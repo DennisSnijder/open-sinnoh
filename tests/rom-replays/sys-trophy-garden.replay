@@ -1,0 +1,44 @@
+from parts/trophy-garden-office.replay
+# sys-trophy-garden (decomp trophy_garden_daily_encounters.c, special_encounter.c): the same day Mr. Backlot only names
+# the Pokémon; the next day (the daily flag clear) and back in the office, a second one is added (slot 1 moves to
+# slot 2). The encounter in the garden is the test's (tests/integration/special-encounters).
++0 press a
++1 release a
+until message
++0 assert text platinum:PokemonMansionOffice_Text_ThereAreCutePokemon 0
+advance text
+until idle
++0 date 2009-03-23 12:00
+until idle
++0 assert flag platinum:FLAG_DAILY_ADDED_TROPHY_GARDEN_MON false
+# Out of the office and back (VAR_MAP_LOCAL_0x0B, set with the first, is cleared by the map change).
++0 press down
+until state player.zone "platinum:MAP_HEADER_POKEMON_MANSION"
++0 release down
+until idle
++0 press down
+until position 48 6
++0 release down
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_POKEMON_MANSION_OFFICE"
++0 release up
+until idle
++0 press up
+until position 16 9
++0 release up
+until idle
++0 press a
++1 release a
+advance text
++0 assert text platinum:PokemonMansionOffice_Text_YouAreEnviousYes 5
++0 press a
++1 release a
+advance text
++0 assert text platinum:PokemonMansionOffice_Text_YouAreEnviousYes2 4
++0 press a
++1 release a
+advance text
+until idle
++0 reload
+until idle

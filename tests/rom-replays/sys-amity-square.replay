@@ -1,0 +1,246 @@
+# Amity Square (decomp scripts_amity_square.s, scrcmd_amity_square.c): Pikachu is allowed to walk along. Stepping in
+# at the west gate, the receptionist's YES sends it out to follow (MOVEMENT_TYPE_FOLLOW_PLAYER, SetHasPartner); after
+# 200 steps (SystemVars_IncrementAmitySquareStepCount, cleared on entry) talking to it hands over what it found: an
+# accessory from Pikachu's pool (CalcAmitySquareFoundAccessory) or, one time in five, a berry; RECORD_UNK_051 counts
+# it. Walking back out ends the stroll.
+party 0 platinum:SPECIES_PIKACHU 20 platinum:MOVE_THUNDER_SHOCK
+warp platinum:MAP_HEADER_AMITY_SQUARE 12 47 up
+until idle
++0 press up
+until position 12 46
++0 release up
+advance text
+until yesno
++2 press a
++1 release a
+advance text 600
+until idle
++0 assert state vars.platinum:VAR_FOLLOWER_MON_ACTIVE 1
++0 assert state hasPartner true
++0 screenshot amity-follower
+# Up and down the lawn, 4 tiles each way.
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
++0 press up
+until position 12 41
++0 release up
++0 press down
+until position 12 44
++0 release down
+until idle
++0 assert state vars.platinum:VAR_AMITY_SQUARE_STEP_COUNT 205
+# Pikachu follows one tile behind: turn to it and talk.
++0 press up
++1 release up
++4 press a
++1 release a
+advance text 900
+until idle
++0 assert state records.counts["51"] 1
++0 screenshot amity-find
++0 reload
+until idle
++0 assert state hasPartner true
+# Back out through the gate.
++0 press down
+until position 12 47
++0 release down
+advance text 600
+until idle
++0 assert state hasPartner false

@@ -1,0 +1,69 @@
+# fixture: walking and collision in the room, talking to the helper (sets a flag), the TV bg (two pages).
+# Timings (real World/VM, 30 Hz): walk 8 ticks per tile; a new direction first turns (2 ticks);
+# walking into a wall or object bumps in place; text prints 1 char per 2 ticks.
+#
+# new game: spawn in the room; the onFrame intro starts once the fade-in ends
+0 assert map fixture:ROOM
+0 assert position fixture:ROOM 14 16
+0 assert flag fixture:FLAG_NEW_GAME_DONE true
+12 assert message open
+80 press a
+82 release a
+86 assert message closed
+86 assert var fixture:VAR_ROOM_INTRO 1
+# up one tile (already facing up: no turn)
+90 press up
+92 release up
+100 assert position fixture:ROOM 14 15
+# left is the table (12..13, 14..15): turn, then bump in place
+100 press left
+120 release left
+130 assert position fixture:ROOM 14 15
+# right four tiles to 18,15, below the helper
+130 press right
+160 release right
+170 assert position fixture:ROOM 18 15
+# up into the helper: turn and bump, no step
+170 press up
+190 release up
+200 assert position fixture:ROOM 18 15
+# talk: the flag is set at once, the message waits for A
+200 press a
+202 release a
+206 assert flag fixture:FLAG_TALKED_TO_HELPER true
+206 assert message open
+320 assert message open
+320 press a
+322 release a
+326 assert message closed
+# talk again: the other branch, flag unchanged
+330 press a
+332 release a
+336 assert message open
+420 press a
+422 release a
+426 assert message closed
+426 assert flag fixture:FLAG_TALKED_TO_HELPER true
+# to the TV: left to 14,15, up to 14,13, left to 12,13, face up
+430 press left
+464 release left
+474 assert position fixture:ROOM 14 15
+474 press up
+492 release up
+502 assert position fixture:ROOM 14 13
+502 press left
+520 release left
+530 assert position fixture:ROOM 12 13
+530 press up
+531 release up
+# the TV bg at 12,12 faces up; its text has two pages ({clear})
+540 press a
+542 release a
+546 assert message open
+620 press a
+622 release a
+626 assert message open
+680 press a
+682 release a
+686 assert message closed
+686 assert position fixture:ROOM 12 13

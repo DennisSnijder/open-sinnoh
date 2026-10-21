@@ -1,0 +1,304 @@
+# sys-gym-pastoria (docs/research/gym-puzzles.md): Pastoria Gym's water and
+# buttons. A button (a coord event guarded by its map-local var) presses the prop under the player: the three
+# colours' pattern animations play once, then the water moves one unit a tick to 0 (orange), 32 (green) or 64
+# (blue) and the plate under the pool takes that height. H/M/L ground lets the player in only at 0/32/64, and
+# pool tiles whose height would come from the water collide. The route (a shortest walk over the decomp's
+# collision rules) presses orange, green, blue, green, orange, blue; a save round trip at the low water;
+# every trainer met on the way battled from where they spot the player; Wake won; leaving and re-entering sets
+# green again (the onTransition script).
+party 0 platinum:SPECIES_ALAKAZAM 80 platinum:MOVE_PSYCHIC platinum:MOVE_PSYCHO_CUT platinum:MOVE_ZEN_HEADBUTT platinum:MOVE_SHADOW_BALL
+party 1 platinum:SPECIES_VENUSAUR 80 platinum:MOVE_ENERGY_BALL platinum:MOVE_SOLAR_BEAM platinum:MOVE_EARTHQUAKE platinum:MOVE_SLUDGE_BOMB
+set flag platinum:FLAG_HIDE_PASTORIA_CITY_RIVAL true
+set flag platinum:FLAG_HIDE_PASTORIA_CITY_CRASHER_WAKE true
+warp platinum:MAP_HEADER_PASTORIA_CITY_GYM 13 41 up
+until idle
++0 assert state mapFeatures {"kind": "pastoria-gym", "pressedButton": 1}
++0 assert var platinum:VAR_MAP_LOCAL_0x01 0
++0 assert var platinum:VAR_MAP_LOCAL_0x02 1
++0 assert var platinum:VAR_MAP_LOCAL_0x03 0
++0 screenshot pastoria-green
++0 press up
+until position 13 26
++0 release up
+until idle
++0 press left
+until position 3 26
++0 release left
+until idle
++0 press down
+until position 3 34
++0 release down
+until idle
++0 assert state mapFeatures {"kind": "pastoria-gym", "pressedButton": 0}
++0 assert var platinum:VAR_MAP_LOCAL_0x01 0
++0 assert var platinum:VAR_MAP_LOCAL_0x02 0
++0 assert var platinum:VAR_MAP_LOCAL_0x03 1
++0 screenshot pastoria-orange
++0 reload
+until idle
++0 assert state mapFeatures {"kind": "pastoria-gym", "pressedButton": 0}
++0 screenshot pastoria-orange
++0 press right
+until position 9 34
++0 release right
+until idle
++0 press up
+until position 9 28
++0 release up
+until idle
++0 press right
+until position 16 28
++0 release right
+until idle
++0 press up
+until position 16 24
++0 release up
+until idle
++0 press left
+until position 13 24
++0 release left
+until idle
++0 press up
+until position 13 18
++0 release up
+until idle
++0 press right
+until position 14 18
++0 release right
+until idle
++0 press up
+until position 14 11
++0 release up
+until idle
++0 press right
+until position 17 11
++0 release right
+until idle
++0 press up
+until position 17 9
++0 release up
+until idle
++0 assert state mapFeatures {"kind": "pastoria-gym", "pressedButton": 1}
++0 assert var platinum:VAR_MAP_LOCAL_0x01 0
++0 assert var platinum:VAR_MAP_LOCAL_0x02 1
++0 assert var platinum:VAR_MAP_LOCAL_0x03 0
++0 screenshot pastoria-green
++0 press left
+until position 14 9
++0 release left
+until idle
++0 press down
+until position 14 13
++0 release down
+until idle
++0 press right
+until position 16 13
++0 release right
+until idle
++0 press down
+until position 16 20
++0 release down
+until idle
++0 press left
+until position 5 20
++0 release left
+until idle
++0 press down
+until position 5 22
++0 release down
+until idle
++0 press right
+until position 6 22
++0 release right
+until idle
++0 press down
+until position 6 23
++0 release down
+until idle
++0 press right
+until position 7 23
++0 release right
+until message 300
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_SAILOR_DAMIAN won
+advance text
+until idle
++0 press right
+until position 9 23
++0 release right
+until idle
++0 press down
+until position 9 24
++0 release down
+until idle
++0 assert state mapFeatures {"kind": "pastoria-gym", "pressedButton": 2}
++0 assert var platinum:VAR_MAP_LOCAL_0x01 1
++0 assert var platinum:VAR_MAP_LOCAL_0x02 0
++0 assert var platinum:VAR_MAP_LOCAL_0x03 0
++0 screenshot pastoria-blue
++0 press left
+until position 6 24
++0 release left
+until idle
++0 press down
+until position 6 34
++0 release down
+until idle
++0 press right
+until position 11 34
++0 release right
+until message 300
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_TUBER_JACKY won
+advance text
+until idle
++0 press right
+until position 20 34
++0 release right
+until idle
++0 press up
+until position 20 33
++0 release up
+until message 300
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_TUBER_CAITLYN won
+advance text
+until idle
++0 press up
+until position 20 17
++0 release up
+until idle
++0 press left
+until position 19 17
++0 release left
+until idle
++0 press up
+until position 19 13
++0 release up
+until idle
++0 assert state mapFeatures {"kind": "pastoria-gym", "pressedButton": 1}
++0 assert var platinum:VAR_MAP_LOCAL_0x01 0
++0 assert var platinum:VAR_MAP_LOCAL_0x02 1
++0 assert var platinum:VAR_MAP_LOCAL_0x03 0
++0 screenshot pastoria-green
++0 press right
+until position 23 13
++0 release right
+until idle
++0 press down
+until position 23 31
++0 release down
+until idle
++0 assert state mapFeatures {"kind": "pastoria-gym", "pressedButton": 0}
++0 assert var platinum:VAR_MAP_LOCAL_0x01 0
++0 assert var platinum:VAR_MAP_LOCAL_0x02 0
++0 assert var platinum:VAR_MAP_LOCAL_0x03 1
++0 screenshot pastoria-orange
++0 press left
+until position 21 31
++0 release left
+until idle
++0 press up
+until position 21 7
++0 release up
+until idle
++0 press left
+until position 6 7
++0 release left
+until idle
++0 press down
+until position 6 16
++0 release down
+until idle
++0 press left
+until position 3 16
++0 release left
+until idle
++0 press up
+until position 3 8
++0 release up
+until message 300
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_SAILOR_SAMSON won
+advance text
+until idle
++0 press up
+until position 3 6
++0 release up
+until idle
++0 assert state mapFeatures {"kind": "pastoria-gym", "pressedButton": 2}
++0 assert var platinum:VAR_MAP_LOCAL_0x01 1
++0 assert var platinum:VAR_MAP_LOCAL_0x02 0
++0 assert var platinum:VAR_MAP_LOCAL_0x03 0
++0 screenshot pastoria-blue
++0 press right
+until position 5 6
++0 release right
+until idle
++0 press down
+until position 5 9
++0 release down
+until idle
++0 press right
+until position 13 9
++0 release right
+until idle
++0 press up
+until position 13 5
++0 release up
+until idle
++0 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_LEADER_WAKE won
+advance text 4400
+until idle
++0 assert state badges ["platinum:BADGE_ID_FEN"]
++0 assert var platinum:VAR_PASTORIA_CITY_STATE 3
++0 press right
+until position 15 5
++0 release right
+until idle
++0 press up
+until position 15 3
++0 release up
+until idle
++0 press right
+until position 25 3
++0 release right
+until idle
++0 press down
+until position 25 37
++0 release down
+until idle
++0 press left
+until position 16 37
++0 release left
+until idle
++0 press down
+until position 16 41
++0 release down
+until idle
++0 press left
+until position 13 41
++0 release left
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_PASTORIA_CITY"
++0 release down
+advance text 3000
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_PASTORIA_CITY_GYM"
++0 release up
+until idle
++0 assert state mapFeatures {"kind": "pastoria-gym", "pressedButton": 1}
++0 assert var platinum:VAR_MAP_LOCAL_0x01 0
++0 assert var platinum:VAR_MAP_LOCAL_0x02 1
++0 assert var platinum:VAR_MAP_LOCAL_0x03 0
++0 screenshot pastoria-green

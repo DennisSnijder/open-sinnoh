@@ -1,0 +1,15 @@
+# sys-pokerus (decomp unk_020559DC.c FieldSystem_HandleDailyEvents → Party_UpdatePokerusStatus): an infected Pokémon's
+# days count down by the days passed; a gap of more than four days, or more than it has left, cures it (strain kept).
+# Setup: the lead's Pokérus byte (strain 1, three days: 0x13).
+party 0 platinum:SPECIES_GARCHOMP 50 platinum:MOVE_DRAGON_CLAW
+set state party[0].pokerus 19
+date 2009-03-22 12:00
+warp platinum:MAP_HEADER_ROUTE_201 142 846 up
+until idle
++0 date 2009-03-23 00:00
+until state party[0].pokerus 18
++0 reload
+until idle
++0 assert state party[0].pokerus 18
++0 date 2009-03-29 00:00
+until state party[0].pokerus 16

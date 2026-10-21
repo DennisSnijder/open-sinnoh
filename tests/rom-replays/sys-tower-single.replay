@@ -1,0 +1,75 @@
+# A short Battle Tower singles streak (decomp scripts_battle_tower.s, frontier_scripts_battle_tower_corridor.s and
+# _battle_room.s): CHALLENGE, SINGLE, three Pokémon picked in order (the party's PARTY_MENU_MODE_BATTLE_TOWER), the
+# save before the challenge (both questions YES), the elevator, the corridor and the battle room as frontier scenes,
+# two wins (KEEP GOING after each), then RUN in the third battle forfeits it (a loss). The video question NO, the
+# record (UpdateGameRecords: best and latest streak 2), the lobby's "challenge ended" and its save. Opponents are
+# drawn from the tower RNG, so they differ by seed; the battles' count and results do not.
+party 0 platinum:SPECIES_GARCHOMP 60 platinum:MOVE_EARTHQUAKE platinum:MOVE_DRAGON_CLAW
+party 1 platinum:SPECIES_LUCARIO 55 platinum:MOVE_AURA_SPHERE
+party 2 platinum:SPECIES_STARAPTOR 52 platinum:MOVE_BRAVE_BIRD
+warp platinum:MAP_HEADER_BATTLE_TOWER 15 6 up
+until idle
++0 press a
++1 release a
+advance text
+until menu 600
+# CHALLENGE
++2 press a
++1 release a
+advance text
+until menu 600
+# SINGLE
++2 press a
++1 release a
+advance text
+until app party 600
++2 screenshot tower-party
++2 tap slot:0
++2 tap menu:0
++2 tap slot:1
++2 tap menu:0
++2 tap slot:2
++2 tap menu:0
++2 tap confirm
+until app none 300
+advance text
+until yesno 600
++2 press a
++1 release a
+advance text
+until yesno 600
++2 press a
++1 release a
++300 press a
++1 release a
+until state player.zone "platinum:MAP_HEADER_BATTLE_TOWER_ELEVATOR" 1200
++2000 press a
++1 release a
+until battle 2000
++0 screenshot tower-battle
+battle auto 20000
+until menu 3000
++0 screenshot tower-room
++10 press a
++1 release a
++300 press a
++1 release a
+until battle 3000
+battle auto 20000
+until menu 3000
++10 press a
++1 release a
++300 press a
++1 release a
+until battle 3000
++0 battle run
+until battle 600
++0 battle answer yes
+until battle end 3000
+until yesno 3000
++2 press b
++1 release b
+until state player.zone "platinum:MAP_HEADER_BATTLE_TOWER" 3000
+advance text 3000
++0 assert battles frontier 3
++0 assert state frontier.towerStreaks[0] {"record":2,"latest":2}

@@ -1,0 +1,35 @@
+# Evolution, stopped: the same battle as m2-evolve, but B is pressed while the
+# silhouettes swap (`evolve cancel`): "Huh? PIPLUP stopped evolving!", it stays Piplup at L16.
+party 0 platinum:SPECIES_PIPLUP 15 platinum:MOVE_POUND platinum:MOVE_BUBBLE platinum:MOVE_PECK
+set state party[0].exp 2534
+set var platinum:VAR_ROUTE_202_STATE 1
+warp platinum:MAP_HEADER_ROUTE_202 178 827 up
+until idle
++0 evolve cancel
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
+until battle 900
+battle auto 3000
++0 assert battle wild * won
++0 assert app evolution
+until app none 3000
++0 assert state party[0].species "platinum:SPECIES_PIPLUP"
++0 assert state party[0].level 16
++0 assert state party[0].moves ["platinum:MOVE_POUND","platinum:MOVE_BUBBLE","platinum:MOVE_PECK"]
+until idle
++0 reload
+until idle

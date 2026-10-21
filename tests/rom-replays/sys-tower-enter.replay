@@ -1,0 +1,23 @@
+# The Battle Tower from the Battle Frontier (decomp scripts_battle_tower.s): through the doors into the lobby; its
+# onTransition runs (Teala hidden: no trophy is due, scr_cmd_1e0 0), then the single attendant's welcome, the
+# CHALLENGE / INFO / EXIT menu, EXIT and the goodbye.
+party 0 platinum:SPECIES_GARCHOMP 60 platinum:MOVE_EARTHQUAKE
+warp platinum:MAP_HEADER_BATTLE_FRONTIER 48 19 up
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_BATTLE_TOWER" 300
++0 release up
+until idle 600
++0 assert map platinum:MAP_HEADER_BATTLE_TOWER
++0 assert flag platinum:FLAG_HIDE_BATTLE_TOWER_TEALA true
++0 press up
+until position 15 6 600
++0 release up
+until idle 300
++0 press a
++1 release a
+advance text
+until menu 600
++10 press b
++1 release b
+advance text 600

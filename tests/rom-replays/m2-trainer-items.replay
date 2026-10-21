@@ -1,0 +1,15 @@
+from opening.replay
+# A trainer uses its items (decomp TrainerAI_ShouldUseItem through the ported AI; Roark carries two
+# Potions). A unit-style replay: Piplup at level 40 with Pound only (not very effective on Roark's rock
+# types) wears his Pokémon down slowly, so his AI drinks its Potions. The ROM test watches for "Leader Roark
+# used one Potion!" and checks that both are spent.
+party 0 platinum:SPECIES_PIPLUP 40 platinum:MOVE_POUND
+warp platinum:MAP_HEADER_OREBURGH_CITY_GYM 5 4 up
+until idle
++1 press a
++1 release a
+advance text
+battle auto move 1 20000
++0 assert battle trainer platinum:TRAINER_LEADER_ROARK won
+advance text 4400
++0 assert state badges ["platinum:BADGE_ID_COAL"]

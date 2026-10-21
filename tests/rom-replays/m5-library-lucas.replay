@@ -1,0 +1,124 @@
+from cp10.replay
+set state gender "female"
+set var platinum:VAR_CANALAVE_CITY_STATE 3
+set var platinum:VAR_CANALAVE_LIBRARY_STATE 1
+set var platinum:VAR_ROUTE_218_GATE_TO_CANALAVE_CITY_STATE 1
+set flag platinum:FLAG_HIDE_CANALAVE_LIBRARY_COUNTERPART false
+set flag platinum:FLAG_HIDE_CANALAVE_LIBRARY_RIVAL false
+set flag platinum:FLAG_HIDE_CANALAVE_LIBRARY_ROWAN false
+set flag platinum:FLAG_DEFEATED_TRAINER_ACE_TRAINER_BREANNA true
+set flag platinum:FLAG_DEFEATED_TRAINER_ACE_TRAINER_CESAR true
+set flag platinum:FLAG_DEFEATED_TRAINER_BLACK_BELT_DAVID true
+set flag platinum:FLAG_DEFEATED_TRAINER_BLACK_BELT_RICKY true
+set flag platinum:FLAG_DEFEATED_TRAINER_WORKER_GARY true
+set flag platinum:FLAG_DEFEATED_TRAINER_WORKER_GERARDO true
+set flag platinum:FLAG_DEFEATED_TRAINER_WORKER_JACKSON true
+set flag platinum:FLAG_FIRST_ARRIVAL_IRON_ISLAND_EXTERIOR true
+set flag platinum:FLAG_HIDE_CELESTIC_TOWN_CYNTHIA true
+set flag platinum:FLAG_HIDE_IRON_ISLAND_RILEY true
+set flag platinum:FLAG_HIDE_ROUTE_218_GATE_TO_CANALAVE_CITY_SCIENTIST_M true
+set flag platinum:FLAG_HIDE_SANDGEM_TOWN_LAB_PROF_ROWAN true
+set flag platinum:FLAG_RECEIVED_BYRON_TM91 true
+give badge platinum:BADGE_ID_MINE
+give item platinum:ITEM_HM04
+give item platinum:ITEM_TM91
+warp platinum:MAP_HEADER_CANALAVE_CITY 37 720 up
+# Gender branch for cp11: the Canalave Library explosion for a girl.
+# CanalaveLibrary3F_OnTransition draws the counterpart by gender (VAR_OBJ_GFX_ID_0: Lucas, OBJ_EVENT_GFX_PLAYER_M
+# 0, where cp11 has Dawn, 97), and the explosion scene takes Lucas's lines (CanalaveLibrary3F_LucasCountOnMe …),
+# as does Canalave after it (CanalaveCity_LucasIWonderWhatHappened); the library TV plays between. Setup lines stage it from CP10's end with
+# the state cp11 has at the library door after Byron (Mine Badge, HM04, the library cast shown, Canalave state 3,
+# library state 1). Headless from the cp10 anchor (tests/integration/checkpoints-m5b-branches.rom.test.ts).
++0 wild auto
++0 evolve cancel
+until idle
+# Barry at the library door checks for HM04 (CanalaveCity_RivalLibrary)
++1 press up
++1 release up
+until idle
++0 assert facing player up
++1 press a
++1 release a
+advance text 6000
+until idle 3000
++8 release select
+# into the library
++0 press up
+until state player.zone "platinum:MAP_HEADER_CANALAVE_LIBRARY_1F" 3000
++0 release up
+until idle
++8 release select
+# up the stairs to the second floor
++0 press up
+until position 11 4 3000
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_CANALAVE_LIBRARY_2F" 3000
++0 release left
+until idle
++8 release select
+# and up to the third floor: Lucas is drawn for the counterpart; the explosion (CanalaveLibrary3F_OnFrame_Explosion)
++0 press down
+until position 4 6 6000
++0 release down
++0 press right
+until position 12 6 6000
++0 release right
++0 press up
+until position 12 4 6000
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_CANALAVE_LIBRARY_3F" 3000
++0 release left
++0 assert var platinum:VAR_OBJ_GFX_ID_0 0
+advance text 9000
+# the library TV (ScrCmd_StartLibraryTV): the browser beat in its hold (tests/browser/library-tv.rom.spec.ts)
++0 assert app library-tv
++120 screenshot library-tv
+until app none 600
+advance text 9000
+until idle 3000
++0 assert var platinum:VAR_CANALAVE_LIBRARY_STATE 2
++0 assert flag platinum:FLAG_LAKE_VALOR_EXPLODED true
++0 assert flag platinum:FLAG_HIDE_VALOR_LAKEFRONT_CAMERAMEN true
++8 release select
+# down through the library: the stairs are entered sideways
++0 press up
+until position 7 6 6000
++0 release up
++0 press left
+until position 3 6 6000
++0 release left
++0 press up
+until position 3 3 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_CANALAVE_LIBRARY_2F" 600
++0 release right
+until idle
++8 release select
++0 press down
+until position 11 6 6000
++0 release down
++0 press left
+until position 3 6 6000
++0 release left
++0 press up
+until position 3 4 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_CANALAVE_LIBRARY_1F" 600
++0 release right
+until idle
++8 release select
+# out of the library: Canalave after the explosion, Lucas's line (CanalaveCity_LucasIWonderWhatHappened)
++0 press down
+until position 11 11 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_CANALAVE_CITY" 3000
++0 release down
++0 assert var platinum:VAR_OBJ_GFX_ID_0 0
+advance text 9000
+until idle 3000
++0 assert var platinum:VAR_CANALAVE_CITY_STATE 5

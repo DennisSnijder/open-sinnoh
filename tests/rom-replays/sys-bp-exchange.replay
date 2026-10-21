@@ -1,0 +1,27 @@
+# The Battle Frontier's Exchange Service Corner (decomp scripts_battle_frontier.s, shop_menu.c MART_TYPE_FRONTIER):
+# 50 BP set up; the left counter, YES, three Proteins at 1 BP each (prices from Shop_GetItemBPPrice), then NO and
+# goodbye: 47 BP left and the Proteins in the bag.
+party 0 platinum:SPECIES_GARCHOMP 60 platinum:MOVE_EARTHQUAKE
+set state frontier {"bp":50,"towerFlags":0,"towerRooms":[0,0,0,0,0,0],"towerStreaks":[{"record":0,"latest":0},{"record":0,"latest":0},{"record":0,"latest":0},{"record":0,"latest":0},{"record":0,"latest":0}],"towerSave":{"inProgress":false,"mode":0,"nextOpponent":0,"slots":[0,0,0,0],"trainers":[0,0,0,0,0,0,0,0,0,0,0,0,0,0],"seed":0,"partner":0}}
+warp platinum:MAP_HEADER_BATTLE_FRONTIER 46 43 left
+until idle
++0 press a
++1 release a
+advance text
+until app mart 600
++4 tap menu:0
++4 tap row:0
++0 screenshot bp-exchange
++4 tap qty:+1
++2 tap qty:+1
++2 tap ok
++4 tap yes
++4 tap next
++4 tap next
++4 tap cancel
++4 tap menu:1
++4 tap next
+until app none 300
+until idle 600
++0 assert state frontier.bp 47
++0 assert state bag.medicine [{"item":"platinum:ITEM_PROTEIN","count":3}]

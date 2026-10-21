@@ -1,0 +1,33 @@
+# Saturn is at his post-battle spot beside the button; refuse, then free the guardians.
+from parts/sys-hq-containment-start.replay
+set state objects[localId=0].x 9
+set state objects[localId=0].facing "left"
++0 press up
+until position 8 6
++0 release up
+until idle
++0 screenshot hq-contained
++0 press a
++1 release a
+until yesno
++0 press b
++1 release b
+advance text 1000
+until idle
++0 assert flag platinum:FLAG_FREED_GALACTIC_HQ_POKEMON false
++0 press a
++1 release a
+until yesno
++0 press a
++1 release a
+advance text 5000
+until idle
++0 assert flag platinum:FLAG_FREED_GALACTIC_HQ_POKEMON true
++0 assert flag platinum:FLAG_HIDE_GALACTIC_HQ_CONTROL_ROOM_LAKE_GUARDIANS true
++0 assert var platinum:VAR_GALACTIC_HQ_CONTROL_ROOM_STATE 0
++0 assert var platinum:VAR_MT_CORONET_2F_STATE 1
++0 assert flag platinum:FLAG_HIDE_MT_CORONET_2F_CAVE_PAINTING true
++0 screenshot hq-released
++0 reload
+until idle
++0 assert flag platinum:FLAG_FREED_GALACTIC_HQ_POKEMON true

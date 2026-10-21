@@ -1,0 +1,54 @@
+/*
+ * The PC boxes on their DS screens (storage.ts): boards at the UI unit, every part at its DS place. In
+ * compare mode two whole boards, the compare page and the box screen, side by side or stacked.
+ */
+
+/* Stand-ins without the ROM art (the fixture). */
+.box-css-screen { background: linear-gradient(#8ab8c8, #8ab8c8) 0 0 / calc(var(--unit) * 88) 100% no-repeat, #84e0a4; }
+.box-css-screen.compare { background: #84e0a4; }
+.ui-layer[data-mode] .box-board .css-wallpaper { background: repeating-linear-gradient(45deg, #cfe6c4 0 calc(var(--unit) * 8), #c1dcb4 calc(var(--unit) * 8) calc(var(--unit) * 16)); }
+.ui-layer[data-mode] .box-board .css-wallpaper.w1 { background: repeating-linear-gradient(45deg, #d8d0ec 0 calc(var(--unit) * 8), #cac0e2 calc(var(--unit) * 8) calc(var(--unit) * 16)); }
+.ui-layer[data-mode] .box-board .css-wallpaper.w2 { background: repeating-linear-gradient(45deg, #f0dcc4 0 calc(var(--unit) * 8), #e6cdb2 calc(var(--unit) * 8) calc(var(--unit) * 16)); }
+.ui-layer[data-mode] .box-board .css-wallpaper.w3 { background: repeating-linear-gradient(45deg, #c8dcf0 0 calc(var(--unit) * 8), #b8cee6 calc(var(--unit) * 8) calc(var(--unit) * 16)); }
+.box-tray.css { background: #e8b8a0; box-shadow: inset 0 0 0 var(--unit) #b0705a; }
+.compare-board.css { background: #2c3c74; }
+.ui-layer[data-mode] .ds-screen .cmp-dot.css { background: #f8f8f8; }
+
+/* The header: the name centred on the wallpaper's plate; the plate and arrows tap. */
+.ui-layer[data-mode] .box-board .box-title { display: grid; justify-items: center; pointer-events: none; }
+.ui-layer[data-mode] .box-board .box-name { display: block; background: none; box-shadow: none; }
+.ui-layer[data-mode] .box-board .box-arrow.rom::before { display: none; }
+
+/* Slots: the icon centred on the DS's 24-px grid (it overflows the slot, as the 32-px OBJ does). */
+.ui-layer[data-mode] .box-board .box-slot { display: grid; place-items: center; background: none; box-shadow: none; overflow: visible; }
+.ui-layer[data-mode] .box-board .mon-icon-box { position: relative; }
+.ui-layer[data-mode] .box-board .box-slot .held-item { right: calc(var(--unit) * 4); bottom: calc(var(--unit) * 4); }
+.ui-layer[data-mode] .box-board.rom-cursor [data-nav].box-slot.is-cursor, .ui-layer[data-mode] .box-board.rom-cursor .box-name.is-cursor { background: none; box-shadow: none; }
+.ui-layer[data-mode] .box-board.rom-cursor [data-nav].box-slot.is-cursor::before, .ui-layer[data-mode] .box-board.rom-cursor .box-name.is-cursor::before { display: none; }
+.ui-layer[data-mode] .box-board .box-slot:not(.is-cursor):hover { background: rgb(255 255 255 / 0.3); }
+.ui-layer[data-mode] .box-board .in-hand { display: grid; place-items: center; pointer-events: none; transform: none; }
+.ui-layer[data-mode] .box-board .box-close.rom { background: none; box-shadow: none; padding: 0; }
+.ui-layer[data-mode] .box-board .box-close.pill { justify-content: center; padding: 0; }
+
+/* The preview panel: the front sprite and its text rows. */
+.ui-layer[data-mode] .box-board .box-preview-pic { display: grid; place-items: center; pointer-events: none; }
+.ui-layer[data-mode] .box-board .box-marks { display: flex; padding: 0; background: none; box-shadow: none; }
+
+/* The DS windows: rows of 16 px, the frame at the tile around them. */
+.ui-layer[data-mode] .box-board .app-menu { min-width: 0; max-height: none; overflow: visible; }
+.ui-layer[data-mode] .box-board .app-menu .menu-entry, .ui-layer[data-mode] .box-board .yes-no .choice { min-height: 0; height: calc(var(--unit) * 16); padding: 0 0 0 calc(var(--unit) * 10); }
+.ui-layer[data-mode] .box-board .yes-no .choice { min-width: 0; }
+.ui-layer[data-mode] .box-board .mark-entry canvas, .ui-layer[data-mode] .box-board .mark-css { margin-left: calc(var(--unit) * 34); }
+.mark-css { width: calc(var(--unit) * 8); height: calc(var(--unit) * 8); background: #b8c0d0; }
+.mark-css.on { background: #303848; }
+
+/* Compare: the page's text cells centred in their DS windows; the corner buttons are the ROM sprites. */
+.ui-layer[data-mode] .compare-touch .cmp-name, .ui-layer[data-mode] .compare-touch .cmp-cell { display: grid; place-items: center; }
+.ui-layer[data-mode] .compare-touch .cmp-icon { display: grid; place-items: center; pointer-events: none; }
+.ui-layer[data-mode] .compare-touch .cmp-set.rom, .ui-layer[data-mode] .compare-touch .cmp-page.rom { background: none; box-shadow: none; padding: 0; min-height: 0; }
+.ui-layer[data-mode] .compare-touch .cmp-set.pill, .ui-layer[data-mode] .compare-touch .cmp-page.pill { justify-content: center; padding: 0; min-height: 0; }
+.ui-layer[data-mode] .compare-touch .cmp-set[aria-disabled='true'] { opacity: 1; }
+/* The preview's info strip: one 96×16 page shows; the column of pages scrolls (previewStrip). */
+.ui-layer[data-mode] .box-board .box-preview-strip { overflow: hidden; pointer-events: none; }
+.box-preview-page { position: relative; display: flex; align-items: center; height: calc(var(--unit) * 16); }
+.ui-layer[data-mode] .box-board .box-preview-page .type-icon { display: block; }

@@ -1,0 +1,62 @@
+/*
+ * The party menu on its DS screen (party.ts): ROM panels, sprites and windows at their DS rects on a board
+ * (one DS px = --unit). CSS stand-ins draw the same rects when the pack has no art (the fixture).
+ */
+
+/* DS boards as sheets: no sheet chrome; centred on phones too. */
+.ui-screen.board { background-color: transparent; box-shadow: none; clip-path: none; }
+.ui-layer[data-mode='compact'] .ui-sheet:has(> .board) { display: grid; place-items: center; }
+/* A DS screen has no drop shadow (and a filter over its animated icons repaints the whole screen each step). */
+.ui-frame:has(> .board) { filter: none; }
+
+.party-bg.css { background: #2f3445; }
+.party-column .party-bg.rom-picture { background-size: 100% 100%; }
+
+.party-slot { display: block; }
+.party-slot .sprite, .party-slot .party-panel, .party-slot .hp-bar { display: block; pointer-events: none; }
+.party-screen [data-nav].party-slot.is-cursor, .party-screen [data-nav].party-cancel.is-cursor { background: none; box-shadow: none; }
+.party-screen .party-slot.is-cursor::before, .party-screen .party-cancel.is-cursor::before { display: none; }
+.party-name, .party-level > *, .party-note, .party-hp > * { display: flex; align-items: flex-start; }
+.party-hp-now { justify-content: flex-end; }
+.party-icon { display: grid; place-items: center; pointer-events: none; }
+.party-icon .mon-icon-box { width: calc(var(--unit) * 32); height: calc(var(--unit) * 32); }
+.party-icon .mon-icon-sprite { width: calc(var(--unit) * 32); height: calc(var(--unit) * 32); background-size: calc(var(--unit) * 32) calc(var(--unit) * 64); }
+.party-icon .icon-flip { animation-name: party-icon-flip; }
+@keyframes party-icon-flip { 50% { background-position: 0 calc(var(--unit) * -32); } }
+
+/* Stand-ins without the art. */
+.party-panel.css { background: #6e8fd8; box-shadow: inset 0 0 0 var(--unit) #2c3a66; }
+.party-panel.css.lead { border-radius: calc(var(--unit) * 24) 0 0 calc(var(--unit) * 24); }
+.party-panel.css.fainted, .party-panel.css.selected_fainted { background: #c06a3a; }
+.party-panel.css.selected, .party-panel.css.selected_fainted { box-shadow: inset 0 0 0 calc(var(--unit) * 2) #f06020; }
+.party-panel.css.switch { background: #78d880; box-shadow: inset 0 0 0 calc(var(--unit) * 2) #f8f8f8; }
+.party-slot.empty.css { background: repeating-linear-gradient(#3c4256 0 var(--unit), #545b70 var(--unit) calc(var(--unit) * 2)); }
+.party-slot .hp-bar.css { padding: calc(var(--unit) * 2) 0; background-clip: content-box; }
+.party-slot .hp-bar.css .hp-fill { display: block; height: 100%; width: calc(var(--hp) * 100%); background: #58d080; }
+.party-slot .hp-bar.css.yellow .hp-fill { background: #e8c838; }
+.party-slot .hp-bar.css.red .hp-fill { background: #e85838; }
+.party-slot .held-item.sprite { background: none; box-shadow: none; }
+.party-slot .held-item.sprite::before { content: none; }
+.party-cancel.css { background: #2c64e8; box-shadow: inset 0 0 0 var(--unit) #1a2c60; }
+.party-cancel.css.is-cursor { box-shadow: inset 0 0 0 calc(var(--unit) * 2) #f06020; }
+
+/* Windows: the frame's own insets (no extra padding), 16-px rows with the DS arrow cursor. */
+.party-screen .window.rom-frame, .party-screen .msg-box.rom-frame { padding: 0; min-height: 0; }
+.party-screen .msg-box:not(.rom-frame) { min-height: 0; }
+.party-menu-list, .party-yes-no { display: grid; align-content: start; }
+.party-screen .menu-entry { height: calc(var(--unit) * 16); padding: 0 0 0 calc(var(--unit) * 8); gap: calc(var(--unit) * 8); }
+.party-screen .menu-entry.is-cursor { background: none; box-shadow: none; }
+.party-screen .menu-entry.is-cursor::before { left: 0; }
+
+/* Phones: one column of panels, the windows along the bottom. */
+.party-column-foot { position: absolute; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: minmax(0, 1fr); align-items: end; }
+.party-column-foot.with-cancel { grid-template-columns: minmax(0, 1fr) auto; }
+.party-column-side { grid-column: 1 / -1; justify-self: end; display: grid; justify-items: end; }
+.party-column-side .party-menu { min-width: calc(var(--unit) * 112); }
+.party-column-side .party-yes-no { min-width: calc(var(--unit) * 72); }
+.party-column-foot .msg-box { min-height: calc(var(--unit) * 32); }
+.party-column-foot .party-cancel { position: relative; width: calc(var(--unit) * var(--w)); height: calc(var(--unit) * var(--h)); }
+/* The Battle Tower order pick: CONFIRM over CANCEL beside the prompt, as the DS stacks them. Their art runs to the
+   DS screen's right edge; on a phone that edge is the glass, so they keep 4 DS px inside it. */
+.party-column-foot .party-order-buttons { display: flex; flex-direction: column; align-items: flex-end; margin-right: calc(var(--unit) * 4); }
+.party-column .menu-entry { height: calc(var(--unit) * 24); }

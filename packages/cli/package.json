@@ -1,0 +1,19 @@
+{
+  "name": "@opensinnoh/cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@opensinnoh/battle": "workspace:*",
+    "@opensinnoh/contracts": "workspace:*",
+    "@opensinnoh/core": "workspace:*",
+    "@opensinnoh/game": "workspace:*",
+    "@opensinnoh/importer": "workspace:*",
+    "@opensinnoh/menus": "workspace:*",
+    "@opensinnoh/vm": "workspace:*",
+    "@opensinnoh/world": "workspace:*"
+  }
+}

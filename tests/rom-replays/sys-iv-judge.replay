@@ -1,0 +1,32 @@
+# The Battle Tower's stats judge (decomp ScrCmd_JudgeStats): the party pick, then the total (91: above average) and
+# the best stat, Attack (no tie, so no coin), at 31: "It can't be better".
+party 0 platinum:SPECIES_GARCHOMP 60 platinum:MOVE_EARTHQUAKE
+set state party[0].ivs {"hp":10,"attack":31,"defense":20,"speed":15,"spAttack":5,"spDefense":10}
+warp platinum:MAP_HEADER_BATTLE_TOWER 24 8 up
+until idle
++0 press a
++1 release a
+advance text
+until app party 600
++4 tap slot:0
+until app none 300
+until message 300
++0 assert text platinum:BattleTower_Text_AboveAveragePotential 0
++2 press a
++1 release a
+until message 300
++0 assert text platinum:BattleTower_Text_AboveAveragePotential 1
++2 press a
++1 release a
+until message 300
++0 assert text platinum:BattleTower_Text_AboveAveragePotential 2
++2 press a
++1 release a
+until message 300
++0 assert text platinum:BattleTower_Text_BestPotentialInAttack 0
++2 press a
++1 release a
+until message 300
++0 assert text platinum:BattleTower_Text_ItCantBeBetter 0
+advance text 600
++0 assert state flags["platinum:FLAG_TALKED_TO_STATS_JUDGE"] true

@@ -1,0 +1,45 @@
+# Branch (docs/research/double-battles.md §7.2): Spear Pillar's two battles
+# before Cyrus. A constructed start (setup lines, not the story chain; cp15 replays it in order): a Turtwig
+# Starter (Barry's TRAINER_RIVAL_SPEAR_PILLAR_TURTWIG team, SpearPillar_SetRivalPartnerTeam), two Pokémon that can
+# fight, the Galactic grunts and Mars and Jupiter shown, Barry hidden (the on-transition hides him below state 3).
+# 1. The grunts' coord event at 31, 48 (state 0): CheckHasTwoAliveMons is TRUE, so StartTrainerBattle with both
+#    grunts and no partner: two trainers against the player alone (decomp Encounter_NewVsTrainer, 19); state 1.
+# 2. Mars and Jupiter's coord event on row 32 (state 1): Barry walks in, SpearPillar_SetRivalPartnerTeam picks his
+#    full party by the player's starter, StartTagBattle (75) with Mars and Jupiter; each side's replacements come
+#    from its own trainer's party. Barry heals the party and leaves; state 2 and the script goes on to Cyrus
+#    and the summoning (as in sys-spear-pillar-chain) to state 3. Runs headless in tests/integration/m5-spear-pillar.rom.test.ts.
+set var platinum:VAR_PLAYER_STARTER 387
+party 0 platinum:SPECIES_GARCHOMP 100 platinum:MOVE_DRAGON_CLAW
+party 1 platinum:SPECIES_LUCARIO 100 platinum:MOVE_AURA_SPHERE
+set flag platinum:FLAG_HIDE_SPEAR_PILLAR_GRUNTS false
+set flag platinum:FLAG_HIDE_SPEAR_PILLAR_MARS_JUPITER false
+set flag platinum:FLAG_HIDE_SPEAR_PILLAR_CYRUS false
+warp platinum:MAP_HEADER_SPEAR_PILLAR 31 50 up
+until idle
++0 press up
+until position 31 48
++0 release up
+advance text 3000
+battle auto 30000
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_SPEAR_PILLAR_1 won trainer-pair
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_SPEAR_PILLAR_2 won trainer-pair
+advance text 3000
+until idle 3000
++0 assert var platinum:VAR_SPEAR_PILLAR_STATE 1
+# north between the grunts to Mars and Jupiter's row
++0 press up
+until position 31 32 3000
++0 release up
+advance text 6000
+battle auto 30000
++0 assert battle trainer platinum:TRAINER_COMMANDER_MARS_SPEAR_PILLAR won ai-partner
++0 assert battle trainer platinum:TRAINER_COMMANDER_JUPITER_SPEAR_PILLAR won ai-partner
+advance text 20000
+until yesno 15000
++0 assert flag platinum:FLAG_HIDE_SPEAR_PILLAR_RIVAL true
++0 press b
++1 release b
+advance text 3000
+until idle
++0 assert var platinum:VAR_SPEAR_PILLAR_STATE 3
++0 assert var platinum:VAR_SPEAR_PILLAR_DISTORTED_STATE 2

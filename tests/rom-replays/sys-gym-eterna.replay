@@ -1,0 +1,210 @@
+# sys-gym-eterna (docs/research/gym-puzzles.md): Eterna Gym's flower clock.
+# Each trainer won advances the clock (advance_eterna_gym_clock): the camera walks to the clock, the hands
+# turn two minutes a tick, the collision mask and hour-hand jump change; after trainers two and three the
+# camera shows a fountain draining and the message waits for A. The route needs each state's mask: up the
+# minute-hand corridor after trainer one (jump at 11,18), across the middle after two (jump at 6,13), the
+# right fountain open after two, the left after three. A save round trip after trainer one, and leaving and
+# re-entering after trainer two: the slot is cleared by the warp and rebuilt from
+# VAR_ETERNA_GYM_FLOWER_CLOCK_STATE. Gardenia's battle ends at the leader state.
+party 0 platinum:SPECIES_CHARIZARD 50 platinum:MOVE_FLAMETHROWER
+warp platinum:MAP_HEADER_ETERNA_CITY_GYM 11 26 up
+until idle
++0 press up
+until position 11 22
++0 release up
+until idle
++0 press right
+until position 13 22
++0 release right
+until idle
++0 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_LASS_CAROLINE won
+advance text
+until idle
++0 assert var platinum:VAR_ETERNA_GYM_TRAINERS_BEATEN 1
++0 assert var platinum:VAR_ETERNA_GYM_FLOWER_CLOCK_STATE 1
++0 assert state mapFeatures {"kind": "eterna-gym", "clock": 1}
++0 reload
+until idle
++0 assert state mapFeatures {"kind": "eterna-gym", "clock": 1}
++0 press up
+until position 13 21
++0 release up
+until idle
++0 press left
+until position 11 21
++0 release left
+until idle
++0 press up
+until position 11 19
++0 release up
+until idle
++0 press up
+until position 11 17
++0 release up
+until idle
++0 press up
+until position 11 13
++0 release up
+until idle
++0 screenshot eterna-clock
++0 press right
+until position 19 13
++0 release right
+until idle
++0 press down
+until position 19 18
++0 release down
+until idle
++0 press right
+until position 20 18
++0 release right
+until idle
++0 press up
++1 release up
+until idle
++0 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_AROMA_LADY_JENNA won
+advance text
+until idle
++0 assert var platinum:VAR_ETERNA_GYM_TRAINERS_BEATEN 2
++0 assert state mapFeatures {"kind": "eterna-gym", "clock": 2}
++0 press down
+until position 20 23
++0 release down
+until idle
++0 press left
+until position 19 23
++0 release left
+until idle
++0 press down
+until position 19 26
++0 release down
+until idle
++0 press left
+until position 11 26
++0 release left
+until idle
++0 press down
++1 release down
+until idle
+# leave and come back: the warp clears the slot, the gym's onTransition selects it again at 0, and the map
+# load rebuilds the clock from its var
++0 press down
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY"
++0 release down
+until idle
++0 assert state mapFeatures null
++0 press up
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY_GYM"
++0 release up
+until idle
++0 assert state mapFeatures {"kind": "eterna-gym", "clock": 2}
++0 press up
+until position 11 21
++0 release up
+until idle
++0 press right
+until position 16 21
++0 release right
+until idle
++0 press up
+until position 16 20
++0 release up
+until idle
++0 press right
+until position 17 20
++0 release right
+until idle
++0 press up
+until position 17 19
++0 release up
+until idle
++0 press right
+until position 18 19
++0 release right
+until idle
++0 press up
+until position 18 18
++0 release up
+until idle
++0 press right
+until position 19 18
++0 release right
+until idle
++0 press up
+until position 19 13
++0 release up
+until idle
++0 press left
+until position 7 13
++0 release left
+until idle
++0 press left
+until position 5 13
++0 release left
+until idle
++0 press left
+until position 3 13
++0 release left
+until idle
++0 press up
+until position 3 8
++0 release up
+until idle
++0 press left
+until position 2 8
++0 release left
+until idle
++0 press up
++1 release up
+until idle
++0 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_AROMA_LADY_ANGELA won
+advance text
+until idle
++0 assert var platinum:VAR_ETERNA_GYM_TRAINERS_BEATEN 3
++0 assert state mapFeatures {"kind": "eterna-gym", "clock": 3}
++0 press down
+until position 2 13
++0 release down
+until idle
++0 press right
+until position 11 13
++0 release right
+until idle
++0 press up
+until position 11 9
++0 release up
+until idle
++0 press up
+until position 11 7
++0 release up
+until idle
++0 press up
+until position 11 4
++0 release up
+until idle
++0 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_LEADER_GARDENIA won
+advance text 4400
+until idle
++0 assert state badges ["platinum:BADGE_ID_FOREST"]
++0 assert var platinum:VAR_ETERNA_GYM_FLOWER_CLOCK_STATE 4
++0 assert state mapFeatures {"kind": "eterna-gym", "clock": 4}
++0 assert battles trainer 4
++0 reload
+until idle
++0 assert state mapFeatures {"kind": "eterna-gym", "clock": 4}

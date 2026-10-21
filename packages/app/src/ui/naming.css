@@ -1,0 +1,31 @@
+/* The naming keyboard (naming.ts): one DS board; ROM pictures at one unit per DS pixel. */
+.naming-board { box-shadow: none; clip-path: none; }
+.naming-board:not(.rom-picture) { background: repeating-linear-gradient(#d8e868 0 calc(var(--unit) * 2), #c8dc58 calc(var(--unit) * 2) calc(var(--unit) * 4)); }
+.naming-board.rom-picture { background-color: transparent; }
+/* The key panel picture alone: its clear corners and edge rows show the stripes, as on the DS (no fill under it). */
+.naming-keys.rom-picture { background-color: transparent; box-shadow: none; }
+.naming-board:not(.rom-picture)::before {
+  content: ''; position: absolute; left: calc(var(--unit) * 12); right: calc(var(--unit) * 12); top: calc(var(--unit) * 2); height: calc(var(--unit) * 42);
+  background: #f8f8f0; box-shadow: inset 0 0 0 calc(var(--unit) * 2) #6060c8;
+}
+.naming-icon { display: grid; place-items: center; }
+.naming-portrait { display: block; width: calc(var(--unit) * var(--w) / 2); height: calc(var(--unit) * var(--h) / 2); background-size: 100% 100%; }
+.naming-box-icon { width: calc(var(--unit) * 24); height: calc(var(--unit) * 20); background: #a0886a; box-shadow: inset 0 0 0 var(--unit) #6a5440, inset 0 calc(var(--unit) * 6) 0 #c4aa86; }
+.naming-entry { display: flex; }
+.naming-cell { display: grid; place-items: center; width: calc(var(--unit) * 12); height: calc(var(--unit) * 16); box-shadow: inset 0 calc(var(--unit) * -1) 0 #8080b8; }
+.naming-cell.next { box-shadow: inset 0 calc(var(--unit) * -2) 0 var(--cursor); }
+.naming-page, .naming-back, .naming-ok { display: grid; place-items: center; background: var(--paper); box-shadow: inset 0 0 0 var(--unit) #6060c8; }
+.naming-page.on { background: #6060c8; }
+.naming-ok { background: #e05048; box-shadow: inset 0 0 0 var(--unit) #a02820; }
+.naming-page.is-cursor, .naming-back.is-cursor, .naming-ok.is-cursor { box-shadow: inset 0 0 0 calc(var(--unit) * 2) var(--cursor); }
+.naming-page::before, .naming-back::before, .naming-ok::before, .naming-key::before { display: none; }
+.naming-keys:not(.rom-picture) { background-color: #f4c0b0; box-shadow: inset 0 0 0 var(--unit) #a06058; }
+.naming-keys.page-1:not(.rom-picture) { background-color: #f8dca0; box-shadow: inset 0 0 0 var(--unit) #a08048; }
+.naming-keys.page-2:not(.rom-picture) { background-color: #c0d8f0; box-shadow: inset 0 0 0 var(--unit) #5878a0; }
+.naming-key { display: block; padding: 0; }
+/* A key's glyph where NamingScreen_PrintChars prints it in its cell (naming.ts). */
+.naming-glyph { position: absolute; left: calc(var(--unit) * var(--glyph-x)); top: calc(var(--unit) * var(--glyph-y)); }
+.naming-key.is-cursor { background: rgb(255 255 255 / 0.7); box-shadow: inset 0 0 0 var(--unit) var(--band-edge); }
+/* Phones: the board centred in the full-screen sheet. */
+.ui-layer[data-mode='compact'] .ui-sheet:has(> .board) { display: grid; place-items: center; }
+/* The rival's icon: his picture fitted to the 32-px icon box. */

@@ -1,0 +1,66 @@
+# sys-honey-tree (docs/research/berries-honey-radar.md; decomp honey_tree.c, scripts_common.s CommonScript_HoneyTree) on
+# the frozen clock: Route 205 South's tree (tree 0), with a trainer id whose Munchlax trees are 0–3 (IsMunchlaxTree:
+# the id's four bytes 0, 21, 0, 42 are all 0 modulo 21). Honey is slathered (a day: 1440 minutes, the group rolled with
+# the Munchlax odds); 5:59 later the tree is still only slathered; at 6:00 a Pokémon waits and the tree shakes when its
+# map loads again (a reload); it is fought; the tree is slathered again and, a day later, bare.
+# Setup: the trainer id (`set state trainerId`) picks the Munchlax trees.
+set state trainerId 1376298
+party 0 platinum:SPECIES_GARCHOMP 50 platinum:MOVE_DRAGON_CLAW
+give item platinum:ITEM_HONEY 2
+date 2009-03-22 12:00
+warp platinum:MAP_HEADER_ROUTE_205_SOUTH 213 653 up
+until idle
+# A bare tree with Honey in the bag: slather it.
++0 press a
++1 release a
+advance text
++0 assert text platinum:CommonStrings_Text_SlatherBarkWithHoney 0
++0 press a
++1 release a
+advance text
+until idle
++0 assert state encounters.honeyTrees[0].minutes 1440
++0 assert state encounters.lastHoneyTree 0
++0 assert state bag.items [{"item":"platinum:ITEM_HONEY","count":1}]
++0 reload
+until idle
+# 5:59 later: still only slathered (the 6-hour window opens at 1080 minutes left).
++0 time 17:59
+until state encounters.honeyTrees[0].minutes 1081
++0 press a
++1 release a
+advance text
++0 press b
++1 release b
+advance text
+until idle
+# 6:00: a Pokémon waits. The tree shakes once its map loads again (here a save and load), unless it rolled no shakes.
++0 time 18:00
+until state encounters.honeyTrees[0].minutes 1080
++0 reload
+until idle
++0 screenshot honey-tree-shake
+# A: the honey tree battle (BACKGROUND_PLAIN); the tree is bare from its start.
++0 press a
++1 release a
+until battle
++0 assert state encounters.honeyTrees[0].minutes 0
+battle auto
+advance text
+until yesno
+# Slather again (CommonScript_HoneyTreePostBattle asks while Honey is left).
++0 press a
++1 release a
+advance text
+until idle
++0 assert state encounters.honeyTrees[0].minutes 1440
++0 assert state bag.items []
+# A day later the honey is gone: bare (and no Honey left: the plain message).
++0 date 2009-03-23 18:00
+until state encounters.honeyTrees[0].minutes 0
++0 press a
++1 release a
+until message
++0 assert text platinum:CommonStrings_Text_HoneyTreeSweetScentNoHoney 0
+advance text
+until idle

@@ -1,0 +1,53 @@
+from m6-celestic-elder.replay
+# Branch m6-palkia (docs/research/postgame.md §6): the Lustrous Orb held by a
+# party Pokémon (CheckPartyHasHeldItem; given and held here) and no Adamant Orb, so Mt. Coronet 6F's warp leads to
+# SPEAR_PILLAR_PALKIA (warp 4). The rift: YES, the L70 battle, Palkia knocked out (battle auto): state 1, not caught;
+# the warp then goes back to the plain Spear Pillar, and the Hall of Fame resets the state (sys-hof-respawn).
+give item platinum:ITEM_LUSTROUS_ORB 1
+set state party[0].heldItem "platinum:ITEM_LUSTROUS_ORB"
+warp platinum:MAP_HEADER_MT_CORONET_6F 7 6 up
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_SPEAR_PILLAR_PALKIA" 120
++0 release up
+until idle 600
++0 assert flag platinum:FLAG_CAUGHT_PALKIA false
++0 press up
+until position 31 18 6000
++0 release up
++0 press right
+until position 33 18 6000
++0 release right
+until idle 60
++0 press up
++1 release up
+until idle 60
++0 press a
++1 release a
+advance text 3000
++0 press a
++1 release a
+advance text 3000
+battle auto 30000
++0 assert battle scripted platinum:SPECIES_PALKIA won
+advance text 20000
+until idle 3000
++0 assert flag platinum:FLAG_CAUGHT_PALKIA false
++0 assert var platinum:VAR_SPEAR_PILLAR_PALKIA_STATE 1
++0 assert state party.length 5
+# Back down and up again: 6F's on-transition now points the warp at the plain Spear Pillar.
++0 press left
+until position 31 18 600
++0 release left
++0 press down
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_6F" 6000
++0 release down
+until idle 600
++0 press down
+until position 7 6 120
++0 release down
+until idle 60
++0 press up
+until state player.zone "platinum:MAP_HEADER_SPEAR_PILLAR" 600
++0 release up
+until idle 600

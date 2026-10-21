@@ -1,0 +1,95 @@
+# Battle Tower multi with an AI partner (BATTLE_TOWER_MODE_MULTI): the multi attendant, NO to communicating with a
+# friend, two Pokémon picked in order, the save, the Battle Salon (Mira shown: FLAG_TRAVELED_WITH_MIRA), her two
+# Pokémon and their first moves (the partners' parties, BT_FUNC_UNK_56), YES to team up, the multi corridor and battle
+# room, one multi battle beside Mira won (topology ai-partner), then RETIRE (YES): the multi record is 1.
+party 0 platinum:SPECIES_GARCHOMP 60 platinum:MOVE_EARTHQUAKE platinum:MOVE_DRAGON_CLAW
+party 1 platinum:SPECIES_LUCARIO 55 platinum:MOVE_AURA_SPHERE
+set flag platinum:FLAG_TRAVELED_WITH_MIRA true
+warp platinum:MAP_HEADER_BATTLE_TOWER 11 6 up
+until idle
++0 press a
++1 release a
+advance text
+until menu 600
++10 press a
++1 release a
+advance text
+until yesno 600
++10 press down
++1 release down
++4 press a
++1 release a
+advance text
+until app party 600
++2 tap slot:0
++2 tap menu:0
++2 tap slot:1
++2 tap menu:0
++2 tap confirm
+until app none 300
+advance text
+until yesno 600
++2 press a
++1 release a
+advance text
+until yesno 600
++2 press a
++1 release a
+advance text 1200
+until state player.zone "platinum:MAP_HEADER_BATTLE_TOWER_BATTLE_SALON" 3000
+advance text 3000
++0 press left
+until position 5 5 600
++0 release left
++0 press down
+until position 5 6 600
++0 release down
+until idle 300
++0 press left
++6 release left
+until idle 300
+until idle 300
++0 press a
++1 release a
+advance text 1000
+until yesno 300
++4 press a
++1 release a
++90 press a
++1 release a
++90 press a
++1 release a
++90 press a
++1 release a
++90 press a
++1 release a
++90 press a
++1 release a
++90 press a
++1 release a
+until state player.zone "platinum:MAP_HEADER_BATTLE_TOWER_ELEVATOR" 3000
++2000 press a
++1 release a
++300 press a
++1 release a
+until battle 6000
+battle auto 20000
+until menu 3000
++10 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++10 press a
++1 release a
+until yesno 600
++10 press up
++1 release up
++4 press a
++1 release a
+until state player.zone "platinum:MAP_HEADER_BATTLE_TOWER" 3000
+until message 3000
+advance text 3000
++0 assert state frontier.towerStreaks[2] {"record":1,"latest":1}
++0 assert battles frontier 1

@@ -1,0 +1,880 @@
+from cp5.replay
++0 reload
+# CP6 (docs/research/story-cp5-19.md §6): from CP5's end at the Valley Windworks,
+# Route 205 South, Eterna Forest with Cheryl (a partner wild double, type 74, in the grass; Jack and Briana,
+# then Lindsey and Elijah, by VS2 with her: 75), Eterna's statue scene and HM01, Gardenia blocking the gym
+# door, the Eterna Gym (the flower clock; 324, 259, 260, Gardenia 315), Cut, the Galactic Eterna Building
+# (Looker, Jupiter 406), to the Rad Rickshaw back in the Cycle Shop.
+# Real battles only (no `party` lines). Trainers that look or walk at random over the only way are battled
+# where the player waits in a line they turn or walk into (`until message`), so every seed fights them.
+# Team plan (cp5's header): Prinplup alone carries the chunk. Gardenia's three all know Grass Knot, so it is
+# levelled in Eterna Forest with Cheryl, who heals the party after every battle, to 36: Empoleon (steel
+# takes Grass Knot neutrally). HM01 Cut goes over Bubble Beam (Rock Smash is an HM move and stays).
++0 wild auto
++0 evolve auto
+until idle 6000
+# back west to heal at Floaroma's Pokémon Center
++0 press down
+until position 243 658 6000
++0 release down
++0 press left
+until position 228 658 6000
++0 release left
++0 press down
+until position 228 662 6000
++0 release down
++0 press left
+until position 179 662 6000
++0 release left
++0 press down
+until position 179 669 6000
++0 release down
++0 press left
+until position 176 669 6000
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle 6000
++0 press up
+until position 8 6
++0 release up
+until idle 6000
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until position 176 667
++0 release down
+until idle 6000
+# east and north along Route 205 South's west side, out of Camper Jacob's lines
++0 press right
+until position 189 667 6000
++0 release right
++0 press up
+until position 189 660 6000
++0 release up
++0 press right
+until position 217 660 6000
++0 release right
++0 press up
+until position 217 651 6000
++0 release up
++0 press left
+until position 214 651 6000
++0 release left
++0 press up
+until position 214 647 6000
++0 release up
++0 press left
+until position 208 647 6000
++0 release left
++0 press up
+until position 208 638 6000
++0 release up
+# Hiker Daniel looks south and west at random over row 637: the player waits in his west line until he turns
++0 press up
+until position 208 637
++0 release up
+until message 3000
+advance text
+battle auto 9000
+advance text
+until idle 6000
++0 assert battle trainer platinum:TRAINER_HIKER_DANIEL won single
+# Camper Zackary walks a loop (x 206–209, z 625–628), facing south down x 209: the player waits in that line
++0 press up
+until position 208 630
++0 release up
++0 press right
+until position 209 630
++0 release right
+until message 3000
+advance text
+battle auto 9000
+advance text
+until idle 6000
++0 assert battle trainer platinum:TRAINER_CAMPER_ZACKARY won single
+# north past Hiker Nicholas's lines (he looks south and east)
++0 press left
+until position 207 630 6000
++0 release left
++0 press up
+until position 207 609 6000
++0 release up
++0 press right
+until position 210 609 6000
++0 release right
++0 press up
+until position 210 604 6000
++0 release up
++0 press left
+until position 209 604 6000
++0 release left
+# Battle Girl Kelsey walks a loop (x 205–207, z 598–603), facing east along row 603: the player waits in that line
++0 press up
+until position 209 603
++0 release up
+until message 3000
+advance text
+battle auto 9000
+advance text
+until idle 6000
++0 assert battle trainer platinum:TRAINER_BATTLE_GIRL_KELSEY won single
+# north to Eterna Forest, out of Picnicker Karina's lines (she looks north and south down x 208)
++0 press up
+until position 209 601 6000
++0 release up
++0 press left
+until position 207 601 6000
++0 release left
++0 press up
+until position 207 582 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_ETERNA_FOREST" 3000
++0 release up
+until idle 6000
+# Eterna Forest: Cheryl's coord event (EternaForest_CoordEvent_CherylStartFollowing) makes her the walking partner
++0 press up
+until message
++0 release up
+advance text 3000
+until idle 3000
++0 assert state hasPartner true
++0 assert var platinum:VAR_PARTNER_TRAINER_ID 608
+# through the grass with Cheryl (a wild encounter here is a partner double, type 74) to Bug Catcher Jack and Lass Briana, who face each other across row 67: both see the player at 38, 67 (VS2) and battle with Cheryl (75)
++0 press right
+until position 31 85 6000
++0 release right
++0 press up
+until position 31 82 6000
++0 release up
++0 press right
+until position 35 82 6000
++0 release right
++0 press up
+until position 35 72 6000
++0 release up
++0 press right
+until position 38 72 6000
++0 release right
++0 press up
+until position 38 68 6000
++0 release up
++0 press up
+until position 38 67
++0 release up
+advance text 3000
+# the browser spec's beat: four battlers, Cheryl beside the player
++12 screenshot eterna-forest-double
+battle auto 30000
++0 assert battle trainer platinum:TRAINER_BUG_CATCHER_JACK won ai-partner
++0 assert battle trainer platinum:TRAINER_LASS_BRIANA won ai-partner
+advance text 3000
+until idle 3000
+# north and round to the psychics Lindsey and Elijah, who face each other across row 67 (sight 4): both see the player at 52, 67
++0 press up
+until position 38 64 6000
++0 release up
++0 press right
+until position 43 64 6000
++0 release right
++0 press up
+until position 43 61 6000
++0 release up
++0 press right
+until position 52 61 6000
++0 release right
++0 press down
+until position 52 66 6000
++0 release down
++0 press down
+until position 52 67
++0 release down
+advance text 3000
+battle auto 30000
++0 assert battle trainer platinum:TRAINER_PSYCHIC_LINDSEY won ai-partner
++0 assert battle trainer platinum:TRAINER_PSYCHIC_ELIJAH won ai-partner
+advance text 3000
+until idle 3000
+# south to the grass by x 63: Prinplup levels with Cheryl, who heals the party after every battle, and evolves at 36
++0 press down
+until position 52 78 6000
++0 release down
++0 press right
+until position 63 78 6000
++0 release right
++0 press up
+until position 63 66 6000
++0 release up
+grind 0 36 up down 400000
+until idle 6000
++0 press up
+until state player.z 58 3000
++0 release up
+until idle 6000
++0 assert party 0 platinum:SPECIES_EMPOLEON
+# north and east to the forest's exit
++0 press right
+until position 71 58 6000
++0 release right
++0 press down
+until position 71 62 6000
++0 release down
++0 press right
+until position 84 62 6000
++0 release right
++0 press up
+until position 84 46 6000
++0 release up
++0 press left
+until position 77 46 6000
++0 release left
++0 press up
+until position 77 36 6000
++0 release up
++0 press right
+until position 81 36 6000
++0 release right
+# Cheryl leaves at the exit (EternaForest_CoordEvent_CherylLeavePlayer): the Soothe Bell, the partner cleared
++0 press right
+until message
++0 release right
+advance text 3000
+until idle 3000
++0 assert state hasPartner false
++0 assert flag platinum:FLAG_TRAVELED_WITH_CHERYL true
++0 assert var platinum:VAR_ETERNA_FOREST_FOLLOWER_CHERYL_STATE 2
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_205_NORTH" 3000
++0 release right
+until idle
+# east to Eterna City: the statue scene (EternaCity_CoordEvent_Rival) on x 303
++0 press right
+until position 264 524 6000
++0 release right
++0 press down
+until position 264 531 6000
++0 release down
++0 press right
+until position 273 531 6000
++0 release right
++0 press down
+until position 273 533 6000
++0 release down
++0 press right
+until position 300 533 6000
++0 release right
++0 press up
+until position 300 524 6000
++0 release up
++0 press right
+until position 303 524 6000
++0 release right
+until message
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_ETERNA_CITY_STATE 1
+# back west: Cynthia gives HM01 (EternaCity_CoordEvent_CynthiaGiveCut)
++0 press left
+until position 322 526 6000
++0 release left
++0 press up
+until position 322 524 6000
++0 release up
++0 press left
+until position 304 524 6000
++0 release left
+until message
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_ETERNA_CITY_STATE 2
++0 assert state bag.tmhms[item="platinum:ITEM_HM01"].count 1
+# south to Gardenia at the gym door
++0 press left
+until position 300 524 6000
++0 release left
++0 press down
+until position 300 534 6000
++0 release down
++0 press right
+until position 306 534 6000
++0 release right
++0 press down
+until position 306 564 6000
++0 release down
++0 press right
+until position 312 564 6000
++0 release right
+until idle
++0 press up
++1 release up
+until idle
++0 assert facing player up
++0 press a
++1 release a
+advance text 3000
+until idle 3000
+# to the Pokémon Center
++0 press up
+until position 312 563 6000
++0 release up
++0 press left
+until position 305 563 6000
++0 release left
++0 press up
+until position 305 531 6000
++0 release up
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
+# HM01 Cut to Empoleon from the bag, over Bubble Beam (Brine is the same power; an HM move cannot be forgotten)
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:3
++1 tap row:2
++1 tap menu:0
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap yes
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap yes
++1 press a
++1 release a
++1 assert app summary
++1 tap move:3
++1 tap move:3
++1 assert state party[0].moves ["platinum:MOVE_ROCK_SMASH","platinum:MOVE_PECK","platinum:MOVE_BRINE","platinum:MOVE_CUT"]
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY" 3000
++0 release down
+until idle
+# to the gym
++0 press down
+until position 305 563 6000
++0 release down
++0 press right
+until position 312 563 6000
++0 release right
+# the Eterna Gym (the route of sys-gym-eterna: each trainer won turns the flower clock)
++0 press up
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY_GYM" 3000
++0 release up
+until idle
++0 press up
+until position 11 22
++0 release up
+until idle
++0 press right
+until position 13 22
++0 release right
+until idle
++0 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_LASS_CAROLINE won
+advance text
+until idle
++0 assert var platinum:VAR_ETERNA_GYM_TRAINERS_BEATEN 1
++0 assert var platinum:VAR_ETERNA_GYM_FLOWER_CLOCK_STATE 1
++0 press up
+until position 13 21
++0 release up
+until idle
++0 press left
+until position 11 21
++0 release left
+until idle
++0 press up
+until position 11 19
++0 release up
+until idle
++0 press up
+until position 11 17
++0 release up
+until idle
++0 press up
+until position 11 13
++0 release up
+until idle
++0 screenshot eterna-clock
++0 press right
+until position 19 13
++0 release right
+until idle
++0 press down
+until position 19 18
++0 release down
+until idle
++0 press right
+until position 20 18
++0 release right
+until idle
++0 press up
++1 release up
+until idle
++0 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_AROMA_LADY_JENNA won
+advance text
+until idle
++0 assert var platinum:VAR_ETERNA_GYM_TRAINERS_BEATEN 2
++0 press down
+until position 20 23
++0 release down
+until idle
++0 press left
+until position 19 23
++0 release left
+until idle
++0 press down
+until position 19 26
++0 release down
+until idle
++0 press left
+until position 11 26
++0 release left
+until idle
+# out to heal before Angela and Gardenia (the clock is rebuilt from its var on the way back in)
++0 press down
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY" 3000
++0 release down
+until idle
++0 press left
+until position 305 563 6000
++0 release left
++0 press up
+until position 305 531 6000
++0 release up
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY" 3000
++0 release down
+until idle
++0 press down
+until position 305 563 6000
++0 release down
++0 press right
+until position 312 563 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY_GYM" 3000
++0 release up
+until idle
++0 press up
+until position 11 21
++0 release up
+until idle
++0 press right
+until position 16 21
++0 release right
+until idle
++0 press up
+until position 16 20
++0 release up
+until idle
++0 press right
+until position 17 20
++0 release right
+until idle
++0 press up
+until position 17 19
++0 release up
+until idle
++0 press right
+until position 18 19
++0 release right
+until idle
++0 press up
+until position 18 18
++0 release up
+until idle
++0 press right
+until position 19 18
++0 release right
+until idle
++0 press up
+until position 19 13
++0 release up
+until idle
++0 press left
+until position 7 13
++0 release left
+until idle
++0 press left
+until position 5 13
++0 release left
+until idle
++0 press left
+until position 3 13
++0 release left
+until idle
++0 press up
+until position 3 8
++0 release up
+until idle
++0 press left
+until position 2 8
++0 release left
+until idle
++0 press up
++1 release up
+until idle
++0 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_AROMA_LADY_ANGELA won
+advance text
+until idle
++0 assert var platinum:VAR_ETERNA_GYM_TRAINERS_BEATEN 3
++0 press down
+until position 2 13
++0 release down
+until idle
++0 press right
+until position 11 13
++0 release right
+until idle
++0 press up
+until position 11 9
++0 release up
+until idle
++0 press up
+until position 11 7
++0 release up
+until idle
++0 press up
+until position 11 4
++0 release up
+until idle
++0 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_LEADER_GARDENIA won
+advance text 4400
+until idle
++0 assert var platinum:VAR_ETERNA_GYM_FLOWER_CLOCK_STATE 4
+# out of the gym
++0 press down
+until position 11 13
++0 release down
+until idle
++0 press down
+until state player.z 26 1800
++0 release down
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY" 3000
++0 release down
+until idle
+# north to the Galactic building: Cut on the tree before its door
++0 press left
+until position 301 563 6000
++0 release left
++0 press up
+until position 301 530 6000
++0 release up
++0 press left
+until position 300 530 6000
++0 release left
++0 press up
+until position 300 523 6000
++0 release up
++0 press right
+until position 305 523 6000
++0 release right
++0 press up
+until position 305 522 6000
++0 release up
+# heal first
++0 press down
+until position 305 525 6000
++0 release down
++0 press left
+until position 300 525 6000
++0 release left
++0 press down
+until position 300 531 6000
++0 release down
++0 press right
+until position 305 531 6000
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY" 3000
++0 release down
+until idle
++0 press left
+until position 300 531 6000
++0 release left
++0 press up
+until position 300 523 6000
++0 release up
++0 press right
+until position 305 523 6000
++0 release right
++0 press up
+until position 305 522 6000
++0 release up
+until idle
++30 release up
+until idle
++1 press a
++1 release a
+until yesno
++1 press a
++1 release a
+advance text
+until idle 3000
++0 press up
+until state player.zone "platinum:MAP_HEADER_TEAM_GALACTIC_ETERNA_BUILDING_1F" 3000
++0 release up
+# Looker's disguise scene (TeamGalacticEternaBuilding1F_OnFrame_Looker)
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_TEAM_GALACTIC_ETERNA_BUILDING_1F_STATE 1
+# 1F: round the grunts (each looks one way across row 8) to the east stairs
++0 press up
+until position 11 13 6000
++0 release up
++0 press right
+until position 20 13 6000
++0 release right
++0 press up
+until position 20 7 6000
++0 release up
++0 press up
+until position 20 6
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_TEAM_GALACTIC_ETERNA_BUILDING_2F" 3000
++0 release left
+until idle
+# 2F: to the middle stairs (3F's east stairs lead to a closed room on 4F)
++0 press down
+until position 8 6 6000
++0 release down
++0 press right
+until position 9 6 6000
++0 release right
++0 press down
+until position 9 9 6000
++0 release down
++0 press left
+until position 8 9 6000
++0 release left
++0 press down
+until position 8 12 6000
++0 release down
++0 press right
+until position 14 12 6000
++0 release right
++0 press up
+until position 14 3 6000
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_TEAM_GALACTIC_ETERNA_BUILDING_3F" 3000
++0 release left
+until idle
+# 3F: down the west side, along row 11 and up to the middle stairs
++0 press down
+until position 2 11 6000
++0 release down
++0 press right
+until position 14 11 6000
++0 release right
++0 press up
+until position 14 3 6000
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_TEAM_GALACTIC_ETERNA_BUILDING_4F" 3000
++0 release left
+until idle
+# 4F: round to Jupiter
++0 press down
+until position 3 12 6000
++0 release down
++0 press right
+until position 13 12 6000
++0 release right
++0 press up
+until position 13 7 6000
++0 release up
++0 press right
+until position 14 7 6000
++0 release right
+until idle
++0 press up
++1 release up
+until idle
++0 assert facing player up
++0 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_COMMANDER_JUPITER_TEAM_GALACTIC_ETERNA_BUILDING won single
+advance text 6000
+until idle 3000
++0 assert flag platinum:FLAG_TEAM_GALACTIC_LEFT_ETERNA_BUILDING true
++0 assert var platinum:VAR_ETERNA_CITY_STATE 3
++0 assert flag platinum:FLAG_HIDE_CYCLE_SHOP_POKEFAN_M false
+# back down and out of the building
++0 press down
+until position 14 12 6000
++0 release down
++0 press left
+until position 3 12 6000
++0 release left
++0 press up
+until position 3 3 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_TEAM_GALACTIC_ETERNA_BUILDING_3F" 3000
++0 release right
+until idle
++0 press down
+until position 14 11 6000
++0 release down
++0 press left
+until position 2 11 6000
++0 release left
++0 press up
+until position 2 3 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_TEAM_GALACTIC_ETERNA_BUILDING_2F" 3000
++0 release right
+until idle
++0 press down
+until position 14 12 6000
++0 release down
++0 press left
+until position 8 12 6000
++0 release left
++0 press up
+until position 8 9 6000
++0 release up
++0 press right
+until position 9 9 6000
++0 release right
++0 press up
+until position 9 5 6000
++0 release up
++0 press left
+until position 8 5 6000
++0 release left
++0 press up
+until position 8 3 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_TEAM_GALACTIC_ETERNA_BUILDING_1F" 3000
++0 release right
+until idle
++0 press down
+until position 20 13 6000
++0 release down
++0 press left
+until position 11 13 6000
++0 release left
++0 press down
+until position 11 15 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY" 3000
++0 release down
+until idle
++30 release down
+# end of CP6: the Galactic building is empty; the Rad Rickshaw is back
++0 assert var platinum:VAR_ETERNA_CITY_STATE 3
++0 assert flag platinum:FLAG_TEAM_GALACTIC_LEFT_ETERNA_BUILDING true
++0 assert flag platinum:FLAG_HIDE_CYCLE_SHOP_POKEFAN_M false
++0 assert flag platinum:FLAG_TRAVELED_WITH_CHERYL true
++0 assert var platinum:VAR_ETERNA_FOREST_FOLLOWER_CHERYL_STATE 2
++0 assert state hasPartner false
++0 assert var platinum:VAR_ETERNA_GYM_TRAINERS_BEATEN 3
++0 assert state badges ["platinum:BADGE_ID_COAL","platinum:BADGE_ID_FOREST"]
++0 assert state bag.tmhms[item="platinum:ITEM_HM01"].count 1
++0 assert state party[0].moves ["platinum:MOVE_ROCK_SMASH","platinum:MOVE_PECK","platinum:MOVE_BRINE","platinum:MOVE_CUT"]
+# The battle log of this replay: every scripted battle by trainer, result and topology. Buneary lives only in
+# Eterna Forest on the chain's way, so its battles are the partner wild doubles (74).
++0 assert battle wild platinum:SPECIES_BUNEARY won ai-partner
++0 assert battle trainer platinum:TRAINER_BUG_CATCHER_JACK won ai-partner
++0 assert battle trainer platinum:TRAINER_LASS_BRIANA won ai-partner
++0 assert battle trainer platinum:TRAINER_PSYCHIC_LINDSEY won ai-partner
++0 assert battle trainer platinum:TRAINER_PSYCHIC_ELIJAH won ai-partner
++0 assert battle trainer platinum:TRAINER_LASS_CAROLINE won single
++0 assert battle trainer platinum:TRAINER_AROMA_LADY_JENNA won single
++0 assert battle trainer platinum:TRAINER_AROMA_LADY_ANGELA won single
++0 assert battle trainer platinum:TRAINER_LEADER_GARDENIA won single
++0 assert battle trainer platinum:TRAINER_COMMANDER_JUPITER_TEAM_GALACTIC_ETERNA_BUILDING won single

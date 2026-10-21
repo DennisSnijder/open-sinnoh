@@ -1,0 +1,41 @@
+# sys-surf: Lake Verity after the Cyrus scene. Surf from the shore at
+# (50, 36) onto the water at (49, 36) from the party menu (FIELD_MOVES 12), save/load mid-surf, cross to
+# the island (29–35, 33), dismount by walking ashore, and walk into Verity Cavern (a warp: walking).
+# Water encounters per seed are checked by tests/integration/sys-replays.rom.test.ts.
+give badge platinum:BADGE_ID_FEN
+party 0 platinum:SPECIES_BIBAREL 30 platinum:MOVE_SURF
+set var platinum:VAR_LAKE_VERITY_PROF_ROWAN_STATE 1
+set flag platinum:FLAG_HIDE_LAKE_VERITY_TEAM_GALACTIC true
+warp platinum:MAP_HEADER_LAKE_VERITY 50 36 left
+until idle
++0 assert state playerState "walk"
++0 field move 0 platinum:MOVE_SURF
+advance text
+until idle
++0 assert state playerState "surf"
++0 assert position platinum:MAP_HEADER_LAKE_VERITY 49 36
+# save/load mid-surf
++0 reload
+until idle
++0 assert state playerState "surf"
++0 assert position platinum:MAP_HEADER_LAKE_VERITY 49 36
+# west along row 36, then north onto the island: stepping ashore dismounts
++0 press left
+until position 35 36
++0 release left
++0 press up
+until position 35 33
++0 release up
+until idle
++0 assert state playerState "walk"
++0 assert position platinum:MAP_HEADER_LAKE_VERITY 35 33
+# to the cave mouth (32, 32): the warp keeps walking
++0 press left
+until position 32 33
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_VERITY_CAVERN"
++0 release up
+until idle
++0 assert map platinum:MAP_HEADER_VERITY_CAVERN
++0 assert state playerState "walk"

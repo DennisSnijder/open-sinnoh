@@ -1,0 +1,109 @@
+# svc-dex (docs/research/pokedex.md): the Pokédex from the start menu, in the Jubilife Pokémon Center.
+# Piplup caught (seen as a female, then a male: GameState v9 seen forms); Starly and Bidoof seen. The Sinnoh
+# list runs to Bidoof (13 rows, gaps blank); scroll by one, by a page (R) and back; open the caught Piplup
+# (info, area, size, forms), step to the seen-only Starly (its area; size refused), back to the list, search
+# A to Z (results, then CANCEL), quit. The checks of each beat are in the test drivers. Then Rowan's PC at
+# the PC rates the 3 seen species (Rowan's PC rating text by count).
+party 0 platinum:SPECIES_PIPLUP 5
+set state pokedex {"obtained":true,"national":false,"seen":["platinum:SPECIES_PIPLUP","platinum:SPECIES_STARLY","platinum:SPECIES_BIDOOF"],"caught":["platinum:SPECIES_PIPLUP"],"forms":{"platinum:SPECIES_PIPLUP":[{"form":0,"gender":"female"},{"form":0,"gender":"male"}]}}
+warp platinum:MAP_HEADER_JUBILIFE_CITY_POKECENTER_1F 12 4 up
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:0
++1 assert app pokedex
++1 screenshot dex-list
+# R: a page down (row 10, Staravia, unseen); up to Starly; L back to the top; down six to Piplup
++12 press r
++1 release r
++12 press up
++1 release up
++12 screenshot dex-scrolled
++12 press l
++1 release l
++12 press down
++1 release down
++12 press down
++1 release down
++12 press down
++1 release down
++12 press down
++1 release down
++12 press down
++1 release down
++12 press down
++1 release down
++12 press a
++1 release a
++12 screenshot dex-entry-caught
+# the cry page (its waveform and level meter run while the cry plays)
++1 tap page:2
++1 screenshot dex-cry
++1 tap page:1
++1 screenshot dex-area-unknown
++1 tap page:3
++1 screenshot dex-size
++1 tap page:4
++1 screenshot dex-forms
++1 tap page:0
+# down: the next seen species of the list (Starly, seen only); its area page
++1 press down
++1 release down
++1 screenshot dex-entry-seen
++1 tap page:3
++1 tap page:1
++1 press right
++1 release right
++1 screenshot dex-area
++1 press b
++1 release b
+# the search: A to Z, OK; the results; CANCEL; QUIT
++1 press x
++1 release x
++1 tap order:1
++1 screenshot dex-search
++1 tap ok
++1 screenshot dex-results
++1 tap quit
++1 tap quit
++1 assert app start-menu
++1 press b
++1 release b
+until app none 5
+until idle
+# Rowan's PC (the PC menu's third entry): the access message, the seen count, then his
+# rating of 3 seen (the first rating; it waits for A without the arrow, wait_ab_press)
++1 press a
++1 release a
+advance text
++0 assert message open
++5 press down
++1 release down
++1 press down
++1 release down
++1 press a
++1 release a
+until message 600
++0 assert text platinum:PokedexRatings_Text_AccessedProfessorRowansPC 0
++1 press a
++1 release a
+until message 600
++0 assert text platinum:PokedexRatings_Text_PokemonSpottedInSinnoh 0
++1 press a
++1 release a
+until message 600
++0 assert text platinum:PokedexRatings_Text_PokemonSpottedInSinnoh 1 0=3
++1 press a
++1 release a
++90 assert text platinum:PokedexRatings_Text_RowanPokemonSeenUpTo15 0
++1 press a
++1 release a
++90 assert text platinum:PokedexRatings_Text_RowanPokemonSeenUpTo15 1
++1 press a
++1 release a
+# back on the PC menu: B closes it
+until menu
++5 press b
++1 release b
+until idle

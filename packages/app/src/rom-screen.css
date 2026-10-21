@@ -1,0 +1,128 @@
+/*
+ * The ROM page (rom-screen.ts) and its first-run setup (first-run.ts) on the OpenSinnoh UI design system, laid out
+ * like the landing page's hero: on wide screens the brand on the left (the Beta eyebrow, the wordmark, the pitch) and
+ * the window on the right; stacked and centred below that, the window full bleed below a 480-px screen. The page
+ * scrolls only when the window does not fit (a short landscape phone, a large zoom); Start playing then stays in
+ * view at the window's foot. Lengths are on the 4-px scale (exceptions 2, 10, 44). Its class is .rom-screen, never
+ * bare .rom: that marks UI parts drawn from ROM art.
+ */
+.rom-screen.os-screen {
+  position: fixed; inset: 0; display: grid; place-items: safe center; overflow: hidden auto;
+  padding: max(24px, var(--sat)) max(16px, var(--sar)) max(24px, var(--sab)) max(16px, var(--sal));
+}
+/* While a file is dragged over the page, the whole page is the target (the picker lights up too). */
+.rom-screen:has(.os-file.over)::after { content: ''; position: fixed; inset: 8px; outline: 2px dashed var(--os-accent); outline-offset: -2px; pointer-events: none; }
+
+.rom-panel { width: min(100%, 560px); display: grid; gap: 32px; }
+
+/* ---------- The brand, as on the landing page's hero ---------- */
+.rom-brand { display: grid; justify-items: center; text-align: center; container-type: inline-size; }
+.rom-kick { display: flex; align-items: center; gap: 8px; font: 400 16px/20px var(--os-font-num); color: var(--os-muted); text-transform: uppercase; }
+/* The wordmark at whole scales (58 × 11 art px): ×5 here, ×7 beside the window, ×4 on the narrowest phones; 2 glyph px of clear space. */
+.rom-wordmark { margin: 12px 0 8px; padding: 10px; }
+@container (max-width: 309px) { .rom-wordmark { padding: 8px; } .rom-wordmark .os-wordmark { width: 232px; height: 44px; } }
+.rom-pitch { font-size: 20px; line-height: 28px; text-wrap: balance; }
+.rom-runs { margin-top: 4px; font-size: 16px; line-height: 24px; font-weight: 600; text-wrap: balance; }
+.rom-tagline { margin-top: 12px; max-width: 44ch; font-size: 14px; line-height: 20px; color: var(--os-muted); text-wrap: balance; }
+
+/* ---------- The window ---------- */
+.rom-main { display: grid; gap: 32px; min-width: 0; }
+.rom-win { display: grid; min-width: 0; }
+.rom-body { display: grid; gap: 16px; padding: 8px; }
+.rom-need { color: var(--os-muted); font-size: 12px; line-height: 16px; text-wrap: pretty; }
+.rom-need strong { color: var(--os-ink); font-weight: 600; }
+.rom-need code { font: 12px/16px var(--os-font-mono); color: var(--os-ink); }
+.rom-note, .rom-status { color: var(--os-ink); }
+.rom-status:empty { display: none; }
+.rom-win .os-file.drop { padding: 40px 16px; }
+.rom-install { display: grid; gap: 8px; justify-items: start; margin: 4px 8px 8px; padding-top: 12px; border-top: 2px solid var(--os-line); }
+
+/* The rail: your ROM, setup, play (the landing page's three steps). The stage you are on is gold with a 2-dot bar,
+   like the active tab; the ones behind you carry a check. */
+.rom-rail { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin: 0 8px 4px; padding: 0; list-style: none; }
+.rom-rail li { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 8px 4px; color: var(--os-muted); box-shadow: inset 0 -2px 0 var(--os-line); }
+.rom-rail .os-num { color: inherit; }
+.rom-rail .rn { font-size: 12px; line-height: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rom-rail .os-ico { display: none; color: var(--os-ok); }
+.rom-rail li.now { color: var(--os-accent); box-shadow: inset 0 -4px 0 var(--os-accent); }
+.rom-rail li.done .os-ico { display: block; }
+.rom-rail li.done .os-num { display: none; }
+
+/* ---------- The session: the imports, compact ---------- */
+.rom-jobs { display: grid; gap: 12px; }
+.rom-job { display: grid; gap: 4px; }
+.rom-stage { display: flex; align-items: center; gap: 8px; min-height: 16px; color: var(--os-muted); font-size: 12px; line-height: 16px; }
+.rom-job.done .rom-stage { color: var(--os-ink); }
+.rom-job.done .rom-stage .os-ico { color: var(--os-ok); }
+
+/* ---------- The setup (first-run.ts) ---------- */
+.fr { padding-top: 16px; border-top: 2px solid var(--os-line); }
+.fr-step { display: grid; gap: 12px; }
+.fr-count { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--os-muted); }
+.fr-count .os-num { font-size: 12px; line-height: 16px; text-transform: uppercase; }
+.fr-dots { display: flex; gap: 4px; }
+.fr-dots i { width: 8px; height: 8px; box-shadow: inset 0 0 0 2px var(--os-edge); }
+.fr-dots i.now { box-shadow: inset 0 0 0 2px var(--os-accent); }
+.fr-dots i.done { background: var(--os-accent); box-shadow: none; }
+.fr-ask { display: grid; gap: 4px; padding: 0 4px; }
+.fr-q { margin: 0; font: 500 24px/32px var(--os-font-px); text-wrap: balance; }
+.os-win .fr-q { text-shadow: var(--os-tsd); }
+.fr-q:focus { outline: none; }
+.fr-text { color: var(--os-muted); text-wrap: pretty; }
+@media (hover: hover) { .fr-choices .os-choice:hover:not(.is-cursor) { background: var(--os-face-alt); } }
+.fr-done { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 4px 12px; align-items: start; padding: 0 4px; }
+.fr-done > .os-ico { color: var(--os-ok); margin-top: 8px; }
+
+/* ---------- Start playing ---------- */
+.rom-start { display: grid; gap: 8px; justify-items: stretch; padding: 12px 8px 8px; border-top: 2px solid var(--os-line); background: var(--os-face); }
+.rom-start .os-btn { justify-content: center; gap: 8px; }
+.rom-why { min-height: 16px; text-align: center; color: var(--os-muted); font-size: 12px; line-height: 16px; }
+
+.rom-foot { display: grid; gap: 4px; text-align: center; color: var(--os-muted); font-size: 12px; line-height: 16px; }
+.rom-foot p { text-wrap: balance; }
+.rom-foot p:empty { display: none; }
+
+/* ---------- Wide and tall enough: the landing page's two columns ---------- */
+@media (min-width: 960px) and (min-height: 600px) {
+  .rom-panel { width: min(100%, 1168px); grid-template-columns: minmax(0, 1fr) minmax(0, 520px); grid-template-rows: auto auto; align-items: center; column-gap: 64px; row-gap: 32px; }
+  .rom-brand { grid-area: 1 / 1; justify-items: start; text-align: left; }
+  .rom-main { grid-area: 1 / 2 / span 2; }
+  .rom-foot { grid-area: 2 / 1; align-self: start; text-align: left; }
+  .rom-wordmark { margin: 16px 0 16px -10px; }
+  .rom-wordmark .os-wordmark { width: 406px; height: 77px; }
+  .rom-pitch { max-width: 30ch; }
+  .rom-tagline { margin-top: 20px; }
+}
+@media (min-width: 1200px) and (min-height: 600px) { .rom-wordmark .os-wordmark { width: 464px; height: 88px; } }
+
+/* ---------- Phone: the window full bleed in the page's padding, without its frame; the brand shrinks once a file is picked ---------- */
+/* The page itself (a container query reaches only what is inside it): from the top, and what the keyboard moves to
+   is never hidden under Start playing. */
+@media (max-width: 480px) { .rom-screen.os-screen { place-items: start center; scroll-padding-bottom: 128px; } }
+@container os-screen (max-width: 400px) { .rom-kick { font-size: 12px; line-height: 16px; } }
+@container os-screen (max-width: 480px) {
+  .rom-panel { gap: 24px; }
+  .rom-main { gap: 16px; }
+  .rom-wordmark { margin: 8px 0 4px; padding: 0; }
+  .rom-pitch { font-size: 18px; line-height: 28px; }
+  .os-win.rom-win { border-width: 0; border-image-source: none; background: var(--os-face); margin-inline: -16px; }
+  .rom-rail, .rom-body { padding-inline: 8px; }
+  .rom-body { padding-block: 12px; }
+  .rom-start { position: sticky; bottom: calc(-1 * max(24px, var(--sab))); padding: 12px 16px max(12px, var(--sab)); }
+  .rom-start .os-btn { width: 100%; }
+  [data-step='importing'] .rom-brand :is(.rom-pitch, .rom-runs, .rom-tagline) { display: none; }
+}
+
+/* ---------- Short landscape phones: the brand and the footer on the left, the window on the right ---------- */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rom-panel { width: min(100%, 860px); grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; column-gap: 32px; row-gap: 12px; }
+  .rom-brand { grid-area: 1 / 1; align-self: end; }
+  .rom-foot { grid-area: 2 / 1; align-self: start; }
+  .rom-main { grid-area: 1 / 2 / span 2; }
+  .rom-wordmark { margin: 8px 0 4px; }
+  .rom-tagline, .rom-runs, .rom-rail { display: none; }
+  .rom-body { padding: 4px 8px 8px; gap: 8px; }
+  .rom-win .os-file.drop { padding: 12px; }
+  .rom-win .os-file.drop :is(.fh, .os-ico) { display: none; }
+  .rom-start { position: sticky; bottom: calc(-1 * max(24px, var(--sab))); }
+}

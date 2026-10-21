@@ -1,0 +1,45 @@
+# svc-repel: the Repel keeps weaker wild Pokémon away (decomp
+# Field_CheckWildEncounter → the Repel check: a wild Pokémon below the lead's level does not appear). The
+# lead is level 20 on Route 201 (levels 2–4); the Repel's steps are set (the bag's Repel sets them in
+# svc-bag). Walking back and forth in the grass counts them down and starts no battle. Without the Repel
+# the same walk meets wild Pokémon on seeds 1–3 (tests/integration/services-m3a.rom.test.ts runs it).
+party 0 platinum:SPECIES_TURTWIG 20
+set state repel 100
+warp platinum:MAP_HEADER_ROUTE_201 115 853 right
+until idle
+# wild encounters (only without the Repel) flee at once, so both runs walk the same path
++1 wild flee
++1 press right
+until position 119 853
++0 release right
+until idle
++1 press left
+until position 115 853
++0 release left
+until idle
++1 press right
+until position 119 853
++0 release right
+until idle
++1 press left
+until position 115 853
++0 release left
+until idle
++1 press right
+until position 119 853
++0 release right
+until idle
++1 press left
+until position 115 853
++0 release left
+until idle
++1 press right
+until position 119 853
++0 release right
+until idle
++1 press left
+until position 115 853
++0 release left
+until idle
++0 assert battles wild 0
++0 assert state repel 68

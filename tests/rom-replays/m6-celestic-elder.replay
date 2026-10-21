@@ -1,0 +1,13 @@
+from cp21f.replay
+# Branch m6-celestic-elder (docs/research/postgame.md §6): after the credits,
+# the Celestic elder's research (FLAG_GAME_COMPLETED) unlocks Spear Pillar's Dialga and Palkia
+# (FLAG_UNLOCKED_DIALGA_PALKIA_SPEAR_PILLAR). From cp21f's end (the National Pokédex); kept setup: the warp into the
+# elder's house (Celestic is off cp21f's end). m6-dialga and m6-palkia chain from this one.
+warp platinum:MAP_HEADER_CELESTIC_TOWN_NORTH_HOUSE 3 6 left
+until idle
++0 assert flag platinum:FLAG_UNLOCKED_DIALGA_PALKIA_SPEAR_PILLAR false
++0 press a
++1 release a
+advance text 3000
+until idle 600
++0 assert flag platinum:FLAG_UNLOCKED_DIALGA_PALKIA_SPEAR_PILLAR true

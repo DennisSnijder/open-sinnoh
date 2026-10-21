@@ -1,0 +1,38 @@
+# Evolution: a level-up in a battle evolves the Pokémon after it (decomp
+# BATTLE_STATE_CHECK_EVOLUTION). Piplup L15, one exp point short of L16 (medium slow: 2535), knows three
+# moves; it wins a wild battle on Route 202, grows to L16 and evolves into Prinplup, which learns Metal Claw
+# at 16 (decomp Pokemon_LevelUpMove after evolving). The waits play the scene (`evolve auto`).
+party 0 platinum:SPECIES_PIPLUP 15 platinum:MOVE_POUND platinum:MOVE_BUBBLE platinum:MOVE_PECK
+set state party[0].exp 2534
+set var platinum:VAR_ROUTE_202_STATE 1
+warp platinum:MAP_HEADER_ROUTE_202 178 827 up
+until idle
++0 evolve auto
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
+until battle 900
+battle auto 3000
++0 assert battle wild * won
++0 assert app evolution
+until app none 3000
++0 assert state party[0].species "platinum:SPECIES_PRINPLUP"
++0 assert state party[0].level 16
++0 assert state party[0].moves ["platinum:MOVE_POUND","platinum:MOVE_BUBBLE","platinum:MOVE_PECK","platinum:MOVE_METAL_CLAW"]
++0 assert state party[0].nickname null
+until idle
++0 reload
+until idle

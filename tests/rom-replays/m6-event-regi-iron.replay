@@ -1,0 +1,91 @@
+from cp23b.replay
+# Event branch m6-event-regi-iron (docs/decisions.md: the dev-only event flag;
+# docs/research/postgame.md §6): `event regigigas` gives a fateful Regigigas (My Pokémon Ranch's, L100), the gate of the
+# three ruins (check_party_has_fateful_encounter_regigigas; a plain Regigigas is not enough). From cp23b's end (Snowpoint
+# Temple opened on the chain). Kept setup: the event, two more Master Balls, the warp into the Iron Ruins (Iron Island
+# B3F, off the chain): the seven dots of sys-regi-ruins-dots activate the statue (RUINS_STATE_ACTIVATED_STATUE
+# 270); A on the statue: Registeel's L30 battle, caught: state RUINS_STATE_CAUGHT_REGI (290), Registeel to the PC (the
+# party is full). m6-event-regi-rock and -ice chain on.
+event regigigas
+give item platinum:ITEM_MASTER_BALL 2
+warp platinum:MAP_HEADER_IRON_RUINS 7 11 up
+until idle
++0 press up
+until position 7 9 300
++0 release up
++0 press left
+until position 5 9 300
++0 release left
+until idle 300
++0 press up
+until position 5 7 300
++0 release up
++0 press left
+until position 4 7 300
++0 release left
+until idle 300
++0 press up
+until position 4 5 300
++0 release up
++0 press right
+until position 5 5 300
++0 release right
+until idle 300
++0 press down
+until position 5 7 300
++0 release down
++0 press right
+until position 7 7 300
++0 release right
+until idle 300
++0 press up
+until position 7 5 300
++0 release up
++0 press right
+until position 9 5 300
++0 release right
+until idle 300
++0 press down
+until position 9 7 300
++0 release down
++0 press right
+until position 10 7 300
++0 release right
+until idle 300
++0 press down
+until position 10 9 300
++0 release down
++0 press left
+until position 9 9 300
++0 release left
+advance text 3000
+until idle 600
++0 assert var platinum:VAR_IRON_RUINS_STATE 270
++0 press left
+until position 8 9 300
++0 release left
++0 press up
+until position 8 2 300
++0 release up
++0 press left
+until position 7 2 300
++0 release left
+until idle 60
++0 press up
++1 release up
+until idle 60
++0 press a
++1 release a
+advance text 3000
+battle catch platinum:ITEM_MASTER_BALL 20000
++0 assert battle scripted platinum:SPECIES_REGISTEEL caught
+advance text 20000
+until idle 3000
++0 assert var platinum:VAR_IRON_RUINS_STATE 290
++0 assert state party.length 6
+# Out to Iron Island B3F (leaving the ruins clears their map-local dot vars).
++0 press down
+until state player.zone "platinum:MAP_HEADER_IRON_ISLAND_B3F" 600
++0 release down
+until idle 600
++0 assert var platinum:VAR_IRON_RUINS_STATE 290

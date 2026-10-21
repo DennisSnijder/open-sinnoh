@@ -1,0 +1,1614 @@
+from cp21f.replay
++0 reload
+# CP22 (docs/research/postgame.md §3): from Rowan's lab back north to Snowpoint and by ship
+# to the Fight Area; Route 225, the Survival Area, Routes 226 and 227 to Stark Mountain: Mars and Jupiter in room 1,
+# Buck as the partner through room 2, Charon's arrest in room 3. Wild Pokémon are fought by the auto policy.
++0 wild auto
++0 evolve auto
+until idle
+# wild Pokémon are fled on the long way north (as cp20)
++0 wild flee
+# out of the lab, round Dawn and north by bike to Snowpoint (cp20's way)
++0 press down
+until position 7 14 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_SANDGEM_TOWN" 3000
++0 release down
+until idle
++8 release select
++0 press down
+until position 168 844 6000
++0 release down
+until idle
++1 press y
++1 release y
+until state playerState "cycle" 300
+until idle
++0 press right
+until position 184 844 6000
++0 release right
++0 press up
+until position 184 826 6000
++0 release up
++0 press left
+until position 165 826 6000
++0 release left
++0 press up
+until position 165 818 6000
++0 release up
++0 press right
+until position 176 818 6000
++0 release right
++0 press down
+until position 176 819 6000
++0 release down
++0 press right
+until position 187 819 6000
++0 release right
++0 press up
+until position 187 805 6000
++0 release up
++0 press left
+until position 175 805 6000
++0 release left
++0 press up
+until position 175 799 6000
++0 release up
+until idle
++8 release select
+# Jubilife to Route 203; east below Lass Kaitlin on row 759 once she is up at row 756, up x 246 to the Oreburgh Gate
++0 press up
+until position 175 758 6000
++0 release up
++0 press right
+until position 191 758 6000
++0 release right
++0 press right
+until position 238 758 6000
++0 release right
++0 press down
+until position 238 759 6000
++0 release down
++0 press right
+until position 241 759 6000
++0 release right
+until idle
++0 assert state objects[localId=2].movementType 3
+until state objects[localId=2].z 757 6000
+until state objects[localId=2].z 756 6000
++0 press right
+until position 246 759 6000
++0 release right
++0 press up
+until position 246 749 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_OREBURGH_GATE_1F" 3000
+until state player.zone "platinum:MAP_HEADER_OREBURGH_CITY" 3000
++0 release right
+until idle
++8 release select
++8 release select
+# Oreburgh: up the slope at x 306 in gear 1 (CP13's way), north to Cycling Road and up it to Eterna
++0 press right
+until position 271 749 6000
++0 release right
++0 press down
+until position 271 757 6000
++0 release down
++0 press right
+until position 299 757 6000
++0 release right
++0 press up
+until position 299 724 6000
++0 release up
++0 press right
+until position 306 724 6000
++0 release right
+until idle
++1 press b
++1 release b
++1 assert state cyclingGear 1
++0 press up
+until position 306 717 6000
++0 release up
+until idle
++0 press b
++1 release b
++1 assert state cyclingGear 0
++0 press up
+until position 306 712 6000
++0 release up
++0 press left
+until position 303 712 6000
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_206_CYCLING_ROAD_SOUTH_GATE" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_206" 3000
++0 release up
+until idle
++0 press right
+until position 305 681 600
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_206_CYCLING_ROAD_NORTH_GATE" 9000
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY" 3000
++0 release up
+until idle
++8 release select
++8 release select
+# through Eterna and Route 211 West (CP13's way; Hiker Louis was beaten there) to Mt. Coronet
++0 press up
+until position 304 531 6000
++0 release up
++0 press left
+until position 301 531 6000
++0 release left
++0 press up
+until position 301 525 6000
++0 release up
++0 press right
+until position 325 525 6000
++0 release right
++0 press down
+until position 325 533 6000
++0 release down
++0 press right
+until position 379 533 6000
++0 release right
++0 press up
+until position 379 532 600
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_NORTH_ROOM_1" 3000
++0 release right
+until idle
++8 release select
++8 release select
+# Mt. Coronet 1F north room 1: off the bike; Rock Smash on (10, 36)
+until idle
++1 press y
++1 release y
+until state playerState "walk"
+until idle
++0 press right
+until position 3 41 6000
++0 release right
++0 press up
+until position 3 37 6000
++0 release up
++0 press right
+until position 9 37 6000
++0 release right
++0 press up
+until position 9 36 6000
++0 release up
+until idle
++1 press right
++1 release right
+until idle
++0 assert facing player right
++0 press a
++1 release a
+until yesno
++0 press a
++1 release a
+advance text
+until idle 3000
++8 release select
+# Strength (Bibarel) on the boulder at (18, 39): two pushes east, then down to row 40
++0 press right
+until position 14 36 6000
++0 release right
++0 press down
+until position 14 39 6000
++0 release down
++0 press right
+until position 17 39 6000
++0 release right
+until idle
++0 assert facing player right
++0 field move 4 platinum:MOVE_STRENGTH
+advance text
+until idle
++0 assert flag platinum:FLAG_STRENGTH_ACTIVE true
++0 press right
+until state objects[localId=9].x 19 120
++0 release right
+until idle
++0 press right
+until position 18 39 120
++0 release right
+until idle
++0 press right
+until state objects[localId=9].x 20 120
++0 release right
+until idle
++0 press right
+until position 19 39 120
++0 release right
++0 press down
+until position 19 40 120
++0 release down
+until idle
++8 release select
+# east and north to the boulder at (29, 30): three pushes north, then up x 28 and west to the stairs down
++0 press down
+until position 19 42 6000
++0 release down
++0 press right
+until position 28 42 6000
++0 release right
++0 press up
+until position 28 31 6000
++0 release up
++0 press right
+until position 29 31 6000
++0 release right
+until idle
++0 press up
+until state objects[localId=7].z 29 120
++0 release up
+until idle
++0 press up
+until position 29 30 120
++0 release up
+until idle
++0 press up
+until state objects[localId=7].z 28 120
++0 release up
+until idle
++0 press up
+until position 29 29 120
++0 release up
+until idle
++0 press up
+until state objects[localId=7].z 27 120
++0 release up
+until idle
++0 press up
+until position 29 28 120
++0 release up
++0 press left
+until position 28 28 120
++0 release left
++0 press up
+until position 28 11 6000
++0 release up
++0 press left
+until position 12 11 6000
++0 release left
++0 press up
+until position 12 10 600
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_B1F" 3000
++0 release left
+until idle
++8 release select
+# Mt. Coronet B1F: up the west side to the stairs to north room 2 (entered from the west)
++0 press left
+until position 4 60 6000
++0 release left
++0 press up
+until position 4 58 6000
++0 release up
++0 press left
+until position 3 58 6000
++0 release left
++0 press up
+until position 3 3 6000
++0 release up
++0 press right
+until position 7 3 6000
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_NORTH_ROOM_2" 3000
++0 release right
+until idle
++8 release select
+# north room 2 to Route 216
++0 press right
+until position 15 27 6000
++0 release right
++0 press up
+until position 15 18 6000
++0 release up
++0 press left
+until position 3 18 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_216" 3000
++0 release left
+until idle
++8 release select
++8 release select
+# Route 216 west on row 401 (CP13's way; Ace Trainer Laura was beaten there)
++0 press left
+until position 370 403 6000
++0 release left
++0 press up
+until position 370 401 6000
++0 release up
++0 press left
+until position 316 401 6000
++0 release left
+# Skier Edward loops x 311–315, rows 402–404 (sight 1, no pauses): pass him on row 401 as he turns down at its
+# west end
+until idle
++0 assert state objects[localId=7].movementType 38
+until state objects[localId=7].z 403 3000
+until state objects[localId=7].z 402 3000
+until state objects[localId=7].x 311 3000
++0 press left
+until position 302 401 6000
++0 release left
+# north through the grass west of Ace Trainer Garrett (x 299; he looks up and down), across his column three rows
+# above him, to the way north to Route 217
++0 press up
+until position 302 399 6000
++0 release up
++0 press left
+until position 298 399 6000
++0 release left
++0 press up
+until position 298 391 6000
++0 release up
++0 press right
+until position 302 391 6000
++0 release right
++0 press up
+until position 302 388 6000
++0 release up
++0 press right
+until position 304 388 6000
++0 release right
++0 press up
+until position 304 380 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_217" 3000
++0 release up
+until idle
++8 release select
++8 release select
+# Route 217 north (CP13's way; Maylene's scene is over, Ace Trainers Dalton and Olivia were beaten)
++0 press up
+until position 304 378 600
++0 release up
++0 press left
+until position 303 378 600
++0 release left
++0 press up
+until position 303 374 6000
++0 release up
++0 press right
+until position 305 374 6000
++0 release right
++0 press up
+until position 305 369 6000
++0 release up
++0 press left
+until position 302 369 6000
++0 release left
++0 press up
+until position 302 307 6000
++0 release up
++0 press right
+until position 303 307 6000
++0 release right
+# north up x 303 between the skiers' loops, then west over Skier Lexie's column x 294 (she looks up it on her
+# loop) just after she reaches its north-west corner; up x 290 beside Black Belt Luke's column (x 291, rows
+# 273–281, sight 2), east over it on row 271 once he turns back south
++0 press up
+until position 303 288 6000
++0 release up
++0 press left
+until position 296 288 6000
++0 release left
+until idle
++0 assert state objects[localId=1].movementType 37
+until state objects[localId=1].x 291 3000
+until state objects[localId=1].x 290 3000
++0 press left
+until position 293 288 600
++0 release left
++0 press up
+until position 293 284 600
++0 release up
++0 press left
+until position 290 284 600
++0 release left
++0 press up
+until position 290 271 6000
++0 release up
+until idle
++0 assert state objects[localId=6].movementType 20
+until state objects[localId=6].z 273 3000
+until state objects[localId=6].z 274 3000
++0 press right
+until position 304 271 6000
++0 release right
++0 press up
+until position 304 267 6000
++0 release up
++0 press right
+until position 310 267 6000
++0 release right
++0 press up
+until position 310 242 6000
++0 release up
++0 press right
+until position 319 242 6000
++0 release right
++0 press up
+until position 319 241 6000
++0 release up
++0 press right
+until position 325 241 6000
++0 release right
++15 release select
++0 press down
+until position 325 242 6000
++0 release down
++0 press right
+until position 337 242 6000
++0 release right
++0 press up
+until position 337 238 6000
++0 release up
++0 press right
+until position 354 238 6000
++0 release right
++0 press down
+until position 354 240 6000
++0 release down
++0 press right
+until position 359 240 6000
++0 release right
++0 press up
+until position 359 239 6000
++0 release up
++0 press right
+until position 367 239 6000
++0 release right
++0 press up
+until position 367 227 6000
++0 release up
++0 press right
+until position 375 227 6000
++0 release right
++0 press down
+until position 375 234 6000
++0 release down
++0 press right
+until position 379 234 6000
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_SNOWPOINT_CITY" 3000
++0 release down
+until idle
++8 release select
++8 release select
++8 release select
+# the S.S. Spiral to the Fight Area
++0 press left
+until position 374 234 6000
++0 release left
++0 press up
+until position 374 227 6000
++0 release up
++0 press left
+until position 366 227 6000
++0 release left
++0 press down
+until position 366 245 6000
++0 release down
++0 press left
+until position 356 245 6000
++0 release left
++0 press down
+until position 356 246 6000
++0 release down
+until idle
++1 press a
++1 release a
+until yesno 3000
++0 press a
++1 release a
++0 press a
++1 release a
+advance text 9000
+until state player.zone "platinum:MAP_HEADER_FIGHT_AREA" 9000
+until idle 3000
++8 release select
+# from here wild Pokémon are fought by the auto policy
++0 wild auto
++8 release select
+# north through the gate to Route 225 (the blockade is gone)
++0 press right
+until position 630 434 6000
++0 release right
++0 press up
+until position 630 422 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_225_GATE_TO_FIGHT_AREA" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_225" 6000
++0 release up
+until idle
++8 release select
++8 release select
+# Route 225: Bird Keeper Audrey (628, 397) looks north up x 628 and Ranger Ashlee (628, 392) south or east, both four
+# tiles, over the only way west. One at a time: step into the column as Ashlee turns east (Audrey alone sees the
+# player), then wait in it until Ashlee turns south
++0 press up
+until position 630 394 6000
++0 release up
+until idle
++0 assert state objects[localId=20].movementType 9
+until state objects[localId=20].facing "down" 3000
+until state objects[localId=20].facing "right" 3000
++0 press left
+until message 600
++0 release left
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_BIRD_KEEPER_AUDREY won single
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_RANGER_ASHLEE won single
++8 release select
+# Route 225 north to the Survival Area (round its bridges; the trainers in the way met where they look)
++0 press left
+until position 614 394 6000
++0 release left
++0 press up
+until position 614 381 6000
++0 release up
++0 press right
+until position 618 381 6000
++0 release right
++0 press down
+until position 618 383 6000
++0 release down
++0 press right
+until position 626 383 6000
++0 release right
++0 press up
+until position 626 379 6000
++0 release up
++0 press right
+until position 630 379 6000
++0 release right
++0 press up
+until position 630 371 6000
++0 release up
++0 press left
+until position 624 371 6000
++0 release left
++0 press down
+until position 624 389 6000
++0 release down
++0 press right
+until position 635 389 6000
++0 release right
++0 press down
+until position 635 400 6000
++0 release down
++0 press left
+until position 623 400 6000
++0 release left
++0 press down
+until position 623 404 6000
++0 release down
+# Ranger Dwayne wanders x 610–614, rows 397–403 above the corridor's foot (sight 2): wait at (614, 404) below it
+# until he faces down from (614, 402–403) and sees the player
++0 press left
+until position 614 404 6000
++0 release left
+until message 60000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_RANGER_DWAYNE won single
++0 press left
+until position 613 404 6000
++0 release left
++0 press up
+until position 613 397 6000
++0 release up
++0 press left
+until position 610 397 6000
++0 release left
++0 press up
+until position 610 380 6000
++0 release up
++0 press right
+until position 611 380 6000
++0 release right
++0 press up
+until position 611 378 6000
++0 release up
++0 press right
+until position 617 378 6000
++0 release right
++0 press up
+until position 617 377 6000
++0 release up
+# Ace Trainer Rodolfo walks row 377 between x 608 and 616 (sight 2): wait east of its end
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_RODOLFO won single
++0 press up
+until position 617 369 6000
++0 release up
++0 press left
+until position 615 369 6000
++0 release left
++0 press up
+until position 615 361 6000
++0 release up
++0 press right
+until position 625 361 6000
++0 release right
++0 press down
+until position 625 366 6000
++0 release down
++0 press right
+until position 631 366 6000
++0 release right
++0 press up
+until position 631 339 6000
++0 release up
++0 press left
+until position 617 339 6000
++0 release left
++0 press up
+until position 617 335 6000
++0 release up
++0 press right
+until position 629 335 6000
++0 release right
++0 press up
+until position 629 331 6000
++0 release up
++0 press right
+until position 639 331 6000
++0 release right
++0 press down
+until position 639 336 6000
++0 release down
++0 press right
+until position 645 336 6000
++0 release right
++7 release select
+# heal at the Survival Area's Pokémon Center
++0 press right
+until position 648 336 6000
++0 release right
++0 press down
+until position 648 339 6000
++0 release down
++0 press right
+until position 659 339 6000
++0 release right
++0 press up
+until position 8 12 3000
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_SURVIVAL_AREA" 3000
++0 release down
+until idle
++8 release select
+# east to Route 226: Rock Climb (Bibarel) up the wall at x 686
++0 press right
+until position 678 339 6000
++0 release right
++0 press down
+until position 678 342 6000
++0 release down
++0 press right
+until position 686 342 6000
++0 release right
+until idle
++1 press up
++1 release up
+until idle
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle
++8 release select
+# Route 226: Rock Climb down the wall at x 690, up the one at x 700, down the one at x 705
++0 press right
+until position 690 336 6000
++0 release right
+until idle
++1 press down
++1 release down
+until idle
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle
++0 assert position platinum:MAP_HEADER_ROUTE_226 690 340
++0 press right
+until position 697 340 6000
++0 release right
++0 press up
+until position 697 339 6000
++0 release up
++0 press right
+until position 700 339 6000
++0 release right
+until idle
++1 press up
++1 release up
+until idle
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle
++8 release select
+# Bird Keeper Geneva turns about at (707, 331), two tiles: wait two tiles west of her, at the top of the wall at x 705
++0 press up
+until position 700 330 6000
++0 release up
++0 press right
+until position 704 330 6000
++0 release right
++0 press down
+until position 704 331 6000
++0 release down
++0 press right
+until position 705 331 6000
++0 release right
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_BIRD_KEEPER_GENEVA won single
+until idle
++1 press down
++1 release down
+until idle
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle
++8 release select
+# Surf east across Route 226 to the land by the Route 228 gate
++0 press down
+until position 705 343 6000
++0 release down
++0 press right
+until position 722 343 6000
++0 release right
+until idle
++1 press right
++1 release right
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until state playerState "surf" 3000
+until idle
++0 press right
+until position 727 343 6000
++0 release right
+# Swimmer Lydia looks south from (727, 342)
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_SWIMMER_LYDIA won single
++0 press right
+until position 731 343 6000
++0 release right
++0 press up
+until position 731 341 6000
++0 release up
++0 press up
+until position 731 340 6000
++0 release up
++0 press right
+until position 742 340 6000
++0 release right
++7 release select
+# Surf on east to the shore by the Route 228 gate, and through it
++0 press up
+until position 742 337 6000
++0 release up
++0 press right
+until position 743 337 6000
++0 release right
+until idle
++1 press right
++1 release right
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until state playerState "surf" 3000
+until idle
++0 press right
+until position 753 337 6000
++0 release right
++0 press up
+until position 753 335 6000
++0 release up
++0 press right
+until position 754 335 6000
++0 release right
+until idle
++0 press up
+until position 754 330 6000
++0 release up
++0 press right
+until position 766 330 6000
++0 release right
+# north from Route 226's shore into Route 227's south pocket; by bike in gear 1 off the two westward ramps
++0 press left
+until position 757 330 6000
++0 release left
++0 press up
+until position 757 312 6000
++0 release up
++0 press right
+until position 761 312 6000
++0 release right
++0 press up
+until position 761 308 6000
++0 release up
++0 press right
+until position 766 308 6000
++0 release right
++0 press up
+until position 766 305 6000
++0 release up
++0 press right
+until position 767 305 6000
++0 release right
+until idle 20000
++1 press y
++1 release y
+until idle 20000
++1 press b
++1 release b
++1 assert state cyclingGear 1
++0 press left
+until position 757 305 6000
++0 release left
+until idle 20000
++0 press right
+until position 757 305 6000
++0 release right
++0 press down
+until position 757 309 6000
++0 release down
++0 press left
+until position 750 309 6000
++0 release left
+until idle 20000
++8 release select
+# down the ledge at x 749, west below Felicia's ledge and round north to z 299, east to the bike bridge at x 758 and north over it
++0 press right
+until position 749 309 6000
++0 release right
++0 press down
+until position 749 313 6000
++0 release down
++0 press down
+until position 749 315 6000
++0 release down
++0 press left
+until position 741 315 6000
++0 release left
++0 press up
+until position 741 314 6000
++0 release up
++0 press left
+until position 739 314 6000
++0 release left
++0 press up
+until message 6000
++0 release up
+advance text 6000
+until idle 6000
++0 press right
+until position 749 305 6000
++0 release right
++0 press up
+until position 749 299 6000
++0 release up
++0 press right
+until position 751 299 6000
++0 release right
++0 press up
+until position 751 298 6000
++0 release up
++0 press right
+until position 754 298 6000
++0 release right
++0 press down
+until position 754 299 6000
++0 release down
++0 press right
+until position 758 299 6000
++0 release right
++0 press up
+until message 6000
++0 release up
+advance text 3000
+until yesno 3000
++0 press a
++1 release a
+advance text 3000
+until idle 3000
++8 release select
+# past Buck, through the grass and down the ledges at x 760 to Griffin's back
++0 press left
+until position 757 277 6000
++0 release left
++0 press up
+until position 757 269 6000
++0 release up
++0 press left
+until position 756 269 6000
++0 release left
++0 press up
+until position 756 268 6000
++0 release up
++0 press left
+until position 754 268 6000
++0 release left
++0 press up
+until position 754 260 6000
++0 release up
++0 press right
+until position 760 260 6000
++0 release right
++0 press down
+until position 760 266 6000
++0 release down
++0 press right
+until position 763 266 6000
++0 release right
+until idle 20000
+# Black Belt Griffin (looks south or east), talked to from the west
++1 press a
++1 release a
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle 20000
++0 assert battle trainer platinum:TRAINER_BLACK_BELT_GRIFFIN won single
++8 release select
+# round Griffin, north up x 765 and west to the Rock Climb wall at x 756; off the bike and up it
++0 press down
+until position 763 267 6000
++0 release down
++0 press right
+until position 765 267 6000
++0 release right
++0 press up
+until position 765 255 6000
++0 release up
++0 press left
+until position 756 255 6000
++0 release left
++0 press up
+until position 756 254 6000
++0 release up
+until idle 20000
++1 press y
++1 release y
+until idle 20000
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle 20000
++0 assert position platinum:MAP_HEADER_STARK_MOUNTAIN_OUTSIDE 756 249
++8 release select
+# north through the grass and round to the grunts' scene at (752, 235)
++0 press up
+until position 756 237 6000
++0 release up
++0 press right
+until position 762 237 6000
++0 release right
++0 press up
+until position 762 235 6000
++0 release up
++0 press left
+until message 6000
++0 release left
+advance text 6000
+until idle 6000
++8 release select
+# down x 752 and round by x 742 to the entrance; into Stark Mountain
++0 press down
+until position 752 244 6000
++0 release down
++0 press left
+until position 742 244 6000
++0 release left
++0 press up
+until position 742 232 6000
++0 release up
++0 press right
+until position 746 232 6000
++0 release right
++0 press down
+until position 746 234 6000
++0 release down
++0 press right
+until position 750 234 6000
++0 release right
++0 press up
+until position 750 232 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_STARK_MOUNTAIN_ROOM_1" 3000
++0 release up
+advance text 6000
+battle auto 30000
+advance text 6000
+battle auto 30000
+advance text 6000
+until idle 6000
++0 assert battle trainer platinum:TRAINER_COMMANDER_MARS_STARK_MOUNTAIN won single
++0 assert battle trainer platinum:TRAINER_COMMANDER_JUPITER_STARK_MOUNTAIN won single
++0 assert var platinum:VAR_STARK_MOUNTAIN_ROOM_1_STATE 1
++8 release select
+# Stark Mountain room 1: Strength (Bibarel) through the boulders at x 26, round by x 32, the boulder at (27, 13) four pushes west, Rock Smash at (11, 11), the boulder at (18, 9) three pushes east, up to the stairs at (17, 2)
++0 press up
+until position 19 24 6000
++0 release up
++0 press right
+until position 20 24 6000
++0 release right
++0 press up
+until position 20 17 6000
++0 release up
++0 press right
+until position 22 17 6000
++0 release right
++0 press up
+until position 22 15 6000
++0 release up
++0 press right
+until position 25 15 6000
++0 release right
+until idle 20000
++0 field move 4 platinum:MOVE_STRENGTH
+advance text
+until idle 20000
++0 assert flag platinum:FLAG_STRENGTH_ACTIVE true
+until idle 20000
++0 press right
+until state objects[localId=5].x 27 240
++0 release right
+until idle 20000
++0 press right
+until position 26 15 240
++0 release right
++0 press left
+until position 25 15 6000
++0 release left
++0 press down
+until position 25 17 6000
++0 release down
+until idle 20000
++0 press right
+until state objects[localId=7].x 27 240
++0 release right
+until idle 20000
++0 press right
+until position 26 17 240
++0 release right
+until idle 20000
++0 press up
+until state objects[localId=6].z 15 240
++0 release up
+until idle 20000
++0 press up
+until position 26 16 240
++0 release up
++0 press right
+until position 29 16 6000
++0 release right
++0 press up
+until position 29 15 6000
++0 release up
++0 press right
+until position 32 15 6000
++0 release right
++0 press up
+until position 32 9 6000
++0 release up
++0 press left
+until position 30 9 6000
++0 release left
++0 press down
+until position 30 13 6000
++0 release down
++0 press left
+until position 28 13 6000
++0 release left
+until idle 20000
++0 press left
+until state objects[localId=8].x 26 240
++0 release left
+until idle 20000
++0 press left
+until position 27 13 240
++0 release left
+until idle 20000
++0 press left
+until state objects[localId=8].x 25 240
++0 release left
+until idle 20000
++0 press left
+until position 26 13 240
++0 release left
+until idle 20000
++0 press left
+until state objects[localId=8].x 24 240
++0 release left
+until idle 20000
++0 press left
+until position 25 13 240
++0 release left
+until idle 20000
++0 press left
+until state objects[localId=8].x 23 240
++0 release left
+until idle 20000
++0 press left
+until position 24 13 240
++0 release left
++0 press up
+until position 24 11 6000
++0 release up
++0 press left
+until position 17 11 6000
++0 release left
++0 press down
+until position 17 13 6000
++0 release down
++0 press left
+until position 8 13 6000
++0 release left
++0 press up
+until position 8 11 6000
++0 release up
++0 press right
+until position 10 11 6000
++0 release right
+until idle 20000
++1 press right
++1 release right
+until idle 20000
++0 assert facing player right
++0 press a
++1 release a
+until yesno
++0 press a
++1 release a
+advance text
+until idle 3000
++0 press right
+until position 12 11 6000
++0 release right
++0 press up
+until position 12 9 6000
++0 release up
++0 press right
+until position 17 9 6000
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=9].x 19 240
++0 release right
+until idle 20000
++0 press right
+until position 18 9 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=9].x 20 240
++0 release right
+until idle 20000
++0 press right
+until position 19 9 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=9].x 21 240
++0 release right
+until idle 20000
++0 press right
+until position 20 9 240
++0 release right
++0 press up
+until position 20 7 6000
++0 release up
++0 press left
+until position 14 7 6000
++0 release left
++0 press up
+until position 14 3 6000
++0 release up
++0 press right
+until position 17 3 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_STARK_MOUNTAIN_ROOM_2" 3000
++0 release up
+until idle 20000
++8 release select
++0 press up
+until position 42 70 6000
++0 release up
+# Stark Mountain room 2: Buck joins at (42, 69)
++0 press up
+until message 6000
++0 release up
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_STARK_MOUNTAIN_ROOM_2_FOLLOWER_BUCK_STATE 1
+# east and up x 51 between Krystal's and Ray's lines; Strength (Bibarel) on the boulder at (53, 52): seven pushes north
++0 press up
+until position 42 66 6000
++0 release up
++0 press right
+until position 50 66 6000
++0 release right
++0 press up
+until position 50 64 6000
++0 release up
++0 press right
+until position 51 64 6000
++0 release right
++0 press up
+until position 51 53 6000
++0 release up
++0 press right
+until position 53 53 6000
++0 release right
+until idle 20000
++1 press up
++1 release up
+until idle 20000
++0 field move 4 platinum:MOVE_STRENGTH
+advance text
+until idle 20000
+until idle 20000
++0 press up
+until state objects[localId=3].z 51 240
++0 release up
+until idle 20000
++0 press up
+until position 53 52 240
++0 release up
+until idle 20000
++0 press up
+until state objects[localId=3].z 50 240
++0 release up
+until idle 20000
++0 press up
+until position 53 51 240
++0 release up
+until idle 20000
++0 press up
+until state objects[localId=3].z 49 240
++0 release up
+until idle 20000
++0 press up
+until position 53 50 240
++0 release up
+until idle 20000
++0 press up
+until state objects[localId=3].z 48 240
++0 release up
+until idle 20000
++0 press up
+until position 53 49 240
++0 release up
+until idle 20000
++0 press up
+until state objects[localId=3].z 47 240
++0 release up
+until idle 20000
++0 press up
+until position 53 48 240
++0 release up
+until idle 20000
++0 press up
+until state objects[localId=3].z 46 240
++0 release up
+until idle 20000
++0 press up
+until position 53 47 240
++0 release up
+until idle 20000
++0 press up
+until state objects[localId=3].z 45 240
++0 release up
+until idle 20000
++0 press up
+until position 53 46 240
++0 release up
+# east on row 46, north up x 60, west to x 53 and north to row 15; west along it, Rock Smash at (41, 15)
++0 press right
+until position 60 46 6000
++0 release right
++0 press up
+until position 60 21 6000
++0 release up
++0 press left
+until position 53 21 6000
++0 release left
++0 press up
+until position 53 15 6000
++0 release up
++0 press left
+until position 42 15 6000
++0 release left
+until idle 20000
++0 assert facing player left
++0 press a
++1 release a
+until yesno
++0 press a
++1 release a
+advance text
+until idle 3000
++0 press left
+until position 16 15 6000
++0 release left
+# down x 16 between Drake and Jarrett: Buck's tag battle (the browser spec's beat: four battlers, at the first command)
++0 press down
+until message 6000
++0 release down
+advance text 6000
++12 screenshot stark-mountain-tag
+battle auto 40000
+advance text
+until idle 20000
++0 assert battle trainer platinum:TRAINER_DRAGON_TAMER_DRAKE won ai-partner
++0 assert battle trainer platinum:TRAINER_BLACK_BELT_JARRETT won ai-partner
+# round by x 4 and row 3 to x 23, down it to row 12; the boulder at (29, 12) nineteen pushes east; up x 47 to (47, 3), where Buck goes on alone
++0 press down
+until position 16 23 6000
++0 release down
++0 press left
+until position 14 23 6000
++0 release left
++0 press up
+until position 14 22 6000
++0 release up
++0 press left
+until position 4 22 6000
++0 release left
++0 press up
+until position 4 3 6000
++0 release up
++0 press right
+until position 23 3 6000
++0 release right
++0 press down
+until position 23 12 6000
++0 release down
++0 press right
+until position 28 12 6000
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 30 240
++0 release right
+until idle 20000
++0 press right
+until position 29 12 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 31 240
++0 release right
+until idle 20000
++0 press right
+until position 30 12 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 32 240
++0 release right
+until idle 20000
++0 press right
+until position 31 12 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 33 240
++0 release right
+until idle 20000
++0 press right
+until position 32 12 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 34 240
++0 release right
+until idle 20000
++0 press right
+until position 33 12 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 35 240
++0 release right
+until idle 20000
++0 press right
+until position 34 12 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 36 240
++0 release right
+until idle 20000
++0 press right
+until position 35 12 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 37 240
++0 release right
+until idle 20000
++0 press right
+until position 36 12 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 38 240
++0 release right
+until idle 20000
++0 press right
+until position 37 12 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 39 240
++0 release right
+until idle 20000
++0 press right
+until position 38 12 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 40 240
++0 release right
+until idle 20000
++0 press right
+until position 39 12 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 41 240
++0 release right
+until idle 20000
++0 press right
+until position 40 12 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 42 240
++0 release right
+until idle 20000
++0 press right
+until position 41 12 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 43 240
++0 release right
+until idle 20000
++0 press right
+until position 42 12 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 44 240
++0 release right
+until idle 20000
++0 press right
+until position 43 12 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 45 240
++0 release right
+until idle 20000
++0 press right
+until position 44 12 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 46 240
++0 release right
+until idle 20000
++0 press right
+until position 45 12 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 47 240
++0 release right
+until idle 20000
++0 press right
+until position 46 12 240
++0 release right
+until idle 20000
++0 press right
+until state objects[localId=2].x 48 240
++0 release right
+until idle 20000
++0 press right
+until position 47 12 240
++0 release right
++0 press up
+until position 47 4 6000
++0 release up
++0 press up
+until message 6000
++0 release up
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_STARK_MOUNTAIN_ROOM_2_FOLLOWER_BUCK_STATE 2
++0 press right
+until position 47 3 600
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_STARK_MOUNTAIN_ROOM_3" 3000
++0 release up
+# room 3: Charon and the Magma Stone; Looker arrests him; outside, Buck goes home
+advance text 20000
+until idle 6000
++0 assert var platinum:VAR_STARK_MOUNTAIN_ROOM_1_STATE 1
++0 assert var platinum:VAR_STARK_MOUNTAIN_ROOM_3_STATE 1
++0 assert var platinum:VAR_STARK_MOUNTAIN_OUTSIDE_STATE 3
++0 assert flag platinum:FLAG_ARRESTED_CHARON_STARK_MOUNTAIN true
++0 assert flag platinum:FLAG_HIDE_STARK_MOUNTAIN_ROOM_3_BUCK true
++8 release select

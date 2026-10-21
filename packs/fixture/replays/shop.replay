@@ -1,0 +1,125 @@
+# fixture: the shop (contracts 0.11 menu apps): the clerk's script opens the mart app and waits for it.
+# Not enough money is refused; selling pays half (a key item cannot be sold, one of a kind skips the
+# quantity window); buying takes price × quantity; then the healer's machine and heal_party.
+set money 150
+give item fixture:ITEM_LAMP_OIL 3
+give item fixture:ITEM_LESSON_DIG
+give item fixture:ITEM_TOWN_GUIDE
+party 0 fixture:SPECIES_EMBERKIT 7
+set state party[0].hp 3
+warp fixture:SHOP 16 14
+until idle
+# talk to the clerk (facing up): the greeting, then the mart opens
++1 press a
++1 release a
+until app mart
++0 assert app mart
+# BUY: the first item (Capture Orb, 200) costs more than 150
++1 press a
++1 release a
++1 press a
++1 release a
++0 assert state money 150
+# the refusal message waits for A; then B goes back to the menu
++1 press a
++1 release a
++1 press b
++1 release b
+# SELL (down, A): Lamp Oil ×3 → how many? up to 2, A, YES → +100
++1 press down
++1 release down
++1 press a
++1 release a
++1 press a
++1 release a
++1 press up
++1 release up
++1 press a
++1 release a
++1 press a
++1 release a
++0 assert state money 250
++0 assert state bag.items[0] {"item":"fixture:ITEM_LAMP_OIL","count":1}
++1 press a
++1 release a
+# right to the lessons pocket: one Lesson Dig goes straight to YES/NO → +500
++1 press right
++1 release right
++1 press right
++1 release right
++1 press right
++1 release right
++1 press a
++1 release a
++1 press a
++1 release a
++0 assert state money 750
++0 assert state bag.tmhms []
++1 press a
++1 release a
+# left four to the keepsakes pocket (wraps): the Town Guide is refused
++1 press left
++1 release left
++1 press left
++1 release left
++1 press left
++1 release left
++1 press left
++1 release left
++1 press a
++1 release a
++1 press a
++1 release a
++0 assert state bag.key_items [{"item":"fixture:ITEM_TOWN_GUIDE","count":1}]
++0 assert state money 750
+# back to the menu, BUY (up to it), down to Tonic (300): two of them by tap
++1 press b
++1 release b
++1 press up
++1 release up
++1 tap menu:0
++1 tap row:1
++1 tap qty:+1
++1 tap ok
++1 tap yes
++1 assert state money 150
++0 assert state bag.medicine [{"item":"fixture:ITEM_TONIC","count":2}]
+# two message pages, then the list; B to the menu, B to the goodbye, A closes
++1 press a
++1 release a
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
++1 press a
++1 release a
+until app none 10
++0 assert app none
+until idle
+# the healer, three tiles east (a turn first): yes → the machine (timed: no prop in the fixture), the party is healed
++1 press right
++1 release right
+until idle
++1 press right
++1 release right
+until idle
++1 press right
++1 release right
+until idle
++1 press right
++1 release right
+until idle
++1 press up
++1 release up
+until idle
++1 press a
++1 release a
+until yesno
++1 press a
++1 release a
+until message 600
++0 assert state party[0].hp 22
+advance text
++0 assert position fixture:SHOP 19 14

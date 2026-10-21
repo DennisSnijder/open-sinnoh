@@ -1,0 +1,24 @@
+from cp23a.replay
+# Branch m6-heatran-caught: Heatran caught with the story's team and the
+# Master Ball Cyrus gave in the Galactic HQ (CP14). From cp23a's end, in front of Heatran: the National Pokédex
+# (cp21f), Charon's arrest (cp22) and Buck's talk in the Battleground (cp23a) are the chain's own. No setup lines.
+# sys-heatran-* cover the other outcomes on a constructed start.
++0 reload
+until idle
++0 assert flag platinum:FLAG_GAME_COMPLETED true
++0 assert flag platinum:FLAG_HIDE_STARK_MOUNTAIN_ROOM_3_HEATRAN false
++0 assert state bag.balls[item="platinum:ITEM_MASTER_BALL"].count 1
++0 press a
++1 release a
+advance text 3000
+battle catch platinum:ITEM_MASTER_BALL 20000
++0 assert battle scripted platinum:SPECIES_HEATRAN caught
+advance text 20000
+until idle 3000
++0 assert flag platinum:FLAG_CAUGHT_HEATRAN true
++0 assert flag platinum:FLAG_BATTLED_STARK_MOUNTAIN_ROOM_3_HEATRAN true
++0 assert flag platinum:FLAG_UNLOCKED_VS_SEEKER_LVL_5 true
++0 assert flag platinum:FLAG_HIDE_STARK_MOUNTAIN_ROOM_3_HEATRAN true
++0 assert var platinum:VAR_STARK_MOUNTAIN_ROOM_3_STATE 2
++0 assert party 5 platinum:SPECIES_HEATRAN
++0 assert state party[5].level 50

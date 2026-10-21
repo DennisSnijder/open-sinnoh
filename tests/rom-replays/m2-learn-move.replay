@@ -1,0 +1,41 @@
+# Learning a move in battle. Piplup L31 one exp point short of
+# L32 (medium slow: 27021) knows four moves; Bubble knocks out the wild Pokémon on Route 202, Piplup grows
+# to L32 and wants Whirlpool: "Make it forget another move?" YES, then Growl (slot 2) is forgotten for it.
+# After the battle Piplup (L32) evolves into Prinplup (the waits play the scene, `evolve auto`).
+party 0 platinum:SPECIES_PIPLUP 31 platinum:MOVE_POUND platinum:MOVE_GROWL platinum:MOVE_BUBBLE platinum:MOVE_PECK
+set state party[0].exp 27020
+set var platinum:VAR_ROUTE_202_STATE 1
+warp platinum:MAP_HEADER_ROUTE_202 178 827 up
+until idle
++0 evolve auto
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
+until battle 900
++0 battle move 3
+until battle 3000
++0 battle answer yes
+until battle 3000
++0 screenshot learn-move
++0 battle forget 2
+until battle end 3000
++0 assert battle wild * won
++0 assert state party[0].level 32
++0 assert state party[0].moves ["platinum:MOVE_POUND","platinum:MOVE_WHIRLPOOL","platinum:MOVE_BUBBLE","platinum:MOVE_PECK"]
+until idle
++0 assert state party[0].species "platinum:SPECIES_PRINPLUP"
++0 reload
+until idle

@@ -1,0 +1,20 @@
+# Part of sys-static-lake-trio: Valor Cavern after Rowan's event cleared FLAG_HIDE_VALOR_CAVERN_AZELF (lake-rowan;
+# Saturn hidden). Azelf L50 (start_legendary_battle), caught with a Master Ball: FLAG_CAUGHT_AZELF; the field's return
+# runs the on-load script (FLAG_MAP_LOCAL_REMOVE_OBJECT), which hides and removes Azelf.
+from lake-rowan.replay
+party 0 platinum:SPECIES_CROBAT 70 platinum:MOVE_CROSS_POISON
+give item platinum:ITEM_MASTER_BALL 1
+set flag platinum:FLAG_HIDE_LAKE_VALOR_GALACTIC true
+warp platinum:MAP_HEADER_VALOR_CAVERN 16 15 up
+until idle
++0 press a
++1 release a
+advance text
+battle catch platinum:ITEM_MASTER_BALL 9000
++0 assert battle scripted platinum:SPECIES_AZELF caught
+advance text
+until idle
++0 assert flag platinum:FLAG_CAUGHT_AZELF true
++0 assert flag platinum:FLAG_HIDE_VALOR_CAVERN_AZELF true
++0 assert flag platinum:FLAG_MAP_LOCAL_REMOVE_OBJECT false
++0 assert party 1 platinum:SPECIES_AZELF

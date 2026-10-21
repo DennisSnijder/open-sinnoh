@@ -1,0 +1,36 @@
+# sys-flash: Wayward Cave 1F is DARK_FLASH. Flash from the party menu
+# (FIELD_MOVES 15: do_flash_func + 0C3) sets FLAG_FLASH_ACTIVE and CLEAR. A warp to a cave (B1F and back)
+# keeps it, so 1F stays CLEAR (decomp FieldMapChange_UpdateGameData); the warp outside clears it. The
+# `dark`/`flash` screenshot lines mark the browser spec's darkness-radius check.
+party 0 platinum:SPECIES_BIBAREL 30 platinum:MOVE_FLASH
+warp platinum:MAP_HEADER_WAYWARD_CAVE_1F 30 54 left
+until idle
++0 assert state weather "platinum:OVERWORLD_WEATHER_DARK_FLASH"
++0 screenshot dark
++0 field move 0 platinum:MOVE_FLASH
+advance text
+until idle
++0 assert flag platinum:FLAG_FLASH_ACTIVE true
++0 assert state weather "platinum:OVERWORLD_WEATHER_CLEAR"
++0 screenshot flash
+# west to the stairs (28, 54) down to B1F, and back up the B1F stairs (16, 40)
++0 press left
+until state player.zone "platinum:MAP_HEADER_WAYWARD_CAVE_B1F"
++0 release left
+until idle
++0 assert flag platinum:FLAG_FLASH_ACTIVE true
++0 press right
+until state player.zone "platinum:MAP_HEADER_WAYWARD_CAVE_1F"
++0 release right
+until idle
++0 assert flag platinum:FLAG_FLASH_ACTIVE true
++0 assert state weather "platinum:OVERWORLD_WEATHER_CLEAR"
+# out through the south exit (30, 55) to Route 206: not a cave, Flash ends
++0 press right
+until position 30 54
++0 release right
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_206"
++0 release down
+until idle
++0 assert flag platinum:FLAG_FLASH_ACTIVE false

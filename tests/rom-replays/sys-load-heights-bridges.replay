@@ -1,0 +1,38 @@
+# A loaded save stands at its saved height where a tile has two levels, and knows whether it is on the
+# bridge or under it (the DS saves the player's y and MAP_OBJ_STATUS_ON_ELEVATED_BRIDGE; docs/decisions.md).
+set state repel 250
+set flag platinum:FLAG_DEFEATED_TRAINER_RUIN_MANIAC_CALVIN true
+# Route 215: the bridge over the lower path at x 591–593. On the deck, a reload, then on along the deck.
+warp platinum:MAP_HEADER_ROUTE_215 592 597 up
+until idle
++0 press up
+until position 592 590
++0 release up
+until idle
++0 assert state player.y 64.40625
++0 reload
+until idle
++0 assert state player.y 64.40625
++0 press up
+until position 592 587
++0 release up
+until idle
+# Down the ramp to the lower path, under the same bridge, a reload, and on east under the deck.
++0 press left
+until position 588 587
++0 release left
++0 press down
+until position 588 591
++0 release down
++0 press right
+until position 592 591
++0 release right
+until idle
++0 assert state player.y 32
++0 reload
+until idle
++0 assert state player.y 32
++0 press right
+until position 595 591
++0 release right
+until idle

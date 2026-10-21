@@ -1,0 +1,563 @@
+from cp21c.replay
++0 reload
+# CP21d (docs/research/story-cp20-24.md §CP21): the dex sweep, part 4. From the League's
+# south Pokémon Center down the waterfall and Route 223 to Sunyshore, west over Route 222, Valor Lakefront and
+# Route 213 to Pastoria, Route 212 to Hearthome (CP12's way back), and Chansey in Route 209's grass. Wild Pokémon are
+# fought by the auto policy (seen, and out of the way).
++0 wild auto
++0 evolve auto
+until idle
+# Surf down the waterfall at (848, 604) and south over Route 223 (CP17's way up, reversed; its swimmers beaten then)
++0 press down
+until position 842 600 6000
++0 release down
++0 press right
+until position 848 600 6000
++0 release right
+until idle
++1 press down
++1 release down
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until idle
++0 press down
+until position 848 605 6000
++0 release down
++0 press left
+until position 846 605 6000
++0 release left
++0 press down
+until position 846 614 6000
++0 release down
++0 press left
+until position 845 614 6000
++0 release left
++0 press down
+until position 845 616 6000
++0 release down
++0 press left
+until position 843 616 6000
++0 release left
++0 press down
+until position 843 637 6000
++0 release down
++0 press left
+until position 841 637 6000
++0 release left
++0 press down
+until position 841 648 6000
++0 release down
++0 press left
+until position 836 648 6000
++0 release left
++7 release select
++0 press down
+until position 836 654 6000
++0 release down
+until idle
++1 press left
++1 release left
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until idle
++0 press down
+until position 835 658 6000
++0 release down
++0 press right
+until position 841 658 6000
++0 release right
++0 press up
+until position 841 657 6000
++0 release up
++0 press right
+until position 851 657 6000
++0 release right
+until idle
++1 press down
++1 release down
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until idle
++0 press down
+until position 851 660 6000
++0 release down
++0 press left
+until position 850 660 6000
++0 release left
++0 press down
+until position 850 663 6000
++0 release down
++0 press right
+until position 855 663 6000
++0 release right
++0 press down
+until position 855 691 6000
++0 release down
++0 press left
+until position 849 691 6000
++0 release left
++0 press down
+until position 849 698 6000
++0 release down
++0 press right
+until position 853 698 6000
++0 release right
++0 press down
+until position 853 711 6000
++0 release down
++0 press right
+until position 856 711 6000
++0 release right
++0 press down
+until position 856 738 6000
++0 release down
++7 release select
+# through Sunyshore and west over Route 222 to Valor Lakefront (CP16's way, reversed)
++0 press down
+until position 856 765 6000
++0 release down
++0 press left
+until position 851 765 6000
++0 release left
++0 press down
+until position 851 771 6000
++0 release down
++0 press right
+until position 855 771 6000
++0 release right
++0 press down
+until position 855 788 6000
++0 release down
++0 press left
+until position 845 788 6000
++0 release left
++0 press down
+until position 845 790 6000
++0 release down
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_222" 3000
++0 release left
+until idle
++8 release select
++8 release select
+# Route 222 west
++0 press left
+until position 821 790 6000
++0 release left
++0 press up
+until position 821 786 6000
++0 release up
++0 press left
+until position 766 786 6000
++0 release left
++0 press up
+until position 766 785 6000
++0 release up
++0 press left
+until position 740 785 6000
++0 release left
++0 press down
+until position 740 791 6000
++0 release down
++0 press left
+until position 718 791 6000
++0 release left
++7 release select
+# Valor Lakefront back through the hotel lobby, Route 213, Pastoria, Route 212 to Hearthome (CP12's way back)
++0 press left
+until position 706 791 6000
++0 release left
++0 press down
+until position 706 812 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_GRAND_LAKE_ROUTE_213_LOBBY" 3000
++0 release down
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_213" 3000
++0 release down
+until idle
+# Route 213 west: off the plateau over Tuber Jared's walk (row 832, x 703–712; he never pauses) just after he
+# turns at its east end, then west on the beach (CP10's way back)
++0 press down
+until position 706 826 6000
++0 release down
++0 press right
+until position 709 826 6000
++0 release right
++0 press down
+until position 709 831 6000
++0 release down
++0 press left
+until position 705 831 6000
++0 release left
+until idle
++0 assert state objects[localId=4].movementType 20
+until state objects[localId=4].x 712 3000
++0 press down
+until position 705 832 600
++0 release down
++0 press left
+until position 700 832 600
++0 release left
+until idle
++0 press left
+until position 679 832 6000
++0 release left
++0 press down
+until position 679 835 6000
++0 release down
++0 press left
+until position 669 835 6000
++0 release left
++0 press up
+until position 669 826 6000
++0 release up
++0 press right
+until position 671 826 6000
++0 release right
++0 press up
+until position 671 812 6000
++0 release up
++0 press left
+until position 647 812 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_213_GATE_TO_PASTORIA_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_PASTORIA_CITY" 3000
++0 release left
+until idle
+# heal at the Pastoria Pokémon Center
++0 press left
+until position 603 812 6000
++0 release left
++0 press down
+until position 603 816 6000
++0 release down
++0 press left
+until position 600 816 6000
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_PASTORIA_CITY" 3000
++0 release down
+until idle
+
++8 release select
+# a Max Repel, then west to Route 212 South
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:0
++1 tap row:2
++1 tap menu:0
++1 assert state repel 250
++0 assert state bag.items[item="platinum:ITEM_MAX_REPEL"].count 1
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
++0 press down
+until position 600 820 6000
++0 release down
++0 press left
+until position 598 820 6000
++0 release left
++0 press down
+until position 598 831 6000
++0 release down
++0 press right
+until position 604 831 6000
++0 release right
++0 press down
+until position 604 848 6000
++0 release down
++0 press left
+until position 576 848 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_212_SOUTH" 3000
++0 release left
+until idle
+# Route 212 South back west on this chunk's way (its trainers beaten), round the deep mud
++0 press left
+until position 571 848 6000
++0 release left
++0 press down
+until position 571 856 6000
++0 release down
++0 press left
+until position 549 856 6000
++0 release left
++0 press up
+until position 549 846 6000
++0 release up
++0 press left
+until position 532 846 6000
++0 release left
++0 press down
+until position 532 852 6000
++0 release down
++0 press left
+until position 520 852 6000
++0 release left
++0 press up
+until position 520 851 6000
++0 release up
++0 press left
+until position 517 851 6000
++0 release left
++0 press down
+until position 517 852 6000
++0 release down
++0 press left
+until position 501 852 6000
++0 release left
++0 press down
+until position 501 855 6000
++0 release down
++0 press left
+until position 495 855 6000
++0 release left
++0 press up
+until position 495 851 6000
++0 release up
++0 press left
+until position 486 851 6000
++0 release left
++0 press up
+until position 486 840 6000
++0 release up
++0 press left
+until position 466 840 6000
++0 release left
++0 press down
+until position 466 854 6000
++0 release down
++0 press left
+until position 460 854 6000
++0 release left
++0 press down
+until position 460 857 6000
++0 release down
++0 press left
+until position 456 857 6000
++0 release left
++0 press up
+until position 456 856 6000
++0 release up
+# the Max Repel wears off here
++0 press left
+until state repel 0 600
++0 release left
++90 press a
++1 release a
+until idle
++0 press left
+until position 454 856 6000
++0 release left
++0 press up
+until position 454 843 6000
++0 release up
++0 press right
+until position 460 843 6000
++0 release right
++0 press up
+until position 460 839 6000
++0 release up
++0 press left
+until position 458 839 6000
++0 release left
++0 press up
+until position 458 831 6000
++0 release up
+until idle
++8 release select
+# Route 212 North back to Hearthome
++0 press up
+until position 458 823 6000
++0 release up
++0 press right
+until position 461 823 6000
++0 release right
++0 press up
+until position 461 808 6000
++0 release up
++0 press left
+until position 458 808 6000
++0 release left
++0 press up
+until position 458 801 6000
++0 release up
++0 press left
+until position 452 801 6000
++0 release left
++0 press up
+until position 452 795 6000
++0 release up
++0 press right
+until position 454 795 6000
++0 release right
++0 press up
+until position 454 793 6000
++0 release up
++0 press right
+until position 458 793 6000
++0 release right
++0 press up
+until position 458 785 6000
++0 release up
++0 press left
+until position 457 785 6000
++0 release left
++0 press up
+until position 457 774 6000
++0 release up
++0 press left
+until position 455 774 6000
++0 release left
++0 press up
+until position 455 770 6000
++0 release up
++0 press left
+until position 451 770 6000
++0 release left
++0 press up
+until position 451 764 6000
++0 release up
++0 press right
+until position 455 764 6000
++0 release right
++0 press up
+until position 455 761 6000
++0 release up
++0 press right
+until position 461 761 6000
++0 release right
++0 press up
+until position 461 737 6000
++0 release up
++0 press left
+until position 458 737 6000
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_212_GATE_TO_HEARTHOME_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY" 3000
++0 release up
+until idle
++8 release select
++8 release select
+# east through the gate to Route 209: Chansey in its grass
++0 press up
+until position 458 726 6000
++0 release up
++0 press right
+until position 504 726 6000
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_209_GATE_TO_HEARTHOME_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_209" 3000
++0 release right
+until idle
++8 release select
++0 press right
+until position 517 726 6000
++0 release right
++0 press up
+until position 517 719 6000
++0 release up
+until wild platinum:SPECIES_CHANSEY up down 60000
+battle auto 20000
+advance text
+until idle
+# the browser spec's beat: Route 209's grass
++0 screenshot route-209-chansey
++8 release select
+# back to Hearthome; heal
++0 press down
+until position 517 726 6000
++0 release down
++0 press left
+until position 512 726 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_209_GATE_TO_HEARTHOME_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY" 3000
++0 release left
+until idle
++0 press up
+until position 505 724 6000
++0 release up
++0 press left
+until position 499 724 6000
++0 release left
++0 press up
+until position 499 722 6000
++0 release up
++0 press left
+until position 490 722 6000
++0 release left
++0 press up
+until position 490 718 6000
++0 release up
++0 press left
+until position 489 718 6000
++0 release left
++0 press up
+until position 489 712 6000
++0 release up
++0 press left
+until position 469 712 6000
++0 release left
++0 press up
+until position 469 698 6000
++0 release up
++0 press left
+until position 465 698 6000
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY" 3000
++0 release down
+until idle
+# end of CP21d
++0 assert position platinum:MAP_HEADER_HEARTHOME_CITY 465 698
++8 release select

@@ -1,0 +1,18 @@
+[
+  {
+    "registry": "species",
+    "id": "platinum:SPECIES_CHIMCHAR",
+    "operations": [
+      { "op": "test", "path": "/starterSlot", "value": 1 },
+      { "op": "replace", "path": "/starterSlot", "value": 2 }
+    ]
+  },
+  {
+    "registry": "species",
+    "id": "platinum:SPECIES_PIPLUP",
+    "operations": [
+      { "op": "test", "path": "/starterSlot", "value": 2 },
+      { "op": "replace", "path": "/starterSlot", "value": 1 }
+    ]
+  }
+]

@@ -1,0 +1,19 @@
+# sys-giratina-defeated (m5-giratina-defeated until the Distortion World plays to the Giratina room):
+# the Giratina room's native script, Giratina knocked out. The same constructed
+# start as sys-giratina-caught. get_battle_result 1 (won): no catch flags; the field's return still removes Giratina
+# (progress 14), and Cyrus's lines follow ("That Pokémon was defeated").
+party 0 platinum:SPECIES_GARCHOMP 100 platinum:MOVE_DRAGON_CLAW
+set var platinum:VAR_DISTORTION_WORLD_PROGRESS 13
+warp platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM 15 14 up
+until idle
++0 press a
++1 release a
+advance text 3000
+battle auto 20000
++0 assert battle scripted platinum:SPECIES_GIRATINA won
+advance text 20000
+until idle 3000
++0 assert flag platinum:FLAG_CAUGHT_GIRATINA false
++0 assert flag platinum:FLAG_HIDE_TURNBACK_CAVE_GIRATINA_ROOM_GIRATINA false
++0 assert flag platinum:FLAG_MAP_LOCAL_REMOVE_OBJECT false
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 14

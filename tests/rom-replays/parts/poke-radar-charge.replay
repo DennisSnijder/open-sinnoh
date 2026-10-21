@@ -1,0 +1,39 @@
+# The Poké Radar on Route 222's grass (decomp pokeradar.c RefreshRadarChain, RadarChargeStep): Y with the Radar
+# registered and the battery flat runs POKE_RADAR 0 (50 steps left); fifty steps charge it, out of the grass and back;
+# Y again empties the battery and the patches shake.
+# Setup: Repel steps (no ordinary encounter on the way), Master Balls for the chain, and the registered Radar.
+party 0 platinum:SPECIES_GARCHOMP 50 platinum:MOVE_DRAGON_CLAW
+give item platinum:ITEM_POKE_RADAR 1
+give item platinum:ITEM_MASTER_BALL 12
+set state repel 250
+set state registeredItem "platinum:ITEM_POKE_RADAR"
+warp platinum:MAP_HEADER_ROUTE_222 750 777 right
+until idle
++0 press y
++1 release y
+until message
+advance text
+until idle
++0 assert state encounters.radarCharge 0
++0 press right
+until position 770 777
++0 release right
+until idle
++0 press down
+until position 770 778
++0 release down
+until idle
++0 press left
+until position 741 778
++0 release left
+until idle
++0 press right
+until position 744 778
++0 release right
+until idle
++0 assert state encounters.radarCharge 50
++0 press y
++1 release y
++20 screenshot radar-patches
+until idle
++0 assert state encounters.radarCharge 0

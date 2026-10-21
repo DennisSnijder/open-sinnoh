@@ -1,0 +1,61 @@
+# sys-griseous-orb (decomp party menu UpdatePokemonWithItem, PartyMenuCB_TakeItem,
+# BoxPokemon_SetGiratinaForm): a constructed start in Turnback Cave's Giratina room with an Altered Giratina and the
+# Griseous Orb (m6-turnback-giratina-caught picks it up in the revisit room). The party menu's ITEM → GIVE puts the
+# orb on Giratina: after "… now carries the Griseous Orb", the form change: "… changed form!", Origin, its ability
+# (Levitate) and stats, the form in the Pokédex. A reload keeps all of it; TAKE brings the orb back, and Altered.
+party 0 platinum:SPECIES_GIRATINA 47 platinum:MOVE_SHADOW_FORCE platinum:MOVE_DRAGON_CLAW
+give item platinum:ITEM_GRISEOUS_ORB 1
+set flag platinum:FLAG_HIDE_TURNBACK_CAVE_GIRATINA_ROOM_GIRATINA true
+warp platinum:MAP_HEADER_TURNBACK_CAVE_GIRATINA_ROOM 11 16 up
+until idle
++0 assert state party[0].form 0
++0 assert state party[0].ability "platinum:ABILITY_PRESSURE"
++1 press x
++1 release x
+until app start-menu
++1 tap entry:0
++1 assert app party
++1 tap slot:0
++1 tap menu:2
++1 tap menu:0
++1 assert app bag
++1 tap pocket:0
++1 tap row:0
++1 assert state party[0].heldItem "platinum:ITEM_GRISEOUS_ORB"
++0 assert state party[0].form 1
++0 assert state party[0].ability "platinum:ABILITY_LEVITATE"
++30 press a
++1 release a
++0 assert state pokedex.forms.platinum:SPECIES_GIRATINA[1].form 1
++90 press a
++1 release a
++30 press b
++1 release b
++30 press b
++1 release b
+until app none 300
+until idle 300
++0 reload
++0 assert state party[0].form 1
++0 assert state party[0].heldItem "platinum:ITEM_GRISEOUS_ORB"
++1 press x
++1 release x
+until app start-menu
++1 tap entry:0
++1 tap slot:0
++1 tap menu:2
++1 tap menu:1
++1 assert state party[0].heldItem null
++0 assert state party[0].form 0
++0 assert state party[0].ability "platinum:ABILITY_PRESSURE"
++0 assert state bag.items[item="platinum:ITEM_GRISEOUS_ORB"].count 1
++30 press a
++1 release a
++30 press b
++1 release b
++30 press b
++1 release b
++30 press b
++1 release b
+until app none 300
+until idle 300

@@ -1,0 +1,96 @@
+# Route 208's berry patches (decomp scrcmd_berry.c, berry_patches.c, scripts_berry_tree_interaction.s) on the frozen
+# clock: the new game's Nanab Berries are picked; the soil gets Growth Mulch and a Cheri Berry from the script bag;
+# the Sprayduck waters it and, right held, walks along the row; the plant grows stage by stage as the clock steps
+# (Growth Mulch: 135-minute stages) and its berries are picked.
+party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK
+give item platinum:ITEM_GROWTH_MULCH 1
+give item platinum:ITEM_CHERI_BERRY 1
+give item platinum:ITEM_SPRAYDUCK 1
+time 12:00
+warp platinum:MAP_HEADER_ROUTE_208 435 715 up
+until idle
++0 assert state berryPatches[26].stage "fruit"
++0 assert state berryPatches[26].growing true
++0 screenshot berry-fruit
+# The Nanab Berries the new game grew.
++0 press a
++1 release a
+until yesno
++0 press a
++1 release a
+advance text
+until idle
++0 assert state berryPatches[26].stage "none"
++0 assert state bag.berries [{"item":"platinum:ITEM_CHERI_BERRY","count":1},{"item":"platinum:ITEM_NANAB_BERRY","count":2}]
+# Mulch, then a Cheri Berry, from the script bag.
++0 press a
++1 release a
+advance text
+until menu
++4 press a
++1 release a
+until app bag
++2 tap row:0
+until app none
+advance text
+until yesno
++0 press a
++1 release a
+until app bag
++2 tap row:0
+until app none
+advance text
+until idle
++0 assert state berryPatches[26] {"berry":"platinum:ITEM_CHERI_BERRY","stage":"planted","stageMinutes":135,"moistureMinutes":0,"replants":0,"yield":0,"moisture":100,"yieldRating":5,"mulch":"platinum:ITEM_GROWTH_MULCH","growing":true}
++0 assert state bag.items []
++0 reload
+until idle
+# An hour later: Growth Mulch drains 22 an hour. The Sprayduck waters it, then right walks to the next patch.
++0 time 13:00
++2 assert state berryPatches[26].moisture 78
++0 press a
++1 release a
+advance text
+until yesno
++0 press a
++1 release a
++10 press right
+until position 436 715
++0 release right
+advance text
+until idle
++0 assert state berryPatches[26].moisture 100
++0 assert facing player up
+# The stages: sprouted, growing, blooming, fruit.
++0 time 14:15
++2 assert state berryPatches[26].stage "sprouted"
++0 time 16:30
++2 assert state berryPatches[26].stage "growing"
++0 reload
+until idle
++0 time 18:45
++2 assert state berryPatches[26].stage "blooming"
++0 time 21:00
++2 assert state berryPatches[26].stage "fruit"
+# The soil dried out around 18:00 (22 an hour from 100): three dry hours leave rating 2, so 2 berries.
++0 assert state berryPatches[26].yieldRating 2
++0 assert state berryPatches[26].yield 2
++0 screenshot berry-trees
+# Pick them.
++0 press left
+until position 435 715
++0 release left
+until idle
++1 press up
++1 release up
+until idle
++0 assert facing player up
++0 press a
++1 release a
+until yesno
++0 press a
++1 release a
+advance text
+until idle
++0 assert state berryPatches[26].stage "none"
++0 assert state bag.berries [{"item":"platinum:ITEM_CHERI_BERRY","count":2},{"item":"platinum:ITEM_NANAB_BERRY","count":2}]

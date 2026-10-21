@@ -1,0 +1,820 @@
+from cp8.replay
++0 reload
++0 wild auto
++0 evolve auto
+until idle
++8 release select
+# out of the warehouse
++0 press down
+until position 13 11 6000
++0 release down
++0 press left
+until position 8 11 6000
++0 release left
++0 press down
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_CITY" 3000
++0 release down
+until idle
+# the Department Store's ball counter: Great Balls
++0 press down
+until position 701 597 6000
++0 release down
++0 press left
+until position 694 597 6000
++0 release left
++0 press down
+until position 694 610 6000
++0 release down
++0 press right
+until position 705 610 6000
++0 release right
++0 press down
+until position 705 617 6000
++0 release down
++0 press right
+until position 710 617 6000
++0 release right
++0 press up
+until position 710 606 6000
++0 release up
++0 press left
+until position 701 606 6000
++0 release left
++0 press up
+until position 701 604 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_STORE_1F" 3000
++0 release up
+until idle
++0 press up
+until position 10 10 6000
++0 release up
++0 press left
+until position 3 10 6000
++0 release left
++0 press up
+until position 3 7 6000
++0 release up
++0 press left
+until position 2 7 6000
++0 release left
+until idle
++1 press up
++1 release up
+until idle
++0 assert facing player up
++1 press a
++1 release a
+until app mart
++1 tap menu:0
++1 tap row:1
++1 tap qty:+10
++1 tap qty:+10
++1 tap qty:-1
++1 tap ok
++1 tap yes
++1 assert state bag.balls[item="platinum:ITEM_GREAT_BALL"].count 20
++1 press a
++1 release a
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
++1 press a
++1 release a
+until app none 5
+until idle
++8 release select
++0 press right
+until position 6 7 6000
++0 release right
++0 press down
+until position 6 12 6000
++0 release down
++0 press right
+until position 10 12 6000
++0 release right
++0 press down
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_CITY" 3000
++0 release down
+until idle
++8 release select
+# south to Route 214
++0 press down
+until position 701 606 6000
++0 release down
++0 press right
+until position 712 606 6000
++0 release right
++0 press down
+until position 712 619 6000
++0 release down
++0 press right
+until position 721 619 6000
++0 release right
++0 press down
+until position 721 637 6000
++0 release down
++0 press left
+until position 718 637 6000
++0 release left
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_214_GATE_TO_VEILSTONE_CITY" 3000
++0 release down
+until idle
++8 release select
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_214" 3000
++0 release down
+until idle
++8 release select
+# Route 214: Psychic Abigail looks west over the whole way at row 660
++0 press down
+until message 3000
++0 release down
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_PSYCHIC_ABIGAIL won single
++8 release select
+# south past the vents
++0 press down
+until position 718 672 6000
++0 release down
++0 press right
+until position 720 672 6000
++0 release right
++0 press down
+until position 720 677 6000
++0 release down
++0 press left
+until position 718 677 6000
++0 release left
++0 press down
+until position 718 687 6000
++0 release down
++0 press right
+until position 720 687 6000
++0 release right
++0 press down
+until position 720 696 6000
++0 release down
++0 press left
+until position 712 696 6000
++0 release left
++0 press down
+until position 712 707 6000
++0 release down
++0 press right
+until position 720 707 6000
++0 release right
+until idle
+# Ruin Maniac Ronald looks north and south at random over the only way (column 721): step into his north line as he turns north
+until state objects[localId=4].facing "down" 3000
+until state objects[localId=4].facing "up" 3000
++0 press right
+until message 600
++0 release right
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_RUIN_MANIAC_RONALD won single
+# south to Valor Lakefront
++0 press right
+until position 722 707 6000
++0 release right
++0 press down
+until position 722 712 6000
++0 release down
++0 press left
+until position 717 712 6000
++0 release left
++0 press down
+until position 717 714 6000
++0 release down
++0 press left
+until position 715 714 6000
++0 release left
++0 press down
+until position 715 719 6000
++0 release down
++0 press right
+until position 729 719 6000
++0 release right
++0 press down
+until position 729 735 6000
++0 release down
+until idle
++0 press down
+until position 729 743 6000
++0 release down
++0 press left
+until position 722 743 6000
++0 release left
++0 press down
+until position 722 784 6000
++0 release down
++0 press left
+until position 718 784 6000
++0 release left
++0 press down
+until position 718 791 6000
++0 release down
++0 press left
+until position 700 791 6000
++0 release left
++0 press down
+until position 700 798 6000
++0 release down
+until idle
+# through the Hotel Grand Lake lobby to Route 213
++0 press down
+until position 700 800 6000
++0 release down
++0 press right
+until position 706 800 6000
++0 release right
++0 press down
+until position 706 812 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_GRAND_LAKE_ROUTE_213_LOBBY" 3000
++0 release down
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_213" 3000
++0 release down
+until idle
+# Route 213 west to Pastoria: down the plateau east of Tuber Chelsea, then wait at the east end of Tuber Jared's walk (row 832) until he walks up and sees the player
++0 press down
+until position 706 825 6000
++0 release down
++0 press right
+until position 715 825 6000
++0 release right
++0 press down
+until position 715 832 6000
++0 release down
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_TUBER_JARED won single
+# west along the beach
++0 press up
+until position 715 831 6000
++0 release up
++0 press left
+until position 705 831 6000
++0 release left
++0 press down
+until position 705 832 6000
++0 release down
++0 press left
+until position 679 832 6000
++0 release left
++0 press down
+until position 679 836 6000
++0 release down
++0 press left
+until position 661 836 6000
++0 release left
++0 press up
+until position 661 834 6000
++0 release up
++0 press up
+until position 661 828 6000
++0 release up
++0 press right
+until position 664 828 6000
++0 release right
+until idle
+# Beauty Cyndy looks west and east at random over every way north (row 827): wait in her west line until she turns and sees the player
++0 press up
+until position 664 827 6000
++0 release up
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_BEAUTY_CYNDY won single
++0 press up
+until position 664 823 6000
++0 release up
++0 press right
+until position 667 823 6000
++0 release right
++0 press up
+until position 667 819 6000
++0 release up
++0 press right
+until position 670 819 6000
++0 release right
++0 press up
+until position 670 812 6000
++0 release up
++0 press left
+until position 647 812 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_213_GATE_TO_PASTORIA_CITY" 3000
++0 release left
+until idle
++0 press left
+until state player.zone "platinum:MAP_HEADER_PASTORIA_CITY" 3000
++0 release left
+until idle
+# heal at the Pastoria Pokémon Center
++0 press left
+until position 603 812 6000
++0 release left
++0 press down
+until position 603 816 6000
++0 release down
++0 press left
+until position 600 816 6000
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
+# the Togepi Egg goes into the PC (BOX 1): its hatching step depends on each seed's steps since CP7
++0 press right
+until position 12 6 6000
++0 release right
++0 press up
+until position 12 4 6000
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++5 press a
++1 release a
+advance text
++5 press a
++1 release a
+until app storage
++1 tap party:1
++1 tap menu:0
++1 press a
++1 release a
++1 assert state boxes[0].slots[0].species "platinum:SPECIES_TOGEPI"
++0 assert state party.length 1
++1 press b
++1 release b
++1 tap yes
+until app none
+# back at the storage menu: B; then SWITCH OFF (the fourth entry) on "Which PC should be accessed?"
++40 press b
++1 release b
++69 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++4 press a
++1 release a
+advance text
+until idle
++0 press down
+until position 12 6 6000
++0 release down
++0 press left
+until position 8 6 6000
++0 release left
++0 press down
+until state player.zone "platinum:MAP_HEADER_PASTORIA_CITY" 3000
++0 release down
+until idle
+# Barry in front of the gym (PastoriaCity_CoordEvent_RivalBattle)
++0 press down
+until position 600 820 6000
++0 release down
++0 press left
+until position 594 820 6000
++0 release left
++0 press down
+until position 594 828 6000
++0 release down
++0 press left
+until message 6000
++0 release left
+advance text
+battle auto move 3 20000
++0 assert battle trainer platinum:TRAINER_RIVAL_PASTORIA_CITY_PIPLUP won single
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_PASTORIA_CITY_STATE 2
++8 release select
+# heal at the Pokémon Center before the gym
++0 press right
+until position 598 828 6000
++0 release right
++0 press up
+until position 598 816 6000
++0 release up
++0 press right
+until position 600 816 6000
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_PASTORIA_CITY" 3000
++0 release down
+until idle
++8 release select
+# back towards the gym
++0 press down
+until position 600 820 6000
++0 release down
++0 press left
+until position 594 820 6000
++0 release left
+until idle
+# TM86 Grass Knot (from CP7's path) to Empoleon over Peck, for Wake's Gyarados, Quagsire and Floatzel
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:3
++1 tap row:4
++1 tap menu:0
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap yes
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap yes
++1 press a
++1 release a
++1 assert app summary
++1 tap move:1
++1 tap move:1
++1 assert state party[0].moves ["platinum:MOVE_ROCK_SMASH","platinum:MOVE_GRASS_KNOT","platinum:MOVE_BRINE","platinum:MOVE_CUT"]
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
++8 release select
++0 press down
+until position 594 828 6000
++0 release down
++0 press left
+until position 589 828 6000
++0 release left
+# Pastoria Gym (the route of sys-gym-pastoria): orange, green, blue, green, orange, blue; its trainers where they spot the player; Wake
++0 press up
+until state player.zone "platinum:MAP_HEADER_PASTORIA_CITY_GYM" 3000
++0 release up
+until idle
++0 assert position platinum:MAP_HEADER_PASTORIA_CITY_GYM 13 42
+# the browser spec's beat: the gym's pools at the green level
++0 screenshot pastoria-gym
+
++0 press up
+until position 13 26
++0 release up
+until idle
++0 press left
+until position 3 26
++0 release left
+until idle
++0 press down
+until position 3 34
++0 release down
+until idle
++0 assert state mapFeatures {"kind": "pastoria-gym", "pressedButton": 0}
++0 assert var platinum:VAR_MAP_LOCAL_0x01 0
++0 assert var platinum:VAR_MAP_LOCAL_0x02 0
++0 assert var platinum:VAR_MAP_LOCAL_0x03 1
+until idle
++0 assert state mapFeatures {"kind": "pastoria-gym", "pressedButton": 0}
++0 press right
+until position 9 34
++0 release right
+until idle
++0 press up
+until position 9 28
++0 release up
+until idle
++0 press right
+until position 16 28
++0 release right
+until idle
++0 press up
+until position 16 24
++0 release up
+until idle
++0 press left
+until position 13 24
++0 release left
+until idle
++0 press up
+until position 13 18
++0 release up
+until idle
++0 press right
+until position 14 18
++0 release right
+until idle
++0 press up
+until position 14 11
++0 release up
+until idle
++0 press right
+until position 17 11
++0 release right
+until idle
++0 press up
+until position 17 9
++0 release up
+until idle
++0 assert state mapFeatures {"kind": "pastoria-gym", "pressedButton": 1}
++0 assert var platinum:VAR_MAP_LOCAL_0x01 0
++0 assert var platinum:VAR_MAP_LOCAL_0x02 1
++0 assert var platinum:VAR_MAP_LOCAL_0x03 0
++0 press left
+until position 14 9
++0 release left
+until idle
++0 press down
+until position 14 13
++0 release down
+until idle
++0 press right
+until position 16 13
++0 release right
+until idle
++0 press down
+until position 16 20
++0 release down
+until idle
++0 press left
+until position 5 20
++0 release left
+until idle
++0 press down
+until position 5 22
++0 release down
+until idle
++0 press right
+until position 6 22
++0 release right
+until idle
++0 press down
+until position 6 23
++0 release down
+until idle
++0 press right
+until position 7 23
++0 release right
+until message 300
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_SAILOR_DAMIAN won
+advance text
+until idle
++0 press right
+until position 9 23
++0 release right
+until idle
++0 press down
+until position 9 24
++0 release down
+until idle
++0 assert state mapFeatures {"kind": "pastoria-gym", "pressedButton": 2}
++0 assert var platinum:VAR_MAP_LOCAL_0x01 1
++0 assert var platinum:VAR_MAP_LOCAL_0x02 0
++0 assert var platinum:VAR_MAP_LOCAL_0x03 0
++0 press left
+until position 6 24
++0 release left
+until idle
++0 press down
+until position 6 34
++0 release down
+until idle
++0 press right
+until position 11 34
++0 release right
+until message 300
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_TUBER_JACKY won
+advance text
+until idle
++0 press right
+until position 20 34
++0 release right
+until idle
++0 press up
+until position 20 33
++0 release up
+until message 300
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_TUBER_CAITLYN won
+advance text
+until idle
++0 press up
+until position 20 17
++0 release up
+until idle
++0 press left
+until position 19 17
++0 release left
+until idle
++0 press up
+until position 19 13
++0 release up
+until idle
++0 assert state mapFeatures {"kind": "pastoria-gym", "pressedButton": 1}
++0 assert var platinum:VAR_MAP_LOCAL_0x01 0
++0 assert var platinum:VAR_MAP_LOCAL_0x02 1
++0 assert var platinum:VAR_MAP_LOCAL_0x03 0
++0 press right
+until position 23 13
++0 release right
+until idle
++0 press down
+until position 23 31
++0 release down
+until idle
++0 assert state mapFeatures {"kind": "pastoria-gym", "pressedButton": 0}
++0 assert var platinum:VAR_MAP_LOCAL_0x01 0
++0 assert var platinum:VAR_MAP_LOCAL_0x02 0
++0 assert var platinum:VAR_MAP_LOCAL_0x03 1
++0 press left
+until position 21 31
++0 release left
+until idle
++0 press up
+until position 21 7
++0 release up
+until idle
++0 press left
+until position 6 7
++0 release left
+until idle
++0 press down
+until position 6 16
++0 release down
+until idle
++0 press left
+until position 3 16
++0 release left
+until idle
++0 press up
+until position 3 8
++0 release up
+until message 300
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_SAILOR_SAMSON won
+advance text
+until idle
++0 press up
+until position 3 6
++0 release up
+until idle
++0 assert state mapFeatures {"kind": "pastoria-gym", "pressedButton": 2}
++0 assert var platinum:VAR_MAP_LOCAL_0x01 1
++0 assert var platinum:VAR_MAP_LOCAL_0x02 0
++0 assert var platinum:VAR_MAP_LOCAL_0x03 0
++0 press right
+until position 5 6
++0 release right
+until idle
++0 press down
+until position 5 9
++0 release down
+until idle
++0 press right
+until position 13 9
++0 release right
+until idle
++0 press up
+until position 13 5
++0 release up
+until idle
++0 press a
++1 release a
+advance text
+battle auto move 2 20000
++0 assert battle trainer platinum:TRAINER_LEADER_WAKE won single
+advance text 4400
+until idle
++0 assert state badges ["platinum:BADGE_ID_COAL","platinum:BADGE_ID_FOREST","platinum:BADGE_ID_RELIC","platinum:BADGE_ID_COBBLE","platinum:BADGE_ID_FEN"]
++0 assert var platinum:VAR_PASTORIA_CITY_STATE 3
++0 press right
+until position 15 5
++0 release right
+until idle
++0 press up
+until position 15 3
++0 release up
+until idle
++0 press right
+until position 25 3
++0 release right
+until idle
++0 press down
+until position 25 37
++0 release down
+until idle
++0 press left
+until position 16 37
++0 release left
+until idle
++0 press down
+until position 16 41
++0 release down
+until idle
++0 press left
+until position 13 41
++0 release left
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_PASTORIA_CITY"
++0 release down
+advance text 3000
+until idle
++0 assert var platinum:VAR_PASTORIA_CITY_STATE 4
++8 release select
+# north to the Great Marsh gate: the bomb (PastoriaCity_CoordEvent_Bomb)
++0 press right
+until position 598 829 6000
++0 release right
++0 press up
+until position 598 816 6000
++0 release up
++0 press right
+until position 610 816 6000
++0 release right
++0 press up
+until position 610 811 6000
++0 release up
++0 press up
+until message 3000
++0 release up
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_PASTORIA_CITY_STATE 5
++0 assert flag platinum:FLAG_PASTORIA_CITY_GRUNT_M_MOVED_EAST true
+# end of CP9
++0 assert battle trainer platinum:TRAINER_RIVAL_PASTORIA_CITY_PIPLUP won single
++0 assert battle trainer platinum:TRAINER_LEADER_WAKE won single
++0 assert state badges ["platinum:BADGE_ID_COAL","platinum:BADGE_ID_FOREST","platinum:BADGE_ID_RELIC","platinum:BADGE_ID_COBBLE","platinum:BADGE_ID_FEN"]
++0 assert var platinum:VAR_PASTORIA_CITY_STATE 5
++0 assert flag platinum:FLAG_PASTORIA_CITY_GRUNT_M_MOVED_EAST true
++0 assert var platinum:VAR_SAFARI_GAME_STATE 0
++8 release select

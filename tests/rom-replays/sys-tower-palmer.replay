@@ -1,0 +1,53 @@
+# Palmer at his first appearance: a constructed save (the frontier state set below, not played) holds a singles
+# challenge interrupted by REST with 20 wins (two sevens carried, opponent 7 of room 2 next, the saved draw's seventh
+# trainer FRONTIER_TRAINER_TOWER_TYCOON_PALMER_SILVER, 305). The lobby resumes it (OnFrame_ResumeChallenge), the
+# battle room announces the Tower Tycoon (streak 20), Palmer's intro and the Frontier Brain cut-in (its timing; the
+# art is logged), then RUN forfeits. The streak ends at 20, so Teala's bronze trophy is due: it goes to the
+# Underground's goods PC, and she says goodbye.
+party 0 platinum:SPECIES_GARCHOMP 60 platinum:MOVE_EARTHQUAKE platinum:MOVE_DRAGON_CLAW
+party 1 platinum:SPECIES_LUCARIO 55 platinum:MOVE_AURA_SPHERE
+party 2 platinum:SPECIES_STARAPTOR 52 platinum:MOVE_BRAVE_BIRD
+set state frontier {"bp":0,"towerFlags":256,"towerRooms":[2,0,0,0,0,0],"towerStreaks":[{"record":14,"latest":14},{"record":0,"latest":0},{"record":0,"latest":0},{"record":0,"latest":0},{"record":0,"latest":0}],"towerSave":{"inProgress":true,"mode":0,"nextOpponent":7,"slots":[0,1,2,255],"trainers":[100,101,102,103,104,105,305,65535,65535,65535,65535,65535,65535,65535],"seed":12345,"partner":0}}
+set var platinum:VAR_BATTLE_TOWER_LOBBY_LOAD_ACTION 2
+warp platinum:MAP_HEADER_BATTLE_TOWER 15 6 up
+until message 2000
++2 press a
++1 release a
++300 press a
++1 release a
+until state player.zone "platinum:MAP_HEADER_BATTLE_TOWER_ELEVATOR" 1200
+advance text 4000
++10 press a
++1 release a
++60 release a
+advance text 4000
+until battle 3000
++0 battle run
+until battle 600
++0 battle answer yes
+until battle end 3000
+until yesno 3000
++2 press b
++1 release b
+until state player.zone "platinum:MAP_HEADER_BATTLE_TOWER" 3000
+until message 3000
++150 press a
++1 release a
++150 press a
++1 release a
++150 press a
++1 release a
++150 press a
++1 release a
++150 press a
++1 release a
++150 press a
++1 release a
++150 press a
++1 release a
++150 press a
++1 release a
+until idle 900
++0 assert state frontier.towerStreaks[0] {"record":20,"latest":20}
++0 assert battles frontier 1
++0 assert state frontier.towerFlags 8192

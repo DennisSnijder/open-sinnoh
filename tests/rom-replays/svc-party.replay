@@ -1,0 +1,76 @@
+# svc-party, in Oreburgh Gate 1F with the Coal Badge: the party's context
+# window (SUMMARY, the field moves, SWITCH, ITEM), SWITCH changes the order, ITEM gives and takes a held
+# item, SUMMARY shows its pages (RIBBONS: Bibarel's 14 ribbons, one selected after scrolling a row), and ROCK SMASH from the party menu smashes the rock ahead (the app closes
+# and the FIELD_MOVES script runs, as in sys-rock-smash).
+give badge platinum:BADGE_ID_COAL
+party 0 platinum:SPECIES_TURTWIG 12
+party 1 platinum:SPECIES_BIBAREL 30 platinum:MOVE_ROCK_SMASH platinum:MOVE_TACKLE
+set state party[1].ribbons [0,1,5,9,13,17,21,25,30,40,50,60,70,79]
+give item platinum:ITEM_ORAN_BERRY 1
+warp platinum:MAP_HEADER_OREBURGH_GATE_1F 11 12 up
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:0
++1 assert app party
+# SWITCH: Bibarel to the lead
++1 tap slot:1
++1 tap menu:2
++1 tap slot:0
++1 assert state party[0].species "platinum:SPECIES_BIBAREL"
+# ITEM → GIVE: the Oran Berry from the bag, then TAKE it back
++1 tap slot:0
++1 tap menu:3
++1 tap menu:0
++1 assert app bag
++1 tap pocket:4
++1 tap row:0
++1 assert state party[0].heldItem "platinum:ITEM_ORAN_BERRY"
++1 press a
++1 release a
++1 tap slot:0
++1 tap menu:3
++1 tap menu:1
++1 assert state party[0].heldItem null
++0 assert state bag.berries [{"item":"platinum:ITEM_ORAN_BERRY","count":1}]
++1 press a
++1 release a
+# SUMMARY: the pages, then back
++1 tap slot:0
++1 tap menu:0
++1 assert app summary
++1 press right
++1 release right
++1 press right
++1 release right
++1 tap page:moves
++1 tap move:0
++1 screenshot summary
+# B leaves the move details; RIBBONS shows three rows, A selects the first, down twice scrolls a row
++1 press b
++1 release b
++1 tap page:ribbons
++1 screenshot ribbons
++1 press a
++1 release a
++1 press down
++1 release down
++1 press down
++1 release down
++1 press right
++1 release right
++1 screenshot ribbon
+# B lets go of the ribbon, B again leaves the summary
++1 press b
++1 release b
++1 press b
++1 release b
++1 assert app party
+# ROCK SMASH from the context window: the menu closes and the field move's script asks nothing more
++1 tap slot:0
++1 tap menu:1
+until app none
+advance text
+until idle
++0 assert flag platinum:FLAG_MAP_LOCAL_HIDE_OBSTACLE_4 true

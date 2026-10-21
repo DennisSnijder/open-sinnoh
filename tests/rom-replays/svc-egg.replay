@@ -1,0 +1,74 @@
+from svc-daycare.replay
+# svc-egg: the two Pikachu in the daycare have an egg waiting (the roll
+# every 256 steps is unit-tested; its PID is set here). Outside, the old man (turned east by the town's
+# map script, check_daycare_has_egg) gives it: a Pichu egg (the mother's base species, pms.narc) with the
+# offspring PID, Volt Tackle (she holds a Light Ball), 10 egg cycles in its friendship. Walking runs the
+# egg-cycle step counter; the summary shows the egg's memo and "The Egg Watch".
+set state daycare.offspring 2018915346
+# Out of the door to the old man (from below, facing up)
++0 press down
+until position 553 646
++0 release down
+until idle
++0 assert facing 3 right
++0 press right
+until position 560 646
++0 release right
++0 press down
+until position 560 650
++0 release down
++0 press left
+until position 555 650
++0 release left
++0 press up
+until position 555 649
++0 release up
+until idle
+# "Your Pokémon was holding an Egg! … You want it, yes?" YES
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+# The fanfare plays, then the message waits for A (WaitABPress, not a printer wait)
++300 press a
++1 release a
+advance text
+until state party.length 3
++0 assert state party[2].isEgg true
++0 assert state party[2].species "platinum:SPECIES_PICHU"
++0 assert state party[2].pid 2018915346
++0 assert state party[2].friendship 10
++0 assert state party[2].level 1
++0 assert state party[2].moves ["platinum:MOVE_THUNDER_SHOCK","platinum:MOVE_CHARM","platinum:MOVE_VOLT_TACKLE"]
++0 assert state party[2].otName "Lucas"
++0 assert state daycare.offspring 0
++0 assert state daycare.stepCounter 0
+advance text
+until idle
+# A few steps: the egg-cycle counter runs (255 steps per cycle)
++0 press down
+until position 555 650
++0 release down
++0 press right
+until position 562 650
++0 release right
++0 assert state daycare.stepCounter 7
+# The egg's summary: the memo page only, with "The Egg Watch"
++0 press x
++1 release x
+until app start-menu
++1 tap entry:0
+until app party
++1 tap slot:2
++1 tap menu:0
+until app summary
++0 screenshot egg-summary
++1 press b
++1 release b
++1 press b
++1 release b
++1 press b
++1 release b
+until app none
+until idle

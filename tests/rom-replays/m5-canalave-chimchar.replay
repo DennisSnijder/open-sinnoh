@@ -1,0 +1,45 @@
+from cp10.replay
+set state gender "female"
+set var platinum:VAR_PLAYER_STARTER 390
+party 0 platinum:SPECIES_INFERNAPE 55 platinum:MOVE_FLAMETHROWER platinum:MOVE_THUNDER_PUNCH platinum:MOVE_CLOSE_COMBAT platinum:MOVE_SURF
+warp platinum:MAP_HEADER_ROUTE_218_GATE_TO_CANALAVE_CITY 10 7 left
+# Starter/gender branch for cp11: the way into Canalave for a girl who chose
+# Chimchar. Route218GateToCanalaveCity_CoordEvent_ScientistM takes the female branch; CanalaveCity_OnTransition
+# draws the counterpart by gender (VAR_OBJ_GFX_ID_0: Lucas, OBJ_EVENT_GFX_PLAYER_M 0, where cp11 has Dawn, 97);
+# CanalaveCity_CoordEvent_Rival picks Barry's team by VAR_PLAYER_STARTER: TRAINER_RIVAL_CANALAVE_CITY_CHIMCHAR
+# (478), not cp11's _PIPLUP (476). Setup lines stage it from CP10's end: the gender and starter as the save keeps
+# them, an Infernape that knows Surf, the player in the gate as cp11 arrives there. The library's gender branch
+# is m5-library-lucas. Headless from the cp10 anchor (tests/integration/checkpoints-m5b-branches.rom.test.ts).
++0 wild auto
++0 evolve cancel
+until idle
+# the gate to Canalave: the scientist's female branch
++0 press left
+until message 3000
++0 release left
++0 assert text platinum:Route218GateToCanalaveCity_Text_UpgradeYourPokedexFemale 0
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_ROUTE_218_GATE_TO_CANALAVE_CITY_STATE 1
++0 press left
+until state player.zone "platinum:MAP_HEADER_CANALAVE_CITY" 3000
++0 release left
+until idle
++0 assert var platinum:VAR_OBJ_GFX_ID_0 0
++8 release select
+# Barry on the bridge (CanalaveCity_CoordEvent_Rival), cp11's way past the Pokémon Center
++0 press left
+until position 60 754 6000
++0 release left
++0 press up
+until position 60 723 6000
++0 release up
++0 press left
+until message 3000
++0 release left
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_RIVAL_CANALAVE_CITY_CHIMCHAR won single
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_CANALAVE_CITY_STATE 1

@@ -1,0 +1,31 @@
+{
+  "id": "/",
+  "name": "OpenSinnoh",
+  "short_name": "OpenSinnoh",
+  "description": "Play Pokémon Platinum in your browser, on desktop or phone, from your own copy.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "categories": ["games"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Continue",
+      "short_name": "Continue",
+      "description": "Load your last save",
+      "url": "/?continue",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
+  "screenshots": [
+    { "src": "/screenshots/rom-page-wide.png", "sizes": "1280x720", "type": "image/png", "form_factor": "wide", "label": "Choose your ROM: it stays on your device" },
+    { "src": "/screenshots/rom-page-narrow.png", "sizes": "390x844", "type": "image/png", "form_factor": "narrow", "label": "Choose your ROM: it stays on your device" }
+  ]
+}

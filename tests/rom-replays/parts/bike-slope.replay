@@ -1,0 +1,21 @@
+from bike-standstill.replay
+# Part of sys-bike: Route 207, the same slope after a run-up from z 724 in gear 1: the bike climbs it
+# and rolls on north. B toggles the gear; a save/load keeps gear 1.
+warp platinum:MAP_HEADER_ROUTE_207 306 724 up
+until idle
++0 assert state playerState "cycle"
++0 press up
+until position 306 717
++0 release up
+until idle
++0 press b
++1 release b
++1 assert state cyclingGear 0
++0 press b
++1 release b
++1 assert state cyclingGear 1
+until idle
++0 reload
+until idle
++0 assert state playerState "cycle"
++0 assert state cyclingGear 1

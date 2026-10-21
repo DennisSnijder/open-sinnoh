@@ -1,0 +1,83 @@
+# Mystery Gift unlocked as on the DS (docs/decisions.md "Mystery Gift with gift codes"): Jubilife TV 3F's
+# questionnaire (decomp JubilifeTV3F_GymGuide2). YES, then the Easy Chat word picker twice (choose_two_custom_message_words):
+# EVERYONE HAPPY (PEOPLE, FEELINGS), then WI-FI CONNECTION (UNION, twice). The wallpaper passwords are not checked
+# (get_wallpaper_from_custom_message_words stays a stub: no wallpaper), so check_is_mystery_gift_phrase compares with
+# the ROM's own phrase and unlock_mystery_gift sets the save's flag (`mysteryGift.unlocked`). A wrong answer first
+# (EVERYONE HAPPY, HAPPY EVERYONE): thanks, nothing unlocked.
+party 0 platinum:SPECIES_TURTWIG 10 platinum:MOVE_TACKLE
+warp platinum:MAP_HEADER_JUBILIFE_TV_3F 10 14 down
+until idle
++0 press a
++1 release a
+advance text
+until yesno
++0 press a
++1 release a
+until app easy-chat
++1 tap slot:0
++1 tap group:4
++1 tap word:6
++1 tap slot:1
++1 tap group:7
++1 tap word:20
++1 tap yes
+until app none
+until message
++0 assert text platinum:JubilifeTV3F_Text_WhatFeedbackCanYouGive 0
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until app easy-chat
++1 tap slot:0
++1 tap group:7
++1 tap word:20
++1 tap slot:1
++1 tap group:4
++1 tap word:6
++1 tap yes
+until app none
+until message
++0 assert text platinum:JubilifeTV3F_Text_ThanksForAnsweringMyQuestion 0
+advance text
+until idle
+# The phrase: EVERYONE HAPPY, WI-FI CONNECTION.
++0 press a
++1 release a
+advance text
+until yesno
++0 press a
++1 release a
+until app easy-chat
++1 tap slot:0
++1 tap group:4
++1 tap word:6
++1 tap slot:1
++1 tap group:7
++1 tap word:20
++1 tap yes
+until app none
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until app easy-chat
++1 tap slot:0
++1 tap group:9
++1 tap word:22
++1 tap slot:1
++1 tap group:9
++1 tap word:3
++1 tap yes
+until app none
+until message
++0 assert text platinum:JubilifeTV3F_Text_DealForMysteryGift 0
+advance text
+until idle
++0 assert state mysteryGift.unlocked true
++0 reload
+until idle
++0 assert state mysteryGift.unlocked true

@@ -1,0 +1,538 @@
+# sys-gym-veilstone (docs/research/gym-puzzles.md): Veilstone Gym's
+# punching bags and tyre stacks. Walking into a bag kicks it along the gym's track grid; a stack just past
+# its stop topples. A blocked kick swings the bag in place; leaving and re-entering sets the puzzle up again;
+# the 10-tile push north (bag 4,22 to 4,12) walks the camera along and is saved and reloaded at rest; the last
+# kick (bag 8,7 east to 11,7, stack 12,7 toppled) opens the way to Maylene. The game seed is pinned (`set
+# state seed`) so the turning Black Belts face the same way on every run seed: the route battles Rafael when
+# he spots the player, Darren and Jeffery from the tile next to them; battles still follow the run seed.
+party 0 platinum:SPECIES_ALAKAZAM 60 platinum:MOVE_PSYCHIC
+set state seed 4242
+warp platinum:MAP_HEADER_VEILSTONE_CITY_GYM 12 29 up
+until idle
++0 screenshot veilstone-before
+# a blocked kick: the bag at (15,26) has a wall north of it, so it swings on the spot
++0 press up
+until position 12 27
++0 release up
+until idle
++0 press right
+until position 15 27
++0 release right
+until idle
++0 press up
++1 release up
+until idle
++0 press up
++1 release up
+until idle
++0 assert state mapFeatures.bags[4] {"x": 15, "z": 26}
++0 press left
+until position 14 27
++0 release left
+until idle
++0 press up
+until position 14 26
++0 release up
+until idle
++0 press right
++1 release right
+until idle
++0 press right
++1 release right
+until idle
++0 assert state mapFeatures.bags[4] {"x": 19, "z": 26}
++0 assert state mapFeatures.stacks[8] null
++0 screenshot veilstone-kicked
++0 press down
+until position 14 28
++0 release down
+until idle
++0 press left
+until position 12 28
++0 release left
+until idle
++0 press down
+until position 12 29
++0 release down
+until idle
+# leaving and coming back sets the puzzle up again
++0 press down
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_CITY"
++0 release down
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_CITY_GYM"
++0 release up
+until idle
++0 assert state mapFeatures.bags[4] {"x": 15, "z": 26}
++0 assert state mapFeatures.stacks[8] {"x": 20, "z": 26}
++0 press up
+until position 12 27
++0 release up
+until idle
++0 press right
+until position 14 27
++0 release right
+until idle
++0 press up
+until position 14 26
++0 release up
+until idle
++0 press right
++1 release right
+until idle
++0 press right
++1 release right
+until idle
++0 assert state mapFeatures.bags[4] {"x": 19, "z": 26}
++0 assert state mapFeatures.stacks[8] null
++0 press down
+until position 14 27
++0 release down
+until idle
++0 press right
+until position 20 27
++0 release right
+until idle
++0 press up
+until position 20 20
++0 release up
+until idle
++0 press right
+until position 21 20
++0 release right
+until idle
++0 press up
+until position 21 18
++0 release up
+until idle
++0 press left
+until position 19 18
++0 release left
+until idle
++0 press up
+until position 19 17
++0 release up
+until idle
++0 press left
+until position 12 17
++0 release left
+until idle
++0 press left
+until position 11 17
++0 release left
++12 release a
+until message 300
+advance text
+battle auto 20000
+advance text
+until idle
++0 press right
+until position 19 17
++0 release right
+until idle
++0 press up
+until position 19 14
++0 release up
+until idle
++0 press left
+until position 18 14
++0 release left
++12 release a
++0 press left
+until position 17 14
++0 release left
++12 release a
++0 press up
+until position 17 13
++0 release up
++12 release a
++0 press left
+until position 16 13
++0 release left
++1 press down
++1 release down
++1 press a
++1 release a
+until message 300
+advance text
+battle auto 20000
+advance text
+until idle
++0 press left
+until position 15 13
++0 release left
+until idle
++0 press down
+until position 15 14
++0 release down
+until idle
++0 press left
+until position 11 14
++0 release left
+until idle
++0 press down
+until position 11 15
++0 release down
+until idle
++0 press left
+until position 7 15
++0 release left
+until idle
++0 press up
+until position 7 14
++0 release up
+until idle
++0 press left
+until position 5 14
++0 release left
+until idle
++0 press up
+until position 5 13
++0 release up
+until idle
++0 press left
+until position 1 13
++0 release left
+until idle
++0 press up
+until position 1 10
++0 release up
+until idle
++0 press right
+until position 2 10
++0 release right
++1 press up
++1 release up
++1 press a
++1 release a
+until message 300
+advance text
+battle auto 20000
+advance text
+until idle
++0 press left
+until position 1 10
++0 release left
+until idle
++0 press up
+until position 1 8
++0 release up
+until idle
++0 press right
+until position 3 8
++0 release right
+until idle
++0 press down
+until position 3 9
++0 release down
+until idle
++0 press down
++1 release down
+until idle
++0 press down
+until position 3 13
++0 release down
+until idle
++0 press left
+until position 2 13
++0 release left
+until idle
++0 press down
+until position 2 14
++0 release down
+until idle
++0 press right
++1 release right
+until idle
++0 press right
++1 release right
+until idle
++0 press down
+until position 2 20
++0 release down
+until idle
++0 press right
+until position 4 20
++0 release right
+until idle
++0 press down
+until position 4 21
++0 release down
+until idle
++0 press right
+until position 8 21
++0 release right
+until idle
++0 press up
++1 release up
+until idle
++0 press up
++1 release up
+until idle
++0 press up
+until position 8 18
++0 release up
+until idle
++0 press left
+until position 7 18
++0 release left
+until idle
++0 press up
+until position 7 16
++0 release up
+until idle
++0 press right
+until position 9 16
++0 release right
+until idle
++0 press down
+until position 9 17
++0 release down
+until idle
++0 press left
++1 release left
+until idle
++0 press left
++1 release left
+until idle
++0 press up
+until position 9 16
++0 release up
+until idle
++0 press left
+until position 3 16
++0 release left
+until idle
++0 press down
++1 release down
+until idle
++0 press down
++1 release down
+until idle
++0 press down
+until position 3 19
++0 release down
+until idle
++0 press left
+until position 2 19
++0 release left
+until idle
++0 press down
+until position 2 21
++0 release down
+until idle
++0 press right
+until position 3 21
++0 release right
+until idle
++0 press down
+until position 3 23
++0 release down
+until idle
++0 press right
+until position 4 23
++0 release right
+until idle
++0 press up
++1 release up
+until idle
++0 press up
++1 release up
+until idle
++0 assert state mapFeatures.bags[1] {"x": 4, "z": 12}
++0 reload
+until idle
++0 assert state mapFeatures.bags[1] {"x": 4, "z": 12}
++0 press up
+until position 4 13
++0 release up
+until idle
++0 press left
+until position 3 13
++0 release left
+until idle
++0 press up
+until position 3 12
++0 release up
+until idle
++0 press right
++1 release right
+until idle
++0 press right
++1 release right
+until idle
++0 press down
+until position 3 15
++0 release down
+until idle
++0 press right
+until position 10 15
++0 release right
+until idle
++0 press up
+until position 10 14
++0 release up
+until idle
++0 press right
+until position 14 14
++0 release right
+until idle
++0 press up
+until position 14 13
++0 release up
+until idle
++0 press right
+until position 17 13
++0 release right
+until idle
++0 press down
+until position 17 14
++0 release down
+until idle
++0 press right
+until position 19 14
++0 release right
+until idle
++0 press down
+until position 19 18
++0 release down
+until idle
++0 press right
+until position 20 18
++0 release right
+until idle
++0 press up
++1 release up
+until idle
++0 press up
++1 release up
+until idle
++0 press up
+until position 20 13
++0 release up
+until idle
++0 press left
+until position 19 13
++0 release left
+until idle
++0 press up
+until position 19 11
++0 release up
+until idle
++0 press right
+until position 21 11
++0 release right
+until idle
++0 press up
+until position 21 9
++0 release up
+until idle
++0 press left
+until position 18 9
++0 release left
+until idle
++0 press down
+until position 18 10
++0 release down
+until idle
++0 press left
+until position 17 10
++0 release left
+until idle
++0 press left
++1 release left
+until idle
++0 press left
+until position 14 10
++0 release left
+until idle
++0 press left
++1 release left
+until idle
++0 press left
+until position 12 10
++0 release left
+until idle
++0 press down
+until position 12 14
++0 release down
+until idle
++0 press left
+until position 11 14
++0 release left
+until idle
++0 press down
+until position 11 15
++0 release down
+until idle
++0 press left
+until position 8 15
++0 release left
+until idle
++0 press up
+until position 8 8
++0 release up
+until idle
++0 press left
+until position 7 8
++0 release left
+until idle
++0 press up
+until position 7 7
++0 release up
+until idle
++0 press right
++1 release right
+until idle
++0 press right
++1 release right
+until idle
++0 assert state mapFeatures.bags[2] {"x": 11, "z": 7}
++0 assert state mapFeatures.stacks[4] null
++0 press down
+until position 7 8
++0 release down
+until idle
++0 press right
+until position 8 8
++0 release right
+until idle
++0 press down
+until position 8 15
++0 release down
+until idle
++0 press right
+until position 10 15
++0 release right
+until idle
++0 press up
+until position 10 14
++0 release up
+until idle
++0 press right
+until position 11 14
++0 release right
+until idle
++0 press up
+until position 11 10
++0 release up
+until idle
++0 press right
+until position 12 10
++0 release right
+until idle
++0 press up
+until position 12 5
++0 release up
+until idle
++0 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_LEADER_MAYLENE won
+advance text 4400
+until idle
++0 assert state badges ["platinum:BADGE_ID_COBBLE"]
++0 assert var platinum:VAR_VEILSTONE_WAREHOUSE_GUARDS_FIGHTABLE 1
++0 assert state mapFeatures.bags[2] {"x": 11, "z": 7}

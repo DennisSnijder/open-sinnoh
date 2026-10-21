@@ -1,0 +1,64 @@
+from cp18.replay
++0 reload
+# CP19 (docs/research/story-cp5-19.md §19): from CP18's end in Lucian's room, north to
+# the lift up to the Champion's room; Cynthia (267), the walk to the Hall of Fame, clear_game (the Champion ribbons,
+# the record screen, the save, the credits, the reset), and CONTINUE: the clear's save upstairs in Twinleaf.
++0 wild flee
++0 evolve auto
+until idle
+# north out of Lucian's room to the lift up to the Champion's room
++0 press left
+until position 7 6 6000
++0 release left
++0 press up
+until position 7 3 6000
++0 release up
++0 press right
+until position 8 3 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_POKEMON_LEAGUE_ELEVATOR_TO_CHAMPION_ROOM" 3000
++0 release up
+until idle 6000
++0 press up
+until position 4 19 3000
++0 release up
+until idle 6000
++0 press up
+until state player.zone "platinum:MAP_HEADER_POKEMON_LEAGUE_CHAMPION_ROOM" 6000
++0 release up
++30 screenshot champion-room
+# Cynthia (PokemonLeagueChampionRoom_OnFrame_EnterRoom): her room's script walks the player up and starts her battle (267)
+advance text 6000
+battle auto 90000
++0 assert battle trainer platinum:TRAINER_CHAMPION_CYNTHIA won single
+advance text 20000
++0 assert flag platinum:FLAG_DEFEATED_CYNTHIA true
++0 assert map platinum:MAP_HEADER_POKEMON_LEAGUE_HALL_OF_FAME
++0 assert app hall-of-fame
+# the Hall of Fame (the hallway's and the room's scripts) and clear_game: the Champion ribbons, the record screen
++0 assert flag platinum:FLAG_GAME_COMPLETED true
++0 assert var platinum:VAR_PLAYER_HOUSE_POSTGAME_STATE 1
++0 assert state party[0].ribbons [32]
++0 assert state party[4].ribbons [32]
+# the record screen: each member alone, then the group; only the final screen takes A
++1500 release select
++0 press a
++1 release a
+until app credits 600
++0 assert state hallOfFame.total 1
++0 assert state hallOfFame.entries[0].party[4].species "platinum:SPECIES_BIBAREL"
+# the credits (unskippable on a first clear), the OpenSinnoh card, the reset
+until app none 12000
++0 reset
+until idle 600
+# CONTINUE: the clear's save, upstairs in Twinleaf
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_2F 4 6
++0 assert state player.facing "up"
++0 assert flag platinum:FLAG_GAME_COMPLETED true
++0 assert flag platinum:FLAG_DEFEATED_CYNTHIA true
++0 assert state hallOfFame.total 1
++0 assert state party[0].ribbons [32]
+# end of CP19
++0 assert var platinum:VAR_PLAYER_HOUSE_POSTGAME_STATE 1
+until idle

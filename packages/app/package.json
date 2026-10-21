@@ -1,0 +1,22 @@
+{
+  "name": "@opensinnoh/app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@opensinnoh/audio": "workspace:*",
+    "@opensinnoh/battle": "workspace:*",
+    "@opensinnoh/contracts": "workspace:*",
+    "@opensinnoh/core": "workspace:*",
+    "@opensinnoh/game": "workspace:*",
+    "@opensinnoh/importer": "workspace:*",
+    "@opensinnoh/menus": "workspace:*",
+    "@opensinnoh/nds": "workspace:*",
+    "@opensinnoh/render": "workspace:*",
+    "@opensinnoh/text": "workspace:*",
+    "@opensinnoh/ui": "workspace:*",
+    "@opensinnoh/vm": "workspace:*",
+    "@opensinnoh/world": "workspace:*",
+    "@sentry/browser": "10.76.0"
+  }
+}

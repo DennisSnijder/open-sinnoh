@@ -1,0 +1,1459 @@
+from cp11.replay
++0 reload
+# CP12 (docs/research/story-cp5-19.md §12): from CP11's end in Canalave, back east to
+# Hearthome, Route 212 to Pastoria, Route 213 and Valor Lakefront, the drained lake and Valor Cavern (Saturn
+# 408), then west to Lake Verity (Mars 405): Lake Acuity state 1.
++0 wild auto
++0 evolve auto
+until idle
+# heal at the Canalave Pokémon Center
++0 press down
+until position 37 723 6000
++0 release down
++0 press right
+until position 58 723 6000
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_CANALAVE_CITY" 3000
++0 release down
+until idle
+# Canalave Mart: Max Repels (a wild Quagsire's Water Absorb stalls Surf, the auto policy's pick)
++0 press down
+until position 58 741 6000
++0 release down
++0 press left
+until position 53 741 6000
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_CANALAVE_CITY_MART" 3000
++0 release up
+until idle
++8 release select
++0 press up
+until position 3 7 6000
++0 release up
+until idle
++0 assert facing player up
++1 press a
++1 release a
+until app mart
++1 tap menu:0
++1 tap row:16
++1 tap qty:+1
++1 tap qty:+1
++1 tap qty:+1
++1 tap qty:+1
++1 tap qty:+1
++1 tap ok
++1 tap yes
++1 assert state bag.items[item="platinum:ITEM_MAX_REPEL"].count 6
++1 press a
++1 release a
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
++1 press a
++1 release a
+until app none 5
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_CANALAVE_CITY" 3000
++0 release down
+until idle
++0 press down
+until position 53 742 6000
++0 release down
++0 press right
+until position 58 742 6000
++0 release right
++0 press up
+until position 58 723 6000
++0 release up
+until idle
++8 release select
+# east to Route 218
++0 press down
+until position 58 748 6000
++0 release down
++0 press right
+until position 61 748 6000
++0 release right
++0 press down
+until position 61 754 6000
++0 release down
++0 press right
+until position 62 754 6000
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_218_GATE_TO_CANALAVE_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_218" 3000
++0 release right
+until idle
+# Route 218 east on CP11's way back: Surf from the shore at (79, 749) east along row 749, land on the strip at x 93,
+# Surf again from (93, 756) to the bridge
++0 press right
+until position 79 754 6000
++0 release right
++0 press up
+until position 79 749 6000
++0 release up
+until idle
++1 press right
++1 release right
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until state playerState "surf" 3000
+until idle
++0 press right
+until position 94 749 6000
++0 release right
++0 press down
+until position 94 752 6000
++0 release down
++0 press left
+until position 93 752 6000
++0 release left
++0 press down
+until position 93 756 6000
++0 release down
+until idle
++1 press right
++1 release right
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until state playerState "surf" 3000
+until idle
++0 press right
+until position 112 756 6000
++0 release right
++0 press down
+until position 112 758 6000
++0 release down
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_218_GATE_TO_JUBILIFE_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_JUBILIFE_CITY" 3000
++0 release right
+until idle
+# Jubilife on row 758 to Route 203. Lass Kaitlin wanders x 242–244, rows 756–758 (sight 1) over the only way north:
+# cross below her on row 759 once she is up at row 756, then up x 246 to the Oreburgh Gate
++0 press right
+until position 238 758 6000
++0 release right
++0 press down
+until position 238 759 6000
++0 release down
++0 press right
+until position 241 759 6000
++0 release right
+until idle
++0 assert state objects[localId=2].movementType 3
+until state objects[localId=2].z 757 6000
+until state objects[localId=2].z 756 6000
++0 press right
+until position 246 759 6000
++0 release right
++0 press up
+until position 246 749 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_OREBURGH_GATE_1F" 3000
++0 release right
+until idle
+# through the Oreburgh Gate
++0 press right
+until state player.zone "platinum:MAP_HEADER_OREBURGH_CITY" 3000
++0 release right
+until idle
+# Oreburgh to Route 207 and up the slope at x 306 by bike in gear 1 (CP7's way)
++0 press right
+until position 271 749 6000
++0 release right
++0 press down
+until position 271 757 6000
++0 release down
++0 press right
+until position 299 757 6000
++0 release right
++0 press up
+until position 299 724 6000
++0 release up
++0 press right
+until position 306 724 6000
++0 release right
+until idle
++1 press y
++1 release y
+until state playerState "cycle"
+until idle
++1 press b
++1 release b
++1 assert state cyclingGear 1
++0 press up
+until position 306 717 6000
++0 release up
+until idle
++0 press b
++1 release b
++1 assert state cyclingGear 0
++0 press up
+until position 306 712 6000
++0 release up
++0 press right
+until position 340 712 6000
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_SOUTH" 3000
++0 release right
+until idle
+# through Mt. Coronet 1F on CP7's way to Route 208
++0 press right
+until position 6 8 6000
++0 release right
++0 press down
+until position 6 23 6000
++0 release down
++0 press right
+until position 15 23 6000
++0 release right
++0 press up
+until position 15 19 6000
++0 release up
++0 press right
+until position 19 19 6000
++0 release right
++0 press up
+until position 19 15 6000
++0 release up
++0 press right
+until position 24 15 6000
++0 release right
++0 press up
+until position 24 13 6000
++0 release up
++0 press right
+until position 27 13 6000
++0 release right
++0 press down
+until position 27 20 6000
++0 release down
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_208" 3000
++0 release right
+until idle
+# Route 208 east on CP7's way: round the rocks north of Hiker Robert, through the grass to the Hearthome gate
++0 press right
+until position 422 724 6000
++0 release right
++0 press up
+until position 422 715 6000
++0 release up
++0 press right
+until position 427 715 6000
++0 release right
++0 press down
+until position 427 729 6000
++0 release down
++0 press right
+until position 446 729 6000
++0 release right
++0 press up
+until position 446 726 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_208_GATE_TO_HEARTHOME_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY" 3000
++0 release right
+until idle
+# off the bike; heal at the Hearthome Pokémon Center
+until idle
++1 press y
++1 release y
+until state playerState "walk"
+until idle
++0 press right
+until position 485 726 6000
++0 release right
++0 press up
+until position 485 712 6000
++0 release up
++0 press left
+until position 465 712 6000
++0 release left
++0 press up
+until position 465 698 6000
++0 release up
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
+# Bibarel goes into the PC (BOX 1) until Snowpoint: with one Pokémon no double battle and no pair of sight
+# trainers on the way (Route 212's rangers, Route 209's twins) battles it at once
++0 press right
+until position 12 6 6000
++0 release right
++0 press up
+until position 12 4 6000
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++5 press a
++1 release a
+advance text
++5 press a
++1 release a
+until app storage
++1 tap party:1
++1 tap menu:0
++1 press a
++1 release a
++0 assert state party.length 1
++1 press b
++1 release b
++1 tap yes
+until app none
+# back at the storage menu: B; then SWITCH OFF (the fourth entry) on "Which PC should be accessed?"
++40 press b
++1 release b
++69 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++4 press a
++1 release a
+advance text
+until idle
++0 press down
+until position 12 6 6000
++0 release down
++0 press left
+until position 8 6 6000
++0 release left
++0 assert state boxes[0].slots[1].species "platinum:SPECIES_BIBAREL"
++0 press down
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY" 3000
++0 release down
+until idle
+# south through the gate to Route 212
++0 press down
+until position 465 716 6000
++0 release down
++0 press right
+until position 485 716 6000
++0 release right
++0 press down
+until position 485 727 6000
++0 release down
++0 press left
+until position 458 727 6000
++0 release left
++0 press down
+until position 458 728 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_212_GATE_TO_HEARTHOME_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_212_NORTH" 3000
++0 release down
+until idle
+# Route 212 North by day (the policemen are not trainers): west of Gentleman Jeremy's and Socialite Reina's lines
++0 press down
+until position 458 753 6000
++0 release down
++0 press right
+until position 460 753 6000
++0 release right
++0 press down
+until position 460 761 6000
++0 release down
++0 press left
+until position 454 761 6000
++0 release left
++0 press down
+until position 454 766 6000
++0 release down
++0 press left
+until position 451 766 6000
++0 release left
++0 press down
+until position 451 771 6000
++0 release down
++0 press right
+until position 455 771 6000
++0 release right
++0 press down
+until position 455 775 6000
++0 release down
++0 press right
+until position 457 775 6000
++0 release right
++0 press down
+until position 457 786 6000
++0 release down
++0 press right
+until position 458 786 6000
++0 release right
++0 press down
+until position 458 793 6000
++0 release down
++0 press left
+until position 454 793 6000
++0 release left
++0 press down
+until position 454 795 6000
++0 release down
++0 press left
+until position 452 795 6000
++0 release left
++0 press down
+until position 452 801 6000
++0 release down
++0 press right
+until position 460 801 6000
++0 release right
++0 press down
+until position 460 811 6000
++0 release down
++0 press right
+until position 461 811 6000
++0 release right
++0 press down
+until position 461 825 6000
++0 release down
++0 press left
+until position 458 825 6000
++0 release left
++0 press down
+until position 458 831 6000
++0 release down
+until idle
+# a Max Repel for Route 212 South
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:0
++1 tap row:2
++1 tap menu:0
++1 assert state repel 250
++0 assert state bag.items[item="platinum:ITEM_MAX_REPEL"].count 5
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
+# Route 212 South: Rangers Allison and Jeffrey face each other over x 457 (rows 843–844), the only way west
++0 press down
+until position 458 839 6000
++0 release down
++0 press right
+until position 460 839 6000
++0 release right
++0 press down
+until position 460 843 6000
++0 release down
++0 press left
+until message 3000
++0 release left
+advance text
+battle auto 20000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_RANGER_ALLISON won single
++0 assert battle trainer platinum:TRAINER_RANGER_JEFFREY won single
+# Scientist Stefano looks south and west at random from (458, 856) over every way east: walk into his west line until he sees the player
++0 press left
+until position 454 843 6000
++0 release left
++0 press down
+until position 454 856 6000
++0 release down
++0 press right
+until message 6000
++0 release right
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_SCIENTIST_STEFANO won single
+# east through the marsh (Stefano saw the player at x 455, 456 or 457): Collector Dean looks north and east at
+# random from (492, 853): wait in his north line
++0 press down
+until state player.z 857 6000
++0 release down
++0 press right
+until position 460 857 6000
++0 release right
++0 press up
+until position 460 854 6000
++0 release up
++0 press right
+until position 466 854 6000
++0 release right
++0 press up
+until position 466 840 6000
++0 release up
++0 press right
+until position 486 840 6000
++0 release right
++0 press down
+until position 486 851 6000
++0 release down
++0 press right
+until position 491 851 6000
++0 release right
++0 press right
+until position 492 851 6000
++0 release right
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_COLLECTOR_DEAN won single
+# Parasol Lady Alexa turns clockwise at (520, 848): wait in her south line until she faces it
++0 press right
+until position 495 851 6000
++0 release right
++0 press down
+until position 495 855 6000
++0 release down
++0 press right
+until position 501 855 6000
++0 release right
++0 press up
+until position 501 852 6000
++0 release up
++0 press right
+until position 517 852 6000
++0 release right
++0 press up
+until position 517 851 6000
++0 release up
++0 press right
+until position 519 851 6000
++0 release right
++0 press right
+until position 520 851 6000
++0 release right
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_PARASOL_LADY_ALEXA won single
+# east to Pastoria round the deep mud (x 533–536 and 541–543): along row 846, down the grass at x 549
++0 press down
+until position 520 852 6000
++0 release down
++0 press right
+until position 532 852 6000
++0 release right
++0 press up
+until position 532 846 6000
++0 release up
++0 press right
+until position 549 846 6000
++0 release right
++0 press down
+until position 549 856 6000
++0 release down
+# Ranger Taylor looks south over row 856 at x 551
++0 press right
+until message 3000
++0 release right
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_RANGER_TAYLOR won single
++0 press right
+until position 571 856 6000
++0 release right
++0 press up
+until position 571 848 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_PASTORIA_CITY" 3000
++0 release right
+until idle
+# Pastoria to the Route 213 gate (the Max Repel wears off on the way north)
++0 press right
+until position 604 848 6000
++0 release right
++0 press up
+until state repel 0 600
++0 release up
++90 press a
++1 release a
+until idle
++0 press up
+until position 604 830 6000
++0 release up
++0 press left
+until position 598 830 6000
++0 release left
++0 press up
+until position 598 820 6000
++0 release up
++0 press right
+until position 627 820 6000
++0 release right
++0 press up
+until position 627 812 6000
++0 release up
++0 press right
+until position 638 812 6000
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_213_GATE_TO_PASTORIA_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_213" 3000
++0 release right
+until idle
+# Route 213 and the hotel lobby to Valor Lakefront (CP10's way)
++0 press right
+until position 671 812 6000
++0 release right
++0 press down
+until position 671 828 6000
++0 release down
++0 press left
+until position 669 828 6000
++0 release left
++0 press down
+until position 669 835 6000
++0 release down
++0 press right
+until position 682 835 6000
++0 release right
++0 press up
+until position 682 832 6000
++0 release up
+# Tuber Jared (beaten) walks row 832 between x 703 and 712 without pausing, and Tuber Chelsea looks over x 704
+# and row 827 at random: follow Jared east from his west end and step up the plateau at x 705
++0 press right
+until position 702 832 6000
++0 release right
+until idle
++0 assert state objects[localId=4].movementType 20
+until state objects[localId=4].x 703 3000
+until state objects[localId=4].x 704 3000
++0 press right
+until position 705 832 600
++0 release right
++0 press up
+until position 705 828 600
++0 release up
++0 press right
+until position 709 828 6000
++0 release right
++0 press up
+until position 709 823 6000
++0 release up
++0 press left
+until position 706 823 6000
++0 release left
++0 press up
+until position 706 819 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_GRAND_LAKE_ROUTE_213_LOBBY" 3000
++0 release up
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_VALOR_LAKEFRONT" 3000
++0 release up
+until idle
+# Valor Lakefront: the cameramen are gone; west into the drained lake
++0 press up
+until position 706 791 6000
++0 release up
++0 press right
+until position 720 791 6000
++0 release right
++0 press up
+until position 720 779 6000
++0 release up
++0 press right
+until position 722 779 6000
++0 release right
++0 press up
+until position 722 760 6000
++0 release up
++0 press left
+until position 718 760 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_LAKE_VALOR_DRAINED" 3000
++0 release left
+until idle
+# through the drained lake to Valor Cavern: the grunt at (17, 32) looks north and east at random over the way south; wait in his east line
++0 press left
+until position 42 10 6000
++0 release left
++0 press down
+until position 42 12 6000
++0 release down
++0 press left
+until position 37 12 6000
++0 release left
++0 press down
+until position 37 15 6000
++0 release down
++0 press left
+until position 34 15 6000
++0 release left
++0 press down
+until position 34 17 6000
++0 release down
++0 press left
+until position 32 17 6000
++0 release left
++0 press down
+until position 32 20 6000
++0 release down
++0 press left
+until position 22 20 6000
++0 release left
++0 press down
+until position 22 27 6000
++0 release down
++0 press left
+until position 19 27 6000
++0 release left
++0 press down
+until position 19 28 6000
++0 release down
++0 press left
+until position 18 28 6000
++0 release left
++0 press down
+until position 18 31 6000
++0 release down
++0 press down
+until position 18 32 6000
++0 release down
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_LAKE_VALOR_1 won single
++0 press down
+until position 18 38 6000
++0 release down
++0 press right
+until position 24 38 6000
++0 release right
++0 press down
+until position 24 39 6000
++0 release down
++0 press right
+until position 32 39 6000
++0 release right
++0 press up
+until position 32 33 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_VALOR_CAVERN" 3000
++0 release up
+until idle
+# Saturn in Valor Cavern (ValorCavern_Saturn): 408, Surf on every one
++0 press up
+until position 14 20 6000
++0 release up
+until idle
++0 assert facing player up
++1 press a
++1 release a
+advance text
+battle auto move 3 20000
++0 assert battle trainer platinum:TRAINER_COMMANDER_SATURN_VALOR_CAVERN won single
+advance text 9000
+until idle 3000
++0 assert flag platinum:FLAG_DEFEATED_COMMANDER_SATURN_VALOR_CAVERN true
+# back out through the drained lake to Valor Lakefront
++0 press down
+until position 14 29 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_LAKE_VALOR_DRAINED" 3000
++0 release down
+until idle
++0 press down
+until position 32 39 6000
++0 release down
++0 press left
+until position 20 39 6000
++0 release left
++0 press up
+until position 20 31 6000
++0 release up
++0 press left
+until position 17 31 6000
++0 release left
++0 press up
+until position 17 25 6000
++0 release up
++0 press right
+until position 22 25 6000
++0 release right
++0 press up
+until position 22 20 6000
++0 release up
++0 press right
+until position 33 20 6000
++0 release right
++0 press up
+until position 33 17 6000
++0 release up
++0 press right
+until position 35 17 6000
++0 release right
++0 press up
+until position 35 15 6000
++0 release up
++0 press right
+until position 40 15 6000
++0 release right
++0 press up
+until position 40 11 6000
++0 release up
++0 press right
+until position 51 11 6000
++0 release right
++0 press up
+until position 51 10 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_VALOR_LAKEFRONT" 3000
++0 release right
+until idle
+# Valor Lakefront back through the hotel lobby to Route 213
++0 press right
+until position 722 760 6000
++0 release right
++0 press down
+until position 722 784 6000
++0 release down
++0 press left
+until position 718 784 6000
++0 release left
++0 press down
+until position 718 791 6000
++0 release down
++0 press left
+until position 706 791 6000
++0 release left
++0 press down
+until position 706 812 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_GRAND_LAKE_ROUTE_213_LOBBY" 3000
++0 release down
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_213" 3000
++0 release down
+until idle
+# Route 213 west: off the plateau over Tuber Jared's walk (row 832, x 703–712; he never pauses) just after he
+# turns at its east end, then west on the beach (CP10's way back)
++0 press down
+until position 706 826 6000
++0 release down
++0 press right
+until position 709 826 6000
++0 release right
++0 press down
+until position 709 831 6000
++0 release down
++0 press left
+until position 705 831 6000
++0 release left
+until idle
++0 assert state objects[localId=4].movementType 20
+until state objects[localId=4].x 712 3000
++0 press down
+until position 705 832 600
++0 release down
++0 press left
+until position 700 832 600
++0 release left
+until idle
++0 press left
+until position 679 832 6000
++0 release left
++0 press down
+until position 679 835 6000
++0 release down
++0 press left
+until position 669 835 6000
++0 release left
++0 press up
+until position 669 826 6000
++0 release up
++0 press right
+until position 671 826 6000
++0 release right
++0 press up
+until position 671 812 6000
++0 release up
++0 press left
+until position 647 812 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_213_GATE_TO_PASTORIA_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_PASTORIA_CITY" 3000
++0 release left
+until idle
+# heal at the Pastoria Pokémon Center
++0 press left
+until position 603 812 6000
++0 release left
++0 press down
+until position 603 816 6000
++0 release down
++0 press left
+until position 600 816 6000
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_PASTORIA_CITY" 3000
++0 release down
+until idle
+
++8 release select
+# a Max Repel, then west to Route 212 South
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:0
++1 tap row:2
++1 tap menu:0
++1 assert state repel 250
++0 assert state bag.items[item="platinum:ITEM_MAX_REPEL"].count 4
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
++0 press down
+until position 600 820 6000
++0 release down
++0 press left
+until position 598 820 6000
++0 release left
++0 press down
+until position 598 831 6000
++0 release down
++0 press right
+until position 604 831 6000
++0 release right
++0 press down
+until position 604 848 6000
++0 release down
++0 press left
+until position 576 848 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_212_SOUTH" 3000
++0 release left
+until idle
+# Route 212 South back west on this chunk's way (its trainers beaten), round the deep mud
++0 press left
+until position 571 848 6000
++0 release left
++0 press down
+until position 571 856 6000
++0 release down
++0 press left
+until position 549 856 6000
++0 release left
++0 press up
+until position 549 846 6000
++0 release up
++0 press left
+until position 532 846 6000
++0 release left
++0 press down
+until position 532 852 6000
++0 release down
++0 press left
+until position 520 852 6000
++0 release left
++0 press up
+until position 520 851 6000
++0 release up
++0 press left
+until position 517 851 6000
++0 release left
++0 press down
+until position 517 852 6000
++0 release down
++0 press left
+until position 501 852 6000
++0 release left
++0 press down
+until position 501 855 6000
++0 release down
++0 press left
+until position 495 855 6000
++0 release left
++0 press up
+until position 495 851 6000
++0 release up
++0 press left
+until position 486 851 6000
++0 release left
++0 press up
+until position 486 840 6000
++0 release up
++0 press left
+until position 466 840 6000
++0 release left
++0 press down
+until position 466 854 6000
++0 release down
++0 press left
+until position 460 854 6000
++0 release left
++0 press down
+until position 460 857 6000
++0 release down
++0 press left
+until position 456 857 6000
++0 release left
++0 press up
+until position 456 856 6000
++0 release up
+# the Max Repel wears off here
++0 press left
+until state repel 0 600
++0 release left
++90 press a
++1 release a
+until idle
++0 press left
+until position 454 856 6000
++0 release left
++0 press up
+until position 454 843 6000
++0 release up
++0 press right
+until position 460 843 6000
++0 release right
++0 press up
+until position 460 839 6000
++0 release up
++0 press left
+until position 458 839 6000
++0 release left
++0 press up
+until position 458 831 6000
++0 release up
+until idle
++8 release select
+# Route 212 North back to Hearthome
++0 press up
+until position 458 823 6000
++0 release up
++0 press right
+until position 461 823 6000
++0 release right
++0 press up
+until position 461 808 6000
++0 release up
++0 press left
+until position 458 808 6000
++0 release left
++0 press up
+until position 458 801 6000
++0 release up
++0 press left
+until position 452 801 6000
++0 release left
++0 press up
+until position 452 795 6000
++0 release up
++0 press right
+until position 454 795 6000
++0 release right
++0 press up
+until position 454 793 6000
++0 release up
++0 press right
+until position 458 793 6000
++0 release right
++0 press up
+until position 458 785 6000
++0 release up
++0 press left
+until position 457 785 6000
++0 release left
++0 press up
+until position 457 774 6000
++0 release up
++0 press left
+until position 455 774 6000
++0 release left
++0 press up
+until position 455 770 6000
++0 release up
++0 press left
+until position 451 770 6000
++0 release left
++0 press up
+until position 451 764 6000
++0 release up
++0 press right
+until position 455 764 6000
++0 release right
++0 press up
+until position 455 761 6000
++0 release up
++0 press right
+until position 461 761 6000
++0 release right
++0 press up
+until position 461 737 6000
++0 release up
++0 press left
+until position 458 737 6000
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_212_GATE_TO_HEARTHOME_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY" 3000
++0 release up
+until idle
++8 release select
+# Hearthome west to Route 208
++0 press up
+until position 458 726 6000
++0 release up
++0 press left
+until position 455 726 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_208_GATE_TO_HEARTHOME_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_208" 3000
++0 release left
+until idle
++8 release select
+# Route 208 west to Mt. Coronet (CP11's way)
++0 press left
+until position 440 726 6000
++0 release left
++0 press down
+until position 440 729 6000
++0 release down
++0 press left
+until position 427 729 6000
++0 release left
++0 press up
+until position 427 715 6000
++0 release up
++0 press left
+until position 422 715 6000
++0 release left
++0 press down
+until position 422 724 6000
++0 release down
++0 press left
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_SOUTH" 6000
++0 release left
+until idle
+# through Mt. Coronet 1F to Route 207
++0 press up
+until position 27 13 6000
++0 release up
++0 press left
+until position 24 13 6000
++0 release left
++0 press down
+until position 24 15 6000
++0 release down
++0 press left
+until position 19 15 6000
++0 release left
++0 press down
+until position 19 19 6000
++0 release down
++0 press left
+until position 15 19 6000
++0 release left
++0 press down
+until position 15 23 6000
++0 release down
++0 press left
+until position 6 23 6000
++0 release left
++0 press up
+until position 6 8 6000
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_207" 3000
++0 release left
+until idle
++8 release select
+# Route 207 down to Oreburgh, west to the Oreburgh Gate
++0 press left
+until position 306 712 6000
++0 release left
++0 press down
+until position 306 725 6000
++0 release down
++0 press left
+until position 300 725 6000
++0 release left
++0 press down
+until position 300 735 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_OREBURGH_CITY" 3000
++0 release down
+until idle
++8 release select
++0 press left
+until position 297 736 6000
++0 release left
++0 press down
+until position 297 753 6000
++0 release down
++0 press left
+until position 286 753 6000
++0 release left
++0 press up
+until position 286 750 6000
++0 release up
++0 press left
+until position 259 750 6000
++0 release left
++0 press up
+until position 259 749 6000
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_OREBURGH_GATE_1F" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_203" 3000
++0 release left
+until idle
++8 release select
+# Route 203 west: down x 246, then below Lass Kaitlin on row 759 once she is up at row 756
++0 press down
+until position 246 759 6000
++0 release down
+until idle
++0 assert state objects[localId=2].movementType 3
+until state objects[localId=2].z 757 6000
+until state objects[localId=2].z 756 6000
++0 press left
+until position 238 759 6000
++0 release left
++0 press up
+until position 238 758 6000
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_JUBILIFE_CITY" 6000
++0 release left
+until idle
++8 release select
+# Jubilife south to Route 202
++0 press left
+until position 175 758 6000
++0 release left
++0 press down
+until position 175 800 6000
++0 release down
+until idle
++8 release select
+# Route 202 south to Sandgem
++0 press down
+until position 175 808 6000
++0 release down
++0 press right
+until position 184 808 6000
++0 release right
++0 press down
+until position 184 848 6000
++0 release down
++0 press left
+until position 170 848 6000
++0 release left
+until idle
++8 release select
+# heal at the Sandgem Pokémon Center (Surf's PP)
++0 press right
+until position 177 848 6000
++0 release right
++0 press up
+until position 177 843 6000
++0 release up
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_SANDGEM_TOWN" 3000
++0 release down
+until idle
++8 release select
+# Route 201 west to Lake Verity
++0 press down
+until position 177 845 6000
++0 release down
++0 press left
+until position 138 845 6000
++0 release left
++0 press down
+until position 138 850 6000
++0 release down
++0 press left
+until position 81 850 6000
++0 release left
++0 press up
+until position 81 844 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_LAKE_VERITY" 3000
++0 release up
+advance text 6000
+until idle 3000
+# Lake Verity: two grunts face each other over row 49, the way north
++0 press up
+until position 47 52 600
++0 release up
++0 press right
+until position 48 52 600
++0 release right
++0 press up
+until message 3000
++0 release up
+advance text
+battle auto move 3 20000
+advance text
+battle auto move 3 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_LAKE_VERITY_1 won single
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_LAKE_VERITY_2 won single
+# and two more over row 43
++0 press up
+until position 48 48 6000
++0 release up
++0 press right
+until position 50 48 6000
++0 release right
++0 press up
+until position 50 44 6000
++0 release up
++0 press up
+until message 3000
++0 release up
+advance text
+battle auto move 3 20000
+advance text
+battle auto move 3 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_LAKE_VERITY_3 won single
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_LAKE_VERITY_4 won single
+
++8 release select
+# Mars at Lake Verity (LakeVerity_Mars): 405, Surf on every one
++0 press up
+until position 50 39 6000
++0 release up
++0 press right
+until position 55 39 6000
++0 release right
+until idle
++1 press up
++1 release up
+until idle
++0 assert facing player up
++1 press a
++1 release a
+advance text
+battle auto move 3 20000
++0 assert battle trainer platinum:TRAINER_COMMANDER_MARS_LAKE_VERITY won single
+advance text 9000
+until idle 3000
++0 assert flag platinum:FLAG_TEAM_GALACTIC_LEFT_LAKE_VERITY true
++0 assert var platinum:VAR_LAKE_ACUITY_STATE 1
+# the browser spec's beat: Lake Verity after Mars
++0 screenshot lake-verity
+# end of CP12
++0 assert battle trainer platinum:TRAINER_COMMANDER_SATURN_VALOR_CAVERN won single
++0 assert flag platinum:FLAG_DEFEATED_COMMANDER_SATURN_VALOR_CAVERN true
++0 assert battle trainer platinum:TRAINER_COMMANDER_MARS_LAKE_VERITY won single
++0 assert flag platinum:FLAG_TEAM_GALACTIC_LEFT_LAKE_VERITY true
++0 assert flag platinum:FLAG_HIDE_MT_CORONET_1F_NORTH_ROOM_1_GRUNTS_M true
++0 assert var platinum:VAR_LAKE_ACUITY_STATE 1

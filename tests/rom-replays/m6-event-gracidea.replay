@@ -1,0 +1,42 @@
+from m6-event-shaymin-caught.replay
+# Event branch m6-event-gracidea (decomp Pokemon_CanShayminSkyForm, Party_SetShayminForm):
+# Shaymin's Sky Forme. Staged in Floaroma by the Beauty, the fateful Shaymin of m6-event-shaymin-caught in the party
+# (find_party_slot_with_fateful_encounter_species): she gives the Gracidea. From the bag at noon, USE on Shaymin: the form
+# change, Sky Forme (its ability Serene Grace, its stats). Then the clock moves on to 21:00: the night turns it back to
+# Land Forme (the game clock's minutes, decomp sub_02055B64). The Gracidea stays in the bag.
+# Kept setup: the clock to noon (the chain's frozen clock has stood at 20:00 since cp21e) and the warp to Floaroma.
+time 12:00
+warp platinum:MAP_HEADER_FLOAROMA_TOWN 171 659 left
+until idle
++0 press a
++1 release a
+advance text 3000
+until idle 600
++0 assert state bag.key_items[item="platinum:ITEM_GRACIDEA"].count 1
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:7
++1 tap row:12
++1 tap menu:0
++1 assert app party
++1 tap slot:5
++1 assert state party[5].form 1
++0 assert state party[5].ability "platinum:ABILITY_SERENE_GRACE"
++30 press a
++1 release a
++30 press b
++1 release b
++30 press b
++1 release b
++30 press b
++1 release b
+until app none 600
+until idle 600
++0 assert state party[5].form 1
++0 assert state bag.key_items[item="platinum:ITEM_GRACIDEA"].count 1
++0 time 21:00
++5 assert state party[5].form 0
++0 assert state party[5].ability "platinum:ABILITY_NATURAL_CURE"

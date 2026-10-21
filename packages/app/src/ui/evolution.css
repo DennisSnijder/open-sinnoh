@@ -1,0 +1,48 @@
+/*
+ * DS screen scenes (evolution, egg hatching): a whole-pixel DS screen (the canvas) with the message box and
+ * YES/NO at their DS places, centred in the room; on big landscape views a window over the dimmed field,
+ * elsewhere full screen over black (no field around it).
+ */
+.ui-frame.ui-scene { inset: 0; filter: none; }
+.ui-scene.ui-enter { animation: none; }
+.ds-scene.ui-screen {
+  position: absolute; inset: 0; box-sizing: border-box; display: grid; place-items: center;
+  padding: var(--room-top, 0px) var(--room-right, 0px) var(--room-bottom, 0px) var(--room-left, 0px);
+  background: #000; box-shadow: none; clip-path: none; max-height: none;
+}
+.ds-scene.is-window { background: rgb(8 12 20 / 0.55); }
+.ds-scene-stage { position: relative; overflow: hidden; }
+.ds-scene.is-window .ds-scene-stage { box-shadow: 0 0 0 var(--k) #10141c, 0 calc(var(--k) * 3) 0 calc(var(--k) * 1) rgb(8 12 20 / 0.45); }
+.ds-scene-canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; }
+.ds-scene-boxes > * { position: absolute; box-sizing: border-box; margin: 0; }
+.ds-scene-message { display: flex; align-items: flex-start; }
+.ds-scene-yes-no { align-content: center; }
+/* DS-size rows on phones too (two 16-px rows in the window's 4 tiles); each row taps across the window. */
+.ui-layer[data-mode] .ds-scene .ds-scene-yes-no .choice { min-height: 0; min-width: 0; height: calc(var(--k) * 16); }
+
+/* The Hall of Fame and the credits (ui/hall-of-fame.ts): DS text rows at their DS places; the OpenSinnoh card. */
+.ds-scene-boxes > .hof-line { white-space: nowrap; line-height: 0; }
+.ds-scene-boxes > .credits-card {
+  inset: 0; display: grid; place-content: center; justify-items: center; gap: calc(var(--k) * 10);
+  padding: 0 calc(var(--k) * 20); text-align: center; color: #f4f4ee;
+  font: 500 calc(var(--k) * 8.5) / 1.45 system-ui, sans-serif; text-wrap: balance;
+}
+.credits-card p { margin: 0; max-width: 34ch; }
+.credits-card p + p { color: #a8acb8; font-size: calc(var(--k) * 7.5); }
+/* The wordmark at 3 glyph px per DS pixel (58 × 11 → 174 × 33 DS px); the scene's --k keeps it whole in device px. */
+.credits-card-mark { width: calc(var(--k) * 174); height: calc(var(--k) * 33); }
+
+/* Rowan's intro and the setup before it (ui/rowan-intro.ts): the brightness shade, the tap targets, the info text. */
+.intro-shade { position: absolute; inset: 0; background: #000; pointer-events: none; opacity: 0; }
+.ds-scene-boxes > .intro-ball, .ds-scene-boxes > .intro-avatar { padding: 0; border: 0; background: none; cursor: pointer; border-radius: 50%; }
+.ds-scene-boxes > .intro-avatar { border-radius: calc(var(--k) * 4); }
+.intro-ball:focus-visible, .intro-avatar:focus-visible { outline: calc(var(--k) * 1) solid #f0b030; outline-offset: calc(var(--k) * 1); }
+.ds-scene-boxes > .intro-block { line-height: 0; cursor: default; }
+.intro-menu { display: grid; align-content: center; }
+.ui-layer[data-mode] .ds-scene .intro-menu .choice { min-height: 0; min-width: 0; height: calc(var(--k) * 16); }
+.ds-scene.intro-scene { padding: var(--sat) var(--sar) var(--sab) var(--sal); }
+.intro-flash { position: absolute; inset: 0; background: #fff; pointer-events: none; opacity: 0; }
+.intro-scene > .ds-scene-stage { position: relative; }
+/* The Town Map (town-map.ts): the name window's text, the fly location taps. */
+.ds-scene-boxes > .town-map-text { line-height: 0; white-space: nowrap; pointer-events: none; }
+.ds-scene-boxes > .town-map-town { padding: 0; border: 0; background: none; cursor: pointer; }

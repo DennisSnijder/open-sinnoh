@@ -1,0 +1,62 @@
+# svc-softboiled: Softboiled and Milk Drink from the party menu (decomp PartyMenu_StartFieldMoveHPTransfer,
+# PartyMenu_UseHPTransferFieldMove). The donor gives a fifth of its max HP (at most what the target misses), the bars
+# count a point a DS frame, then "…'s HP was restored by … point(s)."; a full target is refused, and a donor at or
+# below a fifth of its max HP has "Not enough HP...". Setup: HP and max HP set to round numbers (`set state`).
+party 0 platinum:SPECIES_CHANSEY 30 platinum:MOVE_SOFTBOILED
+party 1 platinum:SPECIES_MILTANK 30 platinum:MOVE_MILK_DRINK
+party 2 platinum:SPECIES_BIDOOF 30
+set state party[0].stats.hp 100
+set state party[0].hp 21
+set state party[1].stats.hp 80
+set state party[1].hp 80
+set state party[2].stats.hp 60
+set state party[2].hp 1
+warp platinum:MAP_HEADER_ROUTE_203 246 749 right
++0 wild flee
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:0
+# Chansey's Softboiled: Miltank is at full HP (refused), then Bidoof gets 20.
++1 tap slot:0
++1 tap menu:1
++1 assert app party
++1 tap slot:1
++1 assert text platinum:PartyMenu_Text_ThisCantBeUsedOnThatPokemon 0
++1 press a
++1 release a
++1 tap slot:2
++30 assert text platinum:PartyMenu_Text_MonsHPWasRestored 0 0=BIDOOF 1=20
++0 assert state party[0].hp 1
++0 assert state party[2].hp 21
++1 press a
++1 release a
+# Miltank's Milk Drink: 16 to Bidoof, then 16 to Chansey.
++1 tap slot:1
++1 tap menu:1
++1 tap slot:2
++30 assert text platinum:PartyMenu_Text_MonsHPWasRestored 0 0=BIDOOF 1=16
++0 assert state party[2].hp 37
++1 press a
++1 release a
++1 tap slot:1
++1 tap menu:1
++1 tap slot:0
++30 assert text platinum:PartyMenu_Text_MonsHPWasRestored 0 0=CHANSEY 1=16
++0 assert state party[0].hp 17
++0 assert state party[1].hp 48
++1 press a
++1 release a
+# Chansey at 17 of 100: not enough HP.
++1 tap slot:0
++1 tap menu:1
++1 assert text platinum:PartyMenu_Text_NotEnoughHP 0
++1 press a
++1 release a
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle

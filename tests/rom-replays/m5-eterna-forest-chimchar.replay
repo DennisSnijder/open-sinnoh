@@ -1,0 +1,58 @@
+from cp5.replay
+set state gender "female"
+set var platinum:VAR_PLAYER_STARTER 390
+party 0 platinum:SPECIES_MONFERNO 30
+warp platinum:MAP_HEADER_ROUTE_205_SOUTH 207 583 up
+# Starter/gender branch for cp6: Eterna Forest with Cheryl for a girl who chose
+# Chimchar. cp6 meets no trainer or partner chosen by starter or gender (the decomp's GetPlayerGender and
+# GetPlayerStarterSpecies are not on its path): Cheryl is the partner whatever the player is
+# (EternaForest_CoordEvent_CherylStartFollowing: VAR_PARTNER_TRAINER_ID 608), and her first tag battle, Jack and
+# Briana by VS2 (75), plays with TRAINER_CHERYL_ETERNA_FOREST beside a girl's Monferno (asserted by
+# tests/integration/checkpoints-m5a.ts at the screenshot). Setup lines stage it from CP5's end: the gender and
+# Starter as the save keeps them, a Monferno, the player at the forest's door. Headless from the cp5 anchor
+# (tests/integration/checkpoints-m5a-branches.rom.test.ts).
++0 wild auto
++0 evolve cancel
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_ETERNA_FOREST" 3000
++0 release up
+until idle 6000
+# Eterna Forest: Cheryl's coord event (EternaForest_CoordEvent_CherylStartFollowing) makes her the walking partner
++0 press up
+until message
++0 release up
+advance text 3000
+until idle 3000
++0 assert state hasPartner true
++0 assert var platinum:VAR_PARTNER_TRAINER_ID 608
+# through the grass with Cheryl (a wild encounter here is a partner double, type 74) to Bug Catcher Jack and Lass Briana, who face each other across row 67: both see the player at 38, 67 (VS2) and battle with Cheryl (75)
++0 press right
+until position 31 85 6000
++0 release right
++0 press up
+until position 31 82 6000
++0 release up
++0 press right
+until position 35 82 6000
++0 release right
++0 press up
+until position 35 72 6000
++0 release up
++0 press right
+until position 38 72 6000
++0 release right
++0 press up
+until position 38 68 6000
++0 release up
++0 press up
+until position 38 67
++0 release up
+advance text 3000
+# the partner is read here (tests/integration/checkpoints-m5a.ts PARTNERS)
++12 screenshot eterna-forest-double-chimchar
+battle auto 30000
++0 assert battle trainer platinum:TRAINER_BUG_CATCHER_JACK won ai-partner
++0 assert battle trainer platinum:TRAINER_LASS_BRIANA won ai-partner
+advance text 3000
+until idle 3000

@@ -1,0 +1,38 @@
+name: Feature request
+description: Suggest something new, or a quality-of-life option.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check [ROADMAP.md](https://github.com/DennisSnijder/open-sinnoh/blob/main/ROADMAP.md) first: much of the game is already planned.
+        OpenSinnoh plays like the DS by default. A change to how the game plays is an option whose default is the DS behaviour.
+        Never attach a ROM, ROM dumps or extracted game files.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you would like
+      description: The feature, and the problem it solves or the moment in the game where you missed it.
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - Missing DS feature (something the DS game has)
+        - Quality-of-life option
+        - Mobile, controls or accessibility
+        - Modding or developer tools
+        - Website or other
+    validations:
+      required: true
+  - type: textarea
+    id: ds
+    attributes:
+      label: How the DS does it
+      description: For a missing DS feature, what the game does there. A link to the decompilation helps.
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else

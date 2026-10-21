@@ -1,0 +1,576 @@
+from cp21e.replay
++0 reload
+# CP21f (docs/research/story-cp20-24.md §CP21): the dex sweep, part 6. Out of the Old
+# Chateau and Eterna Forest to Floaroma; Route 204 (Bug Catcher Brandon), Jubilife, Route 218 (Guitarist Tony),
+# Route 202, Sandgem, Route 201 and Lake Verity: Mesprit's picture in Verity Cavern; Rowan's lab: 210 seen, the
+# National Pokédex, Oak and the Poké Radar. Wild Pokémon are fought by the auto policy (seen, and out of the way).
++0 wild auto
++0 evolve auto
+until idle
+# out of the Old Chateau
++0 press down
+until state player.zone "platinum:MAP_HEADER_OLD_CHATEAU_CORRIDOR" 3000
++0 release down
+until idle
++8 release select
++8 release select
++0 press down
+until position 11 4 6000
++0 release down
++0 press right
+until position 19 4 6000
++0 release right
++0 press down
+until state player.zone "platinum:MAP_HEADER_OLD_CHATEAU" 3000
++0 release down
+until idle
++8 release select
++8 release select
++0 press down
+until position 9 4 6000
++0 release down
++0 press left
+until position 3 4 6000
++0 release left
++0 press down
+until position 3 10 6000
++0 release down
++0 press right
+until position 9 10 6000
++0 release right
++0 press down
+until position 9 14 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_ETERNA_FOREST" 3000
++0 release down
+until idle
++8 release select
++8 release select
+# back south through the grass; Cut the tree at (74, 33) again
++0 press down
+until position 74 32 6000
++0 release down
+until idle
++1 press down
++1 release down
+until idle
++1 press a
++1 release a
+until yesno 3000
++0 press a
++1 release a
+advance text 3000
+until idle 3000
++0 press down
+until position 74 34 6000
++0 release down
++7 release select
+# west and south through Eterna Forest to Route 205
++0 press down
+until position 74 49 6000
++0 release down
++0 press right
+until position 84 49 6000
++0 release right
++0 press down
+until position 84 63 6000
++0 release down
++0 press left
+until position 62 63 6000
++0 release left
++0 press down
+until position 62 78 6000
++0 release down
++0 press left
+until position 51 78 6000
++0 release left
++0 press up
+until position 51 61 6000
++0 release up
++0 press left
+until position 40 61 6000
++0 release left
++0 press down
+until position 40 66 6000
++0 release down
++0 press left
+until position 38 66 6000
++0 release left
++0 press down
+until position 38 73 6000
++0 release down
++0 press left
+until position 27 73 6000
++0 release left
++0 press down
+until position 27 85 6000
++0 release down
++0 press right
+until position 28 85 6000
++0 release right
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_205_SOUTH" 3000
++0 release down
+until idle
++8 release select
++8 release select
+# south over Route 205 to Floaroma and Route 204
++0 press down
+until position 206 590 6000
++0 release down
++0 press right
+until position 212 590 6000
++0 release right
++0 press down
+until position 212 598 6000
++0 release down
++0 press right
+until position 216 598 6000
++0 release right
++0 press down
+until position 216 615 6000
++0 release down
++0 press left
+until position 211 615 6000
++0 release left
++0 press down
+until position 211 620 6000
++0 release down
++0 press right
+until position 212 620 6000
++0 release right
++0 press down
+until position 212 621 6000
++0 release down
++0 press right
+until position 213 621 6000
++0 release right
++0 press down
+until position 213 624 6000
++0 release down
++0 press right
+until position 216 624 6000
++0 release right
++0 press down
+until position 216 662 6000
++0 release down
++0 press left
+until position 171 662 6000
++0 release left
++0 press down
+until position 171 693 6000
++0 release down
++0 press right
+until position 181 693 6000
++0 release right
++0 press up
+until position 181 687 6000
++0 release up
++0 press right
+until position 182 687 6000
++0 release right
++7 release select
+# Bug Catcher Brandon (Kricketot) looks east from (182, 685): step into his line
++0 press right
+until position 183 687 6000
++0 release right
++0 press up
+until position 183 685 6000
++0 release up
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_BUG_CATCHER_BRANDON won single
++8 release select
+# back down Route 204 North and through the Ravaged Path (Rock Smash; CP5's way, reversed) to Jubilife
++0 press up
+until position 183 684 6000
++0 release up
++0 press left
+until position 172 684 6000
++0 release left
++0 press down
+until position 172 699 6000
++0 release down
++0 press right
+until position 180 699 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_RAVAGED_PATH" 3000
++0 release up
+until idle
++8 release select
++0 press up
+until position 28 43 6000
++0 release up
++0 press left
+until position 23 43 6000
++0 release left
+until idle
++1 press left
++1 release left
+until idle
++1 press a
++1 release a
+until yesno 3000
++0 press a
++1 release a
+advance text 3000
+until idle 3000
++0 press left
+until position 19 43 6000
++0 release left
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_204_SOUTH" 3000
++0 release down
+until idle
++8 release select
++8 release select
++0 press down
+until position 171 708 6000
++0 release down
++0 press right
+until position 173 708 6000
++0 release right
++0 press down
+until position 173 722 6000
++0 release down
++0 press right
+until position 175 722 6000
++0 release right
++0 press down
+until position 175 726 6000
++0 release down
++0 press left
+until position 172 726 6000
++0 release left
++0 press down
+until position 172 736 6000
++0 release down
++0 press right
+until position 174 736 6000
++0 release right
++0 press down
+until state player.zone "platinum:MAP_HEADER_JUBILIFE_CITY" 3000
++0 release down
+until idle
++8 release select
++8 release select
+# west through Jubilife to Route 218
++0 press left
+until position 173 736 6000
++0 release left
++0 press down
+until position 173 758 6000
++0 release down
++0 press left
+until position 129 758 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_218_GATE_TO_JUBILIFE_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_218" 3000
++0 release left
+until idle
++8 release select
++8 release select
+# Route 218 west (CP12's way, reversed): over the bridge, Surf to the strip at x 93, Surf again from (93, 752) up
+# and west along row 749 to the shore; Guitarist Tony (Kricketune) looks south from (80, 753): step into his line
++0 press left
+until position 112 758 6000
++0 release left
++0 press up
+until position 112 756 6000
++0 release up
++0 press left
+until position 103 756 6000
++0 release left
+until idle
++1 press left
++1 release left
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until state playerState "surf" 3000
+until idle
++0 press left
+until position 93 756 6000
++0 release left
+until idle
++0 press up
+until position 93 752 6000
++0 release up
+until idle
++1 press right
++1 release right
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until state playerState "surf" 3000
+until idle
++0 press up
+until position 94 749 6000
++0 release up
++0 press left
+until position 79 749 6000
++0 release left
+until idle
++0 press down
+until position 79 754 6000
++0 release down
++0 press right
+until position 80 754 6000
++0 release right
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_GUITARIST_TONY won single
++8 release select
+# back east over Route 218 to Jubilife
++0 press left
+until position 79 754 6000
++0 release left
++0 press up
+until position 79 749 6000
++0 release up
+until idle
++1 press right
++1 release right
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until state playerState "surf" 3000
+until idle
++0 press right
+until position 94 749 6000
++0 release right
++0 press down
+until position 94 752 6000
++0 release down
++0 press left
+until position 93 752 6000
++0 release left
+until idle
++0 press down
+until position 93 756 6000
++0 release down
+until idle
++1 press right
++1 release right
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until state playerState "surf" 3000
+until idle
++0 press right
+until position 112 756 6000
++0 release right
++0 press down
+until position 112 758 6000
++0 release down
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_218_GATE_TO_JUBILIFE_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_JUBILIFE_CITY" 3000
++0 release right
+until idle
++8 release select
++8 release select
+# south through Jubilife and over Route 202 to Sandgem (CP12's way); heal
++0 press right
+until position 175 758 6000
++0 release right
++0 press down
+until position 175 808 6000
++0 release down
++0 press right
+until position 184 808 6000
++0 release right
++0 press down
+until position 184 848 6000
++0 release down
++0 press left
+until position 177 848 6000
++0 release left
++0 press up
+until position 177 843 6000
++0 release up
++0 press up
+until position 8 12 3000
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_SANDGEM_TOWN" 3000
++0 release down
+until idle
++8 release select
+# Route 201 west to Lake Verity (round Dawn by row 844; CP12's way)
++0 press down
+until position 177 844 6000
++0 release down
++0 press left
+until position 138 844 6000
++0 release left
++0 press down
+until position 138 850 6000
++0 release down
++0 press left
+until position 81 850 6000
++0 release left
++0 press up
+until position 81 844 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_LAKE_VERITY" 3000
++0 release up
+until idle 3000
++8 release select
++8 release select
+# Lake Verity: Surf (Empoleon) out to the island and Verity Cavern
++0 press up
+until position 47 47 6000
++0 release up
++0 press left
+until position 44 47 6000
++0 release left
+until idle
++1 press left
++1 release left
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until state playerState "surf" 3000
+until idle
++0 press left
+until position 32 47 6000
++0 release left
++0 press up
+until position 32 35 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_VERITY_CAVERN" 3000
++0 release up
+until idle
++8 release select
++8 release select
+# Mesprit (VerityCavern_Mesprit): its picture marks it seen (draw_pokemon_preview, WaitABPress takes A); it flies off to roam and Rowan comes in
++0 press up
+until position 14 14 6000
++0 release up
++0 press left
+until position 12 14 6000
++0 release left
+until idle
++1 press up
++1 release up
+until idle
++1 press a
++1 release a
+# the browser spec's beat: Mesprit's picture
++15 screenshot mesprit-preview
++15 press a
++1 release a
+advance text 9000
+until idle 6000
++8 release select
+# back out across the lake and east over Route 201 to Sandgem
++0 press down
+until position 12 22 6000
++0 release down
++0 press right
+until position 14 22 6000
++0 release right
++0 press down
+until state player.zone "platinum:MAP_HEADER_LAKE_VERITY" 3000
++0 release down
+until idle
++8 release select
++0 press down
+until position 32 34 6000
++0 release down
+until idle
++1 press down
++1 release down
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until idle
++0 assert position platinum:MAP_HEADER_LAKE_VERITY 32 35
++0 press down
+until position 32 47 6000
++0 release down
++0 press right
+until position 44 47 6000
++0 release right
++0 press right
+until position 47 47 6000
++0 release right
++0 press down
+until state player.zone "platinum:MAP_HEADER_VERITY_LAKEFRONT" 3000
++0 release down
+until idle
++8 release select
++8 release select
+# Route 201 east to Rowan's lab (Dawn stands below its door)
++0 press down
+until position 81 853 6000
++0 release down
++0 press right
+until position 104 853 6000
++0 release right
++0 press up
+until position 104 852 6000
++0 release up
++0 press right
+until position 146 852 6000
++0 release right
++0 press up
+until position 146 844 6000
++0 release up
++0 press right
+until position 168 844 6000
++0 release right
++0 press up
+until position 168 843 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_SANDGEM_TOWN_POKEMON_RESEARCH_LAB" 3000
++0 release up
+until idle
++8 release select
++8 release select
+# Rowan: 210 seen (SandgemTownLab_ShowCompleteLocalDex): YES; Oak, the National Pokédex, the Poké Radar
++0 press up
+until position 7 6 6000
++0 release up
+until idle
++1 press up
++1 release up
+until idle
++1 press a
++1 release a
+advance text 3000
+until yesno 3000
++0 press a
++1 release a
+advance text 30000
+until idle 6000
+# end of CP21: the National Pokédex; the Fight Area state was 2, so the blockade goes now
++0 assert state pokedex.national true
++0 assert state bag.key_items[item="platinum:ITEM_POKE_RADAR"].count 1
++0 assert flag platinum:FLAG_HIDE_FIGHT_AREA_BLOCKADE true
++0 assert flag platinum:FLAG_FIRST_ARRIVAL_ETERNA_CITY true
++8 release select

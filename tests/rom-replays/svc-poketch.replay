@@ -1,0 +1,85 @@
+# svc-poketch (docs/research/poketch.md): the Pokétch from the Pokétch Co. president in Jubilife (the end
+# of CP3, set up here: the three coupons, the campaign done). It adds the Digital Watch, Calculator, Pedometer
+# and Party Status. The Dowsing Machine (Route 207 later) is registered up front, so it is the current app.
+# The side button walks the apps in app id order; touches are the DS bottom screen's (panel px). The checks
+# of each beat are in the test drivers.
+party 0 platinum:SPECIES_PIPLUP 5
+set var platinum:VAR_JUBILIFE_CITY_STATE 1
+set var platinum:VAR_POKETCH_CAMPAIGN_STATE 2
+set flag platinum:FLAG_RECEIVED_COUPON_1 true
+set flag platinum:FLAG_RECEIVED_COUPON_2 true
+set flag platinum:FLAG_RECEIVED_COUPON_3 true
+set flag platinum:FLAG_HIDE_JUBILIFE_CITY_POKETCH_CO_PRESIDENT false
+give item platinum:ITEM_COUPON_1
+give item platinum:ITEM_COUPON_2
+give item platinum:ITEM_COUPON_3
+set state poketch.apps ["platinum:POKETCH_APPID_DOWSINGMACHINE"]
+set state poketch.current "platinum:POKETCH_APPID_DOWSINGMACHINE"
+warp platinum:MAP_HEADER_JUBILIFE_CITY 174 770 down
+until idle
+# the president: "… a Pokémon Watch in return for the coupons", the Pokétch, and he leaves
++0 press a
++1 release a
+advance text
+until idle
++0 assert state poketch.enabled true
++0 assert state poketch.apps ["platinum:POKETCH_APPID_DOWSINGMACHINE","platinum:POKETCH_APPID_DIGITALWATCH","platinum:POKETCH_APPID_CALCULATOR","platinum:POKETCH_APPID_PEDOMETER","platinum:POKETCH_APPID_PARTYSTATUS"]
++10 screenshot poketch-dowsing-start
+# DOWN: the Digital Watch (the next app id after the Dowsing Machine wraps to 0)
++0 touch 240 128
++1 untouch
++12 screenshot poketch-watch
+# DOWN: the Calculator; 1 2 + 3 = shows 15, = again 18
++0 touch 240 128
++1 untouch
++12 touch 48 128
++1 untouch
++1 touch 80 128
++1 untouch
++1 touch 144 96
++1 untouch
++1 touch 112 128
++1 untouch
++1 touch 160 160
++1 untouch
++1 screenshot poketch-calc-15
++0 touch 160 160
++1 untouch
++1 screenshot poketch-calc-18
+# DOWN: the Pedometer at 0; six steps south count six
++0 touch 240 128
++1 untouch
++12 screenshot poketch-pedometer-0
++0 press down
+until position 174 776
++0 release down
+until idle
++0 assert state poketch.steps 6
++0 screenshot poketch-pedometer-6
+# its button resets the count on release
++0 touch 114 128
++1 untouch
++1 assert state poketch.steps 0
+# a save round trip (the Pokétch restarts on the Pedometer; the steps are saved)
++0 reload
++0 press down
+until position 174 790
++0 release down
++0 press left
+until position 168 790
++0 release left
+until idle
++0 assert state poketch.steps 20
+# UP twice wraps the other way: Pedometer → Calculator → … DOWN twice: Party Status, Dowsing Machine
++0 touch 240 128
++1 untouch
++12 screenshot poketch-party
++0 touch 240 128
++1 untouch
++12 screenshot poketch-dowsing
+# the Jubilife stardust is 5 tiles south (168, 795): its spot on the map is (112, 156); a tap there finds it
++0 touch 112 150
++1 untouch
++8 screenshot poketch-dowsing-ping
++14 screenshot poketch-dowsing-found
++0 assert state poketch.current "platinum:POKETCH_APPID_DOWSINGMACHINE"

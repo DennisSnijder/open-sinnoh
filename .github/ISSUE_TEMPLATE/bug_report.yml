@@ -1,0 +1,80 @@
+name: Bug report
+description: Something in the game or the website doesn't work, or plays differently from the DS.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. **Never attach a ROM, a ROM dump, extracted game files or exported game data**, not even zipped. Issues that do are deleted.
+        Saves, short screen recordings and the crash screen's details are welcome.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected (for a DS difference, what the DS does), and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Where in the game (town, route, building), and the steps from a save or from a new game.
+      placeholder: |
+        1. Load the attached save, standing outside the Jubilife Pokémon Center
+        2. Walk north onto Route 204
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      options:
+        - play.opensinnoh.com (the game)
+        - opensinnoh.com (the website)
+        - A local build from this repository
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and operating system
+      placeholder: e.g. iPhone 15, iOS 18.5 / Windows 11 desktop / Pixel 8, Android 15
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      description: Say if the game is installed as an app.
+      placeholder: e.g. Safari 18.5, installed to the home screen / Chrome 140
+    validations:
+      required: true
+  - type: input
+    id: input
+    attributes:
+      label: Controls
+      placeholder: keyboard / gamepad (which one) / touch
+  - type: checkboxes
+    id: rom
+    attributes:
+      label: ROM
+      description: OpenSinnoh supports Pokémon Platinum US rev 0 (SHA-1 `ce81046eda7d232513069519cb2085349896dec7`), and HeartGold US rev 0 for the follower add-on. The ROM page refuses other dumps.
+      options:
+        - label: My ROM was accepted by the ROM page (Platinum US rev 0), dumped from a cartridge I own.
+          required: true
+        - label: I have not attached a ROM, ROM dump or extracted game files to this issue.
+          required: true
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Save, replay or crash details
+      description: |
+        - **Save:** Options, EXPORT SAVE downloads your last save as a file. Zip it and drag it here. Saves are useful and contain no game data, only your progress and names.
+        - **Replay:** if you reproduced the bug with a replay (`tests/rom-replays/` format, a local build), paste or attach it.
+        - **Crash screen:** use "Copy details" and paste the text here.
+        - **Recording or screenshot:** a short clip of the moment helps for visual and timing bugs.
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else

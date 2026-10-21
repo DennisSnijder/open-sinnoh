@@ -1,0 +1,57 @@
+# svc-item-wheel: the registered-item wheel (OpenSinnoh option `itemWheel`; run with it on by
+# tests/integration/qol.rom.test.ts). The Bag's REGISTER adds the Bicycle and the Coin Case to the wheel; Y keeps the
+# newest. A short press of Y uses it as on the DS (the Coin Case's message); Y held opens the wheel over the field: up
+# picks the Bicycle and letting go of Y gets on; held again, a tap on the Coin Case shows the coins.
+party 0 platinum:SPECIES_TURTWIG 12
+give item platinum:ITEM_BICYCLE 1
+give item platinum:ITEM_COIN_CASE 1
+set state coins 120
+warp platinum:MAP_HEADER_ROUTE_201 115 853 right
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:1
++1 tap pocket:7
++1 tap row:0
++1 tap menu:1
++1 tap row:1
++1 tap menu:1
++1 assert state registeredWheel ["platinum:ITEM_BICYCLE","platinum:ITEM_COIN_CASE"]
++0 assert state registeredItem "platinum:ITEM_COIN_CASE"
++1 press b
++1 release b
++1 press b
++1 release b
+until app none
+until idle
+# A short press: the registered item, when Y is let go.
++1 press y
++3 release y
+until message
++0 assert text platinum:Bag_Text_CoinCaseMessage 0 0=120
++1 press b
++1 release b
+until idle
+# Held: the wheel. Up picks the Bicycle; letting go of Y uses it.
++1 press y
+until app item-wheel 20
++0 assert app item-wheel
++1 press up
++1 release up
++1 release y
+until state playerState "cycle"
+until idle
++0 screenshot wheel-bicycle
+# Held again: a tap on the Coin Case.
++1 press y
+until app item-wheel 20
++1 release y
++1 assert app item-wheel
++1 tap item:1
+until message
++0 assert text platinum:Bag_Text_CoinCaseMessage 0 0=120
++1 press b
++1 release b
+until idle
++0 assert state playerState "cycle"

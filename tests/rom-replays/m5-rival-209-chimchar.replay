@@ -1,0 +1,24 @@
+from cp7.replay
+set var platinum:VAR_PLAYER_STARTER 390
+party 0 platinum:SPECIES_INFERNAPE 50 platinum:MOVE_FLAMETHROWER platinum:MOVE_THUNDER_PUNCH platinum:MOVE_CLOSE_COMBAT
+warp platinum:MAP_HEADER_HEARTHOME_CITY 504 726 right
+# Starter branch for cp8: Barry at the Route 209 gate for a player who chose
+# Chimchar. Route209GateToHearthomeCity_CoordEvent_Rival picks his team by VAR_PLAYER_STARTER (decomp
+# SystemVars_GetPlayerStarter): TRAINER_RIVAL_ROUTE_209_CHIMCHAR (472, with Prinplup), not cp8's _PIPLUP (470).
+# Setup lines stage it from CP7's end outside the Hearthome Gym: the starter as the save keeps it, an Infernape
+# in its slot, the player one step west of the gate. Headless from the cp7 anchor
+# (tests/integration/checkpoints-m5a-branches.rom.test.ts).
++0 wild auto
++0 evolve cancel
+until idle
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_209_GATE_TO_HEARTHOME_CITY" 3000
+until message 3000
++0 release right
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_RIVAL_ROUTE_209_CHIMCHAR won single
++0 assert battles trainer 1
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_ROUTE_209_GATE_TO_HEARTHOME_CITY_STATE 2

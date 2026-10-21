@@ -1,0 +1,22 @@
+# A loaded save stands at its saved height where a tile has two levels, and knows whether it is on the
+# bridge or under it (the DS saves the player's y and MAP_OBJ_STATUS_ON_ELEVATED_BRIDGE; docs/decisions.md).
+set state repel 250
+# Route 212 South: under the bike bridge (BIKE_BRIDGE_E_W: deck at 48, path at 16). A walker under it may cross
+# its tiles east–west; on the deck (elevated) a walker could not. A reload keeps the player under it.
+warp platinum:MAP_HEADER_ROUTE_212_SOUTH 482 846 up
+until idle
++0 press up
+until position 482 845
++0 release up
+until idle
++0 press right
+until position 483 845
++0 release right
+until idle
++0 reload
+until idle
++0 assert state player.y 16
++0 press right
+until position 484 845 120
++0 release right
+until idle

@@ -1,0 +1,25 @@
+# Record the outdoor exit by entering a cave through its real warp, save/load inside, USE a Rope
+# from the bag and arrive back at that recorded exit. One rope is consumed.
+party 0 platinum:SPECIES_BIBAREL 40
+give item platinum:ITEM_ESCAPE_ROPE 2
+warp platinum:MAP_HEADER_ROUTE_203 246 749 right
++0 wild flee
+until idle
++0 press right
++1 release right
+until state player.zone "platinum:MAP_HEADER_OREBURGH_GATE_1F"
+advance text
+until idle
++0 reload
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:1
++1 tap pocket:0
++1 tap row:0
++1 tap menu:0
+until app none
+until idle
++0 assert position platinum:MAP_HEADER_ROUTE_203 246 749
++0 assert state bag.items[0].count 1

@@ -1,0 +1,66 @@
+from m6-event-regi-rock.replay
+# Event branch m6-event-regi-ice: the Iceberg Ruins (Mt. Coronet) with the fateful
+# Regigigas: the seven dots once each, the statue activated, Regice's L30 battle, caught (290), out to Mt. Coronet.
+warp platinum:MAP_HEADER_ICEBERG_RUINS 7 11 up
+until idle
++0 press up
+until position 7 9 300
++0 release up
+until idle 300
++0 press up
+until position 7 7 300
++0 release up
+until idle 300
++0 press up
+until position 7 5 300
++0 release up
+until idle 300
++0 press left
+until position 5 5 300
++0 release left
++0 press down
+until position 5 7 300
++0 release down
+until idle 300
++0 press left
+until position 3 7 300
++0 release left
+until idle 300
++0 press down
+until position 3 8 300
++0 release down
++0 press right
+until position 9 8 300
++0 release right
++0 press up
+until position 9 7 300
++0 release up
+until idle 300
++0 press right
+until position 11 7 300
++0 release right
+advance text 3000
+until idle 600
++0 assert var platinum:VAR_ICEBERG_RUINS_STATE 270
++0 press up
+until position 11 2 300
++0 release up
++0 press left
+until position 7 2 300
++0 release left
+until idle 60
++0 press up
++1 release up
+until idle 60
++0 press a
++1 release a
+advance text 3000
+battle catch platinum:ITEM_MASTER_BALL 20000
++0 assert battle scripted platinum:SPECIES_REGICE caught
+advance text 20000
+until idle 3000
++0 press down
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_NORTH_ROOM_2" 600
++0 release down
+until idle 600
++0 assert var platinum:VAR_ICEBERG_RUINS_STATE 290

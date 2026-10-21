@@ -1,0 +1,54 @@
+# sys-turnback-timeout (decomp ScrCmd_InitTurnbackCave). A constructed start: one pillar
+# seen and 29 rooms visited, the player at a pillar-1 room's south door; its onTransition adds the 30th room, so every
+# other door leads back to the entrance (the decomp's timeout), whose onTransition clears both counters. Out by the
+# entrance's south door to Sendoff Spring.
+set var platinum:VAR_TURNBACK_CAVE_PILLARS_SEEN 1
+set var platinum:VAR_TURNBACK_CAVE_ROOMS_VISITED 29
+warp platinum:MAP_HEADER_TURNBACK_CAVE_PILLAR_1_ROOM_1 11 20 up
+until idle
++0 assert var platinum:VAR_TURNBACK_CAVE_PILLARS_SEEN 1
++0 assert var platinum:VAR_TURNBACK_CAVE_ROOMS_VISITED 30
+# The east door (20,11): up a row, right to the aisle, up to the door's row, then right into it.
++0 press up
+until position 11 19
++0 release up
++0 press right
+until position 19 19
++0 release right
++0 press up
+until position 19 11
++0 release up
++0 press right
+until position 2 11 300
++0 release right
+until idle 300
++0 assert position platinum:MAP_HEADER_TURNBACK_CAVE_ENTRANCE 2 11
++0 assert var platinum:VAR_TURNBACK_CAVE_PILLARS_SEEN 0
++0 assert var platinum:VAR_TURNBACK_CAVE_ROOMS_VISITED 0
+# Out to Sendoff Spring: up the west aisle, through the gap at the top, round the inscription to its south door (11,16).
++0 press right
+until position 3 11
++0 release right
++0 press up
+until position 3 3
++0 release up
++0 press right
+until position 11 3
++0 release right
++0 press down
+until position 11 12
++0 release down
++0 press left
+until position 7 12
++0 release left
++0 press down
+until position 7 15
++0 release down
++0 press right
+until position 11 15
++0 release right
++0 press down
+until position 31 16 300
++0 release down
+until idle 300
++0 assert map platinum:MAP_HEADER_SENDOFF_SPRING

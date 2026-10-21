@@ -1,0 +1,27 @@
+# Part of sys-strength: Oreburgh Gate B1F, boulder 3 at (8, 19). Walking into it before Strength does
+# not move it; after Strength from the party menu (FIELD_MOVES 10) a push moves it one tile west. The
+# `strength-*` screenshot lines are the browser spec's key beat (the boulder drawn where it is).
+give badge platinum:BADGE_ID_MINE
+party 0 platinum:SPECIES_BIBAREL 30 platinum:MOVE_STRENGTH
+warp platinum:MAP_HEADER_OREBURGH_GATE_B1F 9 19 left
+until idle
++0 assert state objects[localId=3].x 8
++0 press left
++24 release left
+until idle
++0 assert position platinum:MAP_HEADER_OREBURGH_GATE_B1F 9 19
++0 assert state objects[localId=3].x 8
++0 assert flag platinum:FLAG_STRENGTH_ACTIVE false
++0 field move 0 platinum:MOVE_STRENGTH
+advance text
+until idle
++0 assert flag platinum:FLAG_STRENGTH_ACTIVE true
++0 screenshot strength-before
++0 press left
+until state objects[localId=3].x 7 120
++0 release left
+until idle
++0 assert state objects[localId=3].x 7
++0 assert state objects[localId=3].z 19
++0 assert position platinum:MAP_HEADER_OREBURGH_GATE_B1F 9 19
++0 screenshot strength-after

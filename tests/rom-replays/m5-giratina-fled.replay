@@ -1,0 +1,66 @@
+from cp15-giratina-room.replay
+# Story branch m5-giratina-fled. The anchor plays CP15 from the HQ through
+# Spear Pillar, the full Distortion World puzzle, Cyrus 404 and Giratina's arrival. No warp or
+# progress/object setup. The saved story team runs from the real scripted battle.
++0 reload
+until idle 6000
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 13
++0 assert flag platinum:FLAG_DISTORTION_WORLD_PUZZLE_FINISHED true
++0 assert flag platinum:FLAG_CAUGHT_GIRATINA false
++0 assert position platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM 15 14
++0 assert state player.y 16
++0 press a
++1 release a
+advance text 3000
+until battle 3000
++0 battle run
+advance text 20000
++0 assert battle scripted platinum:SPECIES_GIRATINA fled
+advance text 20000
+until idle 6000
++0 assert flag platinum:FLAG_CAUGHT_GIRATINA false
++0 assert state party.length 5
++0 assert flag platinum:FLAG_MAP_LOCAL_REMOVE_OBJECT false
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 14
++0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM","x":15,"z":14,"y":16,"facing":"down"}
++0 assert state mapFeatures.cameraAngle [0,0,0]
+# CP15's portal and Cynthia's Sendoff Spring conversation, through ordinary story input.
++0 press up
++1 release up
+until idle 600
++0 press a
++1 release a
++138 press a
++1 release a
++57 press a
++1 release a
++23 assert state player.zone "platinum:MAP_HEADER_SENDOFF_SPRING"
++49 press a
++1 release a
++101 press a
++1 release a
++96 press a
++1 release a
++144 press a
++1 release a
++102 press a
++1 release a
++122 press a
++1 release a
++116 press a
++1 release a
++100 press a
++1 release a
++128 press a
++1 release a
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_SENDOFF_SPRING"
++0 assert state player {"zone":"platinum:MAP_HEADER_SENDOFF_SPRING","x":32,"z":17,"y":32,"facing":"left"}
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 14
+until idle 6000
++0 assert var platinum:VAR_EXITED_DISTORTION_WORLD_STATE 2
++0 assert flag platinum:FLAG_DISTORTION_WORLD_PUZZLE_FINISHED true
++0 assert state mapFeatures null
++0 assert var platinum:VAR_SANDGEM_TOWN_LAB_STATE 2
++0 assert flag platinum:FLAG_SPEAR_PILLAR_IS_DISTORTED false
++0 assert flag platinum:FLAG_GALACTIC_LEFT_LAKE_VALOR true

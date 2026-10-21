@@ -1,0 +1,15 @@
+# Part of sys-movement: Route 205 South walk loops. Battle Girl Kelsey (local id 5, movement type 39,
+# WALK_WEST_SOUTH_EAST_NORTH) walks a rectangle west, south, east, north; Camper Zackary (21, type 44,
+# WALK_EAST_SOUTH_WEST_NORTH) east, south, west, north.
+# The waits check the corners in that order. The player waits out of sight at (219, 612).
+warp platinum:MAP_HEADER_ROUTE_205_SOUTH 219 612 up
+# Kelsey's loop corners in order (range x 2, z 5): (205, 598) → (205, 603) → (207, 603) → (207, 598)
+until state objects[localId=5].x 205 240
+until state objects[localId=5].z 603 240
+until state objects[localId=5].x 207 240
+until state objects[localId=5].z 598 240
+# Zackary's (range 3): east to 209, south to 628, west to 206, north to 625
+until state objects[localId=21].x 209 240
+until state objects[localId=21].z 628 240
+until state objects[localId=21].x 206 240
+until state objects[localId=21].z 625 240

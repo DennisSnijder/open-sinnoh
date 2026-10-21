@@ -1,0 +1,37 @@
+from m6-celestic-elder.replay
+# Branch m6-dialga (docs/research/postgame.md §6): the Adamant Orb in the bag
+# (an item ball on Mt. Coronet 4F, given here) and the elder's unlock: Mt. Coronet 6F's on-transition puts the warp
+# to SPEAR_PILLAR_DIALGA (warp 3) at the top (7, 5). The rift: "challenge Dialga?" YES, the L70 battle, caught with
+# the Master Ball: VAR_SPEAR_PILLAR_DIALGA_STATE 1, FLAG_CAUGHT_DIALGA; the rift then only hums.
+give item platinum:ITEM_ADAMANT_ORB 1
+warp platinum:MAP_HEADER_MT_CORONET_6F 7 6 up
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_SPEAR_PILLAR_DIALGA" 120
++0 release up
+until idle 600
++0 assert flag platinum:FLAG_CAUGHT_DIALGA false
++0 press up
+until position 31 18 6000
++0 release up
++0 press left
+until position 29 18 6000
++0 release left
+until idle 60
++0 press up
++1 release up
+until idle 60
++0 press a
++1 release a
+advance text 3000
++0 press a
++1 release a
+advance text 3000
+battle catch platinum:ITEM_MASTER_BALL 20000
++0 assert battle scripted platinum:SPECIES_DIALGA caught
+advance text 20000
+until idle 3000
++0 assert flag platinum:FLAG_CAUGHT_DIALGA true
++0 assert var platinum:VAR_SPEAR_PILLAR_DIALGA_STATE 1
++0 assert party 5 platinum:SPECIES_DIALGA
++0 assert state party[5].level 70

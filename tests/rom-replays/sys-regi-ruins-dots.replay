@@ -1,0 +1,71 @@
+# sys-regi-ruins-dots (decomp ScrCmd_ActivateRegiRuinsDot). The Iron Ruins after the
+# credits: each of the seven dots (coord events, once per visit) sets its bit in VAR_IRON_RUINS_STATE with the jump
+# sound; the seventh makes it RUINS_STATE_ACTIVATED_ALL_DOTS and the statue activates ("something changed in the
+# air", RUINS_STATE_ACTIVATED_STATUE 270). Out to Iron Island B3F. The statue's Registeel needs a fateful Regigigas
+# (m6 Regi branches). The other two ruins' dot tables are unit-tested (m6-ops.test.ts).
+party 0 platinum:SPECIES_GARCHOMP 60 platinum:MOVE_EARTHQUAKE
+set flag platinum:FLAG_GAME_COMPLETED true
+date 2009-03-22 12:00
+warp platinum:MAP_HEADER_IRON_RUINS 7 11 up
+until idle
++0 press up
+until position 7 9 300
++0 release up
++0 press left
+until position 5 9 300
++0 release left
+until idle 300
++0 press up
+until position 5 7 300
++0 release up
++0 press left
+until position 4 7 300
++0 release left
+until idle 300
++0 press up
+until position 4 5 300
++0 release up
++0 press right
+until position 5 5 300
++0 release right
+until idle 300
++0 press down
+until position 5 7 300
++0 release down
++0 press right
+until position 7 7 300
++0 release right
+until idle 300
++0 press up
+until position 7 5 300
++0 release up
++0 press right
+until position 9 5 300
++0 release right
+until idle 300
++0 press down
+until position 9 7 300
++0 release down
++0 press right
+until position 10 7 300
++0 release right
+until idle 300
++0 press down
+until position 10 9 300
++0 release down
++0 press left
+until position 9 9 300
++0 release left
+advance text 3000
+until idle 600
++0 assert var platinum:VAR_IRON_RUINS_STATE 270
++0 press down
+until position 9 11 300
++0 release down
++0 press left
+until position 7 11 300
++0 release left
++0 press down
+until state player.zone "platinum:MAP_HEADER_IRON_ISLAND_B3F" 300
++0 release down
+until idle 600

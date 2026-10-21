@@ -1,0 +1,120 @@
+# svc-dept-store-b1f: Veilstone Department Store B1F (decomp scripts_veilstone_store_b1f.s). The berry
+# vendor (specialty 19, VEILSTONE_B1F) in her booth, across its counter from the east; one berry. Then the
+# Lava Cookie vendor: the money window (ShowMoney 20, 2), one cookie for 200 (RECORD_MONEY_SPENT counts it;
+# UpdateMoneyDisplay), and the window closes (HideMoney). tests/integration/services.rom.test.ts checks the
+# stock list and the money window at the screenshot beats.
+set money 20000
+warp platinum:MAP_HEADER_VEILSTONE_STORE_B1F 7 11 left
+until idle
++1 press a
++1 release a
+until app mart
++1 tap menu:0
++1 screenshot dept-b1f
++1 tap row:0
++1 tap ok
++1 tap yes
++1 assert state bag.berries [{"item":"platinum:ITEM_FIGY_BERRY","count":1}]
++0 assert var platinum:VAR_DEPARTMENT_STORE_REGULAR_COUNTER 1
++1 press a
++1 release a
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
++1 press a
++1 release a
+until app none 5
+until idle
+# to the Lava Cookie vendor behind her counter: down 2, right 11, up 4, right 2 (each turn first), face south
++1 press down
++1 release down
+until idle
++1 press down
++1 release down
+until idle
++1 press down
++1 release down
+until idle
++1 press right
++1 release right
+until idle
++1 press right
++1 release right
+until idle
++1 press right
++1 release right
+until idle
++1 press right
++1 release right
+until idle
++1 press right
++1 release right
+until idle
++1 press right
++1 release right
+until idle
++1 press right
++1 release right
+until idle
++1 press right
++1 release right
+until idle
++1 press right
++1 release right
+until idle
++1 press right
++1 release right
+until idle
++1 press right
++1 release right
+until idle
++1 press right
++1 release right
+until idle
++1 press up
++1 release up
+until idle
++1 press up
++1 release up
+until idle
++1 press up
++1 release up
+until idle
++1 press up
++1 release up
+until idle
++1 press up
++1 release up
+until idle
++1 press right
++1 release right
+until idle
++1 press right
++1 release right
+until idle
++1 press right
++1 release right
+until idle
++1 press down
++1 release down
+until idle
++0 assert position platinum:MAP_HEADER_VEILSTONE_STORE_B1F 20 9
++1 press a
++1 release a
+advance text
++0 screenshot lava-cookie-menu
+# ONE: paid, the window shows the new amount until the last message closes
++4 press a
++1 release a
+until message
++0 screenshot lava-cookie-paid
++0 assert state records.counts {"35":200}
++0 assert state bag.medicine [{"item":"platinum:ITEM_LAVA_COOKIE","count":1}]
++0 assert state money 19780
++0 assert var platinum:VAR_DEPARTMENT_STORE_REGULAR_COUNTER 2
+advance text
+until idle
++0 screenshot lava-cookie-closed

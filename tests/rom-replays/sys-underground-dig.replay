@@ -1,0 +1,83 @@
+from parts/underground-down.replay
+# sys-underground-dig (mining.c): a bulging wall east of the arrival under Eterna
+# City; A asks to dig, YES opens the board (the spot goes, FLAG_DIGGING_FOR_FOSSILS), the first board's tutorial, then the
+# board is struck with the pickaxe until it ends; up again, the Underground Man's second mission gives three spheres.
+# Setup: to a bulging wall east of the arrival (the day's spots are the save's: the same on every seed).
+warp platinum:MAP_HEADER_UNDERGROUND 198 260 left
+until idle
++0 press a
++1 release a
+until app mining
++1 screenshot mining-prompt
++0 tap yes
+# The fade, the ping, "Something pinged in the wall!" (80 ticks), then the first board's tutorial (seven pages).
++110 tap next
++2 tap next
++2 tap next
++2 tap next
++2 tap next
++2 tap next
++2 tap next
++0 assert flag platinum:FLAG_DIGGING_FOR_FOSSILS true
++1 screenshot mining-board
+# The pickaxe (4 off the wall a strike) over the three Spheres the wall holds (the visit's generator is seeded from the
+# frozen clock and the Underground step count at arrival, the weights by the even trainer id: the same board on every seed): everything is
+# dug up, then each is named and put away.
++3 tap hit:88,168
++3 tap hit:104,184
++3 tap hit:56,72
++3 tap hit:184,104
++3 tap hit:168,120
++3 tap hit:200,120
++3 tap hit:184,136
++3 tap hit:88,168
++3 tap hit:104,184
++2 screenshot mining-dig
++3 tap hit:40,56
++3 tap hit:56,72
++3 tap hit:184,104
++3 tap hit:168,120
++3 tap hit:200,120
++3 tap hit:184,136
++3 tap hit:88,168
++3 tap hit:104,184
++40 assert app mining
++0 screenshot mining-items
+until app none 3000
++0 assert state underground.mined true
++0 assert state underground.records.spheresDug 3
+# Up again and to the Underground Man: he gives the second mission, already done (FLAG_DIGGING_FOR_FOSSILS), and then a
+# Prism, a Red and a Blue Sphere.
++0 press x
++1 release x
+until app ug-menu
++1 tap entry:5
++1 tap yes
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY"
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY_UNDERGROUND_MAN_HOUSE"
++0 release up
+until idle
++0 press up
+until position 4 6
++0 release up
+until idle
++0 press right
+until position 6 6
++0 release right
+until idle
++0 press up
++1 release up
++4 press a
++5 release a
+advance text
+until idle
++0 assert flag platinum:FLAG_HAS_ACTIVE_UNDERGROUND_MISSION true
+# The mission (dig) is already done: talking again rewards it.
++0 press a
++1 release a
+advance text
+until idle
++0 assert var platinum:VAR_CURRENT_UNDERGROUND_MISSION 2
++0 assert state underground.spheres [{"type":4,"size":10},{"type":4,"size":20},{"type":3,"size":10},{"type":1,"size":1},{"type":3,"size":1},{"type":4,"size":1}]

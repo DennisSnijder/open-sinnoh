@@ -1,0 +1,58 @@
+from cp6.replay
++0 reload
+# Branch m5-eterna-egg-declined (docs/research/story-cp5-19.md §7.1): cp7's way
+# to Cynthia's Togepi Egg, declined: VAR_ETERNA_CITY_STATE stays 4 and Cynthia (EternaCity_CoordEvent_
+# CynthiaBlockBikeShop) turns the player back from the Cycle Shop; asked again (EternaCity_Cynthia), the
+# player takes the Egg (state 5). Headless from the cp6 anchor (tests/integration/checkpoints-m5a-branches.rom.test.ts).
++0 wild auto
++0 evolve auto
+until idle
+# the tree has grown back: Cut it again
++1 press a
++1 release a
+until yesno
++0 press a
++1 release a
+advance text
+until idle 3000
+# to the Cycle Shop: Cynthia's Togepi Egg on the way (EternaCity_CoordEvent_CynthiaTryGiveEgg)
++0 press down
+until position 305 525 6000
++0 release down
++0 press left
+until position 301 525 6000
++0 release left
++0 press down
+until position 301 542 6000
++0 release down
++0 press right
+until position 308 542 6000
++0 release right
+until message
+advance text
++1 press b
++1 release b
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_ETERNA_CITY_STATE 4
++0 assert state party.length 1
+# on to the shop: Cynthia turns the player back
++0 press right
+until message 3000
++0 release right
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_ETERNA_CITY_STATE 4
+# asked again (EternaCity_Cynthia): the Egg
++0 assert facing player left
++0 press a
++1 release a
+advance text
+until yesno 3000
++0 press a
++1 release a
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_ETERNA_CITY_STATE 5
++0 assert state party[1].isEgg true
++0 assert state party[1].species "platinum:SPECIES_TOGEPI"

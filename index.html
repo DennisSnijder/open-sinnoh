@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b0d12" />
+    <meta name="description" content="Play Pokémon Platinum in your browser, on desktop or phone, from your own copy. Unofficial fan project." />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="OpenSinnoh" />
+    <link rel="canonical" href="https://play.opensinnoh.com/" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="OpenSinnoh" />
+    <meta property="og:title" content="OpenSinnoh" />
+    <meta property="og:description" content="Play Pokémon Platinum in your browser, on desktop or phone, from your own copy." />
+    <meta property="og:url" content="https://play.opensinnoh.com/" />
+    <meta property="og:image" content="https://play.opensinnoh.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The OpenSinnoh mark and wordmark: play Pokémon Platinum in your browser, from your own copy." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="OpenSinnoh" />
+    <meta name="twitter:description" content="Play Pokémon Platinum in your browser, on desktop or phone, from your own copy." />
+    <meta name="twitter:image" content="https://play.opensinnoh.com/og-image.png" />
+    <meta name="twitter:image:alt" content="The OpenSinnoh mark and wordmark: play Pokémon Platinum in your browser, from your own copy." />
+    <title>OpenSinnoh</title>
+    <!--
+      The startup splash (#splash below): the wordmark over a busy bar from the first paint, before any script, until
+      the app shows its first real screen (packages/app/src/splash.ts). Its wordmark and colours are generated
+      (tools/splash.ts); the bar and the button are os.css's (.os-prog, .os-btn), which loads with the page.
+    -->
+    <style>
+      /*opensinnoh:splash-tokens*/
+      #splash {
+        position: fixed; inset: 0; z-index: 1000; display: grid; place-content: center; justify-items: center; gap: 32px;
+        padding: calc(16px + var(--sat, 0px)) calc(16px + var(--sar, 0px)) calc(16px + var(--sab, 0px)) calc(16px + var(--sal, 0px));
+        background: var(--os-bg); color: var(--os-ink);
+      }
+      #splash .os-prog { width: 230px; }
+      #splash-hint { display: grid; justify-items: center; gap: 12px; max-width: 320px; text-align: center; color: var(--os-muted); }
+      #splash-hint[hidden] { display: none; }
+      #splash-hint .os-btn { min-height: 44px; }
+      /* The app's script never ran, so the button skins (installUi) are missing: a plain teal button. */
+      #splash.bare .os-btn { border: 2px solid var(--os-edge); border-image: none; background: var(--os-action); }
+      /* The hand-over: fades out (15 frames, stepped) while the title fades in from black. */
+      #splash.out { opacity: 0; pointer-events: none; transition: opacity calc(var(--os-f) * 15) steps(15); }
+      @media (prefers-reduced-motion: reduce) { #splash.out { transition: none; } }
+    </style>
+    <script>
+      // The stored theme override (installUi applies it again), set before the first paint so the splash themes right.
+      try {
+        const t = localStorage.getItem('lantern-nds:theme');
+        if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
+      } catch {
+        // Storage blocked: the system theme.
+      }
+    </script>
+  </head>
+  <body>
+    <div id="splash" class="os">
+      <!--opensinnoh:splash-wordmark-->
+      <div class="os-prog busy" role="progressbar" aria-busy="true" aria-label="Loading game…">
+        <div class="lt"><b aria-live="polite">Loading game…</b><span>Busy</span></div>
+        <div class="cells"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div id="splash-hint" role="status" hidden>
+        <p></p>
+        <button type="button" class="os-btn primary">Reload</button>
+      </div>
+    </div>
+    <script>
+      // The splash's phases (packages/app/src/splash.ts calls these): a phase that takes too long shows its hint and a
+      // Reload, so a stuck start never spins silently; done() hands over to the app's first real screen.
+      (() => {
+        const el = document.getElementById('splash');
+        const bar = el.querySelector('.os-prog');
+        const hint = document.getElementById('splash-hint');
+        hint.querySelector('button').addEventListener('click', () => location.reload());
+        let timer = 0;
+        const slow = (text) => {
+          hint.querySelector('p').textContent = text;
+          el.classList.toggle('bare', !document.getElementById('os-tokens'));
+          hint.hidden = false;
+        };
+        window.openSinnohSplash = {
+          phase(label, slowText, ms) {
+            if (!el.isConnected) return;
+            performance.mark(`splash: ${label}`);
+            bar.setAttribute('aria-label', label);
+            bar.querySelector('b').textContent = label;
+            hint.hidden = true;
+            clearTimeout(timer);
+            timer = setTimeout(() => slow(slowText), ms);
+          },
+          done(fade) {
+            clearTimeout(timer);
+            if (!el.isConnected || el.classList.contains('out')) return;
+            performance.mark('splash: done');
+            if (!fade || matchMedia('(prefers-reduced-motion: reduce)').matches) return el.remove();
+            // Fading out over the screen that took over: no longer read out.
+            el.setAttribute('aria-hidden', 'true');
+            el.classList.add('out');
+            setTimeout(() => el.remove(), 600);
+          },
+        };
+        window.openSinnohSplash.phase('Loading game…', 'Loading is taking longer than usual. Check your connection, then reload.', 30000);
+      })();
+    </script>
+    <!-- The ROM screen, built by packages/app/src/rom-screen.ts (OpenSinnoh UI). -->
+    <main id="rom" class="rom-screen os os-screen os-field" hidden></main>
+
+    <main id="game" hidden>
+      <canvas id="main-canvas" aria-label="Field view"></canvas>
+      <canvas id="overlay-canvas" aria-hidden="true"></canvas>
+      <canvas id="battle-canvas" aria-label="Battle" hidden></canvas>
+      <canvas id="panel-canvas" aria-label="Touch panel"></canvas>
+      <div id="dpad" class="controls" hidden>
+        <button data-button="up" aria-label="Up"><span class="arrow"></span></button>
+        <button data-button="left" aria-label="Left"><span class="arrow"></span></button>
+        <button data-button="right" aria-label="Right"><span class="arrow"></span></button>
+        <button data-button="down" aria-label="Down"><span class="arrow"></span></button>
+      </div>
+      <div id="buttons" class="controls" hidden>
+        <button data-button="x" class="face"><span>X</span></button>
+        <button data-button="y" class="face"><span>Y</span></button>
+        <button data-button="a" class="face"><span>A</span></button>
+        <button data-button="b" class="face"><span>B</span></button>
+      </div>
+      <div id="select-pill" class="controls" hidden><button data-button="select" class="pill"><span>Select</span></button></div>
+      <div id="start-pill" class="controls" hidden><button data-button="start" class="pill"><span>Start</span></button></div>
+      <div id="safe-area-probe" aria-hidden="true"></div>
+    </main>
+
+    <div id="ios-hint" class="banner" hidden>
+      <span>On iPhone and iPad, add OpenSinnoh to your Home Screen (Share → Add to Home Screen) so the imported data is kept.</span>
+      <button id="ios-hint-close" aria-label="Dismiss">✕</button>
+    </div>
+
+    <script type="module" src="/packages/app/src/main.ts"></script>
+  </body>
+</html>

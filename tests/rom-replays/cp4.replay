@@ -1,0 +1,391 @@
+from cp3.replay
+# CP4: the Route 203 rival, Route 203 trainers, Oreburgh Gate, Oreburgh,
+# Roark in the mine, the gym and the Coal Badge. Yes on yes/no.
+# Inputs wait on the game (`until …`, `advance text`); walks hold a
+# direction `until position`, running with B held; `+N` only follows a sync point (re-timed from a
+# recording with tools/replays/retime.ts). Runs headless, also started late and on other seeds, in
+# tests/integration/checkpoints.rom.test.ts.
+# east to Route 203: the rival battle
++0 press b
++0 press up
+until position 174 758
++0 release up
++0 press right
+until position 196 758
++0 release right
++0 release b
+advance text
+battle auto 9000
+advance text
++0 assert var platinum:VAR_ROUTE_203_RIVAL_STATE 1
+# along Route 203 to Oreburgh Gate (trainers see the player on the way)
++0 press b
++0 press right
+until position 207 758
++0 release right
++0 press up
+until position 207 757
++0 release up
++0 press right
+until position 222 757
++0 release right
++3 release b
+advance text
+battle auto 9000
+advance text
++0 press b
++0 press right
+until position 223 757
++0 release right
++0 press up
+until position 223 756
++0 release up
++0 press right
+until position 242 756
++0 release right
++0 press up
+until position 242 749
++0 release up
++0 press right
+until position 246 749
++0 release right
++0 release b
+until idle
++0 press right
++1 release right
+# Oreburgh Gate 1F (a cave: encounters on)
+until idle
++0 press b
++0 press right
+until position 7 22
++0 release right
++3 release b
+advance text
++0 press b
++0 press right
+until position 17 22
++0 release right
++3 release b
+advance text
+battle auto 9000
+advance text
++0 press b
++0 press right
+until position 24 22
++0 release right
++3 release b
+advance text
+battle auto 9000
+advance text
++0 press b
++0 press right
+until position 27 22
++0 release right
++0 press left
+until position 23 22
++0 release left
++0 press up
+until position 23 21
++0 release up
++0 press up
+until position 23 20
++0 release up
++0 press right
+until position 25 20
++0 release right
++0 press down
+until position 25 21
++0 release down
++0 press right
+until position 26 21
++0 release right
++0 press down
+until position 26 22
++0 release down
++0 press left
+until position 23 22
++0 release left
++0 press up
+until position 23 21
++0 release up
++0 press up
+until position 23 20
++0 release up
++0 press right
+until position 25 20
++0 release right
++0 press down
+until position 25 21
++0 release down
++0 press right
+until position 26 21
++0 release right
++0 press down
+until position 26 22
++0 release down
++0 press right
+until position 27 22
++0 release right
++0 release b
+until idle
++0 press right
++1 release right
+# Oreburgh: the youngster walks the player to the gym
+until idle
++0 press b
++0 press down
+until position 258 750
++0 release down
++0 press right
+until position 266 750
++0 release right
++3 release b
+advance text
++0 assert var platinum:VAR_OREBURGH_CITY_STATE 1
+# south to Oreburgh Mine
++0 press b
++0 press down
+until position 279 761
++0 release down
++0 press right
+until position 280 761
++0 release right
++0 press down
+until position 280 762
++0 release down
++0 press right
+until position 300 762
++0 release right
++0 press down
+until position 300 777
++0 release down
++0 press right
+until position 301 777
++0 release right
++0 press down
+until position 301 791
++0 release down
++0 press right
+until position 302 791
++0 release right
++0 press down
+until position 302 795
++0 release down
++0 release b
+until idle
++0 press down
++1 release down
+until idle
++0 press b
++0 press down
+until position 12 21
++0 release down
++0 release b
+until idle
++0 press down
++1 release down
+# Mine B2F: Roark smashes a rock and heads back to the gym
+until idle
++0 press b
++0 press down
+until position 15 9
++0 release down
++0 press right
+until position 16 9
++0 release right
++0 press down
+until position 16 11
++0 release down
++0 press left
+until position 15 11
++0 release left
++0 press down
+until position 15 17
++0 release down
++0 press right
+until position 26 17
++0 release right
++0 press down
+until position 26 19
++0 release down
++0 press right
+until position 27 19
++0 release right
++0 press down
+until position 27 21
++0 release down
++0 press right
+until position 28 21
++0 release right
++0 press down
+until position 28 27
++0 release down
++0 press left
+until position 27 27
++0 release left
++0 press down
+until position 27 29
++0 release down
++0 press left
+until position 18 29
++0 release left
++0 release b
+until idle
++0 press up
++1 release up
+until idle
++0 press a
++1 release a
+advance text
++0 assert flag platinum:FLAG_ROARK_RETURNED_TO_OREBURGH_GYM true
++0 assert flag platinum:FLAG_HIDE_OREBURGH_CITY_RIVAL true
+# back up to the city and into the gym
++0 press b
++0 press up
+until position 18 28
++0 release up
++0 press right
+until position 26 28
++0 release right
++0 press up
+until position 26 25
++0 release up
++0 press right
+until position 27 25
++0 release right
++0 press up
+until position 27 24
++0 release up
++0 press right
+until position 28 24
++0 release right
++0 press up
+until position 28 16
++0 release up
++0 press left
+until position 19 16
++0 release left
++0 press up
+until position 19 15
++0 release up
++0 press left
+until position 17 15
++0 release left
++0 press up
+until position 17 13
++0 release up
++0 press left
+until position 15 13
++0 release left
++0 press up
+until position 15 11
++0 release up
++0 press right
+until position 16 11
++0 release right
++0 press up
+until position 16 9
++0 release up
++0 press left
+until position 15 9
++0 release left
++0 press up
+until position 15 1
++0 release up
++0 press up
+until position 12 1
++0 release up
++0 press up
+until position 302 757
++0 release up
+# heal at Oreburgh's Pokémon Center (next to the mine's exit) before the gym
++0 release b
+until idle
++0 press right
+until position 303 757
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until position 303 757
++0 release down
+until idle
++0 press b
++0 press left
+until position 282 757
++0 release left
++0 release b
+until idle
++0 press up
++2 release up
+# the gym trainers, then Roark
+until idle
++0 press b
++0 press up
+until position 5 18
++0 release up
++3 release b
+advance text
+battle auto 9000
+advance text
++0 press b
++0 press up
+until position 5 11
++0 release up
++3 release b
+advance text
+battle auto 9000
+advance text
++0 press b
++0 press up
+until position 5 4
++0 release up
++0 release b
+until idle
++0 press a
++1 release a
+advance text 4400
+# Roark (EXPERT AI): the browser spec screenshots the battle
++12 screenshot roark-battle
+battle auto 9000
+advance text 4400
+# end of CP4
++0 assert position platinum:MAP_HEADER_OREBURGH_CITY_GYM 5 4
++0 assert state badges ["platinum:BADGE_ID_COAL"]
++0 assert var platinum:VAR_OREBURGH_CITY_STATE 2
++0 assert var platinum:VAR_JUBILIFE_CITY_STATE 3
++0 assert flag platinum:FLAG_ROARK_RETURNED_TO_OREBURGH_GYM true
++0 assert flag platinum:FLAG_HIDE_OREBURGH_CITY_RIVAL true
++0 assert flag platinum:FLAG_RECEIVED_ROARK_TM76 true
++0 assert state bag.tmhms[item="platinum:ITEM_TM76"].count 1
++0 assert flag platinum:FLAG_HIDE_POKECENTER_BASEMENT_BLOCKADE true
+# the battle log since CP3: the rival, the route and gym trainers and Roark (EXPERT AI), all real and won;
+# every wild battle on the way was fought and won; the first battle and the Route 202 trainers make 11.
++0 assert battle trainer platinum:TRAINER_RIVAL_ROUTE_203_PIPLUP won
++0 assert battle trainer platinum:TRAINER_YOUNGSTER_DALLAS won
++0 assert battle trainer platinum:TRAINER_CAMPER_CURTIS won
++0 assert battle trainer platinum:TRAINER_PICNICKER_DIANA won
++0 assert battle trainer platinum:TRAINER_YOUNGSTER_JONATHON won
++0 assert battle trainer platinum:TRAINER_YOUNGSTER_DARIUS won
++0 assert battle trainer platinum:TRAINER_LEADER_ROARK won
++0 assert battle wild * won
++0 assert battles trainer 11
++0 assert state money 7024
+# Trainers met by sight get their defeated flag; StartTrainerBattle alone (rival, Roark) sets none.
++0 assert flag platinum:FLAG_DEFEATED_TRAINER_YOUNGSTER_DALLAS true
++0 assert flag platinum:FLAG_DEFEATED_TRAINER_CAMPER_CURTIS true
++0 assert flag platinum:FLAG_DEFEATED_TRAINER_PICNICKER_DIANA true
++0 assert flag platinum:FLAG_DEFEATED_TRAINER_YOUNGSTER_JONATHON true
++0 assert flag platinum:FLAG_DEFEATED_TRAINER_YOUNGSTER_DARIUS true

@@ -1,0 +1,22 @@
+# FieldTask_Fishing: registered Old Rod at a real shore. A fixed encounter stream isolates the cast
+# and bite timing from the game's seed; tables still come from the user's ROM.
+party 0 platinum:SPECIES_BIBAREL 40
+give item platinum:ITEM_OLD_ROD 1
+set state registeredItem "platinum:ITEM_OLD_ROD"
+set state encounterRng {"seed":6}
+set var platinum:VAR_LAKE_VERITY_PROF_ROWAN_STATE 1
+set flag platinum:FLAG_HIDE_LAKE_VERITY_TEAM_GALACTIC true
+warp platinum:MAP_HEADER_LAKE_VERITY 50 36 left
++0 wild flee
+until idle
++0 press y
++1 release y
++100 press a
++1 release a
+advance text
+until idle
++0 assert battles wild 1
++0 assert state records.counts["10"] 1
++0 reload
+until idle
++0 assert position platinum:MAP_HEADER_LAKE_VERITY 50 36

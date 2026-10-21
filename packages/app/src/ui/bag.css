@@ -1,0 +1,46 @@
+/*
+ * The bag on its DS screen (bag.ts): one board at the UI unit (--dot is the unit), every part at its DS
+ * place. The board clips what the DS leaves off screen (the left arrow's edge).
+ */
+.ui-layer[data-mode] .bag-board .ds-sprite, .ui-layer[data-mode] .bag-board .ds-picture, .ui-layer[data-mode] .bag-board .item-highlight { pointer-events: none; }
+.ui-layer[data-mode] .bag-board .ds-picture { display: block; }
+
+/* Stand-ins without the ROM screen (the fixture): the panel, the list frame and the description bar. */
+.bag-css-screen {
+  background:
+    linear-gradient(#7352f7, #7352f7) 0 calc(var(--unit) * 144) / 100% calc(var(--unit) * 48) no-repeat,
+    linear-gradient(#fff, #fff) calc(var(--unit) * 108) calc(var(--unit) * 8) / calc(var(--unit) * 142) calc(var(--unit) * 124) no-repeat,
+    linear-gradient(#5ace52, #5ace52) calc(var(--unit) * 100) 0 / calc(var(--unit) * 156) calc(var(--unit) * 144) no-repeat,
+    linear-gradient(#f7ad52, #f7ad52) 0 calc(var(--unit) * 84) / calc(var(--unit) * 100) calc(var(--unit) * 52) no-repeat,
+    linear-gradient(#cfe7f7, #a5d6f7);
+}
+
+/* Pockets: the icon tabs on the selector bar (icons 3 px down, as blitted), the name in its field. */
+.ui-layer[data-mode] .bag-board .pocket-tab { display: grid; justify-items: center; align-content: start; padding: calc(var(--unit) * 3) 0 0; min-height: 0; background: none; box-shadow: none; }
+.ui-layer[data-mode] .bag-board .pocket-tab:not(:has(canvas))::before { content: ''; width: calc(var(--unit) * 8); height: calc(var(--unit) * 8); margin-top: var(--unit); background: #737b94; }
+.ui-layer[data-mode] .bag-board .pocket-tab.on:not(:has(canvas))::before { background: #f8f8f8; }
+.ui-layer[data-mode] .bag-board .pocket-arrow.rom::before { display: none; }
+.ui-layer[data-mode] .bag-board .pocket-arrow:not(.rom) { display: grid; place-items: center; }
+.ui-layer[data-mode] .bag-board .pocket-name { display: grid; justify-items: center; }
+
+/* The list: 16-px rows, the name at the list window's x, the count right-aligned, the ROM highlight on the cursor row. */
+.ui-layer[data-mode] .bag-board .item-list { display: block; overflow-y: auto; overflow-x: hidden; padding: calc(var(--unit) * 8) 0; background: none; box-shadow: none; scrollbar-width: none; scroll-padding-block: calc(var(--unit) * 8); }
+.ui-layer[data-mode] .bag-board .item-row { display: flex; align-items: center; height: calc(var(--unit) * 16); padding: 0 0 0 calc(var(--unit) * 8); gap: 0; width: 100%; }
+.ui-layer[data-mode] .bag-board .item-row + .item-row { border-top: 0; }
+.ui-layer[data-mode] .bag-board .item-row .count { margin-left: auto; padding-right: calc(var(--unit) * var(--count-right)); }
+.ui-layer[data-mode] .bag-board .item-list.rom [data-nav].is-cursor { background: none; box-shadow: none; }
+.ui-layer[data-mode] .bag-board .item-list.rom [data-nav].is-cursor::before { display: none; }
+@media (hover: hover) { .ui-layer[data-mode] .bag-board .item-list.rom [data-nav]:hover:not(.is-cursor) { background: rgb(255 255 255 / 0.5); } }
+.ui-layer[data-mode] .bag-board .registered-mark.css { position: absolute; left: calc(var(--unit) * 104); }
+
+.ui-layer[data-mode] .bag-board .item-panel-text { display: block; }
+.ui-layer[data-mode] .bag-board .bag-item-icon { display: grid; place-items: center; pointer-events: none; }
+
+/* The DS windows: rows of 16 px, the frame at the tile around them. */
+.ui-layer[data-mode] .bag-board .app-menu { min-width: 0; max-height: none; overflow: visible; }
+.ui-layer[data-mode] .bag-board .app-menu .menu-entry, .ui-layer[data-mode] .bag-board .yes-no .choice { min-height: 0; height: calc(var(--unit) * 16); padding: 0 0 0 calc(var(--unit) * 10); }
+.ui-layer[data-mode] .bag-board .window.rom-frame, .ui-layer[data-mode] .bag-board .msg-box.rom-frame { padding: 0; }
+.ui-layer[data-mode] .bag-board .yes-no .choice { min-width: 0; }
+.ui-layer[data-mode] .bag-board .qty-count { min-height: 0; padding: 0; justify-content: center; }
+.ui-layer[data-mode] .bag-board .qty-count.is-cursor { background: none; box-shadow: none; }
+.ui-layer[data-mode] .bag-board .qty-count.is-cursor::before { display: none; }

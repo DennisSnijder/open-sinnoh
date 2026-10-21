@@ -1,0 +1,8 @@
+{
+  "id": "fixture",
+  "name": "Fixture pack (original content)",
+  "version": "0.1.0",
+  "engine": "^0.1.0",
+  "dependencies": {},
+  "loadAfter": []
+}

@@ -1,0 +1,69 @@
+from m6-rotom-chateau.replay
+# Event branch m6-event-rotom (docs/decisions.md: the dev-only
+# event flag; docs/research/postgame.md §7): the Secret Key distribution (`event rotom`: VAR_DISTRIBUTION_EVENT_ROTOM's
+# magic number and the key) with the Rotom caught in m6-rotom-chateau. In the Galactic Eterna Building the key opens
+# the wall to Rotom's room; its on-transition shows the five appliances (get_rotom_forms_in_save: none in the save).
+# Into the microwave: get_party_rotom_count_and_first 0, YES, set_rotom_form Heat: Overheat into a free slot, the form
+# in the Pokédex, the microwave gone; the warp in place starts Rowan's visit (FLAG_USED_ROTOM_APPLIANCE, state 2). A
+# reload keeps Heat Rotom; the appliance spot's RECALL brings it back to its base form, Overheat forgotten.
+event rotom
+warp platinum:MAP_HEADER_TEAM_GALACTIC_ETERNA_BUILDING_1F 2 5 left
+until idle
++0 press a
++1 release a
+advance text 3000
+until idle 600
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROTOMS_ROOM" 600
++0 release up
+until idle 600
++0 assert flag platinum:FLAG_HIDE_ROTOMS_ROOM_MICROWAVE false
++0 press up
+until position 7 7 6000
++0 release up
++0 press left
+until position 4 7 6000
++0 release left
+until idle 60
++0 press up
++1 release up
+until idle 60
++0 press a
++1 release a
+advance text 3000
++0 press a
++1 release a
+advance text 6000
++0 press a
++1 release a
+until app summary 600
++1 tap move:3
++1 tap move:3
+until app none 600
+advance text 3000
++0 press a
++1 release a
+advance text 6000
+until idle 6000
++0 assert state party[5].form 1
++0 assert state party[5].moves[3] "platinum:MOVE_OVERHEAT"
++0 assert state party[5].ability "platinum:ABILITY_LEVITATE"
++0 assert flag platinum:FLAG_USED_ROTOM_APPLIANCE true
++0 assert var platinum:VAR_ROTOMS_ROOM_STATE 2
++0 assert flag platinum:FLAG_HIDE_ROTOMS_ROOM_MICROWAVE true
++0 reload
++0 assert state party[5].form 1
++0 press up
++1 release up
+until idle 60
++0 press a
++1 release a
+advance text 600
+until menu 600
++10 press a
++1 release a
+advance text 6000
+until idle 6000
++0 assert state party[5].form 0
++0 assert state party[5].moves ["platinum:MOVE_THUNDER_SHOCK","platinum:MOVE_CONFUSE_RAY","platinum:MOVE_UPROAR"]
++0 assert flag platinum:FLAG_HIDE_ROTOMS_ROOM_MICROWAVE false

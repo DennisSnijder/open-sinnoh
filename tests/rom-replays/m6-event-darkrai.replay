@@ -1,0 +1,60 @@
+from m6-cresselia.replay
+# Event branch m6-event-darkrai (docs/decisions.md: the dev-only event flag;
+# docs/research/postgame.md §6): the Member Card distribution (`event darkrai`) after m6-cresselia woke the boy. In
+# Canalave's Harbor Inn the on-transition starts the event (VAR_DARKRAI_EVENT_STATE 1, the Gym Guide's reservation);
+# the frame script lays the player down and the dream warps to Newmoon Island (FLAG_TRAVELED_TO_NEWMOON_ISLAND,
+# state 2). In the forest Darkrai's L50 battle, caught with the Master Ball: FLAG_CAUGHT_DARKRAI; the voice sends the
+# player back to the inn, awake in Canalave (state 3).
+event darkrai
+warp platinum:MAP_HEADER_CANALAVE_CITY_HARBOR_INN 4 7 up
+advance text 3000
+until idle 3000
++0 assert state player.zone "platinum:MAP_HEADER_NEWMOON_ISLAND"
++0 assert var platinum:VAR_DARKRAI_EVENT_STATE 2
++0 assert flag platinum:FLAG_TRAVELED_TO_NEWMOON_ISLAND true
++0 press up
+until position 152 274 6000
++0 release up
++0 press right
+until position 154 274 6000
++0 release right
++0 press up
+until position 154 268 6000
++0 release up
++0 press left
+until position 149 268 6000
++0 release left
++0 press down
+until position 149 269 6000
++0 release down
++0 press left
+until position 143 269 6000
++0 release left
++0 press down
+until position 143 270 6000
++0 release down
++0 press left
+until position 137 270 6000
++0 release left
++0 press up
+until position 137 269 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_NEWMOON_ISLAND_FOREST" 300
++0 release up
+until idle 600
++0 assert flag platinum:FLAG_HIDE_NEWMOON_ISLAND_FOREST_DARKRAI false
++0 press up
+until position 16 14 600
++0 release up
+until idle 60
++0 press a
++1 release a
+advance text 3000
+battle catch platinum:ITEM_MASTER_BALL 20000
++0 assert battle scripted platinum:SPECIES_DARKRAI caught
+advance text 20000
+until idle 6000
++0 assert flag platinum:FLAG_CAUGHT_DARKRAI true
++0 assert var platinum:VAR_DARKRAI_EVENT_STATE 3
++0 assert party 5 platinum:SPECIES_DARKRAI

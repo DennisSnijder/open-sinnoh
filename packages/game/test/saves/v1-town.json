@@ -1,0 +1,23 @@
+{
+  "format": "lantern-nds-save",
+  "version": 1,
+  "savedAt": "2026-10-14T00:00:00.000Z",
+  "state": {
+    "schemaVersion": 1,
+    "packs": [{ "id": "fixture", "version": "0.1.0" }],
+    "names": { "player": "Ari", "rival": "Bo" },
+    "gender": "male",
+    "flags": { "fixture:FLAG_NEW_GAME_DONE": true, "fixture:FLAG_TALKED_TO_HELPER": true },
+    "vars": { "fixture:VAR_ROOM_INTRO": 1, "fixture:VAR_PLAYER_STARTER": 2 },
+    "party": [{ "species": "fixture:SPECIES_EMBERKIT", "level": 5 }],
+    "money": 3000,
+    "items": {},
+    "player": { "zone": "fixture:TOWN", "x": 40, "z": 16, "y": 0, "facing": "right" },
+    "objects": [{ "localId": 0, "x": 44, "z": 16, "y": 0, "facing": "left", "movementType": 0 }],
+    "hasPartner": false,
+    "runningShoes": true,
+    "follower": null,
+    "rng": { "seed": 12345 },
+    "tick": 900
+  }
+}

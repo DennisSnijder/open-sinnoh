@@ -1,0 +1,55 @@
+# Branch m5-league-lost: a loss to the Elite Four blacks out. A constructed
+# start (setup lines, no story chain): eight badges, one level-10 Pokémon, $10000, the blackout spawn the League's
+# north Pokémon Center (entering it makes it so, as the DS does). The elevator lands in Aaron's room: the on-frame
+# script walks the player in and shuts the door behind (FLAG_HIDE_POKEMON_LEAGUE_AARON_ROOM_ENTRANCE_DOOR clear).
+# Aaron's battle (261) is lost: CheckWonBattle FALSE → PokemonLeagueAaronRoom_BlackOut → BlackOutFromBattle. The
+# player wakes at the north center's counter, the nurse heals the party, the penalty is paid (highest level · 4 ·
+# 30 with eight badges: $1200), and Aaron stays undefeated. Headless in tests/integration/m5-league.rom.test.ts.
+party 0 platinum:SPECIES_BIDOOF 10 platinum:MOVE_TACKLE
+set money 10000
+give badge platinum:BADGE_ID_COAL
+give badge platinum:BADGE_ID_FOREST
+give badge platinum:BADGE_ID_COBBLE
+give badge platinum:BADGE_ID_FEN
+give badge platinum:BADGE_ID_RELIC
+give badge platinum:BADGE_ID_MINE
+give badge platinum:BADGE_ID_ICICLE
+give badge platinum:BADGE_ID_BEACON
+set var platinum:VAR_RIVAL_BEAT_SUNYSHORE_GYM 1
+set flag platinum:FLAG_POKEMON_LEAGUE_DOOR_GUARD_MOVED_AWAY true
+warp platinum:MAP_HEADER_POKEMON_LEAGUE 847 560 up
+until idle
++0 press up
+until position 11 11 3000
++0 release up
+until idle 3000
++0 assert state blackOut "platinum:MAP_HEADER_POKEMON_LEAGUE_NORTH_POKECENTER_1F"
++0 press up
+until position 11 2 3000
++0 release up
+until idle 3000
+# the elevator room: onto the platform lift at 4, 11, which carries the player up to the room's door
++0 press up
+until position 4 11 3000
++0 release up
+until idle 6000
++0 press up
+until position 8 11 6000
++0 release up
+until idle 3000
++0 assert position platinum:MAP_HEADER_POKEMON_LEAGUE_AARON_ROOM 8 9
++0 press up
+until position 8 6 3000
++0 release up
+until idle 3000
++0 press a
++1 release a
+advance text 3000
+battle auto 30000
++0 assert battle trainer platinum:TRAINER_ELITE_FOUR_AARON lost single
+until position 4 3 6000
++0 assert position platinum:MAP_HEADER_POKEMON_LEAGUE_NORTH_POKECENTER_1F 4 3
++0 assert state money 8800
+advance text 3000
+until idle 3000
++0 assert flag platinum:FLAG_DEFEATED_AARON false

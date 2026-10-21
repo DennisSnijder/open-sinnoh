@@ -1,0 +1,1090 @@
+from cp10.replay
++0 reload
+# CP11 (docs/research/story-cp5-19.md §11): from CP10's end in Celestic, back over
+# Route 210 to Solaceon (Mt. Coronet's Route 211 tunnel needs Strength), Hearthome, Mt. Coronet, Route 207 (a
+# Machop for Strength and Rock Climb), Oreburgh, Jubilife, Route 218 on Surf, Barry on Canalave's bridge (476),
+# the boat to Iron Island and Riley's HM04, the boat back, Byron (250), the library and the explosion: Canalave
+# state 5.
++0 wild auto
++0 evolve auto
+until idle
+# heal at the Celestic Pokémon Center
++0 press down
+until position 463 525 6000
++0 release down
++0 press right
+until position 465 525 6000
++0 release right
++0 press down
+until position 465 539 6000
++0 release down
++0 press right
+until position 472 539 6000
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_CELESTIC_TOWN" 3000
++0 release down
+until idle
+# back east over Route 210 North the way CP10 came (its trainers beaten; one Pokémon, so the double team on
+# their ledge never battles): the stairs, the bridge, the low path, the bridge at x 521 up to the high path
++0 press right
+until position 476 539 6000
++0 release right
++0 press up
+until position 476 530 6000
++0 release up
++0 press right
+until position 510 530 6000
++0 release right
++0 press down
+until position 510 535 6000
++0 release down
++0 press right
+until position 516 535 6000
++0 release right
++0 press down
+until position 516 541 6000
++0 release down
++0 press right
+until position 521 541 6000
++0 release right
++0 press up
+until position 521 521 6000
++0 release up
+until idle
++8 release select
+# east on the high path, down the stairs at x 539, over the double team's ledge and down the stairs at x 543
++0 press right
+until position 539 521 6000
++0 release right
++0 press down
+until position 539 527 6000
++0 release down
++0 press right
+until position 543 527 6000
++0 release right
++0 press down
+until position 543 533 6000
++0 release down
++0 press right
+until position 553 533 6000
++0 release right
++0 press down
+until position 553 540 6000
++0 release down
++0 press right
+until position 563 540 6000
++0 release right
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_210_SOUTH" 3000
++0 release down
+until idle
++8 release select
+# south over Route 210 South to Solaceon
++0 press down
+until position 563 569 6000
++0 release down
++0 press right
+until position 564 569 6000
++0 release right
++0 press down
+until position 564 581 6000
++0 release down
++0 press left
+until position 561 581 6000
++0 release left
++0 press down
+until position 561 597 6000
++0 release down
++0 press right
+until position 567 597 6000
++0 release right
++0 press down
+until position 567 610 6000
++0 release down
++0 press left
+until position 561 610 6000
++0 release left
++0 press down
+until position 561 624 6000
++0 release down
++0 press right
+until position 562 624 6000
++0 release right
++0 press down
+until position 562 640 6000
++0 release down
+until idle
++8 release select
+# heal at the Solaceon Pokémon Center
++0 press down
+until position 562 657 6000
++0 release down
++0 press right
+until position 566 657 6000
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_SOLACEON_TOWN" 3000
++0 release down
+until idle
++8 release select
+# Route 209 back to Hearthome on CP8's way (its trainers beaten; one Pokémon, so the twins and the couple never battle)
++0 press left
+until position 563 657 6000
++0 release left
++0 press down
+until position 563 670 6000
++0 release down
++0 press left
+until position 562 670 6000
++0 release left
++0 press down
+until position 562 708 6000
++0 release down
++0 press left
+until position 555 708 6000
++0 release left
++0 press down
+until position 555 715 6000
++0 release down
++0 press left
+until position 553 715 6000
++0 release left
++0 press left
+until position 549 715 6000
++0 release left
++0 press down
+until position 549 722 6000
++0 release down
++0 press left
+until position 527 722 6000
++0 release left
+until idle
++8 release select
+# Breeder Albert looks north and south at random over every way west (x 522): wait in his north line until he turns and sees the player
++0 press left
+until position 522 722 6000
++0 release left
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_BREEDER_ALBERT won single
++8 release select
+# west through the gate to Hearthome
++0 press left
+until position 516 722 6000
++0 release left
++0 press down
+until position 516 726 6000
++0 release down
++0 press left
+until position 513 726 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_209_GATE_TO_HEARTHOME_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY" 3000
++0 release left
+until idle
++8 release select
+# west across Hearthome to the Route 208 gate
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_208_GATE_TO_HEARTHOME_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_208" 3000
++0 release left
+until idle
++8 release select
+# Route 208's grass: catch a Bibarel (Strength, Rock Climb)
++0 press left
+until position 440 726 6000
++0 release left
++0 press down
+until position 440 729 6000
++0 release down
++0 press left
+until position 430 729 6000
++0 release left
++0 press up
+until position 430 728 6000
++0 release up
+until idle
+until wild platinum:SPECIES_BIBAREL left right 60000
+battle catch platinum:ITEM_GREAT_BALL 30000
+advance text
+until idle
++0 assert state party[1].species "platinum:SPECIES_BIBAREL"
++8 release select
+# west to Mt. Coronet on CP7's way back (the catch ends at x 429 or 430 on row 728): round the rocks north of Hiker Robert
++0 press down
+until state player.z 729 600
++0 release down
++0 press left
+until position 427 729 6000
++0 release left
++0 press up
+until position 427 715 6000
++0 release up
++0 press left
+until position 422 715 6000
++0 release left
++0 press down
+until position 422 724 6000
++0 release down
++0 press left
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_SOUTH" 6000
++0 release left
+until idle
++8 release select
+# through Mt. Coronet 1F on CP7's way back to Route 207
++0 press up
+until position 27 13 6000
++0 release up
++0 press left
+until position 24 13 6000
++0 release left
++0 press down
+until position 24 15 6000
++0 release down
++0 press left
+until position 19 15 6000
++0 release left
++0 press down
+until position 19 19 6000
++0 release down
++0 press left
+until position 15 19 6000
++0 release left
++0 press down
+until position 15 23 6000
++0 release down
++0 press left
+until position 6 23 6000
++0 release left
++0 press up
+until position 6 8 6000
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_207" 3000
++0 release left
+until idle
++8 release select
+# Route 207 west and down the slope at x 306 to Oreburgh
++0 press left
+until position 306 712 6000
++0 release left
++0 press down
+until position 306 725 6000
++0 release down
++0 press left
+until position 300 725 6000
++0 release left
++0 press down
+until position 300 735 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_OREBURGH_CITY" 3000
++0 release down
+until idle
++8 release select
+# Oreburgh west into the Oreburgh Gate
++0 press left
+until position 297 736 6000
++0 release left
++0 press down
+until position 297 753 6000
++0 release down
++0 press left
+until position 286 753 6000
++0 release left
++0 press up
+until position 286 750 6000
++0 release up
++0 press left
+until position 259 750 6000
++0 release left
++0 press up
+until position 259 749 6000
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_OREBURGH_GATE_1F" 3000
++0 release left
+until idle
++8 release select
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_203" 3000
++0 release left
+until idle
++8 release select
+# Route 203 west to Jubilife: Lass Madeline looks south over the way out of the gate (x 240)
++0 press left
+until message 3000
++0 release left
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_LASS_MADELINE won single
++8 release select
+# Jubilife on row 758 to the Route 218 gate
++0 press left
+until position 229 749 6000
++0 release left
++0 press down
+until position 229 756 6000
++0 release down
++0 press left
+until position 223 756 6000
++0 release left
++0 press down
+until position 223 758 6000
++0 release down
++0 press left
+until position 129 758 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_218_GATE_TO_JUBILIFE_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_218" 3000
++0 release left
+until idle
++8 release select
+# Route 218: over the bridge, then Surf (Empoleon, slot 1) west across the water
++0 press left
+until position 116 758 6000
++0 release left
++0 press up
+until position 116 756 6000
++0 release up
++0 press left
+until position 103 756 6000
++0 release left
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until state playerState "surf" 3000
+until idle
++0 press left
+until position 93 756 6000
++0 release left
+until idle
++8 release select
+# north on the strip at x 93 to Fisherman Luc, Surf east of him, up to row 749 and west to the shore at x 79
++0 press up
+until position 93 752 6000
++0 release up
+until idle
++1 press right
++1 release right
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until state playerState "surf" 3000
+until idle
++0 press up
+until position 94 749 6000
++0 release up
++0 press left
+until position 79 749 6000
++0 release left
+until idle
++0 press down
+until position 79 754 6000
++0 release down
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_218_GATE_TO_CANALAVE_CITY" 3000
++0 release left
+until idle
++8 release select
+# the gate to Canalave: a talk on the way through
++0 press left
+until message 3000
++0 release left
+advance text 6000
+until idle 3000
++0 press left
+until state player.zone "platinum:MAP_HEADER_CANALAVE_CITY" 3000
++0 release left
+until idle
++8 release select
+# heal at the Canalave Pokémon Center
++0 press left
+until position 60 754 6000
++0 release left
++0 press up
+until position 60 723 6000
++0 release up
++0 press left
+until position 58 723 6000
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_CANALAVE_CITY" 3000
++0 release down
+until idle
++8 release select
+# Barry on the bridge (CanalaveCity_CoordEvent_Rival): rival 476, Surf on every one
++0 press left
+until message 3000
++0 release left
+advance text
+battle auto move 3 20000
++0 assert battle trainer platinum:TRAINER_RIVAL_CANALAVE_CITY_PIPLUP won single
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_CANALAVE_CITY_STATE 1
++8 release select
+# heal again before Iron Island
++0 press right
+until position 58 723 6000
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_CANALAVE_CITY" 3000
++0 release down
+until idle
++8 release select
+# Sailor Eldritch's boat to Iron Island (play_boat_cutscene)
++0 press down
+until position 58 726 6000
++0 release down
++0 press left
+until position 35 726 6000
++0 release left
++0 press down
+until position 35 750 6000
++0 release down
++0 press right
+until position 44 750 6000
++0 release right
+until idle
++1 press right
++1 release right
+until idle
++0 assert facing player right
++0 press a
++1 release a
+until menu 600
++4 press a
++1 release a
+advance text 4000
+until idle 600
++0 assert position platinum:MAP_HEADER_IRON_ISLAND 100 502
++8 release select
+# Riley at the cave mouth (IronIsland_Riley): HM04
++0 press right
+until position 105 502 6000
++0 release right
++0 press down
+until position 105 503 6000
++0 release down
++0 press right
+until position 117 503 6000
++0 release right
++0 press up
+until position 117 491 6000
++0 release up
+until idle
++1 press up
++1 release up
+until idle
++0 assert facing player up
++1 press a
++1 release a
+advance text 6000
+until idle 3000
++0 assert state bag.tmhms[item="platinum:ITEM_HM04"].count 1
++8 release select
+# HM04 Strength to Bibarel over Defense Curl
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:3
++1 tap row:8
++1 tap menu:0
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap yes
++1 assert app party
++1 tap slot:1
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap yes
++1 press a
++1 release a
++1 assert app summary
++1 tap move:0
++1 tap move:0
++1 assert state party[1].moves ["platinum:MOVE_STRENGTH","platinum:MOVE_ROLLOUT","platinum:MOVE_WATER_GUN","platinum:MOVE_HEADBUTT"]
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
++8 release select
+# the boat back to Canalave
++0 press down
+until position 117 503 6000
++0 release down
++0 press left
+until position 103 503 6000
++0 release left
++0 press up
+until position 103 502 6000
++0 release up
++0 press left
+until position 100 502 6000
++0 release left
+until idle
++1 press left
++1 release left
+until idle
++0 assert facing player left
++0 press a
++1 release a
+until yesno 600
++4 press a
++1 release a
+advance text 4000
+until idle 600
++0 assert position platinum:MAP_HEADER_CANALAVE_CITY 44 750
++8 release select
+# Canalave Gym (the route of sys-gym-canalave): 13 lifts to Byron, its trainers where they spot the player
++0 press left
+until position 42 750 6000
++0 release left
++0 press up
+until position 42 732 6000
++0 release up
++0 press left
+until position 39 732 6000
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_CANALAVE_CITY_GYM" 3000
++0 release up
+until idle
++0 assert position platinum:MAP_HEADER_CANALAVE_CITY_GYM 16 27
+# the browser spec's beat: the gym's lifts
++0 screenshot canalave-gym
++0 press up
+until position 16 19
++0 release up
+until idle
++0 press left
+until position 8 19
++0 release left
+until idle
++0 press up
+until position 8 17
++0 release up
+until message 300
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_BLACK_BELT_RICKY won single
+advance text
+until idle
++0 press up
+until position 8 16
++0 release up
+until idle
++0 press right
+until position 18 16
++0 release right
+until idle
++0 press up
+until position 18 14
++0 release up
+until idle
++0 press right
+until position 20 14
++0 release right
+until idle
++0 press up
+until position 20 13
++0 release up
+until idle
+# Worker Gary looks north and south at random from (22, 16): wait in his north line until he turns and sees the player
++0 press right
+until position 22 13
++0 release right
+until message 6000
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_WORKER_GARY won single
+advance text
+until idle
++0 press right
+until position 24 13
++0 release right
+until idle
+# [ride 4 y -> 24,10,13]
++0 press down
+until position 24 15
++0 release down
+until idle
++0 press right
+until position 29 15
++0 release right
+until idle
++0 press down
+until position 29 22
++0 release down
+until idle
+# [ride 8 y -> 29,0,22]
++0 press down
+until position 29 26
++0 release down
+until idle
++0 press left
+until position 27 26
++0 release left
+until message 300
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_CESAR won single
+advance text
+until idle
++0 press left
+until position 26 26
++0 release left
+until idle
++0 press up
+until position 26 25
++0 release up
+until idle
++0 press left
+until position 22 25
++0 release left
+until idle
++0 press up
+until position 22 22
++0 release up
+until idle
++0 press left
+until position 21 22
++0 release left
+until idle
+# [ride 5 y -> 21,10,22]
++0 press left
+until position 18 22
++0 release left
+until idle
+# [ride 10 x -> 11,10,22]
++0 press left
+until position 9 22
++0 release left
+until idle
++0 press up
+until position 9 21
++0 release up
+until idle
++0 press left
+until position 2 21
++0 release left
+until idle
++0 press down
+until position 2 26
++0 release down
+until idle
++0 press right
+until position 5 26
++0 release right
+until idle
+# [ride 9 y -> 5,20,26]
++0 assert state player.y 320
+until idle
++0 assert state player.y 320
++0 press up
+until position 5 24
++0 release up
+until idle
++0 press left
+until position 2 24
++0 release left
+until idle
++0 press up
+until position 2 22
++0 release up
+until idle
+# [ride 16 z -> 2,20,19]
++0 press up
+until position 2 12
++0 release up
+until idle
++0 press right
+until position 4 12
++0 release right
+until idle
++0 press up
+until position 4 4
++0 release up
+until idle
++0 press right
+until position 8 4
++0 release right
+until message 300
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_WORKER_GERARDO won single
+advance text
+until idle
++0 press right
+until position 10 4
++0 release right
+until idle
+# [ride 12 x -> 14,20,4]
++0 press right
+until position 19 4
++0 release right
+until idle
+# [ride 13 x -> 22,20,4]
++0 press right
+until position 24 4
++0 release right
+until message 300
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_BLACK_BELT_DAVID won single
+advance text
+until idle
++0 press down
+until position 24 6
++0 release down
+until idle
++0 press right
+until position 26 6
++0 release right
+until idle
++0 press down
+until position 26 16
++0 release down
+until idle
+# [ride 17 z -> 26,20,22]
++0 press down
+until position 26 24
++0 release down
+until idle
++0 press right
+until position 29 24
++0 release right
+until idle
++0 press up
+until position 29 22
++0 release up
+until idle
+# [ride 18 z -> 29,20,16]
++0 press up
+until position 29 9
++0 release up
+until idle
+# [ride 11 y -> 29,10,9]
++0 press up
+until position 29 5
++0 release up
+until message 300
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_BREANNA won single
+advance text
+until idle
++0 press up
+until position 29 4
++0 release up
+until idle
++0 press left
+until position 27 4
++0 release left
+until idle
++0 press down
+until position 27 5
++0 release down
+until idle
++0 press left
+until position 23 5
++0 release left
+until idle
++0 press down
+until position 23 9
++0 release down
+until idle
++0 press right
+until position 25 9
++0 release right
+until idle
+# [ride 6 y -> 25,0,9]
++0 press left
+until position 16 9
++0 release left
+until idle
+# [ride 0 y -> 16,30,9]
++0 press up
+until position 16 4
++0 release up
+until idle
++0 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_LEADER_BYRON won single
+advance text 4400
+until idle
++0 assert state badges ["platinum:BADGE_ID_COAL","platinum:BADGE_ID_FOREST","platinum:BADGE_ID_RELIC","platinum:BADGE_ID_COBBLE","platinum:BADGE_ID_FEN","platinum:BADGE_ID_MINE"]
++0 assert var platinum:VAR_CANALAVE_CITY_STATE 2
++0 assert state player.y 480
++0 assert state mapFeatures {"kind": "canalave-gym", "platformStates": 11154097}
++0 press right
+until position 19 4
++0 release right
+until idle
+# [ride 20 x -> 26,30,4]
++0 press right
+until position 28 4
++0 release right
+until idle
++0 press down
+until position 28 5
++0 release down
+until idle
++0 press right
+until position 29 5
++0 release right
+until idle
++0 press down
+until position 29 7
++0 release down
+until idle
+# [ride 22 z -> 29,30,23]
++0 press down
+until position 29 26
++0 release down
+until idle
++0 press left
+until position 26 26
++0 release left
+until idle
+# [ride 21 x -> 5,30,26]
++0 press left
+until position 3 26
++0 release left
+until idle
++0 press up
+until position 3 25
++0 release up
+until idle
++0 press left
+until position 2 25
++0 release left
+until idle
++0 press up
+until position 2 23
++0 release up
+until idle
+# [ride 23 z -> 2,30,12]
++0 press up
+until position 2 9
++0 release up
+until idle
++0 press right
+until position 7 9
++0 release right
+until idle
+# [ride 19 y -> 7,0,9]
++0 press down
+until position 7 26
++0 release down
+until idle
++0 press right
+until position 16 26
++0 release right
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_CANALAVE_CITY"
++0 release down
+advance text 3000
+until idle 3000
++0 assert var platinum:VAR_CANALAVE_CITY_STATE 3
++8 release select
+# Barry at the library door checks for HM04 (CanalaveCity_RivalLibrary)
++0 press left
+until position 37 732 6000
++0 release left
++0 press down
+until position 37 733 6000
++0 release down
++0 press left
+until position 35 733 6000
++0 release left
++0 press up
+until position 35 723 6000
++0 release up
++0 press right
+until position 37 723 6000
++0 release right
++0 press up
+until position 37 720 6000
++0 release up
+until idle
++1 press up
++1 release up
+until idle
++0 assert facing player up
++1 press a
++1 release a
+advance text 6000
+until idle 3000
++8 release select
+# into the library
++0 press up
+until state player.zone "platinum:MAP_HEADER_CANALAVE_LIBRARY_1F" 3000
++0 release up
+until idle
++8 release select
+# up the stairs to the second floor
++0 press up
+until position 11 4 3000
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_CANALAVE_LIBRARY_2F" 3000
++0 release left
+until idle
++8 release select
+# and up to the third floor (the stairs at (11, 4) entered from the east): the explosion (CanalaveLibrary3F_OnFrame_Explosion) and the library TV
++0 press down
+until position 4 6 6000
++0 release down
++0 press right
+until position 12 6 6000
++0 release right
++0 press up
+until position 12 4 6000
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_CANALAVE_LIBRARY_3F" 3000
++0 release left
+advance text 9000
++0 assert app library-tv
+until app none 600
+advance text 9000
+until idle 3000
++0 assert var platinum:VAR_CANALAVE_LIBRARY_STATE 2
++0 assert flag platinum:FLAG_LAKE_VALOR_EXPLODED true
++0 assert flag platinum:FLAG_HIDE_VALOR_LAKEFRONT_CAMERAMEN true
++8 release select
+# down through the library: the stairs are entered sideways
++0 press up
+until position 7 6 6000
++0 release up
++0 press left
+until position 3 6 6000
++0 release left
++0 press up
+until position 3 3 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_CANALAVE_LIBRARY_2F" 600
++0 release right
+until idle
++8 release select
++0 press down
+until position 11 6 6000
++0 release down
++0 press left
+until position 3 6 6000
++0 release left
++0 press up
+until position 3 4 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_CANALAVE_LIBRARY_1F" 600
++0 release right
+until idle
++8 release select
+# out of the library: Canalave after the explosion (CanalaveCity_OnFrame_AfterExplosion)
++0 press down
+until position 11 11 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_CANALAVE_CITY" 3000
++0 release down
+advance text 9000
+until idle 3000
++0 assert var platinum:VAR_CANALAVE_CITY_STATE 5
+# end of CP11
++0 assert battle trainer platinum:TRAINER_RIVAL_CANALAVE_CITY_PIPLUP won single
++0 assert state bag.tmhms[item="platinum:ITEM_HM04"].count 1
++0 assert state party[1].moves[0] "platinum:MOVE_STRENGTH"
++0 assert battle trainer platinum:TRAINER_LEADER_BYRON won single
++0 assert state badges ["platinum:BADGE_ID_COAL","platinum:BADGE_ID_FOREST","platinum:BADGE_ID_RELIC","platinum:BADGE_ID_COBBLE","platinum:BADGE_ID_FEN","platinum:BADGE_ID_MINE"]
++0 assert var platinum:VAR_CANALAVE_CITY_STATE 5
++0 assert var platinum:VAR_CANALAVE_LIBRARY_STATE 2
++0 assert flag platinum:FLAG_LAKE_VALOR_EXPLODED true
++0 assert flag platinum:FLAG_HIDE_VALOR_LAKEFRONT_CAMERAMEN true

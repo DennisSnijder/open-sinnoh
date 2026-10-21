@@ -1,0 +1,36 @@
+# Catching on Route 202. Piplup L8 and ten Poké Balls; the player
+# paces in the tall grass north of Sandgem until a wild Pokémon appears, then throws Poké Balls until it is
+# caught. The catch joins the party and the Pokédex marks it caught. Save round trip after the battle.
+party 0 platinum:SPECIES_PIPLUP 8
+give item platinum:ITEM_POKE_BALL 10
+set var platinum:VAR_ROUTE_202_STATE 1
+warp platinum:MAP_HEADER_ROUTE_202 178 827 up
+until idle
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
+until battle 900
++0 screenshot catch-command
+battle catch platinum:ITEM_POKE_BALL 9000
++0 assert battle wild * caught
++0 assert battles wild 1
++0 assert state party.length 2
++0 assert state pokedex.caught.length 2
+# Trainer score (encounter.c UpdateGameRecords, the catch sequence): a regional catch 2, a new species 20.
++0 assert state records.score 22
+until idle
++0 reload
+until idle

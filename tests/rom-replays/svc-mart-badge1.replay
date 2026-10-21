@@ -1,0 +1,37 @@
+from svc-mart.replay
+# svc-mart, one badge: the common stock is tier 2, so row 2 is now the Super Potion (700).
+give badge platinum:BADGE_ID_COAL
+set money 1000
+until idle
++1 press right
++1 release right
+until idle
++1 press right
++1 release right
+until idle
++1 press up
++1 release up
+until idle
++0 assert position platinum:MAP_HEADER_JUBILIFE_CITY_MART 3 7
++1 press a
++1 release a
+until app mart
++1 tap menu:0
++1 tap row:2
++1 tap ok
++1 tap yes
++1 assert state money 300
++0 assert state bag.medicine [{"item":"platinum:ITEM_POTION","count":1},{"item":"platinum:ITEM_SUPER_POTION","count":1}]
++0 screenshot tier2
++1 press a
++1 release a
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
++1 press a
++1 release a
+until app none 5
+until idle

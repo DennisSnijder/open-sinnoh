@@ -1,0 +1,23 @@
+# sys-heatran-lost (docs/research/postgame.md §3): Stark Mountain room 3, Heatran.
+# The constructed start of sys-heatran-caught with a lone L5 Bidoof that only growls (battle auto move 1): the battle
+# is lost, the script puts room 3 back to state 1 and blacks out. FLAG_MAP_LOCAL_REMOVE_OBJECT was cleared by the
+# script before the field came back, so Heatran stays; the battled flag stays set, the Vs. Seeker unlock does not come.
+party 0 platinum:SPECIES_BIDOOF 5 platinum:MOVE_GROWL
+set flag platinum:FLAG_GAME_COMPLETED true
+set state pokedex.national true
+set flag platinum:FLAG_TALKED_TO_BATTLEGROUND_BUCK true
+set var platinum:VAR_STARK_MOUNTAIN_ROOM_3_STATE 1
+warp platinum:MAP_HEADER_STARK_MOUNTAIN_ROOM_3 7 7 up
+until idle
++0 press a
++1 release a
+advance text 3000
+battle auto move 1 20000
++0 assert battle scripted platinum:SPECIES_HEATRAN lost
+advance text 20000
+until idle 3000
++0 assert flag platinum:FLAG_CAUGHT_HEATRAN false
++0 assert flag platinum:FLAG_BATTLED_STARK_MOUNTAIN_ROOM_3_HEATRAN true
++0 assert flag platinum:FLAG_UNLOCKED_VS_SEEKER_LVL_5 false
++0 assert flag platinum:FLAG_HIDE_STARK_MOUNTAIN_ROOM_3_HEATRAN false
++0 assert var platinum:VAR_STARK_MOUNTAIN_ROOM_3_STATE 1

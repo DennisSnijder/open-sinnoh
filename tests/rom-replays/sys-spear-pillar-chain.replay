@@ -1,0 +1,19 @@
+# Constructed system start at the native Cyrus continuation after the tag battle.
+# The system harness dispatches that native entry when state 2 is loaded; progression stays script-owned.
+set var platinum:VAR_SPEAR_PILLAR_STATE 2
+set flag platinum:FLAG_HIDE_SPEAR_PILLAR_RIVAL true
+warp platinum:MAP_HEADER_SPEAR_PILLAR 31 35 up
+advance text 15000
+until yesno 15000
++0 press b
++1 release b
+advance text 3000
+until idle
++0 assert var platinum:VAR_SPEAR_PILLAR_STATE 3
++0 assert var platinum:VAR_SPEAR_PILLAR_DISTORTED_STATE 2
++0 assert flag platinum:FLAG_SPEAR_PILLAR_IS_DISTORTED true
++0 assert flag platinum:FLAG_HIDE_SPEAR_PILLAR_CYRUS true
++0 assert state pokedex.seen ["platinum:SPECIES_DIALGA","platinum:SPECIES_PALKIA"]
++0 reload
+until idle
++0 assert state player.zone "platinum:MAP_HEADER_SPEAR_PILLAR_DISTORTED"

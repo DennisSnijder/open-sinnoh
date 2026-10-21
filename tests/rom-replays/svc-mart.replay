@@ -1,0 +1,113 @@
+# svc-mart: Jubilife Mart with no badges. The common vendor's stock is
+# tier 1 (Poké Ball, Potion, Antidote, Parlyz Heal). Ten Poké Balls cost 2000 and add a Premier Ball;
+# a Potion is then refused (not enough money); selling pays half; a key item cannot be sold. Then the
+# specialty vendor (Jubilife: Air Mail, Heal Ball). svc-mart-badges plays on from here with badges.
+set money 2100
+give item platinum:ITEM_POTION 3
+give item platinum:ITEM_TOWN_MAP
+warp platinum:MAP_HEADER_JUBILIFE_CITY_MART 3 7
+until idle
++0 assert facing player up
+# the common vendor, over the counter: the greeting, then the mart
++1 press a
++1 release a
+until app mart
++0 assert app mart
+# BUY, Poké Ball (row 0); quantity: up to what 2100 pays (10): right +10 stops at 10; A; YES
++1 tap menu:0
++1 screenshot buy-list
++1 tap row:0
++1 press right
++1 release right
++1 press a
++1 release a
++1 press a
++1 release a
++0 assert state money 100
++0 assert state bag.balls [{"item":"platinum:ITEM_POKE_BALL","count":10},{"item":"platinum:ITEM_PREMIER_BALL","count":1}]
+# "Here you are!", the pocket page, then the Premier Ball bonus
++0 screenshot buy-done
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
+# Potion (row 1, 300) is refused with 100: the message waits for A
++1 tap row:1
++1 assert state money 100
++0 screenshot no-money
++1 press a
++1 release a
++0 assert state bag.medicine [{"item":"platinum:ITEM_POTION","count":3}]
+# B to the menu; SELL (down, A): the bag opens on ITEMS; right to MEDICINE; Potion ×2 at 150 each
++1 press b
++1 release b
++1 press down
++1 release down
++1 press a
++1 release a
++1 press right
++1 release right
++1 tap row:0
++1 press up
++1 release up
++0 screenshot sell-quantity
++1 press a
++1 release a
++1 tap yes
++1 assert state money 400
++0 assert state bag.medicine [{"item":"platinum:ITEM_POTION","count":1}]
++1 press a
++1 release a
+# the key items pocket (left twice from MEDICINE, wrapping): the Town Map is refused
++1 press left
++1 release left
++1 press left
++1 release left
++1 tap row:0
++1 press a
++1 release a
++0 assert state bag.key_items [{"item":"platinum:ITEM_TOWN_MAP","count":1}]
++0 assert state money 400
+# back to the menu, SEE YA!, the goodbye message
++1 press b
++1 release b
++1 tap menu:2
++0 assert app mart
++1 press a
++1 release a
+until app none 5
+until idle
+# the specialty vendor one tile west: Heal Ball (row 1, 300) ×1
++1 press left
++1 release left
+until idle
++1 press left
++1 release left
+until idle
++1 press up
++1 release up
+until idle
++0 assert position platinum:MAP_HEADER_JUBILIFE_CITY_MART 2 7
++1 press a
++1 release a
+until app mart
++1 tap menu:0
++1 tap row:1
++1 tap ok
++1 tap yes
++1 assert state money 100
++0 assert state bag.balls [{"item":"platinum:ITEM_POKE_BALL","count":10},{"item":"platinum:ITEM_PREMIER_BALL","count":1},{"item":"platinum:ITEM_HEAL_BALL","count":1}]
++1 press a
++1 release a
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
++1 press a
++1 release a
+until app none 5
+until idle

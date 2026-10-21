@@ -1,0 +1,38 @@
+# sys-boat (docs/research/story-scenes.md): the Canalave–Iron Island boat both
+# ways (play_boat_cutscene). From Canalave the ship by the player sails south (0.25 units a tick, 1.25 from its
+# 24th update) with the camera following and panning east; 14 tiles out the two bridges play their one-shot
+# clips; once both have ended and the ship is 25 tiles out the screen fades, the cinematic's length passes
+# (its first animation's frames, then a 6-tick fade) and the map changes to Iron Island 100,502 facing east.
+# The return starts at the fade and arrives at Canalave 44,750 facing west. A save round trip at idle before
+# and after each trip.
+warp platinum:MAP_HEADER_CANALAVE_CITY 44 750 right
+until idle
++0 screenshot boat-canalave
++0 reload
+until idle
++0 press a
++1 release a
+until menu 600
++4 press a
++1 release a
+advance text 4000
+until idle 600
++0 assert position platinum:MAP_HEADER_IRON_ISLAND 100 502
++0 assert state player.facing "right"
++0 screenshot boat-iron-island
++0 reload
+until idle
++0 press left
++1 release left
+until idle
++0 press a
++1 release a
+until yesno 600
++4 press a
++1 release a
+advance text 4000
+until idle 600
++0 assert position platinum:MAP_HEADER_CANALAVE_CITY 44 750
++0 assert state player.facing "left"
++0 reload
+until idle

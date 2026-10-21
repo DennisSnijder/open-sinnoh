@@ -1,0 +1,42 @@
+{
+  "_": { "_": "Every number is an upper bound (pnpm perf, tools/perf-check.ts). Frame and tick ms are wall clock, per display frame / per tick; MB are 10^6 bytes; kB gzip are 10^3 bytes." },
+  "bundle": {
+    "romPage.gzipKB": 300,
+    "game.gzipKB": 1100,
+    "importWorker.gzipKB": 350,
+    "sentry.gzipKB": 40
+  },
+  "fixture": {
+    "heap.growthMB": 10
+  },
+  "desktop": {
+    "frame.p99": 4,
+    "dropped": 0,
+    "heap.maxMB": 150,
+    "heap.growthMB": 10,
+    "gpu.textureMB": 64,
+    "gpu.bufferMB": 32,
+    "storage.baseMB": 130,
+    "import.s": 25,
+    "firstVisit.s": 4,
+    "memory.gameMB": 450,
+    "memory.importPeakMB": 600
+  },
+  "phone-4x": {
+    "frame.p95": 8,
+    "frame.p99": 12,
+    "tick.p99": 4,
+    "tick.max": 16,
+    "dropped": 0,
+    "heap.maxMB": 150,
+    "load.titleS": 3,
+    "load.continueS": 2,
+    "fieldDpr.max": 2,
+    "firstVisit.s": 4
+  },
+  "phone-6x": {
+    "_": "Informational except the 60 Hz row (frame p99) and the logic rate (dropped).",
+    "frame.p99": 16.7,
+    "dropped": 0
+  }
+}

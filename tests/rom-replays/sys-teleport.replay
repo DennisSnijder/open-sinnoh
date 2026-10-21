@@ -1,0 +1,62 @@
+# sys-teleport: Teleport from the party menu (decomp field_move_tasks.c FieldMoves_CheckTeleport and
+# FieldMoves_TeleportTask, overlay006/field_warp.c). In Sandgem's Pokémon Center (the blackout spawn), with an Abra
+# knowing Teleport: refused indoors and, outside, in the town (MapHeader_IsTeleportAllowed: no towns or cities, PartyMenu_Text_CantUseThatHere). On Route 202 it
+# works: the HM cut-in, the spin and the fade to black, and the player stands at Sandgem's fly point (Location_InitFly
+# of the blackout spawn) facing down, on foot.
+party 0 platinum:SPECIES_ABRA 20 platinum:MOVE_TELEPORT
+warp platinum:MAP_HEADER_SANDGEM_TOWN_POKECENTER_1F 8 6 up
+until idle
++0 assert state blackOut "platinum:MAP_HEADER_SANDGEM_TOWN_POKECENTER_1F"
++1 press x
++1 release x
+until app start-menu
++1 tap entry:0
++1 tap slot:0
++1 tap menu:1
++1 assert app party
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
+until app none
+# Out of the Pokémon Center: Sandgem refuses too.
++0 press down
+until state player.zone "platinum:MAP_HEADER_SANDGEM_TOWN" 300
++0 release down
+until idle
++0 assert position platinum:MAP_HEADER_SANDGEM_TOWN 177 843
++1 press x
++1 release x
+until app start-menu
++1 tap entry:0
++1 tap slot:0
++1 tap menu:1
++1 assert app party
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
+until app none
+# North onto Route 202, then Teleport.
++0 press right
+until position 184 843
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_202" 300
++0 release up
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:0
++1 tap slot:0
++1 tap menu:1
+until app none
+until idle 600
++0 assert position platinum:MAP_HEADER_SANDGEM_TOWN 177 843
++0 assert facing player down
++0 assert state playerState "walk"

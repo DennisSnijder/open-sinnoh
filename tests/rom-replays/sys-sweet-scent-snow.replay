@@ -1,0 +1,12 @@
+# sys-sweet-scent-snow (decomp ov5_021F007C.c ov5_021F0438): in Route 217's snow Sweet Scent does nothing: 20 frames
+# later "There appears to be nothing here…" (COMMON_SCRIPTS 29), no blend, no battle.
+party 0 platinum:SPECIES_GARCHOMP 50 platinum:MOVE_DRAGON_CLAW
+party 1 platinum:SPECIES_BEAUTIFLY 20 platinum:MOVE_SWEET_SCENT
+warp platinum:MAP_HEADER_ROUTE_217 311 263 up
+until idle
++0 field move 1 platinum:MOVE_SWEET_SCENT
+until message 600
++0 assert text platinum:CommonStrings_Text_SweetScentNothingHere 0
+advance text
+until idle
++0 assert battles wild 0

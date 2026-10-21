@@ -1,0 +1,964 @@
+from cp20.replay
++0 reload
+# CP21a (docs/research/story-cp20-24.md §CP21): the dex sweep, part 1. From the Fight
+# Area by ship to Snowpoint; Route 217's and Route 216's trainers, Uxie at Lake Acuity; Mt. Coronet, Route 211,
+# Celestic, Route 210's trainers and the Café; Solaceon and the Ruins (Unown). Wild Pokémon are fought by the
+# auto policy (seen, and out of the way).
++0 wild auto
++0 evolve auto
+until idle
+# the ship back to Snowpoint (FightArea_Sailor2)
++0 press left
+until position 644 430 6000
++0 release left
++0 press down
+until position 644 434 6000
++0 release down
++0 press left
+until position 620 434 6000
++0 release left
++0 press down
+until position 620 435 6000
++0 release down
+until idle
++1 press left
++1 release left
+until idle
++1 press a
++1 release a
+until yesno 3000
++0 press a
++1 release a
+advance text 9000
+until state player.zone "platinum:MAP_HEADER_SNOWPOINT_CITY" 9000
+until idle 3000
++8 release select
+# west to Acuity Lakefront: Rock Climb (Bibarel) up the wall at x 310 to Lake Acuity (CP13's way)
++0 press up
+until position 356 241 6000
++0 release up
++0 press left
+until position 353 241 6000
++0 release left
++0 press up
+until position 353 238 6000
++0 release up
++0 press left
+until position 328 238 6000
++0 release left
++0 press down
+until position 328 242 6000
++0 release down
++0 press left
+until position 324 242 6000
++0 release left
++0 press up
+until position 324 241 6000
++0 release up
++0 press left
+until position 318 241 6000
++0 release left
++0 press down
+until position 318 242 6000
++0 release down
++0 press left
+until position 310 242 6000
++0 release left
+until idle
++1 press up
++1 release up
+until idle
++0 assert facing player up
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle
++8 release select
++0 press up
+until position 310 232 6000
++0 release up
++0 press left
+until position 308 232 6000
++0 release left
++0 press up
+until position 308 230 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_LAKE_ACUITY" 3000
++0 release up
+until idle 3000
++8 release select
++8 release select
+# Lake Acuity: Surf (Empoleon) out to the island and Acuity Cavern
++0 press up
+until position 14 48 6000
++0 release up
++0 press right
+until position 21 48 6000
++0 release right
+until idle
++1 press right
++1 release right
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until idle
++0 press up
+until position 22 35 6000
++0 release up
++0 press right
+until position 32 35 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_ACUITY_CAVERN" 3000
++0 release up
+until idle
++8 release select
++8 release select
+# Uxie (start_legendary_battle, L50): seen, and defeated by the auto policy (the Hall of Fame brings it back)
++0 press up
+until position 14 11 6000
++0 release up
+until idle
+# the browser spec's beat: Uxie in Acuity Cavern
++0 screenshot acuity-cavern-uxie
++1 press a
++1 release a
+advance text 3000
+until battle 3000
+battle auto 20000
+advance text 3000
+until idle 3000
++0 assert battle scripted platinum:SPECIES_UXIE won
++0 assert flag platinum:FLAG_CAUGHT_UXIE false
++8 release select
+# back out across the lake to Acuity Lakefront
++0 press down
+until state player.zone "platinum:MAP_HEADER_LAKE_ACUITY" 3000
++0 release down
+until idle
++8 release select
++0 press down
+until position 32 34 6000
++0 release down
+until idle
++1 press down
++1 release down
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until idle
++0 press down
+until position 32 49 6000
++0 release down
++0 press left
+until position 15 49 6000
++0 release left
++0 press down
+until state player.zone "platinum:MAP_HEADER_ACUITY_LAKEFRONT" 3000
++0 release down
+until idle
++8 release select
++8 release select
+# down the rock wall at x 310 (Rock Climb) and south into Route 217
++0 press down
+until position 309 230 6000
++0 release down
++0 press left
+until position 308 230 6000
++0 release left
++0 press down
+until position 308 237 6000
++0 release down
++0 press right
+until position 310 237 6000
++0 release right
+until idle
++1 press down
++1 release down
+until idle
++0 assert facing player down
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle
++8 release select
++0 press down
+until position 310 267 6000
++0 release down
+until idle
++8 release select
+# Black Belt Luke (Riolu) walks x 291 between rows 273 and 281 and looks two tiles: wait on row 271 in his column
++0 press left
+until position 304 267 6000
++0 release left
++0 press down
+until position 304 271 6000
++0 release down
++0 press left
+until position 291 271 6000
++0 release left
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_BLACK_BELT_LUKE won single
++8 release select
+# Skier Lexie (Glaceon) loops x 290–294, rows 290–296, and looks up x 294 on her loop: wait on row 288 in that column
++0 press left
+until position 290 271 6000
++0 release left
++0 press down
+until position 290 284 6000
++0 release down
++0 press right
+until position 293 284 6000
++0 release right
++0 press down
+until position 293 288 6000
++0 release down
++0 press right
+until position 294 288 6000
++0 release right
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_SKIER_LEXIE won single
++8 release select
+# Ninja Boy Ethan (Skorupi) hides in the snow at (290, 321) and springs out beside him
++0 press left
+until position 290 288 6000
++0 release left
++0 press down
+until position 290 320 6000
++0 release down
+until message 3000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_NINJA_BOY_ETHAN won single
++8 release select
+# south down x 302 to Route 216 (CP13's way back)
++0 press right
+until position 302 320 6000
++0 release right
++0 press down
+until position 302 369 6000
++0 release down
++0 press right
+until position 305 369 6000
++0 release right
++0 press down
+until position 305 374 6000
++0 release down
++0 press left
+until position 303 374 6000
++0 release left
++0 press down
+until position 303 378 6000
++0 release down
++0 press right
+until position 304 378 6000
++0 release right
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_216" 3000
++0 release down
+until idle
++8 release select
++8 release select
+# Ace Trainer Garrett (Dusclops) looks up and down x 299 from row 394: wait two rows above him
++0 press down
+until position 304 392 6000
++0 release down
++0 press left
+until position 299 392 6000
++0 release left
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_GARRETT won single
++8 release select
+# Skier Edward loops x 311–315, rows 402–404 (sight 1), up its east side: wait on row 401 above it
++0 press left
+until position 298 392 6000
++0 release left
++0 press down
+until position 298 399 6000
++0 release down
++0 press right
+until position 302 399 6000
++0 release right
++0 press down
+until position 302 401 6000
++0 release down
++0 press right
+until position 315 401 6000
++0 release right
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_SKIER_EDWARD won single
++8 release select
+# Ace Trainer Blake (Ambipom, Porygon2) looks south from (355, 402): step into his line from the east
++0 press right
+until position 357 401 6000
++0 release right
++0 press down
+until position 357 403 6000
++0 release down
++0 press left
+until position 355 403 6000
++0 release left
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_BLAKE won single
++8 release select
+# Ace Trainer Maria (Sudowoodo) turns about at (344, 411) and looks two tiles: over the bridge at x 334 (from the
+# ledge at row 394, above the snow) down to her strip, and wait two tiles west of her
++0 press right
+until position 356 403 6000
++0 release right
++0 press up
+until position 356 401 6000
++0 release up
++0 press left
+until position 332 401 6000
++0 release left
++0 press up
+until position 332 394 6000
++0 release up
++0 press right
+until position 334 394 6000
++0 release right
++0 press down
+until position 334 411 6000
++0 release down
++0 press right
+until position 342 411 6000
++0 release right
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_MARIA won single
++8 release select
+# back north over the bridge to Route 217 (Bradley and Kaitlyn's snowfield has no way in from here): Skier Madison
+# (Snorunt) looks south from (291, 344), three tiles
++0 press left
+until position 334 411 6000
++0 release left
++0 press up
+until position 334 394 6000
++0 release up
++0 press left
+until position 332 394 6000
++0 release left
++0 press down
+until position 332 401 6000
++0 release down
++0 press left
+until position 302 401 6000
++0 release left
++0 press up
+until position 302 399 6000
++0 release up
++0 press left
+until position 298 399 6000
++0 release left
++0 press up
+until position 298 391 6000
++0 release up
++0 press right
+until position 302 391 6000
++0 release right
++0 press up
+until position 302 388 6000
++0 release up
++0 press right
+until position 304 388 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_217" 3000
++0 release up
+until idle
++8 release select
++8 release select
+# Skier Madison (Snorunt) looks south from (291, 344), three tiles: step into her line on row 347
++0 press up
+until position 304 378 6000
++0 release up
++0 press left
+until position 303 378 6000
++0 release left
++0 press up
+until position 303 374 6000
++0 release up
++0 press right
+until position 304 374 6000
++0 release right
++0 press up
+until position 304 347 6000
++0 release up
++0 press left
+until position 291 347 6000
++0 release left
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_SKIER_MADISON won single
++8 release select
+# Skier Bjorn (Swinub) walks a loop x 314–318, rows 296–302, turning at every step, two tiles' sight: wait two tiles west of its west side
++0 press right
+until position 303 347 6000
++0 release right
++0 press up
+until position 303 298 6000
++0 release up
++0 press right
+until position 312 298 6000
++0 release right
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_SKIER_BJORN won single
++8 release select
+# back south through Route 217 and east along Route 216 to Mt. Coronet
++0 press down
+until position 312 331 6000
++0 release down
++0 press left
+until position 304 331 6000
++0 release left
++0 press down
+until position 304 375 6000
++0 release down
++0 press left
+until position 303 375 6000
++0 release left
++0 press down
+until position 303 378 6000
++0 release down
++0 press right
+until position 304 378 6000
++0 release right
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_216" 3000
++0 release down
+until idle
++8 release select
++0 press down
+until position 304 388 6000
++0 release down
++0 press left
+until position 302 388 6000
++0 release left
++0 press down
+until position 302 391 6000
++0 release down
++0 press left
+until position 298 391 6000
++0 release left
++0 press down
+until position 298 399 6000
++0 release down
++0 press right
+until position 302 399 6000
++0 release right
++0 press down
+until position 302 401 6000
++0 release down
++0 press right
+until position 370 401 6000
++0 release right
++0 press down
+until position 370 403 6000
++0 release down
++0 press right
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_NORTH_ROOM_2" 3000
++0 release right
+until idle
++8 release select
++8 release select
+# Mt. Coronet north room 2 and B1F back down to north room 1 (CP13's way up, reversed)
++0 press right
+until position 15 18 6000
++0 release right
++0 press down
+until position 15 27 6000
++0 release down
++0 press left
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_B1F" 3000
++0 release left
+until idle
++8 release select
++0 press left
+until position 3 3 6000
++0 release left
++0 press down
+until position 3 58 6000
++0 release down
++0 press right
+until position 4 58 6000
++0 release right
++0 press down
+until position 4 60 6000
++0 release down
++0 press right
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_NORTH_ROOM_1" 3000
++0 release right
+until idle
++8 release select
++8 release select
+# north room 1: east and down x 28; Strength (Bibarel) pushes the boulder at (29, 30) down a tile
++0 press right
+until position 28 10 6000
++0 release right
++0 press down
+until position 28 28 6000
++0 release down
++0 press right
+until position 29 28 6000
++0 release right
++0 press down
+until position 29 29 6000
++0 release down
+until idle
++1 press down
++1 release down
+until idle
++0 assert facing player down
++0 field move 4 platinum:MOVE_STRENGTH
+advance text
+until idle
++0 press down
+until state objects[localId=7].z 31 120
++0 release down
+until idle
++0 press down
+until position 29 30 120
++0 release down
+until idle
++0 press left
+until position 28 30 600
++0 release left
++0 press down
+until position 28 34 6000
++0 release down
++7 release select
+# out east to Route 211 East and down to Celestic Town
++0 press down
+until position 28 35 6000
++0 release down
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_211_EAST" 3000
++0 release right
+until idle
++8 release select
++8 release select
+# Route 211 East: down and through the grass, east on row 527 and down x 452 to Celestic Town
++0 press down
+until position 419 530 6000
++0 release down
++0 press right
+until position 425 530 6000
++0 release right
++0 press down
+until position 425 531 6000
++0 release down
++0 press right
+until position 435 531 6000
++0 release right
++0 press up
+until position 435 527 6000
++0 release up
++0 press right
+until position 452 527 6000
++0 release right
++0 press down
+until position 452 541 6000
++0 release down
++0 press right
+until state player.zone "platinum:MAP_HEADER_CELESTIC_TOWN" 3000
++0 release right
+until idle
++8 release select
+# heal at Celestic's Pokémon Center
++0 press up
+until position 452 540 6000
++0 release up
++0 press right
+until position 455 540 6000
++0 release right
++0 press down
+until position 455 541 6000
++0 release down
++0 press right
+until position 465 541 6000
++0 release right
++0 press up
+until position 465 540 6000
++0 release up
++0 press right
+until position 472 540 6000
++0 release right
++0 press up
+until position 8 12 3000
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_CELESTIC_TOWN" 3000
++0 release down
+until idle
++8 release select
+# east out of Celestic onto Route 210 North
++0 press down
+until position 472 540 6000
++0 release down
++0 press right
+until position 476 540 6000
++0 release right
++0 press up
+until position 476 530 6000
++0 release up
++0 press right
+until position 504 530 6000
++0 release right
++7 release select
+# Route 210 North, CP10's way reversed (its trainers were beaten then): over the bridge east, round the water to the
+# low path, up the plain bridge at x 522 to the high path, down the stairs at x 539 and x 543, south past Alyssa
++0 press right
+until position 510 530 6000
++0 release right
++0 press down
+until position 510 535 6000
++0 release down
++0 press right
+until position 516 535 6000
++0 release right
++0 press down
+until position 516 541 6000
++0 release down
++0 press right
+until position 522 541 6000
++0 release right
++0 press up
+until position 522 521 6000
++0 release up
++0 press right
+until position 539 521 6000
++0 release right
++0 press down
+until position 539 527 6000
++0 release down
++0 press right
+until position 543 527 6000
++0 release right
++0 press down
+until position 543 533 6000
++0 release down
++0 press right
+until position 553 533 6000
++0 release right
++0 press down
+until position 553 540 6000
++0 release down
++0 press right
+until position 563 540 6000
++0 release right
++0 press down
+until position 563 552 6000
++0 release down
++0 press right
+until position 564 552 6000
++0 release right
++0 press down
+until position 564 572 6000
++0 release down
++7 release select
+# Route 210 South: the Café Cabin
++0 press down
+until position 564 581 6000
++0 release down
++0 press left
+until position 561 581 6000
++0 release left
++0 press down
+until position 561 592 6000
++0 release down
++0 press right
+until position 566 592 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_CAFE" 3000
++0 release up
+until idle
++8 release select
++8 release select
+# Waitress Kati (Clefairy) and Collector Edwin (Munchlax): talked to (sight 0)
++0 press up
+until position 5 4 6000
++0 release up
+until idle
++1 press up
++1 release up
+until idle
++1 press a
++1 release a
+until message 3000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_WAITRESS_KATI won single
++0 press left
+until position 4 4 6000
++0 release left
+until idle
++1 press left
++1 release left
+until idle
++1 press a
++1 release a
+until message 3000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_COLLECTOR_EDWIN won single
++8 release select
+# out of the Café; Breeder Amber (Togepi, Magby) looks west from (563, 601), three tiles: step into her line
++0 press right
+until position 5 4 6000
++0 release right
++0 press down
+until position 5 8 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_210_SOUTH" 3000
++0 release down
+until idle
++8 release select
++0 press left
+until position 560 592 6000
++0 release left
++0 press down
+until position 560 601 6000
++0 release down
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_BREEDER_AMBER won single
++8 release select
+# Twins Teri and Tia (Clefairy) look south from (557–558, 609), three tiles: down x 561, then up the bike slope at
+# x 557 in gear 1 and into their line
++0 press down
+until position 560 604 6000
++0 release down
++0 press right
+until position 561 604 6000
++0 release right
++0 press down
+until position 561 620 6000
++0 release down
++0 press left
+until position 557 620 6000
++0 release left
++0 press down
+until position 557 623 6000
++0 release down
+until idle
++1 press y
++1 release y
+until state playerState "cycle"
+until idle
++1 press b
++1 release b
++1 assert state cyclingGear 1
++0 press up
+until position 557 616 6000
++0 release up
+until idle
++0 press b
++1 release b
++1 assert state cyclingGear 0
++0 press up
+until position 557 612 6000
++0 release up
+until message 6000
+advance text
+battle auto 30000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_TWINS_TERI_AND_TIA won double
++8 release select
+# Breeder Kahlil (Happiny, Elekid) looks west from (554, 604), two tiles: up x 552 into his line
++0 press left
+until position 552 612 6000
++0 release left
++0 press up
+until position 552 604 6000
++0 release up
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_BREEDER_KAHLIL won single
++8 release select
+# back down the bike slope and south to Solaceon
++0 press down
+until position 552 612 6000
++0 release down
++0 press right
+until position 557 612 6000
++0 release right
++0 press down
+until position 557 623 6000
++0 release down
++2 release select
+# off the bike, south through the grass to Solaceon; heal at the Pokémon Center
+until idle
++1 press y
++1 release y
+until state playerState "walk"
+until idle
++0 press down
+until position 557 627 6000
++0 release down
+# Rancher Marco looks east over x 557 from (555, 627)
+until message 3000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_RANCHER_MARCO won single
++0 press down
+until position 557 631 6000
++0 release down
++0 press right
+until position 562 631 6000
++0 release right
++0 press down
+until position 562 657 6000
++0 release down
++0 press right
+until position 566 657 6000
++0 release right
++0 press up
+until position 8 12 3000
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_SOLACEON_TOWN" 3000
++0 release down
+until idle
++8 release select
+# the Solaceon Ruins: Unown
++0 press left
+until position 562 657 6000
++0 release left
++0 press up
+until position 562 641 6000
++0 release up
++0 press right
+until position 591 641 6000
++0 release right
++0 press down
+until position 591 660 6000
++0 release down
++0 press right
+until position 595 660 6000
++0 release right
++0 press up
+until position 595 656 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_SOLACEON_RUINS_ROOM_1" 3000
++0 release up
+until idle
++8 release select
++8 release select
+# room 1 has no wild Pokémon: down the stairs to its south-east dead end, where Unown live
++0 press up
+until position 5 10 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_SOLACEON_RUINS_ROOM_1_SOUTHEAST_DEAD_END" 3000
++0 release right
+until idle
++8 release select
++8 release select
++0 press up
+until position 2 2 6000
++0 release up
++0 press right
+until position 3 2 6000
++0 release right
+until wild platinum:SPECIES_UNOWN right left 20000
+battle auto 20000
+advance text
+until idle
++8 release select
+# out of the Ruins to Solaceon
++0 press left
+until position 2 2 6000
++0 release left
++0 press down
+until position 2 3 6000
++0 release down
++0 press left
+until state player.zone "platinum:MAP_HEADER_SOLACEON_RUINS_ROOM_1" 3000
++0 release left
+until idle
++8 release select
++0 press left
+until position 5 10 6000
++0 release left
++0 press down
+until state player.zone "platinum:MAP_HEADER_SOLACEON_TOWN" 3000
++0 release down
+until idle
++8 release select
++0 press down
+until position 595 656 600
++0 release down
+until idle
+# end of CP21a
++0 assert position platinum:MAP_HEADER_SOLACEON_TOWN 595 656
++8 release select

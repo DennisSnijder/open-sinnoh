@@ -1,0 +1,56 @@
+from opening.replay
+# One real wild battle on Route 201. After the opening (Piplup L5 at
+# Lake Verity), wild encounters battle again; the player walks south onto Route 201 and paces in the tall
+# grass west of Sandgem (x 116–125, z 853) until a wild Pokémon appears, then fights with the strongest
+# move until it faints. Seeds 1–3 meet different Pokémon. Save round trips before and after the battle.
+# Runs headless in tests/integration/m2-wild.rom.test.ts and in the browser (desktop and phone).
++0 wild battle
++0 reload
+# leave Lake Verity onto Route 201 (as cp2)
++0 press down
+until position 46 54
++0 release down
+until idle
++0 press b
++0 press down
+until position 80 853
++0 release down
++0 press right
+until position 115 853
++0 release right
++0 release b
+# pace in the grass, walking: 5 tiles each way. Once a battle starts these presses reach its intro and
+# move nothing (the command card is answered by `battle auto`).
++0 press right
++40 release right
++0 press left
++40 release left
++0 press right
++40 release right
++0 press left
++40 release left
++0 press right
++40 release right
++0 press left
++40 release left
++0 press right
++40 release right
++0 press left
++40 release left
++0 press right
++40 release right
++0 press left
++40 release left
+until battle 900
++0 screenshot battle-command
++0 assert battles wild 0
+battle auto 6000
++0 assert battle wild * won
++0 assert battles wild 1
++0 assert state party[0].species "platinum:SPECIES_PIPLUP"
+# Trainer score: the starter (a first catch, 20), the first battle (a trainer battle, 3), this wild win (2).
++0 assert state records.score 25
+until idle
++0 reload
++0 assert map platinum:MAP_HEADER_ROUTE_201
+until idle

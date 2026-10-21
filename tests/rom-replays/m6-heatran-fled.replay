@@ -1,0 +1,21 @@
+from cp23a.replay
+# Branch m6-heatran-fled: the story's team runs from Heatran. From cp23a's
+# end, as m6-heatran-caught. A flight is a loss to check_lost_battle (decomp CheckPlayerLostBattle), so no Vs.
+# Seeker level 5; "Heatran disappeared": hidden, state 2, not caught; the Hall of Fame shows it again
+# (sys-hof-respawn). A lost battle needs a weaker team: sys-heatran-lost.
++0 reload
+until idle
++0 press a
++1 release a
+advance text 3000
+until battle 3000
++0 battle run
+advance text 20000
+until idle 3000
++0 assert battle scripted platinum:SPECIES_HEATRAN fled
++0 assert flag platinum:FLAG_CAUGHT_HEATRAN false
++0 assert flag platinum:FLAG_BATTLED_STARK_MOUNTAIN_ROOM_3_HEATRAN true
++0 assert flag platinum:FLAG_UNLOCKED_VS_SEEKER_LVL_5 false
++0 assert flag platinum:FLAG_HIDE_STARK_MOUNTAIN_ROOM_3_HEATRAN true
++0 assert var platinum:VAR_STARK_MOUNTAIN_ROOM_3_STATE 2
++0 assert state party.length 5

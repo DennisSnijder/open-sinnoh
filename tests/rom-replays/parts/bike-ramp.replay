@@ -1,0 +1,26 @@
+from bike-slope.replay
+# Part of sys-bike: Oreburgh Gate B1F, the westward bike ramp at (27, 13). After a run-up from (32, 13)
+# in gear 1 (speed >= 3) the bike jumps from the ramp tile 3 tiles west (JUMP_FARTHER_WEST: 4 px a
+# frame for 12 frames) to (24, 13), over the gap at x 25. On the ramp tile B does not change the gear
+# (PlayerAvatar_TryCyclingGearChange); after the landing it does. The `bike-jump`/`bike-landed`
+# screenshot lines are the browser spec's key beat: mid-jump the player is drawn higher on screen.
+warp platinum:MAP_HEADER_OREBURGH_GATE_B1F 32 13 left
+until idle
++0 assert state playerState "cycle"
++0 press left
+until position 27 13
++0 press b
++1 release b
++0 assert state cyclingGear 1
+until position 24 13 30
++0 release left
++0 assert position platinum:MAP_HEADER_OREBURGH_GATE_B1F 24 13
++5 screenshot bike-jump
+until idle
++0 screenshot bike-landed
++0 press b
++1 release b
++1 assert state cyclingGear 0
++0 press b
++1 release b
++1 assert state cyclingGear 1

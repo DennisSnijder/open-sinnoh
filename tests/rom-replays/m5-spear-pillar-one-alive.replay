@@ -1,0 +1,19 @@
+# Branch m5-spear-pillar-one-alive: the grunts at Spear Pillar's top with one
+# Pokémon that can fight. A constructed start (setup lines). The grunts' coord event at 31, 48 checks
+# CheckHasTwoAliveMons: FALSE (one Pokémon, the other fainted), so SpearPillar_GruntsOnlyOnePokemon: the grunts
+# send the player back one step south, no battle, VAR_SPEAR_PILLAR_STATE stays 0. With the second Pokémon healed
+# the same step starts the grunts' battle (two trainers, 19). Runs in tests/integration/m5-spear-pillar.rom.test.ts.
+party 0 platinum:SPECIES_GARCHOMP 100 platinum:MOVE_DRAGON_CLAW
+party 1 platinum:SPECIES_LUCARIO 100 platinum:MOVE_AURA_SPHERE
+set state party[1].hp 0
+set flag platinum:FLAG_HIDE_SPEAR_PILLAR_GRUNTS false
+warp platinum:MAP_HEADER_SPEAR_PILLAR 31 50 up
+until idle
++0 press up
+until position 31 48
++0 release up
+advance text 3000
+until idle 3000
++0 assert position platinum:MAP_HEADER_SPEAR_PILLAR 31 49
++0 assert var platinum:VAR_SPEAR_PILLAR_STATE 0
++0 assert battles trainer 0

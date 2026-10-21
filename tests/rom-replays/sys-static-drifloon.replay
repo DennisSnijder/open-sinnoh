@@ -1,0 +1,26 @@
+# sys-static-drifloon: the Friday Drifloon outside the Valley Windworks.
+# A constructed start (setup lines, no story chain): the Windworks freed (VAR_VALLEY_WINDWORKS_STATE 2) on a Friday,
+# so the zone's onTransition shows Drifloon (decomp ValleyWindworksOutside_OnTransition: GetDayOfWeek). Talking to
+# it sets FLAG_MAP_LOCAL_REMOVE_OBJECT and starts start_legendary_battle Drifloon L15 (BATTLE_STATUS_LEGENDARY); the
+# battle is won; the field's return runs the on-load script, which hides and removes Drifloon and clears the flag;
+# the script then sets FLAG_DAILY_WON_AGAINST_VALLEY_WINDWORKS_OUTSIDE_DRIFLOON. Leaving and coming back the same
+# Friday, Drifloon stays away. Runs headless in tests/integration/m5-static.rom.test.ts.
+party 0 platinum:SPECIES_CHARIZARD 50 platinum:MOVE_FLAMETHROWER
+set var platinum:VAR_VALLEY_WINDWORKS_STATE 2
+date 2009-03-27
+warp platinum:MAP_HEADER_VALLEY_WINDWORKS_OUTSIDE 241 661 up
+until idle
++0 assert flag platinum:FLAG_HIDE_VALLEY_WINDWORKS_OUTSIDE_DRIFLOON false
++0 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle scripted platinum:SPECIES_DRIFLOON won
+advance text
+until idle
++0 assert flag platinum:FLAG_DAILY_WON_AGAINST_VALLEY_WINDWORKS_OUTSIDE_DRIFLOON true
++0 assert flag platinum:FLAG_HIDE_VALLEY_WINDWORKS_OUTSIDE_DRIFLOON true
++0 assert flag platinum:FLAG_MAP_LOCAL_REMOVE_OBJECT false
++0 reload
+until idle
++0 assert flag platinum:FLAG_HIDE_VALLEY_WINDWORKS_OUTSIDE_DRIFLOON true

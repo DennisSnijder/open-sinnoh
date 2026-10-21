@@ -1,0 +1,13 @@
+# TryUnlockFlyLocationByMap (decomp src/spawn_locations.c): walking into Eterna from Route 205 sets its
+# first-arrival flag (the Fly unlock that Rowan's lab and the Pokédex rating read); a save round trip keeps it.
+warp platinum:MAP_HEADER_ROUTE_205_NORTH 280 533 right
+until idle
++0 assert flag platinum:FLAG_FIRST_ARRIVAL_ETERNA_CITY false
++0 press right
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY" 600
++0 release right
+until idle
++0 assert flag platinum:FLAG_FIRST_ARRIVAL_ETERNA_CITY true
++0 reload
+until idle
++0 assert flag platinum:FLAG_FIRST_ARRIVAL_ETERNA_CITY true

@@ -1,0 +1,30 @@
+# sys-follower-talk: follower talk (OpenSinnoh option `followerTalk` with the HGSS add-on; run by
+# tests/integration/follower-talk.rom.test.ts with both ROMs). Route 202 with Turtwig as the lead: two steps north,
+# the follower comes out behind; the player turns to it (it stands in front, in view) and presses A. It turns to the player, HGSS's rules pick an
+# interaction, and its messages close with A. Talked to twice; the field is idle (and saveable) only afterwards.
+party 0 platinum:SPECIES_TURTWIG 20
+set state repel 250
+warp platinum:MAP_HEADER_ROUTE_202 171 809 up
+until idle
++0 press up
+until position 171 807
++0 release up
+until idle
++0 assert state partyFollower.z 808
+# talk
++1 press down
++1 release down
+until idle
++0 assert facing player down
++1 press a
++1 release a
+until message 300
+advance text 600
+until idle 300
++0 assert state partyFollower.facing "up"
++1 press a
++1 release a
+until message 300
+advance text 600
+until idle 300
++0 assert position platinum:MAP_HEADER_ROUTE_202 171 807

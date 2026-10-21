@@ -1,0 +1,427 @@
+# Feebas evolves by its beauty (decomp EVO_LEVEL_BEAUTY, 170): seven Dry-Sweet Poffins from the Veilstone Department
+# Store's B1F vendor (scripts_veilstone_store_b1f.s: 32 dry, 32 sweet, smoothness 20, 6400 each), each fed from the
+# Poffin Case (the bag's OPEN, GIVE, the party, the summary's CONDITION and OK, the eating, the condition's change:
+# A feeds, then the raised conditions' messages), then a Rare Candy: the level up evolves it into Milotic. Seven times
+# 32 dry (x0.9 for a nature that dislikes it) is 196 at least.
+party 0 platinum:SPECIES_FEEBAS 20 platinum:MOVE_TACKLE
+give item platinum:ITEM_POFFIN_CASE 1
+give item platinum:ITEM_RARE_CANDY 1
+give money 50000
+warp platinum:MAP_HEADER_VEILSTONE_STORE_B1F 15 12 up
+until idle
+# Buy a Dry-Sweet Poffin (the list's fifth row).
++0 press a
++1 release a
+advance text
++2 press a
++1 release a
+until menu
++4 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++4 press a
++1 release a
+advance text
+until idle
+# Buy a Dry-Sweet Poffin (the list's fifth row).
++0 press a
++1 release a
+advance text
++2 press a
++1 release a
+until menu
++4 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++4 press a
++1 release a
+advance text
+until idle
+# Buy a Dry-Sweet Poffin (the list's fifth row).
++0 press a
++1 release a
+advance text
++2 press a
++1 release a
+until menu
++4 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++4 press a
++1 release a
+advance text
+until idle
+# Buy a Dry-Sweet Poffin (the list's fifth row).
++0 press a
++1 release a
+advance text
++2 press a
++1 release a
+until menu
++4 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++4 press a
++1 release a
+advance text
+until idle
+# Buy a Dry-Sweet Poffin (the list's fifth row).
++0 press a
++1 release a
+advance text
++2 press a
++1 release a
+until menu
++4 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++4 press a
++1 release a
+advance text
+until idle
+# Buy a Dry-Sweet Poffin (the list's fifth row).
++0 press a
++1 release a
+advance text
++2 press a
++1 release a
+until menu
++4 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++4 press a
++1 release a
+advance text
+until idle
+# Buy a Dry-Sweet Poffin (the list's fifth row).
++0 press a
++1 release a
+advance text
++2 press a
++1 release a
+until menu
++4 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++4 press a
++1 release a
+advance text
+until idle
++0 assert state poffins[6] {"type":7,"flavors":[0,32,32,0,0],"smoothness":20}
++0 assert state money 8200
+# Feed the newest Poffin to Feebas: START, BAG, KEY ITEMS, the Poffin Case's OPEN, GIVE.
++0 press x
++1 release x
+until app start-menu
++2 tap entry:1
+until app bag
++2 tap pocket:7
++2 tap row:0
++2 tap menu:0
+until app poffin-case
++10 screenshot poffin-case
++2 tap row:0
++2 tap menu:0
+until app party
++2 tap slot:0
+until app summary
++10 screenshot condition-feed
++2 tap ok
+until app poffin-feed
++20 screenshot poffin-feed
+until app summary 600
++4 press a
++1 release a
++20 screenshot condition-change
++8 press a
++1 release a
++8 press a
++1 release a
++8 press a
++1 release a
+until app poffin-case
++2 tap close
+until app bag
++2 tap cancel
+until app start-menu
++2 press b
++1 release b
+until app none
+until idle
+# Feed the newest Poffin to Feebas: START, BAG, KEY ITEMS, the Poffin Case's OPEN, GIVE.
++0 press x
++1 release x
+until app start-menu
++2 tap entry:1
+until app bag
++2 tap pocket:7
++2 tap row:0
++2 tap menu:0
+until app poffin-case
++2 tap row:0
++2 tap menu:0
+until app party
++2 tap slot:0
+until app summary
++2 tap ok
+until app poffin-feed
+until app summary 600
++4 press a
++1 release a
++8 press a
++1 release a
++8 press a
++1 release a
++8 press a
++1 release a
+until app poffin-case
++2 tap close
+until app bag
++2 tap cancel
+until app start-menu
++2 press b
++1 release b
+until app none
+until idle
+# Feed the newest Poffin to Feebas: START, BAG, KEY ITEMS, the Poffin Case's OPEN, GIVE.
++0 press x
++1 release x
+until app start-menu
++2 tap entry:1
+until app bag
++2 tap pocket:7
++2 tap row:0
++2 tap menu:0
+until app poffin-case
++2 tap row:0
++2 tap menu:0
+until app party
++2 tap slot:0
+until app summary
++2 tap ok
+until app poffin-feed
+until app summary 600
++4 press a
++1 release a
++8 press a
++1 release a
++8 press a
++1 release a
++8 press a
++1 release a
+until app poffin-case
++2 tap close
+until app bag
++2 tap cancel
+until app start-menu
++2 press b
++1 release b
+until app none
+until idle
+# Feed the newest Poffin to Feebas: START, BAG, KEY ITEMS, the Poffin Case's OPEN, GIVE.
++0 press x
++1 release x
+until app start-menu
++2 tap entry:1
+until app bag
++2 tap pocket:7
++2 tap row:0
++2 tap menu:0
+until app poffin-case
++2 tap row:0
++2 tap menu:0
+until app party
++2 tap slot:0
+until app summary
++2 tap ok
+until app poffin-feed
+until app summary 600
++4 press a
++1 release a
++8 press a
++1 release a
++8 press a
++1 release a
++8 press a
++1 release a
+until app poffin-case
++2 tap close
+until app bag
++2 tap cancel
+until app start-menu
++2 press b
++1 release b
+until app none
+until idle
+# Feed the newest Poffin to Feebas: START, BAG, KEY ITEMS, the Poffin Case's OPEN, GIVE.
++0 press x
++1 release x
+until app start-menu
++2 tap entry:1
+until app bag
++2 tap pocket:7
++2 tap row:0
++2 tap menu:0
+until app poffin-case
++2 tap row:0
++2 tap menu:0
+until app party
++2 tap slot:0
+until app summary
++2 tap ok
+until app poffin-feed
+until app summary 600
++4 press a
++1 release a
++8 press a
++1 release a
++8 press a
++1 release a
++8 press a
++1 release a
+until app poffin-case
++2 tap close
+until app bag
++2 tap cancel
+until app start-menu
++2 press b
++1 release b
+until app none
+until idle
+# Feed the newest Poffin to Feebas: START, BAG, KEY ITEMS, the Poffin Case's OPEN, GIVE.
++0 press x
++1 release x
+until app start-menu
++2 tap entry:1
+until app bag
++2 tap pocket:7
++2 tap row:0
++2 tap menu:0
+until app poffin-case
++2 tap row:0
++2 tap menu:0
+until app party
++2 tap slot:0
+until app summary
++2 tap ok
+until app poffin-feed
+until app summary 600
++4 press a
++1 release a
++8 press a
++1 release a
++8 press a
++1 release a
++8 press a
++1 release a
+until app poffin-case
++2 tap close
+until app bag
++2 tap cancel
+until app start-menu
++2 press b
++1 release b
+until app none
+until idle
+# Feed the newest Poffin to Feebas: START, BAG, KEY ITEMS, the Poffin Case's OPEN, GIVE.
++0 press x
++1 release x
+until app start-menu
++2 tap entry:1
+until app bag
++2 tap pocket:7
++2 tap row:0
++2 tap menu:0
+until app poffin-case
++2 tap row:0
++2 tap menu:0
+until app party
++2 tap slot:0
+until app summary
++2 tap ok
+until app poffin-feed
+until app summary 600
++4 press a
++1 release a
++8 press a
++1 release a
++8 press a
++1 release a
++8 press a
++1 release a
+until app poffin-case
++2 tap close
+until app bag
++2 tap cancel
+until app start-menu
++2 press b
++1 release b
+until app none
+until idle
++0 assert state poffins []
++0 assert state party[0].condition.sheen 140
++0 assert state party[0].species "platinum:SPECIES_FEEBAS"
++0 reload
+until idle
+# The Rare Candy: the bag's MEDICINE, USE on Feebas; the level up evolves it.
++0 press x
++1 release x
+until app start-menu
++2 tap entry:1
+until app bag
++2 tap pocket:1
++2 tap row:0
++2 tap menu:0
+until app party
++2 tap slot:0
++30 press a
++1 release a
++10 press a
++1 release a
++10 press a
++1 release a
+until app evolution 300
++0 evolve auto
+until app bag 3000
++2 tap cancel
+until app start-menu
++2 press b
++1 release b
+until app none
++0 assert state party[0].species "platinum:SPECIES_MILOTIC"
++0 assert state party[0].level 21

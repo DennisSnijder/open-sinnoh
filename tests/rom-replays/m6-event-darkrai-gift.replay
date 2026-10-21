@@ -1,0 +1,57 @@
+from m6-event-darkrai-gift-mart.replay
+# Event branch m6-event-darkrai with the Member Card from Mystery Gift (m6-event-darkrai-gift-mart: a gift code and
+# the Poké Mart deliveryman) in place of the dev flag: the same run as m6-event-darkrai from the Harbor Inn. Its
+# on-transition starts the event, the dream warps to Newmoon Island, Darkrai's L50 battle (the Master Ball), the voice
+# sends the player back to the inn, awake (VAR_DARKRAI_EVENT_STATE 3).
+warp platinum:MAP_HEADER_CANALAVE_CITY_HARBOR_INN 4 7 up
+advance text 3000
+until idle 3000
++0 assert state player.zone "platinum:MAP_HEADER_NEWMOON_ISLAND"
++0 assert var platinum:VAR_DARKRAI_EVENT_STATE 2
++0 assert flag platinum:FLAG_TRAVELED_TO_NEWMOON_ISLAND true
++0 press up
+until position 152 274 6000
++0 release up
++0 press right
+until position 154 274 6000
++0 release right
++0 press up
+until position 154 268 6000
++0 release up
++0 press left
+until position 149 268 6000
++0 release left
++0 press down
+until position 149 269 6000
++0 release down
++0 press left
+until position 143 269 6000
++0 release left
++0 press down
+until position 143 270 6000
++0 release down
++0 press left
+until position 137 270 6000
++0 release left
++0 press up
+until position 137 269 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_NEWMOON_ISLAND_FOREST" 300
++0 release up
+until idle 600
++0 assert flag platinum:FLAG_HIDE_NEWMOON_ISLAND_FOREST_DARKRAI false
++0 press up
+until position 16 14 600
++0 release up
+until idle 60
++0 press a
++1 release a
+advance text 3000
+battle catch platinum:ITEM_MASTER_BALL 20000
++0 assert battle scripted platinum:SPECIES_DARKRAI caught
+advance text 20000
+until idle 6000
++0 assert flag platinum:FLAG_CAUGHT_DARKRAI true
++0 assert var platinum:VAR_DARKRAI_EVENT_STATE 3
++0 assert party 5 platinum:SPECIES_DARKRAI

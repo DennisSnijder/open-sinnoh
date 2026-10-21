@@ -1,0 +1,9 @@
+{
+  "id": "platinum-demo",
+  "name": "Platinum demo: Chimchar in the middle and a new Twinleaf line",
+  "version": "0.1.0",
+  "engine": "^0.1.0",
+  "base": "platinum",
+  "dependencies": { "platinum": "^0.1.0" },
+  "loadAfter": ["platinum"]
+}

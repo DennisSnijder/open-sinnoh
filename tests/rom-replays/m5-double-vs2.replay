@@ -1,0 +1,20 @@
+# (docs/research/double-battles.md §6.3): two trainers against the player
+# alone, type 19, by sight. A constructed system replay (party and warp setup lines, no story chain): Eterna Forest
+# row 67, Psychic Lindsey at 50 facing right and Psychic Elijah at 55 facing left, both with sight 4. Stepping up
+# onto 52, 67 both see the player; with two Pokémon that can fight the field makes it APPROACH_TYPE_VS2 (decomp
+# FieldSystem_CheckForTrainersWantingBattle), both walk up, and the common script starts the trainer battle with
+# the two ids and no partner (decomp Encounter_NewVsTrainer: TAG_DOUBLES, 19): each trainer's Pokémon from its own
+# party (the owner adapter). Runs headless in tests/integration/m5-doubles.rom.test.ts.
+party 0 platinum:SPECIES_STARAVIA 25
+party 1 platinum:SPECIES_MONFERNO 25
+warp platinum:MAP_HEADER_ETERNA_FOREST 52 69 up
+until idle
++0 press up
+until position 52 67
++0 release up
+advance text 3000
+battle auto 30000
++0 assert battle trainer platinum:TRAINER_PSYCHIC_LINDSEY won trainer-pair
++0 assert battle trainer platinum:TRAINER_PSYCHIC_ELIJAH won trainer-pair
+advance text 3000
+until idle 3000

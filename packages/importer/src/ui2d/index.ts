@@ -1,0 +1,119 @@
+/**
+ * The shared 2D module: Nitro 2D decoders (NCLR, NCGR, NSCR, NCER, NANR, LZ10 via nds), the OBJ/BG
+ * compositor, the Platinum picture descrambling, and the 2D art import (Pokémon, trainers, battle,
+ * windows, map-name signboards, the Pokédex) used by battles and menus.
+ */
+import type { BattleBackground, BattleTerrain, PokemonSprites, TrainerSprite, Ui2dSheet } from '@opensinnoh/contracts';
+import type { Id } from '@opensinnoh/core';
+import { sha1Hex, type NitroFs } from '@opensinnoh/nds';
+import { HEALTHBOX_PARTS, importBattleArt } from './battle.ts';
+import { importBattleButtons, MOVE_PALETTES } from './battle-buttons.ts';
+export { BACKGROUNDS } from './battle.ts';
+import { importPokemon } from './pokemon.ts';
+import { Sheets } from './sheets.ts';
+import { importTrainerSprites } from './trainers.ts';
+import { importWindowFrames } from './windows.ts';
+import { importMenuArt, RIBBON_COUNT, RIBBON_ROW_SIZE, type RibbonText } from './menus.ts';
+import { importMapPopups } from './map-popups.ts';
+import { importPartyArt } from './party.ts';
+import { importSummaryArt } from './summary.ts';
+export { mapPopupSheet, MAP_POPUP_STYLES } from './map-popups.ts';
+import { importIconFrames, importItemIcons, ITEM_ARCHIVE_ENTRIES } from './items.ts';
+import { importPokedexArt } from './pokedex.ts';
+import { importEvolutionArt } from './evolution.ts';
+import { importEggHatchArt } from './egg-hatch.ts';
+import { importLibraryTvArt } from './library-tv.ts';
+import { importMoveReminderArt, importTradeArt } from './side-screens.ts';
+import { importPoffinArt } from './poffins.ts';
+import { importIntroArt } from './intro.ts';
+import { importHallOfFameArt } from './hall-of-fame.ts';
+import { importShopArt } from './shop.ts';
+import { importStartMenuArt } from './start-menu.ts';
+import { importPoketchArt } from './poketch.ts';
+import { importBagArt } from './bag.ts';
+import { importBoxArt } from './box.ts';
+import { importTownMapArt, type HiddenPatch } from './town-map.ts';
+
+export * from './compose.ts';
+export * from './nanr.ts';
+export * from './ncer.ts';
+export * from './nitro2d.ts';
+export * from './png.ts';
+export * from './pokegra.ts';
+export { Sheets, sheetId } from './sheets.ts';
+export { importUndergroundArt, miningObjectCell } from './underground.ts';
+
+/** Code tables the 2D import reads, each verified by SHA1. */
+const TABLES = {
+  /** pokemon_icon.c sPokemonIconPaletteIndex (generated species_icon_palettes.h): u8 palette per icon. */
+  iconPalettes: { where: 'arm9', offset: 0xf0780, size: 540, sha1: '0657e956fab3593c015e89100e25b26bd4ac48e6' },
+  /** item.c sItemArchiveIDs (generated item_id_map.h): {dataID, iconID, paletteID, gen3ID} per item. */
+  itemArchive: { where: 'arm9', offset: 0xf0cc4, size: ITEM_ARCHIVE_ENTRIES * 8, sha1: '29454be469cee01f941d09948470ffead730e58a' },
+  /** ribbon.c sRibbonDataTable: {u32 monDataParam, u16 spriteID, u16 paletteNum, u16 nameID, u16 descriptionID} per ribbon. */
+  ribbons: { where: 'arm9', offset: 0xf51ac, size: RIBBON_COUNT * RIBBON_ROW_SIZE, sha1: '89f0a7d94d6ebe4c82c58a98fdcbcce41d0e32a4' },
+  healthboxParts: { where: HEALTHBOX_PARTS.overlay, offset: HEALTHBOX_PARTS.offset, size: HEALTHBOX_PARTS.size, sha1: '6d0c3404d49a6b4ffdaa9203eaf142abd31c9b14' },
+  /** move_palettes.c: the move buttons' type palettes. */
+  movePalettes: { where: MOVE_PALETTES.overlay, offset: MOVE_PALETTES.offset, size: MOVE_PALETTES.size, sha1: '48ad44a2b65ae05f6fb025cd2a9c62f2fdb3fdcb' },
+} as const;
+
+export interface Ui2dImport {
+  ui2d: Ui2dSheet[];
+  pokemonSprites: PokemonSprites[];
+  trainerSprites: TrainerSprite[];
+  battleBackgrounds: BattleBackground[];
+  battleTerrains: BattleTerrain[];
+  /** Each ribbon's name and description (TEXT_BANK_RIBBON_NAMES message numbers), by ribbon id. */
+  ribbons: RibbonText[];
+  /** Item index (sourceIndex) → its icon PNG's pack path. */
+  itemIcons: Map<number, string>;
+  /** Where the Town Map's hidden-location patches go (enum HiddenLocation order). */
+  townMapPatches: HiddenPatch[];
+  /** Pack path → bytes. */
+  assets: Map<string, Uint8Array>;
+}
+
+/** `speciesIds`/`classIds`: species and trainer class ids by index (names.json order). */
+export async function importUi2d(fs: NitroFs, speciesIds: Id[], classIds: Id[], onProgress: (done: number, total: number) => void = () => {}): Promise<Ui2dImport> {
+  const table = async (key: keyof typeof TABLES): Promise<Uint8Array> => {
+    const t = TABLES[key];
+    const src = t.where === 'arm9' ? fs.arm9() : fs.overlay(t.where);
+    const bytes = src.subarray(t.offset, t.offset + t.size);
+    const got = await sha1Hex(bytes);
+    if (got !== t.sha1) throw new Error(`ROM table ${key} at ${t.where}:0x${t.offset.toString(16)} has SHA1 ${got}, expected ${t.sha1}`);
+    return bytes;
+  };
+  const sheets = new Sheets();
+  onProgress(0, 4);
+  const pokemon = await importPokemon(fs, speciesIds, await table('iconPalettes'));
+  onProgress(1, 4);
+  const trainerSprites = importTrainerSprites(fs, classIds, sheets);
+  onProgress(2, 4);
+  const battle = importBattleArt(fs, sheets, pokemon.assets, await table('healthboxParts'));
+  importBattleButtons(fs, sheets, await table('movePalettes'));
+  onProgress(3, 4);
+  importWindowFrames(fs, sheets);
+  const ribbons = importMenuArt(fs, sheets, await table('ribbons'));
+  importPartyArt(fs, sheets);
+  importSummaryArt(fs, sheets);
+  importMapPopups(fs, sheets);
+  importIconFrames(fs, sheets);
+  importPokedexArt(fs, sheets);
+  importEvolutionArt(fs, sheets);
+  importEggHatchArt(fs, sheets);
+  importLibraryTvArt(fs, sheets);
+  importMoveReminderArt(fs, sheets);
+  importTradeArt(fs, sheets);
+  importPoffinArt(fs, sheets);
+  importIntroArt(fs, sheets);
+  importHallOfFameArt(fs, sheets);
+  importShopArt(fs, sheets);
+  importStartMenuArt(fs, sheets);
+  importPoketchArt(fs, sheets);
+  importBagArt(fs, sheets);
+  importBoxArt(fs, sheets);
+  const townMapPatches = importTownMapArt(fs, sheets);
+  const items = importItemIcons(fs, await table('itemArchive'));
+  onProgress(4, 4);
+  const assets = new Map([...pokemon.assets, ...sheets.assets, ...items.assets]);
+  return { ui2d: sheets.records, pokemonSprites: pokemon.records, trainerSprites, battleBackgrounds: battle.backgrounds, battleTerrains: battle.terrains, ribbons, itemIcons: items.icons, townMapPatches, assets };
+}

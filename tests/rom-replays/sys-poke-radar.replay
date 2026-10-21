@@ -1,0 +1,9 @@
+from parts/poke-radar-charge.replay
+# sys-poke-radar (docs/research/berries-honey-radar.md; decomp pokeradar.c, wild_encounters.c, encounter.c): the chain
+# is walked to 10 (each Pokémon caught, which keeps the patches more often; with no patch keeping it, the battery is
+# charged again and the Radar used again), the best chain is saved, a reload ends the chain and keeps the record.
+until radar 10 catch platinum:ITEM_MASTER_BALL 30000
++0 assert state encounters.radarRecords[0].count 10
++0 reload
+until idle
++0 assert state encounters.radarRecords[0].count 10

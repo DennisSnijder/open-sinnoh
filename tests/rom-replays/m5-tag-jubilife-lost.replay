@@ -1,0 +1,33 @@
+from cp4.replay
+party 0 platinum:SPECIES_GEODUDE 2 platinum:MOVE_SELFDESTRUCT
+warp platinum:MAP_HEADER_JUBILIFE_CITY 175 745 up
+# Branch m5-tag-jubilife-lost: the Jubilife tag battle (cp5's first scene) lost.
+# A branch, not a CP chain, so setup lines may stage it: from CP4's end (VAR_JUBILIFE_CITY_STATE 3, set at
+# Roark's win) the party is one level-2 Geodude whose only move is Self-Destruct, and the player stands one step
+# south of Team Galactic's coord event (Looker's scene on the way in is skipped). Turn 1 the Geodude faints,
+# by its own Self-Destruct or a grunt's hit, and with an AI partner the battle is lost once the player's own
+# party is out, whatever the partner has left (decomp BattleControllerPlayer_CheckBattleOver). The script's
+# loss path (JubilifeCity_BlackOut: CheckWonBattle FALSE → BlackOutFromBattle) blacks out to the Oreburgh
+# Pokémon Center, where the nurse heals the party; the grunts stay, VAR_JUBILIFE_CITY_STATE stays 3 and there is
+# no Fashion Case. Headless from the cp4 anchor (tests/integration/checkpoints-m5a-branches.rom.test.ts).
++0 wild auto
++0 evolve cancel
+until idle
++0 press up
+until message
++0 release up
+advance text 6000
+battle auto 9000
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_JUBILIFE_CITY_1 lost ai-partner
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_JUBILIFE_CITY_2 lost ai-partner
++0 assert state party[0].hp 0
+# the blackout: the warp to the Oreburgh center (facing up), then the nurse's recover script
+until position 8 6 6000
++0 assert position platinum:MAP_HEADER_OREBURGH_CITY_POKECENTER_1F 8 6
+# the penalty: the highest level · 4 · 4 with one badge, $7024 − 2 · 16
++0 assert state money 6992
+advance text
+until idle
++0 assert var platinum:VAR_JUBILIFE_CITY_STATE 3
++0 assert flag platinum:FLAG_RECEIVED_FASHION_CASE false
++0 assert flag platinum:FLAG_HIDE_JUBILIFE_GALACTIC_GRUNTS false

@@ -1,0 +1,30 @@
+from parts/safari-enter.replay
+# sys-safari-balls (docs/research/great-marsh.md): one Safari Ball left. Thrown at a Wooper: a miss ends the game in
+# the battle ("You're out of Safari Balls! Game over!", the player's flight), the field comes back at the gate
+# (the special location) and SAFARI_GAME 9 ends the game; a catch ends it in the field (SAFARI_GAME 2: the chime,
+# "You've run out of Safari Balls", the warp). Either way the gate's on-frame script walks the player out.
+set state safari {"balls":1,"steps":0,"caught":0}
++0 press up
+until position 68 112
++0 release up
+until idle
++0 press right
+until position 74 112
++0 release right
+until idle
++0 press up
+until position 74 109
++0 release up
+until idle 900
+until wild platinum:SPECIES_WOOPER up down 20000
+battle catch platinum:ITEM_SAFARI_BALL 30000
+# After a catch the field's "run out of Safari Balls" waits for A without an arrow (wait_ab_press).
++120 press a
++1 release a
++120 press a
++1 release a
+until idle 3000
++0 assert position platinum:MAP_HEADER_PASTORIA_CITY_OBSERVATORY_GATE_1F 5 7
++0 assert flag platinum:FLAG_SAFARI_GAME_ACTIVE false
++0 assert var platinum:VAR_SAFARI_GAME_STATE 0
++0 assert state safari.balls 0

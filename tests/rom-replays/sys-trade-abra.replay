@@ -1,0 +1,40 @@
+# Oreburgh's in-game trade (decomp NPC_TRADE_KAZZA_ABRA): the girl asks for a Machop; the party pick, the trade
+# scene, and Kazza the Abra (her fixed OT, IVs and held item) in the Machop's slot, caught in the Pokédex.
+party 0 platinum:SPECIES_GROTLE 20 platinum:MOVE_RAZOR_LEAF
+party 1 platinum:SPECIES_MACHOP 14 platinum:MOVE_KARATE_CHOP
+warp platinum:MAP_HEADER_OREBURGH_CITY_NORTH_HOUSE_1F 11 8 up
+until idle
++0 press a
++1 release a
+advance text
+until yesno
++0 press a
++1 release a
+until app party
++1 tap slot:1
+until app trade
++0 assert app trade
++60 screenshot trade-send
++250 screenshot trade-tube
++150 screenshot trade-sky
++150 screenshot trade-receive
+until app none 1200
+advance text
+until idle
++0 assert flag platinum:FLAG_TRADED_FOR_KAZZA_ABRA true
++0 assert state party[1].species "platinum:SPECIES_ABRA"
++0 assert state party[1].nickname "Kazza"
++0 assert state party[1].otName "Hilary"
++0 assert state party[1].level 14
++0 assert state party[1].heldItem "platinum:ITEM_ORAN_BERRY"
++0 assert state party[1].ivs {"hp":15,"attack":15,"defense":15,"speed":20,"spAttack":25,"spDefense":25}
++0 assert state party[0].species "platinum:SPECIES_GROTLE"
++0 reload
+until idle
++0 assert state party[1].nickname "Kazza"
+# Thanks to the trade, she remembers it.
++0 press a
++1 release a
+advance text
+until idle
++0 assert state party[1].species "platinum:SPECIES_ABRA"

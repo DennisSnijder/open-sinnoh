@@ -1,0 +1,78 @@
+# svc-naming: CP2's walk to the Sandgem lab, where Rowan offers a nickname
+# for the starter: YES opens the naming screen (open_pokemon_naming_screen). The name is entered on the DS
+# keyboard (cursor and A), a page switch, a delete, then typed text (as a physical keyboard does), and OK
+# writes the nickname (the result var 0 takes the "nickname given" branch).
+from opening.replay
++0 press down
+until position 46 54
++0 release down
+# east to Sandgem: the counterpart leads the way to the lab
+until idle
++0 press b
++0 press down
+until position 80 853
++0 release down
++0 press right
+until position 104 853
++0 release right
++0 press up
+until position 104 852
++0 release up
++0 press right
+until position 128 852
++0 release right
++0 press up
+until position 128 848
++0 release up
++0 press right
+until position 136 848
++0 release right
++0 press up
+until position 136 846
++0 release up
++0 press right
+until position 138 846
++0 release right
++0 press up
+until position 138 845
++0 release up
++0 press right
+until position 164 845
++0 release right
++0 release b
+# lab: Rowan offers a nickname: YES
+advance text 3300
+until yesno
++0 press a
++1 release a
+until app naming 600
++0 assert app naming
+# The keyboard: A on "A" (row 0, col 0), right twice and A ("C"), the lower-case page by tap, "e" by tap.
++1 press a
++1 release a
++1 press right
++1 release right
++1 press right
++1 release right
++1 press a
++1 release a
++1 tap page:1
++1 tap key:0:4
++0 screenshot keyboard
+# B deletes the "e"; then typed text
++1 press b
++1 release b
++1 tap type:ey
++1 tap ok
+until app none
+# "You're happy with the nickname?": YES; then Rowan gives the Pokédex
+until yesno
++0 assert state party[0].nickname "ACey"
++0 press a
++1 release a
+advance text 4000
+until yesno
++0 press a
++1 release a
+advance text 4500
++0 assert flag platinum:FLAG_HAS_POKEDEX true

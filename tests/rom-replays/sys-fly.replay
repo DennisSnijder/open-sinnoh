@@ -1,0 +1,72 @@
+# sys-fly: Fly (HM02) from the party menu (decomp field_move_tasks.c FieldMoves_CheckFly and the fly task,
+# applications/town_map). Oreburgh City with the Cobble Badge, a Piplup leading (the party follower) and Staraptor
+# knowing Fly; Twinleaf, Sandgem and Jubilife were visited (their FLAG_FIRST_ARRIVAL_*). Inside the Pokémon Center Fly
+# is refused (the map header forbids it: PartyMenu_Text_CantUseThatHere, the party stays open). Outside, FLY opens the
+# Town Map on Oreburgh's cell: the d-pad walks the cursor west, B goes back to the party, FLY again and a tap on
+# Jubilife's block picks it. The cut-in, the white fade, the map change and the landing put the player on Jubilife's
+# fly point facing down, on foot; the follower was recalled and waits under the player, coming out with the first step.
+give badge platinum:BADGE_ID_COAL
+give badge platinum:BADGE_ID_COBBLE
+party 0 platinum:SPECIES_PIPLUP 20 platinum:MOVE_POUND
+party 1 platinum:SPECIES_STARAPTOR 40 platinum:MOVE_FLY platinum:MOVE_QUICK_ATTACK
+set flag platinum:FLAG_FIRST_ARRIVAL_TWINLEAF_TOWN true
+set flag platinum:FLAG_FIRST_ARRIVAL_SANDGEM_TOWN true
+set flag platinum:FLAG_FIRST_ARRIVAL_JUBILIFE_CITY true
+warp platinum:MAP_HEADER_OREBURGH_CITY 303 757 up
+until idle
++0 assert flag platinum:FLAG_FIRST_ARRIVAL_OREBURGH_CITY true
+# Into the Pokémon Center: Fly is refused there.
++0 press up
+until state player.zone "platinum:MAP_HEADER_OREBURGH_CITY_POKECENTER_1F"
++0 release up
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:0
++1 assert app party
++1 tap slot:1
++1 tap menu:1
++1 assert app party
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
+until app none
+# Back out, then FLY: the Town Map.
++1 press down
+until state player.zone "platinum:MAP_HEADER_OREBURGH_CITY"
++0 release down
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:0
++1 tap slot:1
++1 tap menu:1
+until app town-map
++20 press left
++15 release left
++10 press b
++1 release b
+until app party
++1 tap slot:1
++1 tap menu:1
+until app town-map
++20 tap town:7
+until app none
+until idle 600
++0 assert position platinum:MAP_HEADER_JUBILIFE_CITY 180 777
++0 assert facing player down
++0 assert state playerState "walk"
++0 assert state partyFollower {"x":180,"z":777,"facing":"down","waiting":true}
++0 reload
+until idle
++0 assert position platinum:MAP_HEADER_JUBILIFE_CITY 180 777
++0 press down
+until position 180 778
++0 release down
+until idle
++0 assert state partyFollower {"x":180,"z":777,"facing":"down","waiting":false}

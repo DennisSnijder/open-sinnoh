@@ -1,0 +1,13 @@
+from cp21f.replay
++0 reload
+# Branch m6-mesprit-roam (docs/research/postgame.md §6): cp21f's Verity Cavern
+# scene (A on Mesprit, its portrait, activate_roaming_pokemon ROAMING_SLOT_MESPRIT) set Mesprit roaming; from cp21f's
+# end this checks the roamer the chain left: L50 at full health, VAR_ROAMING_MESPRIT_STATE still ROAMING, the cave's
+# Mesprit hidden. m6-mesprit-flee meets it; m6-continue reads this end. No setup lines.
+until idle 3000
++0 assert state roamers.slots[0].species "platinum:SPECIES_MESPRIT"
++0 assert state roamers.slots[0].level 50
++0 assert state roamers.slots[0].status "none"
++0 assert var platinum:VAR_ROAMING_MESPRIT_STATE 0
++0 assert flag platinum:FLAG_HIDE_VERITY_CAVERN_MESPRIT true
++8 release select

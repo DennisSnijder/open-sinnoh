@@ -1,0 +1,34 @@
+name: ci
+# Manual only: Actions minutes are scarce, and the real gate is local (the ROM tests can't run in CI anyway).
+# Run it from the Actions tab, or: gh workflow run ci
+on: workflow_dispatch
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10.29.2 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+  # The performance budgets that hold on a CI runner: bundle sizes and the fixture's heap growth.
+  # Frame times are never judged here (software GL, 2 cores); the ROM run is local (`pnpm perf`).
+  budgets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10.29.2 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install chromium-headless-shell
+      - run: pnpm build
+      - run: pnpm perf --bundle --fixture
+# No browser job: on GitHub's 2-core runners the software-GL browser suite hits its 30 s test timeouts
+# (it passes locally). Run `pnpm test:browser` locally.

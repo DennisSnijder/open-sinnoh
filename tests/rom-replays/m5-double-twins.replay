@@ -1,0 +1,20 @@
+# (docs/research/double-battles.md §6.3): one double trainer, type 3.
+# A constructed system replay (party and warp setup lines, no story chain): Route 204 North, the twins Liv & Liz
+# (two objects naming one trainer, decomp double_battle) facing down at 175/176, 679. Walking up x 176 the second
+# twin (sight 4) sees the player at 683; the field finds the first as its partner (decomp
+# FieldSystem_CheckForTrainersWantingBattle: APPROACH_TYPE_DOUBLES, needs two Pokémon that can fight); the common
+# script starts the trainer battle with the same id twice (decomp Encounter_NewVsTrainer: TRAINER_DOUBLES, 3).
+# The player commands both Pokémon (`battle auto` answers each). Runs headless in
+# tests/integration/m5-doubles.rom.test.ts.
+party 0 platinum:SPECIES_STARAVIA 25
+party 1 platinum:SPECIES_MONFERNO 25
+warp platinum:MAP_HEADER_ROUTE_204_NORTH 176 685 up
+until idle
++0 press up
+until position 176 683
++0 release up
+advance text 3000
+battle auto 30000
++0 assert battle trainer platinum:TRAINER_TWINS_LIV_AND_LIZ won double
+advance text 3000
+until idle 3000

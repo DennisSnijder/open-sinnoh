@@ -1,0 +1,85 @@
+# svc-pc-compare: a Pokémon Center PC (Jubilife) with the Contest Hall
+# visited (the Storage System lists COMPARE POKéMON). MOVE POKéMON: mark Bidoof (circle, heart, diamond),
+# release Starly; COMPARE POKéMON: Turtwig set on the left, Bidoof live on the right, the three pages.
+# The marks survive a save round trip.
+party 0 platinum:SPECIES_TURTWIG 9
+party 1 platinum:SPECIES_STARLY 6
+party 2 platinum:SPECIES_BIDOOF 4
+set flag platinum:FLAG_CONTEST_HALL_VISITED true
+warp platinum:MAP_HEADER_JUBILIFE_CITY_POKECENTER_1F 12 4 up
+until idle
++1 press a
++1 release a
+advance text
++0 assert message open
+# SOMEONE'S PC
++5 press a
++1 release a
+advance text
+# MOVE POKéMON (DEPOSIT, WITHDRAW, MOVE, MOVE ITEMS, COMPARE, SEE YA!)
++5 press down
++1 release down
++1 press down
++1 release down
++1 press a
++1 release a
+until app storage
+# MARK on Bidoof: the markings window, circle, heart and diamond, CONFIRM
++1 tap party:2
++1 tap menu:2
++1 tap mark:0
++1 tap mark:3
++1 tap mark:5
++1 screenshot mark
++1 tap mark:6
++1 assert state party[2].markings 41
+# RELEASE Starly: "Release this Pokémon?" (NO first), YES, "was released", "Bye-bye"
++1 tap party:1
++1 tap menu:3
++1 tap yes
++1 press a
++1 release a
++1 press a
++1 release a
++1 assert state party.length 2
++0 assert state party[1].species "platinum:SPECIES_BIDOOF"
++1 tap close
++1 tap yes
+until app none
+advance text
+# COMPARE POKéMON: the cursor starts on the box header
++5 press down
++1 release down
++1 press down
++1 release down
++1 press down
++1 release down
++1 press down
++1 release down
++1 press a
++1 release a
+until app storage
++1 tap party:0
++1 tap menu:0
++1 press down
++1 release down
++0 screenshot compare
++1 tap compare:page
++1 screenshot compare-contest
++1 tap compare:page
++1 screenshot compare-moves
++1 tap close
++1 tap yes
+until app none
+advance text
+# B leaves the Storage System, B again switches the PC off
++5 press b
++1 release b
+advance text
++5 press b
++1 release b
+until idle
++1 reload
++0 assert state party[1].markings 41
++0 assert state party.length 2
+until idle

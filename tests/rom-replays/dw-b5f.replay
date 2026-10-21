@@ -1,0 +1,1403 @@
+# dw-b5f: from a constructed start on B5F; the three lake guardians' tutorials and the three boulders pushed into B5F's holes (they drop to B6F).
+party 0 platinum:SPECIES_BIBAREL 50 platinum:MOVE_STRENGTH platinum:MOVE_SURF platinum:MOVE_ROCK_CLIMB
+give badge platinum:BADGE_ID_MINE
+give badge platinum:BADGE_ID_FEN
+give badge platinum:BADGE_ID_ICICLE
+set var platinum:VAR_DISTORTION_WORLD_PROGRESS 6
+warp platinum:MAP_HEADER_DISTORTION_WORLD_B5F 101 68 left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press up
+until state player.z 67 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 100 400
++0 release left
++8 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 99 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 field move 0 platinum:MOVE_STRENGTH
++46 press a
++1 release a
++184 press a
++1 release a
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
++20 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_B5F","x":99,"z":67,"y":2064,"facing":"left"}
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 6
++0 assert var platinum:VAR_DISTORTION_WORLD_CYRUS_APPEARANCE 0
++0 assert flag platinum:FLAG_DISTORTION_WORLD_PUZZLE_FINISHED false
++0 assert state mapFeatures.support null
++0 assert state mapFeatures.cameraAngle [0,0,0]
++0 assert state mapFeatures.puzzleFlags 18453
++0 assert state mapFeatures.platformFlags 136
++0 assert state mapFeatures.hiddenGhostGroups 16777213
++0 press left
+until state player.x 98 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press up
+until state player.z 66 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press up
+until state player.z 65 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 97 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 96 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 95 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 94 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 93 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 66 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 67 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 92 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 89 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press up
+until state player.z 66 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 87 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 86 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 84 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 67 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 81 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 80 400
++0 release left
++8 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press up
+until state player.z 66 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press up
+until state player.z 65 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 79 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 78 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 77 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 76 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 66 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 75 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 67 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 74 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 68 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press right
++1 release right
+until idle 600
++0 press right
++20 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press up
+until state player.z 67 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press right
+until state player.x 75 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press up
+until state player.z 66 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press up
+until state player.z 65 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press right
+until state player.x 76 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press right
+until state player.x 77 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press right
+until state player.x 78 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press right
+until state player.x 79 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press right
+until state player.x 80 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 66 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 67 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 68 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 69 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 70 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 79 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 78 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 71 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 72 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 75 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press right
+until state player.x 79 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 76 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 77 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 78 400
++0 release left
++8 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 78 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 79 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press left
+until state player.x 77 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press left
+until state player.x 76 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press left
+until state player.x 75 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 78 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 77 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press left
+until state player.x 72 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press left
+until state player.x 71 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press left
+until state player.x 70 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press left
+until state player.x 69 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press left
+until state player.x 68 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press left
+until state player.x 67 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 76 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 75 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 74 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 73 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 68 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 72 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 71 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 70 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 69 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 70 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 69 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 68 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 67 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 66 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 65 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press left
+until state player.x 69 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 64 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press left
+until state player.x 68 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press left
+until state player.x 67 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 63 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 62 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 61 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 60 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press left
+until state player.x 66 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press left
+until state player.x 65 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 59 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 58 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 57 400
++0 release up
++8 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 56 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 55 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 54 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 53 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 52 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 51 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 50 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 49 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 48 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 47 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 46 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 45 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 44 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 66 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 67 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 68 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 69 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 70 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 71 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 72 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 73 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press up
+until state player.z 43 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 74 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 75 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 76 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 77 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 78 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 79 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 80 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 81 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 82 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press right
+until state player.x 83 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 44 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 45 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 46 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 47 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 48 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press left
+until state player.x 82 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 49 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 50 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 51 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 52 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 53 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 54 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 55 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 56 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 57 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press left
+until state player.x 81 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 60 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 61 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press left
+until state player.x 80 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press left
+until state player.x 79 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
++0 press down
+until state player.z 62 400
++0 release down
++8 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 61 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 78 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 77 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press down
+until state player.z 62 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 74 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 73 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 72 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 71 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 61 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 60 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 70 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 69 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 68 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 67 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 66 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 65 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 64 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 63 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 62 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 60 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 59 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 58 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 57 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press left
+until state player.x 55 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.z 59 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.z 58 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.z 57 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.z 56 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.z 55 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.z 54 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.z 53 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.z 52 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.z 51 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.z 50 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.z 49 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press down
+until state player.x 57 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 58 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 59 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 60 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 61 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 62 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 63 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 64 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 65 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 66 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 67 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 68 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 69 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 70 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 71 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 72 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 48 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 47 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 46 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 45 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 44 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 43 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 42 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 41 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 40 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 39 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 38 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 37 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 36 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 33 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 73 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 74 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 77 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 78 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 79 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 80 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 81 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 82 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press down
+until state player.z 34 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press down
+until state player.z 35 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press down
+until state player.z 36 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press down
+until state player.z 37 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press down
+until state player.z 38 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press down
+until state player.z 39 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press down
+until state player.z 42 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 83 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 84 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 87 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press down
+until state player.z 43 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press down
+until state player.z 44 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 88 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 89 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 90 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 93 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press down
+until state player.z 45 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 94 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 95 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press right
+until state player.x 96 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 44 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
++0 press up
+until state player.z 43 400
++0 release up
++8 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 44 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 45 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 95 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 94 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press up
+until state player.z 44 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press up
+until state player.z 43 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press up
+until state player.z 42 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press up
+until state player.z 41 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 93 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 90 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 87 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press left
+until state player.x 84 400
++0 release left
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 44 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 47 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 48 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 49 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 50 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press right
+until state player.x 85 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press right
+until state player.x 86 400
++0 release right
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 51 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 52 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 53 400
++0 release down
++8 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
+until state player.z 55 400
++0 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 field move 0 platinum:MOVE_STRENGTH
++46 press a
++1 release a
++184 press a
++1 release a
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 press down
++20 release down
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
++0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_B5F","x":86,"z":55,"y":2064,"facing":"down"}
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 6
++0 assert var platinum:VAR_DISTORTION_WORLD_CYRUS_APPEARANCE 0
++0 assert flag platinum:FLAG_DISTORTION_WORLD_PUZZLE_FINISHED false
++0 assert state mapFeatures.support null
++0 assert state mapFeatures.cameraAngle [0,0,0]
++0 assert state mapFeatures.puzzleFlags 64568
++0 assert state mapFeatures.platformFlags 448
++0 assert state mapFeatures.hiddenGhostGroups 16777213

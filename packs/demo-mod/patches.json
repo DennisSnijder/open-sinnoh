@@ -1,0 +1,16 @@
+[
+  {
+    "registry": "species",
+    "id": "fixture:SPECIES_DRIPLING",
+    "operations": [
+      { "op": "test", "path": "/starterSlot", "value": 2 },
+      { "op": "replace", "path": "/starterSlot", "value": 0 },
+      { "op": "replace", "path": "/name", "value": "Rainlet" }
+    ]
+  },
+  {
+    "registry": "species",
+    "id": "fixture:SPECIES_MOSSLET",
+    "operations": [{ "op": "replace", "path": "/starterSlot", "value": 2 }]
+  }
+]

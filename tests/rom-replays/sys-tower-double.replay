@@ -1,0 +1,66 @@
+# Battle Tower doubles (BATTLE_TOWER_MODE_DOUBLE): four Pokémon picked in order, one double battle won, then RETIRE
+# (its question YES): the doubles record is 1.
+party 0 platinum:SPECIES_GARCHOMP 60 platinum:MOVE_EARTHQUAKE platinum:MOVE_DRAGON_CLAW
+party 1 platinum:SPECIES_LUCARIO 55 platinum:MOVE_AURA_SPHERE
+party 2 platinum:SPECIES_STARAPTOR 52 platinum:MOVE_BRAVE_BIRD
+party 3 platinum:SPECIES_GYARADOS 55 platinum:MOVE_WATERFALL
+warp platinum:MAP_HEADER_BATTLE_TOWER 15 6 up
+until idle
++0 press a
++1 release a
+advance text
+until menu 600
++10 press a
++1 release a
+advance text
+until menu 600
++10 press down
++1 release down
++2 press a
++1 release a
+advance text
+until app party 600
++2 tap slot:0
++2 tap menu:0
++2 tap slot:1
++2 tap menu:0
++2 tap slot:2
++2 tap menu:0
++2 tap slot:3
++2 tap menu:0
++2 tap confirm
+until app none 300
+advance text
+until yesno 600
++2 press a
++1 release a
+advance text
+until yesno 600
++2 press a
++1 release a
++300 press a
++1 release a
+until state player.zone "platinum:MAP_HEADER_BATTLE_TOWER_ELEVATOR" 1200
++2000 press a
++1 release a
+until battle 2000
+battle auto 20000
+until menu 3000
++10 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++10 press a
++1 release a
+until yesno 600
++10 press up
++1 release up
++4 press a
++1 release a
+until state player.zone "platinum:MAP_HEADER_BATTLE_TOWER" 3000
+until message 3000
+advance text 3000
++0 assert state frontier.towerStreaks[1] {"record":1,"latest":1}
++0 assert battles frontier 1

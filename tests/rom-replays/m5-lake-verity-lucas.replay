@@ -1,0 +1,104 @@
+from cp11.replay
+set state gender "female"
+party 0 platinum:SPECIES_EMPOLEON 56 platinum:MOVE_SURF platinum:MOVE_DRILL_PECK platinum:MOVE_ROCK_SMASH platinum:MOVE_CUT
+set var platinum:VAR_CANALAVE_CITY_STATE 6
+set flag platinum:FLAG_ALT_MUSIC_LAKE_VALOR true
+set flag platinum:FLAG_DEFEATED_COMMANDER_SATURN_VALOR_CAVERN true
+set flag platinum:FLAG_DEFEATED_TRAINER_COLLECTOR_DEAN true
+set flag platinum:FLAG_DEFEATED_TRAINER_GALACTIC_GRUNT_LAKE_VALOR_1 true
+set flag platinum:FLAG_DEFEATED_TRAINER_PARASOL_LADY_ALEXA true
+set flag platinum:FLAG_DEFEATED_TRAINER_RANGER_ALLISON true
+set flag platinum:FLAG_DEFEATED_TRAINER_RANGER_JEFFREY true
+set flag platinum:FLAG_DEFEATED_TRAINER_RANGER_TAYLOR true
+set flag platinum:FLAG_DEFEATED_TRAINER_SCIENTIST_STEFANO true
+set flag platinum:FLAG_FIRST_ARRIVAL_VALOR_CAVERN true
+set flag platinum:FLAG_HIDE_CANALAVE_CITY_COUNTERPART true
+set flag platinum:FLAG_HIDE_CANALAVE_CITY_PROF_ROWAN true
+set flag platinum:FLAG_HIDE_LAKE_VALOR_GALACTIC true
+set flag platinum:FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_ALEX true
+set flag platinum:FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_BOBBY true
+set flag platinum:FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_CALEB true
+set flag platinum:FLAG_HIDE_ROUTE_212_NORTH_POLICEMAN_DYLAN true
+set flag platinum:FLAG_HIDE_ROUTE_212_SOUTH_POLICEMAN_DANNY true
+warp platinum:MAP_HEADER_ROUTE_201 81 844 up
+# Gender branch for cp12: Lake Verity for a girl. LakeVerity_OnTransition draws
+# the counterpart by gender (VAR_OBJ_GFX_ID_0: Lucas, OBJ_EVENT_GFX_PLAYER_M 0, where cp12 has Dawn, 97) and Rowan
+# asks for Lucas's help (LakeVerity_YouveGotToHelpLucas); the four grunts and Mars (405) are the same for every
+# player. Setup lines stage it from CP11's end with the state cp12 has on Route 201 after Valor Cavern (Saturn
+# beaten, Canalave state 6): the gender as the save keeps it, an Empoleon at cp12's level there. cp11 ends with the
+# Bibarel in the party (cp12 leaves it in the PC), so the first grunts battle as a pair (type 19); with Bibarel
+# fainted, the second two one at a time (the two-alive check). Headless from the
+# cp11 anchor (tests/integration/checkpoints-m5b-branches.rom.test.ts).
++0 wild auto
++0 evolve cancel
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_LAKE_VERITY" 3000
++0 release up
++0 assert var platinum:VAR_OBJ_GFX_ID_0 0
+# Rowan sees the player (LakeVerity_OnFrame_ProfRowanNoticePlayer): Lucas's line
+until message 3000
++0 assert text platinum:LakeVerity_Text_YouveGotToHelpLucas 0
+advance text 6000
+until idle 3000
+# Lake Verity: two grunts face each other over row 49, the way north
++0 press up
+until position 47 52 600
++0 release up
++0 press right
+until position 48 52 600
++0 release right
++0 press up
+until message 3000
++0 release up
+advance text
+battle auto 20000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_LAKE_VERITY_1 won trainer-pair
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_LAKE_VERITY_2 won trainer-pair
+# and two more over row 43
++0 press up
+until position 48 48 6000
++0 release up
++0 press right
+until position 50 48 6000
++0 release right
++0 press up
+until position 50 44 6000
++0 release up
++0 press up
+until message 3000
++0 release up
+advance text
+battle auto 20000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_LAKE_VERITY_3 won single
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_LAKE_VERITY_4 won single
++8 release select
+# Mars at Lake Verity (LakeVerity_Mars): 405
++0 press up
+until position 50 39 6000
++0 release up
++0 press right
+until position 55 39 6000
++0 release right
+until idle
++1 press up
++1 release up
+until idle
++0 assert facing player up
++1 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_COMMANDER_MARS_LAKE_VERITY won single
+advance text 9000
+until idle 3000
++0 assert flag platinum:FLAG_TEAM_GALACTIC_LEFT_LAKE_VERITY true
++0 assert var platinum:VAR_LAKE_ACUITY_STATE 1

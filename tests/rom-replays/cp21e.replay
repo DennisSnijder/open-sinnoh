@@ -1,0 +1,342 @@
+from cp21d.replay
++0 reload
+# CP21e (docs/research/story-cp20-24.md §CP21): the dex sweep, part 5. From Hearthome over
+# Route 208 (Aroma Lady Hannah) to Mt. Coronet, Medicham on 2F by day; Route 207 to Oreburgh; then night (the frozen
+# clock stepped on): Kricketune on Cycling Road, Eterna, Route 205 and Eterna Forest to the Old Chateau, Rotom in its
+# TV. Wild Pokémon are fought by the auto policy (seen, and out of the way).
++0 wild auto
++0 evolve auto
+until idle
+# west to Route 208
++0 press down
+until position 465 716 6000
++0 release down
++0 press right
+until position 485 716 6000
++0 release right
++0 press down
+until position 485 726 6000
++0 release down
++0 press left
+until position 458 726 6000
++0 release left
++0 press left
+until position 455 726 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_208_GATE_TO_HEARTHOME_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_208" 3000
++0 release left
+until idle
++8 release select
++8 release select
+# Route 208: Aroma Lady Hannah (Combee) looks about from (433, 720), two tiles: up x 433 and wait two tiles south of her
++0 press left
+until position 440 726 6000
++0 release left
++0 press down
+until position 440 729 6000
++0 release down
++0 press left
+until position 433 729 6000
++0 release left
++0 press up
+until position 433 722 6000
++0 release up
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_AROMA_LADY_HANNAH won single
++8 release select
+# west to Mt. Coronet (CP12's way)
++0 press down
+until position 433 729 6000
++0 release down
++0 press left
+until position 427 729 6000
++0 release left
++0 press up
+until position 427 715 6000
++0 release up
++0 press left
+until position 422 715 6000
++0 release left
++0 press down
+until position 422 724 6000
++0 release down
++0 press left
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_SOUTH" 6000
++0 release left
+until idle
++8 release select
++8 release select
++8 release select
+# Surf (Empoleon) east over the pool on rows 4–6, Rock Climb (Bibarel) up the wall at (27, 9), the stairs to 2F
++0 press up
+until position 27 13 6000
++0 release up
++0 press left
+until position 24 13 6000
++0 release left
++0 press down
+until position 24 16 6000
++0 release down
++0 press left
+until position 19 16 6000
++0 release left
++0 press down
+until position 19 19 6000
++0 release down
++0 press left
+until position 16 19 6000
++0 release left
++0 press down
+until position 16 20 6000
++0 release down
++0 press left
+until position 15 20 6000
++0 release left
++0 press down
+until position 15 23 6000
++0 release down
++0 press left
+until position 6 23 6000
++0 release left
++0 press up
+until position 6 5 6000
++0 release up
+until idle
++1 press right
++1 release right
+until idle
++0 assert facing player right
++0 field move 0 platinum:MOVE_SURF
+advance text
+until idle
++0 press right
+until position 22 5 6000
++0 release right
++0 press down
+until position 22 10 6000
++0 release down
++0 press right
+until position 27 10 6000
++0 release right
+until idle
++1 press up
++1 release up
+until idle
++0 assert facing player up
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle
++0 press left
+until position 25 7 6000
++0 release left
++0 press up
+until position 25 4 6000
++0 release up
++0 press up
+until position 25 3 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_2F" 3000
++0 release right
+until idle
++8 release select
++8 release select
+# Mt. Coronet 2F by day: Medicham
+until wild platinum:SPECIES_MEDICHAM up down 60000
+battle auto 20000
+advance text
+until idle
++8 release select
+# back down to 1F, Rock Climb down the wall at x 27, Surf west over the pool to Route 207
++0 press down
+until position 27 48 6000
++0 release down
++0 press left
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_SOUTH" 3000
++0 release left
+until idle
++8 release select
++0 press down
+until position 25 7 6000
++0 release down
++0 press right
+until position 27 7 6000
++0 release right
+until idle
++1 press down
++1 release down
+until idle
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle
++0 press left
+until position 22 10 6000
++0 release left
++0 press up
+until position 22 5 6000
++0 release up
++0 press left
+until position 17 5 6000
++0 release left
+until idle
++1 press left
++1 release left
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until idle
++0 press left
+until position 6 5 6000
++0 release left
++0 press down
+until position 6 8 6000
++0 release down
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_207" 3000
++0 release left
+until idle
++8 release select
++8 release select
+# west along Route 207 to Cycling Road's south gate, by bike; evening falls (the frozen clock stepped on to 20:00)
++0 press left
+until position 303 712 6000
++0 release left
+until idle
++0 time 20:00
++1 press y
++1 release y
+until state playerState "cycle" 300
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_206_CYCLING_ROAD_SOUTH_GATE" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_206" 3000
++0 release up
+until idle
++0 press right
+until position 305 681 600
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_206_CYCLING_ROAD_NORTH_GATE" 9000
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY" 3000
++0 release up
+until idle
++8 release select
++8 release select
+# west out of Eterna over Route 205 into Eterna Forest
++0 press up
+until position 304 533 6000
++0 release up
++0 press left
+until position 272 533 6000
++0 release left
++0 press up
+until position 272 530 6000
++0 release up
++0 press left
+until position 260 530 6000
++0 release left
++0 press up
+until position 260 524 6000
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_ETERNA_FOREST" 3000
++0 release left
+until idle
++8 release select
++8 release select
+# off the bike; Cut (Garchomp) the tree at (74, 33) and north through the grass to the Old Chateau
+until idle
++1 press y
++1 release y
+until state playerState "walk" 300
+until idle
++0 press left
+until position 74 36 6000
++0 release left
++0 press up
+until position 74 34 6000
++0 release up
+until idle
++1 press a
++1 release a
+until yesno 3000
++0 press a
++1 release a
+advance text 3000
+until idle 3000
++8 release select
++0 press up
+until state player.zone "platinum:MAP_HEADER_OLD_CHATEAU" 6000
++0 release up
+until idle
++8 release select
++8 release select
+# the Old Chateau: up the hall to the corridor
++0 press up
+until position 9 10 6000
++0 release up
++0 press left
+until position 3 10 6000
++0 release left
++0 press up
+until position 3 3 6000
++0 release up
++0 press right
+until position 9 3 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_OLD_CHATEAU_CORRIDOR" 3000
++0 release up
+until idle
++8 release select
++8 release select
+# the back middle-west room
++0 press up
+until position 19 4 6000
++0 release up
++0 press left
+until position 11 4 6000
++0 release left
++0 press up
+until position 11 3 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_OLD_CHATEAU_BACK_MIDDLE_WEST_ROOM" 3000
++0 release up
+until idle
++8 release select
++8 release select
+# the TV at night (OldChateauBackMiddleWestRoom_TV): thump it (YES); Rotom (L20), seen and defeated by the auto policy
++0 press up
+until position 11 4 6000
++0 release up
+until idle
++1 press up
++1 release up
+until idle
+# the browser spec's beat: the Old Chateau's TV room at night
++0 screenshot old-chateau-tv
++1 press a
++1 release a
+until message 3000
++0 press a
++1 release a
+until yesno 3000
++0 press a
++1 release a
+advance text 3000
+until battle 3000
+battle auto 20000
+advance text 3000
+until idle 3000
++0 assert battle scripted platinum:SPECIES_ROTOM won
++0 assert flag platinum:FLAG_DAILY_BATTLED_OLD_CHATEAU_ROTOM true
+# end of CP21e
++0 assert position platinum:MAP_HEADER_OLD_CHATEAU_BACK_MIDDLE_WEST_ROOM 11 4
++8 release select

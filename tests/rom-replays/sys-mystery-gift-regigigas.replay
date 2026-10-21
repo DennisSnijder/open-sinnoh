@@ -1,0 +1,90 @@
+# Mystery Gift's Pokémon gift and the Wonder Cards (docs/decisions.md "Mystery Gift with gift codes"). Two gifts by
+# test-only codes: the fateful Regigigas, then Oak's Letter. CHECK CARD: the cards (right for the next), INFO turns
+# one over, TRASH on Oak's Letter, whose gift was not picked up: "You haven't received your gift yet…" YES, "Discarding…":
+# its card and gift are gone and it can be received again (decomp MysteryGift_FreeWcErasePgt). Then in Sandgem's
+# Poké Mart the deliveryman gives the Regigigas (decomp GivePokemon: into the party, fateful, caught), with the ROM's
+# message, and has no more gifts.
+giftcodes test
+party 0 platinum:SPECIES_TURTWIG 10 platinum:MOVE_TACKLE
+warp platinum:MAP_HEADER_SANDGEM_TOWN 187 843 up
+until idle
++0 open mystery-gift
+until app mystery-gift
++1 tap menu:0
+until app naming
++1 tap type:TESTREGI
++1 tap ok
+until app mystery-gift
++65 assert text platinum:MysteryGiftMenu_Text_ReceiveThisGift 0
++1 tap yes
++95 assert text platinum:MysteryGiftMenu_Text_GiftReceivedPickUpInPokeMart 0
++1 tap next
++1 tap next
+until app none
++1 open mystery-gift
+until app mystery-gift
++1 tap menu:0
+until app naming
++1 tap type:TESTSHAY
++1 tap ok
+until app mystery-gift
++65 tap yes
++95 assert text platinum:MysteryGiftMenu_Text_GiftReceivedPickUpInPokeMart 0
++1 tap next
++1 tap next
+until app none
++0 assert state mysteryGift.received ["regigigas","shaymin"]
++0 assert state mysteryGift.deliveries[1] {"gift":"shaymin","card":1}
+# The cards.
++1 open mystery-gift
+until app mystery-gift
++1 tap menu:1
++1 tap menu:0
++1 tap card:next
++1 tap menu:1
++1 assert text platinum:MysteryGiftMenu_Text_HaventReceivedGiftYet 0
++1 tap yes
++1 assert text platinum:MysteryGiftMenu_Text_DiscardingDontTurnOff 0
++35 assert state mysteryGift.cards[1] null
++0 assert state mysteryGift.deliveries[1] null
++0 assert state mysteryGift.received ["regigigas"]
++1 tap menu:2
++1 tap menu:2
+until app none
+# The deliveryman.
++0 press up
+until state player.zone "platinum:MAP_HEADER_SANDGEM_TOWN_MART" 300
++0 release up
+until idle
++0 press up
+until position 3 8 300
++0 release up
++0 press right
+until position 4 8 300
++0 release right
++0 press up
+until state player.facing "up" 30
++0 release up
+until idle
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 assert text platinum:MysteryGiftDeliveryman_Text_ReceivedPokemon 0
+advance text
+until idle
++0 assert party 1 platinum:SPECIES_REGIGIGAS
++0 assert state party[1].fatefulEncounter true
++0 assert state party[1].level 100
++0 assert state mysteryGift.deliveries[0] null
++0 press a
++1 release a
+until message
++0 assert text platinum:MysteryGiftDeliveryman_Text_NoMoreGifts 0
+advance text
+until idle

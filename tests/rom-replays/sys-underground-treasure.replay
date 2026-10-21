@@ -1,0 +1,37 @@
+from sys-sphere-growth.replay
+# sys-underground-treasure (mining.c, menus.c): a second board, after the first, with rocks:
+# a Heart Scale and two Spheres, struck with the pickaxe; the Heart Scale goes from TREASURES into the bag (PUT IN BAG).
+# Setup: 48 minutes on (the visit's mining generator takes the arrival's clock: this board), down at a bulging wall
+# south-west of the vendors' corridor.
+time 12:48
+warp platinum:MAP_HEADER_UNDERGROUND 181 167 left
+until idle
++0 press a
++1 release a
+until app mining
++1 tap yes
+# The fade, the ping and "Something pinged in the wall!" (no tutorial on a second board).
++110 tap hit:200,88
++3 tap hit:200,104
++3 tap hit:72,56
++3 tap hit:120,56
++3 tap hit:88,72
++3 tap hit:136,72
++3 tap hit:184,88
++3 tap hit:200,104
+until app none 3000
++0 assert state underground.treasures [35]
++0 assert state underground.records.otherDug 1
++0 press x
++1 release x
+until app ug-menu
++1 tap entry:3
++1 tap row:0
++1 tap menu:0
++1 assert state underground.treasures []
++0 assert state bag.items [{"item":"platinum:ITEM_HEART_SCALE","count":1}]
++1 tap next
++1 tap back
++1 tap back
+until app none
+until idle

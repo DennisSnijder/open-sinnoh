@@ -1,0 +1,20 @@
+from parts/rock-climb-north-south.replay
+# sys-rock-climb: refused without the Icicle Badge and Route 211 East
+# north–south in the parts. Here Route 207 east–west (z 725, x 344–346): across and back, each climb
+# ending on the first tile past the wall.
+warp platinum:MAP_HEADER_ROUTE_207 343 725 right
+until idle
+# the party menu offers Rock Climb facing the wall (usableFieldMoves, checked by the test at this line)
++0 screenshot rock-climb-offered
++0 field move 0 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle
++0 assert position platinum:MAP_HEADER_ROUTE_207 347 725
++0 press left
++1 release left
+until idle
++0 field move 0 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle
++0 assert position platinum:MAP_HEADER_ROUTE_207 343 725
++0 assert state playerState "walk"

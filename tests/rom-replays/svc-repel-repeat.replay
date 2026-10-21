@@ -1,0 +1,140 @@
+# svc-repel-repeat: the repeat-Repel prompt (OpenSinnoh option `repelPrompt`, HGSS's behaviour; docs/decisions.md
+# 2026-10-19). Run with the option on (tests/integration/qol.rom.test.ts; the contract default is off, where the same
+# walk ends at the ROM's wore-off message). A Repel used from the Bag; 100 steps in Route 201's grass (lead level 20:
+# no wild battle); CommonScript_RepelsEffectWoreOff; then "Use another Repel?" in the field box, YES uses the second.
+party 0 platinum:SPECIES_TURTWIG 20
+give item platinum:ITEM_REPEL 2
+warp platinum:MAP_HEADER_ROUTE_201 115 853 right
+until idle
++1 wild flee
++1 press x
++1 release x
+until app start-menu
++1 tap entry:1
++1 tap pocket:0
++1 tap row:0
++1 tap menu:0
++1 assert state repel 100
++1 press a
++1 release a
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
++1 press right
+until position 119 853
++0 release right
+until idle
++1 press left
+until position 115 853
++0 release left
+until idle
++1 press right
+until position 119 853
++0 release right
+until idle
++1 press left
+until position 115 853
++0 release left
+until idle
++1 press right
+until position 119 853
++0 release right
+until idle
++1 press left
+until position 115 853
++0 release left
+until idle
++1 press right
+until position 119 853
++0 release right
+until idle
++1 press left
+until position 115 853
++0 release left
+until idle
++1 press right
+until position 119 853
++0 release right
+until idle
++1 press left
+until position 115 853
++0 release left
+until idle
++1 press right
+until position 119 853
++0 release right
+until idle
++1 press left
+until position 115 853
++0 release left
+until idle
++1 press right
+until position 119 853
++0 release right
+until idle
++1 press left
+until position 115 853
++0 release left
+until idle
++1 press right
+until position 119 853
++0 release right
+until idle
++1 press left
+until position 115 853
++0 release left
+until idle
++1 press right
+until position 119 853
++0 release right
+until idle
++1 press left
+until position 115 853
++0 release left
+until idle
++1 press right
+until position 119 853
++0 release right
+until idle
++1 press left
+until position 115 853
++0 release left
+until idle
++1 press right
+until position 119 853
++0 release right
+until idle
++1 press left
+until position 115 853
++0 release left
+until idle
++1 press right
+until position 119 853
++0 release right
+until idle
++1 press left
+until position 115 853
++0 release left
+until idle
++1 press right
+until position 119 853
++0 release right
++120 assert text platinum:CommonStrings_Text_RepelsEffectWoreOff 0
++0 assert state repel 0
++1 press a
++1 release a
+until yesno 60
++0 assert text platinum:Lantern_Repel_UseAnother 0 0=Repel
++1 press a
++1 release a
+until message 60
++0 assert text platinum:Bag_Text_UsedRepel 0
++1 press a
++1 release a
+until idle
++0 assert state repel 100
++0 assert state bag.items []
++0 assert battles wild 0

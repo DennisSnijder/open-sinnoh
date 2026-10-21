@@ -1,0 +1,23 @@
+from m6-event-shaymin.replay
+# Event branch m6-event-shaymin-caught: Flower Paradise, at the end of the Seabreak Path
+# m6-event-shaymin opened (staged at Shaymin). Its on-transition shows Shaymin (the letter, the distribution, not caught);
+# A: start_fateful_encounter SPECIES_SHAYMIN 30, caught with the Master Ball: FLAG_CAUGHT_SHAYMIN, and the Shaymin carries
+# the fateful-encounter bit (Pokemon.fatefulEncounter, save v17), which a reload keeps.
+warp platinum:MAP_HEADER_FLOWER_PARADISE 911 204 up
+until idle
++0 assert flag platinum:FLAG_HIDE_FLOWER_PARADISE_SHAYMIN false
++0 press a
++1 release a
+advance text 3000
+battle catch platinum:ITEM_MASTER_BALL 20000
++0 assert battle scripted platinum:SPECIES_SHAYMIN caught
+advance text 20000
+until idle 3000
++0 assert flag platinum:FLAG_CAUGHT_SHAYMIN true
++0 assert party 5 platinum:SPECIES_SHAYMIN
++0 assert state party[5].level 30
++0 assert state party[5].form 0
++0 assert state party[5].fatefulEncounter true
++0 reload
++0 assert state party[5].fatefulEncounter true
+until idle 600

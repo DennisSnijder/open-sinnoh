@@ -1,0 +1,24 @@
+# The Sandgem twin (scripts_sandgem_town_counterpart_house_1f.s SandgemTownCounterpartHouse1F_Twin): once the game is
+# completed and the National Pokédex obtained, the first talk turns swarms on (EnableSwarms), later ones name the
+# day's swarm (GetSwarmMapAndSpecies: swarmDaily % 22).
+# Setup: the game completed, the National Pokédex, and the swarm daily 0 (swarm 0: Route 201's Doduo).
+set flag platinum:FLAG_GAME_COMPLETED true
+set state pokedex.national true
+set state gameTime.swarmDaily 0
+party 0 platinum:SPECIES_GARCHOMP 50 platinum:MOVE_DRAGON_CLAW
+date 2009-03-22 12:00
+warp platinum:MAP_HEADER_SANDGEM_TOWN_COUNTERPART_HOUSE_1F 5 8 up
+until idle
++0 press a
++1 release a
+until message
++0 assert text platinum:SandgemTownCounterpartHouse1F_Text_MassiveOutbreakOfPokemon 0
+advance text
+until idle
++0 assert state encounters.swarms true
++0 press a
++1 release a
+until message
++0 assert text platinum:SandgemTownCounterpartHouse1F_Text_BunchOfPokemonAtLocationMale 0
+advance text
+until idle

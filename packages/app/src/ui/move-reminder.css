@@ -1,0 +1,20 @@
+/*
+ * The move relearner's screen on its DS screen (move-reminder.ts): the page art, sprites and texts at their DS rects
+ * on a board (one DS px = --unit). CSS stand-ins draw the same rects when the pack has no art (the fixture).
+ */
+.move-reminder-screen .mr-bg, .move-reminder-screen .sprite, .move-reminder-screen .type-icon, .move-reminder-screen .type-chip { display: block; pointer-events: none; }
+.move-reminder-screen .sum-text { display: flex; align-items: flex-start; }
+.move-reminder-screen .sum-text.right { justify-content: flex-end; }
+.move-reminder-screen .sum-text.center { justify-content: center; }
+.move-reminder-screen .mr-desc { display: block; }
+.move-reminder-screen .mr-row { display: flex; align-items: center; padding-left: calc(var(--unit) * 2); }
+.move-reminder-screen [data-nav].is-cursor { background: none; box-shadow: none; }
+.move-reminder-screen [data-nav].is-cursor::before { display: none; }
+.move-reminder-screen .mr-arrow-tap { display: grid; place-items: center; }
+.move-reminder-screen .window.rom-frame, .move-reminder-screen .msg-box.rom-frame { padding: 0; min-height: 0; }
+
+/* Stand-ins without the art. */
+.mr-bg.css { background: linear-gradient(90deg, #f8d8c8 0 calc(var(--unit) * 136), #f0e070 calc(var(--unit) * 136)); }
+.move-reminder-screen .mr-selector.css { box-shadow: inset 0 0 0 var(--unit) #e01010; }
+.move-reminder-screen .mr-arrow-tap:empty::before { content: ''; width: calc(var(--unit) * 8); height: calc(var(--unit) * 5); background: #3050e0; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.move-reminder-screen .mr-arrow-tap.down:empty::before { clip-path: polygon(0 0, 100% 0, 50% 100%); }

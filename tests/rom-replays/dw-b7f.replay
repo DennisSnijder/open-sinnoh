@@ -1,0 +1,174 @@
+# dw-b7f: from a constructed start on B7F (Cynthia waiting); Cynthia and Cyrus's scene, Cyrus's battle won (the party healed after), the teleport tile north into the Giratina room.
+party 0 platinum:SPECIES_GARCHOMP 100 platinum:MOVE_EARTHQUAKE platinum:MOVE_STONE_EDGE platinum:MOVE_DRAGON_CLAW platinum:MOVE_FIRE_FANG
+set var platinum:VAR_DISTORTION_WORLD_PROGRESS 8
+warp platinum:MAP_HEADER_DISTORTION_WORLD_B7F 85 77 up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 press up
+until state player.z 76 400
++0 release up
++8 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++78 press a
++1 release a
++133 press a
++1 release a
++124 press a
++1 release a
++112 press a
++1 release a
++147 press a
++1 release a
++152 press a
++1 release a
++122 press a
++1 release a
++110 press a
++1 release a
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_B7F","x":85,"z":76,"y":1040,"facing":"up"}
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 9
++0 assert var platinum:VAR_DISTORTION_WORLD_CYRUS_APPEARANCE 0
++0 assert flag platinum:FLAG_DISTORTION_WORLD_PUZZLE_FINISHED false
++0 assert state mapFeatures.support null
++0 assert state mapFeatures.cameraAngle [0,0,0]
++0 assert state mapFeatures.puzzleFlags 7
++0 assert state mapFeatures.platformFlags 1695
++0 assert state mapFeatures.hiddenGhostGroups 16777213
++0 press up
+until state player.z 75 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 press a
++1 release a
++41 press a
++1 release a
++112 press a
++1 release a
++2 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
+battle auto 30000
++134 press a
++1 release a
++116 press a
++1 release a
++120 press a
++1 release a
++56 press a
++1 release a
++134 press a
++1 release a
++58 press a
++1 release a
++180 press a
++1 release a
++124 press a
++1 release a
++106 press a
++1 release a
++92 press a
++1 release a
++150 press a
++1 release a
++44 press a
++1 release a
++148 press a
++1 release a
++72 press a
++1 release a
++46 press a
++1 release a
++136 press a
++1 release a
++77 press a
++1 release a
++30 press a
++1 release a
++30 press a
++1 release a
++30 press a
++1 release a
++71 press a
++1 release a
++240 press a
++1 release a
++138 press a
++1 release a
++92 press a
++1 release a
++56 press a
++1 release a
++152 press a
++1 release a
++112 press a
++1 release a
++114 press a
++1 release a
++88 press a
++1 release a
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_B7F","x":89,"z":68,"y":1040,"facing":"down"}
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 10
++0 assert var platinum:VAR_DISTORTION_WORLD_CYRUS_APPEARANCE 0
++0 assert flag platinum:FLAG_DISTORTION_WORLD_PUZZLE_FINISHED false
++0 assert state mapFeatures.support null
++0 assert state mapFeatures.cameraAngle [0,0,0]
++0 assert state mapFeatures.puzzleFlags 7
++0 assert state mapFeatures.platformFlags 1695
++0 assert state mapFeatures.hiddenGhostGroups 16777213
++0 press up
+until state player.z 67 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 press up
+until state player.z 66 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 press up
+until state player.z 65 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 press up
+until state player.z 64 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 press up
+until state player.z 63 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 press up
+until state player.z 60 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 press up
+until state player.z 59 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 press up
+until state player.z 58 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 press up
+until state player.z 57 400
++0 release up
++8 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
++0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM","x":15,"z":25,"y":16,"facing":"up"}
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 10
++0 assert var platinum:VAR_DISTORTION_WORLD_CYRUS_APPEARANCE 0
++0 assert flag platinum:FLAG_DISTORTION_WORLD_PUZZLE_FINISHED false
++0 assert state mapFeatures.support null
++0 assert state mapFeatures.cameraAngle [0,0,0]
++0 assert state mapFeatures.puzzleFlags 7
++0 assert state mapFeatures.platformFlags 136
++0 assert state mapFeatures.hiddenGhostGroups 16777214

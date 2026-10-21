@@ -1,0 +1,17 @@
+from parts/safari-enter.replay
+# sys-safari-steps (docs/research/great-marsh.md): 497 steps taken; the 500th (Field_UpdateSafari) starts
+# SAFARI_GAME 1: the chime and "Time's up!", the fade, the warp to the gate, VAR_SAFARI_GAME_STATE 2 and the game's
+# end; the gate's on-frame script walks the player out.
+set state safari {"balls":30,"steps":497,"caught":0}
++0 press up
+until state safari.steps 500
++0 release up
+# The message waits for A or B without an arrow (wait_ab_press).
++150 assert text platinum:SafariGame_Text_TimesUp 0
++0 press a
++1 release a
+until idle
++0 assert position platinum:MAP_HEADER_PASTORIA_CITY_OBSERVATORY_GATE_1F 5 7
++0 assert flag platinum:FLAG_SAFARI_GAME_ACTIVE false
++0 assert var platinum:VAR_SAFARI_GAME_STATE 0
++0 assert state safari {"balls":0,"steps":0,"caught":0}

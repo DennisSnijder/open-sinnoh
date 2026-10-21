@@ -1,0 +1,7 @@
+from weather-228.replay
+# Part of sys-weather: STARK_MOUNTAIN_OUTSIDE has weather SLOW_ASHFALL (header). The `weather-stark` screenshot line marks the browser
+# spec's check that particles or fog change the frame against a clear one.
+warp platinum:MAP_HEADER_STARK_MOUNTAIN_OUTSIDE 749 232 down
+until idle
++0 assert state weather "platinum:OVERWORLD_WEATHER_SLOW_ASHFALL"
++0 screenshot weather-stark

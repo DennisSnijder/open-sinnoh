@@ -1,0 +1,137 @@
+from opening-rival.replay
+# Platinum opening, part 2: the first battle, home, the rival joins, Lake Verity and Cyrus
+# (docs/research/scripts-and-opening.md §5–6).
+# the first battle (decomp StartFirstBattle): Piplup against the rival's Turtwig, no crits, no blackout
+until battle
+battle auto 6000
++0 assert battle trainer platinum:TRAINER_RIVAL_ROUTE_201_PIPLUP won
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until position 2 6  # home: the warp lands here; Mom's scene starts the tick after it ends
++0 assert var platinum:VAR_PLAYER_STARTER 393
++0 assert flag platinum:FLAG_HIDE_ROUTE_201_BRIEFCASE true
++0 assert flag platinum:FLAG_HIDE_ROUTE_201_PROF_ROWAN true
++0 assert var platinum:VAR_FOLLOWER_RIVAL_STATE 2
++0 assert var platinum:VAR_PLAYER_HOUSE_STATE 3
+# home after the battle: running shoes
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_1F 2 6
+advance text 3200
++0 assert var platinum:VAR_PLAYER_HOUSE_STATE 4
++0 assert party 0 platinum:SPECIES_PIPLUP
+# leave the house
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_1F 6 8
++0 press down
+until position 116 886
++0 release down
+until idle
++0 assert var platinum:VAR_PLAYER_HOUSE_STATE 5
+# Route 201: the rival joins
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN 116 886
++0 press left
+until position 113 886
++0 release left
++0 press up
+until position 113 858
++0 release up
++0 press left
+until position 111 858
++0 release left
++0 press up
+until position 111 857
++0 release up
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 assert facing player up
++0 assert facing 2 down
++0 press a
++1 release a
+until idle
++0 assert var platinum:VAR_FOLLOWER_RIVAL_STATE 3
++0 assert party 0 platinum:SPECIES_PIPLUP
+# west to Verity Lakefront
++0 assert position platinum:MAP_HEADER_ROUTE_201 111 857
++0 press up
+until position 111 853
++0 release up
++0 press left
+until position 89 853
++0 release left
++0 press up
+until position 89 852
++0 release up
++0 press left
+until position 83 852
++0 release left
++0 press up
+until position 83 846
++0 release up
++0 press left
+until position 81 846
++0 release left
++0 press up
+until position 81 845
++0 release up
++0 press left
+until position 80 845
++0 release left
++0 press up
+until position 80 844
++0 release up
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until position 46 54  # Lake Verity: the warp lands here; the Cyrus scene starts the tick after it ends
++0 assert var platinum:VAR_VERITY_LAKEFRONT_STATE 1
+# Lake Verity: Cyrus
++0 assert position platinum:MAP_HEADER_LAKE_VERITY_LOW_WATER 46 54
+until message
++0 press a
++1 release a
++54 screenshot lake-verity-cyrus
+advance text 4200
++0 assert var platinum:VAR_VISITED_LAKE_VERITY_WITH_RIVAL 1
++0 assert flag platinum:FLAG_HIDE_LAKE_VERITY_LOW_WATER_RIVAL true
++0 assert var platinum:VAR_FOLLOWER_RIVAL_STATE 4
++0 assert party 0 platinum:SPECIES_PIPLUP
+# end
++0 assert position platinum:MAP_HEADER_LAKE_VERITY_LOW_WATER 46 53
+# state asserts (generic): the starter (level 6 after the rival battle), the rival battle, the running shoes
++0 assert state party[0].species "platinum:SPECIES_PIPLUP"
++0 assert state party[0].level 6
++0 assert state party[0].met.zone "platinum:MAP_HEADER_ROUTE_201"
++0 assert state pokedex.caught ["platinum:SPECIES_PIPLUP"]
++0 assert battle trainer platinum:TRAINER_RIVAL_ROUTE_201_PIPLUP won
++0 assert state runningShoes true

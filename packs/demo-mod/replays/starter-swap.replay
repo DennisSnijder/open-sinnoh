@@ -1,0 +1,63 @@
+# demo-mod: slot 0 is the patched starter (Dripling, renamed Rainlet), and the guide's idle label is
+# overridden with a new line (the text itself is checked in packages/cli/src/replays.test.ts).
+# Timings (real World/VM, 30 Hz): map loads fade 8 ticks; walk 8 ticks per tile; a new direction first
+# turns (2 ticks); text prints 1 char per 2 ticks; the guide's "!" lasts 30 ticks.
+#
+# new game: spawn in the room; the onFrame intro starts once the fade-in ends
+0 assert map fixture:ROOM
+0 assert position fixture:ROOM 14 16
+12 assert message open
+80 press a
+82 release a
+86 assert message closed
+# to the exit mat, then push down into the door warp
+90 press right
+94 release right
+110 assert position fixture:ROOM 15 16
+110 press down
+130 release down
+150 assert position fixture:ROOM 15 19
+150 press down
+152 release down
+170 assert map fixture:TOWN
+# the town door (10,13) opens under the fade in; the player walks out of it, south, and it closes (until 180)
+170 assert position fixture:TOWN 10 14
+# down to the path row, then east along it into the coord trigger (x 38)
+170 press down
+190 release down
+200 assert position fixture:TOWN 10 16
+200 press right
+422 release right
+426 assert position fixture:TOWN 38 16
+# the scene: the guide walks up from 44,16; two message pages
+430 assert message closed
+590 assert message open
+600 press a
+602 release a
+606 assert message open
+730 press a
+732 release a
+# the starter panel: slot 0 is Dripling in this mod; pick it and answer Yes
+740 assert message closed
+740 press a
+742 release a
+800 assert message open
+810 press a
+812 release a
+816 assert party 0 fixture:SPECIES_DRIPLING
+816 assert var fixture:VAR_PLAYER_STARTER 3
+890 press a
+892 release a
+940 assert message closed
+940 assert var fixture:VAR_SCENE 1
+# the guide is back at 44,16; walk up to it (the last push bumps) and talk: the overridden label runs
+940 press right
+990 release right
+1000 assert position fixture:TOWN 43 16
+1010 press a
+1012 release a
+1016 assert message open
+1140 press a
+1142 release a
+1150 assert message closed
+1150 assert party 0 fixture:SPECIES_DRIPLING

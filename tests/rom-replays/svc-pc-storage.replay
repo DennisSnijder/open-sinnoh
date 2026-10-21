@@ -1,0 +1,119 @@
+# svc-pc-storage: a Pokémon Center PC (Jubilife). SOMEONE'S PC, then the
+# Storage System: deposit, withdraw, move across boxes, move a held item; the last healthy Pokémon cannot
+# be deposited; a box name and wallpaper survive a save round trip.
+party 0 platinum:SPECIES_TURTWIG 9
+party 1 platinum:SPECIES_STARLY 6
+set state party[1].heldItem "platinum:ITEM_ORAN_BERRY"
+warp platinum:MAP_HEADER_JUBILIFE_CITY_POKECENTER_1F 12 4 up
+until idle
++1 press a
++1 release a
+advance text
++0 assert message open
+# SOMEONE'S PC
++5 press a
++1 release a
+advance text
+# DEPOSIT POKéMON: Starly (with its Oran Berry) into BOX 2
++5 press a
++1 release a
+until app storage
++0 assert app storage
++1 tap party:1
++1 tap menu:0
++1 press right
++1 release right
++1 press a
++1 release a
++1 assert state boxes[1].slots[0].species "platinum:SPECIES_STARLY"
++0 assert state party.length 1
++0 screenshot deposit
+# Turtwig is the last Pokémon able to battle: refused
++1 tap party:0
++1 tap menu:0
++1 press a
++1 release a
++1 assert state party.length 1
++1 press a
++1 release a
+# B asks "Exit from the Box?": YES
++1 press b
++1 release b
++1 tap yes
+until app none
+advance text
+# WITHDRAW POKéMON (the box shown is BOX 2, where the deposit went)
++5 press down
++1 release down
++1 press a
++1 release a
+until app storage
++1 tap slot:0
++1 tap menu:0
++1 assert state party[1].species "platinum:SPECIES_STARLY"
++0 assert state boxes[1].slots[0] null
++1 tap close
++1 tap yes
+until app none
+advance text
+# MOVE POKéMON: Starly from the party to BOX 1 slot 7, then BOX 1's name and wallpaper
++5 press down
++1 release down
++1 press down
++1 release down
++1 press a
++1 release a
+until app storage
++1 tap box:-1
++1 tap party:1
++1 tap menu:0
++1 tap slot:7
++1 assert state boxes[0].slots[7].species "platinum:SPECIES_STARLY"
++0 assert state party.length 1
++0 screenshot box-cursor
++1 tap header
++1 tap menu:1
++1 assert app naming
++1 tap del
++1 tap type:X
++1 tap ok
++1 assert state boxes[0].name "BOX X"
++1 tap header
++1 tap menu:0
++1 tap menu:2
++1 tap menu:3
++1 assert state boxes[0].wallpaper 11
++0 screenshot box
++1 tap close
++1 tap yes
+until app none
+advance text
+# MOVE ITEMS: the Oran Berry from Starly (BOX 1 slot 7) to Turtwig
++5 press down
++1 release down
++1 press down
++1 release down
++1 press down
++1 release down
++1 press a
++1 release a
+until app storage
++1 tap slot:7
++1 tap party:0
++1 assert state party[0].heldItem "platinum:ITEM_ORAN_BERRY"
++0 assert state boxes[0].slots[7].heldItem null
++1 tap close
++1 tap yes
+until app none
+advance text
+# B leaves the Storage System, B again switches the PC off
++5 press b
++1 release b
+advance text
++5 press b
++1 release b
+until idle
++1 reload
++0 assert state boxes[0].name "BOX X"
++0 assert state boxes[0].wallpaper 11
+until idle

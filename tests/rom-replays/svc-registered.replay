@@ -1,0 +1,72 @@
+# svc-registered (the bag's REGISTER): the registered item on the idle
+# field. Platinum uses Y for it (decomp FieldInput_Update: PAD_BUTTON_Y → registeredItem; Diamond and
+# Pearl used Select). With nothing registered Y shows the key-item info; the Bicycle registered in the bag
+# gets on and off; the Coin Case shows the coins (the message names the count).
+party 0 platinum:SPECIES_TURTWIG 12
+give item platinum:ITEM_BICYCLE 1
+give item platinum:ITEM_COIN_CASE 1
+set state coins 120
+warp platinum:MAP_HEADER_ROUTE_201 115 853 right
+until idle
+# Nothing registered: the key-item info message, closed by A
++1 press y
++1 release y
+until message
++0 assert message open
++0 assert text platinum:Bag_Text_KeyItemInfo 0
++0 assert state playerState "walk"
++1 press a
++1 release a
+until idle
++0 assert message closed
+# The bag: KEY ITEMS, the Bicycle, REGISTER (USE, REGISTER, CANCEL)
++1 press x
++1 release x
+until app start-menu
++1 tap entry:1
++1 assert app bag
++1 tap pocket:7
++1 tap row:0
++1 tap menu:1
++1 assert state registeredItem "platinum:ITEM_BICYCLE"
++1 press b
++1 release b
++1 press b
++1 release b
+until app none
+# Y gets on the bike; two tiles east; Y gets off
++1 press y
++1 release y
+until state playerState "cycle"
++0 screenshot cycling
++1 press right
+until position 117 853
++0 release right
+until idle
++1 press y
++1 release y
+until state playerState "walk"
+until idle
+# The Coin Case: its message shows the coins
++1 press x
++1 release x
+until app start-menu
++1 tap entry:1
++1 tap pocket:7
++1 tap row:1
++1 tap menu:1
++1 assert state registeredItem "platinum:ITEM_COIN_CASE"
++1 press b
++1 release b
++1 press b
++1 release b
+until app none
++1 press y
++1 release y
+until message
++0 assert message open
++0 assert text platinum:Bag_Text_CoinCaseMessage 0 0=120
++0 assert state playerState "walk"
++1 press b
++1 release b
+until idle

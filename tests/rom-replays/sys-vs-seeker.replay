@@ -1,0 +1,34 @@
+# VsSeekerSystem_PickRematchTrainers / GetRematchTrainerID: a charged scan makes a defeated trainer
+# spin; talking starts the unlocked rematch tier, then his normal post-battle movement returns.
+party 0 platinum:SPECIES_CHARIZARD 80 platinum:MOVE_FLAMETHROWER
+give item platinum:ITEM_VS_SEEKER 1
+set state registeredItem "platinum:ITEM_VS_SEEKER"
+set state fieldRng {"seed":0}
+set var platinum:VAR_VS_SEEKER_BATTERY_LEVEL 100
+set flag platinum:FLAG_DEFEATED_TRAINER_YOUNGSTER_TRISTAN true
+set flag platinum:FLAG_UNLOCKED_VS_SEEKER_LVL_1 true
+warp platinum:MAP_HEADER_ROUTE_202 166 814 up
+until idle
++0 press y
++1 release y
+until state objects[localId=0].movementType 49 120
++0 assert var platinum:VAR_VS_SEEKER_BATTERY_LEVEL 0
++0 reload
+until idle
++0 press a
++1 release a
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_YOUNGSTER_TRISTAN_REMATCH_1 won
++0 assert var platinum:VAR_VS_SEEKER_BATTERY_LEVEL 0
+# One committed walking step recharges by one, and the saved battery survives a round trip.
++0 press left
+until position 165 814
++0 release left
+until idle
++0 assert var platinum:VAR_VS_SEEKER_BATTERY_LEVEL 1
++0 reload
+until idle
++0 assert var platinum:VAR_VS_SEEKER_BATTERY_LEVEL 1

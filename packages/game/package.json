@@ -1,0 +1,8 @@
+{
+  "name": "@opensinnoh/game",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": { "@opensinnoh/core": "workspace:*", "@opensinnoh/contracts": "workspace:*", "@opensinnoh/services": "workspace:*" }
+}

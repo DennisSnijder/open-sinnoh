@@ -1,0 +1,70 @@
+# sys-hof-respawn (docs/research/postgame.md §6): the Hall of Fame's respawns
+# (decomp PokemonLeagueHallOfFame_SetHallOfFameVictoryFlagsAndVars) for every legendary left uncaught. A constructed
+# start as in sys-hall-of-fame, after a first clear: the National Pokédex, Heatran battled (room 3 state 2, hidden,
+# Buck talked to), Dialga and Palkia attempted (their Spear Pillar states 1), Giratina, Regigigas, Azelf and Uxie
+# hidden, and the five roamers defeated (VAR_ROAMING_*_STATE 2; Mesprit and Cresselia hidden in their caves). Cynthia's
+# battle and the Hall of Fame run as in sys-hall-of-fame; the room's script resets each one: Heatran back (state 1),
+# the Spear Pillar states 0, the hide flags cleared, the roamers ROAMER_STATE_RESET (3) for Oak or their caves.
+party 0 platinum:SPECIES_GARCHOMP 100 platinum:MOVE_EARTHQUAKE platinum:MOVE_DRAGON_CLAW platinum:MOVE_CRUNCH platinum:MOVE_FIRE_FANG
+party 1 platinum:SPECIES_INFERNAPE 100 platinum:MOVE_FLARE_BLITZ platinum:MOVE_CLOSE_COMBAT platinum:MOVE_THUNDER_PUNCH platinum:MOVE_MACH_PUNCH
+party 2 platinum:SPECIES_LUCARIO 100 platinum:MOVE_AURA_SPHERE platinum:MOVE_DRAGON_PULSE platinum:MOVE_DARK_PULSE platinum:MOVE_FLASH_CANNON
+party 3 platinum:SPECIES_STARAPTOR 100 platinum:MOVE_BRAVE_BIRD platinum:MOVE_CLOSE_COMBAT platinum:MOVE_RETURN platinum:MOVE_QUICK_ATTACK
+party 4 platinum:SPECIES_GYARADOS 100 platinum:MOVE_WATERFALL platinum:MOVE_ICE_FANG platinum:MOVE_EARTHQUAKE platinum:MOVE_RETURN
+party 5 platinum:SPECIES_MAMOSWINE 100 platinum:MOVE_EARTHQUAKE platinum:MOVE_ICE_SHARD platinum:MOVE_STONE_EDGE platinum:MOVE_ICE_FANG
+set var platinum:VAR_PLAYER_HOUSE_SPECIAL_PROGRAM_STATE 1
+set var platinum:VAR_PLAYER_HOUSE_STATE 7
+set var platinum:VAR_PLAYER_HOUSE_POSTGAME_STATE 1
+set flag platinum:FLAG_GAME_COMPLETED true
+set state pokedex.national true
+set flag platinum:FLAG_TALKED_TO_BATTLEGROUND_BUCK true
+set var platinum:VAR_STARK_MOUNTAIN_ROOM_3_STATE 2
+set flag platinum:FLAG_HIDE_STARK_MOUNTAIN_ROOM_3_HEATRAN true
+set var platinum:VAR_SPEAR_PILLAR_DIALGA_STATE 1
+set var platinum:VAR_SPEAR_PILLAR_PALKIA_STATE 1
+set flag platinum:FLAG_HIDE_TURNBACK_CAVE_GIRATINA_ROOM_GIRATINA true
+set flag platinum:FLAG_HIDE_SNOWPOINT_TEMPLE_B5F_REGIGIGAS true
+set flag platinum:FLAG_HIDE_VALOR_CAVERN_AZELF true
+set flag platinum:FLAG_HIDE_ACUITY_CAVERN_UXIE true
+set var platinum:VAR_ROAMING_MESPRIT_STATE 2
+set flag platinum:FLAG_HIDE_VERITY_CAVERN_MESPRIT true
+set var platinum:VAR_ROAMING_CRESSELIA_STATE 2
+set flag platinum:FLAG_HIDE_FULLMOON_ISLAND_FOREST_CRESSELIA true
+set var platinum:VAR_ROAMING_MOLTRES_STATE 2
+set var platinum:VAR_ROAMING_ZAPDOS_STATE 2
+set var platinum:VAR_ROAMING_ARTICUNO_STATE 2
+warp platinum:MAP_HEADER_POKEMON_LEAGUE_CHAMPION_ROOM 8 17 up
+advance text 3000
+battle auto 60000
++0 assert battle trainer platinum:TRAINER_CHAMPION_CYNTHIA won single
+advance text 20000
++0 assert map platinum:MAP_HEADER_POKEMON_LEAGUE_HALL_OF_FAME
++0 assert app hall-of-fame
++0 assert var platinum:VAR_STARK_MOUNTAIN_ROOM_3_STATE 1
++0 assert flag platinum:FLAG_HIDE_STARK_MOUNTAIN_ROOM_3_HEATRAN false
++0 assert var platinum:VAR_SPEAR_PILLAR_DIALGA_STATE 0
++0 assert var platinum:VAR_SPEAR_PILLAR_PALKIA_STATE 0
++0 assert flag platinum:FLAG_HIDE_TURNBACK_CAVE_GIRATINA_ROOM_GIRATINA false
++0 assert flag platinum:FLAG_HIDE_SNOWPOINT_TEMPLE_B5F_REGIGIGAS false
++0 assert flag platinum:FLAG_HIDE_VALOR_CAVERN_AZELF false
++0 assert flag platinum:FLAG_HIDE_ACUITY_CAVERN_UXIE false
++0 assert var platinum:VAR_ROAMING_MESPRIT_STATE 3
++0 assert flag platinum:FLAG_HIDE_VERITY_CAVERN_MESPRIT false
++0 assert var platinum:VAR_ROAMING_CRESSELIA_STATE 3
++0 assert flag platinum:FLAG_HIDE_FULLMOON_ISLAND_FOREST_CRESSELIA false
++0 assert var platinum:VAR_ROAMING_MOLTRES_STATE 3
++0 assert var platinum:VAR_ROAMING_ZAPDOS_STATE 3
++0 assert var platinum:VAR_ROAMING_ARTICUNO_STATE 3
+# The record screen, the credits (skippable on a second clear), the reset: the respawns are in the clear's save.
++1500 press a
++1 release a
+until app credits 600
++600 press a
++1 release a
+until app none 12000
++0 reset
+until idle 600
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_2F 4 6
++0 assert state hallOfFame.total 1
++0 assert var platinum:VAR_STARK_MOUNTAIN_ROOM_3_STATE 1
++0 assert var platinum:VAR_ROAMING_MESPRIT_STATE 3
++0 assert flag platinum:FLAG_HIDE_TURNBACK_CAVE_GIRATINA_ROOM_GIRATINA false

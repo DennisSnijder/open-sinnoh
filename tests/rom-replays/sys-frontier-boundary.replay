@@ -1,0 +1,272 @@
+# sys-frontier-boundary. The Battle Frontier's plaza and lobbies load and are walkable.
+# A constructed start in the plaza; each of the five facilities is entered from the plaza and its single-battle
+# receptionist asked. The Battle Tower is real (its own sys-tower-* replays): here its receptionist's
+# menu is left with B. The other four end on the decomp's own decline:
+# the Hall, Castle and Arcade check the party with a stub that answers "not enough" (call_battle_*_function 0), so
+# the receptionist prints the ROM's not-eligible message (message_seen_banlist_species, real); the Factory (rentals, no
+# party check) heals, then asks to save (the in-script save is real since F1) and B declines, which ends the challenge. No battle, no warp but the lobby doors, no hang; back out to the plaza each time.
+# Generated with a shortest-path walker (see tests/integration/m6-turnback.rom.test.ts), checked by m6-systems.
+party 0 platinum:SPECIES_GARCHOMP 60 platinum:MOVE_EARTHQUAKE platinum:MOVE_DRAGON_CLAW
+party 1 platinum:SPECIES_EMPOLEON 60 platinum:MOVE_SURF
+party 2 platinum:SPECIES_LUXRAY 60 platinum:MOVE_THUNDERBOLT
+set flag platinum:FLAG_GAME_COMPLETED true
+date 2009-03-22 12:00
+warp platinum:MAP_HEADER_BATTLE_FRONTIER 48 51 up
+until idle
+# The Battle Tower.
++0 press up
+until position 48 18 300
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_BATTLE_TOWER" 300
++0 release up
+advance text 3000
+until idle 600
++0 press up
+until position 15 6 300
++0 release up
++8 press up
++2 release up
++8 press a
++1 release a
+advance text 3000
++8 press b
++1 release b
+advance text 3000
+until idle 600
++0 assert map platinum:MAP_HEADER_BATTLE_TOWER
++0 assert battles trainer 0
++0 press down
+until position 15 18 300
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_BATTLE_FRONTIER" 300
++0 release down
+until idle 600
+# The Battle Hall.
++0 press down
+until position 48 34 300
++0 release down
++0 press left
+until position 24 34 300
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_BATTLE_HALL" 300
++0 release left
+advance text 3000
+until idle 600
++0 press left
+until position 7 9 300
++0 release left
++8 press left
++2 release left
++8 press a
++1 release a
+advance text 3000
++8 press a
++1 release a
+advance text 3000
+until idle 600
++0 assert map platinum:MAP_HEADER_BATTLE_HALL
++0 assert battles trainer 0
++0 press right
+until position 24 9 300
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_BATTLE_FRONTIER" 300
++0 release right
+advance text 3000
+until idle 600
+# The Battle Castle.
++0 press down
+until position 23 35 300
++0 release down
++0 press right
+until position 25 35 300
++0 release right
++0 press down
+until position 25 44 300
++0 release down
++0 press right
+until position 27 44 300
++0 release right
++0 press down
+until position 27 48 300
++0 release down
++0 press right
+until position 29 48 300
++0 release right
++0 press down
+until position 29 50 300
++0 release down
++0 press right
+until position 30 50 300
++0 release right
++0 press down
+until position 30 52 300
++0 release down
++0 press right
+until position 31 52 300
++0 release right
++0 press down
+until position 31 54 300
++0 release down
++0 press right
+until position 33 54 300
++0 release right
++0 press down
+until position 33 56 300
++0 release down
++0 press right
+until position 36 56 300
++0 release right
++0 press down
+until position 36 60 300
++0 release down
++0 press right
+until position 37 60 300
++0 release right
++0 press down
+until position 37 62 300
++0 release down
++0 press left
+until state player.zone "platinum:MAP_HEADER_BATTLE_CASTLE" 300
++0 release left
+advance text 3000
+until idle 600
++0 press left
+until position 6 9 300
++0 release left
++8 press left
++2 release left
++8 press a
++1 release a
+advance text 3000
++8 press a
++1 release a
+advance text 3000
+until idle 600
++0 assert map platinum:MAP_HEADER_BATTLE_CASTLE
++0 assert battles trainer 0
++0 press right
+until position 20 9 300
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_BATTLE_FRONTIER" 300
++0 release right
+advance text 3000
+until idle 600
+# The Battle Arcade.
++0 press down
+until position 36 63 300
++0 release down
++0 press right
+until position 51 63 300
++0 release right
++0 press up
+until position 51 62 300
++0 release up
++0 press right
+until position 59 62 300
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_BATTLE_ARCADE" 300
++0 release right
+advance text 3000
+until idle 600
++0 press right
+until position 14 6 300
++0 release right
++8 press up
++2 release up
++8 press a
++1 release a
+advance text 3000
++8 press a
++1 release a
+advance text 3000
+until idle 600
++0 assert map platinum:MAP_HEADER_BATTLE_ARCADE
++0 assert battles trainer 0
++0 press left
+until position 2 6 300
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_BATTLE_FRONTIER" 300
++0 release left
+advance text 3000
+until idle 600
+# The Battle Factory: the save check's "impossible to save" text waits on A or B with no arrow (wait_ab_press).
++0 press up
+until position 60 45 300
++0 release up
++0 press right
+until position 66 45 300
++0 release right
++0 press up
+until position 66 38 300
++0 release up
++0 press right
+until position 70 38 300
++0 release right
++0 press up
+until position 70 34 300
++0 release up
++0 press right
+until position 72 34 300
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_BATTLE_FACTORY" 300
++0 release right
+advance text 3000
+until idle 600
++0 press right
+until position 21 7 300
++0 release right
++8 press up
++2 release up
++8 press a
++1 release a
+advance text 3000
++8 press a
++1 release a
+advance text 3000
++8 press a
++1 release a
++40 press b
++1 release b
++40 press b
++1 release b
++40 press b
++1 release b
++40 press b
++1 release b
++40 press b
++1 release b
++40 press b
++1 release b
++40 press b
++1 release b
++40 press b
++1 release b
++40 press b
++1 release b
++40 press b
++1 release b
++40 press b
++1 release b
++40 press b
++1 release b
+advance text 3000
+until idle 600
++0 assert map platinum:MAP_HEADER_BATTLE_FACTORY
++0 assert battles trainer 0
++0 press left
+until position 2 7 300
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_BATTLE_FRONTIER" 300
++0 release left
+advance text 3000
+until idle 600
++0 assert map platinum:MAP_HEADER_BATTLE_FRONTIER

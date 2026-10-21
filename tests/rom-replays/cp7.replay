@@ -1,0 +1,740 @@
+from cp6.replay
++0 reload
+# CP7 (docs/research/story-cp5-19.md §7): from CP6's end outside the Galactic
+# Eterna Building, Cynthia's Togepi Egg on the way to the Cycle Shop, the Bicycle (registered and ridden with
+# Y), the Explorer Kit (the Eterna exits open), Cycling Road (its rolling south held off with a held direction,
+# its trainers met where they stand), a heal at Oreburgh and the slope back up in gear 1, Route 207 and the
+# counterpart's Vs. Seeker, Cyrus in Mt. Coronet, Route 208, Hearthome (the Buneary scene, Fantina in the
+# Contest Hall), and the Hearthome Gym: its dark rooms' wandering trainers are waited for where only they can
+# meet the player, and each room's door is the clue's (`{mapFeatures.correctDoor|…}`, the state the clue shows).
+# Ends outside the gym with the Relic Badge and the Route 209 gate open.
++0 wild auto
++0 evolve auto
+until idle
+# the tree has grown back: Cut it again
++1 press a
++1 release a
+until yesno
++0 press a
++1 release a
+advance text
+until idle 3000
+# to the Cycle Shop: Cynthia's Togepi Egg on the way (EternaCity_CoordEvent_CynthiaTryGiveEgg)
++0 press down
+until position 305 525 6000
++0 release down
++0 press left
+until position 301 525 6000
++0 release left
++0 press down
+until position 301 542 6000
++0 release down
++0 press right
+until position 308 542 6000
++0 release right
+until message
+advance text
+until yesno
++0 press a
++1 release a
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_ETERNA_CITY_STATE 5
++0 assert state party[1].isEgg true
+# into the Cycle Shop
++0 press up
+until position 308 540 6000
++0 release up
++0 press right
+until position 310 540 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_CYCLE_SHOP" 3000
++0 release up
+until idle
+# the Rad Rickshaw: the Bicycle
++0 press up
+until position 7 6 6000
++0 release up
++0 press left
+until position 3 6 6000
++0 release left
+until idle
++0 press up
++1 release up
+until idle
++0 assert facing player up
++0 press a
++1 release a
+advance text 6000
+until idle 3000
++0 assert flag platinum:FLAG_RECEIVED_BICYCLE true
++0 assert state bag.key_items[item="platinum:ITEM_BICYCLE"].count 1
++0 assert var platinum:VAR_ETERNA_CITY_BLOCK_EXITS_STATE 1
+# out, to the Underground Man's house: the Explorer Kit
++0 press right
+until position 7 6 6000
++0 release right
++0 press down
+until position 7 11 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY" 3000
++0 release down
+until idle
++0 press down
+until position 310 541 6000
++0 release down
++0 press left
+until position 306 541 6000
++0 release left
++0 press up
+until position 306 532 6000
++0 release up
++0 press right
+until position 310 532 6000
++0 release right
++0 press up
+until position 310 531 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY_UNDERGROUND_MAN_HOUSE" 3000
++0 release up
+until idle
++0 press up
+until position 4 6
++0 release up
++0 press right
+until position 6 6
++0 release right
+until idle
++0 press up
++1 release up
+until idle
++0 assert facing player up
++0 press a
++1 release a
+advance text 6000
++0 press a
++1 release a
+advance text 6000
+until idle 3000
++0 assert flag platinum:FLAG_RECEIVED_EXPLORER_KIT true
++0 assert state bag.key_items[item="platinum:ITEM_EXPLORER_KIT"].count 1
++0 press left
+until position 4 6
++0 release left
++0 press down
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY" 3000
++0 release down
+until idle
++0 assert var platinum:VAR_ETERNA_CITY_BLOCK_EXITS_STATE 0
+# the Bicycle is registered and ridden with Y (the bag's USE on the Bicycle is a logged stub here)
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:7
++1 tap row:5
++1 tap menu:1
++1 assert state registeredItem "platinum:ITEM_BICYCLE"
++1 press b
++1 release b
++1 press b
++1 release b
+until app none
+until idle
++1 press y
++1 release y
+until state playerState "cycle"
+until idle
+# south to the Cycling Road gate
++0 press down
+until position 310 534 6000
++0 release down
++0 press left
+until position 304 534 6000
++0 release left
++0 press down
+until position 304 568 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_206_CYCLING_ROAD_NORTH_GATE" 3000
++0 release down
+until idle
++0 assert state playerState "cycle"
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_206" 3000
++0 release down
+until idle
+# Cycling Road (Route 206) by bike: Cyclist Axel looks east over row 601
++0 press down
+until position 304 600 6000
++0 release down
++0 press right
+until position 305 600 6000
++0 release right
++0 press down
+until position 305 601
++0 release down
+until message
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_CYCLIST_AXEL won single
+# right held against the east rail keeps the bike from rolling south (PlayerAvatar_TileMove_CyclingRoadDown needs no input)
++0 press right
+advance text
+until position 306 601
+until idle
+# Cyclist Nicole rides back and forth on row 631: the player waits on its east end, where she turns toward him
++0 release right
++0 press down
+until position 306 631
++0 release down
++0 press right
+until message 3000
++0 release right
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_CYCLIST_NICOLE won single
++0 press right
+advance text
+until idle
+# rolling south, Cyclist John (looking east over row 644) stops the player
++0 release right
+until message 3000
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_CYCLIST_JOHN won single
++0 press right
+advance text
+until idle
+# rolling on down the east lane to Cyclist Kayla (looking north from 306, 675)
++0 release right
+until message 3000
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_CYCLIST_KAYLA won single
+advance text
+until idle
+# round her (she blocks the lane, so the bike stands) and roll on into the south gate
++0 press left
+until position 305 674
++0 release left
+until position 305 680
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_206_CYCLING_ROAD_SOUTH_GATE" 3000
++0 release down
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_206" 3000
++0 release down
+until idle
+# west to heal at Oreburgh's Pokémon Center (Cycling Road's Pikachus and Starlys wear Empoleon down)
++0 press down
+until position 303 717 6000
++0 release down
++0 press right
+until position 306 717 6000
++0 release right
++0 press down
+until position 306 725 6000
++0 release down
++0 press left
+until position 299 725 6000
++0 release left
++0 press down
+until position 299 757 6000
++0 release down
++0 press right
+until position 303 757 6000
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_OREBURGH_CITY" 3000
++0 release down
+until idle
+# Route 207 east: Picnicker Lauren and Camper Anthony look down and up x 320 from both ends
++0 press left
+until position 299 757 6000
++0 release left
++0 press up
+until position 299 724 6000
++0 release up
++0 press right
+until position 306 724 6000
++0 release right
+# back up the slope at x 306 by bike (the Pokémon Center left the player walking): gear 1 (B) and a run-up
+# from row 724, then gear 0 again
+until idle
++1 press y
++1 release y
+until state playerState "cycle"
+until idle
++1 press b
++1 release b
++1 assert state cyclingGear 1
++0 press up
+until position 306 717 6000
++0 release up
+until idle
++0 press b
++1 release b
++1 assert state cyclingGear 0
+# Route 207 east: Picnicker Lauren and Camper Anthony look down and up x 320 from both ends
++0 press up
+until position 306 712 6000
++0 release up
++0 press right
+until position 319 712 6000
++0 release right
++0 press right
+until position 320 712
++0 release right
+until message 3000
+advance text
+battle auto 20000
+advance text
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_PICNICKER_LAUREN won single
++0 assert battle trainer platinum:TRAINER_CAMPER_ANTHONY won single
+# Hiker Justin looks north and east at random up x 329: the player waits in his north line
++0 press right
+until position 329 712
++0 release right
+until message 3000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_HIKER_JUSTIN won single
+# the counterpart at Mt. Coronet's door: the Vs. Seeker and the Dowsing Machine (Route207_CoordEvent_Counterpart)
++0 press right
+until position 340 712 6000
++0 release right
+until message 3000
+advance text 6000
+# "choose which hand": the right
+until menu
++4 press a
++1 release a
+advance text 6000
+until idle 3000
++0 assert flag platinum:FLAG_UNLOCKED_VS_SEEKER_LVL_1 true
++0 assert var platinum:VAR_ROUTE_207_COUNTERPART_TRIGGER_STATE 1
++0 assert state bag.key_items[item="platinum:ITEM_VS_SEEKER"].count 1
++0 press right
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_SOUTH" 3000
++0 release right
+until idle
+# Mt. Coronet: Cyrus on the way through (MtCoronet1FSouth_CoordEvent_Cyrus)
++0 press right
+until position 6 8 6000
++0 release right
++0 press down
+until position 6 23 6000
++0 release down
++0 press right
+until position 14 23 6000
++0 release right
+until message 3000
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_MT_CORONET_1F_SOUTH_STATE 1
+# Rock Smash (Empoleon keeps HM06) on the rocks at (16, 23) and (20, 23)
++0 press up
+until position 14 23
++0 release up
++0 press right
+until position 15 23
++0 release right
+until idle
++0 press right
++1 release right
+until idle
++0 press a
++1 release a
+until yesno
++0 press a
++1 release a
+advance text
+until idle 3000
++0 press right
+until position 19 23
++0 release right
+until idle
++0 press right
++1 release right
+until idle
++0 press a
++1 release a
+until yesno
++0 press a
++1 release a
+advance text
+until idle 3000
+# east to Route 208
++0 press left
+until position 15 23 6000
++0 release left
++0 press up
+until position 15 19 6000
++0 release up
++0 press right
+until position 19 19 6000
++0 release right
++0 press up
+until position 19 15 6000
++0 release up
++0 press right
+until position 24 15 6000
++0 release right
++0 press up
+until position 24 13 6000
++0 release up
++0 press right
+until position 27 13 6000
++0 release right
++0 press down
+until position 27 20 6000
++0 release down
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_208" 3000
++0 release right
+until idle
++0 press right
+until position 408 724
++0 release right
+until message 3000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_HIKER_JONATHAN won single
+# Hiker Robert looks south over x 420: the way east passes him
++0 press right
+until message 3000
++0 release right
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_HIKER_ROBERT won single
+# north round the rocks, then down through the grass to the Hearthome gate
++0 press right
+until position 422 724 6000
++0 release right
++0 press up
+until position 422 715 6000
++0 release up
++0 press right
+until position 427 715 6000
++0 release right
++0 press down
+until position 427 729 6000
++0 release down
++0 press right
+until position 446 729 6000
++0 release right
++0 press up
+until position 446 726 6000
++0 release up
+until idle
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_208_GATE_TO_HEARTHOME_CITY" 3000
++0 release right
+until idle
++0 press right
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY" 3000
++0 release right
+until idle
+# Hearthome: Keira's Buneary scene on x 461 (HearthomeCity_CoordEvent_BunearyAndKeira)
++0 press right
+until message 3000
++0 release right
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_HEARTHOME_CITY_STATE 1
+# north to the Contest Hall
++0 press right
+until position 485 726 6000
++0 release right
++0 press up
+until position 485 712 6000
++0 release up
++0 press left
+until position 469 712 6000
++0 release left
++0 press up
+until position 469 698 6000
++0 release up
++0 press right
+until position 479 698 6000
++0 release right
++0 press up
+until position 479 692 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_CONTEST_HALL_LOBBY" 3000
++0 release up
+until message 3000
+advance text 6000
+until idle 3000
++0 assert flag platinum:FLAG_CONTEST_HALL_VISITED true
+# Fantina in the lobby: she leaves for her gym (ContestHallLobby_Fantina)
++0 press right
+until position 21 11 6000
++0 release right
++0 press up
+until position 21 9 6000
++0 release up
+until idle
++0 press right
++1 release right
+until idle
++0 assert facing player right
++0 press a
++1 release a
+advance text 6000
+until idle 3000
++0 assert flag platinum:FLAG_HIDE_HEARTHOME_CITY_GYM_GUIDE true
+# out, to heal at the Pokémon Center
++0 press left
+until position 16 9 6000
++0 release left
++0 press down
+until position 16 13 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY" 3000
++0 release down
+until idle
++0 press down
+until position 479 698 6000
++0 release down
++0 press left
+until position 465 698 6000
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY" 3000
++0 release down
+until idle
+# to the gym
++0 press right
+until position 499 698 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY_GYM_ENTRANCE_ROOM" 3000
++0 release up
+# the gym guide's first-visit talk
+advance text 6000
+until idle 3000
++0 press up
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY_GYM_TRAINER_ROOM_1" 3000
++0 release up
+until idle
+# the browser spec's gym beat: the dark room in the gym avatar's light
++0 screenshot hearthome-dark-room
+# Room 1 (dark; a trainer battles when it sees the player, or stands 1–2 tiles in front of the player's
+# light). Youngster Donny wanders x 11–13, z 6–8: the player faces up from (11, 10), where only Donny at
+# (11, 8) can meet him, and waits.
++0 press right
+until position 11 10
++0 release right
+until idle
++0 press up
++1 release up
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_YOUNGSTER_DONNY won single
+# up through Donny's corner to row 4; Lass Molly wanders x 3–5, z 6–8: the player faces her from (6, 6) and waits
++0 press left
+until position 10 10 6000
++0 release left
++0 press up
+until position 10 8 6000
++0 release up
++0 press right
+until position 12 8 6000
++0 release right
++0 press up
+until position 12 4 6000
++0 release up
++0 press left
+until position 6 4 6000
++0 release left
++0 press down
+until position 6 6 6000
++0 release down
+until idle
++0 press left
++1 release left
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_LASS_MOLLY won single
+# the clue's door (the state the clue shows: mapFeatures.correctDoor; doors 0–2 at x 4, 8, 12 on row 2)
++0 press up
+until position 6 4 6000
++0 release up
++0 press left
+until position 3 4 6000
++0 release left
++0 press right
+until position {mapFeatures.correctDoor|0=4,1=8,2=12} 4 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY_GYM_TRAINER_ROOM_2" 3000
++0 release up
+until idle
+# Room 2: School Kid Catherine wanders x 11, z 6–12; the player faces her from (10, 12), the first tile she can meet him on, and waits
++0 press up
+until position 14 21 6000
++0 release up
++0 press left
+until position 12 21 6000
++0 release left
++0 press up
+until position 12 19 6000
++0 release up
++0 press left
+until position 11 19 6000
++0 release left
++0 press up
+until position 11 16 6000
++0 release up
++0 press right
+until position 12 16 6000
++0 release right
++0 press up
+until position 12 14 6000
++0 release up
++0 press left
+until position 10 14 6000
++0 release left
++0 press up
+until position 10 13 6000
++0 release up
++0 press up
+until position 10 12
++0 release up
+until idle
++0 press right
++1 release right
+until message 40000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_CATHERINE won single
+# up to row 6; Ace Trainer Allen wanders x 15–21 on row 7: the player faces him from (15, 6) and waits
++0 press up
+until position 10 10 6000
++0 release up
++0 press right
+until position 11 10 6000
++0 release right
++0 press up
+until position 11 6 6000
++0 release up
++0 press right
+until position 14 6 6000
++0 release right
++0 press right
+until position 15 6
++0 release right
+until idle
++0 press down
++1 release down
+until message 40000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_ALLEN won single
+# the clue's door: doors 3–7 at x 4, 9, 14, 19, 24 on row 2, each straight up from row 6
++0 press left
+until position 1 6 6000
++0 release left
++0 press right
+until position {mapFeatures.correctDoor|3=4,4=9,5=14,6=19,7=24} 6 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY_GYM_LEADER_ROOM" 3000
++0 release up
+until idle
+# Fantina
++0 press up
+until position 4 11
++0 release up
+until idle
++0 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_LEADER_FANTINA won single
+advance text 6000
+until idle 3000
++0 assert state badges ["platinum:BADGE_ID_COAL","platinum:BADGE_ID_FOREST","platinum:BADGE_ID_RELIC"]
++0 assert var platinum:VAR_ROUTE_209_GATE_TO_HEARTHOME_CITY_STATE 1
+# out by the south door (to the entrance) and into Hearthome
++0 press down
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY_GYM_ENTRANCE_ROOM" 3000
++0 release down
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY" 3000
++0 release down
+until idle
++30 release down
+# end of CP7
++0 assert state party[1].isEgg true
++0 assert var platinum:VAR_ETERNA_CITY_STATE 5
++0 assert state bag.key_items[item="platinum:ITEM_BICYCLE"].count 1
++0 assert state bag.key_items[item="platinum:ITEM_EXPLORER_KIT"].count 1
++0 assert var platinum:VAR_ETERNA_CITY_BLOCK_EXITS_STATE 0
++0 assert flag platinum:FLAG_UNLOCKED_VS_SEEKER_LVL_1 true
++0 assert var platinum:VAR_ROUTE_207_COUNTERPART_TRIGGER_STATE 1
++0 assert var platinum:VAR_MT_CORONET_1F_SOUTH_STATE 1
++0 assert var platinum:VAR_HEARTHOME_CITY_STATE 1
++0 assert flag platinum:FLAG_CONTEST_HALL_VISITED true
++0 assert state badges ["platinum:BADGE_ID_COAL","platinum:BADGE_ID_FOREST","platinum:BADGE_ID_RELIC"]
++0 assert var platinum:VAR_ROUTE_209_GATE_TO_HEARTHOME_CITY_STATE 1
++0 assert battle trainer platinum:TRAINER_LEADER_FANTINA won single

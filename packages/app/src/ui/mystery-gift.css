@@ -1,0 +1,23 @@
+/*
+ * Mystery Gift and Easy Chat (mystery-gift.ts): boards on the DS blue (main_menu.c's GX_RGB(12, 12, 31)), ROM-framed
+ * windows at their tile rects. One DS px = --unit.
+ */
+.mystery-gift-screen .mg-bg, .easy-chat-screen .mg-bg { display: block; background: rgb(99 99 255); pointer-events: none; }
+.mystery-gift-screen .mg-card, .easy-chat-screen .ec-top { display: flex; flex-direction: column; }
+.mystery-gift-screen .window.rom-frame, .easy-chat-screen .window.rom-frame, .mystery-gift-screen .msg-box.rom-frame, .easy-chat-screen .msg-box.rom-frame { padding: 0; min-height: 0; }
+.mystery-gift-screen .mg-list, .easy-chat-screen .ec-groups { display: grid; grid-auto-rows: calc(var(--unit) * 16); }
+.easy-chat-screen .ec-groups { grid-template-columns: 1fr 1fr; }
+.mystery-gift-screen .mg-entry, .easy-chat-screen .ec-group, .easy-chat-screen .ec-word, .easy-chat-screen .ec-slot { display: flex; align-items: center; padding-left: calc(var(--unit) * 4); text-align: left; }
+.mystery-gift-screen .mg-card-head { display: flex; justify-content: space-between; align-items: center; height: calc(var(--unit) * 24); }
+.mystery-gift-screen .mg-card-icon { width: calc(var(--unit) * 32); height: calc(var(--unit) * 32); margin-top: calc(var(--unit) * -8); }
+.mystery-gift-screen .mg-card-text, .mystery-gift-screen .mg-card-status { display: block; }
+.mystery-gift-screen .mg-arrow, .easy-chat-screen .mg-arrow { display: grid; place-items: center; background: none; border: 0; padding: 0; }
+.mystery-gift-screen .mg-arrow::before, .easy-chat-screen .mg-arrow::before { content: ''; width: calc(var(--unit) * 6); height: calc(var(--unit) * 8); background: #f8f8f8; clip-path: polygon(100% 0, 100% 100%, 0 50%); }
+.mystery-gift-screen .mg-arrow.right::before { clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.easy-chat-screen .mg-arrow.up::before { width: calc(var(--unit) * 8); height: calc(var(--unit) * 6); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.easy-chat-screen .mg-arrow.down::before { width: calc(var(--unit) * 8); height: calc(var(--unit) * 6); clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.easy-chat-screen .ec-slots { display: flex; gap: calc(var(--unit) * 8); }
+.easy-chat-screen .ec-slot { flex: 1; height: calc(var(--unit) * 16); border-bottom: var(--unit) solid #8890a8; }
+.easy-chat-screen .ec-blank { display: block; width: calc(var(--unit) * 64); }
+/* DS rows: 16 px a choice, as the mart's board (the layer's touch-size minimum does not apply inside the board). */
+.ui-layer .mystery-gift-screen :is(.yes-no .choice, .mg-entry), .ui-layer .easy-chat-screen :is(.yes-no .choice, .ec-group, .ec-word, .ec-slot) { min-width: 0; min-height: 0; height: var(--row); }

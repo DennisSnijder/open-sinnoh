@@ -1,0 +1,151 @@
+from cp13.replay
+set state gender "female"
+set var platinum:VAR_PLAYER_STARTER 390
+party 0 platinum:SPECIES_INFERNAPE 64 platinum:MOVE_FLAMETHROWER platinum:MOVE_CLOSE_COMBAT platinum:MOVE_THUNDER_PUNCH platinum:MOVE_MACH_PUNCH
+set flag platinum:FLAG_VEILSTONE_CITY_GRUNT_DROPPED_STORAGE_KEY true
+set flag platinum:FLAG_HIDE_VEILSTONE_CITY_GRUNT_M_STORAGE_KEY true
+set flag platinum:FLAG_AGREED_WITH_LOOKER_TO_ENTER_HIDEOUT true
+set flag platinum:FLAG_USED_STORAGE_KEY true
+set var platinum:VAR_VEILSTONE_CITY_GALACTIC_WAREHOUSE_STATE 4
+set flag platinum:FLAG_OBTAINED_GALACTIC_HQ_B2F_GALACTIC_KEY true
+give item platinum:ITEM_GALACTIC_KEY 1
+set flag platinum:FLAG_HIDE_GALACTIC_HQ_B2F_DOOR true
+set flag platinum:FLAG_HIDE_GALACTIC_HQ_1F_DOOR true
+set var platinum:VAR_GALACTIC_HQ_HALL_STATE 1
+warp platinum:MAP_HEADER_GALACTIC_HQ_4F 4 15 right
+# Starter/gender branch for cp14: Cyrus, Saturn and the release for a girl who
+# chose Chimchar. cp14 meets no trainer or scene chosen by starter or gender (GetPlayerGender and
+# GetPlayerStarterSpecies are in none of the HQ's or Veilstone's scripts), so this plays cp14's end for the other
+# player. Setup lines stage it from CP13's end: the gender and starter as the save keeps them, an Infernape, and
+# the state cp14 has on arriving on 4F (Storage Key used, Galactic Key, the B2F and 1F doors open, the hall
+# speech over). Headless from the cp13 anchor (tests/integration/checkpoints-m5c-branches.rom.test.ts).
++0 wild auto
++0 evolve cancel
+until idle
++0 press right
+until position 8 15 6000
++0 release right
+# the key door before Cyrus
+until idle
++1 press up
++1 release up
+until idle
++0 press a
++1 release a
+until message 300
+advance text
++0 assert text platinum:GalacticHQ4F_Text_UseGalacticKey 1
++0 press a
++1 release a
+advance text
+until idle
+# Cyrus (GalacticHQ4F_CoordEvent_Cyrus): his battle (403)
++0 press up
+until message 600
++0 release up
+advance text 12000
+battle auto 30000
+advance text 12000
+until idle 3000
++0 assert battle trainer platinum:TRAINER_GALACTIC_BOSS_CYRUS_GALACTIC_HQ won single
++0 assert var platinum:VAR_GALACTIC_HQ_4F_STATE 1
++8 release select
++0 press up
+until position 8 8 6000
++0 release up
++0 press right
+until position 14 8 6000
++0 release right
++0 press up
+until position 14 5 6000
++0 release up
++0 press right
+until position 22 5 6000
++0 release right
++0 press up
+until position 22 4 6000
++0 release up
+# the panel to the laboratory, and on to the control room
++0 press up
+until state player.zone "platinum:MAP_HEADER_GALACTIC_HQ_LABORATORY" 600
++0 release up
+until idle
++8 release select
++0 press up
+until position 1 9 6000
++0 release up
++0 press right
+until position 6 9 6000
++0 release right
+# the Full Restore on the floor, for Saturn
+until idle
++1 press up
++1 release up
+until idle
++0 press a
++1 release a
+advance text
+until idle
++0 assert state bag.medicine[item="platinum:ITEM_FULL_RESTORE"].count 1
++8 release select
++0 press down
+until position 6 10 6000
++0 release down
++0 press right
+until position 35 10 6000
++0 release right
+# Scientist F walks x 36, rows 7–13: up x 35 beside her
++0 press up
+until position 35 3 6000
++0 release up
++0 press right
+until position 36 3 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_GALACTIC_HQ_CONTROL_ROOM" 600
++0 release up
+until idle
++8 release select
+# Saturn (GalacticHQControlRoom_Saturn): his battle (409)
++0 press up
+until position 8 12 6000
++0 release up
++0 press left
+until position 6 12 6000
++0 release left
++0 press up
+until position 6 7 6000
++0 release up
++0 press right
+until position 8 7 6000
++0 release right
+until idle
++1 press up
++1 release up
+until idle
++0 press a
++1 release a
+until message 600
+advance text 12000
+battle auto 30000
+advance text 12000
+until idle 3000
++0 assert battle trainer platinum:TRAINER_COMMANDER_SATURN_GALACTIC_HQ won single
++0 assert flag platinum:FLAG_DEFEATED_GALACTIC_HQ_CONTROL_ROOM_SATURN true
+# the release button (GalacticHQControlRoom_Button, behind Saturn's spot)
++0 press up
+until position 8 6 600
++0 release up
+until idle
++0 press a
++1 release a
+until yesno 600
++0 assert text platinum:GalacticHQControlRoom_Text_AskPressButton 0
++0 press a
++1 release a
+advance text 12000
+until idle 3000
++0 assert battle trainer platinum:TRAINER_GALACTIC_BOSS_CYRUS_GALACTIC_HQ won single
++0 assert battle trainer platinum:TRAINER_COMMANDER_SATURN_GALACTIC_HQ won single
++0 assert flag platinum:FLAG_FREED_GALACTIC_HQ_POKEMON true
++0 assert var platinum:VAR_MT_CORONET_2F_STATE 1

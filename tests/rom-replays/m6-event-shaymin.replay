@@ -1,0 +1,57 @@
+from cp21f.replay
+# Event branch m6-event-shaymin (docs/decisions.md: the dev-only event flag;
+# docs/research/postgame.md §6): Oak's Letter (`event shaymin`) from cp21f's end (its National Pokédex). Route 224's on-transition
+# shows Oak and, as the letter's gift set VAR_SHAYMIN_EVENT_STATE 1 (decomp InitShayminEvent; 2026-10-19), moves it to 2
+# and VAR_ROUTE_224_STATE to 1: Marley's coordinate event at the route's west edge brings her to the tablet, and she is
+# in Shaymin's scene and its thanks. Talking to Oak walks the player to the tablet: the tablet's naming screen (open_shaymin_tablet_naming_screen)
+# takes a word, "thank … ?" YES; the Seabreak Path opens (its hidden location), the field player's volume drops
+# (set_player_volume), Shaymin's scene plays, the volume comes back: FLAG_WROTE_ON_ROUTE_224_TABLET, Oak and Marley gone,
+# the word kept (GameState.tabletName; buffer_tablet_name reads it back at the tablet). m6-event-shaymin-caught chains on.
+# Kept setup: the event flag and the warp (off the chain).
+event shaymin
+warp platinum:MAP_HEADER_ROUTE_224 902 497 right
+until idle
++0 assert flag platinum:FLAG_HIDE_ROUTE_224_PROF_OAK false
++0 assert var platinum:VAR_SHAYMIN_EVENT_STATE 2
++0 assert var platinum:VAR_ROUTE_224_STATE 1
+# Marley's coordinate event (VAR_ROUTE_224_STATE 1): she walks up and on to the tablet.
++0 press right
+until position 903 497 300
++0 release right
+advance text 3000
+until idle 3000
++0 assert flag platinum:FLAG_HIDE_ROUTE_224_MARLEY false
++0 press right
+until position 909 497 300
++0 release right
++0 press up
+until position 909 493 300
++0 release up
+until idle 60
++0 press a
++1 release a
+advance text 3000
+until app naming 3000
++1 tap type:Mom
++1 tap ok
+until app none 600
+advance text 3000
++0 assert state tabletName "Mom"
++0 press a
++1 release a
+advance text 6000
+until idle 6000
++0 assert flag platinum:FLAG_WROTE_ON_ROUTE_224_TABLET true
++0 assert flag platinum:FLAG_HIDE_ROUTE_224_PROF_OAK true
++0 assert flag platinum:FLAG_HIDE_ROUTE_224_MARLEY true
++0 assert state tabletName "Mom"
+# The tablet now reads the word back (buffer_tablet_name).
++0 press up
++1 release up
+until idle 60
++0 press a
++1 release a
+until message 600
++0 assert text platinum:Route224_Text_NameWhomIThank 0 1=Mom
+advance text 600
+until idle 600

@@ -1,0 +1,87 @@
+# svc-dept-store: Veilstone Department Store 1F. The right vendor (specialty 8: medicine) and the
+# left vendor (specialty 9: balls, Escape Rope, …) ignore badges; every purchase there counts towards the
+# "regular" (VAR_DEPARTMENT_STORE_REGULAR_COUNTER, decomp incBuyCount).
+set money 3000
+warp platinum:MAP_HEADER_VEILSTONE_STORE_1F 5 5
+until idle
+# face the right vendor across the counter (west)
++1 press left
++1 release left
+until idle
++0 assert position platinum:MAP_HEADER_VEILSTONE_STORE_1F 5 5
++1 press a
++1 release a
+until app mart
+# the stock is medicine: Potion, Super Potion, Hyper Potion, …; Hyper Potion (row 2, 1200) ×2
++1 tap menu:0
++1 tap row:2
++1 tap qty:+1
++1 tap ok
++1 tap yes
++1 assert state money 600
++0 assert state bag.medicine [{"item":"platinum:ITEM_HYPER_POTION","count":2}]
++0 assert var platinum:VAR_DEPARTMENT_STORE_REGULAR_COUNTER 1
++0 screenshot dept-medicine
++1 press a
++1 release a
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
++1 press a
++1 release a
+until app none 5
+until idle
+# the left vendor across the counter to the north: down 2 and left 3 (each turn first), face up
++1 press down
++1 release down
+until idle
++1 press down
++1 release down
+until idle
++1 press down
++1 release down
+until idle
++1 press left
++1 release left
+until idle
++1 press left
++1 release left
+until idle
++1 press left
++1 release left
+until idle
++1 press left
++1 release left
+until idle
++1 press up
++1 release up
+until idle
++0 assert position platinum:MAP_HEADER_VEILSTONE_STORE_1F 2 7
++1 press a
++1 release a
+until app mart
+# Poké Ball (row 0, 200) ×3 spends the rest; the second purchase in the store
++1 tap menu:0
++1 tap row:0
++1 tap qty:+1
++1 tap qty:+1
++1 tap ok
++1 tap yes
++1 assert state money 0
++0 assert state bag.balls [{"item":"platinum:ITEM_POKE_BALL","count":3}]
++0 assert var platinum:VAR_DEPARTMENT_STORE_REGULAR_COUNTER 2
++1 press a
++1 release a
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
++1 press a
++1 release a
+until app none 5
+until idle

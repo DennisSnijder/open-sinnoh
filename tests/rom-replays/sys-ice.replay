@@ -1,0 +1,11 @@
+from parts/ice.replay
+# sys-ice: ice slides in the part. Here the Fuego Ironworks slides
+# (SLIDE_*): stepping onto SLIDE_NORTHWARD at (16, 13) slides north until
+# the wall at z 8, stopping at (16, 9).
+warp platinum:MAP_HEADER_FUEGO_IRONWORKS_BUILDING 16 15 up
+until idle
++0 press up
+until position 16 13
++0 release up
+until position 16 9 120
++20 assert position platinum:MAP_HEADER_FUEGO_IRONWORKS_BUILDING 16 9

@@ -1,0 +1,505 @@
+from cp17.replay
++0 reload
+# CP18 (docs/research/story-cp5-19.md §18): from CP17's end at the League's north
+# Pokémon Center nurse, Full Restores and Revives from the clerk, then the Elite Four in order: Aaron (261),
+# Bertha (262), Flint (263), Lucian (264), each room's lift up to the next; the team healed from the bag before
+# each room. Ends in the lift room before the Champion.
++0 wild flee
++0 evolve auto
+until idle
+# the clerk: Full Restores and Revives
++0 press down
+until position 4 4 6000
++0 release down
++0 press right
+until position 16 4 6000
++0 release right
++0 press up
+until position 16 3 6000
++0 release up
+until idle
++1 press up
++1 release up
+until idle
++0 press a
++1 release a
+until app mart 600
++1 tap menu:0
++1 tap row:7
++1 press right
++1 release right
++1 press right
++1 release right
++1 press right
++1 release right
++1 tap ok
++1 tap yes
++1 assert state bag.medicine[item="platinum:ITEM_FULL_RESTORE"].count 32
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap row:8
++1 press right
++1 release right
++1 tap ok
++1 tap yes
++1 press a
++1 release a
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
++1 press a
++1 release a
+until app none 300
+until idle
++8 release select
+# Aaron's door guard moves (PokemonLeagueNorthPokecenter1F_DoorGuard)
++0 press down
+until position 16 4 6000
++0 release down
++0 press left
+until position 11 4 6000
++0 release left
+until idle
++1 press up
++1 release up
+until idle
++0 press a
++1 release a
+until message 300
+advance text 6000
+until idle 6000
++0 assert flag platinum:FLAG_POKEMON_LEAGUE_DOOR_GUARD_MOVED_AWAY true
+# the door north to the lift up to Aaron's room (m5-league-lost's way)
++0 press up
+until position 11 2 3000
++0 release up
+until idle 3000
++0 press up
+until position 4 11 3000
++0 release up
+until idle 6000
++0 press up
+until position 8 11 6000
++0 release up
+until idle 3000
++0 assert position platinum:MAP_HEADER_POKEMON_LEAGUE_AARON_ROOM 8 9
++0 screenshot aaron-room
++0 press up
+until position 8 6 3000
++0 release up
+until idle 3000
+# Aaron (PokemonLeagueAaronRoom_Aaron): his battle (261)
++0 press a
++1 release a
+advance text 3000
+battle auto 60000
+advance text 6000
+until idle 6000
++0 assert battle trainer platinum:TRAINER_ELITE_FOUR_AARON won single
++0 assert flag platinum:FLAG_DEFEATED_AARON true
++8 release select
+# Revives and Full Restores on the team (no effect where none is needed)
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:1
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 assert app bag
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:1
++1 press a
++1 release a
++1 assert app bag
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:1
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:2
++1 press a
++1 release a
++1 assert app bag
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:2
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:3
++1 press a
++1 release a
++1 assert app bag
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:3
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until app none 300
+until idle
++8 release select
+# north out of Aaron's room to the lift up to Bertha's room
++0 press left
+until position 7 6 6000
++0 release left
++0 press up
+until position 7 3 6000
++0 release up
++0 press right
+until position 8 3 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_POKEMON_LEAGUE_ELEVATOR_TO_BERTHA_ROOM" 3000
++0 release up
+until idle 6000
++0 press up
+until position 4 11 3000
++0 release up
+until idle 6000
++0 press up
+until position 8 11 6000
++0 release up
+until idle 3000
++0 assert position platinum:MAP_HEADER_POKEMON_LEAGUE_BERTHA_ROOM 8 9
++0 press up
+until position 8 6 3000
++0 release up
+until idle 3000
+# Bertha (PokemonLeagueBerthaRoom_Bertha): her battle (262)
++0 press a
++1 release a
+advance text 3000
+battle auto 60000
+advance text 6000
+until idle 6000
++0 assert battle trainer platinum:TRAINER_ELITE_FOUR_BERTHA won single
++0 assert flag platinum:FLAG_DEFEATED_BERTHA true
++8 release select
+# Revives and Full Restores on the team
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:1
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 assert app bag
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:1
++1 press a
++1 release a
++1 assert app bag
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:1
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:2
++1 press a
++1 release a
++1 assert app bag
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:2
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:3
++1 press a
++1 release a
++1 assert app bag
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:3
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until app none 300
+until idle
++8 release select
+# north out of Bertha's room to the lift up to Flint's room
++0 press left
+until position 7 6 6000
++0 release left
++0 press up
+until position 7 3 6000
++0 release up
++0 press right
+until position 8 3 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_POKEMON_LEAGUE_ELEVATOR_TO_FLINT_ROOM" 3000
++0 release up
+until idle 6000
++0 press up
+until position 4 11 3000
++0 release up
+until idle 6000
++0 press up
+until position 8 11 6000
++0 release up
+until idle 3000
++0 assert position platinum:MAP_HEADER_POKEMON_LEAGUE_FLINT_ROOM 8 9
++0 press up
+until position 8 6 3000
++0 release up
+until idle 3000
+# Flint (PokemonLeagueFlintRoom_Flint): his battle (263)
++0 press a
++1 release a
+advance text 3000
+battle auto 60000
+advance text 6000
+until idle 6000
++0 assert battle trainer platinum:TRAINER_ELITE_FOUR_FLINT won single
++0 assert flag platinum:FLAG_DEFEATED_FLINT true
++8 release select
+# Revives and Full Restores on the team
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:1
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 assert app bag
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:1
++1 press a
++1 release a
++1 assert app bag
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:1
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:2
++1 press a
++1 release a
++1 assert app bag
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:2
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:3
++1 press a
++1 release a
++1 assert app bag
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:3
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until app none 300
+until idle
++8 release select
+# north out of Flint's room to the lift up to Lucian's room
++0 press left
+until position 7 6 6000
++0 release left
++0 press up
+until position 7 3 6000
++0 release up
++0 press right
+until position 8 3 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_POKEMON_LEAGUE_ELEVATOR_TO_LUCIAN_ROOM" 3000
++0 release up
+until idle 6000
++0 press up
+until position 4 11 3000
++0 release up
+until idle 6000
++0 press up
+until position 8 11 6000
++0 release up
+until idle 3000
++0 assert position platinum:MAP_HEADER_POKEMON_LEAGUE_LUCIAN_ROOM 8 9
++0 press up
+until position 8 6 3000
++0 release up
+until idle 3000
+# Lucian (PokemonLeagueLucianRoom_Lucian): his battle (264)
++0 press a
++1 release a
+advance text 3000
+battle auto 60000
+advance text 6000
+until idle 6000
++0 assert battle trainer platinum:TRAINER_ELITE_FOUR_LUCIAN won single
++0 assert flag platinum:FLAG_DEFEATED_LUCIAN true
++8 release select
+# Revives and Full Restores on the team
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:1
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 assert app bag
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:1
++1 press a
++1 release a
++1 assert app bag
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:1
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:2
++1 press a
++1 release a
++1 assert app bag
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:2
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:3
++1 press a
++1 release a
++1 assert app bag
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:3
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until app none 300
+until idle
+# end of CP18: the four rooms were won in order (each asserted right after its battle)
++0 assert flag platinum:FLAG_DEFEATED_AARON true
++0 assert flag platinum:FLAG_DEFEATED_BERTHA true
++0 assert flag platinum:FLAG_DEFEATED_FLINT true
++0 assert flag platinum:FLAG_DEFEATED_LUCIAN true
++0 assert flag platinum:FLAG_ARRESTED_CHARON_STARK_MOUNTAIN false

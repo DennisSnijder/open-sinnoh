@@ -1,0 +1,356 @@
+/*
+ * OpenSinnoh UI v0.7: base and components for OpenSinnoh's own screens (Options, setup, data, crash, the ROM
+ * page) and the website. Never for ROM-drawn windows or game text (docs/design-system.md, "the screen's owner").
+ * Colours are the generated --os-* tokens (tokens.ts); one dot is 2 px (--os-d1 … --os-d16); every length is on
+ * the 4-px scale or a listed exception (2, 10, 44). Classes are prefixed os- so they never meet the game's.
+ */
+
+/* The safe-area insets as variables (notch, home indicator): every screen reads these, never env() directly, so a test can set them. */
+:root { --sat: env(safe-area-inset-top, 0px); --sar: env(safe-area-inset-right, 0px); --sab: env(safe-area-inset-bottom, 0px); --sal: env(safe-area-inset-left, 0px); }
+
+/* ---------- Base: three faces (pixel, numbers, reading) and the mono for details ---------- */
+:root {
+  --os-font-px: 'Pixelify Sans', ui-monospace, monospace;
+  --os-font-num: Silkscreen, ui-monospace, monospace;
+  --os-font-body: Figtree, system-ui, sans-serif;
+  --os-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* The pixel text's shadow on window faces: one dot right, down and diagonal. */
+  --os-tsd: 2px 0 var(--os-ink-shadow), 0 2px var(--os-ink-shadow), 2px 2px var(--os-ink-shadow);
+}
+.os {
+  font: 400 14px/20px var(--os-font-body);
+  color: var(--os-ink);
+  -webkit-font-smoothing: antialiased;
+  text-align: left;
+}
+.os *, .os *::before, .os *::after { box-sizing: border-box; }
+/* Pixelify's "fi" ligature reads as an A. Important: every `font` shorthand below would reset it. */
+.os, .os * { font-variant-ligatures: none !important; }
+.os :where(button, input, select) { font: inherit; color: inherit; margin: 0; border-radius: 0; appearance: none; -webkit-tap-highlight-color: transparent; }
+.os :where(p) { margin: 0; }
+.os-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.os-px { font: 500 20px/24px var(--os-font-px); }
+.os-num { font: 400 16px/20px var(--os-font-num); }
+.os-ico { display: block; flex: none; }
+/* Titles are live pixel text: selectable, read aloud, scaled with zoom. */
+.os-title { margin: 0; font: 500 32px/40px var(--os-font-px); }
+.os-title.d40 { font: 700 40px/48px var(--os-font-px); }
+.os-title.d64 { font: 700 64px/72px var(--os-font-px); }
+.os :focus-visible { outline: 2px solid var(--os-accent); outline-offset: 2px; }
+/* Focus that follows the screen's cursor is already marked by the cursor (the ▶ row, the tab): no second ring. */
+.os .is-cursor:focus-visible, .os .os-row.is-cursor :focus-visible, .os .os-choice:focus-visible { outline: none; }
+.os [hidden] { display: none !important; }
+
+/* A screen: the container the phone rule (480 px) reads. */
+.os-screen { position: relative; container: os-screen / inline-size; overflow: hidden; }
+/* The field behind our windows when no game is drawn: a quiet dot grid. */
+.os-field { background-color: var(--os-field); background-image: radial-gradient(var(--os-dot) 1px, transparent 1.5px); background-size: 12px 12px; background-position: 5px 5px; }
+
+/* ---------- Frames: 9-slice skins, one dot = 2 CSS px (the classes come from tokens.ts) ---------- */
+.os-win {
+  position: relative; background: none; color: var(--os-ink);
+  border-style: solid; border-color: transparent; border-width: var(--os-win-w);
+  border-image: var(--os-win-img) var(--os-win-s) fill / var(--os-win-w) / 0 stretch;
+}
+/* Pixel text on a window face carries the shadow (title tabs and buttons sit on their own skins). */
+.os-win :is(.os-px, .os-title, .os-row .lab, .os-choice .cl, .os-pick > button, .os-cyc .cv, .os-tabs [role="tab"], .os-file .fl, .os-dlg h3, .os-prog .lt b) { text-shadow: var(--os-tsd); }
+/* A window over the field: capped, centred on whole pixels, its size snapped to 2 px. */
+.os-panel {
+  position: absolute; --w: min(var(--cap-w, 600px), calc(100% - 48px)); --h: min(var(--cap-h, 424px), calc(100% - 64px));
+  width: round(down, var(--w), 2px); height: round(down, var(--h), 2px);
+  left: round(down, calc((100% - var(--w)) / 2), 1px); top: round(down, calc((100% - var(--h)) / 2 + 8px), 1px);
+  display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+}
+/* Opening (4 frames): opt-in with .os-enter, so a screen that redraws its DOM does not open again. */
+.os-enter { animation: os-win-in calc(var(--os-f) * 4) steps(4) both; }
+@keyframes os-win-in { from { opacity: 0; transform: translateY(4px); } }
+/* Phone: below a 480-px screen the window goes full bleed and drops its frame. */
+@container os-screen (max-width: 480px) {
+  .os-panel { left: 0; top: 0; width: 100%; height: 100%; border-width: 0; border-image-source: none; background: var(--os-face); }
+}
+.os-scrim { position: absolute; inset: 0; background: var(--os-scrim); }
+.os-sect + .os-sect { border-top: 2px solid var(--os-line); }
+
+/* ---------- Title tab: the window's name on its top edge, filled with the screen's tone ---------- */
+.os-tab {
+  display: flex; align-items: center; gap: 8px; width: fit-content; max-width: 100%; height: 32px; margin: -26px 0 8px -4px; padding: 0 8px;
+  font: 500 20px/24px var(--os-font-px); color: var(--os-on-tone); white-space: nowrap; position: relative; z-index: 2;
+  border-style: solid; border-color: transparent; border-width: 4px; border-image: var(--os-tab-system) 2 fill / 4px / 0 stretch;
+}
+.os-tab > .t { margin: 0; font: inherit; overflow: hidden; text-overflow: ellipsis; }
+.os-tab .end { display: flex; align-items: center; gap: 8px; margin-left: 4px; }
+.os-tone-world { --c: var(--os-tone-world); border-image-source: var(--os-tab-world); }
+.os-tone-team { --c: var(--os-tone-team); border-image-source: var(--os-tab-team); }
+.os-tone-items { --c: var(--os-tone-items); border-image-source: var(--os-tab-items); }
+.os-tone-system { --c: var(--os-tone-system); border-image-source: var(--os-tab-system); }
+.os-tone-danger { --c: var(--os-tone-danger); border-image-source: var(--os-tab-danger); }
+/* The bar: the tab across the top (a sheet; every tab below a 480-px screen). */
+.os-tab.bar { width: auto; max-width: none; height: auto; min-height: 48px; margin: 0; padding: 8px 16px; border: 0; border-image-source: none; background: var(--c); }
+.os-tab.bar .end { margin-left: auto; }
+@container os-screen (max-width: 480px) {
+  .os-tab { width: auto; max-width: none; height: auto; min-height: 48px; margin: 0; padding: 8px 16px; border: 0; border-image-source: none; background: var(--c); }
+  .os-tab .end { margin-left: auto; }
+}
+
+/* ---------- Buttons (Control skin, fixed: a 1-dot edge, a 1-dot shade; pressed drops a dot) ---------- */
+.os-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 12px;
+  font: 500 20px/24px var(--os-font-px); color: var(--os-ink); white-space: nowrap; position: relative; cursor: pointer;
+  border-style: solid; border-color: transparent; border-width: 4px; border-image: var(--os-ctl) 2 fill / 4px / 0 stretch; background: none;
+}
+.os-btn.primary { color: var(--os-on-action); border-image-source: var(--os-ctl-primary); }
+.os-btn.danger { color: var(--os-danger); }
+.os-btn.solid-danger { color: var(--os-on-danger); border-image-source: var(--os-ctl-danger); }
+.os-btn.icon { padding: 0; width: 40px; }
+.os-btn.big { min-height: 48px; padding: 0 16px; }
+@media (hover: hover) { .os-btn:hover:not([aria-disabled="true"], .primary, .solid-danger) { border-image-source: var(--os-ctl-hover); } }
+.os-btn:active:not([aria-disabled="true"]) { transform: translateY(2px); border-image-source: var(--os-ctl-down); }
+.os-btn.primary:active:not([aria-disabled="true"]) { border-image-source: var(--os-ctl-primary-down); }
+.os-btn.solid-danger:active:not([aria-disabled="true"]) { border-image-source: var(--os-ctl-danger-down); }
+.os-btn[aria-disabled="true"] { color: var(--os-ink-off); border-image-source: var(--os-ctl-off); cursor: not-allowed; }
+.os-btn[aria-busy="true"] { color: var(--os-muted); }
+[data-density="touch"] .os-btn { min-height: 44px; padding: 0 16px; }
+[data-density="touch"] .os-btn.big { min-height: 48px; }
+[data-density="touch"] .os-btn.icon { width: 44px; padding: 0; }
+
+/* ---------- Counters, badges (Silkscreen) ---------- */
+.os-cnt { display: inline-flex; align-items: center; height: 20px; font: 400 16px/20px var(--os-font-num); padding: 0 4px; color: var(--os-ink); background: var(--os-face-alt); box-shadow: inset 0 0 0 2px var(--os-edge); }
+.os-bdg { display: inline-flex; align-items: center; height: 20px; font: 400 16px/20px var(--os-font-num); padding: 0 4px; color: var(--os-on-accent); background: var(--c, var(--os-accent)); }
+
+/* ---------- Toggle ---------- */
+.os-tgl { display: inline-flex; align-items: center; gap: 8px; border: 0; background: none; padding: 0; min-height: 36px; color: var(--os-ink); cursor: pointer; }
+.os-tgl .tr { width: 36px; height: 20px; position: relative; background: var(--os-face-alt); box-shadow: inset 0 0 0 2px var(--os-edge); flex: none; }
+.os-tgl .kn { position: absolute; left: 4px; top: 4px; width: 12px; height: 12px; background: var(--os-muted); transition: transform calc(var(--os-f) * 4) steps(4); }
+.os-tgl[aria-checked="true"] .tr { background: var(--os-accent); box-shadow: none; }
+.os-tgl[aria-checked="true"] .kn { transform: translateX(16px); background: var(--os-on-accent); }
+.os-tgl .tv { font: 500 20px/24px var(--os-font-px); min-width: 32px; text-align: left; }
+.os-tgl[aria-checked="true"] .tv { color: var(--os-accent); }
+.os-tgl[aria-disabled="true"] { color: var(--os-ink-off); cursor: not-allowed; }
+.os-tgl[aria-disabled="true"] .tv { color: var(--os-ink-off); }
+.os-tgl[aria-disabled="true"] .tr { box-shadow: inset 0 0 0 2px var(--os-line); background: var(--os-face-alt); }
+[data-density="touch"] .os-tgl { min-height: 44px; }
+
+/* ---------- Pick: every value inline; the chosen one in the accent with a 1-dot underline ---------- */
+.os-pick { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.os-pick > button { border: 0; background: none; padding: 2px 8px 4px; min-height: 36px; font: 500 20px/24px var(--os-font-px); color: var(--os-ink); cursor: pointer; }
+.os-pick > button[aria-pressed="true"] { color: var(--os-accent); background: linear-gradient(var(--os-accent), var(--os-accent)) no-repeat 8px calc(100% - 4px) / calc(100% - 16px) 2px; }
+.os-pick[aria-disabled="true"] > button { color: var(--os-ink-off); cursor: not-allowed; }
+.os-pick[aria-disabled="true"] > button[aria-pressed="true"] { background-image: linear-gradient(var(--os-ink-off), var(--os-ink-off)); }
+[data-density="touch"] .os-pick > button { min-height: 44px; min-width: 44px; }
+
+/* ---------- Cycle: ◀ value ▶ (the value in the accent) ---------- */
+.os-cyc { display: inline-flex; align-items: center; }
+.os-cyc .arr { border: 0; background: none; width: 32px; height: 36px; display: grid; place-items: center; color: var(--os-ink); padding: 0; cursor: pointer; }
+.os-cyc .cv { border: 0; background: none; min-width: 88px; height: 36px; padding: 0 4px; display: inline-grid; place-items: center; font: 500 20px/24px var(--os-font-px); color: var(--os-accent); cursor: pointer; }
+.os-cyc[aria-disabled="true"] :is(.arr, .cv) { color: var(--os-ink-off); cursor: not-allowed; }
+[data-density="touch"] .os-cyc .arr { width: 44px; height: 44px; }
+[data-density="touch"] .os-cyc .cv { height: 44px; }
+
+/* ---------- Slider: cells and the number; the whole strip is the pointer target ---------- */
+.os-sld { display: inline-flex; align-items: center; gap: 12px; min-height: 36px; cursor: pointer; }
+.os-sld .cells { display: inline-flex; gap: 2px; }
+.os-sld .cell { width: 8px; height: 20px; background: var(--os-face-alt); box-shadow: inset 0 0 0 2px var(--os-edge); }
+.os-sld .cell.on { background: var(--os-accent); box-shadow: none; }
+.os-sld .num { font: 400 16px/20px var(--os-font-num); min-width: 40px; }
+.os-sld[aria-disabled="true"] { cursor: not-allowed; }
+.os-sld[aria-disabled="true"] .cell { box-shadow: inset 0 0 0 2px var(--os-line); background: var(--os-face-alt); }
+[data-density="touch"] .os-sld { min-height: 44px; }
+[data-density="touch"] .os-sld .cell { width: 12px; height: 24px; }
+
+/* ---------- Text input, select ---------- */
+.os-input { display: grid; gap: 4px; min-width: 0; }
+.os-input > label { font-weight: 600; }
+.os-inp { height: 36px; padding: 0 12px; border: 0; outline: none; background: var(--os-face-alt); color: var(--os-ink); box-shadow: inset 0 0 0 2px var(--os-edge); min-width: 0; width: 100%; }
+.os-inp::placeholder { color: var(--os-muted); opacity: 1; }
+.os-inp:focus-visible { box-shadow: inset 0 0 0 2px var(--os-accent); outline: 2px solid var(--os-accent); outline-offset: 2px; }
+.os-inp[aria-invalid="true"] { box-shadow: inset 0 0 0 2px var(--os-danger); }
+.os-inp:disabled { box-shadow: inset 0 0 0 2px var(--os-line); color: var(--os-ink-off); }
+.os-help { font-size: 12px; line-height: 16px; color: var(--os-muted); }
+.os-err { display: flex; gap: 8px; align-items: center; font-size: 12px; line-height: 16px; color: var(--os-danger); }
+[data-density="touch"] .os-inp { height: 44px; }
+.os-sel-wrap { position: relative; display: grid; gap: 4px; }
+.os-sel { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 36px; padding: 0 8px 0 12px; border: 0; background: var(--os-face-alt); box-shadow: inset 0 0 0 2px var(--os-edge); color: var(--os-ink); text-align: left; cursor: pointer; }
+.os-sel[aria-expanded="true"] { box-shadow: inset 0 0 0 2px var(--os-accent); }
+[data-density="touch"] .os-sel { height: 44px; }
+.os-lbx { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: 4px; list-style: none; max-height: 224px; overflow: auto; overscroll-behavior: contain; scrollbar-width: none; background: var(--os-face); box-shadow: inset 0 0 0 2px var(--os-edge), 4px 4px 0 var(--os-shadow); }
+.os-lbx li { display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px; cursor: pointer; }
+.os-lbx li .os-ico { visibility: hidden; color: var(--os-accent); }
+.os-lbx li[aria-selected="true"] .os-ico { visibility: visible; }
+.os-lbx li.cur { background: var(--os-sel); box-shadow: inset 0 0 0 2px var(--os-sel-line); }
+[data-density="touch"] .os-lbx { max-height: 272px; }
+[data-density="touch"] .os-lbx li { min-height: 44px; }
+.os .os-lbx:focus-visible { outline: none; }
+.os-select-modal { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; border-radius: 0; background: none; color: var(--os-ink); }
+.os-select-modal::backdrop { background: var(--os-scrim); }
+.os-select-modal .os-sheet-scrim { background: none; }
+.os-select-modal .sb { padding: 8px max(12px, var(--sar)) 12px max(12px, var(--sal)); }
+.os-select-modal .sa { display: none; }
+.os-select-modal .os-lbx { position: relative; inset: auto; box-shadow: none; padding: 4px; }
+.os-select-modal .os-sheet { max-height: calc(100% - var(--sat) - 24px); }
+.os-select-modal .os-tab { padding-left: max(16px, var(--sal)); padding-right: max(16px, var(--sar)); }
+
+/* ---------- Underline tabs (OpenSinnoh's own screens: at most five, four on a phone) ---------- */
+/* The rule and the underline are inset shadows: the strip scrolls sideways, which clips anything below its box.
+   Selected: the accent and a 2-dot underline. The cursor or keyboard focus adds the cursor fill; never a box ring. */
+.os-tabs-wrap { position: relative; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); }
+.os-tabs-wrap.has-overflow { grid-template-columns: 44px minmax(0, 1fr) 44px; }
+.os-tab-scroll { display: none; align-items: center; justify-content: center; padding: 0; border: 0; background: var(--os-face); color: var(--os-ink); cursor: pointer; min-width: 44px; min-height: 44px; }
+.has-overflow > .os-tab-scroll { display: flex; visibility: hidden; }
+.more-before > .prev, .more-after > .next { visibility: visible; }
+.os-tabs-wrap::before, .os-tabs-wrap::after { content: ''; position: absolute; top: 0; bottom: 4px; width: 24px; z-index: 1; pointer-events: none; opacity: 0; }
+.os-tabs-wrap::before { left: 44px; background: linear-gradient(to right, var(--os-face), transparent); }
+.os-tabs-wrap::after { right: 44px; background: linear-gradient(to left, var(--os-face), transparent); }
+.os-tabs-wrap.more-before::before, .os-tabs-wrap.more-after::after { opacity: 1; }
+.os-tabs { position: relative; min-width: 0; display: flex; gap: 4px; padding: 0 4px; box-shadow: inset 0 -2px 0 var(--os-line); overflow-x: auto; scrollbar-width: none; }
+.os-tabs [role="tab"] { display: inline-flex; align-items: center; gap: 8px; border: 0; background: none; padding: 0 8px; min-height: 44px; font: 500 20px/24px var(--os-font-px); color: var(--os-muted); position: relative; white-space: nowrap; flex: none; cursor: pointer; }
+.os-tabs [role="tab"][aria-selected="true"] { color: var(--os-accent); box-shadow: inset 0 -4px 0 var(--os-accent); }
+.os .os-tabs [role="tab"]:is(:focus-visible, .is-cursor) { outline: none; color: var(--os-accent); background: var(--os-sel); box-shadow: inset 0 -4px 0 var(--os-accent); }
+@media (hover: hover) { .os-tabs [role="tab"]:not([aria-selected="true"]):hover { color: var(--os-ink); } }
+[data-density="touch"] .os-tabs [role="tab"] { min-height: 48px; min-width: 44px; justify-content: center; }
+/* Five tabs (Options) must fit a 375 px phone: the label steps down to 16 px and the padding to 6 px. */
+@container os-screen (max-width: 480px) { .os-tabs { gap: 0; } .os-tabs [role="tab"] .os-ico { display: none; } }
+@container os-screen (max-width: 560px) { .os-tabs [role="tab"] { padding: 0 6px; font-size: 16px; line-height: 20px; } }
+
+/* ---------- List rows: one selection model (the cursor row: the sel fill, a 1-dot line and the ▶) ---------- */
+/* Rows keep their content height in a scrolling list (auto tracks would shrink to their min-height). */
+.os-list { display: grid; align-content: start; grid-auto-rows: max-content; }
+.os-row { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; gap: 4px 8px; min-height: 44px; padding: 4px 12px 4px 4px; position: relative; cursor: pointer; }
+.os-row > .cur, .os-choice > .cur { visibility: hidden; color: var(--os-accent); justify-self: center; }
+.os-row .lab { font: 500 20px/24px var(--os-font-px); }
+.os-row .desc { color: var(--os-muted); }
+.os-row[aria-disabled="true"] { cursor: default; }
+.os-row[aria-disabled="true"] .lab { color: var(--os-ink-off); }
+.os-row:is(.is-cursor, :has(:focus-visible)) { background: var(--os-sel); box-shadow: inset 0 0 0 2px var(--os-sel-line); }
+.os-row:is(.is-cursor, :has(:focus-visible)) > .cur { visibility: visible; }
+/* d-pad: the description lives in the box under the list; touch: inline under the label. */
+:root:not([data-density="touch"]) .os-row .desc { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+[data-density="touch"] .os-row { min-height: 64px; padding-top: 8px; padding-bottom: 8px; }
+@container os-screen (max-width: 480px) { .os-row { grid-template-columns: 24px minmax(0, 1fr); } .os-row .ctl { grid-column: 2; justify-self: start; margin-left: -8px; } }
+
+/* ---------- Description box: message-style text in a Slim window, typed at the Text speed (typeText) ---------- */
+.os-desc { min-height: 64px; padding: 4px 8px; font: 500 20px/24px var(--os-font-px); color: var(--os-ink); }
+/* Touch shows each row's description inline: the box keeps only a result (`is-status`), never the description twice. */
+[data-density="touch"] .os-desc:not(.is-status) { display: none; }
+
+/* ---------- Footer: the screen's line (or nothing) and Back ---------- */
+.os-foot { display: flex; gap: 8px; align-items: center; padding-top: 8px; }
+.os-foot > :first-child { flex: 1; min-width: 0; }
+.os-foot > .os-btn:last-child { margin-left: auto; }
+.os-foot > .os-btn.is-cursor, .os-dlg .acts > .os-btn.is-cursor { outline: 2px solid var(--os-accent); outline-offset: 2px; }
+
+/* ---------- Toast, banner, dialog, sheet, tooltip ---------- */
+.os-toast-slot { position: absolute; left: 16px; bottom: 16px; z-index: 6; max-width: calc(100% - 32px); }
+@container os-screen (max-width: 480px) { .os-toast-slot { right: 16px; bottom: calc(16px + var(--sab)); display: flex; justify-content: center; } }
+.os-toast { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; font: 500 20px/24px var(--os-font-px); }
+.os-toast .os-ico { color: var(--os-ok); }
+.os-toast.in { animation: os-toast-in calc(var(--os-f) * 6) steps(6) both; }
+.os-toast.out { animation: os-toast-out calc(var(--os-f) * 4) steps(4) both; }
+@keyframes os-toast-in { from { transform: translateY(8px); opacity: 0; } }
+@keyframes os-toast-out { to { transform: translateY(8px); opacity: 0; } }
+.os-banner { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 8px 12px; align-items: start; padding: 8px 12px; background: var(--os-banner); box-shadow: inset 2px 0 0 var(--os-danger); }
+.os-banner > .os-ico { color: var(--os-danger); margin-top: 2px; }
+.os-banner b { font-weight: 600; }
+.os-banner .bt { overflow-wrap: anywhere; }
+.os-banner code { font: 12px/16px var(--os-font-mono); }
+.os-banner .acts { display: flex; gap: 8px; grid-column: 2 / -1; }
+.os-banner.info { background: var(--os-banner-info); box-shadow: inset 2px 0 0 var(--os-ring); }
+.os-banner.info > .os-ico { color: var(--os-ink); }
+.os-layer { position: absolute; inset: 0; display: grid; place-items: center; background: var(--os-scrim); z-index: 5; padding: 16px; }
+.os-dlg { padding: 8px 8px 4px; max-width: 400px; width: 100%; display: grid; gap: 8px; }
+.os-dlg h3 { margin: 0; padding: 4px 8px 0; font: 500 20px/24px var(--os-font-px); }
+.os-dlg p { color: var(--os-muted); padding: 0 8px; }
+.os-dlg .acts { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.os-sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 8; max-height: 75%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; background: var(--os-face); border-top: 2px solid var(--os-rim); box-shadow: 0 -2px 0 var(--os-halo); padding-bottom: var(--sab); animation: os-sheet-in calc(var(--os-f) * 6) steps(6) both; }
+@keyframes os-sheet-in { from { transform: translateY(48px); opacity: 0; } }
+.os-sheet-scrim { position: absolute; inset: 0; z-index: 7; background: var(--os-scrim); }
+.os-sheet .sb { padding: 16px; display: grid; gap: 12px; overflow: auto; min-height: 0; }
+/* The gold focus ring needs a contrasting backing on a coloured title bar. */
+.os-sheet .os-tab .os-btn:focus-visible { box-shadow: 0 0 0 4px var(--os-on-tone); }
+.os-sheet .sa { display: flex; gap: 8px; justify-content: flex-end; padding: 8px 16px 16px; }
+.os-tipw { position: relative; display: inline-flex; }
+.os-tip { position: absolute; z-index: 30; bottom: calc(100% + 8px); left: 50%; translate: -50% 0; white-space: nowrap; padding: 4px 8px; font-size: 12px; line-height: 16px; color: var(--os-ink); background: var(--os-face); box-shadow: inset 0 0 0 2px var(--os-edge); display: none; }
+.os-tipw:hover .os-tip, .os-tipw:focus-within .os-tip { display: block; animation: os-tip calc(var(--os-f) * 15) steps(1, end) both; }
+@keyframes os-tip { from { visibility: hidden; } }
+
+/* ---------- Progress ---------- */
+.os-prog { display: grid; gap: 8px; min-width: 0; }
+.os-prog .lt { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; color: var(--os-muted); }
+.os-prog .lt b { font: 500 20px/24px var(--os-font-px); color: var(--os-ink); }
+.os-prog .lt span { font: 400 16px/20px var(--os-font-num); }
+.os-prog .cells { display: flex; gap: 2px; width: fit-content; max-width: 100%; padding: 4px; position: relative; overflow: hidden; box-shadow: inset 0 0 0 2px var(--os-edge); }
+.os-prog .cells i { width: 12px; height: 12px; flex: none; }
+.os-prog .cells i.on { background: var(--os-accent); }
+.os-prog.busy .cells::after { content: ''; position: absolute; top: 4px; left: 4px; width: 54px; height: 12px; background: repeating-linear-gradient(90deg, var(--os-accent) 0 12px, transparent 12px 14px); animation: os-busy calc(var(--os-f) * 48) steps(16) infinite; }
+@keyframes os-busy { from { transform: translateX(-56px); } to { transform: translateX(224px); } }
+
+/* ---------- Choices: the answers to one question, all visible; the cursor row model ---------- */
+.os-choices { display: grid; gap: 4px; }
+.os-choice { display: grid; grid-template-columns: 24px minmax(0, 1fr); align-items: center; gap: 0 8px; min-height: 44px; padding: 4px 12px 4px 4px; text-align: left; position: relative; cursor: pointer; border: 0; background: none; color: var(--os-ink); }
+.os-choice .cl { font: 500 20px/24px var(--os-font-px); }
+.os-choice .cd { grid-column: 2; color: var(--os-muted); font-size: 12px; line-height: 16px; }
+.os-choice:is(.is-cursor, :focus-visible) { background: var(--os-sel); box-shadow: inset 0 0 0 2px var(--os-sel-line); }
+.os-choice:is(.is-cursor, :focus-visible) > .cur { visibility: visible; }
+[data-density="touch"] .os-choice { min-height: 56px; }
+
+/* ---------- File picker: a label around a hidden file input (the whole box opens the system's dialog) ---------- */
+.os-file { position: relative; cursor: pointer; color: var(--os-ink); }
+.os-file input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+/* The drop target: a dotted 1-dot border (the edge, 3:1 on the face). */
+.os-file.drop {
+  display: grid; justify-items: center; gap: 4px; padding: 20px 16px; text-align: center;
+  background-image: linear-gradient(90deg, var(--os-edge) 50%, transparent 0), linear-gradient(90deg, var(--os-edge) 50%, transparent 0), linear-gradient(var(--os-edge) 50%, transparent 0), linear-gradient(var(--os-edge) 50%, transparent 0);
+  background-size: 8px 2px, 8px 2px, 2px 8px, 2px 8px; background-repeat: repeat-x, repeat-x, repeat-y, repeat-y; background-position: 0 0, 0 100%, 0 0, 100% 0;
+}
+.os-file.drop .os-ico { color: var(--os-ink); margin-bottom: 4px; }
+.os-file.drop .fl { font: 500 20px/24px var(--os-font-px); }
+.os-file.drop .fh { color: var(--os-muted); font-size: 12px; line-height: 16px; }
+.os-file.drop.over { background-color: var(--os-sel); }
+@media (hover: hover) { .os-file.drop:hover { background-color: var(--os-face-alt); } }
+.os-file.quiet { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 12px; font: 500 20px/24px var(--os-font-px); border-style: solid; border-color: transparent; border-width: 4px; border-image: var(--os-ctl) 2 fill / 4px / 0 stretch; }
+@media (hover: hover) { .os-file.quiet:hover { border-image-source: var(--os-ctl-hover); } }
+.os-file:has(input:focus-visible) { outline: 2px solid var(--os-accent); outline-offset: 2px; }
+[data-density="touch"] .os-file.quiet { min-height: 44px; padding: 0 16px; }
+
+/* ---------- The mark and the wordmark (components.ts: logo, wordmark; brand.ts) ---------- */
+.os-brand { display: block; flex: none; overflow: visible; }
+/* The intro (48 frames, brand.ts MARK_MOTION): each group of pixels waits for its frame, hidden until then; the caret
+   is on for frames 34–39, then the idle blinks it three times every 180 frames. Plain CSS steps: nothing runs per
+   frame, and a hidden page or screen runs nothing. The wordmark's intro (32 frames, brand.ts WORDMARK_LETTERS) is
+   the same rule on its letters. */
+.os-brand.anim .f { animation: os-brand-wait calc(var(--f) * var(--os-f)) steps(1) backwards; }
+.os-brand .caret { opacity: 0; }
+.os-brand.anim .caret { animation: os-brand-on calc(var(--os-f) * 6) steps(1) calc(var(--os-f) * 34), os-brand-idle calc(var(--os-f) * 180) steps(1) calc(var(--os-f) * 48) infinite; }
+@keyframes os-brand-wait { from, to { visibility: hidden; } }
+@keyframes os-brand-on { from, to { opacity: 1; } }
+@keyframes os-brand-idle { 0%, 8.889%, 17.778% { opacity: 1; } 4.444%, 13.333%, 22.222%, 100% { opacity: 0; } }
+
+/* ---------- Motion: stepped on the 30 Hz frame; reduced motion is instant and nothing loops ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .os *, .os *::before, .os *::after, .os, .os-brand * { animation: none !important; transition: none !important; }
+}
+/* Forced colours: 9-slice images vanish, so windows, tabs and controls get plain system borders. Shadows and
+   background colours are dropped too, so every state that they drew gets an edge, an outline or an underline. */
+@media (forced-colors: active) {
+  .os-win, .os-btn, .os-tab, .os-file.quiet { border-image-source: none; border: 2px solid CanvasText; background-color: Canvas; }
+  /* The cursor and the keyboard focus on a row or a choice: an outline (the ▶ is shown with it). */
+  .os-row:is(.is-cursor, :has(:focus-visible)), .os-choice:is(.is-cursor, :focus-visible) { outline: 2px solid Highlight; outline-offset: -2px; }
+  /* Tabs: the open one is underlined, the cursor one outlined. */
+  .os-tabs [role="tab"][aria-selected="true"] { text-decoration: underline 4px; text-underline-offset: 6px; }
+  .os .os-tabs [role="tab"]:is(:focus-visible, .is-cursor) { outline: 2px solid Highlight; outline-offset: -2px; }
+  .os-pick > button[aria-pressed="true"] { text-decoration: underline 2px; text-underline-offset: 4px; }
+  /* Switch, slider and progress cells: an edge, and a filled cell or knob when on. */
+  .os-tgl .tr { border: 2px solid CanvasText; }
+  .os-tgl[aria-checked="true"] .tr { forced-color-adjust: none; background: Highlight; border-color: Highlight; }
+  .os-tgl .kn { forced-color-adjust: none; background: CanvasText; }
+  .os-tgl[aria-checked="true"] .kn { background: HighlightText; }
+  .os-sld .cell { border: 2px solid CanvasText; }
+  .os-sld .cell.on, .os-prog .cells i.on { forced-color-adjust: none; background: Highlight; border-color: Highlight; }
+  .os-prog .cells { border: 2px solid CanvasText; }
+  .os-banner { border-left: 4px solid CanvasText; }
+  .os-file.drop { border: 2px dashed CanvasText; }
+  .os-foot > .os-btn.is-cursor, .os-dlg .acts > .os-btn.is-cursor { outline-color: Highlight; }
+}
+/* More contrast asked for: the quiet text and the lines take the full ink. */
+@media (prefers-contrast: more) {
+  .os { --os-muted: var(--os-ink); --os-line: var(--os-ink); --os-edge: var(--os-ink); }
+}

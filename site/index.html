@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>OpenSinnoh: Pokémon Platinum in your browser</title>
+    <meta name="description" content="Play Pokémon Platinum in your browser, on desktop, iPhone, Android or tablet. A new engine that plays the game from your own ROM. No emulator, no download. Free, in beta." />
+    <meta name="theme-color" content="#0b0d12" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#e6e4dd" media="(prefers-color-scheme: light)" />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="canonical" href="https://opensinnoh.com/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="OpenSinnoh" />
+    <meta property="og:title" content="OpenSinnoh: Pokémon Platinum in your browser" />
+    <meta property="og:description" content="A new engine that plays Pokémon Platinum from your own ROM, in your browser, on desktop, phone and tablet." />
+    <meta property="og:url" content="https://opensinnoh.com/" />
+    <meta property="og:image" content="https://opensinnoh.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="OpenSinnoh in beta: the player walking through Twinleaf Town with Charizard following, under the pixel wordmark and the line Pokémon Platinum, rebuilt for the browser." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="OpenSinnoh: Pokémon Platinum in your browser" />
+    <meta name="twitter:description" content="A new engine that plays Pokémon Platinum from your own ROM, in your browser, on desktop, phone and tablet." />
+    <meta name="twitter:image" content="https://opensinnoh.com/og-image.png" />
+    <meta name="twitter:image:alt" content="OpenSinnoh in beta: the player walking through Twinleaf Town with Charizard following, under the pixel wordmark and the line Pokémon Platinum, rebuilt for the browser." />
+    <link rel="preload" as="image" href="./shots/montage-poster.webp" fetchpriority="high" />
+    <!-- The stored theme before the first paint (the toggle is main.ts; the key is the app's, a legacy pre-rename name). -->
+    <script>
+      try {
+        var t = localStorage.getItem('lantern-nds:theme');
+        if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://opensinnoh.com/#website",
+            "url": "https://opensinnoh.com/",
+            "name": "OpenSinnoh",
+            "inLanguage": "en",
+            "publisher": {
+              "@id": "https://opensinnoh.com/#org"
+            }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://opensinnoh.com/#org",
+            "name": "OpenSinnoh",
+            "url": "https://opensinnoh.com/",
+            "logo": "https://opensinnoh.com/apple-touch-icon.png",
+            "sameAs": [
+              "https://discord.gg/DHKCWq9WkF"
+            ]
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "https://opensinnoh.com/#game",
+            "name": "OpenSinnoh",
+            "description": "Play Pokémon Platinum in your browser, on desktop, iPhone, Android or tablet. A new engine that plays the game from your own ROM. No emulator, no download. Unofficial fan project, in beta.",
+            "url": "https://play.opensinnoh.com/",
+            "image": "https://opensinnoh.com/og-image.png",
+            "applicationCategory": "Game",
+            "operatingSystem": "Any (web browser)",
+            "browserRequirements": "A modern web browser and your own Pokémon Platinum ROM",
+            "inLanguage": "en",
+            "isAccessibleForFree": true,
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "publisher": {
+              "@id": "https://opensinnoh.com/#org"
+            },
+            "sameAs": [
+              "https://discord.gg/DHKCWq9WkF"
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Is this legal?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "OpenSinnoh contains no Nintendo content. You need to own the game and make the ROM from your own cartridge; the rules on backups differ by country. We don't link to ROMs."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Which ROM do I need?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Pokémon Platinum, US version. HeartGold or SoulSilver (US) is an optional add-on."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is it finished?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Not yet: it's in beta. The story plays to the credits; the post-game is in progress, and it's still being playtested, so expect rough edges and export your saves. Report bugs on Discord."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Where are my saves?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "In your browser, on your device. Export a save file from Options › Data to back it up or move it."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Does it send anything?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No account and no ads. We count visits anonymously, without cookies. Error reports only if you allow them."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+    <script type="module" src="./src/main.ts"></script>
+  </head>
+  <body class="os">
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="nav wrap">
+      <nav aria-label="Sections" class="links">
+        <a href="#engine">The engine</a>
+        <a href="#story">The story</a>
+        <a href="#how">How it works</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <div class="tools">
+        <span class="os-tipw dc"><a class="os-btn icon" href="https://discord.gg/DHKCWq9WkF" rel="noopener" aria-label="Join our Discord"><!--discord--></a><span class="os-tip" role="tooltip">Join our Discord</span></span>
+        <a class="os-btn" href="https://play.opensinnoh.com" rel="noopener">Play</a>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- Hero: the wordmark and the game running, on a laptop and a phone. -->
+      <section class="hero os-field" aria-labelledby="hero-title">
+        <div class="wrap hero-grid">
+          <div class="hero-copy">
+            <p class="kick"><span class="os-bdg">Beta</span>Playable now, in your browser</p>
+            <h1 id="hero-title" class="mark"><span class="vh">OpenSinnoh: play Pokémon Platinum in your browser</span><!--wordmark--></h1>
+            <p class="pitch">Pokémon Platinum, rebuilt from the ground up. A new engine plays the game from your own ROM, on desktop, tablet and phone (iPhone and Android).</p>
+            <p class="runs">Runs right in your browser. No emulator, no download.</p>
+            <div class="cta">
+              <a class="os-btn primary big" href="https://play.opensinnoh.com" rel="noopener" data-play>Play now<!--icon:right--></a>
+              <a class="os-btn big" href="#engine">About the engine</a>
+            </div>
+            <p class="small">Free and open source. Your ROM never leaves your device.</p>
+            <p class="small beta-note">Beta: playable to the credits, still being playtested. Expect rough edges, and export your saves. <a href="https://discord.gg/DHKCWq9WkF" rel="noopener">Report bugs on Discord</a></p>
+          </div>
+          <div class="hero-art">
+            <div class="devices">
+              <div class="laptop">
+                <div class="lid">
+                  <div class="screen">
+                    <button type="button" class="loop-btn" data-loop-toggle aria-label="Gameplay montage, press to pause">
+                      <video class="loop" muted loop playsinline preload="none" poster="./shots/montage-poster.webp" width="1280" height="720">
+                        <source src="./shots/montage.webm" type="video/webm" />
+                        <source src="./shots/montage.mp4" type="video/mp4" />
+                      </video>
+                    </button>
+                  </div>
+                </div>
+                <div class="base"></div>
+              </div>
+              <div class="phone">
+                <div class="screen">
+                  <img src="./shots/phone.webp" width="390" height="844" alt="OpenSinnoh on a phone: Jubilife City in portrait, Piplup following the player, with the touch controls below." fetchpriority="low" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- The engine: what OpenSinnoh is, and what that makes possible. -->
+      <section id="engine" class="band" aria-labelledby="engine-title">
+        <div class="wrap">
+          <div class="head">
+            <p class="kick"><span class="cur"><!--icon:cursor--></span>The engine</p>
+            <h2 id="engine-title" class="os-title d40">A new engine, not an emulator</h2>
+            <p class="lead">OpenSinnoh doesn't emulate a DS or run the game's code. It's a new engine, written for the browser, that reimplements Platinum's systems. Your ROM is read once, on your device, to import the maps, models, sprites, text and music. Then the engine plays the game itself, in 3D at your screen's resolution.</p>
+          </div>
+          <ol class="flow" aria-label="From your ROM to the game">
+            <li class="os-win"><span class="os-num">Your ROM</span><span>platinum.nds, from your cartridge</span></li>
+            <li class="arrow" aria-hidden="true"><!--icon:right--></li>
+            <li class="os-win"><span class="os-num">Import</span><span>once, in your browser</span></li>
+            <li class="arrow" aria-hidden="true"><!--icon:right--></li>
+            <li class="os-win"><span class="os-num">Engine</span><span>plays the game natively</span></li>
+          </ol>
+          <ul class="perks">
+            <li><!--icon:screen--><b>Sharp at any size</b><span>Drawn at your screen's resolution.</span></li>
+            <li><!--icon:pad--><b>Made for phones</b><span>Touch controls and layout, installable on iPhone and Android.</span></li>
+            <li><!--icon:clock--><b>Fast-forward</b><span>Up to 8×, hold or toggle.</span></li>
+            <li><!--icon:save--><b>Real saves</b><span>Export them, move devices.</span></li>
+            <li><!--icon:info--><b>Accessible</b><span>Screen readers, remapping, less flashing.</span></li>
+          </ul>
+          <div class="addon os-win">
+            <h3 class="os-tab os-tone-system"><!--icon:plus--><span class="t">Optional add-on</span></h3>
+            <img src="./shots/addon-charizard.webp" width="640" height="360" loading="lazy" decoding="async" alt="Charizard following the player in Jubilife City, drawn with HeartGold's follower sprite." />
+            <p>Have your own HeartGold or SoulSilver ROM? Add it for following Pokémon, and more content later.</p>
+          </div>
+          <p class="note"><!--icon:mods-->Next: mods and new content on the same engine. Not ready yet.</p>
+        </div>
+      </section>
+
+      <!-- The story: a few moments, to show it is the whole game. -->
+      <section id="story" class="band" aria-labelledby="story-title">
+        <div class="wrap">
+          <div class="head">
+            <p class="kick"><span class="cur"><!--icon:cursor--></span>The story</p>
+            <h2 id="story-title" class="os-title d40">The whole game, to the credits</h2>
+          </div>
+          <ul class="moments">
+            <li><figure class="shot os-win"><figcaption class="os-tab os-tone-world"><span class="t">Spear Pillar</span></figcaption><img src="./shots/spear-pillar.webp" width="640" height="360" loading="lazy" decoding="async" alt="Spear Pillar: Giratina's shadow spreads its wings over Dialga and Palkia." /></figure></li>
+            <li><figure class="shot os-win"><figcaption class="os-tab os-tone-world"><span class="t">Distortion<span class="wide"> World</span></span></figcaption><img src="./shots/distortion.webp" width="640" height="360" loading="lazy" decoding="async" alt="The Distortion World: floating platforms and sideways trees against a deep blue void." /></figure></li>
+            <li><figure class="shot os-win"><figcaption class="os-tab os-tone-team"><span class="t">Giratina</span></figcaption><img src="./shots/battle.webp" width="640" height="360" loading="lazy" decoding="async" alt="The battle with Giratina: Garchomp faces Giratina in its Origin Forme." /></figure></li>
+            <li><figure class="shot os-win"><figcaption class="os-tab os-tone-world"><span class="t"><span class="wide">Pokémon </span>League</span></figcaption><img src="./shots/league.webp" width="640" height="360" loading="lazy" decoding="async" alt="The player at the entrance of the Pokémon League." /></figure></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- How it works: three steps and the privacy promise. -->
+      <section id="how" class="band" aria-labelledby="how-title">
+        <div class="wrap">
+          <div class="head">
+            <p class="kick"><span class="cur"><!--icon:cursor--></span>How it works</p>
+            <h2 id="how-title" class="os-title d40">Three steps to Twinleaf Town</h2>
+          </div>
+          <ol class="steps">
+            <li class="os-win">
+              <span class="n os-num">01</span>
+              <h3>Open the game</h3>
+              <p>Go to <a href="https://play.opensinnoh.com" rel="noopener">play.opensinnoh.com</a>.</p>
+            </li>
+            <li class="os-win">
+              <span class="n os-num">02</span>
+              <h3>Pick your ROM</h3>
+              <p>The Pokémon Platinum file you made from your own cartridge.</p>
+              <div class="mini-file" aria-hidden="true"><!--icon:file--><span>platinum.nds</span></div>
+            </li>
+            <li class="os-win">
+              <span class="n os-num">03</span>
+              <h3>Play</h3>
+              <p>The import takes about 15 seconds. After that it starts offline.</p>
+              <div class="mini-prog" aria-hidden="true"><span class="cells"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="os-num">100%</span></div>
+            </li>
+          </ol>
+          <p class="note"><!--icon:shield-->We never host, receive or see your ROM. Nothing is uploaded, and OpenSinnoh ships no Nintendo code, art, text or music.</p>
+        </div>
+      </section>
+
+      <!-- Open source and the community: two windows side by side (stacked on a phone). -->
+      <section id="community" class="band">
+        <div class="wrap duo">
+          <div class="oss os-win">
+            <h2 class="os-tab os-tone-system"><!--icon:star--><span class="t">Open source</span></h2>
+            <div class="oss-body">
+              <p class="big-line">The engine is MIT-licensed. Read the code, report issues and contribute on GitHub.</p>
+              <div class="cta">
+                <a class="os-btn big" href="https://github.com/DennisSnijder/open-sinnoh" rel="noopener">View on GitHub<!--icon:right--></a>
+              </div>
+            </div>
+          </div>
+          <div class="oss os-win">
+            <h2 class="os-tab os-tone-system"><!--discord--><span class="t">Join the community</span></h2>
+            <div class="oss-body">
+              <p class="big-line">Follow along, report bugs and see what's next on Discord.</p>
+              <div class="cta">
+                <a class="os-btn primary big" href="https://discord.gg/DHKCWq9WkF" rel="noopener">Join the Discord<!--icon:right--></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ. -->
+      <section id="faq" class="band" aria-labelledby="faq-title">
+        <div class="wrap faq-wrap">
+          <div class="head">
+            <p class="kick"><span class="cur"><!--icon:cursor--></span>FAQ</p>
+            <h2 id="faq-title" class="os-title d40">Questions</h2>
+          </div>
+          <div class="faq os-win">
+            <details>
+              <summary><span class="cur"><!--icon:cursor--></span>Is this legal?</summary>
+              <p>OpenSinnoh contains no Nintendo content. You need to own the game and make the ROM from your own cartridge; the rules on backups differ by country. We don't link to ROMs.</p>
+            </details>
+            <details>
+              <summary><span class="cur"><!--icon:cursor--></span>Which ROM do I need?</summary>
+              <p>Pokémon Platinum, US version. HeartGold or SoulSilver (US) is an optional add-on.</p>
+            </details>
+            <details>
+              <summary><span class="cur"><!--icon:cursor--></span>Is it finished?</summary>
+              <p>Not yet: it's in beta. The story plays to the credits; the post-game is in progress, and it's still being playtested, so expect rough edges and export your saves. <a href="https://discord.gg/DHKCWq9WkF" rel="noopener">Report bugs on Discord</a>.</p>
+            </details>
+            <details>
+              <summary><span class="cur"><!--icon:cursor--></span>Where are my saves?</summary>
+              <p>In your browser, on your device. Export a save file from Options › Data to back it up or move it.</p>
+            </details>
+            <details>
+              <summary><span class="cur"><!--icon:cursor--></span>Does it send anything?</summary>
+              <p>No account and no ads. We count visits anonymously, without cookies. Error reports only if you allow them.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <div class="wrap foot-grid">
+        <a class="foot-mark" href="#main" aria-label="OpenSinnoh, back to the top"><!--logo:64--></a>
+        <nav aria-label="Links" class="foot-links">
+          <a href="https://play.opensinnoh.com" rel="noopener">Play</a>
+          <a href="https://discord.gg/DHKCWq9WkF" rel="noopener">Discord</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+        <div class="theme os-pick" role="group" aria-label="Theme">
+          <button type="button" data-theme-pick="system" aria-pressed="true">Auto</button>
+          <button type="button" data-theme-pick="dark" aria-pressed="false">Dark</button>
+          <button type="button" data-theme-pick="light" aria-pressed="false">Light</button>
+        </div>
+        <p class="legal">OpenSinnoh is an unofficial fan project, not affiliated with Nintendo, Game Freak or The Pokémon Company. Pokémon is a trademark of its owners. You need your own copy of the game. Code under the MIT licence.</p>
+      </div>
+    </footer>
+  </body>
+</html>

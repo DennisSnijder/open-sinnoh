@@ -1,0 +1,22 @@
+/* The Underground's windows over the field (ui/underground.ts), on the mart's board. */
+.ug-board .window.rom-frame { padding: 0; }
+.ug-board .menu-entry { padding-left: calc(var(--dot) * 10); }
+.ug-list-window { display: grid; }
+.ug-board .ug-list { padding: 0; background: none; box-shadow: none; overflow: hidden; }
+.ug-board .item-row { padding: 0 calc(var(--dot) * 4) 0 calc(var(--dot) * 8); gap: calc(var(--dot) * 2); }
+.ug-board .item-row + .item-row { border-top: 0; }
+.ug-board .price { margin-left: auto; }
+.ug-description { display: grid; pointer-events: none; }
+.ug-description-box { white-space: pre-line; }
+.ug-price { display: grid; grid-template-rows: 1fr 1fr; align-items: center; }
+.ug-price-value { justify-self: end; }
+.ug-heading { white-space: pre-line; }
+.ug-records-window { display: grid; }
+.ug-records { display: grid; align-content: start; gap: calc(var(--dot) * 2); padding: 0; background: none; text-align: left; }
+.ug-record { display: flex; justify-content: space-between; }
+.ug-record-title { margin-bottom: calc(var(--dot) * 4); }
+/* The mining board: the side buttons are hit boxes over the canvas's drawn buttons. */
+.ug-mining-scene .ug-tool { position: absolute; background: none; border: 0; padding: 0; }
+.ug-mining-scene .ug-tool.is-cursor { outline: none; background: none; box-shadow: none; }
+.ug-mining-scene .ug-tool.is-cursor::before { display: none; }
+.ug-mining-scene .ds-scene-canvas { touch-action: none; }

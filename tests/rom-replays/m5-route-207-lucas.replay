@@ -1,0 +1,27 @@
+from cp6.replay
+set state gender "female"
+warp platinum:MAP_HEADER_ROUTE_207 336 712 right
+# Gender branch for cp7: the counterpart at Mt. Coronet's door on Route 207 for a
+# girl. Route207_OnTransition draws the counterpart by the player's gender (VAR_OBJ_GFX_ID_0: Lucas,
+# OBJ_EVENT_GFX_PLAYER_M 0, where cp7 has Dawn, OBJ_EVENT_GFX_PLAYER_F 97), and Route207_Counterpart takes
+# Lucas's branch; both give the Vs. Seeker. Setup lines stage it from CP6's end: the gender as the save keeps it,
+# the player east of Route 207's trainers, short of the coord event. Headless from the cp6 anchor
+# (tests/integration/checkpoints-m5a-branches.rom.test.ts).
++0 wild auto
++0 evolve cancel
+until idle
++0 assert var platinum:VAR_OBJ_GFX_ID_0 0
++0 press right
+until position 340 712 6000
++0 release right
+until message 3000
+advance text 6000
+# "choose a hand": the right
+until menu
++4 press a
++1 release a
+advance text 6000
+until idle 3000
++0 assert flag platinum:FLAG_UNLOCKED_VS_SEEKER_LVL_1 true
++0 assert var platinum:VAR_ROUTE_207_COUNTERPART_TRIGGER_STATE 1
++0 assert state bag.key_items[item="platinum:ITEM_VS_SEEKER"].count 1

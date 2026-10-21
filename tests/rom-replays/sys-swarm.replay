@@ -1,0 +1,17 @@
+from parts/swarm-twin.replay
+# sys-swarm (decomp swarm.c, wild_encounters.c WildEncounters_ReplaceSwarmEncounters, unk_020559DC.c): on Route 201, the
+# day's swarm, Doduo takes land slots 0–1 (40%); it is met in the grass and fled. The next day
+# (FieldSystem_HandleDailyEvents: SpecialEncounter_SetMixedRecordDailies) the swarm daily is the day's RecordMixedRNG
+# value.
+warp platinum:MAP_HEADER_ROUTE_201 142 846 left
+until idle
+until wild platinum:SPECIES_DODUO left right 20000
+until battle
++0 battle run
+until battle end
+until idle
++0 date 2009-03-23 12:00
+until idle
++0 reload
+until idle
++0 assert state encounters.swarms true

@@ -1,0 +1,29 @@
+from cp8.replay
+set var platinum:VAR_PLAYER_STARTER 387
+party 0 platinum:SPECIES_TORTERRA 55 platinum:MOVE_EARTHQUAKE platinum:MOVE_CRUNCH platinum:MOVE_WOOD_HAMMER platinum:MOVE_STONE_EDGE
+warp platinum:MAP_HEADER_PASTORIA_CITY 600 820 down
+# Starter branch for cp9: Barry in front of Pastoria Gym for a player who chose
+# Turtwig. PastoriaCity_CoordEvent_RivalBattle picks his team by VAR_PLAYER_STARTER (decomp
+# GetPlayerStarterSpecies): TRAINER_RIVAL_PASTORIA_CITY_TURTWIG (474), not cp9's _PIPLUP (473). Setup lines stage
+# it from CP8's end (VAR_PASTORIA_CITY_STATE 1): the starter as the save keeps it, a Torterra in its slot, the
+# player north of the coord event. Headless from the cp8 anchor (tests/integration/checkpoints-m5b-branches.rom.test.ts).
++0 wild auto
++0 evolve cancel
+until idle
+# Barry in front of the gym (PastoriaCity_CoordEvent_RivalBattle), as cp9 walks into it
++0 press left
+until position 594 820 6000
++0 release left
++0 press down
+until position 594 828 6000
++0 release down
++0 press left
+until message 6000
++0 release left
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_RIVAL_PASTORIA_CITY_TURTWIG won single
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_PASTORIA_CITY_STATE 2
++8 release select

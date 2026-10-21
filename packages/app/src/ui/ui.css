@@ -1,0 +1,205 @@
+/*
+ * In-game UI: "faithful-inspired". DS windows (paper fill, two-ring slate frame, notched pixel
+ * corners, hard drop shadow) in the game's own bitmap font, laid out for the web. Every length that
+ * draws a frame is a multiple of --dot (one DS pixel at the UI scale, 2px or 3px).
+ */
+.ui-layer {
+  --dot: 2px;
+  --paper: #f8f8f0;
+  --paper-2: #ecece2;
+  --frame: #3a4256;
+  --frame-hi: #aab3c4;
+  --slate: #2e3647;
+  --slate-2: #444f66;
+  --band: #d9e3f5;
+  --band-edge: #9fb2d8;
+  --cursor: #e0503c;
+  --scrim: rgb(10 14 24 / 0.5);
+  --icon-ink: #3a4256;
+  --icon-accent: #e0503c;
+  --row: calc(var(--dot) * 20);
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+  font: 13px/1.4 system-ui, sans-serif;
+  color: #2a2f3a;
+}
+.ui-layer[data-mode='compact'] { --row: calc(var(--dot) * 24); }
+.ui-layer > * { pointer-events: auto; }
+:where(.ui-layer) button { all: unset; box-sizing: border-box; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+:where(.ui-layer) button:disabled { cursor: default; }
+.ui-layer canvas { flex: none; max-width: none; display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.px { display: inline-flex; flex: none; align-items: center; }
+/* Wrapping text (PixelFont.flow): words a space apart, wrapped to the box. */
+.px-flow { display: flex; flex-direction: column; min-width: 0; }
+.px-flow-line { display: flex; flex-wrap: wrap; column-gap: var(--space); }
+.ui-icon { width: calc(var(--dot) * 12); height: calc(var(--dot) * 12); flex: none; }
+.ui-icon.dim { --icon-ink: #c4c9d2; --icon-accent: #d8dce3; }
+
+/* --- Frames ------------------------------------------------------------------------------- */
+.ui-host { position: absolute; inset: 0; }
+.ui-scrim { position: absolute; inset: 0; background: var(--scrim); }
+/* Phones: a DS screen full screen, on an opaque backdrop in its edge colour (set when the art loads). */
+.ui-scrim.opaque { background: #10141c; }
+.ui-frame { position: absolute; --row: calc(var(--dot) * 20); filter: drop-shadow(0 calc(var(--dot) * 2) 0 rgb(8 12 20 / 0.45)); }
+.ui-layer[data-mode='compact'] .ui-frame { --row: calc(var(--dot) * 24); }
+.ui-screen {
+  --n: calc(var(--dot) * 2);
+  background: var(--paper);
+  box-shadow: inset 0 0 0 var(--dot) var(--frame), inset 0 0 0 calc(var(--dot) * 2) var(--frame-hi), inset 0 0 0 calc(var(--dot) * 3) var(--paper-2);
+  clip-path: polygon(var(--n) 0, calc(100% - var(--n)) 0, 100% var(--n), 100% calc(100% - var(--n)), calc(100% - var(--n)) 100%, var(--n) 100%, 0 calc(100% - var(--n)), 0 var(--n));
+}
+.ui-enter { animation: ui-in 160ms steps(4, end) both; }
+.ui-window.ui-enter { animation-name: ui-in-side; }
+@keyframes ui-in { from { transform: translateY(calc(var(--dot) * 12)); opacity: 0; } }
+@keyframes ui-in-side { from { transform: translateX(calc(var(--dot) * 16)); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .ui-enter, .poketch:not([hidden]) { animation: none !important; }
+}
+
+/* An OpenSinnoh UI screen (@opensinnoh/ui) in the layer, from the game or the title: its frame fills the room and
+   lets clicks through; the screen's window places itself and opens with the system's stepped animation. */
+.ui-os { inset: var(--room-top, 0px) var(--room-right, 0px) var(--room-bottom, 0px) var(--room-left, 0px); filter: none; pointer-events: none; }
+/* The window opens with the system's stepped animation, not the sheets'. */
+.ui-os.ui-enter { animation: none; }
+.ui-os.ui-enter .os-panel { animation: os-win-in calc(var(--os-f) * 4) steps(4) both; }
+/* The game layer's DS focus outline (ui.css) is not ours: the system's accent ring, here as everywhere. */
+.ui-layer .os :is(button, [tabindex]):focus-visible { outline: 2px solid var(--os-accent); outline-offset: 2px; }
+/* Focus that follows the cursor gets no second ring (os.css): the cursor row's control, a cursor button, the tabs. */
+.ui-layer .os .os-row.is-cursor :is(button, [tabindex]):focus-visible,
+.ui-layer .os .is-cursor:is(button, [tabindex]):focus-visible:not(.os-foot > .os-btn, .os-dlg .acts > .os-btn),
+.ui-layer .os .os-tabs [role="tab"]:is(:focus-visible, .is-cursor) { outline: none; }
+
+/* A cursor stop: the selected one gets the blue band and the red pixel arrow, as in the DS menus. */
+[data-nav] { position: relative; }
+/* A row alone on its line taps across its window, frame included (hits.ts sets the extension); invisible. */
+.window [data-nav]::after { content: ''; position: absolute; top: 0; bottom: 0; left: calc(-1 * var(--hit-l, 0px)); right: calc(-1 * var(--hit-r, 0px)); }
+[data-nav].is-cursor { background: var(--band); box-shadow: inset 0 0 0 var(--dot) var(--band-edge); }
+[data-nav].is-cursor::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--dot) * 2);
+  top: 50%;
+  width: calc(var(--dot) * 4);
+  height: calc(var(--dot) * 7);
+  margin-top: calc(var(--dot) * -3.5);
+  background: var(--cursor);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+@media (hover: hover) { [data-nav]:hover:not(.is-cursor) { background: rgb(217 227 245 / 0.5); } }
+/* Focus that follows the game cursor shows as the cursor; a stop or button Tab reaches off the cursor gets an outline. */
+.ui-layer :is(.is-cursor, .msg-box, [data-screen]):focus-visible { outline: none; }
+.ui-layer :is(button, [tabindex]):focus-visible:not(.is-cursor, .msg-box, [data-screen]) { outline: var(--dot) dashed var(--cursor); outline-offset: var(--dot); }
+@media (forced-colors: active) { .ui-layer :focus-visible { outline: 2px solid Highlight !important; } }
+
+/* --- HUD ---------------------------------------------------------------------------------- */
+.ui-hud { position: absolute; z-index: 1; top: max(8px, var(--sat)); right: max(8px, var(--sar)); display: flex; gap: 8px; }
+/* Landscape touch controls take the side columns (menu screens keep clear of them): the HUD sits above the d-pad. */
+.ui-layer[data-controls='side'] .ui-hud { right: auto; left: max(8px, var(--sal)); }
+/* Busy: dimmed by colour, not opacity. The button itself is styled in style.css. */
+.ui-hud.busy .hud-button:not(.hud-fast, .hud-fullscreen) { --icon-ink: #8a90a0; --icon-accent: #8c7a58; }
+/* Fast-forward stays usable mid-event (cutscenes are where it helps); lit while on. */
+.hud-fullscreen[aria-pressed='true'] { background: rgb(242 169 59 / 0.88); --icon-ink: #1e2432; --icon-accent: #f4f1e6; }
+.hud-fast.on { background: rgb(242 169 59 / 0.88); --icon-ink: #1e2432; --icon-accent: #f4f1e6; }
+
+/* --- Start menu (a window at the right of the field, as on the DS) ---------------------------- */
+.ui-window { top: calc(var(--room-top, 0px) + 60px); right: calc(var(--room-right, 0px) + 12px); max-height: calc(100% - var(--room-top, 0px) - 72px); }
+.start-menu { padding: calc(var(--dot) * 4); overflow: auto; }
+.start-list { display: grid; }
+.start-entry {
+  display: grid; grid-template-columns: calc(var(--dot) * 8) auto 1fr; align-items: center; gap: calc(var(--dot) * 3);
+  min-width: calc(var(--dot) * 88); height: var(--row); padding: 0 calc(var(--dot) * 6) 0 0;
+}
+.start-entry .ui-icon { grid-column: 2; }
+.start-entry .px { grid-column: 3; }
+.ui-layer[data-mode='compact'] .ui-window { top: auto; bottom: 8px; left: 8px; right: 8px; }
+.ui-layer[data-mode='compact'] .start-entry { min-width: 0; }
+/* With the ROM art (start_menu.c): 88 px wide, 24-px rows, the label at x 28; the icon centred at (14, 12) of the
+   row and the cursor at (44, 12), both running a little into the frame as on the DS. */
+.start-menu:has(> .start-list.rom) { padding: 0; overflow: visible; }
+/* The Safari Game's ball window (start_menu.c StartMenu_PrintBallCount: 12×4 tiles, two 16-px lines), beside the menu. */
+.start-menu:has(> .start-balls) { position: relative; overflow: visible; }
+.start-balls { position: absolute; top: 0; right: calc(100% + var(--dot) * 8); width: calc(var(--dot) * 96); box-sizing: border-box; padding: calc(var(--dot) * 8); display: grid; grid-auto-rows: calc(var(--dot) * 16); align-items: center; }
+.start-list.rom .start-entry { position: relative; display: flex; align-items: center; min-width: calc(var(--dot) * 88); height: calc(var(--dot) * 24); padding: 0 0 0 calc(var(--dot) * 28); box-sizing: border-box; }
+.start-list.rom .start-entry.is-cursor, .start-list.rom .start-entry:hover { background: none; box-shadow: none; }
+.start-list.rom .start-entry.is-cursor::before { display: none; }
+.start-list.rom .start-icon, .start-list.rom .start-cursor { position: absolute; top: calc(var(--dot) * -4); line-height: 0; pointer-events: none; }
+.start-list.rom .start-icon { left: calc(var(--dot) * -2); }
+.start-list.rom .start-cursor { left: calc(var(--dot) * -4); }
+.start-list.rom .start-entry .px { position: relative; }
+.ui-layer[data-mode='compact'] .ui-window.ui-enter { animation-name: ui-in; }
+
+/* --- The registered-item wheel (OpenSinnoh, item-wheel.ts): four field windows about the field's centre ---------- */
+.ui-wheel { inset: var(--room-top, 0px) var(--room-right, 0px) var(--room-bottom, 0px) var(--room-left, 0px); display: grid; place-items: center; filter: none; pointer-events: none; }
+.ui-wheel > .item-wheel { width: 100%; height: 100%; background: none; box-shadow: none; clip-path: none; display: grid; grid-template-areas: '. up .' 'left . right' '. down .'; grid-template-columns: 1fr calc(var(--dot) * 24) 1fr; grid-template-rows: 1fr minmax(calc(var(--dot) * 32), auto) 1fr; place-items: center; pointer-events: none; }
+/* Each item toward its direction, about the player at the field's centre. */
+.wheel-up { align-self: end; } .wheel-down { align-self: start; } .wheel-left { justify-self: end; } .wheel-right { justify-self: start; }
+.wheel-slot { padding: calc(var(--dot) * 2); pointer-events: auto; }
+.wheel-up { grid-area: up; } .wheel-right { grid-area: right; } .wheel-down { grid-area: down; } .wheel-left { grid-area: left; }
+.wheel-item { display: grid; justify-items: center; align-content: center; gap: calc(var(--dot) * 1); min-width: calc(var(--dot) * 48); padding: calc(var(--dot) * 2) calc(var(--dot) * 4); }
+.wheel-icon { display: grid; place-items: center; }
+
+/* --- Save (window + message box) ------------------------------------------------------------ */
+.save-window { display: grid; gap: calc(var(--dot) * 4); padding: calc(var(--dot) * 6); min-width: calc(var(--dot) * 120); }
+.save-info { display: grid; grid-template-columns: auto 1fr; gap: calc(var(--dot) * 1) calc(var(--dot) * 8); margin: 0; padding: calc(var(--dot) * 4); background: var(--paper-2); }
+.save-info dd { margin: 0; justify-self: end; }
+.save-box { display: grid; gap: calc(var(--dot) * 3); border-top: var(--dot) solid var(--frame-hi); padding-top: calc(var(--dot) * 4); }
+.message { margin: 0; min-height: calc(var(--dot) * 32); }
+.message-button { display: block; padding: calc(var(--dot) * 2) calc(var(--dot) * 2) calc(var(--dot) * 2) calc(var(--dot) * 9); }
+.choices { display: flex; gap: calc(var(--dot) * 2); justify-content: flex-end; }
+.choice { height: var(--row); padding: 0 calc(var(--dot) * 6) 0 calc(var(--dot) * 9); display: inline-flex; align-items: center; background: var(--paper-2); }
+.ui-error { color: #b42318; font-weight: 600; }
+
+/* --- Sheets ------------------------------------------------------------------------------- */
+/* Every menu app is a DS screen (boards, board.ts) centred in the room; the scrim around it closes. */
+.ui-sheet { inset: var(--room-top, 0px) var(--room-right, 0px) var(--room-bottom, 0px) var(--room-left, 0px); display: grid; place-items: center; pointer-events: none; }
+.ui-sheet > .board, .ui-sheet > .ds-screen { pointer-events: auto; }
+.ui-layer[data-mode='compact'] .ui-sheet { display: block; overflow: hidden; }
+.pill { height: var(--row); padding: 0 calc(var(--dot) * 8) 0 calc(var(--dot) * 9); display: inline-flex; align-items: center; background: var(--paper-2); box-shadow: inset 0 0 0 var(--dot) var(--frame-hi); }
+.prompt { margin: 0; }
+
+/* Lists and pocket bars (the mart). */
+.bag-side { display: grid; align-content: start; gap: calc(var(--dot) * 3); }
+.pocket-bar { display: grid; grid-template-columns: calc(var(--dot) * 22) 1fr calc(var(--dot) * 22); align-items: center; background: var(--slate); min-height: calc(var(--dot) * 22); }
+.pocket-name { justify-self: center; }
+.pocket-arrow { width: calc(var(--dot) * 22); height: calc(var(--dot) * 22); display: grid; place-items: center; }
+.pocket-arrow::before { content: ''; width: calc(var(--dot) * 4); height: calc(var(--dot) * 7); background: var(--cursor); clip-path: polygon(100% 0, 0 50%, 100% 100%); }
+.pocket-arrow.next::before { clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.pocket-tabs { display: grid; gap: var(--dot); }
+.pocket-tab { min-height: calc(var(--dot) * 18); padding: 0 calc(var(--dot) * 5); display: flex; align-items: center; background: var(--paper-2); }
+.pocket-tab.on { background: var(--slate-2); box-shadow: inset calc(var(--dot) * 2) 0 0 var(--cursor); }
+.item-list { display: grid; align-content: start; overflow: auto; background: #fff; box-shadow: inset 0 0 0 var(--dot) var(--paper-2); padding: calc(var(--dot) * 2); }
+.item-row { display: flex; justify-content: space-between; align-items: center; gap: calc(var(--dot) * 6); height: var(--row); padding: 0 calc(var(--dot) * 5) 0 calc(var(--dot) * 9); }
+.item-row + .item-row { border-top: 1px solid #eceae2; }
+.item-row.cancel { color: inherit; }
+.ui-layer[data-mode='compact'] .pocket-tabs { display: flex; overflow-x: auto; scrollbar-width: none; }
+.ui-layer[data-mode='compact'] .pocket-tab { flex: none; }
+.ui-layer[data-mode='compact'] .pocket-tab.on { box-shadow: inset 0 calc(var(--dot) * -2) 0 var(--cursor); }
+
+/* --- Pokétch: the DS bottom screen as a card (ROM frame and side button, drawn on the canvas) -- */
+.poketch {
+  position: absolute; right: calc(var(--room-right, 0px) + 16px); bottom: 16px; display: block; line-height: 0;
+  filter: drop-shadow(0 4px 0 rgb(8 12 20 / 0.45));
+  animation: ui-in 160ms steps(4, end) both;
+}
+.poketch-lcd { image-rendering: pixelated; touch-action: none; cursor: pointer; }
+/* The side button's halves (decomp: x 224–255, y 32–95 and 96–159) as buttons for assistive tech and clicks. */
+.poketch-side { position: absolute; left: 87.5%; width: 12.5%; height: 33.4%; padding: 0; border: 0; background: transparent; }
+.poketch-side.prev { top: 16.6%; }
+.poketch-side.next { top: 50%; }
+.poketch-close { position: absolute; top: -14px; left: -14px; width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 0; background: transparent; }
+.poketch-close::before { content: ''; width: 18px; height: 18px; background: #f7f7f0; box-shadow: 0 0 0 2px #303848; clip-path: polygon(20% 0, 50% 30%, 80% 0, 100% 20%, 70% 50%, 100% 80%, 80% 100%, 50% 70%, 20% 100%, 0 80%, 30% 50%, 0 20%); }
+.ui-layer[data-mode='compact'] .poketch { left: 0; right: 0; bottom: 8px; width: fit-content; margin: 0 auto; }
+
+/* --- DS boards (board.ts): DS-pixel layouts at the UI unit ------------------------------------ */
+/* Not inherited: a placed child of a placed element keeps its own size. */
+@property --at-x { syntax: '*'; inherits: false; }
+@property --at-y { syntax: '*'; inherits: false; }
+@property --at-w { syntax: '*'; inherits: false; }
+@property --at-h { syntax: '*'; inherits: false; }
+@property --board-w { syntax: '*'; inherits: false; }
+@property --board-h { syntax: '*'; inherits: false; }
+.board { --dot: var(--unit); --row: calc(var(--unit) * 16); position: relative; flex: none; width: calc(var(--unit) * var(--board-w)); height: calc(var(--unit) * var(--board-h)); }
+/* An unset --at-w/--at-h makes the calc invalid, so the size falls back to auto. */
+.board-at { position: absolute; box-sizing: border-box; margin: 0; left: calc(var(--unit) * var(--at-x)); top: calc(var(--unit) * var(--at-y)); width: calc(var(--unit) * var(--at-w)); height: calc(var(--unit) * var(--at-h)); }

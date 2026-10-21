@@ -1,0 +1,28 @@
+# sys-chatter: Chatter from the party menu (decomp FieldMoves_CheckChatter, FieldMoves_ChatterTask: script
+# RECORD_CHATOT_CRY 0 with the party slot). The script draws the Chatot preview from its party slot and asks it to
+# learn a saying. Recording needs the DS microphone, which the browser game does not use, so TryRecordChatotCry
+# fails as on a DS whose recording does not start (a logged stub): "…failed to learn…", "Want to try again?", NO.
+party 0 platinum:SPECIES_CHATOT 20 platinum:MOVE_CHATTER
+warp platinum:MAP_HEADER_ROUTE_203 246 749 right
++0 wild flee
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:0
++1 tap slot:0
++1 tap menu:1
+until app none
+until message 600
++0 assert text platinum:RecordChatotCry_Text_PressAOrBThenSpeak 0
++1 press a
++1 release a
+until message 600
++0 assert text platinum:RecordChatotCry_Text_ChatotFailedToLearnSaying 0 0=CHATOT
++1 press a
++1 release a
+until yesno 600
++0 assert text platinum:RecordChatotCry_Text_WantToTryAgain 0
++1 press b
++1 release b
+until idle

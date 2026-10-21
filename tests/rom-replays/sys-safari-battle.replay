@@ -1,0 +1,31 @@
+from parts/safari-enter.replay
+# sys-safari-battle (docs/research/great-marsh.md): Safari battles in area 6's mud grass (x 74). The first Wooper
+# gets Mud, the second Bait, then Safari Balls until the battle ends (caught, fled, or seed-dependent; the test checks
+# the balls and catches against the battle log). Other wild Pokémon on the way are run from.
++0 press up
+until position 68 112
++0 release up
+until idle
++0 press right
+until position 74 112
++0 release right
+until idle
++0 press up
+until position 74 109
++0 release up
+until idle 900
+until wild platinum:SPECIES_WOOPER up down 20000
+until battle
++0 battle safari mud
++1 assert flag platinum:FLAG_SAFARI_GAME_ACTIVE true
+battle catch platinum:ITEM_SAFARI_BALL 30000
+advance text 3000
+until idle 3000
+until wild platinum:SPECIES_WOOPER up down 20000
+until battle
++0 battle safari bait
++1 assert flag platinum:FLAG_SAFARI_GAME_ACTIVE true
+battle catch platinum:ITEM_SAFARI_BALL 30000
+advance text 3000
+until idle 3000
++0 assert flag platinum:FLAG_SAFARI_GAME_ACTIVE true

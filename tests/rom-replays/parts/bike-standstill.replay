@@ -1,0 +1,10 @@
+# Part of sys-bike: Route 207, the bike slope at x 306 (bottom 719, top 718). From a standstill right
+# below it, gear 1 never reaches speed 3: each try slides back to (306, 720) (decomp
+# PlayerAvatar_TileMove_BikeSlope).
+player cycle 1
+warp platinum:MAP_HEADER_ROUTE_207 306 720 up
+until idle
++0 assert state cyclingGear 1
++0 press up
++60 release up
++20 assert position platinum:MAP_HEADER_ROUTE_207 306 720

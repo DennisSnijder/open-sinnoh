@@ -1,0 +1,6 @@
+# Part of sys-weather: ROUTE_217 has weather BLIZZARD (header). The `weather-217` screenshot line marks the browser
+# spec's check that particles or fog change the frame against a clear one.
+warp platinum:MAP_HEADER_ROUTE_217 299 308 down
+until idle
++0 assert state weather "platinum:OVERWORLD_WEATHER_BLIZZARD"
++0 screenshot weather-217

@@ -1,0 +1,43 @@
+# fixture: warp room → town (out of the house door), map-local vars, and back in through the door.
+# Timings (real World/VM, 30 Hz): a map load fades in over 8 ticks; walk 8 ticks per tile; a tap on a
+# new direction only turns (2 ticks); text prints 1 char per 2 ticks.
+#
+# new game: spawn in the room; the onFrame intro starts once the fade-in ends
+0 assert map fixture:ROOM
+0 assert position fixture:ROOM 14 16
+0 assert flag fixture:FLAG_NEW_GAME_DONE true
+8 assert message closed
+12 assert message open
+80 press a
+82 release a
+86 assert message closed
+86 assert var fixture:VAR_ROOM_INTRO 1
+# right onto 15,16 (turn, then one step), then down to the exit mat at 15,19
+90 press right
+94 release right
+110 assert position fixture:ROOM 15 16
+110 press down
+130 release down
+150 assert position fixture:ROOM 15 19
+# pushing down into the exit (a blocked warp tile below the mat) warps to the town: fade out 150..157, load at 157
+150 press down
+152 release down
+170 assert map fixture:TOWN
+170 assert var fixture:VAR_OBJ_GFX_ID_0 3
+170 assert var fixture:VAR_MAP_LOCAL_0 1
+# arriving on the town door (10,13): hidden while the door opens (8 ticks) under the fade in, then the
+# player walks out south (165..172) and the door closes (173..180); free from 181
+170 assert position fixture:TOWN 10 14
+185 assert position fixture:TOWN 10 14
+185 assert facing player down
+# push north into the door: turn (190, 191), the door opens (192..199), the player walks in (200..207),
+# the door closes (208..215), fade out (216..224, load at 224)
+190 press up
+194 release up
+220 assert map fixture:TOWN
+# back in the room on the blocked warp tile, the player walks one step out onto the mat
+250 assert map fixture:ROOM
+250 assert position fixture:ROOM 15 19
+250 assert var fixture:VAR_MAP_LOCAL_0 0
+250 assert var fixture:VAR_ROOM_INTRO 1
+260 assert message closed

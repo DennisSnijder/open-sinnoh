@@ -1,0 +1,413 @@
+{
+ "format": "lantern-nds-save",
+ "version": 1,
+ "savedAt": "2026-10-17T12:00:00.000Z",
+ "state": {
+  "schemaVersion": 16,
+  "packs": [
+   {
+    "id": "fixture",
+    "version": "0.1.0"
+   }
+  ],
+  "names": {
+   "player": "Ari",
+   "rival": "Bo"
+  },
+  "gender": "male",
+  "trainerId": 450454393,
+  "flags": {
+   "fixture:FLAG_NEW_GAME_DONE": true
+  },
+  "vars": {},
+  "party": [
+   {
+    "species": "fixture:SPECIES_EMBERKIT",
+    "form": 0,
+    "nickname": null,
+    "isEgg": false,
+    "pid": 1919769321,
+    "otId": 450454393,
+    "otName": "Ari",
+    "otGender": "male",
+    "language": 2,
+    "level": 12,
+    "exp": 1728,
+    "ivs": {
+     "hp": 18,
+     "attack": 11,
+     "defense": 20,
+     "speed": 2,
+     "spAttack": 21,
+     "spDefense": 4
+    },
+    "evs": {
+     "hp": 0,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "ability": "fixture:ABILITY_KINDLE",
+    "moves": [
+     "fixture:MOVE_BOP",
+     "fixture:MOVE_STARE",
+     "fixture:MOVE_EMBER_FLICK",
+     "fixture:MOVE_QUICK_DASH"
+    ],
+    "pp": [
+     35,
+     30,
+     25,
+     30
+    ],
+    "ppUps": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "heldItem": null,
+    "stats": {
+     "hp": 33,
+     "attack": 19,
+     "defense": 17,
+     "speed": 20,
+     "spAttack": 18,
+     "spDefense": 17
+    },
+    "hp": 33,
+    "status": "none",
+    "friendship": 70,
+    "pokerus": 0,
+    "ball": "fixture:ITEM_CAPTURE_ORB",
+    "met": {
+     "zone": "fixture:ROOM",
+     "level": 12,
+     "date": null
+    },
+    "markings": 0,
+    "ribbons": []
+   }
+  ],
+  "boxes": [
+   {
+    "name": "CRATE 1",
+    "wallpaper": 0,
+    "slots": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   {
+    "name": "CRATE 2",
+    "wallpaper": 1,
+    "slots": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   {
+    "name": "CRATE 3",
+    "wallpaper": 2,
+    "slots": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   },
+   {
+    "name": "CRATE 4",
+    "wallpaper": 3,
+    "slots": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null
+    ]
+   }
+  ],
+  "currentBox": 0,
+  "money": 3000,
+  "bag": {
+   "items": [],
+   "medicine": [],
+   "balls": [],
+   "tmhms": [],
+   "berries": [],
+   "mail": [],
+   "battle_items": [],
+   "key_items": []
+  },
+  "player": {
+   "zone": "fixture:ROOM",
+   "x": 14,
+   "z": 16,
+   "y": 0,
+   "facing": "up"
+  },
+  "objects": [
+   {
+    "zone": "fixture:ROOM",
+    "localId": 0,
+    "x": 18,
+    "z": 14,
+    "y": 0,
+    "facing": "down",
+    "movementType": 0
+   }
+  ],
+  "hasPartner": false,
+  "runningShoes": false,
+  "follower": null,
+  "rng": {
+   "seed": 7
+  },
+  "fieldRng": {
+   "seed": 3010772800
+  },
+  "seed": 7,
+  "encounterRng": {
+   "seed": 3555874714
+  },
+  "badges": [],
+  "pokedex": {
+   "obtained": false,
+   "national": false,
+   "seen": [],
+   "caught": [],
+   "forms": {}
+  },
+  "poketch": {
+   "enabled": false,
+   "apps": [],
+   "current": null,
+   "color": 0,
+   "steps": 0,
+   "alarm": {
+    "on": false,
+    "hour": 0,
+    "minute": 0
+   },
+   "calendar": {
+    "month": 1,
+    "marks": 0
+   },
+   "markers": [
+    {
+     "x": 104,
+     "y": 152
+    },
+    {
+     "x": 120,
+     "y": 152
+    },
+    {
+     "x": 136,
+     "y": 152
+    },
+    {
+     "x": 152,
+     "y": 152
+    },
+    {
+     "x": 168,
+     "y": 152
+    },
+    {
+     "x": 184,
+     "y": 152
+    }
+   ],
+   "dotArt": null,
+   "history": []
+  },
+  "playerState": "walk",
+  "cyclingGear": 0,
+  "weather": "fixture:OVERWORLD_WEATHER_CLEAR",
+  "specialLocation": null,
+  "previousZone": null,
+  "platformLift": null,
+  "mapFeatures": null,
+  "gameTime": {
+   "now": {
+    "date": "2009-03-22",
+    "hour": 12,
+    "minute": 0,
+    "second": 0
+   },
+   "penaltyMinutes": 0,
+   "dailyRandom": 3082458641
+  },
+  "tick": 0,
+  "startDate": "2009-03-22",
+  "playTime": {
+   "hours": 0,
+   "minutes": 0,
+   "seconds": 0
+  },
+  "coins": 0,
+  "registeredItem": null,
+  "wallpapersUnlocked": 0,
+  "repel": 0,
+  "records": {
+   "score": 0,
+   "hallOfFame": null,
+   "timesLinked": 0,
+   "linkBattleWins": 0,
+   "linkBattleLosses": 0,
+   "linkTrades": 0,
+   "counts": {}
+  },
+  "signature": null,
+  "options": {
+   "sound": 0,
+   "battleScene": 0,
+   "battleStyle": 0,
+   "buttonMode": 0,
+   "frame": 0
+  },
+  "daycare": {
+   "mons": [
+    null,
+    null
+   ],
+   "offspring": 0,
+   "stepCounter": 0
+  },
+  "roamers": {
+   "slots": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "routes": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "current": null,
+   "previous": null
+  },
+  "hallOfFame": {
+   "total": 0,
+   "entries": []
+  }
+ }
+}

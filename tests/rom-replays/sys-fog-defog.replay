@@ -1,0 +1,20 @@
+# sys-fog-defog: Route 210 North has FOG. Defog from the party menu
+# (FIELD_MOVES 14: do_defog_func + 0C4) sets FLAG_DEFOG_ACTIVE and the weather to CLEAR; a save/load
+# keeps both. The `fog`/`defog` screenshot lines mark the browser spec's contrast check.
+give badge platinum:BADGE_ID_RELIC
+party 0 platinum:SPECIES_BIBAREL 50 platinum:MOVE_DEFOG
+warp platinum:MAP_HEADER_ROUTE_210_NORTH 498 522 down
+until idle
++0 assert state weather "platinum:OVERWORLD_WEATHER_FOG"
++0 assert flag platinum:FLAG_DEFOG_ACTIVE false
++0 screenshot fog
++0 field move 0 platinum:MOVE_DEFOG
+advance text
+until idle
++0 assert flag platinum:FLAG_DEFOG_ACTIVE true
++0 assert state weather "platinum:OVERWORLD_WEATHER_CLEAR"
++0 reload
+until idle
++0 assert flag platinum:FLAG_DEFOG_ACTIVE true
++0 assert state weather "platinum:OVERWORLD_WEATHER_CLEAR"
++0 screenshot defog

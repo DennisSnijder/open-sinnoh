@@ -1,0 +1,69 @@
+from cp9.replay
+set state gender "female"
+set var platinum:VAR_PLAYER_STARTER 390
+party 0 platinum:SPECIES_INFERNAPE 50 platinum:MOVE_FLAMETHROWER platinum:MOVE_THUNDER_PUNCH platinum:MOVE_CLOSE_COMBAT
+set flag platinum:FLAG_HIDE_GRAND_LAKE_ROUTE_213_LOBBY_LOOKER false
+set flag platinum:FLAG_HIDE_VALOR_LAKEFRONT_GRUNT_M false
+set flag platinum:FLAG_HIDE_PASTORIA_CITY_GRUNT_M true
+set flag platinum:FLAG_ROUTE_213_GRUNT_M_LEFT true
+set flag platinum:FLAG_TALKED_TO_PASTORIA_CITY_GRUNT_M true
+set flag platinum:FLAG_TALKED_TO_ROUTE_213_GRUNT_M true
+warp platinum:MAP_HEADER_VALOR_LAKEFRONT 706 799 up
+# Starter/gender branch for cp10: the Valor Lakefront grunt (847), Cynthia and
+# Barry for a girl who chose Chimchar. cp10 meets no trainer or scene chosen by starter or gender (the decomp's
+# GetPlayerGender and GetPlayerStarterSpecies are in none of its maps' scripts: Pastoria's are cp9's, Route 218's
+# gate is cp11's), so this plays its first Galactic battle and the SecretPotion scene for the other player.
+# Setup lines stage it from CP9's end: the gender and starter as the save keeps them, an Infernape, and the grunt
+# chase's flags as cp10 leaves them on arriving at Valor Lakefront. Headless from the cp9 anchor
+# (tests/integration/checkpoints-m5b-branches.rom.test.ts).
++0 wild auto
++0 evolve cancel
+until idle
+# the grunt at Valor Lakefront (ValorLakefront_GruntM): the first talk moves him north
++0 press up
+until position 706 791 6000
++0 release up
++0 press right
+until position 719 791 6000
++0 release right
+until idle
++1 press up
++1 release up
+until idle
++0 assert facing player up
++1 press a
++1 release a
+advance text 6000
+until idle 3000
++0 assert flag platinum:FLAG_TALKED_TO_VALOR_LAKEFRONT_GRUNT_M true
++8 release select
+# the second talk: grunt 847, then Cynthia and Barry, the SecretPotion
++0 press up
+until position 719 779 6000
++0 release up
++0 press right
+until position 723 779 6000
++0 release right
++0 press up
+until position 723 770 6000
++0 release up
+until idle
++1 press up
++1 release up
+until idle
++0 assert facing player up
++1 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_VALOR_LAKEFRONT won single
+advance text 9000
+# Cynthia: "Have you seen the group of PSYDUCK on Route 210?" YES
+until yesno 600
++1 press a
++1 release a
+advance text 9000
+until idle 3000
++0 assert var platinum:VAR_PASTORIA_CITY_STATE 6
++0 assert state bag.key_items[item="platinum:ITEM_SECRETPOTION"].count 1
++8 release select

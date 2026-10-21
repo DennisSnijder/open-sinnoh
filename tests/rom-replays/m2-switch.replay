@@ -1,0 +1,41 @@
+# Switching in a wild battle on Route 202. Piplup L8 (at 1 HP)
+# leads, Starly L6 waits. The player switches to Starly (the switch takes the turn: the foe attacks
+# Starly), back to Piplup, then fights; if Piplup faints, "Use next Pokémon?" sends Starly in again
+# (`battle auto` answers it with the first Pokémon that can go in). Save round trip after the battle.
+party 0 platinum:SPECIES_PIPLUP 8
+party 1 platinum:SPECIES_STARLY 6
+set state party[0].hp 1
+set var platinum:VAR_ROUTE_202_STATE 1
+warp platinum:MAP_HEADER_ROUTE_202 178 827 up
+until idle
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
+until battle 900
++0 battle switch 2
+until battle 3000
++0 screenshot switch-starly
++0 battle switch 1
+until battle 3000
+battle auto 9000
++0 assert battle wild * won
++0 assert battles wild 1
++0 assert state party.length 2
++0 assert state party[0].species "platinum:SPECIES_PIPLUP"
++0 assert state party[1].species "platinum:SPECIES_STARLY"
+until idle
++0 reload
+until idle

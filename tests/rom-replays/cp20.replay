@@ -1,0 +1,615 @@
+from cp19.replay
++0 reload
+# CP20 (docs/research/postgame.md §2): from CP19's CONTINUE upstairs in Twinleaf, on foot
+# and by bike to Snowpoint (Fly is not a field move yet), the sailor's first trip (the Cynthia scene,
+# FLAG_SAILED_TO_BATTLE_ZONE), the Fight Area: Barry's tag battle with the player against Volkner and Flint
+# (type 75), Palmer and Buck. Ends with VAR_FIGHT_AREA_STATE 2 and the Route 225 blockade still standing.
++0 wild flee
++0 evolve auto
+until idle
+# downstairs: Mom's post-game word (TwinleafTownPlayerHouse1F_OnFrame_Postgame)
++0 press right
+until position 8 6 6000
++0 release right
++0 press up
+until position 8 4 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_1F" 3000
++0 release right
+until message 3000
+advance text 3000
+until idle 3000
++0 assert var platinum:VAR_PLAYER_HOUSE_POSTGAME_STATE 2
++8 release select
+# out of the house; on the Bicycle (registered: Y)
++0 press down
+until position 10 10 6000
++0 release down
++0 press left
+until position 6 10 6000
++0 release left
++0 press down
+until state player.zone "platinum:MAP_HEADER_TWINLEAF_TOWN" 3000
++0 release down
+until idle 3000
++1 press y
++1 release y
+until idle 3000
++8 release select
+# Route 201 east to Sandgem, Route 202 north to Jubilife, Route 203 to Oreburgh (CP13's way)
++0 press left
+until position 113 886 6000
++0 release left
++0 press up
+until position 113 852 6000
++0 release up
++0 press right
+until position 146 852 6000
++0 release right
++0 press up
+until position 146 845 6000
++0 release up
++0 press right
+until position 166 845 6000
++0 release right
+# round Dawn, who stands outside the lab after the credits
++0 press down
+until position 166 846 6000
++0 release down
++0 press right
+until position 184 846 6000
++0 release right
++0 press up
+until position 184 826 6000
++0 release up
++0 press left
+until position 165 826 6000
++0 release left
++0 press up
+until position 165 818 6000
++0 release up
++0 press right
+until position 176 818 6000
++0 release right
++0 press down
+until position 176 819 6000
++0 release down
++0 press right
+until position 187 819 6000
++0 release right
++0 press up
+until position 187 805 6000
++0 release up
++0 press left
+until position 175 805 6000
++0 release left
++0 press up
+until position 175 799 6000
++0 release up
+until idle
++8 release select
+# Jubilife to Route 203; east below Lass Kaitlin on row 759 once she is up at row 756, up x 246 to the Oreburgh Gate
++0 press up
+until position 175 758 6000
++0 release up
++0 press right
+until position 191 758 6000
++0 release right
++0 press right
+until position 238 758 6000
++0 release right
++0 press down
+until position 238 759 6000
++0 release down
++0 press right
+until position 241 759 6000
++0 release right
+until idle
++0 assert state objects[localId=2].movementType 3
+until state objects[localId=2].z 757 6000
+until state objects[localId=2].z 756 6000
++0 press right
+until position 246 759 6000
++0 release right
++0 press up
+until position 246 749 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_OREBURGH_GATE_1F" 3000
+until state player.zone "platinum:MAP_HEADER_OREBURGH_CITY" 3000
++0 release right
+until idle
++8 release select
++8 release select
+# Oreburgh: up the slope at x 306 in gear 1 (CP13's way), north to Cycling Road and up it to Eterna
++0 press right
+until position 271 749 6000
++0 release right
++0 press down
+until position 271 757 6000
++0 release down
++0 press right
+until position 299 757 6000
++0 release right
++0 press up
+until position 299 724 6000
++0 release up
++0 press right
+until position 306 724 6000
++0 release right
+until idle
++1 press b
++1 release b
++1 assert state cyclingGear 1
++0 press up
+until position 306 717 6000
++0 release up
+until idle
++0 press b
++1 release b
++1 assert state cyclingGear 0
++0 press up
+until position 306 712 6000
++0 release up
++0 press left
+until position 303 712 6000
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_206_CYCLING_ROAD_SOUTH_GATE" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_206" 3000
++0 release up
+until idle
++0 press right
+until position 305 681 600
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_206_CYCLING_ROAD_NORTH_GATE" 9000
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY" 3000
++0 release up
+until idle
++8 release select
++8 release select
+# through Eterna and Route 211 West (CP13's way; Hiker Louis was beaten there) to Mt. Coronet
++0 press up
+until position 304 531 6000
++0 release up
++0 press left
+until position 301 531 6000
++0 release left
++0 press up
+until position 301 525 6000
++0 release up
++0 press right
+until position 325 525 6000
++0 release right
++0 press down
+until position 325 533 6000
++0 release down
++0 press right
+until position 379 533 6000
++0 release right
++0 press up
+until position 379 532 600
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_NORTH_ROOM_1" 3000
++0 release right
+until idle
++8 release select
++8 release select
+# Mt. Coronet 1F north room 1: off the bike; Rock Smash on (10, 36)
+until idle
++1 press y
++1 release y
+until state playerState "walk"
+until idle
++0 press right
+until position 3 41 6000
++0 release right
++0 press up
+until position 3 37 6000
++0 release up
++0 press right
+until position 9 37 6000
++0 release right
++0 press up
+until position 9 36 6000
++0 release up
+until idle
++1 press right
++1 release right
+until idle
++0 assert facing player right
++0 press a
++1 release a
+until yesno
++0 press a
++1 release a
+advance text
+until idle 3000
++8 release select
+# Strength (Bibarel) on the boulder at (18, 39): two pushes east, then down to row 40
++0 press right
+until position 14 36 6000
++0 release right
++0 press down
+until position 14 39 6000
++0 release down
++0 press right
+until position 17 39 6000
++0 release right
+until idle
++0 assert facing player right
++0 field move 4 platinum:MOVE_STRENGTH
+advance text
+until idle
++0 assert flag platinum:FLAG_STRENGTH_ACTIVE true
++0 press right
+until state objects[localId=9].x 19 120
++0 release right
+until idle
++0 press right
+until position 18 39 120
++0 release right
+until idle
++0 press right
+until state objects[localId=9].x 20 120
++0 release right
+until idle
++0 press right
+until position 19 39 120
++0 release right
++0 press down
+until position 19 40 120
++0 release down
+until idle
++8 release select
+# east and north to the boulder at (29, 30): three pushes north, then up x 28 and west to the stairs down
++0 press down
+until position 19 42 6000
++0 release down
++0 press right
+until position 28 42 6000
++0 release right
++0 press up
+until position 28 31 6000
++0 release up
++0 press right
+until position 29 31 6000
++0 release right
+until idle
++0 press up
+until state objects[localId=7].z 29 120
++0 release up
+until idle
++0 press up
+until position 29 30 120
++0 release up
+until idle
++0 press up
+until state objects[localId=7].z 28 120
++0 release up
+until idle
++0 press up
+until position 29 29 120
++0 release up
+until idle
++0 press up
+until state objects[localId=7].z 27 120
++0 release up
+until idle
++0 press up
+until position 29 28 120
++0 release up
++0 press left
+until position 28 28 120
++0 release left
++0 press up
+until position 28 11 6000
++0 release up
++0 press left
+until position 12 11 6000
++0 release left
++0 press up
+until position 12 10 600
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_B1F" 3000
++0 release left
+until idle
++8 release select
+# Mt. Coronet B1F: up the west side to the stairs to north room 2 (entered from the west)
++0 press left
+until position 4 60 6000
++0 release left
++0 press up
+until position 4 58 6000
++0 release up
++0 press left
+until position 3 58 6000
++0 release left
++0 press up
+until position 3 3 6000
++0 release up
++0 press right
+until position 7 3 6000
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_NORTH_ROOM_2" 3000
++0 release right
+until idle
++8 release select
+# north room 2 to Route 216
++0 press right
+until position 15 27 6000
++0 release right
++0 press up
+until position 15 18 6000
++0 release up
++0 press left
+until position 3 18 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_216" 3000
++0 release left
+until idle
++8 release select
++8 release select
+# Route 216 west on row 401 (CP13's way; Ace Trainer Laura was beaten there)
++0 press left
+until position 370 403 6000
++0 release left
++0 press up
+until position 370 401 6000
++0 release up
++0 press left
+until position 316 401 6000
++0 release left
+# Skier Edward loops x 311–315, rows 402–404 (sight 1, no pauses): pass him on row 401 as he turns down at its
+# west end
+until idle
++0 assert state objects[localId=7].movementType 38
+until state objects[localId=7].z 403 3000
+until state objects[localId=7].z 402 3000
+until state objects[localId=7].x 311 3000
++0 press left
+until position 302 401 6000
++0 release left
+# north through the grass west of Ace Trainer Garrett (x 299; he looks up and down), across his column three rows
+# above him, to the way north to Route 217
++0 press up
+until position 302 399 6000
++0 release up
++0 press left
+until position 298 399 6000
++0 release left
++0 press up
+until position 298 391 6000
++0 release up
++0 press right
+until position 302 391 6000
++0 release right
++0 press up
+until position 302 388 6000
++0 release up
++0 press right
+until position 304 388 6000
++0 release right
++0 press up
+until position 304 380 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_217" 3000
++0 release up
+until idle
++8 release select
++8 release select
+# Route 217 north (CP13's way; Maylene's scene is over, Ace Trainers Dalton and Olivia were beaten)
++0 press up
+until position 304 378 600
++0 release up
++0 press left
+until position 303 378 600
++0 release left
++0 press up
+until position 303 374 6000
++0 release up
++0 press right
+until position 305 374 6000
++0 release right
++0 press up
+until position 305 369 6000
++0 release up
++0 press left
+until position 302 369 6000
++0 release left
++0 press up
+until position 302 307 6000
++0 release up
++0 press right
+until position 303 307 6000
++0 release right
+# north up x 303 between the skiers' loops, then west over Skier Lexie's column x 294 (she looks up it on her
+# loop) just after she reaches its north-west corner; up x 290 beside Black Belt Luke's column (x 291, rows
+# 273–281, sight 2), east over it on row 271 once he turns back south
++0 press up
+until position 303 288 6000
++0 release up
++0 press left
+until position 296 288 6000
++0 release left
+until idle
++0 assert state objects[localId=1].movementType 37
+until state objects[localId=1].x 291 3000
+until state objects[localId=1].x 290 3000
++0 press left
+until position 293 288 600
++0 release left
++0 press up
+until position 293 284 600
++0 release up
++0 press left
+until position 290 284 600
++0 release left
++0 press up
+until position 290 271 6000
++0 release up
+until idle
++0 assert state objects[localId=6].movementType 20
+until state objects[localId=6].z 273 3000
+until state objects[localId=6].z 274 3000
++0 press right
+until position 304 271 6000
++0 release right
++0 press up
+until position 304 267 6000
++0 release up
++0 press right
+until position 310 267 6000
++0 release right
++0 press up
+until position 310 242 6000
++0 release up
++0 press right
+until position 319 242 6000
++0 release right
++0 press up
+until position 319 241 6000
++0 release up
++0 press right
+until position 325 241 6000
++0 release right
++15 release select
++0 press down
+until position 325 242 6000
++0 release down
++0 press right
+until position 337 242 6000
++0 release right
++0 press up
+until position 337 238 6000
++0 release up
++0 press right
+until position 354 238 6000
++0 release right
++0 press down
+until position 354 240 6000
++0 release down
++0 press right
+until position 359 240 6000
++0 release right
++0 press up
+until position 359 239 6000
++0 release up
++0 press right
+until position 367 239 6000
++0 release right
++0 press up
+until position 367 227 6000
++0 release up
++0 press right
+until position 375 227 6000
++0 release right
++0 press down
+until position 375 234 6000
++0 release down
++0 press right
+until position 379 234 6000
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_SNOWPOINT_CITY" 3000
++0 release down
+until idle
++8 release select
++8 release select
+# Snowpoint's harbour: the S.S. Spiral's sailor (SnowpointCity_SailorSSSpiral); the first trip's Cynthia scene
++0 press left
+until position 374 234 6000
++0 release left
++0 press up
+until position 374 227 6000
++0 release up
++0 press left
+until position 366 227 6000
++0 release left
++0 press down
+until position 366 245 6000
++0 release down
++0 press left
+until position 356 245 6000
++0 release left
++0 press down
+until position 356 246 6000
++0 release down
+until idle
++1 press a
++1 release a
+until yesno 3000
++0 press a
++1 release a
+advance text 9000
++0 assert flag platinum:FLAG_SAILED_TO_BATTLE_ZONE true
++0 assert var platinum:VAR_FIGHT_AREA_STATE 1
+# Barry: team up against Volkner and Flint (FightArea_BattleVolknerFlint)
++0 press a
++1 release a
+advance text 6000
+until battle 3000
+# the browser spec's beat: four battlers, at the first command
+advance text 6000
++12 screenshot fight-area-tag
+battle auto 90000
++0 assert battle trainer platinum:TRAINER_LEADER_VOLKNER_FIGHT_AREA won ai-partner
++0 assert battle trainer platinum:TRAINER_ELITE_FOUR_FLINT_FIGHT_AREA won ai-partner
+# Volkner and Flint leave; Palmer, then Buck (FightArea_PostBattleVolknerFlint); no National Dex yet: the blockade stays
+advance text 20000
+until idle 6000
++0 assert var platinum:VAR_FIGHT_AREA_STATE 2
++0 assert flag platinum:FLAG_HIDE_FIGHT_AREA_BLOCKADE false
++8 release select
+# heal at the Fight Area's Pokémon Center
++0 press down
+until position 654 430 6000
++0 release down
++0 press left
+until position 647 430 6000
++0 release left
++0 press up
+until position 8 12 3000
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_FIGHT_AREA" 3000
++0 release down
+until idle
+# end of CP20
++0 assert position platinum:MAP_HEADER_FIGHT_AREA 647 430
++0 assert var platinum:VAR_FIGHT_AREA_STATE 2
++0 assert flag platinum:FLAG_HIDE_FIGHT_AREA_BLOCKADE false
++0 assert flag platinum:FLAG_SAILED_TO_BATTLE_ZONE true
++8 release select

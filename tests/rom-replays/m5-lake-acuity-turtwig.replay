@@ -1,0 +1,29 @@
+from cp12.replay
+set state gender "female"
+set var platinum:VAR_PLAYER_STARTER 387
+party 0 platinum:SPECIES_TORTERRA 57 platinum:MOVE_EARTHQUAKE platinum:MOVE_CRUNCH platinum:MOVE_WOOD_HAMMER platinum:MOVE_STONE_EDGE
+set var platinum:VAR_ACUITY_LAKEFRONT_STATE 1
+set var platinum:VAR_ROUTE_217_STATE 1
+set flag platinum:FLAG_HIDE_ACUITY_LAKEFRONT_RIVAL true
+set flag platinum:FLAG_OBTAINED_ROUTE_217_HM08 true
+give badge platinum:BADGE_ID_ICICLE
+warp platinum:MAP_HEADER_ACUITY_LAKEFRONT 308 230 up
+# Starter/gender branch for cp13: Lake Acuity for a girl who chose Turtwig.
+# cp13 meets no trainer or scene chosen by starter or gender (the decomp's GetPlayerGender and
+# GetPlayerStarterSpecies are in none of its maps' scripts; Barry at the ledge and at the lake only buffers his
+# name), so this plays the Jupiter scene (LakeAcuity_CoordEvent_JupiterRival) for the other player. Setup lines
+# stage it from CP12's end (VAR_LAKE_ACUITY_STATE 1): the gender and starter as the save keeps them, a Torterra,
+# and the state cp13 has at the lake's mouth after Candice and Barry's ledge talk. Headless from the cp12 anchor
+# (tests/integration/checkpoints-m5b-branches.rom.test.ts).
++0 wild auto
++0 evolve cancel
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_LAKE_ACUITY" 3000
++0 release up
+# Barry and Jupiter at the lake (LakeAcuity_CoordEvent_JupiterRival): no battle
+advance text 12000
+until idle 3000
++0 assert var platinum:VAR_LAKE_ACUITY_STATE 2
++0 assert flag platinum:FLAG_HIDE_VEILSTONE_CITY_GRUNT_M_STORAGE_KEY false
++0 assert flag platinum:FLAG_LAKE_VALOR_EXPLODED false

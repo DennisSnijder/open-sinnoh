@@ -1,0 +1,22 @@
+# Part of sys-ice: Snowpoint Temple B3F, the ice field (x 2–15, z 7–14). One step onto the ice slides
+# the player until the next tile is blocked: down from (3, 6) to (3, 14), right to (15, 14), up to
+# (15, 12). Each wait is on the stop tile, then 20 ticks prove the slide stopped there. The `ice-*`
+# screenshot lines are the browser spec's key beat (the view moved with the slide, the player drawn).
+warp platinum:MAP_HEADER_SNOWPOINT_TEMPLE_B3F 3 6 down
+until idle
++0 screenshot ice-start
++0 press down
++1 release down
+until position 3 14 120
++20 assert position platinum:MAP_HEADER_SNOWPOINT_TEMPLE_B3F 3 14
++0 screenshot ice-stop
++0 press right
+until position 4 14
++0 release right
+until position 15 14 120
++20 assert position platinum:MAP_HEADER_SNOWPOINT_TEMPLE_B3F 15 14
++0 press up
+until position 15 13
++0 release up
+until position 15 12 120
++20 assert position platinum:MAP_HEADER_SNOWPOINT_TEMPLE_B3F 15 12

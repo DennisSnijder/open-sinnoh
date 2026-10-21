@@ -1,0 +1,22 @@
+# fixture: new game spawn and the onFrame intro message.
+# Timings (real World/VM, 30 Hz): the map fades in over 8 ticks, then the onFrame row fires; text
+# prints 1 char per 2 ticks ("Morning light fills the room." waits for input at tick 70).
+0 assert map fixture:ROOM
+0 assert position fixture:ROOM 14 16
+0 assert flag fixture:FLAG_NEW_GAME_DONE true
+0 assert var fixture:VAR_ROOM_INTRO 0
+8 assert message closed
+12 assert message open
+12 assert var fixture:VAR_ROOM_INTRO 1
+# the script locks the player: holding a direction does not walk
+20 press left
+24 release left
+40 assert position fixture:ROOM 14 16
+80 assert message open
+80 press a
+82 release a
+86 assert message closed
+# the intro does not run again (VAR_ROOM_INTRO is 1); the player is free to move
+90 press up
+92 release up
+100 assert position fixture:ROOM 14 15

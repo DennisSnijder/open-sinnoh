@@ -1,0 +1,49 @@
+# (docs/research/double-battles.md §6.3): Eterna Forest with Cheryl.
+# A constructed system replay, labelled as such: a CP5-like party set up here (not the story chain; cp6 replays it
+# in order). Cheryl's coord event at 28, 85 (EternaForest_CoordEvent_CherylStartFollowing) sets
+# VAR_PARTNER_TRAINER_ID and the has-partner flag; she follows. In the grass a wild encounter rolls two slots and
+# battles with her (decomp TryGenerateGrassEncounter_DoubleBattle: BATTLE_TYPE_AI_PARTNER, 74; the party is healed
+# after it, Party_HealAllMembers). Then Bug Catcher Jack (37, 67, facing right) and Lass Briana (40, 67, facing
+# left) both see the player at 38, 67: APPROACH_TYPE_VS2, and the common script's StartTrainerBattle takes the
+# walking partner (decomp TRAINER_WITH_AI_PARTNER, 75). Runs headless in tests/integration/m5-doubles.rom.test.ts.
+party 0 platinum:SPECIES_STARAVIA 22
+party 1 platinum:SPECIES_MONFERNO 22
+set flag platinum:FLAG_HIDE_ETERNA_FOREST_CHERYL false
+warp platinum:MAP_HEADER_ETERNA_FOREST 28 84 down
+until idle
++0 press down
+until position 28 85
++0 release down
+advance text 3000
+until idle 3000
++0 assert state hasPartner true
+# north past the signboard to the grass at x 32
++0 press up
+until position 28 83
++0 release up
++0 press right
+until position 32 83
++0 release right
++0 press up
+until battle 3000
++0 release up
+battle auto 30000
++0 assert battle wild * won ai-partner
+until idle 3000
+# Jack and Briana: east along row 75, then up the x 38 path to row 67, where both see the player
++0 press right
+until position 38 75
++0 release right
++0 press up
+until position 38 67
++0 release up
+advance text 3000
+battle auto 30000
++0 assert battle trainer platinum:TRAINER_BUG_CATCHER_JACK won ai-partner
++0 assert battle trainer platinum:TRAINER_LASS_BRIANA won ai-partner
+advance text 3000
+until idle 3000
++0 assert state hasPartner true
+# Healed after the win while Cheryl walks along (Staravia was paralyzed in the battle).
++0 assert state party[0].status "none"
++0 assert state party[0].hp 58

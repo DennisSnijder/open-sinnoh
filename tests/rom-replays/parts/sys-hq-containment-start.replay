@@ -1,0 +1,5 @@
+# Constructed start after Saturn's battle, before pressing the button.
+set flag platinum:FLAG_DEFEATED_GALACTIC_HQ_CONTROL_ROOM_SATURN true
+set flag platinum:FLAG_HIDE_GALACTIC_HQ_CONTROL_ROOM_CHARON true
+warp platinum:MAP_HEADER_GALACTIC_HQ_CONTROL_ROOM 8 7 up
+until idle

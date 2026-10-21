@@ -1,0 +1,446 @@
+# Platinum opening, part 1: new game to the Route 201 rival's challenge (opening.replay goes on with the
+# battle; m2-first-battle-lost.replay loses it). The opening as a whole: new game to the Lake Verity Cyrus scene (docs/research/scripts-and-opening.md §5–6).
+# Inputs and asserts only (no ROM content). Runs headless in tests/integration/opening.rom.test.ts
+# against a pack imported from OPENSINNOH_NDS_ROM, seed 1. Messages are answered with A, yes/no with yes,
+# the starter scene with right, right, A (Piplup; the browser spec taps the ball instead of the
+# "starter key" lines). Grammar: packages/core/src/replay.ts.
+# Inputs wait on the game (`until …`, `advance text`); walks hold a
+# direction `until position`, running with B held; `+N` only follows a sync point (re-timed from a
+# recording with tools/replays/retime.ts). Runs headless, also started late and on other seeds, in
+# tests/integration/checkpoints.rom.test.ts. Screenshot lines are the browser spec's beats: mid-scene,
+# `+N` after the input that started the scene.
+# Every battle is real: wild encounters on the way are fought by the waits with the `battle auto`
+# policy (`wild auto`), trainer battles with explicit `battle auto` lines.
++0 wild auto
+# Piplup's evolution is stopped with B wherever it comes up (`evolve cancel`): the checkpoints keep
+# the Piplup they were recorded with (docs/decisions.md).
++0 evolve cancel
+# new game: bedroom, TV program frame script
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_2F 4 6
++128 screenshot bedroom-message
+advance text
++0 assert var platinum:VAR_PLAYER_HOUSE_SPECIAL_PROGRAM_STATE 1
+# step north: rival bursts in
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_2F 4 6
++0 press up
+until position 4 5
++0 release up
+until message
++0 press a
++1 release a
+# the rival faces the player (decomp RivalApproachPlayerNorth, PlayerFaceRival)
+until message
++0 assert facing player right
++0 assert facing 0 left
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 assert facing player left
++0 assert facing 0 right
++0 press a
++1 release a
+advance text
++0 assert var platinum:VAR_PLAYER_HOUSE_RIVAL_STATE 1
++0 assert flag platinum:FLAG_HIDE_TWINLEAF_TOWN_PLAYER_HOUSE_2F_RIVAL true
+# downstairs
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_2F 4 5
++0 press right
+until position 6 5
++0 release right
++0 press up
+until position 6 4
++0 release up
++0 press right
+until position 9 4
++0 release right
+# 1F: Mom
++40 assert position platinum:MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_1F 10 3
+# off the stairs facing away from them (decomp sub_02057368: WARP_STAIRS_WEST → walk east)
++0 assert facing player right
+until message
++0 assert facing player down
++0 assert facing 0 up
++0 press a
++1 release a
+advance text
++0 assert var platinum:VAR_PLAYER_HOUSE_STATE 1
++0 assert flag platinum:FLAG_TALKED_TO_MOM true
+# to the door: Mom warns about tall grass
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_1F 10 3
++0 press down
+until position 10 10
++0 release down
++0 press left
+until position 6 10
++0 release left
+until message
++0 assert facing player up
++0 assert facing 0 down
++0 press a
++1 release a
+advance text
++0 assert var platinum:VAR_PLAYER_HOUSE_STATE 2
+# out the door
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_1F 6 10
++0 press down
+until position 116 886
++0 release down
+# Twinleaf
+until idle
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN 116 886
++0 assert facing player down
+# to the rival house door: big thud
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN 116 886
++0 press left
+until position 113 886
++0 release left
++0 press up
+until position 113 876
++0 release up
++0 press left
+until position 105 876
++0 release left
+# after the bump the rival's LOOK_SOUTH movement type takes its first update: he faces the player
+until message
++0 assert facing player up
++0 assert facing 2 down
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 assert facing player up
++0 assert facing 2 down
++0 press a
++1 release a
+until idle
++0 assert var platinum:VAR_TWINLEAF_TOWN_RIVAL_TRIGGER_STATE 1
++0 assert var platinum:VAR_TWINLEAF_TOWN_GUITARIST_TRIGGER_STATE 1
+# into the rival house
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN 105 877
++0 press up
+until position 6 9
++0 release up
+# rival house 1F, upstairs
+until idle
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN_RIVAL_HOUSE_1F 6 9
++0 press up
+until position 6 7
++0 release up
++0 press left
+until position 3 7
++0 release left
++0 press up
+until position 3 5
++0 release up
++0 press left
+until position 2 5
++0 release left
++0 press up
+until position 2 3
++0 release up
+# the stairs are pushed east (TILE_BEHAVIOR_WARP_STAIRS_EAST)
+until idle
++0 press right
+until position 3 3
++0 release right
+# rival room scene
++40 assert position platinum:MAP_HEADER_TWINLEAF_TOWN_RIVAL_HOUSE_2F 3 4
+# off the stairs facing away from them (WARP_STAIRS_WEST → walk east)
++0 assert facing player right
++0 assert facing 0 up
+until message
++0 press a
++1 release a
+until message
++0 assert facing 0 left
++0 press a
++1 release a
+advance text
++0 assert var platinum:VAR_RIVAL_HOUSE_STATE 1
++0 assert var platinum:VAR_TWINLEAF_TOWN_GUITARIST_TRIGGER_STATE 2
++0 assert flag platinum:FLAG_RIVAL_LEFT_HOME true
+# back down and out
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN_RIVAL_HOUSE_2F 3 5
++0 assert facing player up
++0 press up
+until position 3 4
++0 release up
+# the stairs are pushed west (TILE_BEHAVIOR_WARP_STAIRS_WEST)
+until idle
++0 press left
+until position 2 4
++0 release left
+# off the stairs facing away from them (WARP_STAIRS_EAST → walk west)
+until idle
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN_RIVAL_HOUSE_1F 2 3
++0 assert facing player left
++0 press down
+until position 2 10
++0 release down
++0 press right
+until position 6 10
++0 release right
++0 press down
+until position 105 876
++0 release down
+# north to Route 201
+until idle
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN 105 876
++0 press right
+until position 110 876
++0 release right
++0 press up
+until position 110 857
++0 release up
+# Route 201 starter scene (decomp scripts_route_201.s, Route201_CoordEvent_ChooseStarterScene): fires at x 110,
+# the rival walks over before "too slow"
++18 assert position platinum:MAP_HEADER_ROUTE_201 110 857
++0 assert message closed
++40 assert message open
+until message
++0 assert facing player up
++0 assert facing 2 down
++0 press a
++1 release a
++15 screenshot route201-rowan
+until message
++0 press a
++1 release a
+# at the tall grass with the rival; Rowan is still hidden
++69 assert position platinum:MAP_HEADER_ROUTE_201 114 854
++0 assert flag platinum:FLAG_HIDE_ROUTE_201_PROF_ROWAN true
+until message
++0 assert facing player right
++0 assert facing 2 left
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+# "Hold it!": Rowan is added and walks in before he speaks
++42 assert flag platinum:FLAG_HIDE_ROUTE_201_PROF_ROWAN true
++30 assert flag platinum:FLAG_HIDE_ROUTE_201_PROF_ROWAN false
++0 assert message closed
++70 assert message open
+# Rowan stands at 113,853 next to the rival (the renderer once dropped him: local id 5 is also the Sandgem signboard clone)
++0 screenshot route201-rowan-speaks
+advance text
+until yesno
++0 press a
++1 release a
+advance text
+until yesno
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+# the counterpart arrives with the briefcase
++52 assert flag platinum:FLAG_HIDE_ROUTE_201_COUNTERPART true
++20 assert flag platinum:FLAG_HIDE_ROUTE_201_COUNTERPART false
++0 assert flag platinum:FLAG_HIDE_ROUTE_201_BRIEFCASE true
++0 assert message closed
+until message
+# the counterpart (Dawn for a boy) at 112,853 names Rowan
++0 screenshot route201-counterpart
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+# Rowan turns to the counterpart: the briefcase appears, then he speaks
++23 assert flag platinum:FLAG_HIDE_ROUTE_201_BRIEFCASE false
++20 assert message open
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+# after the last line the box is closed; the rival state is set just before release_all
++6 assert var platinum:VAR_FOLLOWER_RIVAL_STATE 0
++0 assert message closed
+until idle
++0 assert var platinum:VAR_FOLLOWER_RIVAL_STATE 1
+# open the briefcase: choose Piplup
++0 assert position platinum:MAP_HEADER_ROUTE_201 114 854
+# set_object_event_movement_type edits the event only: the live rival keeps facing south
++0 assert facing player left
++0 assert facing 2 down
++0 press left
+until position 113 854
++0 release left
+until idle
++0 press left
++3 release left
+until idle
++0 press a
++1 release a
+until choice
++0 press right  # starter key
++1 release right  # starter key
+until choice
++0 press right  # starter key
++1 release right  # starter key
+until choice
++0 screenshot starter-panel
++0 press a  # starter key
++1 release a  # starter key
+until message
++0 assert facing player up
++0 assert facing 2 left
++0 press a
++1 release a
+advance text
+until yesno
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a

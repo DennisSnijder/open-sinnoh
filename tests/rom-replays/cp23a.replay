@@ -1,0 +1,882 @@
+from cp22.replay
++0 reload
+# CP23a (docs/research/story-cp20-24.md §CP23): from Stark Mountain's door down Routes
+# 227 and 226 to Buck at the Battleground (Survival Area), and back up to room 3, where Buck's talk shows Heatran:
+# it ends facing Heatran before the battle (m6-heatran-caught and -fled branch here). Wild Pokémon are fought by the
+# auto policy.
++0 wild auto
++0 evolve auto
+until idle 3000
+# back down to the Rock Climb wall at x 756, and down it
++0 press left
+until position 748 233 6000
++0 release left
++0 press down
+until position 748 234 6000
++0 release down
++0 press left
+until position 745 234 6000
++0 release left
++0 press up
+until position 745 232 6000
++0 release up
++0 press left
+until position 742 232 6000
++0 release left
++0 press down
+until position 742 244 6000
++0 release down
++0 press right
+until position 752 244 6000
++0 release right
++0 press up
+until position 752 235 6000
++0 release up
++0 press right
+until position 762 235 6000
++0 release right
++0 press down
+until position 762 237 6000
++0 release down
++0 press left
+until position 756 237 6000
++0 release left
++0 press down
+until position 756 249 6000
++0 release down
+until idle 20000
++1 press down
++1 release down
+until idle 20000
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle 20000
++0 assert position platinum:MAP_HEADER_STARK_MOUNTAIN_OUTSIDE 756 254
++8 release select
+# by bike down Route 227's ledges and the x 758 bike bridge, down x 750 to Route 226's shore
+until idle 3000
++1 press y
++1 release y
+until state playerState "cycle" 600
+until idle 3000
++0 press down
+until position 756 274 6000
++0 release down
++0 press right
+until position 757 274 6000
++0 release right
++0 press down
+until position 757 277 6000
++0 release down
++0 press right
+until position 758 277 6000
++0 release right
++0 press down
+until position 758 299 6000
++0 release down
++0 press left
+until position 753 299 6000
++0 release left
++0 press up
+until position 753 298 6000
++0 release up
++0 press left
+until position 750 298 6000
++0 release left
++0 press down
+until position 750 330 6000
++0 release down
++0 press right
+until position 757 330 6000
++0 release right
++1 release select
+# off the bike; Surf west across Route 226 (cp22's way back)
+until idle 3000
++1 press y
++1 release y
+until state playerState "walk" 600
+until idle 3000
++0 press left
+until position 754 330 6000
++0 release left
++0 press down
+until position 754 335 6000
++0 release down
+until idle 20000
++1 press left
++1 release left
+until idle 3000
++0 field move 0 platinum:MOVE_SURF
+advance text
+until state playerState "surf" 3000
+until idle 3000
++0 press down
+until position 753 337 6000
++0 release down
++0 press left
+until position 743 337 6000
++0 release left
+until idle 3000
++0 press left
+until position 742 337 6000
++0 release left
++0 press down
+until position 742 340 6000
++0 release down
++0 press left
+until position 737 340 6000
++0 release left
+until idle 20000
++1 press left
++1 release left
+until idle 3000
++0 field move 0 platinum:MOVE_SURF
+advance text
+until state playerState "surf" 3000
+until idle 3000
++0 press left
+until position 731 340 6000
++0 release left
++0 press down
+until position 731 343 6000
++0 release down
++0 press left
+until position 722 343 6000
++0 release left
+until idle 3000
+# Rock Climb up the wall at x 705, down the one at x 700, up the lower one at x 690, down the one at x 686
++0 press left
+until position 705 343 6000
++0 release left
++0 press up
+until position 705 340 6000
++0 release up
+until idle 20000
++1 press up
++1 release up
+until idle 3000
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle 20000
++0 assert position platinum:MAP_HEADER_ROUTE_226 705 331
++0 press left
+until position 704 331 6000
++0 release left
++0 press up
+until position 704 330 6000
++0 release up
++0 press left
+until position 700 330 6000
++0 release left
++0 press down
+until position 700 333 6000
++0 release down
+until idle 20000
++1 press down
++1 release down
+until idle 3000
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle 20000
++0 assert position platinum:MAP_HEADER_ROUTE_226 700 339
++0 press left
+until position 697 339 6000
++0 release left
++0 press down
+until position 697 340 6000
++0 release down
++0 press left
+until position 690 340 6000
++0 release left
+until idle 20000
++1 press up
++1 release up
+until idle 3000
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle 20000
++0 assert position platinum:MAP_HEADER_ROUTE_226 690 336
++0 press left
+until position 686 336 6000
++0 release left
+until idle 20000
++1 press down
++1 release down
+until idle 3000
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle 20000
++0 assert position platinum:MAP_HEADER_ROUTE_226 686 342
++8 release select
+# west to the Battleground
++0 press left
+until position 676 342 6000
++0 release left
++0 press up
+until position 676 339 6000
++0 release up
++0 press left
+until position 653 339 6000
++0 release left
+until idle 3000
++0 assert facing player left
+# Buck, in front of the Battleground's door, goes in
++0 press a
++1 release a
+advance text 3000
+until idle 3000
++0 press left
+until position 652 339 6000
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_BATTLEGROUND" 3000
++0 release up
+# the Battleground's owner meets Buck's friend
+advance text 6000
+until idle 3000
+# Buck opens the Battleground and goes home
++1 press up
++1 release up
+until idle 3000
++0 assert facing player up
++0 press a
++1 release a
+advance text 3000
+until idle 3000
++0 assert flag platinum:FLAG_TALKED_TO_BATTLEGROUND_BUCK true
++0 assert flag platinum:FLAG_BUCK_LEFT_BATTLEGROUND true
++8 release select
+# out, and back east over Route 226 (cp22's way): Rock Climb up at x 686, down at x 690, up at x 700, down at x 705
++0 press left
+until position 7 9 6000
++0 release left
++0 press down
+until position 7 10 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_SURVIVAL_AREA" 3000
++0 release down
++24 release select
++0 press right
+until position 678 339 6000
++0 release right
++0 press down
+until position 678 342 6000
++0 release down
++0 press right
+until position 686 342 6000
++0 release right
+until idle 20000
++1 press up
++1 release up
+until idle 3000
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle 20000
++0 assert position platinum:MAP_HEADER_ROUTE_226 686 336
++0 press right
+until position 690 336 6000
++0 release right
+until idle 20000
++1 press down
++1 release down
+until idle 3000
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle 20000
++0 assert position platinum:MAP_HEADER_ROUTE_226 690 340
++0 press right
+until position 697 340 6000
++0 release right
++0 press up
+until position 697 339 6000
++0 release up
++0 press right
+until position 700 339 6000
++0 release right
+until idle 20000
++1 press up
++1 release up
+until idle 3000
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle 20000
++0 assert position platinum:MAP_HEADER_ROUTE_226 700 333
++0 press up
+until position 700 330 6000
++0 release up
++0 press right
+until position 704 330 6000
++0 release right
++0 press down
+until position 704 331 6000
++0 release down
++0 press right
+until position 705 331 6000
++0 release right
+until idle 20000
++1 press down
++1 release down
+until idle 3000
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle 20000
++0 assert position platinum:MAP_HEADER_ROUTE_226 705 340
+# Surf east to the shore by the Route 228 gate
++0 press down
+until position 705 343 6000
++0 release down
++0 press right
+until position 722 343 6000
++0 release right
+until idle 20000
++1 press right
++1 release right
+until idle 3000
++0 field move 0 platinum:MOVE_SURF
+advance text
+until state playerState "surf" 3000
+until idle 3000
++0 press right
+until position 731 343 6000
++0 release right
++0 press up
+until position 731 340 6000
++0 release up
++0 press right
+until position 742 340 6000
++0 release right
+until idle 3000
++0 press up
+until position 742 337 6000
++0 release up
++0 press right
+until position 743 337 6000
++0 release right
+until idle 20000
++1 press right
++1 release right
+until idle 3000
++0 field move 0 platinum:MOVE_SURF
+advance text
+until state playerState "surf" 3000
+until idle 3000
++0 press right
+until position 753 337 6000
++0 release right
++0 press up
+until position 753 335 6000
++0 release up
++0 press right
+until position 754 335 6000
++0 release right
+until idle 3000
++0 press up
+until position 754 330 6000
++0 release up
++0 press right
+until position 757 330 6000
++0 release right
++7 release select
+# north into Route 227 by the bike ramps, over the x 758 bridge and up to Stark Mountain again (cp22's way, its scenes done)
++0 press up
+until position 757 312 6000
++0 release up
++0 press right
+until position 761 312 6000
++0 release right
++0 press up
+until position 761 308 6000
++0 release up
++0 press right
+until position 766 308 6000
++0 release right
++0 press up
+until position 766 305 6000
++0 release up
++0 press right
+until position 767 305 6000
++0 release right
+until idle 20000
++1 press y
++1 release y
+until idle 20000
++1 assert state cyclingGear 1
++0 press left
+until position 757 305 6000
++0 release left
+until idle 20000
++0 press right
+until position 757 305 6000
++0 release right
++0 press down
+until position 757 309 6000
++0 release down
++0 press left
+until position 750 309 6000
++0 release left
+until idle 20000
++8 release select
+# down the ledge at x 749, west below Felicia's ledge and round north to z 299, east to the bike bridge at x 758 and north over it
++0 press right
+until position 749 309 6000
++0 release right
++0 press down
+until position 749 313 6000
++0 release down
++0 press down
+until position 749 315 6000
++0 release down
++0 press left
+until position 741 315 6000
++0 release left
++0 press up
+until position 741 314 6000
++0 release up
++0 press left
+until position 739 314 6000
++0 release left
++0 press up
+until position 739 305 6000
++0 release up
++0 press right
+until position 749 305 6000
++0 release right
++0 press up
+until position 749 299 6000
++0 release up
+until idle 3000
++1 press b
++1 release b
++1 assert state cyclingGear 0
++0 press right
+until position 751 299 6000
++0 release right
++0 press up
+until position 751 298 6000
++0 release up
++0 press right
+until position 754 298 6000
++0 release right
++0 press down
+until position 754 299 6000
++0 release down
++0 press right
+until position 758 299 6000
++0 release right
++0 press up
+until position 758 277 6000
++0 release up
++8 release select
+# past Buck, through the grass and down the ledges at x 760 to Griffin's back
++0 press left
+until position 757 277 6000
++0 release left
++0 press up
+until position 757 269 6000
++0 release up
++0 press left
+until position 756 269 6000
++0 release left
++0 press up
+until position 756 268 6000
++0 release up
++0 press left
+until position 754 268 6000
++0 release left
++0 press up
+until position 754 260 6000
++0 release up
++0 press right
+until position 760 260 6000
++0 release right
++0 press down
+until position 760 266 6000
++0 release down
++0 press right
+until position 763 266 6000
++0 release right
+until idle 20000
++8 release select
+# round Griffin, north up x 765 and west to the Rock Climb wall at x 756; off the bike and up it
++0 press down
+until position 763 267 6000
++0 release down
++0 press right
+until position 765 267 6000
++0 release right
++0 press up
+until position 765 255 6000
++0 release up
++0 press left
+until position 756 255 6000
++0 release left
++0 press up
+until position 756 254 6000
++0 release up
+until idle 20000
++1 press y
++1 release y
+until idle 20000
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle 20000
++0 assert position platinum:MAP_HEADER_STARK_MOUNTAIN_OUTSIDE 756 249
++8 release select
+# north through the grass and round to the grunts' scene at (752, 235)
++0 press up
+until position 756 237 6000
++0 release up
++0 press right
+until position 762 237 6000
++0 release right
++0 press up
+until position 762 235 6000
++0 release up
++0 press left
+until position 752 235 6000
++0 release left
++8 release select
+# down x 752 and round by x 742 to the entrance; into Stark Mountain
++0 press down
+until position 752 244 6000
++0 release down
++0 press left
+until position 742 244 6000
++0 release left
++0 press up
+until position 742 232 6000
++0 release up
++0 press right
+until position 746 232 6000
++0 release right
++0 press down
+until position 746 234 6000
++0 release down
++0 press right
+until position 750 234 6000
++0 release right
++0 press up
+until position 750 232 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_STARK_MOUNTAIN_ROOM_1" 3000
++0 release up
+until idle 20000
++8 release select
+# room 1 again (its boulders back in place): cp22's way to the stairs
++0 press up
+until position 20 17 6000
++0 release up
++0 press right
+until position 22 17 6000
++0 release right
++0 press up
+until position 22 15 6000
++0 release up
++0 press right
+until position 25 15 6000
++0 release right
+until idle
++0 field move 4 platinum:MOVE_STRENGTH
+advance text
+until idle
++0 assert flag platinum:FLAG_STRENGTH_ACTIVE true
+until idle
++0 press right
+until state objects[localId=5].x 27 240
++0 release right
+until idle
++0 press right
+until position 26 15 240
++0 release right
++0 press left
+until position 25 15 6000
++0 release left
++0 press down
+until position 25 17 6000
++0 release down
+until idle
++0 press right
+until state objects[localId=7].x 27 240
++0 release right
+until idle
++0 press right
+until position 26 17 240
++0 release right
+until idle
++0 press up
+until state objects[localId=6].z 15 240
++0 release up
+until idle
++0 press up
+until position 26 16 240
++0 release up
++0 press right
+until position 29 16 6000
++0 release right
++0 press up
+until position 29 15 6000
++0 release up
++0 press right
+until position 32 15 6000
++0 release right
++0 press up
+until position 32 9 6000
++0 release up
++0 press left
+until position 30 9 6000
++0 release left
++0 press down
+until position 30 13 6000
++0 release down
++0 press left
+until position 28 13 6000
++0 release left
+until idle
++0 press left
+until state objects[localId=8].x 26 240
++0 release left
+until idle
++0 press left
+until position 27 13 240
++0 release left
+until idle
++0 press left
+until state objects[localId=8].x 25 240
++0 release left
+until idle
++0 press left
+until position 26 13 240
++0 release left
+until idle
++0 press left
+until state objects[localId=8].x 24 240
++0 release left
+until idle
++0 press left
+until position 25 13 240
++0 release left
+until idle
++0 press left
+until state objects[localId=8].x 23 240
++0 release left
+until idle
++0 press left
+until position 24 13 240
++0 release left
++0 press up
+until position 24 11 6000
++0 release up
++0 press left
+until position 17 11 6000
++0 release left
++0 press down
+until position 17 13 6000
++0 release down
++0 press left
+until position 8 13 6000
++0 release left
++0 press up
+until position 8 11 6000
++0 release up
++0 press right
+until position 10 11 6000
++0 release right
+until idle
++1 press right
++1 release right
+until idle
++0 assert facing player right
++0 press a
++1 release a
+until yesno
++0 press a
++1 release a
+advance text
+until idle 3000
++0 press right
+until position 12 11 6000
++0 release right
++0 press up
+until position 12 9 6000
++0 release up
++0 press right
+until position 17 9 6000
++0 release right
+until idle
++0 press right
+until state objects[localId=9].x 19 240
++0 release right
+until idle
++0 press right
+until position 18 9 240
++0 release right
+until idle
++0 press right
+until state objects[localId=9].x 20 240
++0 release right
+until idle
++0 press right
+until position 19 9 240
++0 release right
+until idle
++0 press right
+until state objects[localId=9].x 21 240
++0 release right
+until idle
++0 press right
+until position 20 9 240
++0 release right
++0 press up
+until position 20 7 6000
++0 release up
++0 press left
+until position 14 7 6000
++0 release left
++0 press up
+until position 14 3 6000
++0 release up
++0 press right
+until position 17 3 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_STARK_MOUNTAIN_ROOM_2" 3000
++0 release up
+until idle
++8 release select
+# room 2 alone (Rock Climb allowed again): up x 51, Strength on the boulder at (53, 52) seven pushes north, up x 60
++0 press up
+until position 42 66 6000
++0 release up
++0 press right
+until position 50 66 6000
++0 release right
++0 press up
+until position 50 64 6000
++0 release up
++0 press right
+until position 51 64 6000
++0 release right
++0 press up
+until position 51 53 6000
++0 release up
++0 press right
+until position 53 53 6000
++0 release right
+until idle 20000
++1 press up
++1 release up
+until idle 3000
++0 field move 4 platinum:MOVE_STRENGTH
+advance text
+until idle 20000
+until idle
++0 press up
+until state objects[localId=3].z 51 240
++0 release up
+until idle
++0 press up
+until position 53 52 240
++0 release up
+until idle
++0 press up
+until state objects[localId=3].z 50 240
++0 release up
+until idle
++0 press up
+until position 53 51 240
++0 release up
+until idle
++0 press up
+until state objects[localId=3].z 49 240
++0 release up
+until idle
++0 press up
+until position 53 50 240
++0 release up
+until idle
++0 press up
+until state objects[localId=3].z 48 240
++0 release up
+until idle
++0 press up
+until position 53 49 240
++0 release up
+until idle
++0 press up
+until state objects[localId=3].z 47 240
++0 release up
+until idle
++0 press up
+until position 53 48 240
++0 release up
+until idle
++0 press up
+until state objects[localId=3].z 46 240
++0 release up
+until idle
++0 press up
+until position 53 47 240
++0 release up
+until idle
++0 press up
+until state objects[localId=3].z 45 240
++0 release up
+until idle
++0 press up
+until position 53 46 240
++0 release up
++0 press right
+until position 60 46 6000
++0 release right
++0 press up
+until position 60 21 6000
++0 release up
++0 press left
+until position 53 21 6000
++0 release left
+# north between Skylar and Natasha: their double battle
++0 press up
+until message 6000
++0 release up
+advance text
+battle auto 40000
+advance text
+until idle 20000
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_SKYLAR won trainer-pair
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_NATASHA won trainer-pair
+# up the Rock Climb wall at x 52, west to the stairs at (47, 2)
++0 press up
+until position 53 10 6000
++0 release up
++0 press left
+until position 52 10 6000
++0 release left
+until idle 20000
++1 press up
++1 release up
+until idle 3000
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle 20000
++0 assert position platinum:MAP_HEADER_STARK_MOUNTAIN_ROOM_2 52 3
++0 press left
+until position 47 3 6000
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_STARK_MOUNTAIN_ROOM_3" 3000
++0 release up
+until idle 20000
++8 release select
+# room 3: Heatran (L50) where the Magma Stone was (the browser spec's beat: Heatran before the battle)
++0 press up
+until position 7 7 6000
++0 release up
+until idle 3000
++0 assert facing player up
++0 screenshot stark-mountain-heatran
+# end of CP23a: in front of Heatran
++0 assert flag platinum:FLAG_TALKED_TO_BATTLEGROUND_BUCK true
++0 assert flag platinum:FLAG_HIDE_STARK_MOUNTAIN_ROOM_3_HEATRAN false
++0 assert position platinum:MAP_HEADER_STARK_MOUNTAIN_ROOM_3 7 7

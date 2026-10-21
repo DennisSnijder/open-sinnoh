@@ -1,0 +1,112 @@
+:root {
+  --bg: #141a26;
+  --card: #1d2433;
+  --ink: #f4ecd8;
+  --muted: #a9b0c2;
+  --accent: #f2a93b;
+  --danger: #ff7a6b;
+  /*
+   * Touch controls sit over the field and over menus' opaque backdrops, pale or dark: a dark translucent fill
+   * under pale glyphs, ringed in pale ink, reads on both.
+   */
+  --control: rgba(16, 20, 30, 0.45);
+  --control-ring: inset 0 0 0 1.5px rgba(244, 236, 216, 0.4);
+  --control-active: rgba(242, 169, 59, 0.7);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 15px/1.45 system-ui, -apple-system, sans-serif; }
+body { overflow: hidden; overscroll-behavior: none; }
+/* No double-tap zoom anywhere (touch-action applies through the ancestors); pinch zoom stays where an element allows it. */
+html, body { touch-action: manipulation; }
+[hidden] { display: none !important; }
+.small { font-size: 13px; color: var(--muted); }
+
+#game { position: fixed; inset: 0; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+#game > canvas { position: absolute; display: block; }
+/* At the title (title.css, z 30, laid out in the field's area by game-view.ts) only the touch controls show, over it. */
+#game.at-title { z-index: 31; pointer-events: none; }
+#game.at-title > :not(.controls, #safe-area-probe) { display: none; }
+#game.at-title > .controls { pointer-events: auto; }
+#panel-canvas { image-rendering: pixelated; image-rendering: crisp-edges; border-radius: 10px; box-shadow: 0 10px 40px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.08); z-index: 2; }
+#overlay-canvas { pointer-events: none; }
+#safe-area-probe { position: fixed; visibility: hidden; pointer-events: none; padding: var(--sat) var(--sar) var(--sab) var(--sal); }
+
+/*
+ * On-screen controls. layout.ts places each box (its hit area, at controlMetrics' sizes) and game-view.ts sets the
+ * `--c-*` sizes it placed them at (Options › Device › Control size), so the two cannot disagree. The defaults are size M; every glyph is
+ * centred by grid, and the buttons opt out of the page's button style entirely. No selection, callout,
+ * tap highlight or browser gestures on any of them (a long press must stay a held button).
+ */
+/* Above the in-game UI layer (z 4): menu screens keep clear of them, and they drive the menus. */
+.controls { position: absolute; z-index: 5; display: grid; place-content: center; opacity: var(--c-opacity, 1); transition: opacity 0.15s; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+/* A cut-scene that takes no input: the controls fade (still there for a press, which the game ignores). */
+.controls.quiet { opacity: calc(var(--c-opacity, 1) * 0.25); }
+.controls button {
+  all: unset; box-sizing: border-box; position: relative; display: grid; place-items: center; cursor: pointer;
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+  color: var(--ink); font: 700 18px/1 system-ui, -apple-system, sans-serif;
+}
+.controls button > span { position: relative; pointer-events: none; }
+
+#dpad { grid-template: repeat(3, var(--c-key, 48px)) / repeat(3, var(--c-key, 48px)); }
+#dpad::before { content: ''; grid-area: 2 / 2; background: var(--control); }
+#dpad::after { content: ''; grid-area: 2 / 2; place-self: center; width: calc(14px * var(--c-s, 1)); height: calc(14px * var(--c-s, 1)); border-radius: 50%; background: rgb(0 0 0 / 0.22); }
+#dpad button { background: var(--control); box-shadow: var(--control-ring); }
+#dpad button.active { background: var(--control-active); }
+#dpad [data-button='up'] { grid-area: 1 / 2; border-radius: 10px 10px 0 0; }
+#dpad [data-button='left'] { grid-area: 2 / 1; border-radius: 10px 0 0 10px; }
+#dpad [data-button='right'] { grid-area: 2 / 3; border-radius: 0 10px 10px 0; }
+#dpad [data-button='down'] { grid-area: 3 / 2; border-radius: 0 0 10px 10px; }
+#dpad .arrow { background: rgb(244 236 216 / 0.85); }
+#dpad [data-button='up'] .arrow { width: calc(16px * var(--c-s, 1)); height: calc(10px * var(--c-s, 1)); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+#dpad [data-button='down'] .arrow { width: calc(16px * var(--c-s, 1)); height: calc(10px * var(--c-s, 1)); clip-path: polygon(0 0, 100% 0, 50% 100%); }
+#dpad [data-button='left'] .arrow { width: calc(10px * var(--c-s, 1)); height: calc(16px * var(--c-s, 1)); clip-path: polygon(100% 0, 100% 100%, 0 50%); }
+#dpad [data-button='right'] .arrow { width: calc(10px * var(--c-s, 1)); height: calc(16px * var(--c-s, 1)); clip-path: polygon(0 0, 100% 50%, 0 100%); }
+
+/* A/B/X/Y in the DS diamond. */
+#buttons { grid-template: repeat(3, var(--c-face, 46px)) / repeat(3, var(--c-face, 46px)); }
+#buttons .face { width: var(--c-face, 46px); height: var(--c-face, 46px); font-size: calc(18px * var(--c-s, 1)); border-radius: 50%; background: var(--control); box-shadow: var(--control-ring); }
+#buttons .face.active { background: var(--control-active); }
+#buttons [data-button='x'] { grid-area: 1 / 2; }
+#buttons [data-button='y'] { grid-area: 2 / 1; }
+#buttons [data-button='a'] { grid-area: 2 / 3; }
+#buttons [data-button='b'] { grid-area: 3 / 2; }
+/* Select and Start (each its own box, placed by layout.ts): a 44 px tall hit area around a drawn capsule. */
+.controls .pill { width: var(--c-pill-w, 64px); height: var(--c-pill-h, 44px); font-size: calc(10px * var(--c-s, 1)); letter-spacing: 0.08em; text-transform: uppercase; }
+.controls .pill::before { content: ''; position: absolute; inset: var(--c-pill-inset-y, 12px) var(--c-pill-inset-x, 4px); border-radius: 10px; background: var(--control); box-shadow: var(--control-ring); }
+.controls .pill.active::before { background: var(--control-active); }
+
+/* HUD buttons (the Pokétch, the start menu and fast-forward, from ui/index.ts): crisp pixel icons at 2x, inside the safe area. */
+.hud-button {
+  all: unset; box-sizing: border-box; display: grid; place-items: center; width: 44px; height: 44px; cursor: pointer;
+  touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+  border-radius: 10px; background: rgb(30 36 50 / 0.88); box-shadow: inset 0 0 0 1px rgb(244 241 230 / 0.16);
+  --icon-ink: #f4f1e6; --icon-accent: #f2a93b;
+}
+.hud-button .ui-icon { width: 24px; height: 24px; }
+.hud-button:active { background: rgb(242 169 59 / 0.75); }
+.hud-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* Fast-forward on: a small persistent mark in the field's top-left corner (the HUD is top-right). */
+.speed-indicator {
+  position: absolute; top: max(8px, var(--sat)); left: max(8px, var(--sal)); padding: 4px 8px; border-radius: 6px;
+  background: rgb(24 26 32 / 0.72); color: #f2a93b; font: 700 12px/1.2 system-ui, sans-serif; font-variant-numeric: tabular-nums; letter-spacing: 0.04em; pointer-events: none;
+}
+
+button, .button { min-height: 40px; padding: 8px 14px; border: 0; border-radius: 10px; background: #2e3850; color: var(--ink); font: 600 14px system-ui, sans-serif; cursor: pointer; display: inline-flex; align-items: center; }
+button:disabled { opacity: 0.4; cursor: default; }
+button:focus-visible, .button:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.danger { color: var(--danger); }
+
+dialog { width: min(480px, calc(100% - 32px)); max-height: calc(100% - 32px); border: 0; border-radius: 14px; padding: 20px; background: var(--card); color: var(--ink); }
+dialog::backdrop { background: rgba(0, 0, 0, 0.55); }
+dialog h3 { margin: 16px 0 8px; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.menu-head { display: flex; justify-content: space-between; align-items: center; }
+.menu-head h2 { margin: 0; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+.banner { position: fixed; left: 12px; right: 12px; bottom: max(12px, var(--sab)); display: flex; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 12px; background: #2e3850; font-size: 14px; z-index: 10; }
+
+/* "Restart to update" (update-toast.ts): a toast at the bottom of the title and the ROM page, above both and inside the safe area. */
+.update-slot { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: flex; justify-content: center; padding: 16px max(16px, var(--sar)) max(16px, var(--sab)) max(16px, var(--sal)); pointer-events: none; }
+.update-toast { pointer-events: auto; flex-wrap: wrap; justify-content: center; max-width: 100%; }

@@ -1,0 +1,100 @@
+# Mystery Gift by gift code (docs/decisions.md "Mystery Gift with gift codes"), the Member Card. Mystery Gift is the
+# title's screen; replays open the same model over the field (`open mystery-gift`) and enter a test-only code
+# (`giftcodes test`; the real codes are not in the repo). RECEIVE GIFT, the code on the naming keyboard (lower case:
+# codes are case-insensitive), "Searching…", the card and "Receive this gift?", YES, "Receiving…", received: the Wonder
+# Card and the deliveryman's gift in the save. A wrong code: "There were no gifts to be found." The same code again:
+# "You've already received this gift." Then into Sandgem's Poké Mart: its on-transition (MysteryGiftDeliveryman
+# OnMartTransition) shows the deliveryman; he hands over the Member Card (the key item and VAR_DISTRIBUTION_EVENT_DARKRAI's
+# magic number, decomp InitDarkraiEvent) with the ROM's own messages, then has no more gifts.
+giftcodes test
+party 0 platinum:SPECIES_TURTWIG 10 platinum:MOVE_TACKLE
+warp platinum:MAP_HEADER_SANDGEM_TOWN 187 843 up
+until idle
++0 open mystery-gift
+until app mystery-gift
++1 assert text platinum:MysteryGiftMenu_Text_Welcome 0
++1 tap menu:0
+until app naming
++1 tap type:testdark
++1 tap ok
+until app mystery-gift
++1 assert text platinum:MysteryGiftMenu_Text_SearchingForGift 0
++65 assert text platinum:MysteryGiftMenu_Text_ReceiveThisGift 0
++0 assert state mysteryGift.received []
++1 tap yes
++1 assert text platinum:MysteryGiftMenu_Text_ReceivingGiftDontTurnOff 0
++95 assert text platinum:MysteryGiftMenu_Text_GiftReceivedPickUpInPokeMart 0
++0 assert state mysteryGift.received ["darkrai"]
++0 assert state mysteryGift.cards[0] {"gift":"darkrai","received":"2009-03-22"}
++0 assert state mysteryGift.deliveries[0] {"gift":"darkrai","card":0}
++1 tap next
++1 tap next
+until app none
+# A wrong code.
++1 open mystery-gift
+until app mystery-gift
++1 tap menu:0
+until app naming
++1 tap type:QQQQQQQQ
++1 tap ok
+until app mystery-gift
++65 assert text platinum:MysteryGiftMenu_Text_NoGiftsToBeFound 0
++1 tap next
++1 assert text platinum:MysteryGiftMenu_Text_Welcome 0
+# The same code again.
++1 tap menu:0
+until app naming
++1 tap type:TESTDARK
++1 tap ok
+until app mystery-gift
++65 assert text platinum:MysteryGiftMenu_Text_AlreadyReceivedCantGetAnotherOne 0
++1 tap next
++1 assert state mysteryGift.cards[1] null
++1 tap menu:2
+until app none
++0 reload
+until idle
+# Into the Poké Mart: the deliveryman is there.
++0 press up
+until state player.zone "platinum:MAP_HEADER_SANDGEM_TOWN_MART" 300
++0 release up
+until idle
++0 assert flag platinum:FLAG_HIDE_MART_MYSTERY_GIFT_DELIVERYMAN false
++0 assert var platinum:VAR_AVAILABLE_MYSTERY_GIFT_EXISTS 1
++0 press up
+until position 3 8 300
++0 release up
++0 press right
+until position 4 8 300
++0 release right
++0 press up
+until state player.facing "up" 30
++0 release up
+until idle
++0 press a
++1 release a
+until message
++0 assert text platinum:MysteryGiftDeliveryman_Text_MiddayGreeting 0
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 assert text platinum:MysteryGiftDeliveryman_Text_ReceivedMemberCard 0
+advance text
+until idle
++0 assert state bag.key_items[item="platinum:ITEM_MEMBER_CARD"].count 1
++0 assert var platinum:VAR_DISTRIBUTION_EVENT_DARKRAI 4617
++0 assert state mysteryGift.deliveries[0] null
++0 assert state mysteryGift.cards[0].gift "darkrai"
+# No more gifts.
++0 press a
++1 release a
+until message
++0 assert text platinum:MysteryGiftDeliveryman_Text_NoMoreGifts 0
+advance text
+until idle
++0 reload
+until idle
++0 assert state bag.key_items[item="platinum:ITEM_MEMBER_CARD"].count 1

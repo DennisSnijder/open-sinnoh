@@ -1,0 +1,10 @@
+# Cross-map panel from Cyrus's room into the laboratory.
+warp platinum:MAP_HEADER_GALACTIC_HQ_4F 22 4 up
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_GALACTIC_HQ_LABORATORY" 1000
++0 release up
+until idle
++0 assert facing player down
++0 reload
+until idle

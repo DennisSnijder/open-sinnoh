@@ -1,0 +1,67 @@
+# sys-battleground (decomp ScrCmd_GetRandomBattlegroundTrainers). A constructed start
+# in the Survival Area at the Battleground door (open once Charon is arrested). On entry the onTransition sets the
+# daily flag and draws the day's trainers into VAR_BATTLEGROUND_TRAINER_1–4 (OBJ_EVENT_GFX ids; seed-dependent, checked per seed by
+# tests/integration/m6-systems.rom.test.ts), shown through VAR_OBJ_GFX_ID_1–4. The welcome scene runs once.
+# Trainer 1 (always a gym leader) is battled: a leader rematch at L61–66. Re-entering the same day keeps the pick;
+# a midnight clears FLAG_DAILY_SET_BATTLEGROUND_TRAINERS and the next entry draws again.
+party 0 platinum:SPECIES_GARCHOMP 100 platinum:MOVE_EARTHQUAKE platinum:MOVE_DRAGON_CLAW platinum:MOVE_FIRE_FANG platinum:MOVE_CRUNCH
+party 1 platinum:SPECIES_EMPOLEON 100 platinum:MOVE_SURF platinum:MOVE_ICE_BEAM platinum:MOVE_FLASH_CANNON platinum:MOVE_GRASS_KNOT
+party 2 platinum:SPECIES_LUXRAY 100 platinum:MOVE_THUNDERBOLT platinum:MOVE_CRUNCH platinum:MOVE_ICE_FANG platinum:MOVE_FIRE_FANG
+set flag platinum:FLAG_GAME_COMPLETED true
+set flag platinum:FLAG_ARRESTED_CHARON_STARK_MOUNTAIN true
+date 2009-03-22 12:00
+warp platinum:MAP_HEADER_SURVIVAL_AREA 652 339 up
+until idle
++0 press up
++1 release up
+advance text 3000
+until idle 600
++0 assert map platinum:MAP_HEADER_BATTLEGROUND
++0 assert flag platinum:FLAG_DAILY_SET_BATTLEGROUND_TRAINERS true
++0 assert var platinum:VAR_BATTLEGROUND_STATE 1
++0 assert position platinum:MAP_HEADER_BATTLEGROUND 11 9
+# Trainer 1 at (2,9): down a row, left along row 10, face up.
++0 press down
+until position 11 10
++0 release down
++0 press left
+until position 2 10
++0 release left
++8 press up
++2 release up
++8 assert facing player up
++0 press a
++1 release a
+advance text 3000
++0 press a
++1 release a
+advance text 3000
+battle auto 30000
++0 assert battles trainer 1
+advance text 6000
+until idle 600
++0 assert state records.counts["57"] 1
+# Out and back the same day: the pick is kept.
++0 press right
+until position 7 10
++0 release right
++0 press down
+until position 652 339 300
++0 release down
+until idle 300
++0 press up
+until state player.zone "platinum:MAP_HEADER_BATTLEGROUND" 300
++0 release up
+until idle 600
+# The next day: the daily flag clears; the next entry draws again.
++0 date 2009-03-23 00:00
++1 assert flag platinum:FLAG_DAILY_SET_BATTLEGROUND_TRAINERS false
++0 press down
+until position 652 339 300
++0 release down
+until idle 300
++0 press up
+until state player.zone "platinum:MAP_HEADER_BATTLEGROUND" 300
++0 release up
+until idle 600
++0 assert flag platinum:FLAG_DAILY_SET_BATTLEGROUND_TRAINERS true

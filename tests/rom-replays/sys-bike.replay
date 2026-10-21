@@ -1,0 +1,18 @@
+from parts/bike-ramp.replay
+# sys-bike: the slope, gear toggle, save/load in gear 1 and the ramp are
+# in the parts. Here Route 210 North, the bike bridge north–south at x 501 (z 523–539): the bike rides
+# its whole length on the bridge layer (BRIDGE_START at both ends) and stays on the bike. Over the open
+# ground at z 530–533 the player rides at the bridge's height (128), not the ground's (64 at (500, 531)).
+warp platinum:MAP_HEADER_ROUTE_210_NORTH 501 522 down
+until idle
++0 assert state playerState "cycle"
++0 press down
+until position 501 531
++0 assert state player.y 128
++0 screenshot bike-bridge
+until position 501 540
++0 release down
++0 assert position platinum:MAP_HEADER_ROUTE_210_NORTH 501 540
++0 assert state playerState "cycle"
++30 assert state playerState "cycle"
+until idle

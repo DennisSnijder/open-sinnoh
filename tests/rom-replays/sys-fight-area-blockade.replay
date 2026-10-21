@@ -1,0 +1,25 @@
+# sys-fight-area-blockade, National Dex first (cp20/cp21 cover the other order).
+# A constructed start: the National Dex already on (the lab's upgrade before the first Battle Zone trip) and the
+# player off the Snowpoint ship at its Fight Area berth (623,434), Fight Area state 0. Barry's welcome runs
+# (onFrame), YES to the tag battle against Volkner and Flint, won; after Palmer and Buck the script reads the
+# National Dex (get_national_dex_enabled TRUE) and lifts the Route 225 blockade itself: both blockers gone,
+# FLAG_HIDE_FIGHT_AREA_BLOCKADE, state 2.
+party 0 platinum:SPECIES_GARCHOMP 100 platinum:MOVE_EARTHQUAKE platinum:MOVE_DRAGON_CLAW platinum:MOVE_FIRE_FANG platinum:MOVE_CRUNCH
+party 1 platinum:SPECIES_EMPOLEON 100 platinum:MOVE_SURF platinum:MOVE_ICE_BEAM platinum:MOVE_FLASH_CANNON platinum:MOVE_GRASS_KNOT
+party 2 platinum:SPECIES_LUXRAY 100 platinum:MOVE_THUNDERBOLT platinum:MOVE_CRUNCH platinum:MOVE_ICE_FANG platinum:MOVE_FIRE_FANG
+set flag platinum:FLAG_GAME_COMPLETED true
+set flag platinum:FLAG_SAILED_TO_BATTLE_ZONE true
+set state pokedex.national true
+date 2009-03-22 12:00
+warp platinum:MAP_HEADER_FIGHT_AREA 623 434 right
+advance text 6000
++8 press a
++1 release a
+advance text 6000
+battle auto 30000
++0 assert battle trainer platinum:TRAINER_LEADER_VOLKNER_FIGHT_AREA won ai-partner
++0 assert battle trainer platinum:TRAINER_ELITE_FOUR_FLINT_FIGHT_AREA won ai-partner
+advance text 20000
+until idle 1200
++0 assert var platinum:VAR_FIGHT_AREA_STATE 2
++0 assert flag platinum:FLAG_HIDE_FIGHT_AREA_BLOCKADE true

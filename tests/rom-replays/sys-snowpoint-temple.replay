@@ -1,0 +1,209 @@
+# sys-snowpoint-temple: Snowpoint Temple 1F to B5F, round its ice (the player slides
+# until blocked; world `ice`, as in the Snowpoint Gym) and down each floor's stairs. A constructed start inside the
+# door (the guard lets the player in after the National Dex; that gate is cp23's). The walk is a shortest path that
+# models the slides (generated, then replayed as is). B5F's Regigigas is (m6-regigigas).
+party 0 platinum:SPECIES_GARCHOMP 60 platinum:MOVE_EARTHQUAKE
+set flag platinum:FLAG_GAME_COMPLETED true
+date 2009-03-22 12:00
+warp platinum:MAP_HEADER_SNOWPOINT_TEMPLE_1F 8 12 up
+until idle
++0 wild flee
+# 1F → B1F.
++0 press right
+until position 12 12 300
++0 release right
++0 press up
+until position 12 5 300
++0 release up
++0 press right
+until position 14 5 300
++0 release right
++0 press up
+until position 14 3 300
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_SNOWPOINT_TEMPLE_B1F" 300
++0 release left
+until idle 600
++0 assert map platinum:MAP_HEADER_SNOWPOINT_TEMPLE_B1F
+# B1F → B2F.
++0 press down
+until position 4 12 300
++0 release down
++0 press right
+until position 9 12 300
++0 release right
++0 press up
+until position 9 11 300
++0 release up
++0 press right
+until position 14 11 300
++0 release right
++0 press up
+until position 14 3 300
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_SNOWPOINT_TEMPLE_B2F" 300
++0 release left
+until idle 600
++0 assert map platinum:MAP_HEADER_SNOWPOINT_TEMPLE_B2F
+# B2F → B3F.
++0 press down
+until position 6 6 300
++0 release down
++0 press left
+until position 4 6 300
++0 release left
++0 press down
+until position 4 8 300
++0 release down
++0 press left
+until position 3 8 300
++0 release left
++0 press down
+until position 3 9 300
++0 release down
++0 press left
+until position 2 9 300
++0 release left
++0 press down
+until position 2 14 300
++0 release down
++0 press right
+until position 4 14 300
++0 release right
++0 press up
+until position 4 10 300
++0 release up
++0 press right
+until position 6 10 300
++0 release right
++0 press down
+until position 6 14 300
++0 release down
++0 press right
+until position 15 14 300
++0 release right
++0 press up
+until position 15 11 300
++0 release up
++0 press left
+until position 13 11 300
++0 release left
++0 press down
+until position 13 12 300
++0 release down
++0 press left
+until position 10 12 300
++0 release left
++0 press up
+until position 10 8 300
++0 release up
++0 press left
+until position 9 8 300
++0 release left
++0 press down
+until position 9 9 300
++0 release down
++0 press right
+until position 12 9 300
++0 release right
++0 press up
+until position 12 5 300
++0 release up
++0 press right
+until position 14 5 300
++0 release right
++0 press up
+until position 14 3 300
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_SNOWPOINT_TEMPLE_B3F" 300
++0 release left
+until idle 600
++0 assert map platinum:MAP_HEADER_SNOWPOINT_TEMPLE_B3F
+# B3F → B4F.
++0 press down
+until position 6 5 300
++0 release down
++0 press left
+until position 3 5 300
++0 release left
++0 press down
+until position 3 14 300
++0 release down
++0 press left
+until position 2 14 300
++0 release left
++0 press up
+until position 2 11 300
++0 release up
++0 press right
+until position 14 11 300
++0 release right
++0 press up
+until position 14 3 300
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_SNOWPOINT_TEMPLE_B4F" 300
++0 release left
+until idle 600
++0 assert map platinum:MAP_HEADER_SNOWPOINT_TEMPLE_B4F
+# B4F → B5F.
++0 press down
+until position 6 6 300
++0 release down
++0 press left
+until position 4 6 300
++0 release left
++0 press down
+until position 4 10 300
++0 release down
++0 press right
+until position 6 10 300
++0 release right
++0 press down
+until position 6 12 300
++0 release down
++0 press right
+until position 7 12 300
++0 release right
++0 press down
+until position 7 13 300
++0 release down
++0 press right
+until position 8 13 300
++0 release right
++0 press down
+until position 8 15 300
++0 release down
++0 press right
+until position 13 15 300
++0 release right
++0 press up
+until position 13 13 300
++0 release up
++0 press left
+until position 12 13 300
++0 release left
++0 press up
+until position 12 9 300
++0 release up
++0 press right
+until position 13 9 300
++0 release right
++0 press up
+until position 13 5 300
++0 release up
++0 press right
+until position 14 5 300
++0 release right
++0 press up
+until position 14 3 300
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_SNOWPOINT_TEMPLE_B5F" 300
++0 release left
+until idle 600
++0 assert map platinum:MAP_HEADER_SNOWPOINT_TEMPLE_B5F
++0 assert flag platinum:FLAG_FIRST_ARRIVAL_SNOWPOINT_TEMPLE true

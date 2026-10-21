@@ -1,0 +1,39 @@
+from opening-rival.replay
+# The first battle's loss branch (decomp scripts_route_201.s Route201_HandleRivalBattleEnd). Piplup only
+# growls, so the rival's Turtwig wins. The first battle never blacks out: the battle pays the penalty
+# (level 5 · 4 · 2 with no badges = $40), then the script goes on with Route201_RivalWonLetsGoHome (back to
+# the field, "I won!"), heals the party and warps home, as after a win.
+until battle
+battle auto move 2 18000
++0 assert battle trainer platinum:TRAINER_RIVAL_ROUTE_201_PIPLUP lost
++0 assert state money 2960
++0 assert state party[0].hp 0
++0 assert var platinum:VAR_FOLLOWER_RIVAL_STATE 1
+# the rival's "I won!" lines (Route201_Text_IWonLetsGoHome, six pages), then the warp home
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until position 2 6
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_1F 2 6
++0 assert var platinum:VAR_FOLLOWER_RIVAL_STATE 2
++0 assert var platinum:VAR_PLAYER_HOUSE_STATE 3
++0 assert state party[0].level 5
++0 assert state party[0].status "none"
++0 assert state money 2960
+advance text 4000
++0 assert var platinum:VAR_PLAYER_HOUSE_STATE 4

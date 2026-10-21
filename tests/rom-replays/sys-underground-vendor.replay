@@ -1,0 +1,42 @@
+from sys-sphere-growth.replay
+# sys-underground-vendor (vendors.c): a trap vendor's shop. Its five traps and their prices
+# are rolled on the save's seed and the vendor's index (the same on every seed here). GET TRAP: the Move Right Trap for
+# a Red Sphere of at least 5; a Blue Sphere is the wrong kind, the Red Sphere 10 pays. GIVE TRAP: the Bubble Trap for a
+# Blue Sphere 7 (half the rolled size). The Spiritomb option is off: the talk counts for nothing.
+# Setup: down to the vendor north-west of Eterna City's corridor.
+warp platinum:MAP_HEADER_UNDERGROUND 232 88 up
+until idle
++0 press a
++1 release a
+until app ug-vendor
++1 tap next
++1 screenshot ug-vendor
++0 tap menu:0
++1 screenshot ug-vendor-buy
++0 tap row:2
++1 tap next
++1 tap row:0
++1 tap next
++1 tap next
++1 tap menu:0
++1 tap row:2
++1 tap next
++1 tap row:1
++1 assert state underground.traps [1,23,28,33,2]
++0 assert state underground.spheres[1] {"type":1,"size":1}
++1 tap next
++1 tap next
++1 tap next
++1 tap menu:1
++1 tap row:1
++1 tap yes
++1 tap next
++1 assert state underground.traps [1,28,33,2]
++0 assert state underground.spheres[5] {"type":4,"size":7}
++1 tap next
++1 tap next
++1 tap menu:2
++1 tap next
+until app none
+until idle
++0 assert var platinum:VAR_SPIRITOMB_COUNTER 0

@@ -1,0 +1,32 @@
+# sys-explosion (docs/research/story-scenes.md): Pastoria's Great Marsh bomb
+# after Wake (CP9), from sys-gym-pastoria's end. Out of the gym (the city state is 4 after Barry's scene), onto
+# the coord event at 610,810: the rival and Wake gather, the explosion's message waits on its sound, and
+# scr_cmd_29f 1 runs (the BGM fades out, 16 callbacks, the camera shakes 4 units for 24 cycles losing an
+# eighth each, 16 callbacks, the BGM fades back in) before the grunt appears; the scene ends with the city
+# state 5 and the grunt moved east.
+from sys-gym-pastoria.replay
++0 press down
+until state player.zone "platinum:MAP_HEADER_PASTORIA_CITY"
++0 release down
+until idle
++0 assert var platinum:VAR_PASTORIA_CITY_STATE 4
++0 press right
+until position 598 828
++0 release right
+until idle
++0 press up
+until position 598 816
++0 release up
+until idle
++0 press right
+until position 610 816
++0 release right
+until idle
++0 press up
+until position 610 810
++0 release up
+until message 300
+advance text 6000
+until idle
++0 assert var platinum:VAR_PASTORIA_CITY_STATE 5
++0 assert flag platinum:FLAG_PASTORIA_CITY_GRUNT_M_MOVED_EAST true

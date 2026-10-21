@@ -1,0 +1,87 @@
+from sys-underground-kit.replay
+# sys-underground-enter (item_use_functions.c, field_map_change.c,
+# scripts_underground.s): out of the Underground Man's house, the Explorer Kit (registered, on Y) takes the player down
+# under Eterna City; Roark's first-visit intro; X opens the Underground's menu, GO UP returns to the tile left; the
+# Underground Man's first mission is done (FLAG_ENTERED_UNDERGROUND) and gives three traps.
+# Setup: the Explorer Kit registered (the bag's REGISTER).
+set state registeredItem "platinum:ITEM_EXPLORER_KIT"
++0 press left
+until position 4 6
++0 release left
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY"
++0 release down
+until idle
++0 press y
++1 release y
+until state player.zone "platinum:MAP_HEADER_UNDERGROUND"
+until message
+# Roark's intro: ten pages that wait, the last one then WaitABPress (no replay wait: A once it has printed).
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
+until message
++0 press a
++1 release a
++150 press a
++1 release a
+until idle
++0 assert flag platinum:FLAG_ENTERED_UNDERGROUND true
++0 assert var platinum:VAR_HAS_SEEN_UNDERGROUND_ROARK_INTRO 1
++0 assert state underground.respawn false
++0 screenshot ug-field
++0 press x
++1 release x
+until app ug-menu
++1 screenshot ug-menu
++0 tap entry:5
++1 tap yes
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY"
+until idle
++0 assert state player.facing "down"
+# Back to the Underground Man: the first mission's reward.
++0 press up
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY_UNDERGROUND_MAN_HOUSE"
++0 release up
+until idle
++0 press up
+until position 4 6
++0 release up
+until idle
++0 press right
+until position 6 6
++0 release right
+until idle
++0 press up
++1 release up
++4 press a
++5 release a
+advance text
+until idle
++0 assert var platinum:VAR_CURRENT_UNDERGROUND_MISSION 1
++0 assert state underground.traps [1,23,28]

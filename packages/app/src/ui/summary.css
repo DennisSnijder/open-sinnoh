@@ -1,0 +1,50 @@
+/*
+ * The summary screen on its DS screen (summary.ts): the page art, sprites and texts at their DS rects on a
+ * board (one DS px = --unit). CSS stand-ins draw the same rects when the pack has no art (the fixture).
+ */
+.summary-screen .sum-bg, .summary-screen .sum-detail, .summary-screen .sprite, .summary-screen .type-icon, .summary-screen .type-chip { display: block; pointer-events: none; }
+.summary-screen .sum-text { display: flex; align-items: flex-start; }
+.summary-screen .sum-text.right { justify-content: flex-end; }
+.summary-screen .sum-text.center { justify-content: center; }
+.summary-screen .sum-name { gap: calc(var(--unit) * 4); }
+.summary-screen .sum-gender { margin-left: auto; display: flex; }
+.summary-screen .sum-level { gap: calc(var(--unit) * 2); }
+.summary-screen .sum-picture { display: grid; place-items: center; pointer-events: none; }
+.summary-screen .sum-mon-icon { display: grid; place-items: center; pointer-events: none; }
+.summary-screen .sum-mon-icon .mon-icon-box, .summary-screen .sum-mon-icon .mon-icon-sprite { width: calc(var(--unit) * 32); height: calc(var(--unit) * 32); }
+.summary-screen .sum-mon-icon .mon-icon-sprite { background-size: calc(var(--unit) * 32) calc(var(--unit) * 64); }
+.summary-screen .sum-memo, .summary-screen .sum-ability, .summary-screen .move-desc, .summary-screen .ribbon-desc { display: block; }
+.summary-screen .exp-bar, .summary-screen .hp-bar { display: block; pointer-events: none; }
+
+/* Tabs and controls: the art is the control; no band, no arrow. */
+.summary-screen .sum-tab, .summary-screen .sum-exit { display: grid; place-items: center; }
+.summary-screen [data-nav].is-cursor { background: none; box-shadow: none; }
+.summary-screen [data-nav].is-cursor::before { display: none; }
+.summary-screen .move-row, .summary-screen .ribbon-slot { display: grid; place-items: center; }
+.summary-screen .move-row { display: block; }
+.summary-screen .ribbon-arrow { display: grid; place-items: center; }
+.summary-screen .mon-step { display: grid; place-items: center; }
+/* The OpenSinnoh additions (RENAME, the EV/IV label): ROM text in the hint's place, the text is the control. */
+.summary-screen .sum-extra { background: none; border: 0; padding: 0; cursor: pointer; }
+.summary-screen .mon-step::before { content: ''; width: calc(var(--unit) * 8); height: calc(var(--unit) * 5); background: #f05030; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.summary-screen .mon-step.next::before { clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.summary-screen .window.rom-frame, .summary-screen .msg-box.rom-frame { padding: 0; min-height: 0; }
+
+/* Stand-ins without the art. */
+.sum-bg.css { background: linear-gradient(#3060c8 0 calc(var(--unit) * 16), #d0d8c8 calc(var(--unit) * 16)); }
+.sum-bg.css::after { content: ''; position: absolute; left: calc(var(--unit) * 104); top: calc(var(--unit) * 32); right: 0; bottom: 0; background: #8ab0e0; }
+.sum-tab.css, .sum-exit.css { background: #e0e0d8; box-shadow: inset 0 0 0 var(--unit) #506080; }
+.sum-tab.css.on { background: #506080; }
+.sum-detail.css { background: linear-gradient(transparent 0 calc(var(--unit) * 40), #f08070 calc(var(--unit) * 40)); right: auto; width: calc(var(--unit) * 136); }
+.sum-detail.ribbon_info.css { background: linear-gradient(transparent 0 calc(var(--unit) * 140), #f8b0e0 calc(var(--unit) * 140)); width: calc(var(--unit) * 256); }
+.summary-screen .move-cursor.css { box-shadow: inset 0 0 0 var(--unit) #e01010; }
+.summary-screen .ribbon-slot.is-cursor { box-shadow: none; }
+.summary-screen .ribbon-arrow:not(.rom)::before { content: ''; width: calc(var(--unit) * 8); height: calc(var(--unit) * 5); background: #3050e0; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.summary-screen .ribbon-arrow.down:not(.rom)::before { clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.summary-screen .exp-bar.css, .summary-screen .hp-bar.css { height: calc(var(--unit) * 3); margin-top: calc(var(--unit) * 2); background: #404040; }
+.summary-screen .bar-fill { display: block; height: 100%; width: calc(var(--fill) * 100%); background: #40c8f8; }
+.summary-screen .hp-bar.css .bar-fill { background: #70f8a8; }
+
+/* CONDITION (summary.ts condition): the spider graph over the page art. */
+.sum-graph-box { pointer-events: none; }
+.sum-graph-box > svg { width: 100%; height: 100%; display: block; shape-rendering: crispEdges; }

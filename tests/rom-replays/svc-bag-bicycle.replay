@@ -1,0 +1,57 @@
+# Bag USE of field items, decomp ItemActionFunc_Use → UseBicycleFromMenu): the Bicycle
+# used from the bag. In Eterna the bag and the start menu close and the field mounts the bike; the bike
+# rides through the Cycling Road north gate (bikes only) onto Route 206, where the bag refuses getting off
+# (CanUseBicycle: Bag_Text_CannotDismount, printed in the bag). The refusal texts are unit-tested.
+party 0 platinum:SPECIES_TURTWIG 12
+give item platinum:ITEM_BICYCLE 1
+# Eterna, south of the Cycling Road gate: USE gets on the bike
+warp platinum:MAP_HEADER_ETERNA_CITY 304 567 down
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:1
++1 assert app bag
++1 tap pocket:7
++1 tap row:0
++1 tap menu:0
+until app none
+until state playerState "cycle"
++0 screenshot cycling
+until idle
+# Through the gate on the bike, onto Cycling Road
++1 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_206_CYCLING_ROAD_NORTH_GATE"
+until state player.zone "platinum:MAP_HEADER_ROUTE_206"
++0 release down
+until idle
++0 assert state playerState "cycle"
+# On Cycling Road the bag refuses getting off
++1 press x
++1 release x
+until app start-menu
++1 tap entry:1
++1 tap pocket:7
++1 tap row:0
++1 tap menu:0
++1 assert app bag
++0 assert state playerState "cycle"
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
+until app none
++0 assert state playerState "cycle"
+# Back up into the gate (Route 206's onResume rewrites its map-local vars on a load, as on the DS: the save
+# round trip is taken in the gate)
++1 press down
+until position 304 577
++0 release down
+until idle
++1 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_206_CYCLING_ROAD_NORTH_GATE"
++0 release up
+until idle
++0 assert state playerState "cycle"

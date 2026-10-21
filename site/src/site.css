@@ -1,0 +1,208 @@
+/*
+ * opensinnoh.com on OpenSinnoh UI v0.7 (docs/design-system.md): the tokens, frames, buttons, title tabs and rows
+ * come from @opensinnoh/ui (os.css and the build's token sheet); this file only lays the page out. Colours are
+ * --os-* tokens; the device bezels are --site-phone and --site-lid (prerender.ts). Lengths are on the 4-px scale
+ * (exceptions 2, 10 and 44, as in the system).
+ */
+
+html { background: var(--os-bg); scroll-padding-top: 16px; -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body { margin: 0; min-width: 320px; background: var(--os-bg); color: var(--os-ink); font: 400 16px/24px var(--os-font-body); }
+img, video { display: block; max-width: 100%; }
+a { color: inherit; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+a.os-btn { text-decoration: none; }
+h1, h2, h3 { margin: 0; }
+ol, ul { margin: 0; padding: 0; list-style: none; }
+
+/* The page's column: 1168 px of content, whole-pixel gutters (16 px on a phone, 32 px from 720 px). */
+.wrap { padding-inline: max(16px, round(down, calc((100% - 1168px) / 2), 1px)); }
+@media (min-width: 720px) { .wrap { padding-inline: max(32px, round(down, calc((100% - 1168px) / 2), 1px)); } }
+
+.skip { position: absolute; left: 16px; top: -64px; z-index: 10; padding: 8px 12px; background: var(--os-face); color: var(--os-ink); font: 500 20px/24px var(--os-font-px); }
+.vh { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.skip:focus { top: 16px; }
+
+/* ---------- Shared text ---------- */
+.kick { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font: 400 16px/20px var(--os-font-num); color: var(--os-muted); text-transform: uppercase; }
+.kick .cur, .os-row .cur { color: var(--os-accent); }
+.lead { margin-top: 16px; font-size: 18px; line-height: 28px; color: var(--os-muted); max-width: 62ch; }
+.head { max-width: 760px; margin-bottom: 48px; }
+.head p:not(.kick, .lead) { margin-top: 12px; color: var(--os-muted); }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.os-btn .os-ico { margin-right: -4px; }
+.os-title { text-wrap: balance; }
+@media (max-width: 719px) {
+  .os-title.d40 { font-size: 32px; line-height: 40px; }
+  .lead { font-size: 16px; line-height: 24px; }
+  .head { margin-bottom: 40px; }
+}
+@media (pointer: coarse) { .os-btn { min-height: 44px; } .os-pick > button { min-height: 44px; min-width: 44px; } }
+
+/* ---------- Nav (no logo: the wordmark below is the brand; mark or wordmark, never both side by side) ---------- */
+.nav { display: flex; align-items: center; gap: 24px; min-height: 64px; background: var(--os-field); }
+.links { display: flex; gap: 4px; margin-right: auto; }
+.links a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 8px; color: var(--os-muted); font-weight: 600; font-size: 14px; text-decoration: none; }
+.links a:hover { color: var(--os-ink); }
+.tools { display: flex; align-items: center; gap: 16px; margin-left: auto; }
+.theme > button { font-size: 16px; line-height: 20px; color: var(--os-muted); }
+.theme > button[aria-pressed="true"] { color: var(--os-accent); }
+/* Discord: an icon button (Discord's mark, prerender.ts); its tooltip drops below, the bar is the page's top. */
+.dc .os-btn.icon { display: grid; place-items: center; }
+.dc .os-ico { display: block; margin: 0; }
+.dc .os-tip { bottom: auto; top: calc(100% + 8px); }
+@media (max-width: 959px) {
+  .nav .links { display: none; }
+  .tools { flex: 1; gap: 8px; }
+  .dc { margin-right: auto; }
+  .dc .os-tip { left: 0; translate: none; }
+}
+
+/* ---------- Hero ---------- */
+.hero { padding: 40px 0 72px; }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 48px; align-items: center; }
+.hero-copy .kick { margin-bottom: 20px; }
+/* The wordmark at whole scales (58 × 11 art px): ×8, ×7, ×6, ×5; 2 glyph px of clear space all round. */
+.mark { margin: 0 0 24px; }
+.mark .os-wordmark { width: 464px; height: 88px; }
+@media (max-width: 1199px) { .mark .os-wordmark { width: 406px; height: 77px; } }
+@media (max-width: 1023px) { .mark .os-wordmark { width: 348px; height: 66px; } }
+@media (max-width: 479px) { .mark .os-wordmark { width: 290px; height: 55px; } }
+/* Beta, under the wordmark: the system's badge (Silkscreen on the accent), past the wordmark's clear space. */
+.beta-note a { white-space: nowrap; }
+.pitch { font-size: 20px; line-height: 28px; max-width: 30ch; }
+.runs { margin-top: 12px; font-size: 16px; line-height: 24px; font-weight: 600; text-wrap: pretty; }
+.hero .cta { margin-top: 32px; }
+.small { margin-top: 20px; font-size: 14px; line-height: 20px; color: var(--os-muted); }
+@media (max-width: 959px) {
+  .hero { padding: 24px 0 56px; }
+  .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+}
+@media (max-width: 479px) {
+  .pitch { font-size: 18px; line-height: 28px; }
+  .hero .cta .os-btn { flex: 1 1 100%; }
+}
+
+/* Devices, drawn in the windows' colours: halo, near-black body, the teal ring around the glass. */
+.devices { position: relative; padding: 0 12% 32px 0; }
+.laptop { position: relative; }
+.lid { position: relative; padding: 8px; border: 6px solid transparent; border-image: var(--site-lid) 3 fill / 6px / 0 stretch; }
+.lid::before { content: ''; position: absolute; left: calc(50% - 2px); top: -2px; width: 4px; height: 4px; background: var(--os-inner); }
+.screen { position: relative; overflow: hidden; background: var(--os-rim); box-shadow: 0 0 0 2px var(--os-ring); }
+.laptop .screen { aspect-ratio: 16 / 9; }
+.screen > img, .loop-btn video { width: 100%; height: 100%; object-fit: cover; }
+/* The montage is its own pause control (WCAG 2.2.2): a bare button around the video, no chrome but the focus ring. */
+.loop-btn { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
+.loop-btn:focus-visible { outline: 2px solid var(--os-accent); outline-offset: -4px; }
+.base {
+  position: relative; height: 16px; margin: 0 -6%; background: var(--os-rim);
+  box-shadow: inset 0 2px 0 var(--os-halo), inset 0 -2px 0 var(--os-halo);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px));
+}
+.base::before { content: ''; position: absolute; left: 41%; right: 41%; top: 2px; height: 4px; background: var(--os-inner); }
+.phone { position: relative; border: 14px solid transparent; border-image: var(--site-phone) 7 fill / 14px / 0 stretch; }
+.phone .screen { aspect-ratio: 390 / 844; }
+/* The camera island, in whole steps, and the side buttons. */
+.phone .screen::before { content: ''; position: absolute; z-index: 1; left: 36%; right: 36%; top: 6px; height: 12px; background: var(--os-rim); clip-path: polygon(4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px), 0 4px, 2px 4px, 2px 2px, 4px 2px); }
+.phone::after { content: ''; position: absolute; right: -16px; top: 22%; width: 2px; height: 12%; background: var(--os-halo); }
+.hero .phone { position: absolute; right: 0; bottom: 0; width: 27%; }
+@media (max-width: 479px) {
+  .lid { padding: 4px; }
+  .phone { border-width: 10px; border-image-width: 10px; }
+  .phone .screen::before { top: 4px; height: 8px; }
+  .phone::after { right: -12px; }
+}
+
+/* ---------- Bands ---------- */
+.band { padding: 96px 0; border-top: 2px solid var(--os-line); }
+@media (max-width: 719px) { .band { padding: 64px 0; } }
+
+/* A screenshot in a window, named by its title tab. */
+.shot { margin: 16px 0 0; padding: 0 2px 2px; display: flex; flex-direction: column; }
+.shot img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; background: var(--os-face-alt); }
+.os-tab .end { color: var(--os-on-tone); }
+.os-tab .os-ico { flex: none; }
+/* The tab keeps its place on the window's edge at every width (the app's phone rule turns tabs into bars). */
+.band .os-tab { width: fit-content; max-width: 100%; height: 32px; min-height: 0; margin: -26px 0 8px -4px; padding: 0 8px; border: 4px solid transparent; background: none; border-image: var(--os-tab-system) 2 fill / 4px / 0 stretch; }
+.band .os-tone-world { border-image-source: var(--os-tab-world); }
+.band .os-tone-team { border-image-source: var(--os-tab-team); }
+.band .os-tone-items { border-image-source: var(--os-tab-items); }
+
+.note { display: flex; gap: 12px; align-items: flex-start; margin-top: 32px; max-width: 72ch; font-size: 14px; line-height: 20px; color: var(--os-muted); }
+.note .os-ico { flex: none; margin-top: 2px; }
+
+/* The engine: the ROM's one trip, then what the engine makes possible. */
+.flow { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 16px; }
+.flow .os-win { display: grid; gap: 4px; padding: 12px 16px 16px; }
+.flow .os-num { color: var(--os-ink); }
+.flow .os-win span:last-child { color: var(--os-muted); }
+.flow .arrow { display: grid; place-items: center; color: var(--os-muted); }
+.perks { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px 32px; margin-top: 48px; }
+.perks li { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 4px 12px; align-items: start; align-content: start; }
+.perks .os-ico { margin-top: 4px; color: var(--os-ink); }
+.perks b { font: 500 20px/24px var(--os-font-px); }
+.perks span { grid-column: 2; font-size: 14px; line-height: 20px; color: var(--os-muted); }
+@media (max-width: 1023px) { .perks { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 719px) {
+  .flow { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .flow .arrow { rotate: 90deg; }
+  .perks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 479px) { .perks { grid-template-columns: minmax(0, 1fr); } }
+
+/* The optional HeartGold/SoulSilver add-on: one small card under the strip. */
+.addon { display: grid; grid-template-columns: 240px minmax(0, 1fr); align-items: center; gap: 8px 24px; margin-top: 48px; padding: 0 16px 16px 8px; max-width: 760px; }
+.addon .os-tab { grid-column: 1 / -1; }
+.addon img { width: 100%; height: auto; aspect-ratio: 16 / 9; background: var(--os-face-alt); }
+.addon p { font-size: 16px; line-height: 24px; }
+@media (max-width: 599px) { .addon { grid-template-columns: minmax(0, 1fr); padding: 0 8px 16px; } }
+
+/* The story: four moments in one row (two on a phone). */
+.moments { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+@media (max-width: 899px) { .moments { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* On a phone the tabs take the short names (the full name stays in the image's alt text). */
+@media (max-width: 479px) { .moments { gap: 16px; } .band .moments .os-tab { font-size: 16px; line-height: 20px; } .moments .wide { display: none; } }
+
+/* How it works. */
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; counter-reset: step; }
+.steps > li { display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 20px; }
+.steps .n { display: inline-flex; align-items: center; width: fit-content; height: 20px; padding: 0 4px; color: var(--os-ink); background: var(--os-face-alt); box-shadow: inset 0 0 0 2px var(--os-edge); }
+.steps h3, .faq summary { font: 500 20px/24px var(--os-font-px); text-shadow: var(--os-tsd); }
+.steps p { color: var(--os-muted); }
+.steps a { color: var(--os-ink); }
+.mini-file { display: flex; align-items: center; gap: 8px; margin-top: auto; padding: 8px 12px; font: 12px/16px var(--os-font-mono); background-image: linear-gradient(90deg, var(--os-edge) 50%, transparent 0), linear-gradient(90deg, var(--os-edge) 50%, transparent 0), linear-gradient(var(--os-edge) 50%, transparent 0), linear-gradient(var(--os-edge) 50%, transparent 0); background-size: 8px 2px, 8px 2px, 2px 8px, 2px 8px; background-repeat: repeat-x, repeat-x, repeat-y, repeat-y; background-position: 0 0, 0 100%, 0 0, 100% 0; }
+.mini-prog { display: flex; align-items: center; gap: 12px; margin-top: auto; }
+.mini-prog .cells { display: flex; gap: 2px; padding: 4px; box-shadow: inset 0 0 0 2px var(--os-edge); }
+.mini-prog i { width: 12px; height: 12px; background: var(--os-accent); }
+@media (max-width: 959px) { .steps { grid-template-columns: minmax(0, 1fr); gap: 40px; } }
+
+/* Open source and the community: two equal windows in a row, stacked below 768 px. */
+.duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
+@media (max-width: 767px) { .duo { grid-template-columns: minmax(0, 1fr); gap: 48px; } }
+.oss { padding: 0 24px 24px; }
+.oss-body { display: flex; align-items: center; justify-content: space-between; gap: 24px 48px; flex-wrap: wrap; padding-top: 8px; }
+.big-line { font: 500 20px/24px var(--os-font-px); text-shadow: var(--os-tsd); }
+@media (max-width: 479px) { .oss { padding: 0 16px 16px; } .oss .cta { flex: 1 1 100%; } .oss .cta .os-btn { flex: 1 1 100%; } }
+
+/* FAQ: answers in one window, split by dividers. */
+.faq-wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 56px; align-items: start; }
+.faq { padding: 8px; }
+.faq details + details { border-top: 2px solid var(--os-line); }
+.faq summary { display: grid; grid-template-columns: 24px minmax(0, 1fr); align-items: center; gap: 8px; min-height: 56px; padding: 8px 12px 8px 4px; cursor: pointer; list-style: none; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary .cur { color: var(--os-accent); visibility: hidden; justify-self: center; display: grid; }
+.faq summary:is(:hover, :focus-visible) { background: var(--os-sel); box-shadow: inset 0 0 0 2px var(--os-sel-line); }
+.os .faq summary:focus-visible { outline: none; }
+.faq summary:is(:hover, :focus-visible) .cur, .faq details[open] .cur { visibility: visible; }
+.faq details[open] .cur { rotate: 90deg; }
+.faq details p { padding: 4px 16px 20px 36px; color: var(--os-muted); max-width: 70ch; }
+@media (max-width: 899px) { .faq-wrap { grid-template-columns: minmax(0, 1fr); gap: 0; } }
+
+/* ---------- Footer: the mark alone ---------- */
+.foot { padding: 48px 0 calc(48px + var(--sab)); border-top: 2px solid var(--os-line); }
+.foot-grid { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 24px 32px; }
+.foot-mark { display: block; width: fit-content; padding: 8px; }
+.foot-links { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.foot-links a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; text-decoration: none; color: var(--os-muted); }
+.foot-links a:hover { color: var(--os-ink); }
+.legal { grid-column: 1 / -1; font-size: 12px; line-height: 16px; color: var(--os-muted); max-width: 90ch; }
+@media (max-width: 599px) { .foot-grid { grid-template-columns: minmax(0, 1fr); } }

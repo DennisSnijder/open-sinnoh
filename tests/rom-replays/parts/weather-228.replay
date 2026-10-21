@@ -1,0 +1,7 @@
+from weather-215.replay
+# Part of sys-weather: ROUTE_228 has weather SANDSTORM (header). The `weather-228` screenshot line marks the browser
+# spec's check that particles or fog change the frame against a clear one.
+warp platinum:MAP_HEADER_ROUTE_228 775 330 down
+until idle
++0 assert state weather "platinum:OVERWORLD_WEATHER_SANDSTORM"
++0 screenshot weather-228

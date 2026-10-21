@@ -1,0 +1,20 @@
+# sys-underground-kit (scripts_eterna_city_underground_man_house.s): the Underground Man
+# gives the Explorer Kit, the player takes him as mentor (YES) and he gives the first mission, going underground.
+# Setup: an even trainer id (the mining table's weights go by its parity; later replays dig the same wall on every seed).
+set state trainerId 1376298
+party 0 platinum:SPECIES_GARCHOMP 50 platinum:MOVE_DRAGON_CLAW
+warp platinum:MAP_HEADER_ETERNA_CITY_UNDERGROUND_MAN_HOUSE 6 6 up
+until idle
++0 press a
++1 release a
+advance text
+until yesno
++0 assert state bag.key_items [{"item":"platinum:ITEM_EXPLORER_KIT","count":1}]
++0 press a
++1 release a
+advance text
+until idle
++0 assert flag platinum:FLAG_RECEIVED_EXPLORER_KIT true
++0 assert flag platinum:FLAG_ACCEPTED_UNDERGROUND_MAN_AS_MENTOR true
++0 assert flag platinum:FLAG_HAS_ACTIVE_UNDERGROUND_MISSION true
++0 assert var platinum:VAR_CURRENT_UNDERGROUND_MISSION 0

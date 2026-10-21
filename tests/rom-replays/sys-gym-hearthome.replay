@@ -1,0 +1,520 @@
+# sys-gym-hearthome (docs/research/gym-puzzles.md): Hearthome Gym's dark
+# rooms. Entering a trainer room draws its correct door and clue tile from the game's main stream; the replay
+# pins that stream (`set state rng`) so the draw is the same on every run seed, and pins the game seed (`set
+# state seed`) so the wandering trainers walk the same way. Room 1: both trainers are battled where they spot
+# the player (also by the player facing them) or by talking; the draw survives a save round trip; a wrong door
+# (circle) leads back to the entrance facing south and clears the slot; coming back draws again (triangle);
+# room 2's four trainers, then the star door to Fantina.
+party 0 platinum:SPECIES_TYRANITAR 70 platinum:MOVE_CRUNCH
+set state seed 4242
+set state rng {"seed": 7}
+set var platinum:VAR_HAS_ENTERED_HEARTHOME_GYM_BEFORE 1
+warp platinum:MAP_HEADER_HEARTHOME_CITY_GYM_ENTRANCE_ROOM 4 3 up
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY_GYM_TRAINER_ROOM_1"
++0 release up
+until idle
++0 screenshot hearthome-dark
++0 press up
++1 release up
++10 release a
++0 press left
++1 release left
++4 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press up
++1 release up
++4 release a
+until message 300
+advance text
+battle auto 20000
+advance text
+until idle
++0 press right
++1 release right
++4 release a
++0 press right
++1 release right
++10 release a
++0 press right
++1 release right
++10 release a
++0 press up
++1 release up
++4 release a
++0 press up
++1 release up
++10 release a
++0 press right
++1 release right
++4 release a
++0 press right
++1 release right
++10 release a
++0 press right
++1 release right
++10 release a
++0 press right
++1 release right
++10 release a
++0 press right
++1 release right
++10 release a
++0 press up
++1 release up
++4 release a
+until message 300
+advance text
+battle auto 20000
+advance text
+until idle
++0 press right
+until position 12 8
++0 release right
+until idle
++0 press up
+until position 12 4
++0 release up
+until idle
++0 press left
+until position 5 4
++0 release left
+until idle
++0 press up
+until position 5 3
++0 release up
+until idle
++0 press left
+until position 4 3
++0 release left
+until idle
++0 press up
++1 release up
+until idle
+# circle is a wrong door this time: back to the entrance's warp 1, arriving facing south
++0 assert state mapFeatures {"kind": "hearthome-gym", "initialized": true, "correctDoor": 1, "clueX": 6, "clueZ": 9}
++0 reload
+until idle
++0 assert state mapFeatures {"kind": "hearthome-gym", "initialized": true, "correctDoor": 1, "clueX": 6, "clueZ": 9}
++0 press up
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY_GYM_ENTRANCE_ROOM"
++0 release up
+until idle
++0 assert facing player down
++0 assert state mapFeatures null
++0 press up
++1 release up
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY_GYM_TRAINER_ROOM_1"
++0 release up
+until idle
++0 press up
+until position 8 8
++0 release up
+until idle
++0 press right
+until position 11 8
++0 release right
+until idle
++0 press up
+until position 11 6
++0 release up
+until idle
++0 press right
+until position 12 6
++0 release right
+until idle
++0 press up
+until position 12 3
++0 release up
+until idle
++0 assert state mapFeatures {"kind": "hearthome-gym", "initialized": true, "correctDoor": 2, "clueX": 5, "clueZ": 6}
++0 press up
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY_GYM_TRAINER_ROOM_2"
++0 release up
+until idle
++0 press up
++1 release up
++10 release a
++0 press right
++1 release right
++4 release a
++0 press right
++1 release right
++10 release a
++0 press up
++1 release up
++4 release a
++0 press up
++1 release up
++10 release a
++0 press up
++1 release up
++10 release a
++0 press right
++1 release right
++4 release a
++0 press right
++1 release right
++10 release a
++0 press right
++1 release right
++10 release a
++0 press right
++1 release right
++10 release a
++0 press up
++1 release up
++4 release a
++0 press up
++1 release up
++10 release a
++0 press right
++1 release right
++4 release a
++0 press right
++1 release right
++10 release a
++0 press right
++1 release right
++10 release a
++0 press right
++1 release right
++1 press a
++1 release a
+until message 300
+advance text
+battle auto 20000
+advance text
+until idle
++0 press up
++1 release up
++4 release a
++0 press up
++1 release up
++10 release a
++0 press up
++1 release up
++10 release a
++0 press right
++1 release right
++4 release a
++0 press right
++1 release right
++10 release a
++0 press up
++1 release up
++4 release a
++0 press up
++1 release up
++10 release a
++0 press up
++1 release up
++10 release a
++0 press left
++1 release left
++4 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press up
++1 release up
++4 release a
++0 press up
++1 release up
++10 release a
++0 press up
++1 release up
++10 release a
++0 press left
++1 release left
++4 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press up
++1 release up
++1 press a
++1 release a
+until message 300
+advance text
+battle auto 20000
+advance text
+until idle
++0 press right
++1 release right
++4 release a
++0 press right
++1 release right
++10 release a
++0 press right
++1 release right
++10 release a
++0 press right
++1 release right
++10 release a
++0 press right
++1 release right
++10 release a
++0 press right
++1 release right
++10 release a
++0 press right
++1 release right
++10 release a
++0 press right
++1 release right
++10 release a
++0 press right
++1 release right
++10 release a
++0 press right
++1 release right
++10 release a
++0 press up
++1 release up
++4 release a
++0 press up
++1 release up
++10 release a
++0 press up
++1 release up
++10 release a
++0 press right
++1 release right
++4 release a
++0 press right
++1 release right
++10 release a
++0 press right
++1 release right
++10 release a
++0 press up
++1 release up
++4 release a
++0 press up
++1 release up
++10 release a
++0 press up
++1 release up
++10 release a
++0 press left
++1 release left
++4 release a
++0 press left
++1 release left
++10 release a
+until message 300
+advance text
+battle auto 20000
+advance text
+until idle
++0 press right
++1 release right
++4 release a
++0 press right
++1 release right
++10 release a
++0 press down
++1 release down
++4 release a
++0 press down
++1 release down
++10 release a
++0 press down
++1 release down
++10 release a
++0 press left
++1 release left
++4 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press down
++1 release down
++4 release a
++0 press down
++1 release down
++10 release a
++0 press down
++1 release down
++10 release a
++0 press left
++1 release left
++4 release a
++0 press left
++1 release left
++10 release a
++0 press down
++1 release down
++4 release a
++0 press down
++1 release down
++10 release a
++0 press down
++1 release down
++10 release a
++0 press left
++1 release left
++4 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press down
++1 release down
++4 release a
++0 press down
++1 release down
++10 release a
++0 press up
++1 release up
++4 release a
++0 press up
++1 release up
++10 release a
++0 press left
++1 release left
++4 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
++0 press left
++1 release left
++10 release a
+until message 300
+advance text
+battle auto 20000
+advance text
+until idle
++0 press up
+until position 4 10
++0 release up
+until idle
++0 press right
+until position 5 10
++0 release right
+until idle
++0 press up
+until position 5 8
++0 release up
+until idle
++0 press right
+until position 7 8
++0 release right
+until idle
++0 press up
+until position 7 6
++0 release up
+until idle
++0 press right
+until position 17 6
++0 release right
+until idle
++0 press up
+until position 17 5
++0 release up
+until idle
++0 press right
+until position 19 5
++0 release right
+until idle
++0 press up
+until position 19 3
++0 release up
+until idle
++0 assert state mapFeatures {"kind": "hearthome-gym", "initialized": true, "correctDoor": 6, "clueX": 20, "clueZ": 17}
++0 press up
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY_GYM_LEADER_ROOM"
++0 release up
+until idle
++0 assert state mapFeatures null
++0 press up
+until position 4 11
++0 release up
+until idle
++0 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_LEADER_FANTINA won
+advance text 4400
+until idle
++0 assert state badges ["platinum:BADGE_ID_RELIC"]
++0 assert var platinum:VAR_ROUTE_209_GATE_TO_HEARTHOME_CITY_STATE 1
+# The field's return after Fantina's battle (on-load/on-resume, FLAG_MAP_LOCAL_REMOVE_OBJECT): the bollards are gone.
++0 assert flag platinum:FLAG_HIDE_HEARTHOME_CITY_GYM_BOLLARDS true
++0 assert flag platinum:FLAG_MAP_LOCAL_REMOVE_OBJECT false
++0 assert battles trainer 7

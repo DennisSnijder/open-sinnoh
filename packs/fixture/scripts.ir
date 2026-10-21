@@ -1,0 +1,336 @@
+# fixture scripts (original). Ops are decomp command names in snake_case.
+fixture:NewGame_Init::
+  set_flag flag(fixture:FLAG_NEW_GAME_DONE)
+  end
+
+fixture:Common_RepelWoreOff::
+  lock_all
+  message text(fixture:CommonStrings_Text_RepelsEffectWoreOff)
+  wait_button
+  close_message
+  release_all
+  end
+
+fixture:Common_HatchEgg::
+  lock_all
+  message text(fixture:CommonStrings_Text_Oh)
+  wait_ab_press
+  close_message
+  hatch_egg
+  release_all
+  end
+
+fixture:Room_OnFrame_Intro::
+  lock_all
+  set_var_from_value var(fixture:VAR_ROOM_INTRO), 1
+  message text(fixture:Text_RoomIntro)
+  wait_button
+  close_message
+  release_all
+  end
+
+fixture:Room_Helper::
+  lock_all
+  face_player
+  check_flag flag(fixture:FLAG_TALKED_TO_HELPER)
+  go_to_if "eq", label(fixture:Room_Helper_Again)
+  set_flag flag(fixture:FLAG_TALKED_TO_HELPER)
+  buffer_player_name 0
+  message text(fixture:Text_HelperHello)
+  wait_button
+  close_message
+  release_all
+  end
+
+fixture:Room_Helper_Again::
+  message text(fixture:Text_HelperAgain)
+  wait_button
+  close_message
+  release_all
+  end
+
+fixture:Shop_Clerk::
+  lock_all
+  face_player
+  message text(fixture:Text_ClerkHello)
+  close_message_without_erasing
+  poke_mart_common 1
+  release_all
+  end
+
+fixture:Shop_Healer::
+  lock_all
+  face_player
+  message text(fixture:Text_HealerAsk)
+  show_yes_no_menu var(fixture:VAR_RESULT)
+  compare_var_to_value var(fixture:VAR_RESULT), 0
+  go_to_if "ne", label(fixture:Shop_Healer_No)
+  count_party_non_eggs var(fixture:VAR_0x8006)
+  play_pokecenter_healing_animation var(fixture:VAR_0x8006)
+  heal_party
+  message text(fixture:Text_HealerDone)
+  wait_button
+  close_message
+  release_all
+  end
+
+fixture:Room_BlackOutRecover::
+  lock_all
+  heal_party
+  message text(fixture:Text_BlackOutRecover)
+  wait_button
+  close_message
+  release_all
+  end
+
+fixture:Shop_Healer_No::
+  message text(fixture:Text_HealerBye)
+  wait_button
+  close_message
+  release_all
+  end
+
+fixture:Room_TV::
+  lock_all
+  message text(fixture:Text_TvShow)
+  wait_button
+  close_message
+  release_all
+  end
+
+fixture:Town_OnTransition::
+  set_var_from_value var(fixture:VAR_OBJ_GFX_ID_0), 3
+  add_var var(fixture:VAR_MAP_LOCAL_0), 1
+  end
+
+fixture:Town_GuideScene::
+  lock_all
+  apply_movement 0, movement(fixture:MV_GUIDE_APPROACH)
+  apply_movement 255, movement(fixture:MV_PLAYER_FACE_EAST)
+  wait_movement
+  message text(fixture:Text_GuideStop)
+  wait_button
+  message text(fixture:Text_GuideChoose)
+  wait_button
+  close_message
+  go_to label(fixture:Town_GuideScene_Choose)
+
+fixture:Town_GuideScene_Choose::
+  start_choose_starter_scene
+  message text(fixture:Text_GuideConfirm)
+  show_yes_no_menu var(fixture:VAR_RESULT)
+  close_message
+  compare_var_to_value var(fixture:VAR_RESULT), 1
+  go_to_if "eq", label(fixture:Town_GuideScene_Choose)
+  save_chosen_starter
+  get_player_starter_species var(fixture:VAR_RESULT)
+  give_pokemon var(fixture:VAR_RESULT), 5, 0, var(fixture:VAR_RESULT)
+  buffer_player_name 0
+  message text(fixture:Text_GuideDone)
+  wait_button
+  close_message
+  apply_movement 0, movement(fixture:MV_GUIDE_LEAVE)
+  wait_movement
+  set_var_from_value var(fixture:VAR_SCENE), 1
+  release_all
+  end
+
+fixture:Trainer_Hiker::
+  go_to label(fixture:Battles_Trainer)
+
+fixture:Trainer_Twins::
+  go_to label(fixture:Battles_Trainer)
+
+fixture:Trainer_Camper::
+  go_to label(fixture:Battles_Trainer)
+
+fixture:Trainer_Picnicker::
+  go_to label(fixture:Battles_Trainer)
+
+# Talking to a trainer (an original script on the decomp's trainer commands).
+fixture:Battles_Trainer::
+  lock_all
+  face_player
+  get_trainer_id var(fixture:VAR_TRAINER_0)
+  check_trainer_flag var(fixture:VAR_TRAINER_0)
+  go_to_if "eq", label(fixture:Battles_PostBattle)
+  check_is_trainer_double_battle var(fixture:VAR_RESULT)
+  compare_var_to_value var(fixture:VAR_RESULT), 1
+  go_to_if "ne", label(fixture:Battles_Encounter)
+  check_has_two_alive_mons var(fixture:VAR_RESULT)
+  compare_var_to_value var(fixture:VAR_RESULT), 0
+  go_to_if "eq", label(fixture:Battles_NotEnough)
+  go_to label(fixture:Battles_Encounter)
+
+fixture:Battles_Encounter::
+  play_trainer_encounter_bgm var(fixture:VAR_TRAINER_0)
+  open_message
+  get_trainer_message_types var(fixture:VAR_MSG_PRE), var(fixture:VAR_MSG_POST), var(fixture:VAR_MSG_FEW)
+  print_trainer_dialogue var(fixture:VAR_TRAINER_0), var(fixture:VAR_MSG_PRE)
+  close_message
+  set_move_code_for_facing_direction
+  start_trainer_battle var(fixture:VAR_TRAINER_0), 0
+  check_won_battle var(fixture:VAR_RESULT)
+  set_trainer_flag var(fixture:VAR_TRAINER_0)
+  release_all
+  end
+
+fixture:Battles_PostBattle::
+  open_message
+  get_trainer_message_types var(fixture:VAR_MSG_PRE), var(fixture:VAR_MSG_POST), var(fixture:VAR_MSG_FEW)
+  print_trainer_dialogue var(fixture:VAR_TRAINER_0), var(fixture:VAR_MSG_POST)
+  wait_button
+  close_message
+  release_all
+  end
+
+fixture:Battles_NotEnough::
+  open_message
+  get_trainer_message_types var(fixture:VAR_MSG_PRE), var(fixture:VAR_MSG_POST), var(fixture:VAR_MSG_FEW)
+  print_trainer_dialogue var(fixture:VAR_TRAINER_0), var(fixture:VAR_MSG_FEW)
+  wait_ab_press
+  close_message
+  release_all
+  end
+
+# A trainer spotted the player (the world starts this after the sighting).
+fixture:Battles_ApproachingTrainer::
+  lock_all
+  get_approaching_trainer_type var(fixture:VAR_RESULT)
+  compare_var_to_value var(fixture:VAR_RESULT), 1
+  go_to_if "eq", label(fixture:Battles_ApproachDouble)
+  compare_var_to_value var(fixture:VAR_RESULT), 2
+  go_to_if "eq", label(fixture:Battles_ApproachTwo)
+  get_approaching_trainer_id 0, var(fixture:VAR_TRAINER_0)
+  play_trainer_encounter_bgm var(fixture:VAR_TRAINER_0)
+  start_approaching_trainer_task 0
+  call label(fixture:Battles_WaitApproach0)
+  open_message
+  print_trainer_dialogue var(fixture:VAR_TRAINER_0), 0
+  close_message
+  start_trainer_battle var(fixture:VAR_TRAINER_0), 0
+  check_won_battle var(fixture:VAR_RESULT)
+  set_trainer_flag var(fixture:VAR_TRAINER_0)
+  release_all
+  end
+
+fixture:Battles_ApproachDouble::
+  get_approaching_trainer_id 0, var(fixture:VAR_TRAINER_0)
+  play_trainer_encounter_bgm var(fixture:VAR_TRAINER_0)
+  start_approaching_trainer_task 0
+  start_approaching_trainer_task 1
+  call label(fixture:Battles_WaitApproach0)
+  call label(fixture:Battles_WaitApproach1)
+  open_message
+  print_trainer_dialogue var(fixture:VAR_TRAINER_0), 3
+  close_message
+  start_trainer_battle var(fixture:VAR_TRAINER_0), 0
+  check_won_battle var(fixture:VAR_RESULT)
+  set_trainer_flag var(fixture:VAR_TRAINER_0)
+  release_all
+  end
+
+fixture:Battles_ApproachTwo::
+  get_approaching_trainer_id 0, var(fixture:VAR_TRAINER_0)
+  play_trainer_encounter_bgm var(fixture:VAR_TRAINER_0)
+  start_approaching_trainer_task 0
+  call label(fixture:Battles_WaitApproach0)
+  open_message
+  print_trainer_dialogue var(fixture:VAR_TRAINER_0), 0
+  close_message
+  start_approaching_trainer_task 1
+  call label(fixture:Battles_WaitApproach1)
+  get_approaching_trainer_id 1, var(fixture:VAR_TRAINER_1)
+  open_message
+  print_trainer_dialogue var(fixture:VAR_TRAINER_1), 0
+  close_message
+  start_trainer_battle var(fixture:VAR_TRAINER_0), var(fixture:VAR_TRAINER_1)
+  check_won_battle var(fixture:VAR_RESULT)
+  set_trainer_flag var(fixture:VAR_TRAINER_0)
+  set_trainer_flag var(fixture:VAR_TRAINER_1)
+  release_all
+  end
+
+fixture:Battles_WaitApproach0::
+  check_is_approaching_trainer_task_done 0, var(fixture:VAR_RESULT)
+  compare_var_to_value var(fixture:VAR_RESULT), 0
+  go_to_if "eq", label(fixture:Battles_WaitApproach0)
+  return
+
+fixture:Battles_WaitApproach1::
+  check_is_approaching_trainer_task_done 1, var(fixture:VAR_RESULT)
+  compare_var_to_value var(fixture:VAR_RESULT), 0
+  go_to_if "eq", label(fixture:Battles_WaitApproach1)
+  return
+
+fixture:Route_Npc::
+  lock_all
+  face_player
+  message text(fixture:Text_RouteNpc)
+  wait_button
+  close_message
+  release_all
+  end
+
+fixture:Common_PC::
+  lock_all
+  message text(fixture:Text_Pc)
+  wait_button
+  close_message
+  release_all
+  end
+
+fixture:Common_TV::
+  lock_all
+  message text(fixture:Text_Tv)
+  wait_button
+  close_message
+  release_all
+  end
+
+fixture:Common_TownMap::
+  lock_all
+  message text(fixture:Text_TownMap)
+  wait_button
+  close_message
+  release_all
+  end
+
+fixture:Common_Bookshelf::
+  lock_all
+  message text(fixture:Text_Bookshelf)
+  wait_button
+  close_message
+  release_all
+  end
+
+fixture:Common_TrashCan::
+  lock_all
+  message text(fixture:Text_TrashCan)
+  wait_button
+  close_message
+  release_all
+  end
+
+# Field moves (original stand-ins for the decomp FIELD_MOVES scripts; the world starts them).
+fixture:FieldMoves_Surf::
+  end
+
+fixture:FieldMoves_Waterfall::
+  end
+
+fixture:FieldMoves_RockClimb::
+  end
+
+fixture:FieldMoves_Boulder::
+  set_flag flag(fixture:FLAG_STRENGTH_ACTIVE)
+  end
+
+fixture:Town_Guide::
+  lock_all
+  face_player
+  message text(fixture:Text_GuideIdle)
+  wait_button
+  close_message
+  release_all
+  end

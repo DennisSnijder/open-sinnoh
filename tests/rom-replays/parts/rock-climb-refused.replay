@@ -1,0 +1,12 @@
+# Part of sys-rock-climb: Route 211 East, the north–south wall at x 430 (z 515–518). Without the Icicle
+# Badge, A on the wall (FIELD_MOVES 3, FieldMoves_RockyWall) gives a message and leaves the player where
+# they are.
+party 0 platinum:SPECIES_BIBAREL 50 platinum:MOVE_ROCK_CLIMB
+warp platinum:MAP_HEADER_ROUTE_211_EAST 430 519 up
+until idle
++0 press a
++1 release a
+until message
+advance text
+until idle
++0 assert position platinum:MAP_HEADER_ROUTE_211_EAST 430 519

@@ -1,0 +1,1638 @@
+from cp21b.replay
++0 reload
+# CP21c (docs/research/story-cp20-24.md §CP21): the dex sweep, part 3. From Veilstone
+# back down Route 214 to Valor Lakefront; Route 222's fishermen and Beauty Nicola; Sunyshore, Route 223's swimmers
+# and Victory Road's trainers. Wild Pokémon are fought by the auto policy (seen, and out of the way).
++0 wild auto
++0 evolve auto
+until idle
+# south out of Veilstone and down Route 214 to Valor Lakefront (CP10's way, reversed)
++0 press left
+until position 712 612 6000
++0 release left
++0 press down
+until position 712 617 6000
++0 release down
++0 press right
+until position 721 617 6000
++0 release right
++0 press down
+until position 721 628 6000
++0 release down
++0 press left
+until position 718 628 6000
++0 release left
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_214_GATE_TO_VEILSTONE_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_214" 3000
++0 release down
+until idle
++8 release select
++0 press down
+until position 718 671 6000
++0 release down
++0 press right
+until position 720 671 6000
++0 release right
++0 press down
+until position 720 676 6000
++0 release down
++0 press left
+until position 718 676 6000
++0 release left
++0 press down
+until position 718 686 6000
++0 release down
++0 press right
+until position 720 686 6000
++0 release right
++0 press down
+until position 720 695 6000
++0 release down
++0 press left
+until position 712 695 6000
++0 release left
++0 press down
+until position 712 706 6000
++0 release down
++0 press right
+until position 722 706 6000
++0 release right
++0 press down
+until position 722 711 6000
++0 release down
++0 press left
+until position 718 711 6000
++0 release left
++0 press down
+until position 718 713 6000
++0 release down
++0 press left
+until position 715 713 6000
++0 release left
++0 press down
+until position 715 718 6000
++0 release down
++0 press right
+until position 729 718 6000
++0 release right
++0 press down
+until position 729 742 6000
++0 release down
++0 press left
+until position 723 742 6000
++0 release left
++0 press down
+until position 723 760 6000
++0 release down
++7 release select
+# east to Route 222: Fisherman Brett (Magikarp, Finneon, Feebas) faces the sea at (777, 790): talk to him from the west
++0 press down
+until position 723 784 6000
++0 release down
++0 press left
+until position 720 784 6000
++0 release left
++0 press down
+until position 720 789 6000
++0 release down
++0 press right
+until position 756 789 6000
++0 release right
++0 press up
+until position 756 787 6000
++0 release up
++0 press right
+until position 763 787 6000
++0 release right
++0 press down
+until position 763 788 6000
++0 release down
++0 press right
+until position 776 788 6000
++0 release right
++0 press down
+until position 776 790 6000
++0 release down
+until idle
++1 press right
++1 release right
+until idle
++1 press a
++1 release a
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_FISHERMAN_BRETT won single
++8 release select
+# Beauty Nicola (Lopunny) looks about from (771, 777): round by x 756 (past Rich Boy Trey) and wait below her
++0 press up
+until position 776 786 6000
++0 release up
++0 press left
+until position 766 786 6000
++0 release left
++0 press up
+until position 766 785 6000
++0 release up
++0 press left
+until position 756 785 6000
++0 release left
++0 press up
+until position 756 782 6000
++0 release up
+# Rich Boy Trey looks east over row 782
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_RICH_BOY_TREY won single
++0 press up
+until position 756 778 6000
++0 release up
++0 press right
+until position 771 778 6000
++0 release right
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_BEAUTY_NICOLA won single
++8 release select
+# east to Sunyshore; heal
++0 press left
+until position 763 778 6000
++0 release left
++0 press down
+until position 763 783 6000
++0 release down
++0 press right
+until position 786 783 6000
++0 release right
++0 press down
+until position 786 787 6000
++0 release down
++0 press right
+until position 825 787 6000
++0 release right
++0 press down
+until position 825 790 6000
++0 release down
++0 press right
+until state player.zone "platinum:MAP_HEADER_SUNYSHORE_CITY" 3000
++0 release right
+until idle
++0 press right
+until position 845 790 6000
++0 release right
++0 press up
+until position 845 786 6000
++0 release up
++0 press right
+until position 860 786 6000
++0 release right
++0 press up
+until position 860 785 6000
++0 release up
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_SUNYSHORE_CITY" 3000
++0 release down
+until idle
++8 release select
++8 release select
+# north to the beach; Surf (Empoleon) north onto Route 223 (CP17's way)
++0 press left
+until position 856 785 6000
++0 release left
++0 press up
+until position 856 783 6000
++0 release up
++0 press left
+until position 855 783 6000
++0 release left
++0 press up
+until position 855 769 6000
++0 release up
++0 press left
+until position 851 769 6000
++0 release left
++0 press up
+until position 851 763 6000
++0 release up
++0 press right
+until position 853 763 6000
++0 release right
++0 press up
+until position 853 756 6000
++0 release up
++0 press right
+until position 855 756 6000
++0 release right
++0 press up
+until position 855 742 6000
++0 release up
++0 press right
+until position 856 742 6000
++0 release right
+until idle
++1 press up
++1 release up
+until idle
++0 press up
+until position 856 737 6000
++0 release up
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until idle
++8 release select
+# north on x 856 (CP17's way; Swimmers Miranda and Oscar were beaten then)
++0 press up
+until position 856 723 6000
++0 release up
++8 release select
+# round by (849, 698)
++0 press up
+until position 856 711 6000
++0 release up
++0 press left
+until position 853 711 6000
++0 release left
++0 press up
+until position 853 698 6000
++0 release up
++0 press left
+until position 850 698 6000
++0 release left
++0 press left
+until position 849 698 6000
++0 release left
++8 release select
+# Swimmers Paige and Colton (Octillery) look east and west along row 689: between them, both see the player
++0 press up
+until position 849 691 6000
++0 release up
++0 press right
+until position 853 691 6000
++0 release right
++0 press up
+until position 853 689 6000
++0 release up
+until message 6000
+advance text
+battle auto 60000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_SWIMMER_COLTON won trainer-pair
++0 assert battle trainer platinum:TRAINER_SWIMMER_PAIGE won trainer-pair
+# Swimmer Ricardo (Tentacruel) looks about from (844, 682), three tiles: wait three tiles east of him
++0 press up
+until position 853 682 6000
++0 release up
++0 press left
+until position 847 682 6000
++0 release left
+until message 6000
+advance text
+battle auto 60000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_SWIMMER_RICARDO won single
++0 press right
+until position 855 682 6000
++0 release right
++0 press up
+until position 855 670 6000
++0 release up
+# on north on CP17's way (Swimmers Crystal, Gabrielle and Troy and Sailor Zachariah were beaten then)
++0 press up
+until position 855 668 6000
++0 release up
++8 release select
+# north through the gap at x 851 (Zachariah looks south at 847, Francisco north at 861)
++0 press up
+until position 855 663 6000
++0 release up
++0 press left
+until position 850 663 6000
++0 release left
++0 press up
+until position 850 656 6000
++0 release up
++0 press right
+until position 851 656 6000
++0 release right
+# back onto the deep water from the shallows (the way north is the east channel)
++0 press down
+until position 851 657 6000
++0 release down
+until idle
++1 press down
++1 release down
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until idle
++8 release select
+# west on the shallows (Sailor Zachariah looks south over x 847), Surf down at x 841, west and up the channel at x 835 to the shallows at x 836
++0 press up
+until position 851 657 6000
++0 release up
++0 press left
++0 press left
+until position 841 657 6000
++0 release left
+until idle
++1 press down
++1 release down
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until idle
++0 press left
+until position 835 658 6000
++0 release left
++0 press up
+until position 835 654 6000
++0 release up
++0 press right
+until position 836 654 6000
++0 release right
++0 press up
+until position 836 648 6000
++0 release up
++7 release select
+# Surf up from the shallows at x 841
++0 press right
+until position 841 648 6000
++0 release right
+until idle
++1 press up
++1 release up
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until idle
++0 press up
+until position 841 642 6000
++0 release up
++8 release select
+# north on x 843 (west of Swimmer Cassandra's round)
++0 press up
+until position 841 637 6000
++0 release up
++0 press right
+until position 843 637 6000
++0 release right
++0 press up
+until position 843 623 6000
++0 release up
++0 press up
+until position 843 622 6000
++0 release up
++8 release select
+# west round the rocks to the waterfall at (848, 604): Waterfall (Bibarel) up to the Pokémon League
++0 press up
+until position 843 616 6000
++0 release up
++0 press right
+until position 845 616 6000
++0 release right
++0 press up
+until position 845 614 6000
++0 release up
++0 press right
+until position 846 614 6000
++0 release right
++0 press up
+until position 846 605 6000
++0 release up
++0 press right
+until position 848 605 6000
++0 release right
+until idle
++1 press up
++1 release up
+until idle
++0 field move 4 platinum:MOVE_WATERFALL
+advance text
+until idle 6000
++8 release select
+# heal at the League's south Pokémon Center
++0 press up
+until position 848 600 6000
++0 release up
++0 press left
+until position 842 600 6000
++0 release left
++0 press up
+until position 842 599 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_POKEMON_LEAGUE_SOUTH_POKECENTER_1F" 3000
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_POKEMON_LEAGUE" 3000
++0 release down
+until idle
++8 release select
+# into Victory Road
++0 press right
+until position 851 599 6000
++0 release right
++0 press up
+until position 851 598 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_VICTORY_ROAD_1F" 3000
++0 release up
+until idle
++0 assert flag platinum:FLAG_FIRST_ARRIVAL_VICTORY_ROAD true
++8 release select
++8 release select
+# Victory Road 1F: Bird Keeper Hana (Togetic) looks west from (31, 58), three tiles: round her and step into her line
++0 press up
+until position 15 63 6000
++0 release up
++0 press right
+until position 33 63 6000
++0 release right
++0 press down
+until position 33 66 6000
++0 release down
++0 press right
+until position 37 66 6000
++0 release right
++0 press up
+until position 37 57 6000
++0 release up
++0 press left
+until position 28 57 6000
++0 release left
++0 press down
+until position 28 58 6000
++0 release down
+until message 6000
+advance text
+battle auto 30000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_BIRD_KEEPER_HANA won single
++8 release select
+# back to the entrance, then CP17's way up to 2F and down to 1F's low corridor (its trainers beaten then)
++0 press up
+until position 28 57 6000
++0 release up
++0 press right
+until position 37 57 6000
++0 release right
++0 press down
+until position 37 66 6000
++0 release down
++0 press left
+until position 33 66 6000
++0 release left
++0 press up
+until position 33 63 6000
++0 release up
++0 press left
+until position 15 63 6000
++0 release left
++0 press down
+until position 15 78 6000
++0 release down
+until idle
+# Victory Road 1F: west and north (Ace Trainer Mariah looks south), Rock Climb, the stairs to 2F (a search over the engine's steps)
++0 press up
+until state player.z 77 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 76 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 75 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 74 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 73 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 72 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 71 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 70 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 69 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 68 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 67 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 66 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 65 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 64 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 63 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 62 400
++0 release up
+until idle 6000
++0 press right
+until state player.x 16 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 17 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 18 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 19 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 20 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 21 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 22 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 23 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 24 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 25 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 26 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 27 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 28 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 29 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 30 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 31 400
++0 release right
+until idle 6000
++0 press up
+until state player.z 61 400
++0 release up
+until idle 6000
++0 press right
+until state player.x 32 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 33 400
++0 release right
+until idle 6000
++0 press up
+until state player.z 60 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 59 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 58 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 57 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 56 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 55 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 54 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 53 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 52 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 51 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 50 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 49 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 48 400
++0 release up
+until idle 6000
++0 press right
+until state player.x 34 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 35 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 36 400
++0 release right
+until idle 6000
++1 press down
++1 release down
+until idle
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text 6000
+until idle 6000
++0 press down
+until state player.z 54 400
++0 release down
+until idle 6000
++0 press left
+until state player.x 35 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 34 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 33 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 32 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 31 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 30 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 29 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 28 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 27 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 26 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 25 400
++0 release left
+until idle 6000
++0 press down
+until state player.z 55 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 56 400
++0 release down
+until idle 6000
++0 press left
+until state player.x 24 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 23 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 22 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 21 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 20 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 19 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 18 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 17 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 16 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 15 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 14 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 13 400
++0 release left
+until idle 6000
++0 press up
+until state player.z 55 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 54 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 53 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 52 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 51 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 50 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 49 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 48 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 47 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 46 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 45 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 44 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 43 400
++0 release up
+until idle 6000
++0 press left
+until state player.x 12 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 11 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 10 400
++0 release left
++0 press left
+until state player.x 9 400
++0 release left
+until idle 6000
++0 press up
+until state player.z 42 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 41 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 40 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 39 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 38 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 37 400
++0 release up
+until idle 6000
++0 press left
+until state player.x 8 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 7 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 6 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 5 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 4 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 3 400
++0 release left
+until idle 6000
++8 release select
+# 2F: smash the rocks south of the stairs, Strength on the boulders by Veteran Clayton's room, west to (6, 31)
++0 press down
+until state player.z 17 400
++0 release down
+until idle 6000
++0 press left
+until state player.x 19 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 18 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 17 400
++0 release left
+until idle 6000
++0 press down
+until state player.z 18 400
++0 release down
+until idle 6000
++0 press left
+until state player.x 16 400
++0 release left
+until idle 6000
++1 press down
++1 release down
+until idle
++0 press a
++1 release a
+until yesno 600
++0 press a
++1 release a
+advance text 6000
+until idle 6000
++0 press down
+until state player.z 19 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 20 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 21 400
++0 release down
+until idle 6000
++0 press right
+until state player.x 17 400
++0 release right
+until idle 6000
++0 press down
+until state player.z 22 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 23 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 24 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 25 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 26 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 27 400
++0 release down
+until idle 6000
++1 press down
++1 release down
+until idle
++0 field move 4 platinum:MOVE_STRENGTH
+advance text 6000
+until idle 6000
++0 press down
+until state objects[localId=16].z 29 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 28 400
++0 release down
+until idle 6000
++0 press left
+until state objects[localId=15].x 15 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 16 400
++0 release left
+until idle 6000
++0 press down
+until state objects[localId=17].z 30 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 29 400
++0 release down
+until idle 6000
++0 press left
+until state player.x 15 400
++0 release left
+until idle 6000
++0 press down
+until state player.z 30 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 31 400
++0 release down
+until idle 6000
++0 press left
+until state player.x 14 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 13 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 12 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 11 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 10 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 9 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 8 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 7 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 6 400
++0 release left
+until idle 6000
++8 release select
+# Revives and Max Potions on the team (no effect where none is needed)
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:1
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 assert app bag
++1 tap row:2
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:1
++1 press a
++1 release a
++1 assert app bag
++1 tap row:2
++1 tap menu:0
++1 assert app party
++1 tap slot:1
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:2
++1 press a
++1 release a
++1 assert app bag
++1 tap row:2
++1 tap menu:0
++1 assert app party
++1 tap slot:2
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:3
++1 press a
++1 release a
++1 assert app bag
++1 tap row:2
++1 tap menu:0
++1 assert app party
++1 tap slot:3
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until app none 300
+until idle
+# south past Ace Trainer Omar: a boulder pushed, the rocks smashed, down x 9
++0 press left
+until state player.x 5 400
++0 release left
++0 press down
+until state objects[localId=19].z 33 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 32 400
++0 release down
+until idle 6000
++0 press left
+until state player.x 4 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 3 400
++0 release left
+until idle 6000
++0 press down
+until state player.z 33 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 34 400
++0 release down
+until idle 6000
++0 press right
+until state player.x 4 400
++0 release right
+until idle 6000
++1 press right
++1 release right
+until idle
++0 press a
++1 release a
+until yesno 600
++0 press a
++1 release a
+advance text 6000
+until idle 6000
++0 press right
+until state player.x 5 400
++0 release right
+until idle 6000
++0 press up
+until state objects[localId=19].z 32 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 33 400
++0 release up
+until idle 6000
++0 press right
+until state player.x 6 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 7 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 8 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 9 400
++0 release right
+until idle 6000
++0 press down
+until state player.z 34 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 35 400
++0 release down
+until idle 6000
++1 press down
++1 release down
+until idle
++0 press a
++1 release a
+until yesno 600
++0 press a
++1 release a
+advance text 6000
+until idle 6000
++0 press down
+until state player.z 36 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 37 400
++0 release down
+until idle 6000
++8 release select
+# east past Ace Trainer Sydney and Veteran Clayton, a boulder pushed, the stairs down to 1F
++0 press right
+until state player.x 10 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 11 400
++0 release right
++0 press up
+until state player.z 36 400
++0 release up
+until idle 6000
++0 press right
+until state player.x 12 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 13 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 14 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 15 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 16 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 17 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 18 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 19 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 20 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 21 400
++0 release right
+until idle 6000
++0 press down
+until state player.z 37 400
++0 release down
+until idle 6000
++0 press right
+until state player.x 22 400
++0 release right
+until idle 6000
++0 press right
+until state objects[localId=21].x 24 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 23 400
++0 release right
+until idle 6000
++0 press up
+until state player.z 36 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 35 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 34 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 33 400
++0 release up
++0 press left
+until state player.x 22 400
++0 release left
+until idle 6000
++0 press up
+until state player.z 32 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 31 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 30 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 29 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 28 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 27 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 26 400
++0 release up
+until idle 6000
++0 press right
+until state player.x 23 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 24 400
++0 release right
+until idle 6000
++0 press down
+until state player.z 48 400
++0 release down
+until idle 6000
++8 release select
+# Revives and Max Potions on the team (no effect where none is needed)
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:1
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 assert app bag
++1 tap row:2
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:1
++1 press a
++1 release a
++1 assert app bag
++1 tap row:2
++1 tap menu:0
++1 assert app party
++1 tap slot:1
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:2
++1 press a
++1 release a
++1 assert app bag
++1 tap row:2
++1 tap menu:0
++1 assert app party
++1 tap slot:2
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:3
++1 press a
++1 release a
++1 assert app bag
++1 tap row:2
++1 tap menu:0
++1 assert app party
++1 tap slot:3
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until app none 300
+until idle
++8 release select
+# east along row 48 and Rock Climb (Bibarel) down to the low corridor (CP17's way)
+# 1F: down the climb to the low corridor and B1F; Psychic Valencia
++0 press right
+until state player.x 8 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 9 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 10 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 11 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 12 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 13 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 14 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 15 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 16 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 17 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 18 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 19 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 20 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 21 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 22 400
++0 release right
+until idle 6000
++1 press down
++1 release down
+until idle
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text 6000
+until idle 6000
++8 release select
+# Psychic Bryce (Gengar, Gardevoir) looks about from (7, 69), two tiles: west along the low corridor and wait two tiles east of him
++0 press down
+until position 22 57 6000
++0 release down
++0 press right
+until position 24 57 6000
++0 release right
++0 press down
+until position 24 69 6000
++0 release down
++0 press left
+until position 9 69 6000
++0 release left
+until message 6000
+advance text
+battle auto 30000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_PSYCHIC_BRYCE won single
+# the browser spec's beat: Victory Road's low corridor
++0 screenshot victory-road-low-corridor
++8 release select
+# Rhydon in the low corridor
++0 press right
+until position 12 69 6000
++0 release right
+until wild platinum:SPECIES_RHYDON right left 60000
+battle auto 20000
+advance text
+until idle
++8 release select
+# Rock Climb (Bibarel) up out of the low corridor at x 18, and back south to Victory Road's entrance
++0 press right
+until position 18 69 6000
++0 release right
+until idle
++1 press up
++1 release up
+until idle
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text 6000
+until idle 6000
++0 press up
+until position 18 63 6000
++0 release up
++0 press left
+until position 15 63 6000
++0 release left
++0 press down
+until position 15 78 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_POKEMON_LEAGUE" 3000
++0 release down
+until idle
++8 release select
++8 release select
+# heal at the League's south Pokémon Center
++0 press down
+until position 851 599 6000
++0 release down
++0 press left
+until position 842 599 6000
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_POKEMON_LEAGUE_SOUTH_POKECENTER_1F" 3000
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_POKEMON_LEAGUE" 3000
++0 release down
+until idle
+# end of CP21c
++0 assert position platinum:MAP_HEADER_POKEMON_LEAGUE 842 599
++8 release select

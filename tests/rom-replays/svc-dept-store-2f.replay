@@ -1,0 +1,66 @@
+# svc-dept-store-2f: Veilstone Department Store 2F (decomp scripts_veilstone_store_2f.s). The top vendor
+# (specialty 10, VEILSTONE_2F_UP: the X items) and the middle vendor (11, VEILSTONE_2F_MID: the vitamins)
+# across the counter; one purchase from each counts towards the "regular" (VAR_DEPARTMENT_STORE_REGULAR_COUNTER).
+# tests/integration/services.rom.test.ts checks each stock list at its screenshot beat.
+set money 20000
+warp platinum:MAP_HEADER_VEILSTONE_STORE_2F 4 4 left
+until idle
+# the top vendor across the counter (west): its first item, one
++1 press a
++1 release a
+until app mart
++1 tap menu:0
++1 screenshot dept-2f-up
++1 tap row:0
++1 tap ok
++1 tap yes
++1 assert state bag.battle_items [{"item":"platinum:ITEM_X_SPEED","count":1}]
++0 assert var platinum:VAR_DEPARTMENT_STORE_REGULAR_COUNTER 1
++1 press a
++1 release a
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
++1 press a
++1 release a
+until app none 5
+until idle
+# down 2 (turn first) to the middle vendor, face west
++1 press down
++1 release down
+until idle
++1 press down
++1 release down
+until idle
++1 press down
++1 release down
+until idle
++1 press left
++1 release left
+until idle
++0 assert position platinum:MAP_HEADER_VEILSTONE_STORE_2F 4 6
++1 press a
++1 release a
+until app mart
++1 tap menu:0
++1 screenshot dept-2f-mid
++1 tap row:0
++1 tap ok
++1 tap yes
++1 assert state bag.medicine [{"item":"platinum:ITEM_PROTEIN","count":1}]
++0 assert var platinum:VAR_DEPARTMENT_STORE_REGULAR_COUNTER 2
++1 press a
++1 release a
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
++1 press a
++1 release a
+until app none 5
+until idle

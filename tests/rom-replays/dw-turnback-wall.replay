@@ -1,0 +1,21 @@
+# Constructed start at the optional east wall: climb on, cross, and return to land.
+warp platinum:MAP_HEADER_DISTORTION_WORLD_TURNBACK_CAVE_ROOM 118 67 right
+until idle 6000
++0 press right
++1 release right
+until idle 6000
++0 assert state player.x 119
++0 assert state player.y 1040
++0 assert state player.z 66
++0 assert state mapFeatures.support 0
++0 press left
+until state player.z 54 400
++0 release left
+until idle 6000
++0 press down
++1 release down
+until idle 6000
++0 assert state player.x 117
++0 assert state player.y 1040
++0 assert state player.z 55
++0 assert state mapFeatures.support null

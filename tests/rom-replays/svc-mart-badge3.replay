@@ -1,0 +1,27 @@
+from svc-mart-badge1.replay
+# svc-mart, three badges: tier 3 adds the Great Ball (600) as row 1.
+give badge platinum:BADGE_ID_FOREST
+give badge platinum:BADGE_ID_COBBLE
+set money 1000
+until idle
++1 press a
++1 release a
+until app mart
++1 tap menu:0
++1 tap row:1
++1 tap ok
++1 tap yes
++1 assert state money 400
++0 assert state bag.balls [{"item":"platinum:ITEM_POKE_BALL","count":10},{"item":"platinum:ITEM_PREMIER_BALL","count":1},{"item":"platinum:ITEM_HEAL_BALL","count":1},{"item":"platinum:ITEM_GREAT_BALL","count":1}]
++1 press a
++1 release a
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
++1 press a
++1 release a
+until app none 5
+until idle

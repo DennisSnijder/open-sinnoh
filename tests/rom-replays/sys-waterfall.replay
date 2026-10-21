@@ -1,0 +1,34 @@
+# sys-waterfall: Route 210 North, the waterfall at (505, 525). Surf
+# from (504, 532), north under the bridge, Waterfall up (FIELD_MOVES 13) and back down. The
+# `waterfall-*` screenshot lines are the browser spec's key beat (the player drawn at the top, the
+# view moved up the falls).
+give badge platinum:BADGE_ID_FEN
+give badge platinum:BADGE_ID_BEACON
+party 0 platinum:SPECIES_BIBAREL 50 platinum:MOVE_SURF platinum:MOVE_WATERFALL
+warp platinum:MAP_HEADER_ROUTE_210_NORTH 504 532 right
+until idle
++0 field move 0 platinum:MOVE_SURF
+advance text
+until idle
++0 assert position platinum:MAP_HEADER_ROUTE_210_NORTH 505 532
++0 press up
+until position 505 526
++0 release up
+until idle
++0 assert facing player up
++0 screenshot waterfall-bottom
++0 field move 0 platinum:MOVE_WATERFALL
+advance text
+until idle
++0 assert position platinum:MAP_HEADER_ROUTE_210_NORTH 505 524
++0 assert state playerState "surf"
++0 screenshot waterfall-top
++0 press down
++1 release down
+until idle
++0 assert facing player down
++0 field move 0 platinum:MOVE_WATERFALL
+advance text
+until idle
++0 assert position platinum:MAP_HEADER_ROUTE_210_NORTH 505 526
++0 assert state playerState "surf"

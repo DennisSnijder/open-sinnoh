@@ -1,0 +1,44 @@
+# Eterna Condominiums' in-game trade (decomp NPC_TRADE_CHARAP_CHATOT): offered the wrong Pokémon he refuses (the
+# trade data is still freed: finish_npc_trade); then the Buizel goes and Charap the Chatot comes, at night, holding
+# its Leppa Berry.
+party 0 platinum:SPECIES_STARAVIA 18 platinum:MOVE_WING_ATTACK
+party 1 platinum:SPECIES_BUIZEL 16 platinum:MOVE_WATER_GUN
+time 21:30
+warp platinum:MAP_HEADER_ETERNA_CITY_CONDOMINIUMS_1F 5 6 up
+until idle
++0 press a
++1 release a
+advance text
+until yesno
++0 press a
++1 release a
+until app party
++1 tap slot:0
+until app none
+advance text
+until idle
++0 assert state party[0].species "platinum:SPECIES_STARAVIA"
++0 assert flag platinum:FLAG_TRADED_FOR_CHARAP_CHATOT false
++0 press a
++1 release a
+advance text
+until yesno
++0 press a
++1 release a
+until app party
++1 tap slot:1
+until app trade
++0 assert app trade
+until app none 1200
+advance text
+until idle
++0 assert flag platinum:FLAG_TRADED_FOR_CHARAP_CHATOT true
++0 assert state party[1].species "platinum:SPECIES_CHATOT"
++0 assert state party[1].nickname "Charap"
++0 assert state party[1].otName "Norton"
++0 assert state party[1].otGender "male"
++0 assert state party[1].level 16
++0 assert state party[1].heldItem "platinum:ITEM_LEPPA_BERRY"
++0 reload
+until idle
++0 assert state party[1].nickname "Charap"

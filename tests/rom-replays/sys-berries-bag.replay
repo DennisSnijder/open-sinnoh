@@ -1,0 +1,78 @@
+# Berries from the bag (decomp item_use_functions.c, bag MakeItemActionsMenu): facing empty soil a berry's action is
+# PLANT (BerryTree_PlantBerry); the Sprayduck registered on Y waters the plant (BerryTree_UseSprayduck); mulch's
+# USE lays it on the next empty soil (BerryTree_UseMulch), and the planting question that follows is declined.
+party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK
+give item platinum:ITEM_ORAN_BERRY 1
+give item platinum:ITEM_SPRAYDUCK 1
+give item platinum:ITEM_DAMP_MULCH 1
+set state registeredItem "platinum:ITEM_SPRAYDUCK"
+time 12:00
+warp platinum:MAP_HEADER_ROUTE_208 436 715 up
+until idle
+# The Razz Berries first, so the soil is empty.
++0 press a
++1 release a
+until yesno
++0 press a
++1 release a
+advance text
+until idle
++0 assert state berryPatches[27].stage "none"
+# PLANT from the bag: the Oran Berry (the berries pocket's first row; Razz comes after it).
++1 press x
++1 release x
+until app start-menu
++1 tap entry:1
++1 assert app bag
++1 tap pocket:4
++1 tap row:0
++1 tap menu:0
+until app none
+advance text
+until idle
++0 assert state berryPatches[27].berry "platinum:ITEM_ORAN_BERRY"
++0 assert state berryPatches[27].stage "planted"
++0 assert state bag.berries [{"item":"platinum:ITEM_RAZZ_BERRY","count":2}]
++0 assert state records.counts {"4":1}
+# Y: the Sprayduck waters it.
++0 time 14:00
++2 assert state berryPatches[27].moisture 70
++1 press y
++1 release y
+advance text
+until idle 300
++0 assert state berryPatches[27].moisture 100
++0 reload
+until idle
+# The patch to the right: pick its Bluk Berries, then mulch from the bag; no berry planted.
++0 press right
+until position 437 715
++0 release right
+until idle
++1 press up
++1 release up
+until idle
++0 press a
++1 release a
+until yesno
++0 press a
++1 release a
+advance text
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:1
++1 tap pocket:0
++1 tap row:0
++1 tap menu:0
+until app none
+advance text
+until yesno
++0 press b
++1 release b
+advance text
+until idle
++0 assert state berryPatches[28].mulch "platinum:ITEM_DAMP_MULCH"
++0 assert state berryPatches[28].stage "none"
++0 assert state bag.items []

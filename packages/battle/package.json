@@ -1,0 +1,16 @@
+{
+  "name": "@opensinnoh/battle",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./formulas": "./src/formulas.ts"
+  },
+  "dependencies": {
+    "@opensinnoh/contracts": "workspace:*",
+    "@opensinnoh/core": "workspace:*",
+    "@opensinnoh/text": "workspace:*",
+    "@pkmn/sim": "0.10.11"
+  }
+}

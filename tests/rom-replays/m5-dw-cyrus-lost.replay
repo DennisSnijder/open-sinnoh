@@ -1,0 +1,34 @@
+from cp15-dw-cyrus.replay
+# Story branch m5-dw-cyrus-lost. CP15 has played from the HQ through Spear Pillar,
+# the Distortion World and its completed boulder puzzle to Cyrus. As m5-tag-jubilife-lost does,
+# setup replaces the team with one weak Pokémon so battle auto loses; clear the other four party slots.
+# No location, blackout spawn, money or story flags are set. The native loss path restores progress 9
+# (LISTENED_TO_CYNTHIA_CYRUS), then BlackOutFromBattle returns to the story's last Pokémon Center,
+# Hearthome. Seven badges: level 2 · 4 · 25 = $200 lost; the nurse heals Bidoof to 14 HP.
+set state party []
+party 0 platinum:SPECIES_BIDOOF 2 platinum:MOVE_TACKLE
+until idle 6000
++0 assert state blackOut "platinum:MAP_HEADER_HEARTHOME_CITY_POKECENTER_1F"
++0 assert state money 160788
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 9
++0 assert flag platinum:FLAG_DISTORTION_WORLD_PUZZLE_FINISHED true
++0 assert position platinum:MAP_HEADER_DISTORTION_WORLD_B7F 85 75
++0 press a
++1 release a
+advance text 12000
+battle auto 30000
++0 assert battle trainer platinum:TRAINER_GALACTIC_BOSS_CYRUS_DISTORTION_WORLD lost single
++0 assert state party[0].hp 0
+advance text 20000
+until idle 6000
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 9
++0 assert flag platinum:FLAG_DISTORTION_WORLD_PUZZLE_FINISHED true
++0 assert flag platinum:FLAG_CAUGHT_GIRATINA false
++0 assert state player {"zone":"platinum:MAP_HEADER_HEARTHOME_CITY_POKECENTER_1F","x":8,"z":6,"y":0,"facing":"up"}
++0 assert state mapFeatures null
++0 assert state money 160588
++0 assert state party.length 1
++0 assert state party[0].hp 14
++0 assert state party[0].status "none"
++0 assert var platinum:VAR_EXITED_DISTORTION_WORLD_STATE 0
++0 assert flag platinum:FLAG_SPEAR_PILLAR_IS_DISTORTED true

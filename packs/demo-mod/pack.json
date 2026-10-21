@@ -1,0 +1,9 @@
+{
+  "id": "demo-mod",
+  "name": "Demo mod: swapped starter and a new guide line",
+  "version": "0.1.0",
+  "engine": "^0.1.0",
+  "base": "fixture",
+  "dependencies": { "fixture": "^0.1.0" },
+  "loadAfter": ["fixture"]
+}

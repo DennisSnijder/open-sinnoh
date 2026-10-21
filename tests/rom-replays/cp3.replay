@@ -1,0 +1,587 @@
+from cp2.replay
+# CP3: Jubilife first arrival, the Trainers' School rival takes the parcel,
+# the Pokétch campaign (three clown quizzes, yes each), the president gives the Pokétch. Yes on yes/no.
+# Inputs wait on the game (`until …`, `advance text`); walks hold a
+# direction `until position`, running with B held; `+N` only follows a sync point (re-timed from a
+# recording with tools/replays/retime.ts). Runs headless, also started late and on other seeds, in
+# tests/integration/checkpoints.rom.test.ts.
+# level Piplup to 14 in the grass south of Route 202 with real wild battles, healing at Sandgem's
+# Pokémon Center whenever its HP is down to half (each grind returns then; one that reached the level returns at once)
+grind 0 14 left right 30000
++0 press right
+until position 184 827
++0 release right
++0 press down
+until position 184 843
++0 release down
++0 press left
+until position 177 843
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until position 177 843
++0 release down
+until idle
++0 press right
+until position 184 843
++0 release right
++0 press up
+until position 184 827
++0 release up
++0 press left
+until position 178 827
++0 release left
+grind 0 14 left right 30000
++0 press right
+until position 184 827
++0 release right
++0 press down
+until position 184 843
++0 release down
++0 press left
+until position 177 843
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until position 177 843
++0 release down
+until idle
++0 press right
+until position 184 843
++0 release right
++0 press up
+until position 184 827
++0 release up
++0 press left
+until position 178 827
++0 release left
+grind 0 14 left right 30000
++0 press right
+until position 184 827
++0 release right
++0 press down
+until position 184 843
++0 release down
++0 press left
+until position 177 843
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until position 177 843
++0 release down
+until idle
++0 press right
+until position 184 843
++0 release right
++0 press up
+until position 184 827
++0 release up
++0 press left
+until position 178 827
++0 release left
+grind 0 14 left right 30000
++0 press right
+until position 184 827
++0 release right
++0 press down
+until position 184 843
++0 release down
++0 press left
+until position 177 843
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until position 177 843
++0 release down
+until idle
++0 press right
+until position 184 843
++0 release right
++0 press up
+until position 184 827
++0 release up
++0 press left
+until position 178 827
++0 release left
+grind 0 14 left right 30000
++0 press right
+until position 184 827
++0 release right
++0 press down
+until position 184 843
++0 release down
++0 press left
+until position 177 843
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until position 177 843
++0 release down
+until idle
++0 press right
+until position 184 843
++0 release right
++0 press up
+until position 184 827
++0 release up
++0 press left
+until position 178 827
++0 release left
+grind 0 14 left right 30000
++0 press right
+until position 184 827
++0 release right
++0 press down
+until position 184 843
++0 release down
++0 press left
+until position 177 843
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until position 177 843
++0 release down
+until idle
++0 press right
+until position 184 843
++0 release right
++0 press up
+until position 184 827
++0 release up
++0 press left
+until position 178 827
++0 release left
+grind 0 14 left right 30000
++0 press right
+until position 184 827
++0 release right
++0 press down
+until position 184 843
++0 release down
++0 press left
+until position 177 843
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until position 177 843
++0 release down
+until idle
++0 press right
+until position 184 843
++0 release right
++0 press up
+until position 184 827
++0 release up
++0 press left
+until position 178 827
++0 release left
+grind 0 14 left right 30000
++0 press right
+until position 184 827
++0 release right
++0 press down
+until position 184 843
++0 release down
++0 press left
+until position 177 843
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until position 177 843
++0 release down
+until idle
++0 press right
+until position 184 843
++0 release right
++0 press up
+until position 184 827
++0 release up
++0 press left
+until position 178 827
++0 release left
+# north on Route 202 to Jubilife: first arrival, the counterpart shows the Trainers' School
++0 press b
++0 press up
+until position 178 825
++0 release up
++0 press left
+until position 165 825
++0 release left
++0 press up
+until position 165 818
++0 release up
++0 press right
+until position 166 818
++0 release right
++3 release b
+advance text
+# Youngster Tristan: the first trainer battle by sight (the browser spec screenshots it)
++12 screenshot trainer-battle
+battle auto 9000
+advance text
++0 press b
++0 press right
+until position 168 818
++0 release right
++0 press down
+until position 168 819
++0 release down
++0 press right
+until position 181 819
++0 release right
++3 release b
+advance text
+battle auto 9000
+advance text
++0 press b
++0 press right
+until position 182 819
++0 release right
++0 press up
+until position 182 811
++0 release up
++0 press right
+until position 187 811
++0 release right
++0 press up
+until position 187 805
++0 release up
++0 press left
+until position 185 805
++0 release left
++3 release b
+advance text
+battle auto 9000
+advance text
++0 press b
++0 press left
+until position 184 805
++0 release left
++0 press up
+until position 184 804
++0 release up
++0 press left
+until position 177 804
++0 release left
++0 press up
+until position 177 798
++0 release up
++0 press left
+until position 175 798
++0 release left
++0 press up
+until position 175 796
++0 release up
++0 release b
+advance text 5100
+until yesno
++0 press a
++1 release a
+advance text 5000
++0 assert var platinum:VAR_JUBILIFE_CITY_STATE 1
+# Trainers' School: the rival takes the parcel
++0 press b
++0 press down
+until position 175 777
++0 release down
++0 press left
+until position 168 777
++0 release left
++0 release b
+until idle
++0 press up
+until position 168 776
++0 release up
+until idle
++0 press b
++0 press up
+until position 7 4
++0 release up
++0 press left
+until position 6 4
++0 release left
++0 release b
+until idle
++0 press up
++1 release up
+until idle
++0 press a
++1 release a
+advance text 3200
++0 assert var platinum:VAR_POKETCH_CAMPAIGN_STATE 1
++0 assert flag platinum:FLAG_TALKED_TO_TRAINERS_SCHOOL_RIVAL true
++0 assert state bag.key_items[item="platinum:ITEM_TOWN_MAP"].count 1
+# out: the Pokétch campaign
++0 press b
++0 press down
+until position 6 11
++0 release down
++0 press right
+until position 7 11
++0 release right
++0 release b
+until idle
++0 press down
++2 release down
+until idle
++0 press b
++0 press down
+until position 168 777
++0 release down
++0 press right
+until position 171 777
++0 release right
++0 press up
+until position 171 776
++0 release up
++0 press right
+until position 172 776
++0 release right
++3 release b
+advance text
++0 assert var platinum:VAR_POKETCH_CAMPAIGN_STATE 2
+# clown 1: yes
++0 press b
++0 press right
+until position 173 776
++0 release right
++0 press up
+until position 173 771
++0 release up
++0 press right
+until position 178 771
++0 release right
++0 press up
+until position 178 770
++0 release up
++0 press right
+until position 182 770
++0 release right
++0 release b
+until idle
++0 press up
++1 release up
+until state objects[localId=24].x 182  # clown 1 wanders x 182..184 on row 769
++0 press a
++1 release a
+advance text
+until yesno
++0 press a
++1 release a
+advance text
++0 assert flag platinum:FLAG_RECEIVED_COUPON_1 true
+# clown 2: yes (rows 767 and 758 stay clear of the wanderers)
++0 press b
++0 press left
+until position 181 770
++0 release left
++0 press up
+until position 181 767
++0 release up
++0 press left
+until position 177 767
++0 release left
++0 press up
+until position 177 765
++0 release up
++0 press left
+until position 176 765
++0 release left
++0 press up
+until position 176 758
++0 release up
++0 press left
+until position 144 758
++0 release left
++0 press up
+until position 144 755
++0 release up
++0 press left
+until position 143 755
++0 release left
++0 release b
+until idle
++0 press up
++1 release up
+until state objects[localId=25].x 143  # clown 2 wanders x 142..144 on row 754
++0 press a
++1 release a
+advance text
+until yesno
++0 press a
++1 release a
+advance text
++0 assert flag platinum:FLAG_RECEIVED_COUPON_2 true
+# clown 3: yes (row 757, clear of the Twin's 160..162 x 753..755)
++0 press b
++0 press down
+until position 143 757
++0 release down
++0 press right
+until position 164 757
++0 release right
++0 press up
+until position 164 753
++0 release up
++0 release b
+until idle
++0 press a
++1 release a
+advance text
+until yesno
++0 press a
++1 release a
+advance text
++0 assert flag platinum:FLAG_RECEIVED_COUPON_3 true
+# the president gives the Pokétch (column 172, clear of the wanderer at 168..170 x 765..767)
++0 press b
++0 press down
+until position 164 758
++0 release down
++0 press right
+until position 172 758
++0 release right
++0 press down
+until position 172 770
++0 release down
++0 press right
+until position 174 770
++0 release right
++0 release b
+until idle
++0 press down
++1 release down
+until idle
++0 press a
++1 release a
+advance text
+# end of CP3
++0 assert position platinum:MAP_HEADER_JUBILIFE_CITY 174 770
++0 assert flag platinum:FLAG_RECEIVED_POKETCH true
++0 assert var platinum:VAR_JUBILIFE_CITY_STATE 2
++0 assert var platinum:VAR_POKETCH_CAMPAIGN_STATE 2
++0 assert flag platinum:FLAG_RECEIVED_COUPON_1 true
++0 assert flag platinum:FLAG_RECEIVED_COUPON_2 true
++0 assert flag platinum:FLAG_RECEIVED_COUPON_3 true
++0 assert flag platinum:FLAG_HIDE_JUBILIFE_CITY_LOOKER true
++0 assert state bag.key_items[item="platinum:ITEM_TOWN_MAP"].count 1
+# the bag as a whole: the parcel and the three coupons are gone
++0 assert state bag.tmhms[item="platinum:ITEM_TM27"].count 1
++0 assert state bag.key_items[item="platinum:ITEM_JOURNAL"].count 1
++0 assert state bag.balls[item="platinum:ITEM_POKE_BALL"].count 5
++0 assert state bag.key_items[item="platinum:ITEM_VS_RECORDER"].count 1
++0 assert state bag.key_items[item="platinum:ITEM_TOWN_MAP"].count 1
++0 assert state poketch.enabled true
++0 assert state poketch.apps ["platinum:POKETCH_APPID_DIGITALWATCH","platinum:POKETCH_APPID_CALCULATOR","platinum:POKETCH_APPID_PEDOMETER","platinum:POKETCH_APPID_PARTYSTATUS"]
++0 assert state poketch.current "platinum:POKETCH_APPID_DIGITALWATCH"
++0 assert state poketch.steps 0
+# the Route 202 trainers on the way, real battles won (with the opening's rival: 4 trainer battles)
++0 assert battle trainer platinum:TRAINER_YOUNGSTER_TRISTAN won
++0 assert battle trainer platinum:TRAINER_LASS_NATALIE won
++0 assert battle trainer platinum:TRAINER_YOUNGSTER_LOGAN won
++0 assert battles trainer 4
++0 assert battle wild * won

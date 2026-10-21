@@ -1,0 +1,23 @@
+from m6-event-regi-ice.replay
+# Event branch m6-event-regigigas (docs/research/postgame.md §4): Snowpoint Temple
+# B5F's Regigigas with the three titans in the party (check_has_all_legendary_titans_in_party). Staged: the Regis
+# caught in m6-event-regi-iron/-rock/-ice went to the PC (the party was full); slots 1–3 take their place here (L30,
+# as caught), a Master Ball, and the player at the statue (sys-snowpoint-temple walks the temple). A on it:
+# FLAG_AWAKENED_REGIGIGAS, the statue shakes, the L1 battle, caught: FLAG_CAUGHT_REGIGIGAS, hidden.
+party 1 platinum:SPECIES_REGIROCK 30
+party 2 platinum:SPECIES_REGICE 30
+party 3 platinum:SPECIES_REGISTEEL 30
+give item platinum:ITEM_MASTER_BALL 1
+warp platinum:MAP_HEADER_SNOWPOINT_TEMPLE_B5F 11 13 up
+until idle
++0 assert flag platinum:FLAG_AWAKENED_REGIGIGAS false
++0 press a
++1 release a
+advance text 3000
+battle catch platinum:ITEM_MASTER_BALL 20000
++0 assert battle scripted platinum:SPECIES_REGIGIGAS caught
+advance text 20000
+until idle 3000
++0 assert flag platinum:FLAG_AWAKENED_REGIGIGAS true
++0 assert flag platinum:FLAG_CAUGHT_REGIGIGAS true
++0 assert flag platinum:FLAG_HIDE_SNOWPOINT_TEMPLE_B5F_REGIGIGAS true

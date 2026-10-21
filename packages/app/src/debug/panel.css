@@ -1,0 +1,8 @@
+#dev-debug { position: fixed; z-index: 10000; top: 8px; right: 8px; width: min(420px, calc(100vw - 16px)); max-height: calc(100dvh - 16px); overflow: auto; overscroll-behavior: contain; background: #fff; color: #111; border: 1px solid #777; padding: 10px; font: 14px/1.4 monospace; user-select: text; }
+#dev-debug summary { cursor: pointer; padding: 4px; }
+#dev-debug form { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; border-top: 1px solid #ccc; padding: 10px 0; }
+#dev-debug label { display: grid; gap: 3px; flex: 1 1 110px; min-width: 0; }
+#dev-debug input, #dev-debug select, #dev-debug button { font: inherit; color: #111; background: #fff; border: 1px solid #777; border-radius: 0; padding: 5px; min-height: 32px; min-width: 0; max-width: 100%; }
+#dev-debug button { cursor: pointer; }
+#dev-debug :focus-visible { outline: 2px solid #1659c7; outline-offset: 2px; }
+#dev-debug output { display: block; overflow-wrap: anywhere; }

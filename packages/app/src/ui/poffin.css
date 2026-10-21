@@ -1,0 +1,15 @@
+/* The Poffin screens (ui/poffin.ts): the cooking's texts, the Poffin Case's list and buttons. */
+.ds-scene-boxes > .poffin-text { line-height: 0; white-space: nowrap; pointer-events: none; display: flex; align-items: center; }
+.ds-scene-boxes > .poffin-text.center, .ds-scene-boxes > .poffin-banner { justify-content: center; }
+.poffin-cooking-scene .ds-scene-stage { touch-action: none; cursor: crosshair; }
+.poffin-case-main, .poffin-case-touch { overflow: hidden; }
+.poffin-css-screen { background: repeating-linear-gradient(45deg, #fcd0f0 0 calc(var(--dot) * 8), #f8c0e8 0 calc(var(--dot) * 16)); }
+.poffin-case-text { line-height: 0; white-space: nowrap; display: flex; align-items: center; }
+.poffin-case-text.center { justify-content: center; }
+.poffin-case-list .poffin-row { display: flex; align-items: center; justify-content: space-between; padding: 0; border: 0; background: none; cursor: pointer; line-height: 0; }
+.poffin-row-level { margin-right: calc(var(--dot) * 4); }
+.poffin-scroll, .poffin-filter { padding: 0; border: 0; background: none; cursor: pointer; }
+.poffin-filter { display: grid; place-items: center; }
+.poffin-filter > .poffin-filter-label { position: relative; line-height: 0; }
+.poffin-filter:not(.rom) { background: #fff8; border-radius: calc(var(--dot) * 6); }
+.poffin-filter:not(.rom).on { background: #fff; }

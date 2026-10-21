@@ -1,0 +1,67 @@
+from m6-event-regi-iron.replay
+# Event branch m6-event-regi-rock: the Rock Peak Ruins (Route 228) with the fateful
+# Regigigas of m6-event-regi-iron. The seven dots once each (activate_regi_ruins_dot), the statue activated,
+# A on it: Regirock's L30 battle, caught (RUINS_STATE_CAUGHT_REGI 290), out to Route 228.
+warp platinum:MAP_HEADER_ROCK_PEAK_RUINS 7 11 up
+until idle
++0 press left
+until position 5 11 300
++0 release left
++0 press up
+until position 5 9 300
++0 release up
+until idle 300
++0 press up
+until position 5 7 300
++0 release up
+until idle 300
++0 press up
+until position 5 5 300
++0 release up
+until idle 300
++0 press right
+until position 7 5 300
++0 release right
++0 press down
+until position 7 7 300
++0 release down
+until idle 300
++0 press right
+until position 9 7 300
++0 release right
+until idle 300
++0 press up
+until position 9 5 300
++0 release up
+until idle 300
++0 press down
+until position 9 9 300
++0 release down
+advance text 3000
+until idle 600
++0 assert var platinum:VAR_ROCK_PEAK_RUINS_STATE 270
++0 press left
+until position 8 9 300
++0 release left
++0 press up
+until position 8 2 300
++0 release up
++0 press left
+until position 7 2 300
++0 release left
+until idle 60
++0 press up
++1 release up
+until idle 60
++0 press a
++1 release a
+advance text 3000
+battle catch platinum:ITEM_MASTER_BALL 20000
++0 assert battle scripted platinum:SPECIES_REGIROCK caught
+advance text 20000
+until idle 3000
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_228" 600
++0 release down
+until idle 600
++0 assert var platinum:VAR_ROCK_PEAK_RUINS_STATE 290

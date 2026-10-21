@@ -1,0 +1,227 @@
+from opening.replay
+# CP2: Sandgem lab and Pokédex, home for the journal and the parcel, the
+# Route 202 catching tutorial. Yes on yes/no except the nickname.
+# Inputs wait on the game (`until …`, `advance text`); walks hold a
+# direction `until position`, running with B held; `+N` only follows a sync point (re-timed from a
+# recording with tools/replays/retime.ts). Runs headless, also started late and on other seeds, in
+# tests/integration/checkpoints.rom.test.ts.
+# leave Lake Verity
++0 press down
+until position 46 54
++0 release down
+# east to Sandgem: the counterpart leads the way to the lab
+until idle
++0 press b
++0 press down
+until position 80 853
++0 release down
++0 press right
+until position 104 853
++0 release right
++0 press up
+until position 104 852
++0 release up
++0 press right
+until position 128 852
++0 release right
++0 press up
+until position 128 848
++0 release up
++0 press right
+until position 136 848
++0 release right
++0 press up
+until position 136 846
++0 release up
++0 press right
+until position 138 846
++0 release right
++0 press up
+until position 138 845
++0 release up
++0 press right
+until position 164 845
++0 release right
++0 release b
+# lab: Rowan checks the starter (nickname: no) and gives the Pokédex
+advance text 3300
+until yesno
++0 press b
++1 release b
+advance text 4000
+until yesno
++0 press a
++1 release a
+advance text 4500
++0 assert var platinum:VAR_SANDGEM_TOWN_LAB_STATE 1
++0 assert flag platinum:FLAG_HAS_POKEDEX true
++0 assert state pokedex.obtained true
+# leave the lab: the counterpart says goodbye
++0 press b
++0 press down
+until position 7 15
++0 release down
++0 release b
+until idle
++0 press down
++1 release down
+advance text 7000
++0 assert var platinum:VAR_SANDGEM_TOWN_STATE 2
+# home to Twinleaf: Mom
++0 press b
++0 press down
+until position 187 846
++0 release down
++0 press left
+until position 152 846
++0 release left
++0 press down
+until position 152 855
++0 release down
++0 press left
+until position 141 855
++0 release left
++0 press up
+until position 141 854
++0 release up
++0 press left
+until position 139 854
++0 release left
++0 press down
+until position 139 855
++0 release down
++0 press left
+until position 123 855
++0 release left
++0 press up
+until position 123 854
++0 release up
++0 press left
+until position 121 854
++0 release left
++0 press down
+until position 121 855
++0 release down
++0 press left
+until position 115 855
++0 release left
++0 press down
+until position 115 857
++0 release down
++0 press left
+until position 113 857
++0 release left
++0 press down
+until position 113 886
++0 release down
++0 press right
+until position 116 886
++0 release right
++0 release b
+until idle
++0 press up
++2 release up
+until idle
++0 press b
++0 press up
+until position 6 8
++0 release up
++0 release b
+until idle
++0 press right
++1 release right
+until idle
++0 press a
++1 release a
+advance text 6700
++0 assert var platinum:VAR_PLAYER_HOUSE_STATE 6
++0 assert flag platinum:FLAG_RECEIVED_PARCEL true
++0 assert state bag.key_items[item="platinum:ITEM_JOURNAL"].count 1
++0 assert state bag.key_items[item="platinum:ITEM_PARCEL"].count 1
+# out and north: Route 202 catching tutorial
++0 press b
++0 press down
+until position 6 10
++0 release down
++0 release b
+until idle
++0 press down
++1 release down
+# Twinleaf's onTransition moves the house state on (decomp TwinleafTown_SetPlayerHouseState7)
+until idle
++0 assert var platinum:VAR_PLAYER_HOUSE_STATE 7
++0 press b
++0 press left
+until position 113 886
++0 release left
++0 press up
+until position 113 852
++0 release up
++0 press right
+until position 128 852
++0 release right
++0 press up
+until position 128 848
++0 release up
++0 press right
+until position 136 848
++0 release right
++0 press up
+until position 136 846
++0 release up
++0 press right
+until position 138 846
++0 release right
++0 press up
+until position 138 843
++0 release up
++0 press right
+until position 150 843
++0 release right
++0 press down
+until position 150 844
++0 release down
++0 press right
+until position 166 844
++0 release right
++0 press up
+until position 166 843
++0 release up
++0 press right
+until position 180 843
++0 release right
++0 press up
++1 release up
++0 press right
+until position 181 843
++0 release right
++0 press up
+until position 181 834
++0 release up
++0 press right
+until position 184 834
++0 release right
++0 press up
+until position 184 827
++0 release up
++0 press left
+until position 180 827
++0 release left
++0 release b
+advance text 3300
+# end of CP2
++0 assert position platinum:MAP_HEADER_ROUTE_202 178 827
++0 assert var platinum:VAR_ROUTE_202_STATE 1
++0 assert flag platinum:FLAG_HAS_POKEDEX true
++0 assert state pokedex.obtained true
++0 assert var platinum:VAR_SANDGEM_TOWN_LAB_STATE 1
++0 assert var platinum:VAR_SANDGEM_TOWN_STATE 2
++0 assert flag platinum:FLAG_RECEIVED_PARCEL true
++0 assert state bag.key_items[item="platinum:ITEM_JOURNAL"].count 1
++0 assert state bag.key_items[item="platinum:ITEM_PARCEL"].count 1
+# the catching tutorial: the counterpart's starter fights the Bidoof once, then her ball catches it
++0 assert battle scripted platinum:SPECIES_BIDOOF caught
++0 assert battles scripted 1
+# wild battles on the way are fought (wild auto) and won; the player's Piplup is still the only one
++0 assert battle wild * won
++0 assert state party.length 1

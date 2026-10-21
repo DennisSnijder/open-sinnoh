@@ -1,0 +1,24 @@
+# The Safari Game's start (docs/research/great-marsh.md): the Pastoria gate 1F's counter. Walking up to the coord
+# event (z 6, VAR_PASTORIA_CITY_OBSERVATORY_GATE_1F_STATE 0) asks to play; YES pays 500 (GoToIfNotEnoughMoney,
+# RemoveMoney), "received 30 Safari Balls", the walk into the gate's north door, VAR_SAFARI_GAME_STATE 1,
+# start_end_safari_game 0 (FLAG_SAFARI_GAME_ACTIVE, 30 balls, 0 steps), the special location (the gate's warp 2,
+# facing south) and the warp to the Great Marsh area 6 (68, 116, facing north).
+party 0 platinum:SPECIES_GARCHOMP 50 platinum:MOVE_DRAGON_CLAW
+set state money 3000
+warp platinum:MAP_HEADER_PASTORIA_CITY_OBSERVATORY_GATE_1F 5 8 up
+until idle
++0 press up
+until position 5 6
++0 release up
+advance text
++0 assert text platinum:PastoriaCityObservatoryGate1F_Text_AskPlaySafariGame 1
++0 press a
++1 release a
+advance text
+until idle
++0 assert position platinum:MAP_HEADER_GREAT_MARSH_6 68 116
++0 assert facing player up
++0 assert flag platinum:FLAG_SAFARI_GAME_ACTIVE true
++0 assert var platinum:VAR_SAFARI_GAME_STATE 1
++0 assert state money 2500
++0 assert state safari {"balls":30,"steps":0,"caught":0}

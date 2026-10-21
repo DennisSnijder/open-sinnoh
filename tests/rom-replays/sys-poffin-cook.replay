@@ -1,0 +1,43 @@
+# Hearthome's Poffin House (decomp scripts_poffin_common.s, applications/poffin_berry_selection, overlay083): the woman
+# by the tables, COOK ALONE, the bag's berries (CONFIRM), the berry drops in and the cooking runs with Right held (the
+# keys' stand-in for the stylus, stirring clockwise round the pot); RESULTS, the Poffin put away, "keep cooking?" NO.
+# The Poffin's flavours follow the stirring (each seed rolls its own directions); its smoothness is the berry's less 1
+# (a Cheri Berry's 25). The save keeps the Poffin.
+party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK
+give item platinum:ITEM_POFFIN_CASE 1
+give item platinum:ITEM_CHERI_BERRY 2
+warp platinum:MAP_HEADER_POFFIN_HOUSE 5 11 up
+until idle
++0 press a
++1 release a
+advance text
+until menu
++4 press a
++1 release a
+until app bag
++0 assert state poffins []
++2 tap row:0
++2 tap menu:0
+until app poffin-cooking 30
++0 assert state bag.berries [{"item":"platinum:ITEM_CHERI_BERRY","count":1}]
++120 screenshot poffin-drop
++30 press right
++300 screenshot poffin-stir
+until state records.counts["52"] 1 2400
++0 release right
+# RESULTS (rows, then the Poffin): A puts the Poffin away, A again asks "keep cooking?", B answers NO.
++80 screenshot poffin-results
++0 press a
++1 release a
+until state poffins[0].smoothness 24 900
++10 press a
++1 release a
++10 press b
++1 release b
+until app none 300
+advance text
+until idle
++0 assert state poffins[0].smoothness 24
++0 reload
+until idle
++0 assert state poffins[0].smoothness 24

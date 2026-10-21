@@ -1,0 +1,23 @@
+from parts/cut-no-badge.replay
+# sys-cut, Route 204 North. Without the Forest Badge (the part): the
+# "can be cut" message. With it: A on the tree (FieldMoves_CutTree), yes, and the tree is gone. The
+# `cut-*` screenshot lines are the browser spec's key beat: the tree drawn before, gone after, and the
+# Cut animation (FIELD_EFFECT_CUT) drawn while it plays.
+give badge platinum:BADGE_ID_FOREST
+until idle
++0 screenshot cut-before
++0 press a
++1 release a
+until yesno
++0 press a
++1 release a
+advance text
+until idle
++0 assert flag platinum:FLAG_MAP_LOCAL_HIDE_OBSTACLE_1 true
++0 screenshot cut-after
+# the path north is open: walk through where the tree stood
++0 press up
+until position 181 677
++0 release up
+until idle
++0 assert position platinum:MAP_HEADER_ROUTE_204_NORTH 181 677

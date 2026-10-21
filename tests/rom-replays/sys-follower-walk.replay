@@ -1,0 +1,35 @@
+# Following Pokémon (docs/decisions.md; world party-follower.ts): the walk. Route 202 with Turtwig (a
+# Platinum walking set) as the lead. It waits under the player after the warp and comes out on the first
+# tile they leave; it walks into each tile the player leaves, jumps the ledge at z 810 after them, runs
+# when they run, and a save and load puts it back where it stood. The Repel keeps wild Pokémon away.
+party 0 platinum:SPECIES_TURTWIG 20
+set state repel 250
+set state runningShoes true
+warp platinum:MAP_HEADER_ROUTE_202 171 805 down
+until idle
++0 assert state partyFollower {"x":171,"z":805,"facing":"down","waiting":true}
++0 press down
+until position 171 806
++0 assert state partyFollower {"x":171,"z":805,"facing":"down","waiting":false}
+until position 171 809
++0 assert state partyFollower.z 808
+# the ledge: the player jumps 809 → 811; the follower walks to 809, then jumps the same two tiles
+until position 171 811
++0 assert state partyFollower.z 809
+until position 171 812
++0 assert state partyFollower.z 811
++0 release down
+until idle
++0 assert state partyFollower {"x":171,"z":811,"facing":"down","waiting":false}
++0 reload
+until idle
++0 assert state partyFollower {"x":171,"z":811,"facing":"down","waiting":false}
+# running west
++0 press b
++0 press left
+until position 168 812
++0 assert state partyFollower.x 169
++0 release left
++0 release b
+until idle
++0 assert state partyFollower {"x":169,"z":812,"facing":"left","waiting":false}

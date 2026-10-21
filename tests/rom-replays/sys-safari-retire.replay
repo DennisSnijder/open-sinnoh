@@ -1,0 +1,26 @@
+from parts/safari-enter.replay
+# sys-safari-retire (docs/research/great-marsh.md): three steps on the marsh's plain ground count as Safari steps
+# (Field_UpdateSafari; no encounters there). The start menu in a Safari Game: RETIRE first, SAVE hidden, the ball
+# window. RETIRE (SAFARI_GAME 21): "Would you like to exit?", YES: the warp back to the gate's north door facing
+# south, VAR_SAFARI_GAME_STATE 2 and start_end_safari_game 1; the gate's on-frame script (state 2) walks the player
+# five steps south and sets the state back to 0.
++0 press up
+until position 68 113
++0 release up
+until idle
++0 assert state safari.steps 3
++0 press x
++1 release x
+until app start-menu
++0 assert app start-menu
++1 tap entry:0
+until yesno
++0 assert text platinum:SafariGame_Text_WouldYouLikeToExit 0
++0 press a
++1 release a
+until idle
++0 assert position platinum:MAP_HEADER_PASTORIA_CITY_OBSERVATORY_GATE_1F 5 7
++0 assert facing player down
++0 assert flag platinum:FLAG_SAFARI_GAME_ACTIVE false
++0 assert var platinum:VAR_SAFARI_GAME_STATE 0
++0 assert state safari {"balls":0,"steps":0,"caught":0}

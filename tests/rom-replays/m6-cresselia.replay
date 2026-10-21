@@ -1,0 +1,182 @@
+from cp21f.replay
+# Branch m6-cresselia (docs/research/postgame.md §6): the Lunar Wing event,
+# waking the boy without catching Cresselia. From cp21f's end (its National Pokédex); kept setup: the warp to the
+# sailor Eldritch's door in Canalave. The house's on-transition starts the event (VAR_LUNAR_WING_EVENT_STATE 1, the boy
+# in bed); talking to him: state 2. Eldritch at the dock sails to Fullmoon Island; in the forest Cresselia's portrait
+# (draw_pokemon_preview), then it flies off: activate_roaming_pokemon ROAMING_SLOT_CRESSELIA, the Lunar Wing left
+# behind, FLAG_MET_CRESSELIA. Back in Canalave the wing wakes the boy: state 3, the wing used up; Cresselia roams on.
+warp platinum:MAP_HEADER_CANALAVE_CITY_SAILOR_ELDRITCH_HOUSE 4 7 up
+until idle
++0 assert var platinum:VAR_LUNAR_WING_EVENT_STATE 1
++0 press right
+until position 7 7 300
++0 release right
++0 press up
+until position 7 6 300
++0 release up
+until idle 60
++0 press right
++1 release right
+until idle 60
++0 press a
++1 release a
+advance text 3000
+until idle 600
++0 assert var platinum:VAR_LUNAR_WING_EVENT_STATE 2
++0 assert flag platinum:FLAG_TALKED_TO_CANALAVE_CITY_SAILOR_ELDRITCH_HOUSE_LITTLE_BOY true
++0 press down
+until position 7 7 300
++0 release down
++0 press left
+until position 4 7 300
++0 release left
++0 press down
+until state player.zone "platinum:MAP_HEADER_CANALAVE_CITY" 300
++0 release down
+until idle 600
++0 press right
+until position 44 749 300
++0 release right
++0 press down
+until position 44 750 300
++0 release down
+until idle 60
++0 press right
++1 release right
+until idle 60
++0 press a
++1 release a
+advance text 3000
++0 press a
++1 release a
+advance text 3000
+until idle 3000
++0 press up
+until position 39 274 6000
++0 release up
++0 press left
+until position 37 274 6000
++0 release left
++0 press up
+until position 37 268 6000
++0 release up
++0 press right
+until position 42 268 6000
++0 release right
++0 press down
+until position 42 269 6000
++0 release down
++0 press right
+until position 50 269 6000
++0 release right
++0 press down
+until position 50 271 6000
++0 release down
++0 press right
+until position 53 271 6000
++0 release right
++0 press up
+until position 53 269 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_FULLMOON_ISLAND_FOREST" 300
++0 release up
+until idle 600
++0 press up
+until position 16 16 6000
++0 release up
+until idle 60
++0 press a
++1 release a
++30 press a
++1 release a
+advance text 3000
+until idle 600
++0 assert flag platinum:FLAG_MET_CRESSELIA true
++0 assert state roamers.slots[1].species "platinum:SPECIES_CRESSELIA"
++0 assert state roamers.slots[1].level 50
++0 assert var platinum:VAR_ROAMING_CRESSELIA_STATE 0
++0 assert flag platinum:FLAG_HIDE_FULLMOON_ISLAND_FOREST_CRESSELIA true
++0 press up
+until position 16 15 300
++0 release up
+until idle 60
++0 press a
++1 release a
+advance text 3000
+until idle 600
++0 assert state bag.key_items[item="platinum:ITEM_LUNAR_WING"].count 1
++0 press down
+until position 16 21 600
+until state player.zone "platinum:MAP_HEADER_FULLMOON_ISLAND" 300
++0 release down
+until idle 600
++0 press down
+until position 53 271 6000
++0 release down
++0 press left
+until position 48 271 6000
++0 release left
++0 press up
+until position 48 269 6000
++0 release up
++0 press left
+until position 40 269 6000
++0 release left
++0 press up
+until position 40 268 6000
++0 release up
++0 press left
+until position 37 268 6000
++0 release left
++0 press down
+until position 37 275 6000
++0 release down
++0 press right
+until position 39 275 6000
++0 release right
++0 press down
+until position 39 277 6000
++0 release down
+until idle 60
++0 press right
++1 release right
+until idle 60
++0 press a
++1 release a
+advance text 3000
++0 press a
++1 release a
+advance text 3000
+until idle 3000
++0 press up
+until position 44 749 300
++0 release up
++0 press left
+until position 39 749 300
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_CANALAVE_CITY_SAILOR_ELDRITCH_HOUSE" 300
++0 release up
+until idle 600
++0 press up
+until position 4 7 300
++0 release up
++0 press right
+until position 7 7 300
++0 release right
++0 press up
+until position 7 6 300
++0 release up
+until idle 60
++0 press right
++1 release right
+until idle 60
++0 press a
++1 release a
+advance text 6000
+until idle 3000
++0 assert flag platinum:FLAG_WOKE_UP_CANALAVE_CITY_SAILOR_ELDRITCH_HOUSE_LITTLE_BOY true
++0 assert var platinum:VAR_LUNAR_WING_EVENT_STATE 3
++0 assert state roamers.slots[1].species "platinum:SPECIES_CRESSELIA"
++0 assert var platinum:VAR_ROAMING_CRESSELIA_STATE 0

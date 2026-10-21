@@ -1,0 +1,23 @@
+# Enter a cave facing north (Ravaged Path from Route 204): the recorded exit is one tile south of the
+# entrance (Field_SetMapConnection), the tile the player stood on. USE a Rope from the bag and arrive there.
+party 0 platinum:SPECIES_BIBAREL 40
+give item platinum:ITEM_ESCAPE_ROPE 1
+warp platinum:MAP_HEADER_ROUTE_204_SOUTH 171 706 up
++0 wild flee
+until idle
++0 press up
++1 release up
+until state player.zone "platinum:MAP_HEADER_RAVAGED_PATH"
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:1
++1 tap pocket:0
++1 tap row:0
++1 tap menu:0
+until app none
+until idle
++0 assert position platinum:MAP_HEADER_ROUTE_204_SOUTH 171 706
++0 assert state player.facing "up"
++0 assert state bag.items.length 0

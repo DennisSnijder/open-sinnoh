@@ -1,0 +1,998 @@
+from cp7.replay
++0 reload
+# CP8 (docs/research/story-cp5-19.md §8): from CP7's end outside the Hearthome
+# Gym, a heal, Barry at the Route 209 gate (470, by the starter), Route 209 (the slope at x 562 in gear 1),
+# Solaceon (the counterpart's scene), Route 210 South (the slope at x 562, the very tall grass on foot),
+# Route 215 (up the ramp, over the long bridge and the cross bridge, down to the low path), Veilstone (Crasher
+# Wake), Maylene's gym (the route of sys-gym-veilstone), the tag battle with the counterpart against grunts
+# 848 and 849 (type 75), the warehouse with Looker, and HM02 on its floor: Pastoria state 1.
+# The twins and the young couple on Route 209 battle only a party of two; the Empoleon and an Egg are not.
++0 wild auto
++0 evolve auto
+until idle
+# heal at the Pokémon Center
++0 press left
+until position 465 698 6000
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY" 3000
++0 release down
+until idle
+# east to the Route 209 gate: Barry (Route209GateToHearthomeCity_CoordEvent_Rival)
++0 press down
+until position 465 716 6000
++0 release down
++0 press right
+until position 489 716 6000
++0 release right
++0 press down
+until position 489 726 6000
++0 release down
++0 press right
+until position 504 726 6000
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_209_GATE_TO_HEARTHOME_CITY" 3000
+until message 3000
++0 release right
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_RIVAL_ROUTE_209_PIPLUP won single
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_ROUTE_209_GATE_TO_HEARTHOME_CITY_STATE 2
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_209" 3000
++0 release right
+until idle
+# Route 209 north, round Breeder Albert's lines (the twins need two Pokémon to battle)
++0 press right
+until position 518 726 6000
++0 release right
++0 press up
+until position 518 720 6000
++0 release up
++0 press right
+until position 527 720 6000
++0 release right
++0 press down
+until position 527 722 6000
++0 release down
++0 press right
+until position 549 722 6000
++0 release right
++0 press up
+until position 549 715 6000
++0 release up
++0 press right
+until position 553 715 6000
++0 release right
+# Breeder Jennifer looks north, south and east at random from (554, 711): the player waits in her south line
++0 press right
+until position 554 715
++0 release right
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_BREEDER_JENNIFER won single
+# north to x 562; the slope at (562, 692) is climbed in gear 1 with a run-up; Cowgirl Shelley looks east over row 690 at the top
++0 press right
+until position 555 715 6000
++0 release right
++0 press up
+until position 555 708 6000
++0 release up
++0 press right
+until position 562 708 6000
++0 release right
+until idle
++1 press y
++1 release y
+until state playerState "cycle"
+until idle
++1 press b
++1 release b
++1 assert state cyclingGear 1
++0 press up
+until message 3000
++0 release up
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_COWGIRL_SHELLEY won single
++1 press b
++1 release b
++1 assert state cyclingGear 0
+# north into Solaceon: the counterpart's scene at the town's edge (SolaceonTown_CoordEvent_Rival)
++0 press up
+until position 562 670 6000
++0 release up
++0 press right
+until position 563 670 6000
++0 release right
++0 press up
+until message 3000
++0 release up
+advance text 6000
+until idle 3000
+# heal at Solaceon's Pokémon Center
++0 press up
+until position 563 657 6000
++0 release up
++0 press right
+until position 566 657 6000
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_SOLACEON_TOWN" 3000
++0 release down
+until idle
+# north on Route 210 South by bike: the slope at (562, 626) in gear 1 with a run-up (the jogger on row 624 is a plain NPC this early)
++0 press left
+until position 562 657 6000
++0 release left
++0 press up
+until position 562 640 6000
++0 release up
+until idle
++1 press y
++1 release y
+until state playerState "cycle"
+until idle
++1 press b
++1 release b
++1 assert state cyclingGear 1
++0 press up
+until position 562 620 6000
++0 release up
+until idle
++1 press b
++1 release b
++1 assert state cyclingGear 0
++0 press up
+until position 562 605 6000
++0 release up
+# off the bike for the very tall grass
+until idle
++1 press y
++1 release y
+until state playerState "walk"
+until idle
+# east onto Route 215 at ground level (under the bridge)
++0 press right
+until position 573 605 6000
++0 release right
++0 press up
+until position 573 598 6000
++0 release up
++0 press right
+until position 593 598 6000
++0 release right
++0 press up
+until position 593 587 6000
++0 release up
++0 press left
+until position 588 587 6000
++0 release left
++0 press down
+until position 588 593 6000
++0 release down
+# Ruin Maniac Calvin looks south down x 589
++0 press right
+until message 3000
++0 release right
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_RUIN_MANIAC_CALVIN won single
++0 press right
+until position 596 593 3000
++0 release right
++0 press right
+until position 606 593 3000
++0 release right
+# up the ramp at x 606 to the bridges: north over the long bridge, west over the cross bridge, down the ramp at x 601
++0 press down
+until position 606 599 3000
++0 release down
++0 press right
+until position 614 599 3000
++0 release right
++0 press up
+until position 614 583 3000
++0 release up
++0 press left
+until position 601 583 3000
++0 release left
++0 press up
+until position 601 579 3000
++0 release up
+# Black Belt Derek looks west and east at random over row 584: the player waits in his east line
++0 press right
+until position 610 579 6000
++0 release right
++0 press down
+until position 610 584 6000
++0 release down
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_BLACK_BELT_DEREK won single
+# east under the long bridge to Ace Trainers Dennis and Maya, who look up and down x 648 from both ends
++0 press down
+until position 610 590 6000
++0 release down
++0 press right
+until position 625 590 6000
++0 release right
++0 press up
+until position 625 583 6000
++0 release up
++0 press right
+until position 634 583 6000
++0 release right
++0 press down
+until position 634 587 6000
++0 release down
++0 press right
+until position 650 587 6000
++0 release right
++0 press down
+until position 650 592 6000
++0 release down
++0 press left
+until position 645 592 6000
++0 release left
++0 press down
+until position 645 598 6000
++0 release down
++0 press right
+until position 647 598 6000
++0 release right
++0 press right
+until position 648 598
++0 release right
+until message 3000
+advance text
+battle auto 20000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_DENNIS won single
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_MAYA won single
+# to the Veilstone gate
++0 press right
+until position 670 598 6000
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_215_GATE_TO_VEILSTONE_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_CITY" 3000
++0 release right
+until idle
+# Veilstone: heal at the Pokémon Center
++0 press right
+until position 694 598 6000
++0 release right
++0 press down
+until position 694 610 6000
++0 release down
++0 press right
+until position 705 610 6000
++0 release right
++0 press down
+until position 705 617 6000
++0 release down
++0 press right
+until position 712 617 6000
++0 release right
++0 press up
+until position 712 612 6000
++0 release up
++0 press right
+until position 717 612 6000
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_CITY" 3000
++0 release down
+until idle
+# to the gym: Crasher Wake and the counterpart on its approach (VeilstoneCity_CoordEvent_CrasherWake)
++0 press down
+until position 717 614 6000
++0 release down
++0 press left
+until position 710 614 6000
++0 release left
++0 press down
+until position 710 619 6000
++0 release down
++0 press left
+until position 702 619 6000
++0 release left
++0 press down
+until position 702 632 6000
++0 release down
++0 press left
+until position 684 632 6000
++0 release left
++0 press up
+until position 684 617 6000
++0 release up
++0 press up
+until message 3000
++0 release up
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_VEILSTONE_CITY_CRASHER_WAKE_STATE 1
+# the Veilstone Gym (the route of sys-gym-veilstone: punching bags kicked along the track topple the tyre stacks)
++0 press up
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_CITY_GYM" 3000
++0 release up
++0 release up
+until idle
++0 assert state mapFeatures.bags[4] {"x": 15, "z": 26}
++0 assert state mapFeatures.stacks[8] {"x": 20, "z": 26}
+# the browser spec's gym beat: the bags and tyre stacks set up
++0 screenshot veilstone-gym
++0 press up
+until position 12 27
++0 release up
+until idle
++0 press right
+until position 14 27
++0 release right
+until idle
++0 press up
+until position 14 26
++0 release up
+until idle
++0 press right
++1 release right
+until idle
++0 press right
++1 release right
+until idle
++0 assert state mapFeatures.bags[4] {"x": 19, "z": 26}
++0 assert state mapFeatures.stacks[8] null
++0 press down
+until position 14 27
++0 release down
+until idle
++0 press right
+until position 20 27
++0 release right
+until idle
++0 press up
+until position 20 20
++0 release up
+until idle
++0 press right
+until position 21 20
++0 release right
+until idle
++0 press up
+until position 21 18
++0 release up
+until idle
++0 press left
+until position 19 18
++0 release left
+until idle
++0 press up
+until position 19 17
++0 release up
+until idle
++0 press left
+until position 12 17
++0 release left
+until idle
++0 press left
+until position 11 17
++0 release left
++12 release a
+until message 300
+advance text
+battle auto 20000
+advance text
+until idle
++0 press right
+until position 19 17
++0 release right
+until idle
++0 press up
+until position 19 14
++0 release up
+until idle
++0 press left
+until position 18 14
++0 release left
++12 release a
++0 press left
+until position 17 14
++0 release left
++12 release a
++0 press up
+until position 17 13
++0 release up
++12 release a
++0 press left
+until position 16 13
++0 release left
++1 press down
++1 release down
++1 press a
++1 release a
+until message 300
+advance text
+battle auto 20000
+advance text
+until idle
++0 press left
+until position 15 13
++0 release left
+until idle
++0 press down
+until position 15 14
++0 release down
+until idle
++0 press left
+until position 11 14
++0 release left
+until idle
++0 press down
+until position 11 15
++0 release down
+until idle
++0 press left
+until position 7 15
++0 release left
+until idle
++0 press up
+until position 7 14
++0 release up
+until idle
++0 press left
+until position 5 14
++0 release left
+until idle
++0 press up
+until position 5 13
++0 release up
+until idle
++0 press left
+until position 1 13
++0 release left
+until idle
++0 press up
+until position 1 10
++0 release up
+until idle
++0 press right
+until position 2 10
++0 release right
++1 press up
++1 release up
++1 press a
++1 release a
+until message 300
+advance text
+battle auto 20000
+advance text
+until idle
++0 press left
+until position 1 10
++0 release left
+until idle
++0 press up
+until position 1 8
++0 release up
+until idle
++0 press right
+until position 3 8
++0 release right
+until idle
++0 press down
+until position 3 9
++0 release down
+until idle
++0 press down
++1 release down
+until idle
++0 press down
+until position 3 13
++0 release down
+until idle
++0 press left
+until position 2 13
++0 release left
+until idle
++0 press down
+until position 2 14
++0 release down
+until idle
++0 press right
++1 release right
+until idle
++0 press right
++1 release right
+until idle
++0 press down
+until position 2 20
++0 release down
+until idle
++0 press right
+until position 4 20
++0 release right
+until idle
++0 press down
+until position 4 21
++0 release down
+until idle
++0 press right
+until position 8 21
++0 release right
+until idle
++0 press up
++1 release up
+until idle
++0 press up
++1 release up
+until idle
++0 press up
+until position 8 18
++0 release up
+until idle
++0 press left
+until position 7 18
++0 release left
+until idle
++0 press up
+until position 7 16
++0 release up
+until idle
++0 press right
+until position 9 16
++0 release right
+until idle
++0 press down
+until position 9 17
++0 release down
+until idle
++0 press left
++1 release left
+until idle
++0 press left
++1 release left
+until idle
++0 press up
+until position 9 16
++0 release up
+until idle
++0 press left
+until position 3 16
++0 release left
+until idle
++0 press down
++1 release down
+until idle
++0 press down
++1 release down
+until idle
++0 press down
+until position 3 19
++0 release down
+until idle
++0 press left
+until position 2 19
++0 release left
+until idle
++0 press down
+until position 2 21
++0 release down
+until idle
++0 press right
+until position 3 21
++0 release right
+until idle
++0 press down
+until position 3 23
++0 release down
+until idle
++0 press right
+until position 4 23
++0 release right
+until idle
++0 press up
++1 release up
+until idle
++0 press up
++1 release up
+until idle
++0 assert state mapFeatures.bags[1] {"x": 4, "z": 12}
+until idle
++0 assert state mapFeatures.bags[1] {"x": 4, "z": 12}
++0 press up
+until position 4 13
++0 release up
+until idle
++0 press left
+until position 3 13
++0 release left
+until idle
++0 press up
+until position 3 12
++0 release up
+until idle
++0 press right
++1 release right
+until idle
++0 press right
++1 release right
+until idle
++0 press down
+until position 3 15
++0 release down
+until idle
++0 press right
+until position 10 15
++0 release right
+until idle
++0 press up
+until position 10 14
++0 release up
+until idle
++0 press right
+until position 14 14
++0 release right
+until idle
++0 press up
+until position 14 13
++0 release up
+until idle
++0 press right
+until position 17 13
++0 release right
+until idle
++0 press down
+until position 17 14
++0 release down
+until idle
++0 press right
+until position 19 14
++0 release right
+until idle
++0 press down
+until position 19 18
++0 release down
+until idle
++0 press right
+until position 20 18
++0 release right
+until idle
++0 press up
++1 release up
+until idle
++0 press up
++1 release up
+until idle
++0 press up
+until position 20 13
++0 release up
+until idle
++0 press left
+until position 19 13
++0 release left
+until idle
++0 press up
+until position 19 11
++0 release up
+until idle
++0 press right
+until position 21 11
++0 release right
+until idle
++0 press up
+until position 21 9
++0 release up
+until idle
++0 press left
+until position 18 9
++0 release left
+until idle
++0 press down
+until position 18 10
++0 release down
+until idle
++0 press left
+until position 17 10
++0 release left
+until idle
++0 press left
++1 release left
+until idle
++0 press left
+until position 14 10
++0 release left
+until idle
++0 press left
++1 release left
+until idle
++0 press left
+until position 12 10
++0 release left
+until idle
++0 press down
+until position 12 14
++0 release down
+until idle
++0 press left
+until position 11 14
++0 release left
+until idle
++0 press down
+until position 11 15
++0 release down
+until idle
++0 press left
+until position 8 15
++0 release left
+until idle
++0 press up
+until position 8 8
++0 release up
+until idle
++0 press left
+until position 7 8
++0 release left
+until idle
++0 press up
+until position 7 7
++0 release up
+until idle
++0 press right
++1 release right
+until idle
++0 press right
++1 release right
+until idle
++0 assert state mapFeatures.bags[2] {"x": 11, "z": 7}
++0 assert state mapFeatures.stacks[4] null
++0 press down
+until position 7 8
++0 release down
+until idle
++0 press right
+until position 8 8
++0 release right
+until idle
++0 press down
+until position 8 15
++0 release down
+until idle
++0 press right
+until position 10 15
++0 release right
+until idle
++0 press up
+until position 10 14
++0 release up
+until idle
++0 press right
+until position 11 14
++0 release right
+until idle
++0 press up
+until position 11 10
++0 release up
+until idle
++0 press right
+until position 12 10
++0 release right
+until idle
++0 press up
+until position 12 5
++0 release up
+until idle
++0 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_LEADER_MAYLENE won
+advance text 4400
+until idle
++0 assert state badges ["platinum:BADGE_ID_COAL","platinum:BADGE_ID_FOREST","platinum:BADGE_ID_RELIC","platinum:BADGE_ID_COBBLE"]
++0 assert var platinum:VAR_VEILSTONE_WAREHOUSE_GUARDS_FIGHTABLE 1
++0 assert state mapFeatures.bags[2] {"x": 11, "z": 7}
+# out of the gym (round the bags and stacks)
++0 press down
+until position 12 9 6000
++0 release down
++0 press right
+until position 21 9 6000
++0 release right
++0 press down
+until position 21 11 6000
++0 release down
++0 press left
+until position 19 11 6000
++0 release left
++0 press down
+until position 19 18 6000
++0 release down
++0 press right
+until position 21 18 6000
++0 release right
++0 press down
+until position 21 23 6000
++0 release down
++0 press left
+until position 20 23 6000
++0 release left
++0 press down
+until position 20 28 6000
++0 release down
++0 press left
+until position 12 28 6000
++0 release left
++0 press down
+until position 12 29 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_CITY" 3000
++0 release down
+advance text 6000
+until idle 3000
+# heal
++0 press down
+until position 684 632 6000
++0 release down
++0 press right
+until position 702 632 6000
++0 release right
++0 press up
+until position 702 617 6000
++0 release up
++0 press right
+until position 712 617 6000
++0 release right
++0 press up
+until position 712 612 6000
++0 release up
++0 press right
+until position 717 612 6000
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_CITY" 3000
++0 release down
+until idle
+# the counterpart by the warehouse: the Veilstone tag battle
++0 press down
+until position 717 614 6000
++0 release down
++0 press left
+until position 710 614 6000
++0 release left
++0 press down
+until position 710 617 6000
++0 release down
++0 press left
+until position 702 617 6000
++0 release left
++0 press up
+until position 702 608 6000
++0 release up
++0 press left
+until position 694 608 6000
++0 release left
++0 press up
+until position 694 596 6000
++0 release up
++0 press right
+until position 695 596 6000
++0 release right
+until idle
++0 press a
++1 release a
+advance text 6000
+until yesno 3000
++0 press a
++1 release a
+advance text 6000
+# the Veilstone tag battle with the counterpart (the browser spec's beat: four battlers)
++12 screenshot veilstone-tag-battle
+battle auto 9000
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_VEILSTONE_CITY_1 won ai-partner
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_VEILSTONE_CITY_2 won ai-partner
+advance text 9000
+until idle 3000
++0 assert var platinum:VAR_VEILSTONE_CITY_GALACTIC_WAREHOUSE_STATE 2
++0 assert var platinum:VAR_PASTORIA_CITY_STATE 1
+# HM02 Fly on the warehouse floor
++0 press right
+until position 13 11 6000
++0 release right
++0 press up
+until position 13 9 6000
++0 release up
+until idle
++0 press up
++1 release up
+until idle
++0 assert facing player up
++0 press a
++1 release a
+advance text
+until idle
++0 assert flag platinum:FLAG_OBTAINED_VEILSTONE_CITY_GALACTIC_WAREHOUSE_HM02 true
++0 assert state bag.tmhms[item="platinum:ITEM_HM02"].count 1
+# end of CP8
++0 assert var platinum:VAR_ROUTE_209_GATE_TO_HEARTHOME_CITY_STATE 2
++0 assert state badges ["platinum:BADGE_ID_COAL","platinum:BADGE_ID_FOREST","platinum:BADGE_ID_RELIC","platinum:BADGE_ID_COBBLE"]
++0 assert var platinum:VAR_VEILSTONE_CITY_GALACTIC_WAREHOUSE_STATE 2
++0 assert var platinum:VAR_PASTORIA_CITY_STATE 1
++0 assert state bag.tmhms[item="platinum:ITEM_HM02"].count 1
++0 assert battle trainer platinum:TRAINER_RIVAL_ROUTE_209_PIPLUP won single
++0 assert battle trainer platinum:TRAINER_LEADER_MAYLENE won single
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_VEILSTONE_CITY_1 won ai-partner
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_VEILSTONE_CITY_2 won ai-partner

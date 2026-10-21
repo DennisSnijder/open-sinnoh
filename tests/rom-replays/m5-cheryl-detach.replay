@@ -1,0 +1,159 @@
+from cp5.replay
++0 reload
+# Branch m5-cheryl-detach (docs/research/story-cp5-19.md §6.1): cp6's way to
+# Cheryl in Eterna Forest; she joins, then the player steps back out through the entrance
+# (EternaForest_CoordEvent_PlayerLeaveCheryl), which parts them; coming back in, she joins again. Headless from
+# the cp5 anchor (tests/integration/checkpoints-m5a-branches.rom.test.ts).
++0 wild auto
++0 evolve auto
+until idle 6000
+# back west to heal at Floaroma's Pokémon Center
++0 press down
+until position 243 658 6000
++0 release down
++0 press left
+until position 228 658 6000
++0 release left
++0 press down
+until position 228 662 6000
++0 release down
++0 press left
+until position 179 662 6000
++0 release left
++0 press down
+until position 179 669 6000
++0 release down
++0 press left
+until position 176 669 6000
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle 6000
++0 press up
+until position 8 6
++0 release up
+until idle 6000
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until position 176 667
++0 release down
+until idle 6000
+# east and north along Route 205 South's west side, out of Camper Jacob's lines
++0 press right
+until position 189 667 6000
++0 release right
++0 press up
+until position 189 660 6000
++0 release up
++0 press right
+until position 217 660 6000
++0 release right
++0 press up
+until position 217 651 6000
++0 release up
++0 press left
+until position 214 651 6000
++0 release left
++0 press up
+until position 214 647 6000
++0 release up
++0 press left
+until position 208 647 6000
++0 release left
++0 press up
+until position 208 638 6000
++0 release up
+# Hiker Daniel looks south and west at random over row 637: the player waits in his west line until he turns
++0 press up
+until position 208 637
++0 release up
+until message 3000
+advance text
+battle auto 9000
+advance text
+until idle 6000
++0 assert battle trainer platinum:TRAINER_HIKER_DANIEL won single
+# Camper Zackary walks a loop (x 206–209, z 625–628), facing south down x 209: the player waits in that line
++0 press up
+until position 208 630
++0 release up
++0 press right
+until position 209 630
++0 release right
+until message 3000
+advance text
+battle auto 9000
+advance text
+until idle 6000
++0 assert battle trainer platinum:TRAINER_CAMPER_ZACKARY won single
+# north past Hiker Nicholas's lines (he looks south and east)
++0 press left
+until position 207 630 6000
++0 release left
++0 press up
+until position 207 609 6000
++0 release up
++0 press right
+until position 210 609 6000
++0 release right
++0 press up
+until position 210 604 6000
++0 release up
++0 press left
+until position 209 604 6000
++0 release left
+# Battle Girl Kelsey walks a loop (x 205–207, z 598–603), facing east along row 603: the player waits in that line
++0 press up
+until position 209 603
++0 release up
+until message 3000
+advance text
+battle auto 9000
+advance text
+until idle 6000
++0 assert battle trainer platinum:TRAINER_BATTLE_GIRL_KELSEY won single
+# north to Eterna Forest, out of Picnicker Karina's lines (she looks north and south down x 208)
++0 press up
+until position 209 601 6000
++0 release up
++0 press left
+until position 207 601 6000
++0 release left
++0 press up
+until position 207 582 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_ETERNA_FOREST" 3000
++0 release up
+until idle 6000
+# Eterna Forest: Cheryl's coord event (EternaForest_CoordEvent_CherylStartFollowing) makes her the walking partner
++0 press up
+until message
++0 release up
+advance text 3000
+until idle 3000
++0 assert state hasPartner true
++0 assert var platinum:VAR_PARTNER_TRAINER_ID 608
+# back out through the entrance
++0 press down
+until message 3000
++0 release down
+advance text 6000
+until idle 3000
++0 assert state hasPartner false
++0 assert var platinum:VAR_ETERNA_FOREST_FOLLOWER_CHERYL_STATE 0
+# back in: she follows again
++0 press up
+until message 3000
++0 release up
+advance text 3000
+until idle 3000
++0 assert state hasPartner true
++0 assert var platinum:VAR_ETERNA_FOREST_FOLLOWER_CHERYL_STATE 1
++0 assert var platinum:VAR_PARTNER_TRAINER_ID 608

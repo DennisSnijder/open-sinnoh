@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions, help and playtest reports
+    url: https://discord.gg/DHKCWq9WkF
+    about: Ask on the OpenSinnoh Discord. Please don't share ROMs there either.
+  - name: Report a security vulnerability
+    url: https://github.com/DennisSnijder/open-sinnoh/security/advisories/new
+    about: Report security problems privately, not in a public issue.

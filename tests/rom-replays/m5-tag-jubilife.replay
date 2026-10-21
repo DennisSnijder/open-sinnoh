@@ -1,0 +1,121 @@
+from cp4.replay
+# The Jubilife tag battle, real. From CP4's end in the Oreburgh gym:
+# heal at Oreburgh's Pokémon Center, Barry runs into the player at the city's west exit, back through the
+# Oreburgh Gate and along Route 203 to Jubilife; Looker's scene on the way in; Team Galactic north of the TV
+# station (coord event at 173–175, 743 while VAR_JUBILIFE_CITY_STATE is 3): Rowan, the counterpart (Dawn or
+# Lucas by gender, the team by the player's starter) and the player against grunts 414 and 415 (decomp
+# StartTagBattle → BATTLE_TYPE_TRAINER_WITH_AI_PARTNER, 75), then the Fashion Case. Wild battles on the way are
+# fought (`wild auto`); trainer battles with `battle auto`, which answers the player's battler
+# (the partner is the trainer AI). Runs headless twice on seed 1 with a save round trip in
+# tests/integration/m5-tag-jubilife.rom.test.ts, and in the browser in tests/browser/m5-tag-jubilife.rom.spec.ts
+# (from a save of CP4's end, so the modes the chain set are set again here).
++0 wild auto
++0 evolve cancel
++0 press b
++0 press down
+until state player.zone "platinum:MAP_HEADER_OREBURGH_CITY" 600
++0 release down
+until idle
+# out of the gym, heal at the Pokémon Center next door
++0 press right
+until position 303 757
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until position 303 757
++0 release down
+until idle
+# west across Oreburgh; Barry runs into the player on the coord trigger at x 262
++0 press left
+until position 270 757
++0 release left
++0 press up
+until position 270 750
++0 release up
++0 press left
+until message
++0 release left
+advance text
+until idle
++0 press left
+until position 259 750
++0 release left
++0 press up
+until position 259 749
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_OREBURGH_GATE_1F" 300
++0 release left
+until idle
+# through the gate and along Route 203 (its trainers were beaten in CP4)
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_203" 600
++0 release left
+until idle
++0 press left
+until position 242 749
++0 release left
++0 press down
+until position 242 756
++0 release down
++0 press left
+until position 223 756
++0 release left
++0 press down
+until position 223 757
++0 release down
++0 press left
+until position 207 757
++0 release left
++0 press down
+until position 207 758
++0 release down
+# Jubilife: Looker's scene on the trigger at x 188
++0 press left
+until message
++0 release left
+advance text
+until idle
+# north to Team Galactic (the map signpost stands at 176, 744)
++0 press b
++0 press left
+until position 176 758
++0 release left
++0 press up
+until position 176 745
++0 release up
++0 press left
+until position 175 745
++0 release left
++0 press up
+until message
++0 release up
++0 release b
+advance text 6000
+# the tag battle: the player's battler by `battle auto`, the counterpart by its trainer AI
++12 screenshot jubilife-tag-battle
+battle auto 9000
+advance text 4400
+# end: the grunts retreat, the counterpart and Rowan leave, the Fashion Case
++0 assert var platinum:VAR_JUBILIFE_CITY_STATE 4
++0 assert var platinum:VAR_JUBILIFE_LOOKER_PAL_PAD_STATE 2
++0 assert var platinum:VAR_OREBURGH_CITY_STATE 3
++0 assert flag platinum:FLAG_RECEIVED_FASHION_CASE true
++0 assert flag platinum:FLAG_HIDE_JUBILIFE_GALACTIC_GRUNTS true
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_JUBILIFE_CITY_1 won ai-partner
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_JUBILIFE_CITY_2 won ai-partner
++0 assert battles trainer 12
++0 assert battle wild * won

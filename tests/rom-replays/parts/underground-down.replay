@@ -1,0 +1,14 @@
+from ../sys-underground-enter.replay
+# After sys-underground-enter: out of the Underground Man's house and down again under Eterna City (the Explorer Kit on Y).
++0 press left
+until position 4 6
++0 release left
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY"
++0 release down
+until idle
++0 press y
++1 release y
+until state player.zone "platinum:MAP_HEADER_UNDERGROUND"
+until idle

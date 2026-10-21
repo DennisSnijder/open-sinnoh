@@ -1,0 +1,16 @@
+# A loaded save stands at its saved height where land is layered: the Hall of Origin's upper floor (256) over
+# the hall below (48). The zone has no objects; a save there stays upstairs (docs/decisions.md).
+warp platinum:MAP_HEADER_HALL_OF_ORIGIN 31 52 up
+until idle
++0 press up
+until position 31 30
++0 release up
+until idle
++0 assert state player.y 256
++0 reload
+until idle
++0 assert state player.y 256
++0 press down
+until position 31 50
++0 release down
+until idle

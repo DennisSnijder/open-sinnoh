@@ -1,0 +1,26 @@
+# sys-giratina-caught: focused room coverage (story branch: m5-giratina-caught).
+# The Giratina room's native script, caught. A constructed start (setup lines) at progress 13
+# (GIRATINA_ARRIVED); the room's objects are the Distortion World's (Giratina at progress 13, Cynthia and Cyrus added
+# by the script). A on Giratina: start_giratina_origin_battle 487, 47
+# (Origin form, TERRAIN_GIRATINA), caught with a Master Ball: get_battle_result 4, FLAG_CAUGHT_GIRATINA, the
+# Turnback Cave Giratina hidden and its item shown; the field's return runs the on-load script
+# (FLAG_MAP_LOCAL_REMOVE_OBJECT): progress 14 (BATTLED_GIRATINA), Giratina's object removed; then Cyrus's lines.
+party 0 platinum:SPECIES_GARCHOMP 100 platinum:MOVE_DRAGON_CLAW
+give item platinum:ITEM_MASTER_BALL 1
+set var platinum:VAR_DISTORTION_WORLD_PROGRESS 13
+warp platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM 15 14 up
+until idle
++0 press a
++1 release a
+advance text 3000
+battle catch platinum:ITEM_MASTER_BALL 20000
++0 assert battle scripted platinum:SPECIES_GIRATINA caught
+advance text 20000
+until idle 3000
++0 assert flag platinum:FLAG_CAUGHT_GIRATINA true
++0 assert flag platinum:FLAG_HIDE_TURNBACK_CAVE_GIRATINA_ROOM_GIRATINA true
++0 assert flag platinum:FLAG_HIDE_TURNBACK_CAVE_GIRATINA_ROOM_ITEM false
++0 assert flag platinum:FLAG_MAP_LOCAL_REMOVE_OBJECT false
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 14
++0 assert party 1 platinum:SPECIES_GIRATINA
++0 assert state party[1].form 1

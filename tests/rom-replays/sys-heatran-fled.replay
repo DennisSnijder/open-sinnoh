@@ -1,0 +1,27 @@
+# sys-heatran-fled (docs/research/postgame.md §3): Stark Mountain room 3, Heatran.
+# A constructed start: the game completed, the National Pokédex, Buck talked to in the Battleground and room 3 at state
+# 1, so the room's on-transition shows Heatran (FLAG_HIDE_STARK_MOUNTAIN_ROOM_3_HEATRAN cleared). A on Heatran:
+# FLAG_BATTLED_STARK_MOUNTAIN_ROOM_3_HEATRAN, state 2, the L50 legendary battle; fled from (Run):
+# check_won_battle TRUE, but check_lost_battle TRUE too (decomp CheckPlayerLostBattle: only a win or a catch is not a loss), so no Vs. Seeker level 5 unlock; "Heatran disappeared", not caught; the room hides it until the Hall of Fame.
+party 0 platinum:SPECIES_GARCHOMP 70 platinum:MOVE_DRAGON_CLAW
+set flag platinum:FLAG_GAME_COMPLETED true
+set state pokedex.national true
+set flag platinum:FLAG_TALKED_TO_BATTLEGROUND_BUCK true
+set var platinum:VAR_STARK_MOUNTAIN_ROOM_3_STATE 1
+warp platinum:MAP_HEADER_STARK_MOUNTAIN_ROOM_3 7 7 up
+until idle
++0 press a
++1 release a
+advance text 3000
+until battle 3000
++0 battle run
+advance text 20000
+until idle 3000
++0 assert battle scripted platinum:SPECIES_HEATRAN fled
++0 assert flag platinum:FLAG_CAUGHT_HEATRAN false
++0 assert flag platinum:FLAG_BATTLED_STARK_MOUNTAIN_ROOM_3_HEATRAN true
++0 assert flag platinum:FLAG_UNLOCKED_VS_SEEKER_LVL_5 false
++0 assert flag platinum:FLAG_HIDE_STARK_MOUNTAIN_ROOM_3_HEATRAN true
++0 assert flag platinum:FLAG_MAP_LOCAL_REMOVE_OBJECT false
++0 assert var platinum:VAR_STARK_MOUNTAIN_ROOM_3_STATE 2
++0 assert state party.length 1

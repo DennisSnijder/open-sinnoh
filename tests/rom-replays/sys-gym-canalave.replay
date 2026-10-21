@@ -1,0 +1,350 @@
+# sys-gym-canalave (docs/research/gym-puzzles.md): Canalave Gym's 24 lifts.
+# A completed step onto a platform's tile at its height rides it (Field_ProcessStep): its bit in the saved
+# set flips at once; a lift carries the player 8 units a tick between floors (height calculation off), a
+# horizontal platform walks the player WALK_FASTER to its other end. The player's collision is the floor's
+# authored mask. The route (a shortest walk over those rules from the authored start) rides 13 platforms to
+# Byron on the fourth floor; trainers battle from where they spot the player (a player on another floor is
+# not seen: objects collide within 2 height units). A save round trip on the third floor keeps the floor
+# and every bit; leaving after Byron and coming back sets the start arrangement again. The game seed is
+# pinned (`set state seed`) so the turning worker faces the same way on every run seed.
+party 0 platinum:SPECIES_INFERNAPE 80 platinum:MOVE_FLAMETHROWER platinum:MOVE_CLOSE_COMBAT platinum:MOVE_EARTHQUAKE platinum:MOVE_FIRE_PUNCH
+party 1 platinum:SPECIES_EMPOLEON 80 platinum:MOVE_SURF platinum:MOVE_EARTHQUAKE platinum:MOVE_ICE_BEAM platinum:MOVE_HYDRO_PUMP
+set state seed 4242
+warp platinum:MAP_HEADER_CANALAVE_CITY_GYM 16 26 up
+until idle
++0 assert state mapFeatures {"kind": "canalave-gym", "platformStates": 11341248}
++0 screenshot canalave-ground
++0 press up
+until position 16 19
++0 release up
+until idle
++0 press left
+until position 8 19
++0 release left
+until idle
++0 press up
+until position 8 17
++0 release up
+until message 300
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_BLACK_BELT_RICKY won
+advance text
+until idle
++0 press up
+until position 8 16
++0 release up
+until idle
++0 press right
+until position 18 16
++0 release right
+until idle
++0 press up
+until position 18 14
++0 release up
+until idle
++0 press right
+until position 20 14
++0 release right
+until idle
++0 press up
+until position 20 13
++0 release up
+until idle
++0 press right
+until position 24 13
++0 release right
+until idle
+# [ride 4 y -> 24,10,13]
++0 press down
+until position 24 15
++0 release down
+until idle
++0 press right
+until position 29 15
++0 release right
+until idle
++0 press down
+until position 29 22
++0 release down
+until idle
+# [ride 8 y -> 29,0,22]
++0 press down
+until position 29 26
++0 release down
+until idle
++0 press left
+until position 27 26
++0 release left
+until message 300
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_CESAR won
+advance text
+until idle
++0 press left
+until position 26 26
++0 release left
+until idle
++0 press up
+until position 26 25
++0 release up
+until idle
++0 press left
+until position 22 25
++0 release left
+until idle
++0 press up
+until position 22 22
++0 release up
+until idle
++0 press left
+until position 21 22
++0 release left
+until idle
+# [ride 5 y -> 21,10,22]
++0 press left
+until position 18 22
++0 release left
+until idle
+# [ride 10 x -> 11,10,22]
++0 press left
+until position 9 22
++0 release left
+until idle
++0 press up
+until position 9 21
++0 release up
+until idle
++0 press left
+until position 2 21
++0 release left
+until idle
++0 press down
+until position 2 26
++0 release down
+until idle
++0 press right
+until position 5 26
++0 release right
+until idle
+# [ride 9 y -> 5,20,26]
++0 assert state player.y 320
++0 reload
+until idle
++0 assert state player.y 320
++0 screenshot canalave-third-floor
++0 press up
+until position 5 24
++0 release up
+until idle
++0 press left
+until position 2 24
++0 release left
+until idle
++0 press up
+until position 2 22
++0 release up
+until idle
+# [ride 16 z -> 2,20,19]
++0 press up
+until position 2 12
++0 release up
+until idle
++0 press right
+until position 4 12
++0 release right
+until idle
++0 press up
+until position 4 4
++0 release up
+until idle
++0 press right
+until position 8 4
++0 release right
+until message 300
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_WORKER_GERARDO won
+advance text
+until idle
++0 press right
+until position 10 4
++0 release right
+until idle
+# [ride 12 x -> 14,20,4]
++0 press right
+until position 19 4
++0 release right
+until idle
+# [ride 13 x -> 22,20,4]
++0 press right
+until position 24 4
++0 release right
+until message 300
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_BLACK_BELT_DAVID won
+advance text
+until idle
++0 press down
+until position 24 6
++0 release down
+until idle
++0 press right
+until position 26 6
++0 release right
+until idle
++0 press down
+until position 26 16
++0 release down
+until idle
+# [ride 17 z -> 26,20,22]
++0 press down
+until position 26 24
++0 release down
+until idle
++0 press right
+until position 29 24
++0 release right
+until idle
++0 press up
+until position 29 22
++0 release up
+until idle
+# [ride 18 z -> 29,20,16]
++0 press up
+until position 29 9
++0 release up
+until idle
+# [ride 11 y -> 29,10,9]
++0 press up
+until position 29 5
++0 release up
+until message 300
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_BREANNA won
+advance text
+until idle
++0 press up
+until position 29 4
++0 release up
+until idle
++0 press left
+until position 27 4
++0 release left
+until idle
++0 press down
+until position 27 5
++0 release down
+until idle
++0 press left
+until position 23 5
++0 release left
+until idle
++0 press down
+until position 23 9
++0 release down
+until idle
++0 press right
+until position 25 9
++0 release right
+until idle
+# [ride 6 y -> 25,0,9]
++0 press left
+until position 16 9
++0 release left
+until idle
+# [ride 0 y -> 16,30,9]
++0 press up
+until position 16 4
++0 release up
+until idle
++0 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_LEADER_BYRON won
+advance text 4400
+until idle
++0 assert state badges ["platinum:BADGE_ID_MINE"]
++0 assert var platinum:VAR_CANALAVE_CITY_STATE 2
++0 assert state player.y 480
++0 assert state mapFeatures {"kind": "canalave-gym", "platformStates": 11154097}
++0 press right
+until position 19 4
++0 release right
+until idle
+# [ride 20 x -> 26,30,4]
++0 press right
+until position 28 4
++0 release right
+until idle
++0 press down
+until position 28 5
++0 release down
+until idle
++0 press right
+until position 29 5
++0 release right
+until idle
++0 press down
+until position 29 7
++0 release down
+until idle
+# [ride 22 z -> 29,30,23]
++0 press down
+until position 29 26
++0 release down
+until idle
++0 press left
+until position 26 26
++0 release left
+until idle
+# [ride 21 x -> 5,30,26]
++0 press left
+until position 3 26
++0 release left
+until idle
++0 press up
+until position 3 25
++0 release up
+until idle
++0 press left
+until position 2 25
++0 release left
+until idle
++0 press up
+until position 2 23
++0 release up
+until idle
+# [ride 23 z -> 2,30,12]
++0 press up
+until position 2 9
++0 release up
+until idle
++0 press right
+until position 7 9
++0 release right
+until idle
+# [ride 19 y -> 7,0,9]
++0 press down
+until position 7 26
++0 release down
+until idle
++0 press right
+until position 16 26
++0 release right
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_CANALAVE_CITY"
++0 release down
+advance text 3000
+until idle
++0 assert var platinum:VAR_CANALAVE_CITY_STATE 3
++0 press up
+until state player.zone "platinum:MAP_HEADER_CANALAVE_CITY_GYM"
++0 release up
+until idle
++0 assert state mapFeatures {"kind": "canalave-gym", "platformStates": 11341248}

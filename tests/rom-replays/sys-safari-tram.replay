@@ -1,0 +1,43 @@
+from parts/safari-enter.replay
+# sys-safari-tram (docs/research/great-marsh.md): the quick trams. The tram is left at areas 1 and 2 (the map
+# features slot), so at area 6's station (69, 106) picking AREA 1 calls it first (MoveGreatMarshTram CALL), then the
+# player boards from the east (four steps west, invisible), rides north with it and leaves to the west at area 1's
+# station (62, 39). From there AREA 5 rides it south (no call: it is there) to area 5's station (62, 107).
+set state mapFeatures {"kind":"great-marsh","tram":0}
++0 press up
+until position 68 112
++0 release up
+until idle
++0 press right
+until position 69 112
++0 release right
+until idle
++0 press up
+until position 69 107
++0 release up
+until idle
++0 press a
++1 release a
+until menu
++0 assert text platinum:SafariGame_Text_QuickTramPrompt 0
++4 press a
++1 release a
+until idle 6000
++0 assert position platinum:MAP_HEADER_GREAT_MARSH_1 62 39
++0 assert state mapFeatures {"kind":"great-marsh","tram":0}
++0 press up
++1 release up
+until idle
++0 press a
++1 release a
+until menu
++4 press down
++1 release down
++1 press down
++1 release down
++1 press a
++1 release a
+until idle 6000
++0 assert position platinum:MAP_HEADER_GREAT_MARSH_5 62 107
++0 assert state mapFeatures {"kind":"great-marsh","tram":2}
++0 assert flag platinum:FLAG_SAFARI_GAME_ACTIVE true

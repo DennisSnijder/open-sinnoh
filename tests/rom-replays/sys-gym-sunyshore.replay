@@ -1,0 +1,216 @@
+# A recorded legal walk through every room, with prior trainers defeated; Volkner is fought.
+party 0 platinum:SPECIES_GARCHOMP 90 platinum:MOVE_EARTHQUAKE platinum:MOVE_DRAGON_CLAW platinum:MOVE_CRUNCH platinum:MOVE_SLASH
+set flag platinum:FLAG_DEFEATED_TRAINER_SCHOOL_KID_TIERA true
+set flag platinum:FLAG_DEFEATED_TRAINER_SCHOOL_KID_FORREST true
+set flag platinum:FLAG_DEFEATED_TRAINER_GUITARIST_JERRY true
+set flag platinum:FLAG_DEFEATED_TRAINER_POKE_KID_MEGHAN true
+set flag platinum:FLAG_DEFEATED_TRAINER_ACE_TRAINER_DESTINY true
+set flag platinum:FLAG_DEFEATED_TRAINER_GUITARIST_PRESTON true
+set flag platinum:FLAG_DEFEATED_TRAINER_GUITARIST_LONNIE true
+set flag platinum:FLAG_DEFEATED_TRAINER_ACE_TRAINER_ZACHERY true
+warp platinum:MAP_HEADER_SUNYSHORE_CITY_GYM_ROOM_1 8 14 up
+until idle
++0 press up
+until position 8 8 1000
++0 release up
+until idle 1000
++0 press right
+until position 13 8 1000
++0 release right
+until idle 1000
++0 assert state mapFeatures.rotationState 1
++0 reload
+until idle
++0 assert state mapFeatures.rotationState 1
++0 press down
+until position 13 11 1000
++0 release down
+until idle 1000
++0 press left
+until position 8 11 1000
++0 release left
+until idle 1000
++0 press up
+until position 8 8 1000
++0 release up
+until idle 1000
++0 press left
+until position 3 8 1000
++0 release left
+until idle 1000
++0 press right
+until position 8 8 1000
++0 release right
+until idle 1000
++0 press up
+until position 8 3 1000
++0 release up
+until idle 1000
++0 press up
+until state player.zone "platinum:MAP_HEADER_SUNYSHORE_CITY_GYM_ROOM_2"
++0 release up
+until idle
++0 press up
+until position 9 16 1000
++0 release up
+until idle 1000
++0 press left
+until position 6 16 1000
++0 release left
+until idle 1000
++0 press up
+until position 6 13 1000
++0 release up
+until idle 1000
++0 press left
+until position 5 13 1000
++0 release left
+until idle 1000
++0 press right
+until position 6 13 1000
++0 release right
+until idle 1000
++0 press up
+until position 6 12 1000
++0 release up
+until idle 1000
++0 press down
+until position 6 13 1000
++0 release down
+until idle 1000
++0 press right
+until position 11 13 1000
++0 release right
+until idle 1000
++0 press down
+until position 11 20 1000
++0 release down
+until idle 1000
++0 press left
+until position 3 20 1000
++0 release left
+until idle 1000
++0 press up
+until position 3 16 1000
++0 release up
+until idle 1000
++0 press left
+until position 2 16 1000
++0 release left
+until idle 1000
++0 press up
+until position 2 4 1000
++0 release up
+until idle 1000
++0 press right
+until position 5 4 1000
++0 release right
+until idle 1000
++0 press down
+until position 5 5 1000
++0 release down
+until idle 1000
++0 press right
+until position 6 5 1000
++0 release right
+until idle 1000
++0 press down
+until position 6 8 1000
++0 release down
+until idle 1000
++0 press right
+until position 11 8 1000
++0 release right
+until idle 1000
++0 press down
+until position 11 13 1000
++0 release down
+until idle 1000
++0 press right
+until position 14 13 1000
++0 release right
+until idle 1000
++0 press down
+until position 14 14 1000
++0 release down
+until idle 1000
++0 press right
+until position 15 14 1000
++0 release right
+until idle 1000
++0 press up
+until position 15 3 1000
++0 release up
+until idle 1000
++0 press left
+until position 9 3 1000
++0 release left
+until idle 1000
++0 press up
+until state player.zone "platinum:MAP_HEADER_SUNYSHORE_CITY_GYM_ROOM_3"
++0 release up
+until idle
++0 press up
+until position 11 18 1000
++0 release up
+until idle 1000
++0 press right
+until position 16 18 1000
++0 release right
+until idle 1000
++0 press down
+until position 16 21 1000
++0 release down
+until idle 1000
++0 press left
+until position 11 21 1000
++0 release left
+until idle 1000
++0 press up
+until position 11 18 1000
++0 release up
+until idle 1000
++0 press left
+until position 6 18 1000
++0 release left
+until idle 1000
++0 press down
+until position 6 24 1000
++0 release down
+until idle 1000
++0 press left
+until position 3 24 1000
++0 release left
+until idle 1000
++0 press up
+until position 3 21 1000
++0 release up
+until idle 1000
++0 press left
+until position 2 21 1000
++0 release left
+until idle 1000
++0 press up
+until position 2 4 1000
++0 release up
+until idle 1000
++0 press right
+until position 11 4 1000
++0 release right
+until idle 1000
++0 screenshot sunyshore-volkner
++0 press up
++1 release up
++0 press a
++1 release a
+advance text 2000
+until battle
+battle auto 8000
+advance text 8000
+until idle
++0 assert battle trainer platinum:TRAINER_LEADER_VOLKNER won
++0 assert state badges ["platinum:BADGE_ID_BEACON"]
++0 assert var platinum:VAR_SUNYSHORE_CITY_STATE 2
++0 reload
+until idle
++0 assert position platinum:MAP_HEADER_SUNYSHORE_CITY_GYM_ROOM_3 11 4

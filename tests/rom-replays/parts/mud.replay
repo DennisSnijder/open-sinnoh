@@ -1,0 +1,24 @@
+# Part of sys-mud-snow: Route 212 South on a frozen date (2009-01-06: THUNDERSTORM in the decomp's
+# sYearlyWeather). Stepping into deep mud (531, 845) gets the player stuck: holding up does not move
+# them. Five changes of direction get them out (decomp FieldTask_StuckInDeepMud), then they walk on.
+date 2009-01-06
+warp platinum:MAP_HEADER_ROUTE_212_SOUTH 531 846 up
+until idle
++0 assert state weather "platinum:OVERWORLD_WEATHER_THUNDERSTORM"
++0 press up
+until position 531 845
++60 release up
++5 assert position platinum:MAP_HEADER_ROUTE_212_SOUTH 531 845
++0 press left
++10 release left
++0 press right
++10 release right
++0 press left
++10 release left
++0 press right
++10 release right
++0 assert position platinum:MAP_HEADER_ROUTE_212_SOUTH 531 845
++0 press left
+until position 530 845 30
++0 release left
+until idle

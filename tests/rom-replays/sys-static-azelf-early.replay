@@ -1,0 +1,34 @@
+# sys-static-azelf-early (docs/research/story-cp5-19.md §12): Valor Cavern as CP12
+# finds it, the guardian still captive. FLAG_HIDE_VALOR_CAVERN_AZELF is set from the new game (scripts_init_new_game)
+# until Rowan's event in CP15, so Azelf's object (ValorCavern_Azelf, a level-50 legendary battle) is not there:
+# its tile at (16, 14) is walked onto and A on the tile past it starts nothing; Saturn stands at (14, 19). The
+# released Azelf is sys-static-lake-trio's (parts/lake-azelf).
+party 0 platinum:SPECIES_EMPOLEON 55 platinum:MOVE_SURF
+set flag platinum:FLAG_LAKE_VALOR_EXPLODED true
+set flag platinum:FLAG_HIDE_VALOR_LAKEFRONT_CAMERAMEN true
+warp platinum:MAP_HEADER_VALOR_CAVERN 16 17 up
+until idle
++0 assert flag platinum:FLAG_HIDE_VALOR_CAVERN_AZELF true
++0 assert flag platinum:FLAG_CAUGHT_AZELF false
++0 assert state objects.length 1
++0 assert state objects[localId=1].x 14
++0 assert state objects[localId=1].z 19
++0 press up
+until position 16 14 600
++0 release up
+until idle
++0 assert position platinum:MAP_HEADER_VALOR_CAVERN 16 14
++0 press up
+until position 16 13 600
++0 release up
+until idle
++0 press down
++1 release down
+until idle
++0 assert facing player down
++0 press a
++1 release a
++30 assert state battles []
+until idle
++0 assert flag platinum:FLAG_CAUGHT_AZELF false
++0 assert flag platinum:FLAG_HIDE_VALOR_CAVERN_AZELF true

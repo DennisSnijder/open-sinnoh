@@ -1,0 +1,18 @@
+/*
+ * OPTIONS on the OpenSinnoh UI design system (options-screen.ts, @opensinnoh/ui), in a `.ui-frame.ui-os`
+ * (ui.css); the root fills it and lets clicks through to the scrim, and the window (`.os-panel`) places itself.
+ * Nothing here restyles a ROM window.
+ */
+.ui-screen.os-options { position: absolute; inset: 0; background: none; box-shadow: none; clip-path: none; pointer-events: none; }
+.os-options .os-panel { pointer-events: auto; --cap-w: 640px; --cap-h: 480px; }
+.os-options .options-rows { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; touch-action: pan-y; padding: 8px 0; min-height: 0; }
+.os-options .options-desc { margin-top: 8px; }
+.os-options .options-rows::-webkit-scrollbar { display: none; }
+/* The cursor moves with the game's keys, so the cursor row marks it even without browser focus. */
+.os-options .options-rows .os-row { scroll-margin: 8px; }
+/* Phone: full bleed; the title bar takes the safe area, the box and Back keep off the edges. */
+@container os-screen (max-width: 480px) {
+  .os-options .os-tab { padding-top: calc(8px + var(--sat)); }
+  .os-options .options-desc { margin: 8px 12px 0; }
+  .os-options .os-foot { padding: 8px 12px calc(12px + var(--sab)); }
+}

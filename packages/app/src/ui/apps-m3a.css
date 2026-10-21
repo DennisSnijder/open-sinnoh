@@ -1,0 +1,49 @@
+/*
+ * The menu screens: context and action windows over the sheets, the summary, the PC boxes, the
+ * naming keyboard, the trainer card and the Pokédex. Every length that draws a frame is a multiple of
+ * --dot; ROM pictures are drawn at one dot per DS pixel.
+ */
+.rom-picture {
+  background-size: calc(var(--dot) * var(--w)) calc(var(--dot) * var(--h));
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+/* --- Context and action windows (the PC's menu) -------------------------------------------- */
+.app-menu { display: grid; min-width: calc(var(--dot) * 88); max-height: 60vh; overflow: auto; }
+.app-menu-title { margin: 0; padding: calc(var(--dot) * 2) calc(var(--dot) * 4); border-bottom: var(--dot) solid var(--frame-hi); white-space: pre-line; }
+.app-menu-list { display: grid; }
+.app-menu .menu-entry { min-height: calc(var(--dot) * 20); gap: calc(var(--dot) * 6); }
+.menu-right { margin-left: auto; }
+.ui-layer[data-mode='compact'] .app-menu .menu-entry, .ui-layer[data-mode='compact'] .yes-no .choice { min-height: 48px; }
+
+/* --- Shared: field lists, type icons (the box preview), the registered mark (bag) ---------------- */
+.registered-mark { font: 700 9px/1 system-ui, sans-serif; letter-spacing: 0.04em; color: #fff; background: var(--slate-2); padding: calc(var(--dot) * 1.5) calc(var(--dot) * 2); }
+.sum-name, .sum-level { display: flex; align-items: center; gap: calc(var(--dot) * 3); }
+.field-list { display: grid; grid-template-columns: auto 1fr; gap: calc(var(--dot) * 1) calc(var(--dot) * 8); margin: 0; padding: calc(var(--dot) * 3) calc(var(--dot) * 5); background: var(--paper-2); box-shadow: inset 0 0 0 var(--dot) var(--frame-hi); }
+.field-list dd { margin: 0; justify-self: end; display: flex; }
+.field-list.compact { padding: calc(var(--dot) * 2) calc(var(--dot) * 3); background: none; box-shadow: none; }
+.type-icon { display: inline-flex; }
+.type-chip { display: inline-flex; align-items: center; padding: var(--dot) calc(var(--dot) * 4); background: #7c7c6c; min-height: calc(var(--dot) * 12); }
+
+/* --- Trainer card and badge case (apps-m3a.ts): two boards; the card art and its rows at DS places --- */
+.card-art { pointer-events: none; }
+.trainer-card:not(.rom) { background: #56657f; }
+.case-css { background: #e8dca0; }
+.card-row { display: flex; justify-content: space-between; pointer-events: none; }
+.card-portrait-art { pointer-events: none; }
+.card-flip, .case-button { background: none; border: 0; cursor: pointer; }
+.card-sign { padding: 0; background: none; border: 0; cursor: crosshair; }
+.card-sign:focus-visible, .card-flip:focus-visible, .case-button:focus-visible { outline: var(--unit) solid var(--cursor); }
+.signature-pad { touch-action: none; cursor: crosshair; box-shadow: 0 0 0 var(--unit) var(--cursor); }
+.signature-art { display: block; }
+.badge-slot.css { background: linear-gradient(135deg, #f5f7fb, #aeb7c8 55%, #e9edf4); }
+.card-done { display: grid; place-items: center; background: var(--paper-2); box-shadow: inset 0 0 0 var(--unit) var(--frame-hi); }
+.card-done.is-cursor::before { display: none; }
+.card-done.is-cursor { box-shadow: inset 0 0 0 calc(var(--unit) * 2) var(--cursor); background: var(--paper-2); }
+.badge-case .yes-no .menu-entry { height: calc(var(--unit) * 16); padding-left: calc(var(--unit) * 10); }
+.badge-case .window.rom-frame, .badge-case .msg-box.rom-frame { padding: 0; min-height: 0; }
+
+.ui-layer[data-mode='compact'] .pocket-arrow { width: 48px; height: 48px; }
+.ui-layer[data-mode='compact'] .pocket-bar { grid-template-columns: 48px 1fr 48px; min-height: 48px; }
+.ui-layer[data-mode='compact'] .mon-step { height: 48px; }

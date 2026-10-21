@@ -1,0 +1,41 @@
+from sys-hall-of-fame.replay
+# sys-hof-pc (docs/research/hall-of-fame-credits.md §3): after the clear, a Pokémon Center PC offers
+# HALL OF FAME (FLAG_GAME_COMPLETED). The viewer opens on the newest entry's first member; A shows its moves and
+# back, Down the next member, Right wraps to the same (only) entry; B closes it (6-frame fades) and the script
+# returns to the PC's menu. Read only: the history is unchanged.
+warp platinum:MAP_HEADER_JUBILIFE_CITY_POKECENTER_1F 12 4 up
+until idle
++1 press a
++1 release a
+advance text
+# SOMEONE'S PC, <player>'S PC, PROF. ROWAN'S PC, HALL OF FAME, SWITCH OFF
++5 press down
++1 release down
++1 press down
++1 release down
++1 press down
++1 release down
++1 press a
++1 release a
+until app hall-of-fame 600
++10 screenshot hof-pc
++0 press a
++1 release a
++1 screenshot hof-pc-moves
++0 press a
++1 release a
++1 press down
++1 release down
++1 press right
++1 release right
++1 press b
++1 release b
+until app none 60
++0 assert state hallOfFame.total 1
++0 assert state hallOfFame.entries.length 1
+until menu 600
++5 press b
++1 release b
+advance text
+until idle 600
++0 assert position platinum:MAP_HEADER_JUBILIFE_CITY_POKECENTER_1F 12 4

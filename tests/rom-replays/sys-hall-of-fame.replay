@@ -1,0 +1,49 @@
+# sys-hall-of-fame (docs/research/hall-of-fame-credits.md): a constructed
+# start (setup lines, no story chain) in the Champion room as the elevator lands, a team of six at level 100. Cynthia's
+# room script walks the player up and starts her battle (267, fought with the battle auto policy); she leads the
+# player to the Hall of Fame (the hallway's and the room's scripts: get_league_victories 0, the first-victory
+# lines, the Hall of Fame machine's balls), and clear_game: the Champion ribbons, the record screen (A once the
+# whole team stands on the final screen), the save, the credits (unskippable on a first clear: the final screen
+# waits for frame 10080), the OpenSinnoh card, the reset. CONTINUE then loads the clear's save in the player's
+# room upstairs in Twinleaf, facing up, with one Hall of Fame entry and the party healed.
+party 0 platinum:SPECIES_GARCHOMP 100 platinum:MOVE_EARTHQUAKE platinum:MOVE_DRAGON_CLAW platinum:MOVE_CRUNCH platinum:MOVE_FIRE_FANG
+party 1 platinum:SPECIES_INFERNAPE 100 platinum:MOVE_FLARE_BLITZ platinum:MOVE_CLOSE_COMBAT platinum:MOVE_THUNDER_PUNCH platinum:MOVE_MACH_PUNCH
+party 2 platinum:SPECIES_LUCARIO 100 platinum:MOVE_AURA_SPHERE platinum:MOVE_DRAGON_PULSE platinum:MOVE_DARK_PULSE platinum:MOVE_FLASH_CANNON
+party 3 platinum:SPECIES_STARAPTOR 100 platinum:MOVE_BRAVE_BIRD platinum:MOVE_CLOSE_COMBAT platinum:MOVE_RETURN platinum:MOVE_QUICK_ATTACK
+party 4 platinum:SPECIES_GYARADOS 100 platinum:MOVE_WATERFALL platinum:MOVE_ICE_FANG platinum:MOVE_EARTHQUAKE platinum:MOVE_RETURN
+party 5 platinum:SPECIES_MAMOSWINE 100 platinum:MOVE_EARTHQUAKE platinum:MOVE_ICE_SHARD platinum:MOVE_STONE_EDGE platinum:MOVE_ICE_FANG
+# The opening's TV program in the player's room is long over (the room's frame script would run it again).
+set var platinum:VAR_PLAYER_HOUSE_SPECIAL_PROGRAM_STATE 1
+set var platinum:VAR_PLAYER_HOUSE_STATE 7
+warp platinum:MAP_HEADER_POKEMON_LEAGUE_CHAMPION_ROOM 8 17 up
+advance text 3000
+battle auto 60000
++0 assert battle trainer platinum:TRAINER_CHAMPION_CYNTHIA won single
+advance text 20000
++0 assert flag platinum:FLAG_DEFEATED_CYNTHIA true
++0 assert map platinum:MAP_HEADER_POKEMON_LEAGUE_HALL_OF_FAME
++0 assert app hall-of-fame
++0 assert flag platinum:FLAG_GAME_COMPLETED true
++0 assert state party[0].ribbons [32]
++0 assert state party[5].ribbons [32]
++0 assert var platinum:VAR_PLAYER_HOUSE_POSTGAME_STATE 1
++0 screenshot hall-of-fame-member
+# The record screen: each member alone, then the group; only the final screen takes A.
++1500 screenshot hall-of-fame-group
++0 press a
++1 release a
+until app credits 600
++0 assert state hallOfFame.total 1
++0 assert state hallOfFame.entries[0].party[5].species "platinum:SPECIES_MAMOSWINE"
++600 screenshot credits-scroll
++7900 screenshot credits-final
++1700 screenshot credits-card
+until app none 1000
++0 reset
+until idle 600
++0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_2F 4 6
++0 assert state player.facing "up"
++0 assert flag platinum:FLAG_GAME_COMPLETED true
++0 assert flag platinum:FLAG_COMMUNICATION_CLUB_ACCESSIBLE false
++0 assert state hallOfFame.total 1
++0 assert state party[0].ribbons [32]

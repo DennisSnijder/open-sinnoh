@@ -1,0 +1,31 @@
+# ROMs, saves and anything derived from them — never commit
+*.nds
+*.srl
+*.sav
+*.dsv
+.opensinnoh-cache/
+# The old local cache names (pre-rename checkouts)
+.lantern-cache/
+.lantern-nds-cache/
+base-pack/
+test-artifacts/
+rom-out/
+
+# Reference material (read-only research, separate licenses)
+reference-projects/
+
+# Local secrets (Sentry, Vercel): never commit
+.env
+.env.*
+.vercel/
+
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+.DS_Store
+*.log
+.claude/worktrees/
+.claude/settings.local.json
+*.tsbuildinfo

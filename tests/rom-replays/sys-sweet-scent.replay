@@ -1,0 +1,32 @@
+# sys-sweet-scent (decomp field_move_tasks.c FieldMoves_SetSweetScentTask, ov5_021F101C.c, ov5_021F007C.c,
+# wild_encounters.c WildEncounters_TrySweetScentEncounter; item_use_functions.c UseHoneyFromMenu): Sweet Scent from the
+# party in Route 222's grass: the cut-in, the pink blend, then a wild Pokémon whatever the step rate; it is fled. Honey
+# from the bag on bare ground: one goes, the pink blends in and out, "The sweet scent faded…" (COMMON_SCRIPTS 28).
+party 0 platinum:SPECIES_GARCHOMP 50 platinum:MOVE_DRAGON_CLAW
+party 1 platinum:SPECIES_BEAUTIFLY 20 platinum:MOVE_SWEET_SCENT
+give item platinum:ITEM_HONEY 1
+warp platinum:MAP_HEADER_ROUTE_222 744 778 up
+until idle
++0 field move 1 platinum:MOVE_SWEET_SCENT
++90 screenshot sweet-scent
+until battle 600
++0 battle run
+until battle end
+until idle
++0 press right
+until position 752 778
++0 release right
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:1
++1 tap pocket:0
++1 tap row:0
++1 tap menu:0
+until app none
+until message 600
++0 assert text platinum:CommonStrings_Text_SweetScentFaded 0
++0 assert state bag.items []
+advance text
+until idle

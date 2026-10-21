@@ -1,0 +1,46 @@
+# sys-survival-barry-weekend. A constructed start: Barry in the Survival Area (shown
+# once Stark Mountain room 3 clears FLAG_HIDE_SURVIVAL_AREA_RIVAL), on a frozen Friday. On a weekday he only talks
+# (get_day_of_week); on Saturday he battles (TRAINER_RIVAL_SURVIVAL_AREA_1_PIPLUP: no starter saved, under 20 League
+# wins) once a day (FLAG_DAILY_DEFEATED_SURVIVAL_AREA_RIVAL); after the win he only talks. Midnight into Sunday
+# clears the daily flag: he battles again.
+party 0 platinum:SPECIES_GARCHOMP 100 platinum:MOVE_EARTHQUAKE platinum:MOVE_DRAGON_CLAW platinum:MOVE_FIRE_FANG platinum:MOVE_CRUNCH
+party 1 platinum:SPECIES_EMPOLEON 100 platinum:MOVE_SURF platinum:MOVE_ICE_BEAM platinum:MOVE_FLASH_CANNON platinum:MOVE_GRASS_KNOT
+party 2 platinum:SPECIES_LUXRAY 100 platinum:MOVE_THUNDERBOLT platinum:MOVE_CRUNCH platinum:MOVE_ICE_FANG platinum:MOVE_FIRE_FANG
+set flag platinum:FLAG_GAME_COMPLETED true
+set flag platinum:FLAG_HIDE_SURVIVAL_AREA_RIVAL false
+date 2009-03-20 12:00
+warp platinum:MAP_HEADER_SURVIVAL_AREA 651 340 up
+until idle
+# Friday: talk only.
++0 press a
++1 release a
+advance text 3000
+until idle 600
++0 assert battles trainer 0
+# Saturday: the battle.
++0 date 2009-03-21 12:00
++1 press a
++1 release a
+advance text 3000
+battle auto 30000
++0 assert battle trainer platinum:TRAINER_RIVAL_SURVIVAL_AREA_1_PIPLUP won
+advance text 6000
+until idle 600
++0 assert flag platinum:FLAG_DAILY_DEFEATED_SURVIVAL_AREA_RIVAL true
+# Again the same day: talk only.
++0 press a
++1 release a
+advance text 3000
+until idle 600
++0 assert battles trainer 1
+# Sunday: the daily flag cleared, the battle again.
++0 date 2009-03-22 00:00
++1 assert flag platinum:FLAG_DAILY_DEFEATED_SURVIVAL_AREA_RIVAL false
++0 press a
++1 release a
+advance text 3000
+battle auto 30000
++0 assert battles trainer 2
+advance text 6000
+until idle 600
++0 assert flag platinum:FLAG_DAILY_DEFEATED_SURVIVAL_AREA_RIVAL true

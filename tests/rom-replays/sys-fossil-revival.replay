@@ -1,0 +1,60 @@
+from sys-underground-kit.replay
+# sys-fossil-revival (scripts_mining_museum.s, scrcmd_fossil.c): with the Explorer Kit the
+# Oreburgh Mining Museum's researcher revives fossils. Two fossils: get_fossil_count is 2, the menu lists both (the
+# ROM's fossil table order), the Skull Fossil is picked (get_species_from_fossil: Cranidos) and taken; out of the
+# museum and back, Cranidos comes at level 20 (no nickname).
+# Setup: a Skull Fossil and an Armor Fossil (what an even and an odd trainer id dig: sMiningObjects' weights).
+give item platinum:ITEM_SKULL_FOSSIL 1
+give item platinum:ITEM_ARMOR_FOSSIL 1
+warp platinum:MAP_HEADER_MINING_MUSEUM 6 5 up
+until idle
++0 press a
++1 release a
+advance text
++0 press a
++1 release a
+until menu
++10 press down
++1 release down
++2 press a
++1 release a
+advance text
+until idle
++0 assert var platinum:VAR_REVIVED_POKEMON_SPECIES 408
++0 assert state bag.items [{"item":"platinum:ITEM_ARMOR_FOSSIL","count":1}]
+# Out and back in (the map-local flag clears), then the researcher again.
++0 press left
+until position 5 5
++0 release left
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_OREBURGH_CITY"
++0 release down
+until idle
++0 press down
+until position 305 748
++0 release down
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_MINING_MUSEUM"
++0 release up
+until idle
++0 press up
+until position 5 5
++0 release up
+until idle
++0 press right
+until position 6 5
++0 release right
+until idle
++0 press up
++1 release up
++4 press a
++5 release a
+advance text
++0 press b
++1 release b
+until idle
++0 assert party 1 platinum:SPECIES_CRANIDOS
++0 assert state party[1].level 20
++0 assert var platinum:VAR_REVIVED_POKEMON_SPECIES 0

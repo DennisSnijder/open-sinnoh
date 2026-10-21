@@ -1,0 +1,386 @@
+# Turnback Cave: enter the postgame Distortion World through the native portal.
+set flag platinum:FLAG_HIDE_TURNBACK_CAVE_GIRATINA_ROOM_GIRATINA true
+warp platinum:MAP_HEADER_TURNBACK_CAVE_GIRATINA_ROOM 11 15 up
+until idle 6000
++0 press a
++1 release a
+advance text 6000
++0 press a
++1 release a
+advance text 6000
+until idle 6000
++0 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_TURNBACK_CAVE_ROOM"
++0 assert state player.y 1040
+
+# Walk the ghost paths to the Griseous Orb.
++0 press left
+until state player.x 115 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 114 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 113 400
++0 release left
+until idle 6000
++0 press up
+until state player.z 74 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 73 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 72 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 71 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 70 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 69 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 68 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 67 400
++0 release up
+until idle 6000
++0 press right
+until state player.x 114 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 115 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 116 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 117 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 118 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 119 400
++0 release right
+until idle 6000
++0 press left
+until state player.z 65 400
++0 release left
+until idle 6000
++0 press left
+until state player.z 64 400
++0 release left
+until idle 6000
++0 press left
+until state player.z 63 400
++0 release left
+until idle 6000
++0 press left
+until state player.z 62 400
++0 release left
+until idle 6000
++0 press left
+until state player.z 61 400
++0 release left
+until idle 6000
++0 press left
+until state player.z 60 400
++0 release left
+until idle 6000
++0 press left
+until state player.z 59 400
++0 release left
+until idle 6000
++0 press left
+until state player.z 58 400
++0 release left
+until idle 6000
++0 press left
+until state player.z 57 400
++0 release left
+until idle 6000
++0 press left
+until state player.z 56 400
++0 release left
+until idle 6000
++0 press left
+until state player.z 55 400
++0 release left
+until idle 6000
++0 press left
+until state player.z 54 400
++0 release left
+until idle 6000
++0 press down
+until state player.x 117 400
++0 release down
+until idle 6000
++0 press left
+until state player.x 116 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 115 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 114 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 113 400
++0 release left
+until idle 6000
++0 press down
+until state player.z 56 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 57 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 58 400
++0 release down
+until idle 6000
++0 press left
+until state player.x 112 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 111 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 110 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 109 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 108 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 107 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 106 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 103 400
++0 release left
+until idle 6000
++0 press down
+until state player.z 61 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 64 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 65 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 66 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 67 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 68 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 69 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 70 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 71 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 72 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 73 400
++0 release down
+until idle 6000
++0 press left
+until state player.x 100 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 97 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 94 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 91 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 90 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 89 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 88 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 87 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 86 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 85 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 84 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 83 400
++0 release left
+until idle 6000
++0 press up
+until state player.z 72 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 71 400
++0 release up
+until idle 6000
++0 press left
+until state player.x 82 400
++0 release left
+until idle 6000
++0 press up
+until state player.z 70 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 69 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 68 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 67 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 66 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 65 400
++0 release up
+until idle 6000
++0 press right
+until state player.x 83 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 84 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 85 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 86 400
++0 release right
+until idle 6000
++0 press up
+until state player.z 64 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 63 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 62 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 61 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 60 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 57 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 56 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 55 400
++0 release up
+until idle 6000
++0 press right
+until state player.x 87 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 88 400
++0 release right
+until idle 6000
++0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_TURNBACK_CAVE_ROOM","x":88,"z":55,"y":1040,"facing":"right"}
++0 press a
++1 release a
+advance text 6000
+until idle 6000
++0 assert flag platinum:FLAG_OBTAINED_DISTORTION_WORLD_TURNBACK_CAVE_ROOM_GRISEOUS_ORB true
++0 assert state bag.items[item="platinum:ITEM_GRISEOUS_ORB"].count 1

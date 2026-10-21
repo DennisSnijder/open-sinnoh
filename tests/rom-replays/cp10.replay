@@ -1,0 +1,977 @@
+from cp9.replay
++0 reload
+# CP10 (docs/research/story-cp5-19.md §10): from CP9's end at the Great Marsh gate, the
+# grunt chase to Valor Lakefront (847), the SecretPotion, the Psyduck and the Old Charm on Route 210, Celestic
+# (grunt 416, the elder, the painting, Cyrus 913), HM03 Surf; Route 218's blockade gone.
++0 wild auto
++0 evolve auto
+until idle
+# heal at the Pastoria Pokémon Center
++0 press down
+until position 611 816 6000
++0 release down
++0 press left
+until position 600 816 6000
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_PASTORIA_CITY" 3000
++0 release down
+until idle
++8 release select
+# the grunt by the Route 213 gate leaves (PastoriaCity_GruntM, moved east)
++0 press right
+until position 622 816 6000
++0 release right
++0 press up
+until position 622 812 6000
++0 release up
++0 press right
+until position 636 812 6000
++0 release right
+until idle
++0 assert facing player right
++1 press a
++1 release a
+advance text 6000
+until idle 3000
++0 assert flag platinum:FLAG_TALKED_TO_PASTORIA_CITY_GRUNT_M true
++8 release select
+# east through the gate to Route 213
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_213_GATE_TO_PASTORIA_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_213" 3000
++0 release right
+until idle
+# the Route 213 grunt (Route213_GruntM): the first talk moves him on
++0 press right
+until position 653 812 6000
++0 release right
+until idle
++1 press a
++1 release a
+advance text 6000
+until idle 3000
++0 assert flag platinum:FLAG_TALKED_TO_ROUTE_213_GRUNT_M true
++8 release select
+# the second talk on the beach: Looker, and the grunt runs for Valor Lakefront
++0 press right
+until position 671 812 6000
++0 release right
++0 press down
+until position 671 828 6000
++0 release down
++0 press left
+until position 669 828 6000
++0 release left
++0 press down
+until position 669 835 6000
++0 release down
++0 press right
+until position 682 835 6000
++0 release right
++0 press up
+until position 682 833 6000
++0 release up
+until idle
++1 press right
++1 release right
+until idle
++0 assert facing player right
++1 press a
++1 release a
+advance text 6000
+until idle 3000
++0 assert flag platinum:FLAG_ROUTE_213_GRUNT_M_LEFT true
++8 release select
+# back through the hotel lobby to Valor Lakefront
++0 press right
+until position 688 833 6000
++0 release right
++0 press up
+until position 688 832 6000
++0 release up
+# Tuber Jared (beaten) walks row 832 between x 703 and 712 without pausing, and Tuber Chelsea looks over x 704
+# and row 827 at random: follow Jared east from his west end and step up the plateau at x 705
++0 press right
+until position 702 832 6000
++0 release right
+until idle
++0 assert state objects[localId=4].movementType 20
+until state objects[localId=4].x 703 3000
+until state objects[localId=4].x 704 3000
++0 press right
+until position 705 832 600
++0 release right
++0 press up
+until position 705 828 600
++0 release up
++0 press right
+until position 709 828 6000
++0 release right
++0 press up
+until position 709 823 6000
++0 release up
++0 press left
+until position 706 823 6000
++0 release left
++0 press up
+until position 706 819 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_GRAND_LAKE_ROUTE_213_LOBBY" 3000
++0 release up
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_VALOR_LAKEFRONT" 3000
++0 release up
+until idle
++8 release select
+# the grunt at Valor Lakefront (ValorLakefront_GruntM): the first talk moves him north
++0 press up
+until position 706 791 6000
++0 release up
++0 press right
+until position 719 791 6000
++0 release right
+until idle
++1 press up
++1 release up
+until idle
++0 assert facing player up
++1 press a
++1 release a
+advance text 6000
+until idle 3000
++0 assert flag platinum:FLAG_TALKED_TO_VALOR_LAKEFRONT_GRUNT_M true
++8 release select
+# the second talk: grunt 847, then Cynthia and Barry, the SecretPotion
++0 press up
+until position 719 779 6000
++0 release up
++0 press right
+until position 723 779 6000
++0 release right
++0 press up
+until position 723 770 6000
++0 release up
+until idle
++1 press up
++1 release up
+until idle
++0 assert facing player up
++1 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_VALOR_LAKEFRONT won single
+advance text 9000
+# Cynthia: "Have you seen the group of PSYDUCK on Route 210?" YES
+until yesno 600
++1 press a
++1 release a
+advance text 9000
+until idle 3000
++0 assert var platinum:VAR_PASTORIA_CITY_STATE 6
++0 assert state bag.key_items[item="platinum:ITEM_SECRETPOTION"].count 1
++8 release select
+# north over Route 214 to Veilstone (CP9's way back)
++0 press up
+until position 723 742 6000
++0 release up
++0 press right
+until position 729 742 6000
++0 release right
++0 press up
+until position 729 735 6000
++0 release up
+until idle
++8 release select
++0 press up
+until position 729 718 6000
++0 release up
++0 press left
+until position 715 718 6000
++0 release left
++0 press up
+until position 715 713 6000
++0 release up
++0 press right
+until position 718 713 6000
++0 release right
++0 press up
+until position 718 711 6000
++0 release up
++0 press right
+until position 722 711 6000
++0 release right
++0 press up
+until position 722 706 6000
++0 release up
++0 press left
+until position 712 706 6000
++0 release left
++0 press up
+until position 712 695 6000
++0 release up
++0 press right
+until position 720 695 6000
++0 release right
++0 press up
+until position 720 686 6000
++0 release up
++0 press left
+until position 718 686 6000
++0 release left
++0 press up
+until position 718 676 6000
++0 release up
++0 press right
+until position 720 676 6000
++0 release right
++0 press up
+until position 720 671 6000
++0 release up
++0 press left
+until position 718 671 6000
++0 release left
++0 press up
+until position 718 646 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_214_GATE_TO_VEILSTONE_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_CITY" 3000
++0 release up
+until idle
++8 release select
+# Veilstone: heal at the Pokémon Center
++0 press up
+until position 718 628 6000
++0 release up
++0 press right
+until position 721 628 6000
++0 release right
++0 press up
+until position 721 617 6000
++0 release up
++0 press left
+until position 712 617 6000
++0 release left
++0 press up
+until position 712 612 6000
++0 release up
++0 press right
+until position 717 612 6000
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_CITY" 3000
++0 release down
+until idle
++8 release select
+# the Department Store's medicine counter: Hyper Potions for Route 210 North
++0 press left
+until position 710 612 6000
++0 release left
++0 press up
+until position 710 604 6000
++0 release up
++0 press left
+until position 701 604 6000
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_STORE_1F" 3000
++0 release up
+until idle
++8 release select
++0 press up
+until position 10 10 6000
++0 release up
++0 press left
+until position 5 10 6000
++0 release left
++0 press up
+until position 5 5 6000
++0 release up
+until idle
++1 press left
++1 release left
+until idle
++0 assert facing player left
++1 press a
++1 release a
+until app mart
++1 tap menu:0
++1 tap row:2
++1 tap qty:+1
++1 tap qty:+1
++1 tap qty:+1
++1 tap qty:+1
++1 tap ok
++1 tap yes
++1 assert state bag.medicine [{"item":"platinum:ITEM_HYPER_POTION","count":5}]
++1 press a
++1 release a
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
++1 press a
++1 release a
+until app none 5
+until idle
+# and two Max Repels at the ball counter: no wild battles to spend Empoleon's PP before Celestic
++0 press down
+until position 5 7 6000
++0 release down
++0 press left
+until position 2 7 6000
++0 release left
+until idle
++1 press up
++1 release up
+until idle
++0 assert facing player up
++1 press a
++1 release a
+until app mart
++1 tap menu:0
++1 tap row:7
++1 tap qty:+1
++1 tap ok
++1 tap yes
++1 assert state bag.items[item="platinum:ITEM_MAX_REPEL"].count 2
++1 press a
++1 release a
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
++1 press a
++1 release a
+until app none 5
+until idle
++8 release select
++0 press down
+until position 2 12 6000
++0 release down
++0 press right
+until position 10 12 6000
++0 release right
++0 press down
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_CITY" 3000
++0 release down
+until idle
+# a Max Repel
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:0
++1 tap row:2
++1 tap menu:0
++1 assert state repel 250
++0 assert state bag.items[item="platinum:ITEM_MAX_REPEL"].count 1
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
++8 release select
+# west through Veilstone to Route 215
++0 press down
+until position 701 606 6000
++0 release down
++0 press right
+until position 710 606 6000
++0 release right
++0 press down
+until position 710 617 6000
++0 release down
++0 press left
+until position 702 617 6000
++0 release left
++0 press up
+until position 702 608 6000
++0 release up
++0 press left
+until position 690 608 6000
++0 release left
++0 press up
+until position 690 598 6000
++0 release up
++0 press left
+until position 679 598 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_215_GATE_TO_VEILSTONE_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_215" 3000
++0 release left
+until idle
++8 release select
+# Route 215 west under the bridges to the Psyduck on Route 210 South
++0 press left
+until position 646 598 6000
++0 release left
++0 press up
+until position 646 590 6000
++0 release up
++0 press right
+until position 654 590 6000
++0 release right
++0 press up
+until position 654 585 6000
++0 release up
++0 press left
+until position 630 585 6000
++0 release left
++0 press up
+until position 630 583 6000
++0 release up
++0 press left
+until position 618 583 6000
++0 release left
++0 press down
+until position 618 593 6000
++0 release down
++0 press left
+until position 604 593 6000
++0 release left
+# Jogger Craig runs a loop round x 598–603, rows 590–593: cross inside it on row 592
++0 press up
+until position 604 592 6000
++0 release up
++0 press left
+until position 597 592 6000
++0 release left
++0 press down
+until position 597 593 6000
++0 release down
++0 press left
+until position 584 593 6000
++0 release left
++0 press down
+until position 584 597 6000
++0 release down
++0 press left
+until position 561 597 6000
++0 release left
++0 press up
+until position 561 588 6000
++0 release up
+until idle
++0 assert facing player up
+# the SecretPotion: YES; then Cynthia's Old Charm: YES
++1 press a
++1 release a
+advance text 6000
+until yesno 600
++1 press a
++1 release a
+advance text 9000
+until yesno 600
++1 press a
++1 release a
+advance text 9000
+until idle 3000
++0 assert flag platinum:FLAG_USED_SECRETPOTION true
++0 assert state bag.key_items[item="platinum:ITEM_OLD_CHARM"].count 1
++8 release select
+# north on Route 210 South: the Max Repel wears off five steps on (a fixed step count on every seed); the second one
++0 press up
+until state repel 0 600
++0 release up
++90 press a
++1 release a
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:0
++1 tap row:2
++1 tap menu:0
++1 assert state repel 250
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
++0 press up
+until position 561 572 6000
++0 release up
++0 press right
+until position 564 572 6000
++0 release right
++0 press up
+until position 564 552 6000
++0 release up
++0 press left
+until position 563 552 6000
++0 release left
++0 press up
+until position 563 544 6000
++0 release up
+until idle
++8 release select
+# Ace Trainer Alyssa looks north over the only way west (547, 533). One Pokémon on Route 210 North: double
+# trainers (Zac and Jen) never battle it, so their seed-dependent spot on the ledge does not matter
++0 press up
+until position 563 540 6000
++0 release up
++0 press left
+until position 553 540 6000
++0 release left
++0 press up
+until position 553 533 6000
++0 release up
++0 press left
+until position 548 533 6000
++0 release left
++0 press left
+until message 3000
++0 release left
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_ALYSSA won single
++8 release select
+# up the stairs at x 543 to the double team's ledge, west along row 527 and up the stairs at x 539
++0 press left
+until position 543 533 6000
++0 release left
++0 press up
+until position 543 527 6000
++0 release up
++0 press left
+until position 539 527 6000
++0 release left
++0 press up
+until position 539 521 6000
++0 release up
++0 press left
+until position 535 521 6000
++0 release left
+until idle
+# Fog lengthens the fights: heal from the five Hyper Potions bought in Solaceon.
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:1
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
+# Ace Trainer Ernest looks north and east at random: wait in his north line until he turns and sees the player
++0 press left
+until position 534 521 6000
++0 release left
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_ERNEST won single
++8 release select
+# west on the high path: the bike bridge from x 520 needs the Bicycle
++0 press left
+until position 521 521 3000
++0 release left
+until idle
++1 press y
++1 release y
+until state playerState "cycle"
+until idle
++8 release select
+# Ninja Boy Davido jumps out at the bridge's west end
++0 press left
+until message 3000
++0 release left
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_NINJA_BOY_DAVIDO won single
++8 release select
++8 release select
++8 release select
+# back east over the bike bridge; down the plain bridge at x 522 to the low path (row 535)
++0 press right
+until position 522 521 600
++0 release right
+until idle
++1 press y
++1 release y
+until state playerState "walk" 300
+until idle
++0 press down
+until position 522 535 600
++0 release down
+until idle
++8 release select
+# Black Belt Adam looks east over the bridge's foot (row 540)
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:1
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
++0 press down
+until message 3000
++0 release down
+advance text
+battle auto move 2 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_BLACK_BELT_ADAM won single
++8 release select
+# west on the low path below the bridge: Bird Keeper Brianna looks south over it (x 511)
++0 press down
+until position 522 541 6000
++0 release down
++0 press left
+until position 516 541 6000
++0 release left
++0 press up
+until position 516 535 6000
++0 release up
++0 press left
+until position 512 535 6000
++0 release left
++0 press left
+until message 3000
++0 release left
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_BIRD_KEEPER_BRIANNA won single
++8 release select
+# north round the water and west over the bridge to the stairs
++0 press left
+until position 510 535 600
++0 release left
++0 press up
+until position 510 530 600
++0 release up
++0 press left
+until position 495 530 600
++0 release left
+until idle
+# Recover before the final fog trainer; Grass Knot conserves the depleted Cut PP.
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:1
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
+# Veteran Brian, who looks south and west at random over the stairs (x 494): wait in his
+# south line until he turns and sees the player; use the remaining Grass Knot PP for his team
++0 press left
+until position 494 530 600
++0 release left
+until message 6000
+advance text
+battle auto move 2 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_VETERAN_BRIAN won single
++0 press left
+until position 492 530 600
++0 release left
+until idle
+# Celestic Town: heal at the Pokémon Center
++0 press left
+until position 475 530 6000
++0 release left
++0 press down
+until position 475 539 6000
++0 release down
++0 press left
+until position 472 539 6000
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_CELESTIC_TOWN" 3000
++0 release down
+until idle
++8 release select
+# north into the plaza: the elder stops the player (CelesticTown_CoordEvent_Elder); the second Max Repel wears off on the way
++0 press left
+until state repel 0 600
++0 release left
++90 press a
++1 release a
+until idle
++0 press left
+until position 464 539 6000
++0 release left
++0 press up
+until message 3000
++0 release up
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_CELESTIC_TOWN_ELDER_STATE 1
++8 release select
+# the grunt at the ruins (CelesticTown_GruntM): grunt 416, the Old Charm to the elder
++0 press right
+until position 465 538 6000
++0 release right
++0 press up
+until position 465 523 6000
++0 release up
++0 press left
+until position 463 523 6000
++0 release left
+until idle
++1 press up
++1 release up
+until idle
++0 assert facing player up
++1 press a
++1 release a
+advance text
+# "Are you going to mess with me?" YES
+until yesno 600
++1 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_CELESTIC_TOWN won single
+advance text 9000
+until idle 3000
++0 assert flag platinum:FLAG_DELIVERED_OLD_CHARM true
++8 release select
+# into the ruins
++0 press up
+until state player.zone "platinum:MAP_HEADER_CELESTIC_TOWN_CAVE" 3000
++0 release up
+until idle
++8 release select
+# the painting (CelesticTownCave_Painting): the elder and Cyrus, his battle (913), HM03
++0 press up
+until position 10 12 6000
++0 release up
++0 press right
+until position 12 12 6000
++0 release right
++0 press up
+until position 12 10 6000
++0 release up
++0 press right
+until position 14 10 6000
++0 release right
++0 press up
+until position 14 4 6000
++0 release up
++0 press left
+until position 11 4 6000
++0 release left
++0 press up
+until position 11 3 6000
++0 release up
++0 press left
+until position 10 3 600
++0 release left
+until idle
++1 press up
++1 release up
+until idle
++0 assert facing player up
++1 press a
++1 release a
+advance text 6000
++0 assert flag platinum:FLAG_EXAMINED_CELESTIC_TOWN_CAVE_PAINTING true
+# Cyrus: "If you feel that way, challenge me." YES
+until yesno 600
++1 press a
++1 release a
+advance text
+battle auto 20000
++0 assert battle trainer platinum:TRAINER_GALACTIC_BOSS_CYRUS_CELESTIC_TOWN_RUINS won single
+advance text 9000
+until idle 3000
++0 assert state bag.tmhms[item="platinum:ITEM_HM03"].count 1
++0 assert var platinum:VAR_CELESTIC_TOWN_STATE 1
++8 release select
+# HM03 Surf to Empoleon over Brine
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:3
++1 tap row:7
++1 tap menu:0
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap yes
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap yes
++1 press a
++1 release a
++1 assert app summary
++1 tap move:2
++1 tap move:2
++1 assert state party[0].moves ["platinum:MOVE_ROCK_SMASH","platinum:MOVE_GRASS_KNOT","platinum:MOVE_SURF","platinum:MOVE_CUT"]
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
++8 release select
+# out of the ruins: Cynthia outside (CelesticTown's frame event), Route 218 opens
++0 press down
+until position 10 4 6000
++0 release down
++0 press right
+until position 14 4 6000
++0 release right
++0 press down
+until position 14 10 6000
++0 release down
++0 press left
+until position 12 10 6000
++0 release left
++0 press down
+until position 12 12 6000
++0 release down
++0 press left
+until position 10 12 6000
++0 release left
++0 press down
+until position 10 20 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_CELESTIC_TOWN" 3000
++0 release down
+advance text 9000
+until idle 3000
++0 assert var platinum:VAR_CELESTIC_TOWN_STATE 2
++0 assert flag platinum:FLAG_HIDE_ROUTE_218_BLOCKADE true
+# the browser spec's beat: Celestic Town after the ruins
++0 screenshot celestic-town
+# end of CP10
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_VALOR_LAKEFRONT won single
++0 assert var platinum:VAR_PASTORIA_CITY_STATE 6
++0 assert flag platinum:FLAG_USED_SECRETPOTION true
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_CELESTIC_TOWN won single
++0 assert battle trainer platinum:TRAINER_GALACTIC_BOSS_CYRUS_CELESTIC_TOWN_RUINS won single
++0 assert flag platinum:FLAG_DELIVERED_OLD_CHARM true
++0 assert flag platinum:FLAG_EXAMINED_CELESTIC_TOWN_CAVE_PAINTING true
++0 assert state bag.tmhms[item="platinum:ITEM_HM03"].count 1
++0 assert state party[0].moves ["platinum:MOVE_ROCK_SMASH","platinum:MOVE_GRASS_KNOT","platinum:MOVE_SURF","platinum:MOVE_CUT"]
++0 assert var platinum:VAR_CELESTIC_TOWN_STATE 2
++0 assert flag platinum:FLAG_HIDE_ROUTE_218_BLOCKADE true

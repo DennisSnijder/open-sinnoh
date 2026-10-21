@@ -1,0 +1,59 @@
+from cp2.replay
+# Losing a trainer battle (decomp Battles_LostBattle → BlackOutFromBattle → FieldTask_BlackOutFromBattle).
+# After the catching tutorial: through Sandgem's Pokémon Center (entering it by its door makes it the
+# blackout spawn, decomp FieldMapChange_UpdateGameData), then north to Youngster Tristan, fighting with Growl
+# only. Piplup loses: the battle pays the penalty (highest level · 4 · 2 with no badges; the ROM test checks
+# it, the level differs by seed), the script blacks
+# out, and the player is back at the center's counter, where the nurse heals the party (CommonScript_
+# PokecenterBlackOutRecover). Wild battles on the way are fought (wild auto, from the opening).
++0 press right
+until position 184 827
++0 release right
++0 press down
+until position 184 843
++0 release down
++0 press left
+until position 177 843
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 assert state blackOut "platinum:MAP_HEADER_SANDGEM_TOWN_POKECENTER_1F"
++0 press down
+until position 177 843
++0 release down
+until idle
++0 press right
+until position 184 843 3600
++0 release right
++0 press up
+until position 184 827 3600
++0 release up
++0 press left
+until position 178 827 3600
++0 release left
+# north on Route 202: Tristan sees the player (as cp3)
++0 press up
+until position 178 825 3600
++0 release up
++0 press left
+until position 165 825 3600
++0 release left
++0 press up
+until position 165 818 3600
++0 release up
++0 press right
+until position 166 818 3600
++0 release right
+advance text
+battle auto move 2 18000
++0 assert battle trainer platinum:TRAINER_YOUNGSTER_TRISTAN lost
++0 assert state party[0].hp 0
+# the blackout: the warp to the center (facing up), then the nurse's recover script heals
+until position 8 6
++0 assert position platinum:MAP_HEADER_SANDGEM_TOWN_POKECENTER_1F 8 6
+advance text
+until idle
++0 assert state party[0].status "none"
++0 assert flag platinum:FLAG_DEFEATED_TRAINER_YOUNGSTER_TRISTAN false

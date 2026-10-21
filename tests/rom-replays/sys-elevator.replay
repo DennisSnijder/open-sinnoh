@@ -1,0 +1,48 @@
+# sys-elevator: Veilstone Department Store. From 1F into the elevator,
+# ask the receptionist for 4F (menu entry 1): the script sets the special location (4F warp 2, decomp
+# SetSpecialLocation) and plays the elevator ride; the exit mat (a dynamic warp) lands on 4F. The
+# `elevator-door` (the BTP0 door opening) and `elevator-ride` (the lights) screenshot lines are the
+# browser spec's key beats.
+warp platinum:MAP_HEADER_VEILSTONE_STORE_1F 15 3 up
+until idle
++0 press up
++6 screenshot elevator-door
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_STORE_ELEVATOR"
++0 release up
+until idle
+# from the mat (3, 6) one step west to (2, 6), then face the receptionist at (1, 6)
++0 press left
+until position 2 6
++0 release left
+until idle
++0 press left
++1 release left
+until idle
++0 assert facing player left
++0 press a
++1 release a
+# the greeting has two pages, then the floor menu
+advance text
+# the menu takes input after its 3-tick delay
++3 press down
++1 release down
++1 press a
++1 release a
+# "Certainly." waits for A; the ride starts after it
+until message
++0 press a
++1 release a
++44 screenshot elevator-ride
+advance text
+until idle
++0 assert state specialLocation {"zone": "platinum:MAP_HEADER_VEILSTONE_STORE_4F", "warp": 2, "x": 18, "z": 2, "facing": "down"}
+# back onto the exit mat (3, 6), a WARP_ENTRANCE_SOUTH tile: pushing down on it warps
++0 press right
+until position 3 6
++0 release right
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_STORE_4F"
++0 release down
+until idle
++0 assert map platinum:MAP_HEADER_VEILSTONE_STORE_4F

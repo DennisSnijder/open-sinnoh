@@ -1,0 +1,6 @@
+/*
+ * The starter-choice scene: a full-bleed layer over the field view (under the on-screen controls).
+ * The 3D canvas draws at DS-pixel size and is upscaled crisply; the 2D canvas is at device resolution.
+ */
+.starter { position: absolute; z-index: 2; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; cursor: pointer; }
+.starter-3d, .starter-2d { position: absolute; left: 0; top: 0; display: block; image-rendering: pixelated; image-rendering: crisp-edges; }

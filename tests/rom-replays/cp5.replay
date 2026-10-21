@@ -1,0 +1,598 @@
+from cp4.replay
++0 reload
+# CP5 (docs/research/story-cp5-19.md §5): from CP4's end in the Oreburgh gym,
+# the Jubilife tag battle (Dawn or Lucas by gender, the team by the starter, against grunts 414 and 415:
+# type 75), Route 204 and the Ravaged Path (Rock Smash), Floaroma, the little girl on Route 205 South, the
+# Windworks door grunt (843), Floaroma Meadow's grunts (296, 297) and the Works Key, the Windworks: Mars
+# (295), and Looker outside, to the moment he leaves.
+# The first story chunk starts here: the line after `from` is a save → load, so the chain anchor (a save of CP4's
+# end, tests/integration/checkpoints-anchors.ts) and the chain from scratch play the same ticks. The battle
+# log and the replay modes are not in a save: this replay asserts its own battles and sets its modes.
+# Real battles only: trainers with `battle auto` after the `advance text` that brings them, wild battles
+# fought by the waits (`wild auto`); no `party` lines. Trainers whose sight depends on a random look
+# (Aroma Lady Taylor, the Windworks grunt at (3, 8)) are talked to from where they never look; Bug Catcher
+# Brandon is passed right after he turns (`until state objects[movementType=20].x 182`).
+#
+# Team and route plan (CP5–8):
+# - The starter carries the team and every HM the chunk needs. Piplup evolves (`evolve auto` from here) at
+#   its first level up, as Prinplup learns HM06 Rock Smash (Piplup cannot) over Pound for the Ravaged Path
+#   (CP5); Cut (HM01, Eterna, CP6) goes over Bubble; Prinplup also takes Surf, Strength, Defog and
+#   Waterfall later, Empoleon (36) Rock Climb (CP13). Fly (HM02, CP8) is not needed on the path.
+# - Level targets per leader, levelled with `grind` where the story path falls short, healed in between:
+#   Mars (Purugly 17) at 20+ (reached on the path); Jupiter (Skuntank 23) and Gardenia (Roserade 22, Peck
+#   and Rock Smash) at 26; Fantina (Mismagius 26) at 30; Maylene (Lucario 32, Bubble Beam) at 34; the
+#   Veilstone tag grunts (Stunky and Croagunk 26) with the counterpart.
+# - Catches: the team grows by the story's gifts (the Togepi Egg, CP7; Eevee from Bebe in Hearthome, CP7).
+#   A chosen wild species cannot be caught on every seed (encounters differ per seed and the grammar has no
+#   wait on a species), so wild catches stay out of the chain until the replays can wait for a species.
++0 wild auto
++0 evolve auto
++0 press b
++0 press down
+until state player.zone "platinum:MAP_HEADER_OREBURGH_CITY" 3000
++0 release down
+until idle
+# out of the gym, heal at the Pokémon Center next door
++0 press right
+until position 303 757
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until position 303 757
++0 release down
+until idle
+# west across Oreburgh; Barry runs into the player on the coord trigger at x 262
++0 press left
+until position 270 757
++0 release left
++0 press up
+until position 270 750
++0 release up
++0 press left
+until message
++0 release left
+advance text
+until idle
++0 press left
+until position 259 750
++0 release left
++0 press up
+until position 259 749
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_OREBURGH_GATE_1F" 3000
++0 release left
+until idle
+# through the gate and along Route 203 (its trainers were beaten in CP4)
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_203" 3000
++0 release left
+until idle
++0 press left
+until position 242 749
++0 release left
++0 press down
+until position 242 756
++0 release down
++0 press left
+until position 223 756
++0 release left
++0 press down
+until position 223 757
++0 release down
++0 press left
+until position 207 757
++0 release left
++0 press down
+until position 207 758
++0 release down
+# Jubilife: Looker's scene on the trigger at x 188
++0 press left
+until message
++0 release left
+advance text
+until idle
+# north to Team Galactic (the map signpost stands at 176, 744)
++0 press b
++0 press left
+until position 176 758
++0 release left
++0 press up
+until position 176 745
++0 release up
++0 press left
+until position 175 745
++0 release left
++0 press up
+until message
++0 release up
++0 release b
+advance text 6000
+# the tag battle: the player's battler by `battle auto`, the counterpart by its trainer AI (the browser
+# spec's beat: four battlers)
++12 screenshot jubilife-tag-battle
+battle auto 9000
+advance text 9000
+# end: the grunts retreat, the counterpart and Rowan leave, the Fashion Case
++0 assert var platinum:VAR_JUBILIFE_CITY_STATE 4
++0 assert var platinum:VAR_JUBILIFE_LOOKER_PAL_PAD_STATE 2
++0 assert var platinum:VAR_OREBURGH_CITY_STATE 3
++0 assert flag platinum:FLAG_RECEIVED_FASHION_CASE true
++0 assert flag platinum:FLAG_HIDE_JUBILIFE_GALACTIC_GRUNTS true
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_JUBILIFE_CITY_1 won ai-partner
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_JUBILIFE_CITY_2 won ai-partner
+# north to Route 204 South. Lass Sarah looks north and east at random over the whole corridor: the player
+# talks to her from the south.
++0 press b
++0 press up
+until position 174 736
++0 release up
++0 press left
+until position 172 736
++0 release left
++0 press up
+until position 172 726
++0 release up
++0 release b
+until idle
++0 press up
++1 release up
+until idle
++0 press a
++1 release a
+advance text
+battle auto 9000
+advance text
++0 assert battle trainer platinum:TRAINER_LASS_SARAH won
++0 press b
++0 press right
+until position 175 726
++0 release right
++0 press up
+until position 175 722
++0 release up
++0 press left
+until position 173 722
++0 release left
++0 press up
+until position 173 717
++0 release up
++0 release b
+until idle
+# Prinplup (Piplup evolves at 16 and is past it) is needed for HM06: the first level up evolves it
+grind 0 19 down up
++0 assert party 0 platinum:SPECIES_PRINPLUP
+# HM06 (from the Oreburgh Gate hiker in CP4) to Prinplup from the bag: forget Pound for Rock Smash
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:3
++1 tap row:2
++1 tap menu:0
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap yes
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap yes
++1 press a
++1 release a
++1 assert app summary
++1 tap move:0
++1 tap move:0
++1 assert state party[0].moves ["platinum:MOVE_ROCK_SMASH","platinum:MOVE_PECK","platinum:MOVE_BUBBLE","platinum:MOVE_BUBBLE_BEAM"]
++0 assert state bag.tmhms[item="platinum:ITEM_HM06"].count 1
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
+# north through the grass to the Ravaged Path
++0 press b
++0 press up
+until position 173 708
++0 release up
++0 press left
+until position 171 708
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_RAVAGED_PATH" 3000
++0 release up
++0 release b
+until idle
+# Rock Smash on the rock at (22, 43), then east to the Route 204 North exit
++0 press b
++0 press up
+until position 19 43
++0 release up
++0 press right
+until position 21 43
++0 release right
++0 release b
+until idle
++0 press right
++1 release right
+until idle
++0 assert facing player right
++0 press a
++1 release a
+until yesno
++0 press a
++1 release a
+advance text
+until idle
++0 press b
++0 press right
+until position 28 43
++0 release right
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_204_NORTH" 3000
++0 release down
++0 release b
+until idle
+# Route 204 North to Floaroma Town. Aroma Lady Taylor looks south and east at random over every way north:
+# the player talks to her from the west. Bug Catcher Brandon walks 178–182 on z 685 (sight 1): the player
+# crosses at x 177 right after he turns at 182.
++0 press b
++0 press down
+until position 180 699
++0 release down
++0 press left
+until position 172 699
++0 release left
++0 press up
+until position 172 692
++0 release up
++0 press right
+until position 176 692
++0 release right
++0 release b
+until idle
++0 press right
++1 release right
+until idle
++0 press a
++1 release a
+advance text
+battle auto 9000
+advance text
++0 assert battle trainer platinum:TRAINER_AROMA_LADY_TAYLOR won
++0 press b
++0 press down
+until position 176 693
++0 release down
++0 press right
+until position 181 693
++0 release right
++0 press up
+until position 181 692
++0 release up
++0 press right
+until position 183 692
++0 release right
++0 press up
+until position 183 687
++0 release up
++0 press left
+until position 177 687
++0 release left
++0 press up
+until position 177 686
++0 release up
++0 release b
+until idle
+until state objects[movementType=20].x 182
++0 press b
++0 press up
+until position 177 684
++0 release up
++0 press left
+until position 172 684
++0 release left
++0 press up
+until position 172 669
++0 release up
++0 release b
+until idle
+# heal at Floaroma's Pokémon Center
++0 press right
+until position 176 669
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until position 176 667
++0 release down
+until idle
+# east to Route 205 South: the little girl's coord event at x 211 (her father is held in the Windworks)
++0 press b
++0 press right
+until position 189 667
++0 release right
++0 press up
+until position 189 660
++0 release up
++0 press right
+until message
++0 release right
++0 release b
+advance text
+until idle
++0 assert var platinum:VAR_VALLEY_WINDWORKS_STATE 1
++0 assert flag platinum:FLAG_TALKED_TO_ROUTE_205_SOUTH_LITTLE_GIRL true
++0 assert flag platinum:FLAG_HIDE_FLOAROMA_TOWN_GRUNTS true
+# east to the Valley Windworks: the grunt at the door (843)
++0 press b
++0 press right
+until position 212 660
++0 release right
++0 press down
+until position 212 662
++0 release down
++0 press right
+until position 242 662
++0 release right
++0 release b
+until idle
++0 press up
+until position 242 656
++0 release up
++0 press right
+until position 243 656
++0 release right
+until idle
++0 press up
++1 release up
+until idle
++0 assert facing player up
++0 press a
++1 release a
+advance text
+battle auto 9000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_VALLEY_WINDWORKS_1 won single
+# back west to Floaroma Town and into Floaroma Meadow (the grunts at its gate left)
++0 press b
++0 press down
+until position 243 657
++0 release down
++0 press left
+until position 242 657
++0 release left
++0 press down
+until position 242 662
++0 release down
++0 press left
+until position 212 662
++0 release left
++0 press up
+until position 212 660
++0 release up
++0 press left
+until position 168 660
++0 release left
++0 press up
+until position 168 642
++0 release up
++0 press left
+until position 163 642
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_FLOAROMA_MEADOW" 3000
++0 release up
++0 release b
+until idle
+# the two grunts holding the Honey man (296, then 297), the Works Key
++0 press up
+until message
++0 release up
+advance text
+battle auto 9000
+advance text
+battle auto 9000
+advance text 6000
+until idle
++0 assert var platinum:VAR_FLOAROMA_MEADOW_STATE 1
++0 assert flag platinum:FLAG_OBTAINED_FLOAROMA_MEADOW_WORKS_KEY true
++0 assert flag platinum:FLAG_DEFEATED_FLOAROMA_MEADOW_GRUNTS true
++0 assert state bag.key_items[item="platinum:ITEM_WORKS_KEY"].count 1
+# back to the Windworks: the Works Key opens the door
++0 press b
++0 press down
+until state player.zone "platinum:MAP_HEADER_FLOAROMA_TOWN" 3000
++0 release down
+until idle
++0 press down
+until position 163 642
++0 release down
++0 press right
+until position 168 642
++0 release right
++0 press down
+until position 168 660
++0 release down
++0 press right
+until position 212 660
++0 release right
++0 press down
+until position 212 662
++0 release down
++0 press right
+until position 242 662
++0 release right
++0 press up
+until position 242 655
++0 release up
++0 press right
+until position 243 655
++0 release right
++0 release b
+until idle
++0 press up
++1 release up
+until idle
++0 press a
++1 release a
+advance text
+until yesno
++0 press a
++1 release a
+advance text
+until idle
++0 assert flag platinum:FLAG_UNLOCKED_VALLEY_WINDWORKS_DOOR true
++0 press up
+until state player.zone "platinum:MAP_HEADER_VALLEY_WINDWORKS_BUILDING" 3000
++0 release up
+advance text
+until idle
++0 assert var platinum:VAR_VALLEY_WINDWORKS_TEAM_GALACTIC_STATE 1
+# inside: the grunt at (3, 8) looks north and west at random over the only way up; the player talks to him
+# from the south
++0 press b
++0 press up
+until position 12 15
++0 release up
++0 press left
+until position 3 15
++0 release left
++0 press up
+until position 3 9
++0 release up
++0 release b
+until idle
++0 press up
++1 release up
+until idle
++0 press a
++1 release a
+advance text
+battle auto 9000
+advance text
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_VALLEY_WINDWORKS_2 won single
+# to Mars: her coord event at x 19
++0 press b
++0 press left
+until position 2 9
++0 release left
++0 press up
+until position 2 7
++0 release up
++0 press right
+until position 8 7
++0 release right
++0 press down
+until position 8 8
++0 release down
++0 press right
+until position 13 8
++0 release right
++0 press up
+until position 13 7
++0 release up
++0 press right
+until message
++0 release right
++0 release b
+advance text
+battle auto 9000
+advance text 6000
+until idle
++0 assert battle trainer platinum:TRAINER_COMMANDER_MARS_VALLEY_WINDWORKS won single
++0 assert var platinum:VAR_VALLEY_WINDWORKS_STATE 2
++0 assert var platinum:VAR_VALLEY_WINDWORKS_LOOKER_STATE 1
++0 assert var platinum:VAR_VALLEY_WINDWORKS_TEAM_GALACTIC_STATE 2
++0 assert flag platinum:FLAG_HIDE_ROUTE_205_SOUTH_GRUNTS true
+# out of the Windworks: Looker inspects the door outside, then leaves
++0 press b
++0 press left
+until position 13 7
++0 release left
++0 press down
+until position 13 8
++0 release down
++0 press left
+until position 8 8
++0 release left
++0 press up
+until position 8 7
++0 release up
++0 press left
+until position 2 7
++0 release left
++0 press down
+until position 2 15
++0 release down
++0 press right
+until position 12 15
++0 release right
++0 press down
+until state player.zone "platinum:MAP_HEADER_VALLEY_WINDWORKS_OUTSIDE" 3000
++0 release down
++0 release b
+advance text
+until idle
+# end of CP5: Looker has left the Windworks (the browser spec's beat)
++0 screenshot windworks-end
++0 assert map platinum:MAP_HEADER_VALLEY_WINDWORKS_OUTSIDE
++0 assert var platinum:VAR_VALLEY_WINDWORKS_STATE 2
++0 assert var platinum:VAR_VALLEY_WINDWORKS_TEAM_GALACTIC_STATE 3
++0 assert var platinum:VAR_VALLEY_WINDWORKS_LOOKER_STATE 2
++0 assert flag platinum:FLAG_UNLOCKED_VALLEY_WINDWORKS_DOOR true
++0 assert flag platinum:FLAG_OBTAINED_FLOAROMA_MEADOW_WORKS_KEY true
++0 assert flag platinum:FLAG_DEFEATED_FLOAROMA_MEADOW_GRUNTS true
++0 assert flag platinum:FLAG_HIDE_ROUTE_205_SOUTH_GRUNTS true
++0 assert var platinum:VAR_JUBILIFE_CITY_STATE 4
++0 assert flag platinum:FLAG_RECEIVED_FASHION_CASE true
++0 assert flag platinum:FLAG_HIDE_VALLEY_WINDWORKS_OUTSIDE_LOOKER true
+# The battle log of this replay: every scripted battle by trainer, result and topology.
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_JUBILIFE_CITY_1 won ai-partner
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_JUBILIFE_CITY_2 won ai-partner
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_VALLEY_WINDWORKS_1 won single
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_FLOAROMA_MEADOW_1 won single
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_FLOAROMA_MEADOW_2 won single
++0 assert battle trainer platinum:TRAINER_COMMANDER_MARS_VALLEY_WINDWORKS won single
++0 assert battle wild * won

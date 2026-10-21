@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Model Viewer</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #202428; color: #e8e8e8; font: 13px system-ui, sans-serif; }
+      #bar { position: fixed; top: 0; left: 0; right: 0; display: flex; gap: 12px; align-items: center; padding: 8px 12px; background: #2c3136; z-index: 1; }
+      #view { position: fixed; inset: 40px 0 0 0; }
+      canvas { display: block; }
+    </style>
+  </head>
+  <body>
+    <div id="bar">
+      <label>ROM <input id="rom" type="file" accept=".nds" /></label>
+      <label>Chunk <select id="chunk" disabled></select></label>
+      <label><input id="props" type="checkbox" checked /> props</label>
+      <span id="status">Pick your Platinum (US) ROM. It stays in this tab.</span>
+    </div>
+    <div id="view"></div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

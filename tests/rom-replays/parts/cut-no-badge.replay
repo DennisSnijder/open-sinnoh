@@ -1,0 +1,14 @@
+# Part of sys-cut: A on the Route 204 North tree without the Forest Badge gives the "can be cut"
+# message and no yes/no (advance text runs to idle); the tree stays.
+party 0 platinum:SPECIES_BIBAREL 30 platinum:MOVE_CUT
+warp platinum:MAP_HEADER_ROUTE_204_NORTH 181 679 up
+until idle
++0 assert state objects[localId=8].z 678
++0 press a
++1 release a
+until message
++0 assert message open
+advance text
+until idle
++0 assert flag platinum:FLAG_MAP_LOCAL_HIDE_OBSTACLE_1 false
++0 assert state objects[localId=8].z 678

@@ -1,0 +1,17 @@
+from parts/mud.replay
+# sys-mud-snow: deep mud in the part. Route 216 on 2009-01-06
+# (HEAVY_SNOW): walking from SNOW_DEEPER takes the slow walk (16 ticks a tile, decomp
+# MapObject_GetDeepSnowMovementAction), so 8 ticks after a step starts the player has not started the
+# next one. The `footprints` screenshot line, right after the steps and before the tracks fade (32 ticks),
+# marks where the test checks FieldView.effects (headless) and the browser spec checks the tracks are drawn.
+date 2009-01-06
+warp platinum:MAP_HEADER_ROUTE_216 298 402 down
+until idle
++0 assert state weather "platinum:OVERWORLD_WEATHER_HEAVY_SNOW"
++0 press down
+until position 298 404
++8 assert position platinum:MAP_HEADER_ROUTE_216 298 404
++8 assert position platinum:MAP_HEADER_ROUTE_216 298 405
++0 release down
++0 screenshot footprints
+until idle

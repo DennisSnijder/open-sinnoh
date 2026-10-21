@@ -1,0 +1,49 @@
+from m6-cresselia.replay
+# Event branch through Mystery Gift (docs/decisions.md "Mystery Gift with gift codes"): the Member Card received
+# by gift code instead of the dev flag (`event darkrai`), after m6-cresselia woke the boy. In Canalave's Poké Mart:
+# Mystery Gift (`open mystery-gift`, the title's screen; a test-only code), out and back in, so the mart's
+# on-transition shows the deliveryman, who hands over the Member Card and sets the ROM's distribution var. Then
+# m6-event-darkrai-gift goes on to the Harbor Inn.
+giftcodes test
+warp platinum:MAP_HEADER_CANALAVE_CITY_MART 3 10 down
+until idle
++0 assert flag platinum:FLAG_HIDE_MART_MYSTERY_GIFT_DELIVERYMAN true
++0 open mystery-gift
+until app mystery-gift
++1 tap menu:0
+until app naming
++1 tap type:TESTDARK
++1 tap ok
+until app mystery-gift
++65 assert text platinum:MysteryGiftMenu_Text_ReceiveThisGift 0
++1 tap yes
++95 assert text platinum:MysteryGiftMenu_Text_GiftReceivedPickUpInPokeMart 0
++1 tap next
++1 tap next
+until app none
++0 press down
+until state player.zone "platinum:MAP_HEADER_CANALAVE_CITY" 300
++0 release down
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_CANALAVE_CITY_MART" 300
++0 release up
+until idle
++0 assert flag platinum:FLAG_HIDE_MART_MYSTERY_GIFT_DELIVERYMAN false
++0 press up
+until position 3 8 300
++0 release up
++0 press right
+until position 4 8 300
++0 release right
++0 press up
+until state player.facing "up" 30
++0 release up
+until idle
++0 press a
++1 release a
+advance text
+until idle
++0 assert state bag.key_items[item="platinum:ITEM_MEMBER_CARD"].count 1
++0 assert var platinum:VAR_DISTRIBUTION_EVENT_DARKRAI 4617
++0 assert state mysteryGift.deliveries[0] null

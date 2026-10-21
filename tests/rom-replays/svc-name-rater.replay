@@ -1,0 +1,58 @@
+# svc-name-rater (party picks by scripts): the Name Rater in Eterna City
+# Condominiums 1F opens the party menu to pick a Pokémon (select_move_tutor_pokemon, read back by
+# get_selected_party_slot). The first visit cancels it (PARTY_SLOT_NONE: "Please come visit again"); the
+# second picks Bidoof, says yes to a better name and renames it on the naming keyboard.
+party 0 platinum:SPECIES_TURTWIG 12
+party 1 platinum:SPECIES_BIDOOF 8
+warp platinum:MAP_HEADER_ETERNA_CITY_CONDOMINIUMS_1F 7 10 right
+until idle
+# First visit: YES, then B in the party menu
++1 press a
++1 release a
+advance text
++0 assert state party[1].nickname null
+until yesno
++0 press a
++1 release a
+# "Which Pokémon's nickname should I critique?" waits for A or B without an arrow (wait_ab_press)
++90 press a
++1 release a
+until app party
++0 assert app party
++1 press b
++1 release b
+until app none
+advance text
+until idle
++0 assert state party[1].nickname null
+# Second visit: pick Bidoof (slot 1) by tap
++1 press a
++1 release a
+advance text
++0 assert state party[1].nickname null
+until yesno
++0 press a
++1 release a
+# "Which Pokémon's nickname should I critique?" waits for A or B without an arrow (wait_ab_press)
++90 press a
++1 release a
+until app party
++0 screenshot pick
++1 tap slot:1
+until app none
+# "Give it a better name?" YES, then the naming screen
+advance text
+until yesno
++0 press a
++1 release a
+# "What shall the new nickname be?" (wait_ab_press)
++150 press a
++1 release a
+until app naming
++1 tap type:Bido
++1 tap ok
+until app none
+advance text
+until idle
++0 assert state party[1].nickname "Bido"
++0 assert state party[0].nickname null

@@ -1,0 +1,80 @@
+# The Route 212 move tutor (decomp scrcmd_move_tutor.c): the cost board by the door (every move there, its shard
+# costs in a window), then the tutor: Knock Off (4 Red, 4 Blue) is refused without Red Shards; Fury Cutter (8 Blue)
+# replaces Tackle (the summary's forget pick), and the shards are paid.
+party 0 platinum:SPECIES_BULBASAUR 30 platinum:MOVE_TACKLE platinum:MOVE_GROWL platinum:MOVE_VINE_WHIP platinum:MOVE_LEECH_SEED
+give item platinum:ITEM_BLUE_SHARD 8
+warp platinum:MAP_HEADER_ROUTE_212_HOUSE 4 3 up
+until idle
+# The board: the list of Route 212's moves, the first one's costs, A closes the window.
++0 press a
++1 release a
+until menu
++4 screenshot tutor-board
++0 press a
++1 release a
++10 screenshot shard-cost
++0 press a
++1 release a
+until idle
+# The tutor: Knock Off, the list's second move, needs Red Shards: refused.
++0 press down
+until position 4 6
++0 release down
+until idle
++0 press right
++1 release right
+until idle
++0 assert facing player right
++0 press a
++1 release a
+advance text
+until yesno
++0 press a
++1 release a
+advance text
+until app party
++1 tap slot:0
+until app none
+until menu
++4 press down
++1 release down
++1 press a
++1 release a
+advance text
+until idle
++0 assert state party[0].moves[0] "platinum:MOVE_TACKLE"
+# Fury Cutter, the first: four moves known, the summary forgets Tackle.
++0 press a
++1 release a
+advance text
+until yesno
++0 press a
++1 release a
+advance text
+until app party
++1 tap slot:0
+until app none
+until menu
++4 press a
++1 release a
+advance text
+until yesno
++0 press a
++1 release a
+until app summary
++4 screenshot tutor-forget
++0 press a
++1 release a
+until app none
+advance text
+until yesno
++0 press a
++1 release a
+advance text
+until idle
++0 assert state party[0].moves ["platinum:MOVE_FURY_CUTTER","platinum:MOVE_GROWL","platinum:MOVE_VINE_WHIP","platinum:MOVE_LEECH_SEED"]
++0 assert state party[0].pp[0] 20
++0 assert state bag.items []
++0 reload
+until idle
++0 assert state party[0].moves[0] "platinum:MOVE_FURY_CUTTER"

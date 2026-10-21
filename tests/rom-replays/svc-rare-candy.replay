@@ -1,0 +1,40 @@
+# Rare Candy (decomp party menu PartyMenuCB_LevelUp): Piplup L15 takes a Rare Candy: "elevated to
+# Lv. 16", the stats window (the increases, then the values), no move at 16, then the level-up evolution
+# check (decomp LEVELUP_STATE_CHECK_EVOLUTION) evolves it into Prinplup, which wants Metal Claw but knows four
+# moves: the waits answer NO, then give up (`evolve auto`). Back in the bag, the candy is gone.
+party 0 platinum:SPECIES_PIPLUP 15
+give item platinum:ITEM_RARE_CANDY 1
+warp platinum:MAP_HEADER_ROUTE_201 115 853 right
+until idle
++0 evolve auto
++1 press x
++1 release x
+until app start-menu
++1 tap entry:1
++1 assert app bag
++1 tap pocket:1
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 assert state party[0].level 16
++0 assert state party[0].exp 2535
++0 assert state bag.medicine []
++0 screenshot rare-candy
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 assert app evolution
+until app bag 3000
++0 assert state party[0].species "platinum:SPECIES_PRINPLUP"
++0 assert state party[0].moves ["platinum:MOVE_GROWL","platinum:MOVE_BUBBLE","platinum:MOVE_WATER_SPORT","platinum:MOVE_PECK"]
++1 tap cancel
+until app start-menu
++1 press b
++1 release b
+until idle
++0 reload
+until idle

@@ -1,0 +1,74 @@
+from cp14.replay
+set state gender "female"
+set var platinum:VAR_PLAYER_STARTER 390
+party 0 platinum:SPECIES_INFERNAPE 60 platinum:MOVE_FLAMETHROWER platinum:MOVE_CLOSE_COMBAT platinum:MOVE_THUNDER_PUNCH platinum:MOVE_MACH_PUNCH
+party 1 platinum:SPECIES_GARCHOMP 58 platinum:MOVE_DRAGON_CLAW platinum:MOVE_SLASH platinum:MOVE_CRUNCH platinum:MOVE_DRAGON_RUSH
+party 2 platinum:SPECIES_LUXRAY 58 platinum:MOVE_SPARK platinum:MOVE_CRUNCH platinum:MOVE_THUNDER_FANG platinum:MOVE_SCARY_FACE
+party 3 platinum:SPECIES_STARAPTOR 57 platinum:MOVE_BRAVE_BIRD platinum:MOVE_CLOSE_COMBAT platinum:MOVE_WING_ATTACK platinum:MOVE_QUICK_ATTACK
+party 4 platinum:SPECIES_BIBAREL 20 platinum:MOVE_STRENGTH platinum:MOVE_ROCK_CLIMB platinum:MOVE_ROCK_SMASH platinum:MOVE_HEADBUTT
+set var platinum:VAR_MT_CORONET_2F_STATE 2
+set flag platinum:FLAG_RECEIVED_MT_CORONET_2F_BLACK_FLUTE true
+set flag platinum:FLAG_HIDE_MT_CORONET_2F_LOOKER true
+set flag platinum:FLAG_DEFEATED_TRAINER_GALACTIC_GRUNT_MT_CORONET_3F_1 true
+set flag platinum:FLAG_DEFEATED_TRAINER_GALACTIC_GRUNT_MT_CORONET_3F_2 true
+set flag platinum:FLAG_DEFEATED_TRAINER_GALACTIC_GRUNT_MT_CORONET_4F_1 true
+set flag platinum:FLAG_DEFEATED_TRAINER_GALACTIC_GRUNT_MT_CORONET_4F_2 true
+set flag platinum:FLAG_DEFEATED_TRAINER_GALACTIC_GRUNT_MT_CORONET_5F_1 true
+set flag platinum:FLAG_DEFEATED_TRAINER_GALACTIC_GRUNT_MT_CORONET_5F_2 true
+set flag platinum:FLAG_DEFEATED_TRAINER_GALACTIC_GRUNT_MT_CORONET_6F true
+warp platinum:MAP_HEADER_MT_CORONET_6F 7 6 up
+# Starter/gender branch for cp15: Spear Pillar for a girl who chose Chimchar.
+# SpearPillar_SetRivalPartnerTeam picks Barry's partner party by the player's starter (TRAINER_RIVAL_SPEAR_PILLAR_
+# CHIMCHAR here, against Mars and Jupiter), and nothing else on cp15's path asks the starter or gender. Setup lines
+# stage it from CP14's end: the gender and starter as the save keeps them, cp15's set team with an Infernape for
+# the starter, and the state cp15 has at the top of Mt. Coronet (2F state 2 after Looker, the mountain's grunts
+# beaten). Then cp15's lines: the grunts (type 19), Mars and Jupiter with Barry (type 75), the summoning and
+# Cynthia's question, the Distortion World's 1F. Headless from the cp14 anchor
+# (tests/integration/checkpoints-m5c-branches.rom.test.ts).
++0 wild flee
++0 evolve auto
+until idle
+# Spear Pillar: the grunts (SpearPillar_CoordEvent_Grunts: two Pokémon standing, type 19)
++0 press up
+until state player.zone "platinum:MAP_HEADER_SPEAR_PILLAR" 600
++0 release up
+until idle
++0 press up
+until message 3000
++0 release up
+advance text 12000
+battle auto 30000
+advance text 12000
+until idle 3000
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_SPEAR_PILLAR_1 won trainer-pair
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_SPEAR_PILLAR_2 won trainer-pair
++0 assert var platinum:VAR_SPEAR_PILLAR_STATE 1
+# Mars (528) and Jupiter (407) with Barry (SpearPillar_CoordEvent_MarsJupiter, type 75), then Cyrus and the Red Chain
++0 press up
+until message 6000
++0 release up
+advance text 12000
++0 screenshot spear-pillar-tag
+battle auto 30000
+advance text 30000
+until yesno 6000
++0 assert text platinum:SpearPillarDistorted_Text_AreYouReady 0
++0 assert battle trainer platinum:TRAINER_COMMANDER_MARS_SPEAR_PILLAR won ai-partner
++0 assert battle trainer platinum:TRAINER_COMMANDER_JUPITER_SPEAR_PILLAR won ai-partner
++0 assert var platinum:VAR_SPEAR_PILLAR_STATE 3
++0 assert var platinum:VAR_SPEAR_PILLAR_DISTORTED_STATE 2
+# YES: into the Distortion World
++0 press a
++1 release a
+advance text 12000
+until state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_1F" 6000
+until idle 6000
+# the Distortion World's 1F, a step west where the game can save
++0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_1F","x":54,"z":40,"y":4624,"facing":"down"}
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 1
++0 assert var platinum:VAR_DISTORTION_WORLD_CYRUS_APPEARANCE 0
++0 assert flag platinum:FLAG_DISTORTION_WORLD_PUZZLE_FINISHED false
++0 press left
+until state player.x 53 400
++0 release left
+until idle 6000

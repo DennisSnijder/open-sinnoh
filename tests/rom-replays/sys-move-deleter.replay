@@ -1,0 +1,32 @@
+# Canalave's Move Deleter (decomp ScrCmd_SelectPartyMonMove, GetSelectedPartyMonMove, ClearPartyMonMoveSlot): the
+# summary picks a move with no new one (an HM too: Cut), it is forgotten and the moves after it move up.
+party 0 platinum:SPECIES_BIDOOF 20 platinum:MOVE_TACKLE platinum:MOVE_CUT platinum:MOVE_ROCK_SMASH
+warp platinum:MAP_HEADER_CANALAVE_CITY_EAST_HOUSE 3 6 left
+until idle
++0 press a
++1 release a
+advance text
+until yesno
++0 press a
++1 release a
+advance text
+until app party
++1 tap slot:0
+until app none
+advance text
+until app summary
+# The first tap shows the move, the second picks it.
++2 tap move:1
++2 tap move:1
+until app none
+advance text
+until yesno
++0 press a
++1 release a
+advance text
+until idle
++0 assert state party[0].moves ["platinum:MOVE_TACKLE","platinum:MOVE_ROCK_SMASH"]
++0 assert state party[0].pp [35,15]
++0 reload
+until idle
++0 assert state party[0].moves ["platinum:MOVE_TACKLE","platinum:MOVE_ROCK_SMASH"]

@@ -1,0 +1,40 @@
+# Evolution by item (decomp party menu PARTY_MENU_EXIT_CODE_EVOLVE_BY_ITEM): the bag's Water Stone opens
+# the party with ABLE! / UNABLE! (decomp PartyMenu_PrintMemberComment_CanUseEvoItem); Piplup refuses it ("It
+# won't have any effect."), Eevee takes it: the stone is used up and Eevee evolves into Vaporeon (B cannot
+# stop a stone's evolution, even under `evolve cancel`), then the bag comes back.
+party 0 platinum:SPECIES_EEVEE 10
+party 1 platinum:SPECIES_PIPLUP 10
+give item platinum:ITEM_WATER_STONE 1
+warp platinum:MAP_HEADER_ROUTE_201 115 853 right
+until idle
++0 evolve cancel
++1 press x
++1 release x
+until app start-menu
++1 tap entry:1
++1 assert app bag
++1 tap pocket:0
++1 tap row:0
++1 tap menu:0
++1 assert app party
++0 screenshot stone-party
++1 tap slot:1
++1 press a
++1 release a
++1 assert app bag
++0 assert state bag.items [{"item":"platinum:ITEM_WATER_STONE","count":1}]
++1 tap row:0
++1 tap menu:0
++1 tap slot:0
++1 assert app evolution
++0 assert state bag.items []
+until app bag 3000
++0 assert state party[0].species "platinum:SPECIES_VAPOREON"
++0 assert state party[1].species "platinum:SPECIES_PIPLUP"
++1 tap cancel
+until app start-menu
++1 press b
++1 release b
+until idle
++0 reload
+until idle

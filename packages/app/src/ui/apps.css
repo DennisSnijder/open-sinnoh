@@ -1,0 +1,114 @@
+/*
+ * Menu apps on ROM art: window frames as nine-slices, Pokémon and item icons, healthbox parts,
+ * the mart. Whole DS pixels on the dot grid; nothing is smoothed.
+ */
+.rom-frame {
+  border-style: solid;
+  border-width: var(--slice-w);
+  border-image-source: var(--frame-src);
+  border-image-slice: var(--slice) fill;
+  border-image-width: var(--slice-w);
+  border-image-repeat: repeat;
+  image-rendering: pixelated;
+  background: none;
+}
+.window:not(.rom-frame) { background: var(--paper); box-shadow: inset 0 0 0 var(--dot) var(--frame), inset 0 0 0 calc(var(--dot) * 2) var(--frame-hi); padding: calc(var(--dot) * 4); }
+.window.rom-frame { padding: var(--dot); }
+.ui-screen.rom-frame { box-shadow: none; clip-path: none; }
+.msg-box {
+  min-height: calc(var(--dot) * 32); padding: calc(var(--dot) * 2) calc(var(--dot) * 4);
+  display: flex; align-items: flex-start; gap: calc(var(--dot) * 4);
+}
+.msg-box:not(.rom-frame) { background: var(--paper); box-shadow: inset 0 0 0 var(--dot) var(--frame-hi); }
+.msg-box.rom-frame { padding: 0; min-height: calc(var(--dot) * 48); }
+.msg-box.waiting { cursor: pointer; }
+.msg-box.waiting::after {
+  content: ''; margin-left: auto; align-self: flex-end; flex: none; width: calc(var(--dot) * 6); height: calc(var(--dot) * 4);
+  background: var(--cursor); clip-path: polygon(0 0, 100% 0, 50% 100%); animation: msg-arrow 0.6s steps(2) infinite;
+}
+@keyframes msg-arrow { 50% { transform: translateY(var(--dot)); } }
+
+.mon-icon-box { display: grid; place-items: center; width: calc(var(--dot) * 32); height: calc(var(--dot) * 32); }
+.mon-icon-sprite {
+  width: calc(var(--dot) * 32); height: calc(var(--dot) * 32);
+  background-size: calc(var(--dot) * 32) calc(var(--dot) * 64); background-repeat: no-repeat; background-position: 0 0;
+  image-rendering: pixelated;
+}
+.mon-icon-sprite.icon-flip { animation: icon-flip var(--icon-period) steps(1) infinite; }
+@keyframes icon-flip { 50% { background-position: 0 calc(var(--dot) * -32); } }
+.mon-icon-sprite.icon-shake { animation: icon-shake var(--icon-period) steps(1) infinite; }
+@keyframes icon-shake { 88.9% { transform: translateX(var(--dot)); } 94.4% { transform: translateX(calc(var(--dot) * -1)); } }
+@media (prefers-reduced-motion: reduce) { .mon-icon-sprite { animation: none !important; } }
+
+.item-icon { display: inline-block; flex: none; width: calc(var(--dot) * 16); height: calc(var(--dot) * 16); background-size: calc(var(--dot) * 16) calc(var(--dot) * 16); background-repeat: no-repeat; image-rendering: pixelated; }
+.item-icon.big { width: calc(var(--dot) * 32); height: calc(var(--dot) * 32); background-size: 100% 100%; }
+.item-icon.blank { visibility: hidden; }
+.item-row { gap: calc(var(--dot) * 3); justify-content: flex-start; }
+.item-row .item-name { flex: 1; display: inline-flex; }
+.item-panel-text { white-space: pre-line; }
+
+/* Party panels: icon, name and gender, level and status, HP bar and numbers, the held-item mark. */
+.party-slot { grid-template-columns: auto 1fr; }
+.party-slot.fainted { background: #f0dcdc; box-shadow: inset 0 0 0 var(--dot) #d8aeae; }
+.mon-frame { position: relative; width: calc(var(--dot) * 34); height: calc(var(--dot) * 34); }
+.held-item {
+  position: absolute; right: 0; bottom: 0; width: calc(var(--dot) * 8); height: calc(var(--dot) * 8);
+  background: #fff; box-shadow: inset 0 0 0 var(--dot) #d03830;
+}
+.held-item::before { content: ''; position: absolute; inset: calc(var(--dot) * 2); background: #d03830; }
+.status-chip { font: 700 10px/1 system-ui, sans-serif; color: #fff; padding: calc(var(--dot) * 1) calc(var(--dot) * 2); background: #8a6aa8; }
+
+/* Bag: the list window, then the selected-item panel (the DS shows it at the bottom). */
+.bag-main { display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: calc(var(--dot) * 3); min-height: 0; }
+.list-window { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); min-height: 0; overflow: hidden; }
+.list-window .item-list { overflow: auto; box-shadow: none; }
+
+/* --- Mart (decomp shop_menu.c): one DS screen at the UI unit, bottom-centred over the field (as the script
+   windows), windows at their DS tiles; buying or selling, on the shop panel. Phones show that screen full
+   screen, centred, over an opaque backdrop (index.ts). */
+.ui-mart { inset: var(--room-top, 0px) var(--room-right, 0px) var(--room-bottom, 0px) var(--room-left, 0px); }
+.mart.ui-screen { background: none; box-shadow: none; clip-path: none; max-height: none; }
+.mart.mart-board { position: absolute; inset: auto; left: calc(50% - var(--unit) * 128); bottom: 0; display: block; pointer-events: none; }
+.ui-layer[data-mode='compact'] .mart.mart-screen, .ui-layer[data-controls='side'] .mart.mart-screen { bottom: calc(50% - var(--unit) * 96); }
+.mart-board > * { pointer-events: auto; }
+.mart-board .ds-picture { display: block; pointer-events: none; }
+.mart-board .board-at { min-width: 0; min-height: 0; }
+.mart-board .window.rom-frame, .mart-board .msg-box.rom-frame { padding: 0; }
+.mart-menu { display: grid; }
+.menu-entry { display: flex; align-items: center; height: var(--row); padding: 0 calc(var(--dot) * 6) 0 calc(var(--dot) * 9); }
+.mart-board .menu-entry { padding-left: calc(var(--dot) * 10); }
+.money-window { display: grid; grid-template-rows: 1fr 1fr; align-items: center; }
+.money-value { justify-self: end; }
+/* The list and the description print on the panel (no frame); a CSS stand-in without the ROM panel (the fixture). */
+.mart-css-panel { background: linear-gradient(#4ab84a, #4ab84a) 0 calc(var(--unit) * 142) / 100% calc(var(--unit) * 50) no-repeat, linear-gradient(#fff, #fff) calc(var(--unit) * 88) 0 / calc(var(--unit) * 166) calc(var(--unit) * 136) no-repeat; }
+.mart-list-window { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.mart-board .item-list { padding: 0; background: none; box-shadow: none; scrollbar-width: none; }
+.mart-board .item-row { padding: 0 0 0 calc(var(--dot) * 8); gap: calc(var(--dot) * 2); }
+.mart-board .item-row + .item-row { border-top: 0; }
+.mart .price { margin-left: auto; }
+.mart-item-icon { display: grid; place-items: center; pointer-events: none; }
+.mart-description { white-space: pre-line; }
+.mart-board .pocket-bar { min-height: var(--row); grid-template-columns: var(--row) 1fr var(--row); background: none; }
+.mart-board .pocket-arrow { width: var(--row); height: var(--row); }
+.qty-window { display: flex; align-items: center; justify-content: space-between; gap: var(--dot); }
+.qty-step { width: calc(var(--dot) * 10); height: var(--row); display: grid; place-items: center; }
+.qty-step::before { content: ''; width: calc(var(--dot) * 7); height: calc(var(--dot) * 4); background: var(--cursor); }
+.qty-step.up::before, .qty-step.up10::before { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.qty-step.down::before, .qty-step.down10::before { clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.qty-step.up10, .qty-step.down10 { opacity: 0.7; }
+.qty-count { min-height: var(--row); display: inline-flex; align-items: center; padding: 0 calc(var(--dot) * 2) 0 calc(var(--dot) * 8); }
+.qty-total { margin-left: auto; }
+.in-bag-window { display: flex; align-items: center; }
+.yes-no { display: grid; }
+.yes-no .choice { min-width: calc(var(--dot) * 40); background: none; }
+.mart-board .yes-no .choice { min-width: 0; height: var(--row); }
+.ui-layer .pocket-tab { min-height: calc(var(--dot) * 20); }
+.ui-layer[data-mode='compact'] .pocket-tab { min-height: 48px; }
+
+/* Notices (a failed save write). */
+.ui-notices { position: absolute; left: 12px; right: 12px; bottom: 12px; display: grid; gap: 8px; pointer-events: none; }
+.ui-notice { margin: 0; padding: 8px 12px; background: #b42318; color: #fff; font: 600 13px/1.3 system-ui, sans-serif; }
+/* A brief neutral note (the zoom after a shortcut), top centre. */
+.ui-toast { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); margin: 0; padding: 6px 12px; border-radius: 6px; background: rgb(24 26 32 / 0.82); color: #fff; font: 600 13px/1.3 system-ui, sans-serif; font-variant-numeric: tabular-nums; pointer-events: none; }
+.ui-toast[hidden] { display: none; }
+.ui-layer[data-mode] .mart-board .yes-no .choice { min-height: 0; }

@@ -1,0 +1,82 @@
+# svc-dept-store-3f: Veilstone Department Store 3F (decomp scripts_veilstone_store_3f.s). The TM vendors:
+# top (specialty 12, VEILSTONE_3F_UP) and bottom (13, VEILSTONE_3F_DOWN, behind the counter to the south); one
+# TM from each. tests/integration/services.rom.test.ts checks each stock list at its screenshot beat.
+set money 20000
+warp platinum:MAP_HEADER_VEILSTONE_STORE_3F 5 4 left
+until idle
++1 press a
++1 release a
+until app mart
++1 tap menu:0
++1 screenshot dept-3f-up
++1 tap row:0
++1 tap ok
++1 tap yes
++1 assert state bag.tmhms [{"item":"platinum:ITEM_TM83","count":1}]
++0 assert var platinum:VAR_DEPARTMENT_STORE_REGULAR_COUNTER 1
++1 press a
++1 release a
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
++1 press a
++1 release a
+until app none 5
+until idle
+# the bottom vendor behind the counter to the south: down 5, left 2 (each turn first), face south
++1 press down
++1 release down
+until idle
++1 press down
++1 release down
+until idle
++1 press down
++1 release down
+until idle
++1 press down
++1 release down
+until idle
++1 press down
++1 release down
+until idle
++1 press down
++1 release down
+until idle
++1 press left
++1 release left
+until idle
++1 press left
++1 release left
+until idle
++1 press left
++1 release left
+until idle
++1 press down
++1 release down
+until idle
++0 assert position platinum:MAP_HEADER_VEILSTONE_STORE_3F 3 9
++1 press a
++1 release a
+until app mart
++1 tap menu:0
++1 screenshot dept-3f-down
++1 tap row:0
++1 tap ok
++1 tap yes
++1 assert state bag.tmhms [{"item":"platinum:ITEM_TM38","count":1},{"item":"platinum:ITEM_TM83","count":1}]
++0 assert var platinum:VAR_DEPARTMENT_STORE_REGULAR_COUNTER 2
++1 press a
++1 release a
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
++1 press a
++1 release a
+until app none 5
+until idle

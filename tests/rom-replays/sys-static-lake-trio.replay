@@ -1,0 +1,21 @@
+# sys-static-lake-trio (docs/research/story-cp5-19.md §15): the lake
+# guardians' object lifecycle. A constructed start (setup lines, no story chain): parts/lake-rowan (hidden since
+# the new game, Rowan's lab scene after the Distortion World shows all three), parts/lake-azelf (Azelf caught), parts/lake-uxie (Uxie fled from), then Verity Cavern: Mesprit's scene ends in
+# activate_roaming_pokemon ROAMING_SLOT_MESPRIT, a roamer at L50 on a route (GameState.roamers; never the zone the
+# player came from), VAR_ROAMING_MESPRIT_STATE still ROAMING; Rowan walks in and out. Its route moves on with zone
+# connections (world roamers.ts); tests/integration/m5-static.rom.test.ts runs this headless and battles it.
+from parts/lake-uxie.replay
+set flag platinum:FLAG_HIDE_VERITY_CAVERN_PROF_OAK true
+warp platinum:MAP_HEADER_VERITY_CAVERN 12 14 up
+until idle
++0 press a
++1 release a
+# Mesprit's portrait (draw_pokemon_preview, a stub until the UI lands) waits for A or B (wait_ab_press).
++10 press a
++1 release a
+advance text 6000
+until idle 3000
++0 assert state roamers.slots[0].species "platinum:SPECIES_MESPRIT"
++0 assert state roamers.slots[0].level 50
++0 assert var platinum:VAR_ROAMING_MESPRIT_STATE 0
++0 assert flag platinum:FLAG_HIDE_VERITY_CAVERN_MESPRIT true

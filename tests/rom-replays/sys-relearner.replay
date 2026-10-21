@@ -1,0 +1,44 @@
+# Pastoria's Move Maniac (decomp scrcmd_party_mon_moves.c, applications/move_reminder.c): for a Heart Scale,
+# Bulbasaur remembers Tackle. It knows four moves, so the relearner's screen asks to forget one through the summary
+# (Razor Leaf), "1, 2, and... Poof!", and the Heart Scale is handed over. Without one he sends the player away.
+party 0 platinum:SPECIES_BULBASAUR 30 platinum:MOVE_RAZOR_LEAF platinum:MOVE_VINE_WHIP platinum:MOVE_LEECH_SEED platinum:MOVE_GROWL
+give item platinum:ITEM_HEART_SCALE 1
+warp platinum:MAP_HEADER_PASTORIA_CITY_EAST_HOUSE 8 5 up
+until idle
++0 press a
++1 release a
+advance text
+until app party
++1 tap slot:0
+until app none
+advance text
+until app move-reminder
++0 assert app move-reminder
++2 screenshot relearner
++2 tap row:0
++2 tap next
++2 tap next
++2 tap yes
+until app summary
++2 tap move:0
+until app move-reminder
++2 tap yes
++2 tap next
++2 tap next
++2 tap next
++2 tap next
+until app none
+advance text
+until idle
++0 assert state party[0].moves ["platinum:MOVE_TACKLE","platinum:MOVE_VINE_WHIP","platinum:MOVE_LEECH_SEED","platinum:MOVE_GROWL"]
++0 assert state party[0].pp[0] 35
++0 assert state bag.items []
++0 reload
+until idle
++0 assert state party[0].moves[0] "platinum:MOVE_TACKLE"
+# No Heart Scale left: come back with one.
++0 press a
++1 release a
+advance text
+until idle
++0 assert state party[0].moves[0] "platinum:MOVE_TACKLE"

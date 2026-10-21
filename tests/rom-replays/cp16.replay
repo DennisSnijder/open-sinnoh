@@ -1,0 +1,1799 @@
+from cp15.replay
++0 reload
+# CP16 (docs/research/story-cp5-19.md §16): from CP15's end at Rowan's lab door in
+# Sandgem, the long way back east (no Fly): Route 202, Jubilife, Route 203, Oreburgh, Route 207, Mt. Coronet,
+# Route 208, Hearthome, Route 212, Pastoria, Route 213 and Valor Lakefront to Route 222 and Sunyshore; Volkner at
+# the Vista Lighthouse, the gym's gears, Volkner (320) and the Beacon Badge, Jasmine's HM07 on the north beach.
+until idle
++0 wild flee
++0 evolve auto
+# Sandgem north to Jubilife, Route 203 to the Oreburgh Gate
++0 press right
+until position 181 843 6000
++0 release right
++0 press up
+until position 181 834 6000
++0 release up
++0 press right
+until position 184 834 6000
++0 release right
++0 press up
+until position 184 826 6000
++0 release up
++0 press left
+until position 182 826 6000
++0 release left
++0 press up
+until position 182 825 6000
++0 release up
++0 press left
+until position 165 825 6000
++0 release left
++0 press up
+until position 165 818 6000
++0 release up
++0 press right
+until position 168 818 6000
++0 release right
++0 press down
+until position 168 819 6000
++0 release down
++0 press right
+until position 182 819 6000
++0 release right
++0 press up
+until position 182 811 6000
++0 release up
++0 press right
+until position 187 811 6000
++0 release right
++0 press up
+until position 187 805 6000
++0 release up
++0 press left
+until position 184 805 6000
++0 release left
++0 press up
+until position 184 804 6000
++0 release up
++0 press left
+until position 177 804 6000
++0 release left
++0 press up
+until position 177 798 6000
++0 release up
++0 press left
+until position 175 798 6000
++0 release left
++0 press up
+until position 175 758 6000
++0 release up
++0 press right
+until position 238 758 6000
++0 release right
++0 press down
+until position 238 759 6000
++0 release down
++0 press right
+until position 241 759 6000
++0 release right
+until idle
++0 assert state objects[localId=2].movementType 3
+until state objects[localId=2].z 757 6000
+until state objects[localId=2].z 756 6000
++0 press right
+until position 246 759 6000
++0 release right
++0 press up
+until position 246 749 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_OREBURGH_GATE_1F" 3000
++0 release right
+until idle
+# through the Oreburgh Gate
++0 press right
+until state player.zone "platinum:MAP_HEADER_OREBURGH_CITY" 3000
++0 release right
+until idle
+# Oreburgh to Route 207 and up the slope at x 306 by bike in gear 1 (CP7's way)
++0 press right
+until position 271 749 6000
++0 release right
++0 press down
+until position 271 757 6000
++0 release down
++0 press right
+until position 299 757 6000
++0 release right
++0 press up
+until position 299 724 6000
++0 release up
++0 press right
+until position 306 724 6000
++0 release right
+until idle
++1 press y
++1 release y
+until state playerState "cycle"
+until idle
++1 press b
++1 release b
++1 assert state cyclingGear 1
++0 press up
+until position 306 717 6000
++0 release up
+until idle
++0 press b
++1 release b
++1 assert state cyclingGear 0
++0 press up
+until position 306 712 6000
++0 release up
++0 press right
+until position 340 712 6000
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_SOUTH" 3000
++0 release right
+until idle
+# through Mt. Coronet 1F on CP7's way to Route 208
++0 press right
+until position 6 8 6000
++0 release right
++0 press down
+until position 6 23 6000
++0 release down
++0 press right
+until position 15 23 6000
++0 release right
++0 press up
+until position 15 19 6000
++0 release up
++0 press right
+until position 19 19 6000
++0 release right
++0 press up
+until position 19 15 6000
++0 release up
++0 press right
+until position 24 15 6000
++0 release right
++0 press up
+until position 24 13 6000
++0 release up
++0 press right
+until position 27 13 6000
++0 release right
++0 press down
+until position 27 20 6000
++0 release down
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_208" 3000
++0 release right
+until idle
+# Route 208 east on CP7's way: round the rocks north of Hiker Robert, through the grass to the Hearthome gate
++0 press right
+until position 422 724 6000
++0 release right
++0 press up
+until position 422 715 6000
++0 release up
++0 press right
+until position 427 715 6000
++0 release right
++0 press down
+until position 427 729 6000
++0 release down
++0 press right
+until position 446 729 6000
++0 release right
++0 press up
+until position 446 726 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_208_GATE_TO_HEARTHOME_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY" 3000
++0 release right
+until idle
+# off the bike; heal at the Hearthome Pokémon Center
+until idle
++1 press y
++1 release y
+until state playerState "walk"
+until idle
++0 press right
+until position 485 726 6000
++0 release right
++0 press up
+until position 485 712 6000
++0 release up
++0 press left
+until position 465 712 6000
++0 release left
++0 press up
+until position 465 698 6000
++0 release up
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY" 3000
++0 release down
+until idle
+# south through the gate to Route 212
++0 press down
+until position 465 716 6000
++0 release down
++0 press right
+until position 485 716 6000
++0 release right
++0 press down
+until position 485 727 6000
++0 release down
++0 press left
+until position 458 727 6000
++0 release left
++0 press down
+until position 458 728 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_212_GATE_TO_HEARTHOME_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_212_NORTH" 3000
++0 release down
+until idle
+# Route 212 North: the Elixir at (459, 821)
++0 press down
+until position 458 753 6000
++0 release down
++0 press right
+until position 460 753 6000
++0 release right
++0 press down
+until position 460 761 6000
++0 release down
++0 press left
+until position 459 761 6000
++0 release left
++0 press down
+until position 459 762 6000
++0 release down
++0 press left
+until position 455 762 6000
++0 release left
++0 press down
+until position 455 766 6000
++0 release down
++0 press left
+until position 451 766 6000
++0 release left
++0 press down
+until position 451 771 6000
++0 release down
++0 press right
+until position 454 771 6000
++0 release right
++0 press down
+until position 454 772 6000
++0 release down
++0 press right
+until position 455 772 6000
++0 release right
++0 press down
+until position 455 774 6000
++0 release down
++0 press right
+until position 456 774 6000
++0 release right
++0 press down
+until position 456 775 6000
++0 release down
++0 press right
+until position 457 775 6000
++0 release right
++0 press down
+until position 457 786 6000
++0 release down
++0 press right
+until position 458 786 6000
++0 release right
++0 press down
+until position 458 795 6000
++0 release down
++0 press left
+until position 454 795 6000
++0 release left
++0 press down
+until position 454 801 6000
++0 release down
++0 press right
+until position 457 801 6000
++0 release right
++0 press down
+until position 457 806 6000
++0 release down
++0 press right
+until position 458 806 6000
++0 release right
++0 press down
+until position 458 811 6000
++0 release down
++0 press right
+until position 461 811 6000
++0 release right
++0 press down
+until position 461 823 6000
++0 release down
++0 press left
+until position 458 823 6000
++0 release left
++0 press up
+until position 458 821 6000
++0 release up
+until idle
++1 press right
++1 release right
+until idle
++0 press a
++1 release a
+advance text
+until idle
++0 assert state bag.medicine[item="platinum:ITEM_ELIXIR"].count 1
+# Route 212 South: the Elixir at (531, 849)
++0 press down
+until position 458 839 6000
++0 release down
++0 press right
+until position 460 839 6000
++0 release right
++0 press down
+until position 460 843 6000
++0 release down
++0 press left
+until position 459 843 6000
++0 release left
++0 press down
+until position 459 844 6000
++0 release down
++0 press left
+until position 456 844 6000
++0 release left
++0 press down
+until position 456 846 6000
++0 release down
++0 press right
+until position 457 846 6000
++0 release right
++0 press down
+until position 457 853 6000
++0 release down
++0 press left
+until position 456 853 6000
++0 release left
++0 press down
+until position 456 857 6000
++0 release down
++0 press right
+until position 459 857 6000
++0 release right
++0 press up
+until position 459 854 6000
++0 release up
++0 press right
+until position 461 854 6000
++0 release right
++0 press up
+until position 461 853 6000
++0 release up
++0 press right
+until position 465 853 6000
++0 release right
++0 press up
+until position 465 851 6000
++0 release up
++0 press right
+until position 466 851 6000
++0 release right
++0 press up
+until position 466 840 6000
++0 release up
++0 press right
+until position 483 840 6000
++0 release right
++0 press down
+until position 483 847 6000
++0 release down
++0 press right
+until position 484 847 6000
++0 release right
++0 press down
+until position 484 851 6000
++0 release down
++0 press right
+until position 492 851 6000
++0 release right
++0 press down
+until position 492 852 6000
++0 release down
++0 press right
+until position 493 852 6000
++0 release right
++0 press down
+until position 493 855 6000
++0 release down
++0 press right
+until position 500 855 6000
++0 release right
++0 press up
+until position 500 852 6000
++0 release up
++0 press right
+until position 508 852 6000
++0 release right
++0 press up
+until position 508 851 6000
++0 release up
++0 press right
+until position 520 851 6000
++0 release right
++0 press down
+until position 520 852 6000
++0 release down
++0 press right
+until position 526 852 6000
++0 release right
++0 press up
+until position 526 849 6000
++0 release up
++0 press right
+until position 530 849 6000
++0 release right
+until idle
++1 press right
++1 release right
+until idle
++0 press a
++1 release a
+advance text
+until idle
++0 assert state bag.medicine[item="platinum:ITEM_ELIXIR"].count 2
+# on to Pastoria
++0 press up
+until position 530 848 6000
++0 release up
++0 press right
+until position 531 848 6000
++0 release right
++0 press up
+until position 531 847 6000
++0 release up
++0 press right
+until position 537 847 6000
++0 release right
++0 press down
+until position 537 852 6000
++0 release down
++0 press right
+until position 544 852 6000
++0 release right
++0 press down
+until position 544 855 6000
++0 release down
++0 press right
+until position 546 855 6000
++0 release right
++0 press down
+until position 546 856 6000
++0 release down
++0 press right
+until position 565 856 6000
++0 release right
++0 press up
+until position 565 854 6000
++0 release up
++0 press right
+until position 567 854 6000
++0 release right
++0 press up
+until position 567 846 6000
++0 release up
++0 press right
+until position 576 846 6000
++0 release right
+# Pastoria to the Route 213 gate; Route 213 and the hotel lobby to Valor Lakefront (CP12's way)
++0 press down
+until position 576 848 6000
++0 release down
++0 press right
+until position 604 848 6000
++0 release right
++0 press up
+until position 604 830 6000
++0 release up
++0 release up
++0 press left
+until position 598 830 6000
++0 release left
++0 press up
+until position 598 820 6000
++0 release up
++0 press right
+until position 627 820 6000
++0 release right
++0 press up
+until position 627 812 6000
++0 release up
++0 press right
+until position 638 812 6000
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_213_GATE_TO_PASTORIA_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_213" 3000
++0 release right
+until idle
+# Route 213 and the hotel lobby to Valor Lakefront (CP10's way)
++0 press right
+until position 671 812 6000
++0 release right
++0 press down
+until position 671 828 6000
++0 release down
++0 press left
+until position 669 828 6000
++0 release left
++0 press down
+until position 669 835 6000
++0 release down
++0 press right
+until position 682 835 6000
++0 release right
++0 press up
+until position 682 832 6000
++0 release up
+# Tuber Jared (beaten) walks row 832 between x 703 and 712 without pausing, and Tuber Chelsea looks over x 704
+# and row 827 at random: follow Jared east from his west end and step up the plateau at x 705
++0 press right
+until position 702 832 6000
++0 release right
+until idle
++0 assert state objects[localId=4].movementType 20
+until state objects[localId=4].x 703 3000
+until state objects[localId=4].x 704 3000
++0 press right
+until position 705 832 600
++0 release right
++0 press up
+until position 705 828 600
++0 release up
++0 press right
+until position 709 828 6000
++0 release right
++0 press up
+until position 709 823 6000
++0 release up
++0 press left
+until position 706 823 6000
++0 release left
++0 press up
+until position 706 819 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_GRAND_LAKE_ROUTE_213_LOBBY" 3000
++0 release up
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_VALOR_LAKEFRONT" 3000
++0 press up
+until position 706 791 6000
++0 release up
++0 press right
+until position 709 791 6000
++0 release right
++0 press up
+until position 709 790 6000
++0 release up
++0 press right
+until position 722 790 6000
++0 release right
++0 press right
+until position 756 790 6000
++0 release right
++0 press up
+until position 756 785 6000
++0 release up
++0 press right
+until position 771 785 6000
++0 release right
++0 press down
+until position 771 787 6000
++0 release down
++0 press right
+until position 786 787 6000
++0 release right
+# Tuber Holly looks north and south at random from (787, 788): step into her north line as she turns north
+until idle
+until state objects[localId=9].facing "down" 3000
+until state objects[localId=9].facing "up" 3000
++0 press right
+until message 3000
++0 release right
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_TUBER_HOLLY won single
++8 release select
+# Sailor Luther looks south over row 787
++0 press right
+until message 3000
++0 release right
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_SAILOR_LUTHER won single
++8 release select
++0 press right
+until position 825 787 6000
++0 release right
++0 press down
+until position 825 790 6000
++0 release down
+# Sunyshore: Flint at the gate (SunyshoreCity_OnFrame_Flint)
++0 press right
+until state player.zone "platinum:MAP_HEADER_SUNYSHORE_CITY" 3000
++0 release right
+until message 3000
+advance text 12000
+until idle 3000
++0 assert var platinum:VAR_SUNYSHORE_CITY_STATE 1
++8 release select
+# heal at the Sunyshore Pokémon Center
++0 press right
+until position 845 790 6000
++0 release right
++0 press up
+until position 845 786 6000
++0 release up
++0 press right
+until position 860 786 6000
++0 release right
++0 press up
+until position 860 785 6000
++0 release up
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_SUNYSHORE_CITY" 3000
++0 release down
+until idle
++8 release select
+# east over the solar walkway to the Vista Lighthouse; its elevator rides up
++0 press down
+until position 860 786 6000
++0 release down
++0 press left
+until position 847 786 6000
++0 release left
++0 press up
+until position 847 785 6000
++0 release up
++0 press left
+until position 845 785 6000
++0 release left
++0 press up
+until position 845 784 6000
++0 release up
++0 press left
+until position 844 784 6000
++0 release left
++0 press up
+until position 844 776 6000
++0 release up
++0 press right
+until position 851 776 6000
++0 release right
++0 press down
+until position 851 791 6000
++0 release down
++0 press right
+until position 886 791 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_VISTA_LIGHTHOUSE_ELEVATOR" 3000
++0 release up
+until idle 6000
++8 release select
+# Volkner at the top (VistaLighthouse_Volkner): he goes back to the gym
+# --to 6 5: 11 steps, 0 in possible trainer sight
++0 press left
+until position 3 10 6000
++0 release left
++0 press up
+until position 3 5 6000
++0 release up
++0 press right
+until position 6 5 6000
++0 release right
+until idle
++1 press up
++1 release up
+until idle
++0 press a
++1 release a
+until message 300
+advance text 12000
+until idle 6000
++0 assert flag platinum:FLAG_VOLKNER_RETURNED_TO_GYM true
++8 release select
+# down the elevator
++0 press right
+until position 9 5 6000
++0 release right
++0 press down
+until position 9 10 6000
++0 release down
++0 press left
+until position 6 10 6000
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_VISTA_LIGHTHOUSE_ELEVATOR" 6000
++0 release up
+until state player.zone "platinum:MAP_HEADER_SUNYSHORE_CITY" 6000
+until idle 6000
++8 release select
+# north over the walkways to the gym; Flint at its door (SunyshoreCity_Flint) steps aside
++0 press left
+until position 872 791 6000
++0 release left
++0 press up
+until position 872 771 6000
++0 release up
++0 press right
+until position 875 771 6000
++0 release right
++0 press up
+until position 875 750 6000
++0 release up
++0 press left
+until position 847 750 6000
++0 release left
++0 press up
+until position 847 749 6000
++0 release up
++0 press left
+until position 845 749 6000
++0 release left
+until idle
++1 press up
++1 release up
+until idle
++0 press a
++1 release a
+until message 300
+advance text 12000
+until idle 6000
++8 release select
+# the Sunyshore Mart: Max Potions and Revives for the gym and Victory Road
++0 press down
+until position 845 751 6000
++0 release down
++0 press right
+until position 869 751 6000
++0 release right
++0 press down
+until position 869 763 6000
++0 release down
++0 press left
+until position 856 763 6000
++0 release left
++0 press down
+until position 856 765 6000
++0 release down
++0 press left
+until position 851 765 6000
++0 release left
++0 press down
+until position 851 769 6000
++0 release down
++0 press right
+until position 853 769 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_SUNYSHORE_CITY_MART" 3000
++0 release up
+until idle
++0 press up
+until position 3 7 3000
++0 release up
+until idle
++0 press a
++1 release a
+until app mart 600
++1 tap menu:0
++1 tap row:6
++1 press right
++1 release right
++1 press right
++1 release right
++1 tap ok
++1 tap yes
++1 assert state money 118480
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap row:7
++1 press right
++1 release right
++1 tap ok
++1 tap yes
++1 assert state money 101980
++0 assert state bag.medicine [{"item":"platinum:ITEM_FULL_RESTORE","count":1},{"item":"platinum:ITEM_ELIXIR","count":2},{"item":"platinum:ITEM_MAX_POTION","count":21},{"item":"platinum:ITEM_REVIVE","count":11}]
++1 press a
++1 release a
++1 press a
++1 release a
++1 press b
++1 release b
++1 press b
++1 release b
++1 press a
++1 release a
+until app none 300
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_SUNYSHORE_CITY" 3000
++0 release down
+until idle
++8 release select
+# back to the gym
++0 press left
+until position 851 769 6000
++0 release left
++0 press up
+until position 851 763 6000
++0 release up
++0 press right
+until position 869 763 6000
++0 release right
++0 press up
+until position 869 750 6000
++0 release up
++0 press left
+until position 847 750 6000
++0 release left
++0 press up
+until position 847 749 6000
++0 release up
++0 press left
+until position 845 749 6000
++0 release left
+# the gym (sys-gym-sunyshore's walk over the gears); its trainers see the player on the way
++0 press up
+until state player.zone "platinum:MAP_HEADER_SUNYSHORE_CITY_GYM_ROOM_1" 3000
++0 release up
+until idle
+until idle
++0 press up
+until position 8 8 6000
++0 release up
+until idle 6000
++0 press right
+until position 13 8 6000
++0 release right
+until idle 6000
+until idle
++0 press down
+until position 13 11 6000
++0 release down
+until idle 6000
++0 press left
+until position 8 11 6000
++0 release left
+until idle 6000
++0 press up
+until position 8 8 6000
++0 release up
+until idle 6000
++0 press left
+until position 3 8 6000
++0 release left
+until idle 6000
++0 press right
+until position 8 8 6000
++0 release right
+until idle 6000
++0 press up
+until message 3000
++0 release up
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_SCHOOL_KID_TIERA won single
++0 press up
+until position 8 3 6000
++0 release up
+until idle 6000
++0 press up
+until state player.zone "platinum:MAP_HEADER_SUNYSHORE_CITY_GYM_ROOM_2"
++0 release up
+until idle
++0 press up
+until position 9 16 6000
++0 release up
+until idle 6000
++0 press left
+until position 6 16 6000
++0 release left
+until idle 6000
++0 press up
+until position 6 13 6000
++0 release up
+until idle 6000
++0 press left
+until position 5 13 6000
++0 release left
+until idle 6000
++0 press right
+until position 6 13 6000
++0 release right
+until idle 6000
++0 press up
+until position 6 12 6000
++0 release up
+until idle 6000
++0 press down
+until position 6 13 6000
++0 release down
+until idle 6000
++0 press right
+until position 11 13 6000
++0 release right
+until idle 6000
++0 press down
+until position 11 20 6000
++0 release down
+until idle 6000
++0 press left
+until position 3 20 6000
++0 release left
+until idle 6000
++0 press up
+until position 3 16 6000
++0 release up
+until idle 6000
++0 press left
+until position 2 16 6000
++0 release left
+until idle 6000
++0 press up
+until position 2 4 6000
++0 release up
+until idle 6000
++0 press right
+until message 3000
++0 release right
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_SCHOOL_KID_FORREST won single
++0 press right
+until position 5 4 6000
++0 release right
+until idle 6000
++0 press down
+until position 5 5 6000
++0 release down
+until idle 6000
++0 press right
+until position 6 5 6000
++0 release right
+until idle 6000
++0 press down
+until position 6 8 6000
++0 release down
+until idle 6000
++0 press right
+until position 11 8 6000
++0 release right
+until idle 6000
++0 press down
+until position 11 13 6000
++0 release down
+until idle 6000
++0 press right
+until position 14 13 6000
++0 release right
+until message 3000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_GUITARIST_JERRY won single
++0 press down
+until position 14 14 6000
++0 release down
+until idle 6000
++0 press right
+until position 15 14 6000
++0 release right
+until idle 6000
++0 press up
+until position 15 3 6000
++0 release up
+until idle 6000
++0 press left
+until position 9 3 6000
++0 release left
+until idle 6000
++0 press up
+until state player.zone "platinum:MAP_HEADER_SUNYSHORE_CITY_GYM_ROOM_3"
++0 release up
+until idle
++0 press up
+until position 11 18 6000
++0 release up
+until idle 6000
++0 press right
+until position 16 18 6000
++0 release right
+until idle 6000
++0 press down
+until position 16 21 6000
++0 release down
+until message 3000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_GUITARIST_LONNIE won single
++0 press left
+until position 11 21 6000
++0 release left
+until idle 6000
++0 press up
+until position 11 18 6000
++0 release up
+until idle 6000
++0 press left
+until position 6 18 6000
++0 release left
+until idle 6000
++0 press down
+until message 3000
++0 release down
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_DESTINY won single
++0 press down
+until position 6 24 6000
++0 release down
+until idle 6000
++0 press left
+until position 3 24 6000
++0 release left
+until idle 6000
++0 press up
+until position 3 21 6000
++0 release up
+until idle 6000
++0 press left
+until position 2 21 6000
++0 release left
+until idle 6000
++0 press up
+until position 2 4 6000
++0 release up
+until idle 6000
++0 press right
+until message 3000
++0 release right
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_GUITARIST_PRESTON won single
++0 press right
+until position 11 4 6000
++0 release right
+until idle 6000
+# Max Potions and Revives on the team before Volkner (no effect where none is needed)
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:1
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 assert app bag
++1 tap row:2
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:1
++1 press a
++1 release a
++1 assert app bag
++1 tap row:2
++1 tap menu:0
++1 assert app party
++1 tap slot:1
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:2
++1 press a
++1 release a
++1 assert app bag
++1 tap row:2
++1 tap menu:0
++1 assert app party
++1 tap slot:2
++1 press a
++1 release a
++1 assert app bag
++1 tap row:3
++1 tap menu:0
++1 assert app party
++1 tap slot:3
++1 press a
++1 release a
++1 assert app bag
++1 tap row:2
++1 tap menu:0
++1 assert app party
++1 tap slot:3
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until app none 300
+until idle
+# Volkner (SunyshoreGymRoom3_Volkner): his battle (320), the Beacon Badge
++0 screenshot sunyshore-volkner
++0 press up
++1 release up
++0 press a
++1 release a
+advance text 12000
+until battle
+battle auto 30000
+advance text 12000
+until idle
++0 assert battle trainer platinum:TRAINER_LEADER_VOLKNER won single
++0 assert state badges ["platinum:BADGE_ID_COAL","platinum:BADGE_ID_FOREST","platinum:BADGE_ID_RELIC","platinum:BADGE_ID_COBBLE","platinum:BADGE_ID_FEN","platinum:BADGE_ID_MINE","platinum:BADGE_ID_ICICLE","platinum:BADGE_ID_BEACON"]
++0 assert var platinum:VAR_SUNYSHORE_CITY_STATE 2
+until idle
++0 assert position platinum:MAP_HEADER_SUNYSHORE_CITY_GYM_ROOM_3 11 4
++8 release select
+# out of the gym (a search over the engine's steps, the gears as Volkner's room leaves them)
++0 press down
+until state player.z 5 400
++0 release down
+until idle 6000
++0 press left
+until state player.x 10 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 9 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 8 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 7 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 6 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 5 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 4 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 3 400
++0 release left
+until idle 6000
++0 press down
+until state player.z 6 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 7 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 8 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 9 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 10 400
++0 release down
+until idle 6000
++0 press left
+until state player.x 2 400
++0 release left
+until idle 6000
++0 press down
+until state player.z 11 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 12 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 13 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 14 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 15 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 16 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 17 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 18 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 19 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 20 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 21 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 22 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 23 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 24 400
++0 release down
+until idle 6000
++0 press right
+until state player.x 3 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 4 400
++0 release right
+until idle 6000
++0 press up
+until state player.z 23 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 22 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 21 400
++0 release up
+until idle 6000
++0 press right
+until state player.x 5 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 6 400
++0 release right
+until idle 6000
++0 press up
+until state player.z 20 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 19 400
++0 release up
+until idle 6000
++0 press up
+until state player.z 18 400
++0 release up
+until idle 6000
++0 press right
+until state player.x 7 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 8 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 9 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 10 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 11 400
++0 release right
+until idle 6000
++0 press down
+until state player.z 19 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 20 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 21 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 22 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 23 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 24 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 25 400
++0 release down
+until idle 6000
++0 press down
+until state player.zone "platinum:MAP_HEADER_SUNYSHORE_CITY_GYM_ROOM_2" 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 3 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 4 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 5 400
++0 release down
+until idle 6000
++0 press right
+until state player.x 10 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 11 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 12 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 13 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 14 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 15 400
++0 release right
+until idle 6000
++0 press down
+until state player.z 6 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 7 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 8 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 9 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 10 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 11 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 12 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 13 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 14 400
++0 release down
+until idle 6000
++0 press left
+until state player.x 14 400
++0 release left
+until idle 6000
++0 press up
+until state player.z 13 400
++0 release up
+until idle 6000
++0 press left
+until state player.x 13 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 12 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 11 400
++0 release left
+until idle 6000
++0 press down
+until state player.z 14 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 15 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 16 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 17 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 18 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 19 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 20 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 21 400
++0 release down
+until idle 6000
++0 press left
+until state player.x 10 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 9 400
++0 release left
+until idle 6000
++0 press down
+until state player.zone "platinum:MAP_HEADER_SUNYSHORE_CITY_GYM_ROOM_1" 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 3 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 4 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 5 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 6 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 7 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 8 400
++0 release down
+until idle 6000
++0 press left
+until state player.x 7 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 6 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 5 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 4 400
++0 release left
+until idle 6000
++0 press left
+until state player.x 3 400
++0 release left
+until idle 6000
++0 press up
+until state player.z 7 400
++0 release up
+until idle 6000
++0 press down
+until state player.z 8 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 9 400
++0 release down
+until idle 6000
++0 press up
+until state player.z 8 400
++0 release up
+until idle 6000
++0 press right
+until state player.x 4 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 5 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 6 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 7 400
++0 release right
+until idle 6000
++0 press right
+until state player.x 8 400
++0 release right
+until idle 6000
++0 press down
+until state player.z 9 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 10 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 11 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 12 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 13 400
++0 release down
+until idle 6000
++0 press down
+until state player.z 14 400
++0 release down
+until idle 6000
++0 press down
+until state player.zone "platinum:MAP_HEADER_SUNYSHORE_CITY" 400
++0 release down
+until idle 6000
++0 assert state player {"zone":"platinum:MAP_HEADER_SUNYSHORE_CITY","x":845,"z":748,"y":80,"facing":"down"}
++8 release select
+# north to the beach
++0 press down
+until position 845 751 6000
++0 release down
++0 press right
+until position 869 751 6000
++0 release right
++0 press down
+until position 869 763 6000
++0 release down
++0 press left
+until position 863 763 6000
++0 release left
++0 press up
+until position 863 760 6000
++0 release up
++0 press left
+until position 857 760 6000
++0 release left
++0 press up
+until position 857 756 6000
++0 release up
++0 press left
+until position 856 756 6000
++0 release left
++0 press up
+until position 856 744 6000
++0 release up
++0 press left
+until position 855 744 6000
++0 release left
+# Jasmine on the north beach (SunyshoreCity_CoordEvent_RivalAndJasmine): Barry, and HM07
++0 press up
+until message 3000
++0 release up
+advance text 20000
+until idle 6000
++0 assert var platinum:VAR_SUNYSHORE_CITY_STATE 3
++0 assert flag platinum:FLAG_RECEIVED_SUNYSHORE_CITY_HM07 true
++0 assert flag platinum:FLAG_VOLKNER_RETURNED_TO_GYM true
++0 assert state bag.tmhms[item="platinum:ITEM_HM07"].count 1
+# HM07 to Bibarel in place of Headbutt (Victory Road's waterfall)
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:3
++1 tap row:12
++1 tap menu:0
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap yes
++1 assert app party
++1 tap slot:4
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap yes
++1 press a
++1 release a
++1 assert app summary
++1 tap move:3
++1 tap move:3
++1 assert state party[4].moves ["platinum:MOVE_STRENGTH","platinum:MOVE_ROCK_CLIMB","platinum:MOVE_ROCK_SMASH","platinum:MOVE_WATERFALL"]
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until app none 300
+until idle
++8 release select
+# heal at the Pokémon Center
++0 press down
+until position 855 765 6000
++0 release down
++0 press left
+until position 851 765 6000
++0 release left
++0 press down
+until position 851 771 6000
++0 release down
++0 press right
+until position 855 771 6000
++0 release right
++0 press down
+until position 855 785 6000
++0 release down
++0 press right
+until position 860 785 6000
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_SUNYSHORE_CITY" 3000
++0 release down
+until idle
++8 release select
+# end of CP16
++0 assert flag platinum:FLAG_VOLKNER_RETURNED_TO_GYM true
++0 assert battle trainer platinum:TRAINER_LEADER_VOLKNER won single
++0 assert state badges ["platinum:BADGE_ID_COAL","platinum:BADGE_ID_FOREST","platinum:BADGE_ID_RELIC","platinum:BADGE_ID_COBBLE","platinum:BADGE_ID_FEN","platinum:BADGE_ID_MINE","platinum:BADGE_ID_ICICLE","platinum:BADGE_ID_BEACON"]
++0 assert var platinum:VAR_SUNYSHORE_CITY_STATE 3
++0 assert state bag.tmhms[item="platinum:ITEM_HM07"].count 1
++8 release select

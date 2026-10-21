@@ -1,0 +1,8 @@
+from parts/weather-stark.replay
+# sys-weather: header weathers in the parts (Route 217 BLIZZARD,
+# Route 215 RAINING, Route 228 SANDSTORM, Stark Mountain SLOW_ASHFALL). Here Eterna Forest (weather 23).
+# Each `weather-*` screenshot line marks the browser spec's pixel check against a clear frame.
+warp platinum:MAP_HEADER_ETERNA_FOREST 27 85 down
+until idle
++0 assert state weather "platinum:OVERWORLD_WEATHER_23"
++0 screenshot weather-eterna-forest

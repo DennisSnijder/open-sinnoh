@@ -1,0 +1,25 @@
+from cp21d.replay
+# Branch m6-rotom-chateau: the Old Chateau's TV at night, caught. From cp21d's
+# end, the last anchor before cp21e thumps the TV by day's rule (its daily flag holds under the frozen clock). Kept
+# setup: the clock to 21:00 (as cp21e steps it), Dusk Balls (a cave at night) and the warp in front of the TV. A on the
+# TV: "thump it?" YES, FLAG_DAILY_BATTLED_OLD_CHATEAU_ROTOM, the L20 wild battle (start_wild_battle), caught:
+# FLAG_CAUGHT_OLD_CHATEAU_ROTOM; afterwards the TV only feels malevolent. Rotom joins in its base form.
+time 21:00
+give item platinum:ITEM_DUSK_BALL 30
+warp platinum:MAP_HEADER_OLD_CHATEAU_BACK_MIDDLE_WEST_ROOM 11 4 up
+until idle
++0 press a
++1 release a
+advance text 3000
++0 press a
++1 release a
+advance text 3000
+battle catch platinum:ITEM_DUSK_BALL 30000
++0 assert battle scripted platinum:SPECIES_ROTOM caught
+advance text 20000
+until idle 3000
++0 assert flag platinum:FLAG_CAUGHT_OLD_CHATEAU_ROTOM true
++0 assert flag platinum:FLAG_DAILY_BATTLED_OLD_CHATEAU_ROTOM true
++0 assert party 5 platinum:SPECIES_ROTOM
++0 assert state party[5].level 20
++0 assert state party[5].form 0

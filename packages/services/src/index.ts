@@ -1,0 +1,17 @@
+/** Service rules over the Pokémon model: headless, used by the menu models, the VM and the game. */
+export * from './mart.ts';
+export * from './items.ts';
+export * from './forms.ts';
+export * from './storage.ts';
+export * from './naming.ts';
+export * from './dex.ts';
+export * from './score.ts';
+export * from './signature.ts';
+export * from './berries.ts';
+export * from './tutors.ts';
+export * from './trades.ts';
+export * from './mystery-gift.ts';
+export * from './easy-chat.ts';
+export * from './poffins.ts';
+export * from './fashion.ts';
+export * from './battle-tower.ts';

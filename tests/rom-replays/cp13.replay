@@ -1,0 +1,1085 @@
+from cp12.replay
++0 reload
+# CP13 (docs/research/story-cp5-19.md §13): from CP12's end at Lake Verity, back north
+# to Oreburgh (Bibarel out of the PC), Cycling Road up to Eterna, Route 211 and Mt. Coronet's north rooms
+# (Strength), Route 216, Route 217 (HM08), Snowpoint and Candice (319), Rock Climb to Lake Acuity and the
+# Jupiter scene: Lake Acuity state 2, the Storage Key grunt in Veilstone.
++0 wild auto
++0 evolve auto
+until idle
+# out of Lake Verity
++0 press left
+until position 54 39 6000
++0 release left
++0 press down
+until position 54 43 6000
++0 release down
++0 press left
+until position 48 43 6000
++0 release left
++0 press down
+until position 48 53 6000
++0 release down
++0 press left
+until position 47 53 6000
++0 release left
++0 press down
+until state player.zone "platinum:MAP_HEADER_VERITY_LAKEFRONT" 3000
++0 release down
+until idle
++8 release select
+# Route 201 east to Sandgem, Route 202 north to Jubilife
++0 press down
+until position 81 853 6000
++0 release down
++0 press right
+until position 104 853 6000
++0 release right
++0 press up
+until position 104 852 6000
++0 release up
++0 press right
+until position 146 852 6000
++0 release right
++0 press up
+until position 146 845 6000
++0 release up
++0 press right
+until position 166 845 6000
++0 release right
+until idle
++8 release select
++0 press right
+until position 184 845 6000
++0 release right
++0 press up
+until position 184 826 6000
++0 release up
++0 press left
+until position 165 826 6000
++0 release left
++0 press up
+until position 165 818 6000
++0 release up
++0 press right
+until position 176 818 6000
++0 release right
++0 press down
+until position 176 819 6000
++0 release down
++0 press right
+until position 187 819 6000
++0 release right
++0 press up
+until position 187 805 6000
++0 release up
++0 press left
+until position 175 805 6000
++0 release left
++0 press up
+until position 175 799 6000
++0 release up
+until idle
++8 release select
+# Jubilife to Route 203; east below Lass Kaitlin on row 759 once she is up at row 756, up x 246 to the Oreburgh Gate
++0 press up
+until position 175 758 6000
++0 release up
++0 press right
+until position 191 758 6000
++0 release right
++0 press right
+until position 238 758 6000
++0 release right
++0 press down
+until position 238 759 6000
++0 release down
++0 press right
+until position 241 759 6000
++0 release right
+until idle
++0 assert state objects[localId=2].movementType 3
+until state objects[localId=2].z 757 6000
+until state objects[localId=2].z 756 6000
++0 press right
+until position 246 759 6000
++0 release right
++0 press up
+until position 246 749 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_OREBURGH_GATE_1F" 3000
+until state player.zone "platinum:MAP_HEADER_OREBURGH_CITY" 3000
++0 release right
+until idle
++8 release select
+# Oreburgh: heal, and Bibarel out of the PC (BOX 1) for Strength and Rock Climb
++0 press right
+until position 271 749 6000
++0 release right
++0 press down
+until position 271 757 6000
++0 release down
++0 press right
+until position 303 757 6000
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press right
+until position 12 6 6000
++0 release right
++0 press up
+until position 12 4 6000
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++5 press a
++1 release a
+advance text
++5 press down
++1 release down
++1 press a
++1 release a
+until app storage
++1 tap slot:1
++1 tap menu:0
++1 assert state party[1].species "platinum:SPECIES_BIBAREL"
++1 tap close
++1 tap yes
+until app none
+# back at the storage menu: B; then SWITCH OFF (the fourth entry) on "Which PC should be accessed?"
++40 press b
++1 release b
++69 press down
++1 release down
++4 press down
++1 release down
++4 press down
++1 release down
++4 press a
++1 release a
+advance text
+until idle
++0 press down
+until position 12 6 6000
++0 release down
++0 press left
+until position 8 6 6000
++0 release left
++0 press down
+until state player.zone "platinum:MAP_HEADER_OREBURGH_CITY" 3000
++0 release down
+until idle
++8 release select
+# up the slope at x 306 by bike in gear 1 (CP7's way), then north to Cycling Road's south gate
++0 press left
+until position 299 757 6000
++0 release left
++0 press up
+until position 299 724 6000
++0 release up
++0 press right
+until position 306 724 6000
++0 release right
+until idle
++1 press y
++1 release y
+until state playerState "cycle"
+until idle
++1 press b
++1 release b
++1 assert state cyclingGear 1
++0 press up
+until position 306 717 6000
++0 release up
+until idle
++0 press b
++1 release b
++1 assert state cyclingGear 0
++0 press up
+until position 306 712 6000
++0 release up
++0 press left
+until position 303 712 6000
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_206_CYCLING_ROAD_SOUTH_GATE" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_206" 3000
++0 release up
+until idle
+# Cycling Road north up the east lane (x 305: clear of the unbeaten cyclists' lines; those CP7 beat stand
+# aside) to Eterna; not a place to stop (Route206_OnResume)
++0 press right
+until position 305 681 600
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_206_CYCLING_ROAD_NORTH_GATE" 9000
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY" 3000
++0 release up
+until idle
++8 release select
+# through Eterna to Route 211 West: Hiker Louis looks south and east at random from (377, 529) over the way to Mt. Coronet; wait in his south line
++0 press up
+until position 304 531 6000
++0 release up
++0 press left
+until position 301 531 6000
++0 release left
++0 press up
+until position 301 525 6000
++0 release up
++0 press right
+until position 325 525 6000
++0 release right
++0 press down
+until position 325 533 6000
++0 release down
++0 press right
+until position 376 533 6000
++0 release right
++0 press right
+until position 377 533 600
++0 release right
+until message 6000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_HIKER_LOUIS won single
+# (he walks up to the player: round him on row 533)
++0 press right
+until position 379 533 600
++0 release right
++0 press up
+until position 379 532 600
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_NORTH_ROOM_1" 3000
++0 release right
+until idle
++8 release select
+# Mt. Coronet 1F north room 1: off the bike; Rock Smash on (10, 36)
+until idle
++1 press y
++1 release y
+until state playerState "walk"
+until idle
++0 press right
+until position 3 41 6000
++0 release right
++0 press up
+until position 3 37 6000
++0 release up
++0 press right
+until position 9 37 6000
++0 release right
++0 press up
+until position 9 36 6000
++0 release up
+until idle
++1 press right
++1 release right
+until idle
++0 assert facing player right
++0 press a
++1 release a
+until yesno
++0 press a
++1 release a
+advance text
+until idle 3000
++8 release select
+# Strength (Bibarel) on the boulder at (18, 39): two pushes east, then down to row 40
++0 press right
+until position 14 36 6000
++0 release right
++0 press down
+until position 14 39 6000
++0 release down
++0 press right
+until position 17 39 6000
++0 release right
+until idle
++0 assert facing player right
++0 field move 1 platinum:MOVE_STRENGTH
+advance text
+until idle
++0 assert flag platinum:FLAG_STRENGTH_ACTIVE true
++0 press right
+until state objects[localId=9].x 19 120
++0 release right
+until idle
++0 press right
+until position 18 39 120
++0 release right
+until idle
++0 press right
+until state objects[localId=9].x 20 120
++0 release right
+until idle
++0 press right
+until position 19 39 120
++0 release right
++0 press down
+until position 19 40 120
++0 release down
+until idle
++8 release select
+# east and north to the boulder at (29, 30): three pushes north, then up x 28 and west to the stairs down
++0 press down
+until position 19 42 6000
++0 release down
++0 press right
+until position 28 42 6000
++0 release right
++0 press up
+until position 28 31 6000
++0 release up
++0 press right
+until position 29 31 6000
++0 release right
+until idle
++0 press up
+until state objects[localId=7].z 29 120
++0 release up
+until idle
++0 press up
+until position 29 30 120
++0 release up
+until idle
++0 press up
+until state objects[localId=7].z 28 120
++0 release up
+until idle
++0 press up
+until position 29 29 120
++0 release up
+until idle
++0 press up
+until state objects[localId=7].z 27 120
++0 release up
+until idle
++0 press up
+until position 29 28 120
++0 release up
++0 press left
+until position 28 28 120
++0 release left
++0 press up
+until position 28 11 6000
++0 release up
++0 press left
+until position 12 11 6000
++0 release left
++0 press up
+until position 12 10 600
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_B1F" 3000
++0 release left
+until idle
++8 release select
+# A stocked Max Repel prevents cave paralysis before the snowy trainer fights.
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:0
++1 tap row:2
++1 tap menu:0
++1 assert state repel 250
++0 assert state bag.items[item="platinum:ITEM_MAX_REPEL"].count 3
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
++8 release select
+# Mt. Coronet B1F: up the west side to the stairs to north room 2 (entered from the west)
++0 press left
+until position 4 60 6000
++0 release left
++0 press up
+until position 4 58 6000
++0 release up
++0 press left
+until position 3 58 6000
++0 release left
++0 press up
+until position 3 3 6000
++0 release up
++0 press right
+until position 7 3 6000
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_NORTH_ROOM_2" 3000
++0 release right
+until idle
++8 release select
+# north room 2 to Route 216
++0 press right
+until position 15 27 6000
++0 release right
++0 press up
+until position 15 18 6000
++0 release up
++0 press left
+until position 3 18 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_216" 3000
++0 release left
+until idle
++8 release select
+# Route 216 west on row 401 (north of Ace Trainer Blake's line); Ace Trainer Laura looks north over x 328, the only way west
++0 press left
+until position 370 403 6000
++0 release left
++0 press up
+until position 370 401 6000
++0 release up
++0 press left
+until position 330 401 6000
++0 release left
++0 press left
+until position 328 401 600
++0 release left
+until message 3000
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_LAURA won single
++8 release select
+# Route 216 west: Skier Edward loops x 311–315, rows 402–404 (sight 1, no pauses): pass him on row 401 as he
+# turns down at its west end
++0 press left
+until position 316 401 6000
++0 release left
+until idle
++0 assert state objects[localId=7].movementType 38
+until state objects[localId=7].z 403 3000
+until state objects[localId=7].z 402 3000
+until state objects[localId=7].x 311 3000
++0 press left
+until position 302 401 6000
++0 release left
+# north through the grass west of Ace Trainer Garrett (x 299; he looks up and down), across his column three rows
+# above him, to the way north to Route 217
++0 press up
+until position 302 399 6000
++0 release up
++0 press left
+until position 298 399 6000
++0 release left
++0 press up
+until position 298 391 6000
++0 release up
++0 press right
+until position 302 391 6000
++0 release right
++0 press up
+until position 302 388 6000
++0 release up
++0 press right
+until position 304 388 6000
++0 release right
++0 press up
+until position 304 380 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_217" 3000
++0 release up
+until idle
++8 release select
+# Route 217: Maylene on the way in (Route217_CoordEvent_Maylene)
++0 press up
+until position 304 378 600
++0 release up
++0 press left
+until position 303 378 600
++0 release left
++0 press up
+until message 3000
++0 release up
+advance text 9000
+until idle 3000
++0 assert var platinum:VAR_ROUTE_217_STATE 1
++8 release select
+# Ace Trainer Dalton looks west over row 369, the way north
++0 press up
+until position 303 374 6000
++0 release up
++0 press right
+until position 305 374 6000
++0 release right
++0 press up
+until position 305 370 6000
++0 release up
++0 press up
+until message 3000
++0 release up
+advance text
+battle auto move 3 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_DALTON won single
++8 release select
+# north up x 302
++0 press left
+until position 302 369 6000
++0 release left
++0 press up
+until state repel 0 6000
++0 release up
++90 press a
++1 release a
+until idle
++0 press up
+until position 302 310 6000
++0 release up
+until idle
++8 release select
+# HM08 on the ground at (296, 305), south of Skier Lexie's loop (x 290–294, rows 290–296)
++0 press up
+until position 302 307 6000
++0 release up
++0 press left
+until position 297 307 6000
++0 release left
++0 press up
+until position 297 305 6000
++0 release up
+until idle
++1 press left
++1 release left
+until idle
++0 assert facing player left
++1 press a
++1 release a
+advance text
+until idle
++0 assert flag platinum:FLAG_OBTAINED_ROUTE_217_HM08 true
++8 release select
+# HM08 Rock Climb to Bibarel over Rollout
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:3
++1 tap row:11
++1 tap menu:0
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap yes
++1 assert app party
++1 tap slot:1
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap yes
++1 press a
++1 release a
++1 assert app summary
++1 tap move:1
++1 tap move:1
++1 assert state party[1].moves ["platinum:MOVE_STRENGTH","platinum:MOVE_ROCK_CLIMB","platinum:MOVE_WATER_GUN","platinum:MOVE_HEADBUTT"]
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
++8 release select
+# north up x 303 between the skiers' loops, then west over Skier Lexie's column x 294 (she looks up it on her
+# loop) just after she reaches its north-west corner; up x 290 beside Black Belt Luke's column (x 291, rows
+# 273–281, sight 2), east over it on row 271 once he turns back south
++0 press down
+until position 297 307 6000
++0 release down
++0 press right
+until position 303 307 6000
++0 release right
++0 press up
+until position 303 288 6000
++0 release up
++0 press left
+until position 296 288 6000
++0 release left
+until idle
++0 assert state objects[localId=1].movementType 37
+until state objects[localId=1].x 291 3000
+until state objects[localId=1].x 290 3000
++0 press left
+until position 293 288 600
++0 release left
++0 press up
+until position 293 284 600
++0 release up
++0 press left
+until position 290 284 600
++0 release left
++0 press up
+until position 290 271 6000
++0 release up
+until idle
++0 assert state objects[localId=6].movementType 20
+until state objects[localId=6].z 273 3000
+until state objects[localId=6].z 274 3000
++0 press right
+until position 304 271 6000
++0 release right
++0 press up
+until position 304 270 6000
++0 release up
++0 press up
+until position 304 268 6000
++0 release up
+# Heal before Olivia after the cave and snow fights (three potions were used through Route 210 fog).
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:1
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 assert state bag.medicine[item="platinum:ITEM_HYPER_POTION"].count 1
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
++8 release select
+# Ace Trainer Olivia looks east over row 267, the way north
++0 press up
+until message 3000
++0 release up
+advance text
+battle auto move 3 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_ACE_TRAINER_OLIVIA won single
+# north to Acuity Lakefront: Barry at the ledge (AcuityLakefront_CoordEvent_Rival)
++0 press right
+until position 310 267 6000
++0 release right
++0 press up
+until position 310 245 6000
++0 release up
++0 press up
+until message 3000
++0 release up
+advance text 9000
+until idle 3000
++0 assert var platinum:VAR_ACUITY_LAKEFRONT_STATE 1
++8 release select
+# east to Snowpoint: heal at the Pokémon Center
++0 press up
+until position 310 242 6000
++0 release up
++0 press right
+until position 319 242 6000
++0 release right
++0 press up
+until position 319 241 6000
++0 release up
++0 press right
+until position 325 241 6000
++0 release right
++0 press down
+until position 325 242 6000
++0 release down
++0 press right
+until position 337 242 6000
++0 release right
++0 press up
+until position 337 238 6000
++0 release up
++0 press right
+until position 354 238 6000
++0 release right
++0 press down
+until position 354 240 6000
++0 release down
++0 press right
+until position 359 240 6000
++0 release right
++0 press up
+until position 359 239 6000
++0 release up
++0 press right
+until position 367 239 6000
++0 release right
++0 press up
+until position 367 227 6000
++0 release up
++0 press right
+until position 375 227 6000
++0 release right
++0 press down
+until position 375 234 6000
++0 release down
++0 press right
+until position 379 234 6000
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_SNOWPOINT_CITY" 3000
++0 release down
+until idle
++8 release select
+# TM91 Flash Cannon (Byron's) to Empoleon over Drill Peck: Steel against every one of Candice's Ice types
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:3
++1 tap row:5
++1 tap menu:0
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap yes
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap yes
++1 press a
++1 release a
++1 assert app summary
++1 tap move:1
++1 tap move:1
++1 assert state party[0].moves ["platinum:MOVE_ROCK_SMASH","platinum:MOVE_FLASH_CANNON","platinum:MOVE_SURF","platinum:MOVE_CUT"]
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
+# Snowpoint Gym (the route of sys-gym-snowpoint): the ice, eight snowballs broken on the way to Candice (Flash Cannon on every one of hers)
++0 press left
+until position 374 234 6000
++0 release left
++0 press up
+until position 374 226 6000
++0 release up
++0 press left
+until position 367 226 6000
++0 release left
++0 press up
+until position 367 223 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_SNOWPOINT_CITY_GYM" 3000
++0 release up
+until idle
++0 assert position platinum:MAP_HEADER_SNOWPOINT_CITY_GYM 11 28
+# the browser spec's beat: the gym's ice and snowballs
++0 screenshot snowpoint-gym
+until idle
++0 press left
+until position 10 28
++0 release left
+until idle
++0 press left
+until position 9 28
++0 release left
+until idle
++0 press left
+until position 8 28
++0 release left
+until idle
++0 press up
+until position 1 27
++0 release up
+until idle
++0 press up
+until position 1 7
++0 release up
+until idle
++0 press right
+until position 2 3
++0 release right
+until idle
++0 press down
+until position 5 4
++0 release down
+until idle
++0 press right
+until position 6 11
++0 release right
+until idle
+until idle
++0 press left
+until position 15 11
++0 release left
+until idle
++0 press down
+until position 7 12
++0 release down
+until idle
++0 press right
+until position 8 14
++0 release right
+until idle
++0 press right
+until position 14 14
++0 release right
+until idle
++0 press down
+until position 15 15
++0 release down
+until idle
++0 press left
+until position 14 16
++0 release left
+until idle
++0 press left
+until position 8 16
++0 release left
+until idle
++0 press down
+until position 7 17
++0 release down
+until idle
++0 press left
+until position 6 19
++0 release left
+until idle
++0 press left
+until position 5 19
++0 release left
+until idle
++0 press down
+until position 4 20
++0 release down
+until idle
++0 press left
+until position 3 22
++0 release left
+until idle
++0 press left
+until position 2 22
++0 release left
+until idle
++0 press left
+until position 1 22
++0 release left
+until idle
++0 press up
+until position 1 21
++0 release up
+until idle
++0 press right
+until position 2 8
++0 release right
+until idle
++0 press left
+until position 18 8
++0 release left
+until idle
++0 press down
+until position 4 9
++0 release down
+until idle
++0 press right
+until position 5 22
++0 release right
+until idle
++0 press up
+until position 11 21
++0 release up
+until idle
++0 press up
+until position 11 19
++0 release up
+until idle
++0 press up
+until position 11 16
++0 release up
+until idle
++0 press up
+until position 11 12
++0 release up
+until idle
++0 press up
+until position 11 9
++0 release up
+until idle
++0 press up
+until position 11 6
++0 release up
+until idle
++0 press up
+until position 11 4
++0 release up
+until idle
++0 press a
++1 release a
+advance text
+battle auto move 2 20000
++0 assert battle trainer platinum:TRAINER_LEADER_CANDICE won single
+advance text 4400
+until idle
++0 assert state badges ["platinum:BADGE_ID_COAL","platinum:BADGE_ID_FOREST","platinum:BADGE_ID_RELIC","platinum:BADGE_ID_COBBLE","platinum:BADGE_ID_FEN","platinum:BADGE_ID_MINE","platinum:BADGE_ID_ICICLE"]
++0 press right
+until position 12 4
++0 release right
+until idle
++0 press down
+until position 12 5
++0 release down
+until idle
++0 press down
+until position 12 26
++0 release down
+until idle
++0 press left
+until position 11 26
++0 release left
+until idle
++0 press down
+until position 11 27
++0 release down
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_SNOWPOINT_CITY"
++0 release down
+advance text 3000
+until idle 3000
++8 release select
+# back west to Acuity Lakefront: Rock Climb (Bibarel) up the wall at x 310 to Lake Acuity
++0 press down
+until position 367 241 6000
++0 release down
++0 press left
+until position 353 241 6000
++0 release left
++0 press up
+until position 353 238 6000
++0 release up
++0 press left
+until position 328 238 6000
++0 release left
++0 press down
+until position 328 242 6000
++0 release down
++0 press left
+until position 324 242 6000
++0 release left
++0 press up
+until position 324 241 6000
++0 release up
++0 press left
+until position 318 241 6000
++0 release left
++0 press down
+until position 318 242 6000
++0 release down
++0 press left
+until position 310 242 6000
++0 release left
+until idle
++1 press up
++1 release up
+until idle
++0 assert facing player up
++0 field move 1 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle
++8 release select
+# into Lake Acuity
++0 press up
+until position 310 232 6000
++0 release up
++0 press left
+until position 308 232 6000
++0 release left
++0 press up
+until position 308 230 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_LAKE_ACUITY" 3000
++0 release up
+# Barry and Jupiter at the lake (LakeAcuity_CoordEvent_JupiterRival): no battle
+advance text 12000
+until idle 3000
++0 assert var platinum:VAR_LAKE_ACUITY_STATE 2
+# the browser spec's beat: Lake Acuity after the scene
++0 screenshot lake-acuity
+# end of CP13
++0 assert flag platinum:FLAG_OBTAINED_ROUTE_217_HM08 true
++0 assert state party[1].moves[1] "platinum:MOVE_ROCK_CLIMB"
++0 assert battle trainer platinum:TRAINER_LEADER_CANDICE won single
++0 assert state badges ["platinum:BADGE_ID_COAL","platinum:BADGE_ID_FOREST","platinum:BADGE_ID_RELIC","platinum:BADGE_ID_COBBLE","platinum:BADGE_ID_FEN","platinum:BADGE_ID_MINE","platinum:BADGE_ID_ICICLE"]
++0 assert var platinum:VAR_LAKE_ACUITY_STATE 2
++0 assert flag platinum:FLAG_HIDE_VEILSTONE_CITY_GRUNT_M_STORAGE_KEY false
++0 assert flag platinum:FLAG_LAKE_VALOR_EXPLODED false

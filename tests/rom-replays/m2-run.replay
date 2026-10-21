@@ -1,0 +1,34 @@
+# Running on a fixed seed (the ROM test runs seed 4; others differ).
+# A slow Piplup L2 meets a faster wild Pokémon on Route 202: the first try fails ("Can't escape!", the foe
+# still attacks: the hidden pass turn), the second gets away (decomp Battler_CanEscape: +30 per attempt).
+party 0 platinum:SPECIES_PIPLUP 2
+set var platinum:VAR_ROUTE_202_STATE 1
+warp platinum:MAP_HEADER_ROUTE_202 178 827 up
+until idle
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
+until battle 900
++0 battle run
+until battle 3000
++0 assert battles wild 0
++0 battle run
+until battle end 3000
++0 assert battle wild * fled
++0 assert battles wild 1
+until idle
++0 reload
+until idle

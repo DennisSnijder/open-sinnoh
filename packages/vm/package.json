@@ -1,0 +1,9 @@
+{
+  "name": "@opensinnoh/vm",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts", "./op-classification.json": "./src/data/op-classification.json" },
+  "dependencies": { "@opensinnoh/core": "workspace:*", "@opensinnoh/contracts": "workspace:*", "@opensinnoh/services": "workspace:*", "@opensinnoh/text": "workspace:*" },
+  "devDependencies": { "@opensinnoh/nds": "workspace:*" }
+}

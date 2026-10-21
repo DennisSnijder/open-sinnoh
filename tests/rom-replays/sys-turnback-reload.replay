@@ -1,0 +1,33 @@
+# Turnback Cave: a save inside a room (decomp FieldTask_LoadSavedGameMap). Loading runs no onTransition, so the
+# room is not counted again and init_turnback_cave draws no new doors: the counters stay as saved and the doors
+# keep the ROM's targets (the routing lives in the loaded map header, not in the save). A constructed start: one
+# pillar seen and five rooms visited, the player at a pillar-1 room's south door; its onTransition adds the sixth.
+set var platinum:VAR_TURNBACK_CAVE_PILLARS_SEEN 1
+set var platinum:VAR_TURNBACK_CAVE_ROOMS_VISITED 5
+warp platinum:MAP_HEADER_TURNBACK_CAVE_PILLAR_1_ROOM_1 11 20 up
+until idle
++0 assert var platinum:VAR_TURNBACK_CAVE_ROOMS_VISITED 6
+# save → load: the state must come back unchanged (the reload line fails on any difference).
++0 reload
+until idle
++0 assert position platinum:MAP_HEADER_TURNBACK_CAVE_PILLAR_1_ROOM_1 11 20
++0 assert var platinum:VAR_TURNBACK_CAVE_PILLARS_SEEN 1
++0 assert var platinum:VAR_TURNBACK_CAVE_ROOMS_VISITED 6
+# The east door (20,11): up a row, right to the aisle, up to the door's row, then right into it.
++0 press up
+until position 11 19
++0 release up
++0 press right
+until position 19 19
++0 release right
++0 press up
+until position 19 11
++0 release up
++0 press right
+until position 2 11 300
++0 release right
+until idle 300
+# The ROM's target: the entrance, whose onTransition clears both counters.
++0 assert position platinum:MAP_HEADER_TURNBACK_CAVE_ENTRANCE 2 11
++0 assert var platinum:VAR_TURNBACK_CAVE_PILLARS_SEEN 0
++0 assert var platinum:VAR_TURNBACK_CAVE_ROOMS_VISITED 0

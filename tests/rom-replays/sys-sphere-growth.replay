@@ -1,0 +1,74 @@
+from sys-underground-dig.replay
+# sys-sphere-growth (spheres.c, underground.c Underground_HandleDailyEvents): the Underground
+# Man's third mission; down under Eterna City, the Blue Sphere 20 is buried in front of the player (SPHERES, BURY), the
+# clock steps a day (the buried spheres grow on the save's seed), A digs it up grown; up again, the mission's reward.
++0 press a
++1 release a
+advance text
+until idle
++0 assert var platinum:VAR_CURRENT_UNDERGROUND_MISSION 2
++0 assert flag platinum:FLAG_HAS_ACTIVE_UNDERGROUND_MISSION true
++0 press left
+until position 4 6
++0 release left
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY"
++0 release down
+until idle
++0 press y
++1 release y
+until state player.zone "platinum:MAP_HEADER_UNDERGROUND"
+until idle
++0 press x
++1 release x
+until app ug-menu
++1 tap entry:1
++1 tap row:1
++1 tap menu:0
++1 assert state underground.buried [{"x":168,"z":265,"type":4,"size":20,"growth":0}]
++0 assert flag platinum:FLAG_SPHERE_ACQUIRED true
++1 tap next
++1 tap back
++1 tap back
+until app none
+until idle
+# A day later the buried sphere has grown.
++0 date 2009-03-23 12:00
+until state underground.respawn true
++0 press a
++1 release a
+until message
++0 assert state underground.buried []
+advance text
+until idle
++0 assert state underground.spheres[5].type 4
++0 assert state underground.spheres[5].size 23
+# Up again: the third mission (FLAG_SPHERE_ACQUIRED) gives the Digger Drill.
++0 press x
++1 release x
+until app ug-menu
++1 tap entry:5
++1 tap yes
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY"
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY_UNDERGROUND_MAN_HOUSE"
++0 release up
+until idle
++0 press up
+until position 4 6
++0 release up
+until idle
++0 press right
+until position 6 6
++0 release right
+until idle
++0 press up
++1 release up
++4 press a
++5 release a
+advance text
+until idle
++0 assert var platinum:VAR_CURRENT_UNDERGROUND_MISSION 3
++0 assert state underground.traps [1,23,28,33]

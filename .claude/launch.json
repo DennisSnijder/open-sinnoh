@@ -1,0 +1,7 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "app-fixture", "runtimeExecutable": "pnpm", "runtimeArgs": ["dev", "--port", "5190"], "port": 5190 },
+    { "name": "site", "runtimeExecutable": "pnpm", "runtimeArgs": ["site:dev"], "port": 5180 }
+  ]
+}

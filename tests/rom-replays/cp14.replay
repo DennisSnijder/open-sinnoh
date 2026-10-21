@@ -1,0 +1,1146 @@
+from cp13.replay
++0 reload
+# CP14 (docs/research/story-cp5-19.md §14): from CP13's end at Lake Acuity, back
+# south and east to Veilstone (Route 216, Mt. Coronet, Celestic, Route 210, Route 215), the Storage Key grunt and
+# Looker, the warehouse and the HQ's warp panels to the Galactic Key, the main entrance, the hall speech, Cyrus
+# (403) on 4F, Saturn (409) in the control room and the release of the lake guardians: Mt. Coronet 2F state 1.
++0 wild auto
++0 evolve auto
+until idle
++0 press left
+until position 14 45 600
++0 release left
++0 press down
+until state player.zone "platinum:MAP_HEADER_ACUITY_LAKEFRONT" 600
++0 release down
+until position 308 229 600
++30 press down
+until position 308 232 600
++0 release down
++0 press right
+until position 310 232 600
++0 release right
++0 press down
+until position 310 237 600
++0 release down
+until idle
++1 press down
++1 release down
+until idle
++0 assert facing player down
++0 field move 1 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle
++8 release select
++0 press down
+until position 310 267 6000
++0 release down
++0 press left
+until position 303 267 6000
++0 release left
++0 press down
+until position 303 271 6000
++0 release down
++0 press left
+until position 290 271 6000
++0 release left
++0 press down
+until position 290 272 6000
++0 release down
++0 press left
+until position 288 272 6000
++0 release left
++0 press down
+until position 288 281 6000
++0 release down
++0 press right
+until position 290 281 6000
++0 release right
++0 press down
+until position 290 285 6000
++0 release down
++0 press right
+until position 293 285 6000
++0 release right
++0 press down
+until position 293 286 6000
++0 release down
++0 press right
+until position 301 286 6000
++0 release right
++0 press down
+until position 301 289 6000
++0 release down
++0 press right
+until position 303 289 6000
++0 release right
++0 press down
+until position 303 369 6000
++0 release down
++0 press right
+until position 304 369 6000
++0 release right
++0 press down
+until position 304 375 6000
++0 release down
++0 press left
+until position 303 375 6000
++0 release left
++0 press down
+until position 303 381 6000
++0 release down
++0 press right
+until position 304 381 6000
++0 release right
++7 release select
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_216" 3000
++0 release down
+until idle
++8 release select
++0 press down
+until position 304 391 6000
++0 release down
++0 press left
+until position 296 391 6000
++0 release left
++0 press down
+until position 296 401 6000
++0 release down
++0 press right
+until position 305 401 6000
++0 release right
++0 press down
+until position 305 405 6000
++0 release down
++0 press right
+until position 327 405 6000
++0 release right
++0 press up
+until position 327 401 6000
++0 release up
++0 press right
+until position 370 401 6000
++0 release right
++0 press down
+until position 370 403 6000
++0 release down
++7 release select
++0 press right
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_NORTH_ROOM_2" 3000
++0 release right
+until idle
++8 release select
+# a Max Repel for the caves and Route 210's grass
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:0
++1 tap row:2
++1 tap menu:0
++1 assert state repel 250
++0 assert state bag.items[item="platinum:ITEM_MAX_REPEL"].count 2
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
+# north room 2 down to B1F (the stairs on the east side, cp13's way back)
++0 press right
+until position 15 18 6000
++0 release right
++0 press down
+until position 15 27 6000
++0 release down
++0 press left
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_B1F" 3000
++0 release left
+until idle
++8 release select
++0 press left
+until position 3 3 6000
++0 release left
++0 press down
+until position 3 59 6000
++0 release down
++0 press right
+until position 7 59 6000
++0 release right
++0 press down
+until position 7 60 6000
++0 release down
++0 press right
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_NORTH_ROOM_1" 3000
++0 release right
+until idle
++8 release select
++0 press right
+until position 28 10 6000
++0 release right
++0 press down
+until position 28 28 6000
++0 release down
++0 press right
+until position 29 28 6000
++0 release right
++0 press down
+until position 29 29 6000
++0 release down
+until idle
++1 press down
++1 release down
+until idle
++0 assert facing player down
++0 field move 1 platinum:MOVE_STRENGTH
+advance text
+until idle
++0 press down
+until state objects[localId=7].z 31 120
++0 release down
+until idle
++0 press down
+until position 29 30 120
++0 release down
++0 press left
+until position 28 30 120
++0 release left
++0 press down
+until position 28 34 600
++0 release down
++0 press right
+until position 29 34 600
++0 release right
++0 press down
+until position 29 35 600
++0 release down
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_211_EAST" 3000
++0 release right
+until idle
++8 release select
++0 press right
+until position 423 527 6000
++0 release right
++0 press down
+until position 423 531 6000
++0 release down
++0 press right
+until position 442 531 6000
++0 release right
++0 press up
+until position 442 530 6000
++0 release up
++0 press right
+until position 450 530 6000
++0 release right
++7 release select
++0 press right
+until position 452 530 6000
++0 release right
++0 press up
+until position 452 519 6000
++0 release up
++0 press right
+until position 473 519 6000
++0 release right
++0 press down
+until position 473 521 6000
++0 release down
++0 press right
+until position 475 521 6000
++0 release right
++0 press down
+until position 475 530 6000
++0 release down
++0 press right
+until position 492 530 6000
++0 release right
++7 release select
++0 press right
+until state repel 0 600
++0 release right
++90 press a
++1 release a
+until idle
++0 press right
+until position 510 530 6000
++0 release right
++0 press down
+until position 510 535 6000
++0 release down
++0 press right
+until position 516 535 6000
++0 release right
++0 press down
+until position 516 541 6000
++0 release down
++0 press right
+until position 522 541 6000
++0 release right
++0 press up
+until position 522 535 6000
++0 release up
++7 release select
++0 press up
+until position 522 521 6000
++0 release up
++0 press right
+until position 539 521 6000
++0 release right
++0 press down
+until position 539 527 6000
++0 release down
++0 press right
+until position 543 527 6000
++0 release right
++0 press down
+until position 543 533 6000
++0 release down
++0 press right
+until position 553 533 6000
++0 release right
++0 press down
+until position 553 540 6000
++0 release down
++0 press right
+until position 563 540 6000
++0 release right
++0 press down
+until position 563 544 6000
++0 release down
++7 release select
++0 press down
+until position 563 552 6000
++0 release down
++0 press right
+until position 564 552 6000
++0 release right
++0 press down
+until position 564 572 6000
++0 release down
++0 press left
+until position 561 572 6000
++0 release left
++0 press down
+until position 561 597 6000
++0 release down
++0 press right
+until position 584 597 6000
++0 release right
++7 release select
++0 press down
+until position 584 598 6000
++0 release down
++0 press right
+until position 593 598 6000
++0 release right
++0 press up
+until position 593 587 6000
++0 release up
++0 press left
+until position 588 587 6000
++0 release left
++0 press down
+until position 588 593 6000
++0 release down
++0 press right
+until position 606 593 6000
++0 release right
++0 press down
+until position 606 599 6000
++0 release down
++0 press right
+until position 614 599 6000
++0 release right
++0 press up
+until position 614 583 6000
++0 release up
++0 press left
+until position 601 583 6000
++0 release left
++0 press up
+until position 601 579 6000
++0 release up
++0 press right
+until position 610 579 6000
++0 release right
++0 press down
+until position 610 590 6000
++0 release down
++0 press right
+until position 625 590 6000
++0 release right
++0 press up
+until position 625 583 6000
++0 release up
++0 press right
+until position 634 583 6000
++0 release right
++0 press down
+until position 634 587 6000
++0 release down
++0 press right
+until position 650 587 6000
++0 release right
++0 press down
+until position 650 592 6000
++0 release down
++0 press left
+until position 645 592 6000
++0 release left
++0 press down
+until position 645 598 6000
++0 release down
++0 press right
+until position 670 598 6000
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_ROUTE_215_GATE_TO_VEILSTONE_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_CITY" 3000
++0 release right
+until idle
++8 release select
++0 press right
+until position 694 598 6000
++0 release right
++0 press down
+until position 694 610 6000
++0 release down
++0 press right
+until position 705 610 6000
++0 release right
++0 press down
+until position 705 617 6000
++0 release down
++0 press right
+until position 723 617 6000
++0 release right
++0 press up
+until position 723 595 6000
++0 release up
++0 press left
+until position 721 595 6000
++0 release left
++0 press up
+until position 721 594 6000
++0 release up
+# the Storage Key grunt (VeilstoneCity_GruntMStorageKey) and Looker: "Will you enter the hideout?" YES
+until idle
++1 press up
++1 release up
+until idle
++0 press a
++1 release a
+until message 300
+advance text 9000
++0 press a
++1 release a
+advance text 9000
+until idle 3000
++0 assert flag platinum:FLAG_AGREED_WITH_LOOKER_TO_ENTER_HIDEOUT true
++0 assert var platinum:VAR_VEILSTONE_CITY_GALACTIC_WAREHOUSE_STATE 3
++8 release select
+# heal at the Pokémon Center before the HQ (Empoleon's Surf and Flash Cannon PP)
++0 press right
+until position 722 594 6000
++0 release right
++0 press down
+until position 722 612 6000
++0 release down
++0 press left
+until position 721 612 6000
++0 release left
++0 press down
+until position 721 617 6000
++0 release down
++0 press left
+until position 712 617 6000
++0 release left
++0 press up
+until position 712 612 6000
++0 release up
++0 press right
+until position 717 612 6000
++0 release right
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_CITY" 3000
++0 release down
+until idle
++8 release select
++0 press left
+until position 712 612 6000
++0 release left
++0 press down
+until position 712 617 6000
++0 release down
++0 press left
+until position 702 617 6000
++0 release left
++0 press up
+until position 702 608 6000
++0 release up
++0 press left
+until position 694 608 6000
++0 release left
++0 press up
+until position 694 595 6000
++0 release up
++0 press right
+until position 701 595 6000
++0 release right
++0 press up
+until position 701 592 6000
++0 release up
+# into the warehouse: Looker opens the door (VeilstoneCityGalacticWarehouse_CoordEvent_LookerOpenDoor)
++0 press up
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_CITY_GALACTIC_WAREHOUSE" 3000
++0 release up
+until idle
+advance text 9000
+until idle 3000
++8 release select
+# Looker uses the Storage Key
++0 press up
+until message 600
++0 release up
+advance text 9000
+until idle 3000
++0 assert flag platinum:FLAG_USED_STORAGE_KEY true
++0 assert var platinum:VAR_VEILSTONE_CITY_GALACTIC_WAREHOUSE_STATE 4
++8 release select
++0 press up
+until position 8 3 6000
++0 release up
++0 press right
+until position 12 3 6000
++0 release right
+# down into the HQ: the stairs at (13, 3), entered from the west
++0 press right
+until state player.zone "platinum:MAP_HEADER_GALACTIC_HQ_B2F" 3000
++0 release right
+until idle
++8 release select
+# grunt B2F 1 looks north and west at random from (40, 15): talk to him from the corridor below (row 16)
++0 press right
+until position 40 16 6000
++0 release right
+until idle
++1 press up
++1 release up
+until idle
++0 press a
++1 release a
+until message 600
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_GALACTIC_HQ_B2F_1 won single
++8 release select
++0 press left
+until position 39 16 6000
++0 release left
++0 press up
+until position 39 11 6000
++0 release up
+# grunt B2F 2 looks south over row 11
++0 press right
+until message 3000
++0 release right
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_GALACTIC_HQ_B2F_2 won single
++8 release select
++0 press right
+until position 75 11 6000
++0 release right
++0 press up
+until position 75 3 6000
++0 release up
++0 press right
+until position 80 3 6000
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_GALACTIC_HQ_B1F" 600
++0 release right
+until idle
++8 release select
++0 press right
+until position 4 7 6000
++0 release right
++0 press up
+until position 4 3 6000
++0 release up
++0 press right
+until position 10 3 6000
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_GALACTIC_HQ_1F" 600
++0 release right
+until idle
++8 release select
++0 press right
+until position 49 3 6000
++0 release right
++0 press down
+until position 49 8 6000
++0 release down
+# grunt 1F looks south and west at random from (41, 7): step into his south line as he turns south
++0 press left
+until position 42 8 6000
++0 release left
+until idle
+until state objects[localId=3].facing "left" 3000
+until state objects[localId=3].facing "down" 3000
++0 press left
+until message 3000
++0 release left
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_GALACTIC_HQ_1F won single
++8 release select
++0 press left
+until position 40 8 6000
++0 release left
++0 press up
+until position 40 3 6000
++0 release up
+# the panels 10 → 11 and 12 → 13
++0 press left
+until position 32 3 600
++0 release left
+until idle
++0 press down
+until position 32 4 6000
++0 release down
++0 press right
+until position 33 4 6000
++0 release right
++0 press down
+until position 33 8 6000
++0 release down
++0 press right
+until position 1 8 600
++0 release right
+until idle
++0 press up
+until position 1 3 6000
++0 release up
++0 press right
+until position 3 3 6000
++0 release right
+# up the stairs (4, 3) to 2F
++0 press right
+until state player.zone "platinum:MAP_HEADER_GALACTIC_HQ_2F" 600
++0 release right
+until idle
++8 release select
++0 press down
+until position 7 5 6000
++0 release down
++0 press left
+until position 2 5 6000
++0 release left
++0 press up
+until position 2 3 6000
++0 release up
+# the panel 5 → 6, then the stairs (24, 3) down to 1F
++0 press left
+until position 17 5 600
++0 release left
+until idle
++8 release select
++0 press right
+until position 23 5 6000
++0 release right
++0 press up
+until position 23 3 6000
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_GALACTIC_HQ_1F" 600
++0 release right
+until idle
++8 release select
++0 press down
+until position 27 7 6000
++0 release down
++0 press left
+until position 18 7 6000
++0 release left
++0 press down
+until position 18 9 6000
++0 release down
++0 press left
+until position 10 9 6000
++0 release left
++0 press up
+until position 10 5 6000
++0 release up
++0 press right
+until position 12 5 6000
++0 release right
++0 press up
+until position 12 3 6000
++0 release up
+# the stairs (11, 3) down to the Galactic Key on B2F
++0 press left
+until state player.zone "platinum:MAP_HEADER_GALACTIC_HQ_B2F" 600
++0 release left
+until idle
++8 release select
++0 press left
+until position 27 3 6000
++0 release left
++0 press down
+until position 27 9 6000
++0 release down
++0 press left
+until position 21 9 6000
++0 release left
++0 press up
+until position 21 5 6000
++0 release up
+# the Galactic Key
+until idle
++1 press left
++1 release left
+until idle
++0 press a
++1 release a
+advance text
+until idle
++0 assert flag platinum:FLAG_OBTAINED_GALACTIC_HQ_B2F_GALACTIC_KEY true
++0 press down
+until position 21 9 6000
++0 release down
++0 press left
+until position 14 9 6000
++0 release left
+# the key door on B2F
+until idle
++1 press up
++1 release up
+until idle
++0 press a
++1 release a
+until message 300
+until message 300
+advance text
++0 assert text platinum:GalacticHQB2F_Text_UseGalacticKey 1
++0 press a
++1 release a
+advance text
+until idle
++0 assert flag platinum:FLAG_HIDE_GALACTIC_HQ_B2F_DOOR true
++8 release select
++0 press up
+until position 14 5 6000
++0 release up
++0 press left
+until position 6 5 6000
++0 release left
++0 press down
+until position 6 16 6000
++0 release down
++0 press left
+until position 4 16 6000
++0 release left
+# back up to the warehouse and out to the HQ main entrance
++0 press left
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_CITY_GALACTIC_WAREHOUSE" 600
++0 release left
+until idle
++8 release select
++0 press left
+until position 8 3 6000
++0 release left
++0 press down
+until position 8 10 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_VEILSTONE_CITY" 600
++0 release down
+until idle
++8 release select
++0 press down
+until position 701 597 6000
++0 release down
++0 press left
+until position 694 597 6000
++0 release left
++0 press down
+until position 694 610 6000
++0 release down
++0 press right
+until position 705 610 6000
++0 release right
++0 press down
+until position 705 617 6000
++0 release down
++0 press right
+until position 723 617 6000
++0 release right
++0 press up
+until position 723 595 6000
++0 release up
++0 press left
+until position 717 595 6000
++0 release left
++0 press up
+until position 717 590 6000
++0 release up
++0 press up
+until state player.zone "platinum:MAP_HEADER_GALACTIC_HQ_1F" 600
++0 release up
+until idle
++8 release select
++0 press up
+until position 29 19 6000
++0 release up
++0 press left
+until position 22 19 6000
++0 release left
+# the key door at the main entrance
+until idle
++1 press up
++1 release up
+until idle
++0 press a
++1 release a
+until message 300
+advance text
++0 assert text platinum:GalacticHQ1F_Text_UseGalacticKey 1
++0 press a
++1 release a
+advance text
+until idle
++0 press up
+until position 22 15 6000
++0 release up
++7 release select
++0 press up
+until position 22 14 6000
++0 release up
++0 press left
+until position 20 14 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_GALACTIC_HQ_2F" 600
++0 release left
+until idle
++8 release select
++0 press down
+until position 10 15 6000
++0 release down
+# grunt 2F 2 looks north and east at random from (21, 16), grunt 2F 3 west from (26, 16): cross 2F 2's north
+# line (x 21) as he turns east, and step into both west/east lines on row 16 as he turns east again (type 19)
++0 press right
+until position 20 15 6000
++0 release right
+until idle
+until state objects[localId=2].facing "up" 3000
+until state objects[localId=2].facing "right" 3000
++0 press right
+until position 25 15 6000
++0 release right
+until idle
+until state objects[localId=2].facing "up" 3000
+until state objects[localId=2].facing "right" 3000
++0 press down
+until message 3000
++0 release down
+advance text
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_GALACTIC_HQ_2F_2 won trainer-pair
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_GALACTIC_HQ_2F_3 won trainer-pair
++8 release select
++0 press down
+until position 25 19 6000
++0 release down
++0 press right
+until position 32 19 6000
++0 release right
++0 press up
+until position 32 13 6000
++0 release up
++0 press left
+until position 30 13 6000
++0 release left
+# the panel to the hall
++0 press left
+until state player.zone "platinum:MAP_HEADER_GALACTIC_HQ_HALL" 600
++0 release left
+until idle
++8 release select
++0 press down
+until position 24 12 6000
++0 release down
++0 press left
+until position 21 12 6000
++0 release left
+# the speech (GalacticHQHall_CoordEvent_Speech)
++0 press left
+until message 600
++0 release left
+advance text 12000
+until idle 3000
++0 assert var platinum:VAR_GALACTIC_HQ_HALL_STATE 1
++8 release select
++0 press left
+until position 2 13 6000
++0 release left
++0 press up
+until position 2 12 6000
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_GALACTIC_HQ_2F" 600
++0 release left
+until idle
++8 release select
++0 press up
+until position 52 3 6000
++0 release up
++0 press left
+until position 51 3 6000
++0 release left
+# the stairs (50, 3) up to 3F
++0 press left
+until state player.zone "platinum:MAP_HEADER_GALACTIC_HQ_3F" 600
++0 release left
+until idle
++8 release select
++0 press left
+until position 46 3 6000
++0 release left
++0 press down
+until position 46 4 6000
++0 release down
++0 press left
+until message 3000
++0 release left
+advance text
+battle auto 20000
+advance text
+# grunts 3F 4 (looking south from (42, 3)) and 3F 3 (north from (42, 7)) both see (42, 4): with one Pokémon
+# standing (Bibarel fainted in the 2F pair) the two-alive check makes it two single battles
+battle auto 20000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_GALACTIC_HQ_3F_4 won single
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_GALACTIC_HQ_3F_3 won single
++0 assert state party[1].hp 0
++8 release select
++0 press left
+until position 20 4 6000
++0 release left
++0 press down
+until position 20 13 6000
++0 release down
++0 press left
+until position 16 13 6000
++0 release left
+# the panel 4 → 3, then the stairs (10, 11) up to 4F
++0 press left
+until position 6 14 600
++0 release left
+until idle
++0 press right
+until position 7 14 6000
++0 release right
++0 press up
+until position 7 11 6000
++0 release up
++0 press right
+until position 9 11 6000
++0 release right
++0 press right
+until state player.zone "platinum:MAP_HEADER_GALACTIC_HQ_4F" 600
++0 release right
+until idle
++8 release select
++0 press right
+until position 8 15 6000
++0 release right
+# the key door before Cyrus
+until idle
++1 press up
++1 release up
+until idle
++0 press a
++1 release a
+until message 300
+advance text
++0 assert text platinum:GalacticHQ4F_Text_UseGalacticKey 1
++0 press a
++1 release a
+advance text
+until idle
+# Cyrus (GalacticHQ4F_CoordEvent_Cyrus): his battle (403)
++0 press up
+until message 600
++0 release up
+advance text 12000
+battle auto 30000
+advance text 12000
+until idle 3000
++0 assert battle trainer platinum:TRAINER_GALACTIC_BOSS_CYRUS_GALACTIC_HQ won single
++0 assert var platinum:VAR_GALACTIC_HQ_4F_STATE 1
++8 release select
++0 press up
+until position 8 8 6000
++0 release up
++0 press right
+until position 14 8 6000
++0 release right
++0 press up
+until position 14 5 6000
++0 release up
++0 press right
+until position 22 5 6000
++0 release right
++0 press up
+until position 22 4 6000
++0 release up
+# the panel to the laboratory, and on to the control room
++0 press up
+until state player.zone "platinum:MAP_HEADER_GALACTIC_HQ_LABORATORY" 600
++0 release up
+until idle
++8 release select
++0 press up
+until position 1 9 6000
++0 release up
++0 press right
+until position 6 9 6000
++0 release right
+# the Full Restore on the floor, for Saturn
+until idle
++1 press up
++1 release up
+until idle
++0 press a
++1 release a
+advance text
+until idle
++0 assert state bag.medicine[item="platinum:ITEM_FULL_RESTORE"].count 1
++8 release select
++0 press down
+until position 6 10 6000
++0 release down
++0 press right
+until position 35 10 6000
++0 release right
+# Scientist F walks x 36, rows 7–13: up x 35 beside her
++0 press up
+until position 35 3 6000
++0 release up
++0 press right
+until position 36 3 6000
++0 release right
++0 press up
+until state player.zone "platinum:MAP_HEADER_GALACTIC_HQ_CONTROL_ROOM" 600
++0 release up
+until idle
++8 release select
+# the Hyper Potion to Empoleon before Saturn
+until idle
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:1
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 assert app bag
++1 press b
++1 release b
+until app start-menu
++1 press b
++1 release b
+until idle
++0 assert state bag.medicine [{"item":"platinum:ITEM_FULL_RESTORE","count":1}]
+# Saturn (GalacticHQControlRoom_Saturn): his battle (409)
++0 press up
+until position 8 12 6000
++0 release up
++0 press left
+until position 6 12 6000
++0 release left
++0 press up
+until position 6 7 6000
++0 release up
++0 press right
+until position 8 7 6000
++0 release right
+until idle
++1 press up
++1 release up
+until idle
++0 press a
++1 release a
+until message 600
+advance text 12000
+battle auto 30000
+advance text 12000
+until idle 3000
++0 assert battle trainer platinum:TRAINER_COMMANDER_SATURN_GALACTIC_HQ won single
++0 assert flag platinum:FLAG_DEFEATED_GALACTIC_HQ_CONTROL_ROOM_SATURN true
+# the release button (GalacticHQControlRoom_Button, behind Saturn's spot)
++0 press up
+until position 8 6 600
++0 release up
+until idle
++0 press a
++1 release a
+until yesno 600
++0 assert text platinum:GalacticHQControlRoom_Text_AskPressButton 0
++0 press a
++1 release a
+advance text 12000
+until idle 3000
+# the browser spec's beat: the control room after the release
++0 screenshot galactic-hq-release
+# end of CP14
++0 assert flag platinum:FLAG_USED_STORAGE_KEY true
++0 assert flag platinum:FLAG_OBTAINED_GALACTIC_HQ_B2F_GALACTIC_KEY true
++0 assert var platinum:VAR_GALACTIC_HQ_HALL_STATE 1
++0 assert battle trainer platinum:TRAINER_GALACTIC_BOSS_CYRUS_GALACTIC_HQ won single
++0 assert var platinum:VAR_GALACTIC_HQ_4F_STATE 1
++0 assert battle trainer platinum:TRAINER_COMMANDER_SATURN_GALACTIC_HQ won single
++0 assert flag platinum:FLAG_DEFEATED_GALACTIC_HQ_CONTROL_ROOM_SATURN true
++0 assert flag platinum:FLAG_FREED_GALACTIC_HQ_POKEMON true
++0 assert var platinum:VAR_GALACTIC_HQ_CONTROL_ROOM_STATE 0
++0 assert flag platinum:FLAG_HIDE_MT_CORONET_2F_CAVE_PAINTING true
++0 assert flag platinum:FLAG_HIDE_MT_CORONET_2F_CAVE_PAINTING_SHARDS false
++0 assert var platinum:VAR_MT_CORONET_2F_STATE 1

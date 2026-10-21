@@ -1,0 +1,15 @@
+# Never upload ROMs, saves or anything derived from them (`vercel` CLI deploys from a local folder).
+*.nds
+*.sav
+*.dsv
+.opensinnoh-cache/
+# The old local cache names (pre-rename checkouts)
+.lantern-cache/
+.lantern-nds-cache/
+base-pack/
+rom-out/
+test-artifacts/
+reference-projects/
+.claude/
+node_modules/
+dist/

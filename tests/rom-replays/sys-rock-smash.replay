@@ -1,0 +1,61 @@
+from cp4.replay
+# sys-rock-smash: Rock Smash in Oreburgh Gate 1F after CP4's real Coal
+# Badge. One rock from the field (A on the rock, FieldMoves_Rock), one from the party menu (field move,
+# FIELD_MOVES 9). The rocks stay gone across a save/load, and come back after leaving the zone.
+# Wild battle counts per seed are checked by tests/integration/sys-replays.rom.test.ts.
+party 1 platinum:SPECIES_BIBAREL 30 platinum:MOVE_ROCK_SMASH
+warp platinum:MAP_HEADER_OREBURGH_GATE_1F 11 12 up
+until idle
++0 assert state objects[localId=5].z 11
+# A on the rock at (11, 11): yes. The `smash-*` screenshot lines are the browser spec's key beat.
++0 screenshot smash-before
++0 press a
++1 release a
+until yesno
++0 press a
++1 release a
+advance text
+until idle
++0 assert flag platinum:FLAG_MAP_LOCAL_HIDE_OBSTACLE_4 true
++0 screenshot smash-after
+# save/load right after the smash: the rock stays gone
++0 reload
+until idle
++0 assert flag platinum:FLAG_MAP_LOCAL_HIDE_OBSTACLE_4 true
+# walk through where it was, then smash the rock at (12, 10) from the party menu
++0 press up
+until position 11 10
++0 release up
+until idle
++0 press right
++1 release right
+until idle
++0 assert facing player right
++0 field move 1 platinum:MOVE_ROCK_SMASH
+advance text
+until idle
++0 assert flag platinum:FLAG_MAP_LOCAL_HIDE_OBSTACLE_3 true
+# north to the B1F stairs (20, 5), down and back up: both rocks are back
++0 press up
+until position 11 7
++0 release up
++0 press right
+until position 12 7
++0 release right
++0 press up
+until position 12 5
++0 release up
++0 press right
+until state player.zone "platinum:MAP_HEADER_OREBURGH_GATE_B1F"
++0 release right
+until idle
++0 assert map platinum:MAP_HEADER_OREBURGH_GATE_B1F
++0 press left
+until state player.zone "platinum:MAP_HEADER_OREBURGH_GATE_1F"
++0 release left
+until idle
++0 assert map platinum:MAP_HEADER_OREBURGH_GATE_1F
++0 assert flag platinum:FLAG_MAP_LOCAL_HIDE_OBSTACLE_4 false
++0 assert flag platinum:FLAG_MAP_LOCAL_HIDE_OBSTACLE_3 false
++0 assert state objects[localId=5].x 11
++0 assert state objects[localId=4].x 12

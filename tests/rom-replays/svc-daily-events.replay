@@ -1,0 +1,23 @@
+# FieldSystem_HandleDailyEvents: a midnight step clears daily claims and advances the record-mixed
+# lottery seed once; the size record persists. A frozen clock does not reroll the random level.
+# The new game's daily random is seed-dependent; pin it to 0 so the lottery value is fixed.
+party 0 platinum:SPECIES_BIBAREL 30
+set state fieldRng {"seed":1}
+set state gameTime.dailyRandom 0
+set var platinum:VAR_SIZE_CONTEST_RECORD 33280
+set flag platinum:FLAG_DAILY_RECEIVED_LOTTERY_PRIZE true
+date 2009-03-22 23:59
+set var platinum:VAR_LAKE_VERITY_PROF_ROWAN_STATE 1
+set flag platinum:FLAG_HIDE_LAKE_VERITY_TEAM_GALACTIC true
+warp platinum:MAP_HEADER_LAKE_VERITY 50 36 left
+until idle
++0 date 2009-03-23 00:00
++1 assert flag platinum:FLAG_DAILY_RECEIVED_LOTTERY_PRIZE false
++0 assert var platinum:VAR_LOTTERY_TRAINER_ID_LOW_HALF 16838
++0 assert var platinum:VAR_DAILY_RANDOM_LEVEL 99
++0 assert var platinum:VAR_SIZE_CONTEST_RECORD 33280
++60 assert var platinum:VAR_DAILY_RANDOM_LEVEL 99
++0 reload
+until idle
++0 assert var platinum:VAR_LOTTERY_TRAINER_ID_LOW_HALF 16838
++0 assert var platinum:VAR_SIZE_CONTEST_RECORD 33280

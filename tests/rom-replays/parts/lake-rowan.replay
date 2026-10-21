@@ -1,0 +1,23 @@
+# Part of sys-static-lake-trio: the lake guardians' objects start hidden (the new game's init script sets
+# FLAG_HIDE_VERITY_CAVERN_MESPRIT, _VALOR_CAVERN_AZELF, _ACUITY_CAVERN_UXIE). A constructed start at the end of
+# CP15 (Sendoff Spring's VAR_EXITED_DISTORTION_WORLD_STATE 2, VAR_SANDGEM_TOWN_LAB_STATE 2): the player walks into
+# Rowan's lab, whose frame script (SandgemTownLab_OnFrame_ReturnedFromDistortionWorld) clears the three hide flags,
+# opens the way to Sunyshore and sets the lab state 3.
+set var platinum:VAR_EXITED_DISTORTION_WORLD_STATE 2
+set var platinum:VAR_SANDGEM_TOWN_LAB_STATE 2
+warp platinum:MAP_HEADER_SANDGEM_TOWN 168 843 up
+until idle
++0 assert flag platinum:FLAG_HIDE_VALOR_CAVERN_AZELF true
++0 assert flag platinum:FLAG_HIDE_ACUITY_CAVERN_UXIE true
++0 assert flag platinum:FLAG_HIDE_VERITY_CAVERN_MESPRIT true
++0 press up
+until position 7 15 3000
++0 release up
+advance text 6000
+until idle 3000
++0 assert var platinum:VAR_SANDGEM_TOWN_LAB_STATE 3
++0 assert var platinum:VAR_EXITED_DISTORTION_WORLD_STATE 3
++0 assert var platinum:VAR_VALOR_LAKEFRONT_BLOCK_SUNYSHORE_STATE 1
++0 assert flag platinum:FLAG_HIDE_VALOR_CAVERN_AZELF false
++0 assert flag platinum:FLAG_HIDE_ACUITY_CAVERN_UXIE false
++0 assert flag platinum:FLAG_HIDE_VERITY_CAVERN_MESPRIT false

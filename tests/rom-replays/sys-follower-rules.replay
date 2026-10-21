@@ -1,0 +1,46 @@
+# Following Pokémon (docs/decisions.md; world party-follower.ts): the rules. The lead that follows is the
+# first party Pokémon that is not fainted and not an egg (Chimchar here, a Platinum walking set). In
+# Sandgem Town it waits under the player after the warp; the Bicycle (registered, on Y) recalls it; getting
+# off puts it back under the player until the next step; walking into the Pokémon Center (indoors: height
+# restricted, a small set follows) recreates it under the player, and a save and load keeps it there.
+party 0 platinum:SPECIES_TURTWIG 20
+party 1 platinum:SPECIES_PIPLUP 5
+party 2 platinum:SPECIES_CHIMCHAR 10
+set state party[0].hp 0
+set state party[1].isEgg true
+give item platinum:ITEM_BICYCLE 1
+set state registeredItem "platinum:ITEM_BICYCLE"
+warp platinum:MAP_HEADER_SANDGEM_TOWN 177 847 up
+until idle
++0 assert state partyFollower {"x":177,"z":847,"facing":"up","waiting":true}
+# Y gets on the bike: recalled while cycling
++1 press y
++1 release y
+until state playerState "cycle"
++1 assert state partyFollower null
++0 press up
+until position 177 845
++0 release up
+until idle
++0 assert state partyFollower null
+# Y gets off: under the player, out on the tile they leave
++1 press y
++1 release y
+until state playerState "walk"
++1 assert state partyFollower {"x":177,"z":845,"facing":"up","waiting":true}
++0 press up
+until position 177 844
++0 assert state partyFollower {"x":177,"z":845,"facing":"up","waiting":false}
+# The door: the map load recreates it under the player
+until state player.zone "platinum:MAP_HEADER_SANDGEM_TOWN_POKECENTER_1F"
++0 release up
+until idle
++0 assert state partyFollower {"x":8,"z":12,"facing":"up","waiting":true}
++0 reload
+until idle
++0 assert state partyFollower {"x":8,"z":12,"facing":"up","waiting":true}
++0 press up
+until position 8 11
++0 release up
+until idle
++0 assert state partyFollower {"x":8,"z":12,"facing":"up","waiting":false}

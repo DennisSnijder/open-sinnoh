@@ -1,0 +1,19 @@
+from cp23b.replay
+# Branch m6-turnback-giratina-defeated: Turnback Cave's Giratina knocked out
+# by the story's team (battle auto). From cp23b's end (Snowpoint), set down in the room, as m6-turnback-giratina-caught is:
+# "Giratina disappeared", hidden (the on-load's FLAG_MAP_LOCAL_REMOVE_OBJECT), not caught; the Hall of Fame shows it
+# again (sys-hof-respawn).
+# Kept setup: the warp into the Giratina room (the pillar rooms are off the chain; sys-turnback-routing).
+warp platinum:MAP_HEADER_TURNBACK_CAVE_GIRATINA_ROOM 11 15 up
+until idle 6000
++0 press a
++1 release a
+advance text 3000
+battle auto 30000
++0 assert battle scripted platinum:SPECIES_GIRATINA won
+advance text 20000
+until idle 3000
++0 assert flag platinum:FLAG_CAUGHT_GIRATINA false
++0 assert flag platinum:FLAG_HIDE_TURNBACK_CAVE_GIRATINA_ROOM_GIRATINA true
++0 assert flag platinum:FLAG_MAP_LOCAL_REMOVE_OBJECT false
++0 assert state party.length 5

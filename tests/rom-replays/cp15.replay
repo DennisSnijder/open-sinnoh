@@ -1,0 +1,755 @@
+from cp15-giratina-room.replay
+# CP15 continues from its story-played Giratina anchor: defeat Giratina, leave through the portal,
+# and visit Rowan's lab. Earlier battles are asserted in the two prefixes (battle logs are not saved).
++0 reload
++0 wild flee
++0 evolve auto
+until idle 6000
++0 press a
++1 release a
++33 press a
++1 release a
++16 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
+battle auto 30000
++144 press a
++1 release a
++47 press a
++1 release a
++71 press a
++1 release a
++176 press a
++1 release a
++116 press a
++1 release a
++118 press a
++1 release a
++98 press a
++1 release a
++124 press a
++1 release a
++72 press a
++1 release a
++55 press a
++1 release a
++50 press a
++1 release a
++120 press a
++1 release a
++140 press a
++1 release a
++72 press a
++1 release a
++120 press a
++1 release a
++21 press a
++1 release a
++69 press a
++1 release a
++110 press a
++1 release a
++126 press a
++1 release a
++34 press a
++1 release a
++124 press a
++1 release a
++124 press a
++1 release a
++80 press a
++1 release a
++118 press a
++1 release a
++130 press a
++1 release a
++102 press a
++1 release a
++46 press a
++1 release a
++139 press a
++1 release a
++80 press a
++1 release a
++84 press a
++1 release a
++49 press a
++1 release a
++120 press a
++1 release a
++142 press a
++1 release a
++116 press a
++1 release a
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
++0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM","x":15,"z":14,"y":16,"facing":"down"}
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 14
++0 assert state mapFeatures.support null
++0 press up
++1 release up
+until idle 600
++0 press a
++1 release a
++138 press a
++1 release a
++57 press a
++1 release a
++23 assert state player.zone "platinum:MAP_HEADER_SENDOFF_SPRING"
++49 press a
++1 release a
++101 press a
++1 release a
++96 press a
++1 release a
++144 press a
++1 release a
++102 press a
++1 release a
++122 press a
++1 release a
++116 press a
++1 release a
++100 press a
++1 release a
++128 press a
++1 release a
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_SENDOFF_SPRING"
++0 assert state player {"zone":"platinum:MAP_HEADER_SENDOFF_SPRING","x":32,"z":17,"y":32,"facing":"left"}
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 14
+until idle 6000
++0 assert var platinum:VAR_EXITED_DISTORTION_WORLD_STATE 2
+# Sendoff Spring: Rock Climb (Bibarel) up from the spring at x 33, round the grass to the south wall at x 32, down it
++0 press right
+until position 33 17 6000
++0 release right
+until idle
++1 press up
++1 release up
+until idle
++0 assert facing player up
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle
++8 release select
++0 press right
+until position 41 12 6000
++0 release right
++0 press down
+until position 41 14 6000
++0 release down
++0 press right
+until position 43 14 6000
++0 release right
++0 press down
+until position 43 16 6000
++0 release down
++0 press right
+until position 45 16 6000
++0 release right
++0 press down
+until position 45 34 6000
++0 release down
++0 press left
+until position 44 34 6000
++0 release left
++0 press down
+until position 44 36 6000
++0 release down
++0 press left
+until position 42 36 6000
++0 release left
++0 press down
+until position 42 38 6000
++0 release down
++0 press left
+until position 40 38 6000
++0 release left
++0 press down
+until position 40 40 6000
++0 release down
++0 press left
+until position 32 40 6000
++0 release left
+until idle
++1 press down
++1 release down
+until idle
++0 assert facing player down
++0 field move 4 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle
++8 release select
++0 press down
+until position 32 49 6000
++0 release down
++0 press left
+until position 29 49 6000
++0 release left
++0 press down
+until position 29 51 6000
++0 release down
++0 press left
+until position 13 51 6000
++0 release left
++0 press down
+until position 13 55 6000
++0 release down
++0 press left
+until position 12 55 6000
++0 release left
++0 press down
+until state player.zone "platinum:MAP_HEADER_SPRING_PATH" 3000
++0 release down
+until idle
++8 release select
++0 press down
+until position 762 715 6000
++0 release down
++0 press left
+until position 753 715 6000
++0 release left
++0 press down
+until position 753 718 6000
++0 release down
++0 press left
+until position 741 718 6000
++0 release left
++0 press up
+until position 741 707 6000
++0 release up
++0 press left
+until position 735 707 6000
++0 release left
++0 press down
+until position 735 709 6000
++0 release down
++0 press left
+until position 733 709 6000
++0 release left
++0 press down
+until position 733 714 6000
++0 release down
++0 press left
+until position 731 714 6000
++0 release left
++0 press down
+until position 731 717 6000
++0 release down
++0 press left
+until position 730 717 6000
++0 release left
++0 press down
+until position 730 718 6000
++0 release down
++0 press left
+until position 729 718 6000
++0 release left
++0 press down
+until position 729 743 6000
++0 release down
++0 press left
+until position 727 743 6000
++0 release left
++0 press down
+until position 727 760 6000
++0 release down
++0 press left
+until position 722 760 6000
++0 release left
++7 release select
+# Valor Lakefront back through the hotel lobby to Route 213
++0 press down
+until position 722 784 6000
++0 release down
++0 press left
+until position 718 784 6000
++0 release left
++0 press down
+until position 718 791 6000
++0 release down
++0 press left
+until position 706 791 6000
++0 release left
++0 press down
+until position 706 812 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_GRAND_LAKE_ROUTE_213_LOBBY" 3000
++0 release down
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_ROUTE_213" 3000
++0 release down
+until idle
+# Route 213 west: off the plateau over Tuber Jared's walk (row 832, x 703–712; he never pauses) just after he
+# turns at its east end, then west on the beach (CP10's way back)
++0 press down
+until position 706 826 6000
++0 release down
++0 press right
+until position 709 826 6000
++0 release right
++0 press down
+until position 709 831 6000
++0 release down
++0 press left
+until position 705 831 6000
++0 release left
+until idle
++0 assert state objects[localId=4].movementType 20
+until state objects[localId=4].x 712 3000
++0 press down
+until position 705 832 600
++0 release down
++0 press left
+until position 700 832 600
++0 release left
+until idle
++0 press left
+until position 679 832 6000
++0 release left
++0 press down
+until position 679 835 6000
++0 release down
++0 press left
+until position 669 835 6000
++0 release left
++0 press up
+until position 669 826 6000
++0 release up
++0 press right
+until position 671 826 6000
++0 release right
++0 press up
+until position 671 812 6000
++0 release up
++0 press left
+until position 647 812 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_213_GATE_TO_PASTORIA_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_PASTORIA_CITY" 3000
++0 release left
+until idle
+# heal at the Pastoria Pokémon Center
++0 press left
+until position 603 812 6000
++0 release left
++0 press down
+until position 603 816 6000
++0 release down
++0 press left
+until position 600 816 6000
++0 release left
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_PASTORIA_CITY" 3000
++0 release down
+until idle
+
++8 release select
++0 press down
+until position 600 820 6000
++0 release down
++0 press left
+until position 598 820 6000
++0 release left
++0 press down
+until position 598 831 6000
++0 release down
++0 press right
+until position 604 831 6000
++0 release right
++0 press down
+until position 604 848 6000
++0 release down
++0 press left
+until position 576 848 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_212_SOUTH" 3000
++0 release left
+until idle
+# Route 212 South back west on this chunk's way (its trainers beaten), round the deep mud
++0 press left
+until position 571 848 6000
++0 release left
++0 press down
+until position 571 856 6000
++0 release down
++0 press left
+until position 549 856 6000
++0 release left
++0 press up
+until position 549 846 6000
++0 release up
++0 press left
+until position 532 846 6000
++0 release left
++0 press down
+until position 532 852 6000
++0 release down
++0 press left
+until position 520 852 6000
++0 release left
++0 press up
+until position 520 851 6000
++0 release up
++0 press left
+until position 517 851 6000
++0 release left
++0 press down
+until position 517 852 6000
++0 release down
++0 press left
+until position 501 852 6000
++0 release left
++0 press down
+until position 501 855 6000
++0 release down
++0 press left
+until position 495 855 6000
++0 release left
++0 press up
+until position 495 851 6000
++0 release up
++0 press left
+until position 486 851 6000
++0 release left
++0 press up
+until position 486 840 6000
++0 release up
++0 press left
+until position 466 840 6000
++0 release left
++0 press down
+until position 466 854 6000
++0 release down
++0 press left
+until position 460 854 6000
++0 release left
++0 press down
+until position 460 857 6000
++0 release down
++0 press left
+until position 456 857 6000
++0 release left
++0 press up
+until position 456 856 6000
++0 release up
++0 press left
+until position 454 856 6000
++0 release left
++0 press up
+until position 454 843 6000
++0 release up
++0 press right
+until position 460 843 6000
++0 release right
++0 press up
+until position 460 839 6000
++0 release up
++0 press left
+until position 458 839 6000
++0 release left
++0 press up
+until position 458 831 6000
++0 release up
+until idle
++8 release select
+# Route 212 North back to Hearthome
++0 press up
+until position 458 823 6000
++0 release up
++0 press right
+until position 461 823 6000
++0 release right
++0 press up
+until position 461 808 6000
++0 release up
++0 press left
+until position 458 808 6000
++0 release left
++0 press up
+until position 458 801 6000
++0 release up
++0 press left
+until position 452 801 6000
++0 release left
++0 press up
+until position 452 795 6000
++0 release up
++0 press right
+until position 454 795 6000
++0 release right
++0 press up
+until position 454 793 6000
++0 release up
++0 press right
+until position 458 793 6000
++0 release right
++0 press up
+until position 458 785 6000
++0 release up
++0 press left
+until position 457 785 6000
++0 release left
++0 press up
+until position 457 774 6000
++0 release up
++0 press left
+until position 455 774 6000
++0 release left
++0 press up
+until position 455 770 6000
++0 release up
++0 press left
+until position 451 770 6000
++0 release left
++0 press up
+until position 451 764 6000
++0 release up
++0 press right
+until position 455 764 6000
++0 release right
++0 press up
+until position 455 761 6000
++0 release up
++0 press right
+until position 461 761 6000
++0 release right
++0 press up
+until position 461 737 6000
++0 release up
++0 press left
+until position 458 737 6000
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_ROUTE_212_GATE_TO_HEARTHOME_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY" 3000
++0 release up
+until idle
++8 release select
+# Hearthome west to Route 208
++0 press up
+until position 458 726 6000
++0 release up
++0 press left
+until position 455 726 6000
++0 release left
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_208_GATE_TO_HEARTHOME_CITY" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_208" 3000
++0 release left
+until idle
++8 release select
+# Route 208 west to Mt. Coronet (CP11's way)
++0 press left
+until position 440 726 6000
++0 release left
++0 press down
+until position 440 729 6000
++0 release down
++0 press left
+until position 427 729 6000
++0 release left
++0 press up
+until position 427 715 6000
++0 release up
++0 press left
+until position 422 715 6000
++0 release left
++0 press down
+until position 422 724 6000
++0 release down
++0 press left
+until state player.zone "platinum:MAP_HEADER_MT_CORONET_1F_SOUTH" 6000
++0 release left
+until idle
+# through Mt. Coronet 1F to Route 207
++0 press up
+until position 27 13 6000
++0 release up
++0 press left
+until position 24 13 6000
++0 release left
++0 press down
+until position 24 15 6000
++0 release down
++0 press left
+until position 19 15 6000
++0 release left
++0 press down
+until position 19 19 6000
++0 release down
++0 press left
+until position 15 19 6000
++0 release left
++0 press down
+until position 15 23 6000
++0 release down
++0 press left
+until position 6 23 6000
++0 release left
++0 press up
+until position 6 8 6000
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_ROUTE_207" 3000
++0 release left
+until idle
++8 release select
+# Route 207 down to Oreburgh, west to the Oreburgh Gate
++0 press left
+until position 306 712 6000
++0 release left
++0 press down
+until position 306 725 6000
++0 release down
++0 press left
+until position 300 725 6000
++0 release left
++0 press down
+until position 300 735 6000
++0 release down
++0 press down
+until state player.zone "platinum:MAP_HEADER_OREBURGH_CITY" 3000
++0 release down
+until idle
++8 release select
++0 press left
+until position 297 736 6000
++0 release left
++0 press down
+until position 297 753 6000
++0 release down
++0 press left
+until position 286 753 6000
++0 release left
++0 press up
+until position 286 750 6000
++0 release up
++0 press left
+until position 259 750 6000
++0 release left
++0 press up
+until position 259 749 6000
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_OREBURGH_GATE_1F" 3000
+until state player.zone "platinum:MAP_HEADER_ROUTE_203" 3000
++0 release left
+until idle
++8 release select
+# Route 203 west: down x 246, then below Lass Kaitlin on row 759 once she is up at row 756
++0 press down
+until position 246 759 6000
++0 release down
+until idle
++0 assert state objects[localId=2].movementType 3
+until state objects[localId=2].z 757 6000
+until state objects[localId=2].z 756 6000
++0 press left
+until position 238 759 6000
++0 release left
++0 press up
+until position 238 758 6000
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_JUBILIFE_CITY" 6000
++0 release left
+until idle
++8 release select
+# Jubilife south to Route 202
++0 press left
+until position 175 758 6000
++0 release left
++0 press down
+until position 175 800 6000
++0 release down
+until idle
++8 release select
+# Route 202 south to Sandgem
++0 press down
+until position 175 808 6000
++0 release down
++0 press right
+until position 184 808 6000
++0 release right
++0 press down
+until position 184 848 6000
++0 release down
++0 press left
+until position 170 848 6000
++0 release left
+until idle
++8 release select
+# heal at the Sandgem Pokémon Center (Surf's PP)
++0 press right
+until position 177 848 6000
++0 release right
++0 press up
+until position 177 843 6000
++0 release up
++0 press up
+until position 8 12
++0 release up
+until idle
++0 press up
+until position 8 6
++0 release up
+until idle
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+advance text
++0 press down
+until state player.zone "platinum:MAP_HEADER_SANDGEM_TOWN" 3000
+# Rowan's lab (SandgemTownLab_OnFrame_ReturnedFromDistortionWorld): the way to Sunyshore opens
++0 press down
+until position 177 843 6000
++0 release down
++0 press left
+until position 168 843 6000
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_SANDGEM_TOWN_POKEMON_RESEARCH_LAB" 3000
++0 release up
+until message 3000
+advance text 12000
+until idle 3000
++0 assert var platinum:VAR_SANDGEM_TOWN_LAB_STATE 3
++0 assert var platinum:VAR_EXITED_DISTORTION_WORLD_STATE 3
++0 assert flag platinum:FLAG_HIDE_VALOR_LAKEFRONT_COLLECTOR true
++0 assert var platinum:VAR_VALOR_LAKEFRONT_BLOCK_SUNYSHORE_STATE 1
++0 press down
+until state player.zone "platinum:MAP_HEADER_SANDGEM_TOWN" 3000
++0 release down
+until idle
+# end of CP15
++0 assert var platinum:VAR_SPEAR_PILLAR_STATE 3
++0 assert var platinum:VAR_SPEAR_PILLAR_DISTORTED_STATE 2
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 14
++0 assert flag platinum:FLAG_DISTORTION_WORLD_PUZZLE_FINISHED true
++0 assert flag platinum:FLAG_DISTORTION_WORLD_STEPPING_STONES true
++0 assert battle scripted platinum:SPECIES_GIRATINA won
++0 assert var platinum:VAR_EXITED_DISTORTION_WORLD_STATE 3
++0 assert var platinum:VAR_SANDGEM_TOWN_LAB_STATE 3
++0 assert var platinum:VAR_VALOR_LAKEFRONT_BLOCK_SUNYSHORE_STATE 1
++0 assert flag platinum:FLAG_SPEAR_PILLAR_IS_DISTORTED false
++0 assert flag platinum:FLAG_GALACTIC_LEFT_LAKE_VALOR true

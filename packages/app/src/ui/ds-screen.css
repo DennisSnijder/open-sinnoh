@@ -1,0 +1,16 @@
+/*
+ * DS screens (boards of the DS-art apps: bag.ts, storage.ts): the ROM art is the screen, so the sheet's
+ * paper and frame are off and the board clips what the DS leaves off screen. A placed part keeps its DS
+ * rect whatever the generic rules say (phone minimum heights, window minimum widths).
+ */
+.ui-layer[data-mode] .ui-screen.ds-screen { background: none; box-shadow: none; clip-path: inset(0); pointer-events: auto; }
+.ui-layer[data-mode] .ds-screen .board-at { position: absolute; left: calc(var(--unit) * var(--at-x)); top: calc(var(--unit) * var(--at-y)); margin: 0; width: calc(var(--unit) * var(--at-w)); height: calc(var(--unit) * var(--at-h)); min-width: 0; min-height: 0; max-height: none; }
+.ui-layer[data-mode] .ds-screen .ds-sprite, .ui-layer[data-mode] .ds-screen .ds-picture { display: block; pointer-events: none; }
+.ui-layer[data-mode] .ds-screen .ds-sprite > canvas { display: block; }
+/* Two DS screens of one app (board.ts dsPair): side by side or stacked. */
+.ui-layer[data-mode] .ds-pair { display: flex; flex: none; pointer-events: auto; }
+.ui-layer[data-mode] .ds-pair.stacked { flex-direction: column; }
+.ui-layer[data-mode] .ds-pair > .board { clip-path: inset(0); }
+/* Phones centre the DS screen too (generic sheets fill the phone instead). */
+.ui-layer[data-mode='compact'] .ui-sheet:has(> .ds-screen) { display: grid; place-items: center; }
+.ui-layer[data-mode] .ds-screen .window.rom-frame, .ui-layer[data-mode] .ds-screen .msg-box.rom-frame { padding: 0; }

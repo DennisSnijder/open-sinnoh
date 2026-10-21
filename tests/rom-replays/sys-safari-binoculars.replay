@@ -1,0 +1,19 @@
+# sys-safari-binoculars (docs/research/great-marsh.md): the Pastoria gate 2F's middle binoculars. YES pays 100 and
+# start_great_marsh_lookout runs the lookout (GreatMarshLookout_Init): the screen fades out, the Pokétch hides, five
+# random marsh spots each open with the iris, a Pokémon of the area in the centre, 60 frames each (an A press ends a view
+# early), and close; then the player is back at the binoculars facing north and the screen fades in.
+party 0 platinum:SPECIES_GARCHOMP 50 platinum:MOVE_DRAGON_CLAW
+set state money 3000
+warp platinum:MAP_HEADER_PASTORIA_CITY_OBSERVATORY_GATE_2F 6 4 up
+until idle
++0 press a
++1 release a
+until yesno
++0 assert text platinum:PastoriaCityObservatoryGate2F_Text_AskPut100InBinoculars 0
++0 press a
++1 release a
+until idle 3000
++0 assert position platinum:MAP_HEADER_PASTORIA_CITY_OBSERVATORY_GATE_2F 6 4
++0 assert facing player up
++0 assert state money 2900
++0 assert flag platinum:FLAG_POKETCH_HIDDEN false

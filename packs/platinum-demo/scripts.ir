@@ -1,0 +1,11 @@
+# platinum-demo overrides the Twinleaf Town collector's talk script (an IR label) with a new line.
+# Original content only: the text lives in data.json; no ROM text or graphics.
+platinum:TwinleafTown_Collector::
+  play_se 1500
+  lock_all
+  face_player
+  message text(platinum-demo:Text_LanternRumor)
+  wait_button
+  close_message
+  release_all
+  end

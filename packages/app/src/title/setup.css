@@ -1,0 +1,22 @@
+/*
+ * The setup (setup.ts) on the OpenSinnoh UI design system: the wordmark (×5) over one window, centred on the field, the
+ * window's width snapped to 2 px; below a 480-px screen the wordmark shrinks to ×3 and the window goes full bleed
+ * under it and drops its frame (the title tab becomes a bar). The
+ * shade fades to black before the main menu fades in from black (the title's own fades).
+ */
+.tm-setup.os-screen { position: absolute; display: grid; place-items: safe center; overflow: hidden; box-sizing: border-box; padding: var(--sat) var(--sar) var(--sab) var(--sal); }
+.setup-col { width: 100%; max-height: 100%; overflow: auto; display: grid; justify-items: center; }
+.setup-brand { padding: 32px 8px 8px; }
+.setup-panel { width: round(down, min(560px, calc(100% - 48px)), 2px); margin: 8px 0 24px; display: grid; }
+.setup-body { display: grid; gap: 16px; padding: 8px 4px 4px; }
+.setup-lead { color: var(--os-muted); padding: 0 8px; }
+.setup-ask { display: grid; gap: 4px; padding: 0 8px; }
+.setup-shade { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; }
+@container os-screen (max-width: 480px) {
+  .setup-col { align-self: stretch; min-height: 100%; grid-template-rows: auto 1fr; }
+  .setup-brand { padding: 12px 8px; }
+  .setup-brand .os-wordmark { width: 174px; height: 33px; }
+  .os-win.setup-panel { animation: none; width: 100%; margin: 0; align-self: stretch; grid-template-rows: auto 1fr; border-width: 0; border-image-source: none; background: var(--os-face); }
+  .setup-body { align-content: start; padding: 16px 12px; }
+  .setup-q.os-title { font-size: 20px; line-height: 24px; }
+}

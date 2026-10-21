@@ -1,0 +1,20 @@
+from cp21f.replay
+# Branch m6-birds (docs/research/postgame.md §6): Oak in Eterna's south house
+# sets the three legendary birds roaming. From cp21f's end (its National Pokédex). Kept setup: Oak shown (his on-frame
+# scene in the Pal Park lobby clears FLAG_HIDE_ETERNA_CITY_SOUTH_HOUSE_PROF_OAK; Pal Park is out of scope) and the warp
+# into the house. A on Oak: the Up-Grade, then activate_roaming_pokemon for Moltres, Zapdos and Articuno (L60, three
+# concurrent roamers), FLAG_ACTIVATED_ROAMING_LEGENDARY_BIRDS. (Zone connections move them: world roamers.test.ts.)
+set flag platinum:FLAG_HIDE_ETERNA_CITY_SOUTH_HOUSE_PROF_OAK false
+warp platinum:MAP_HEADER_ETERNA_CITY_SOUTH_HOUSE 4 6 up
+until idle
++0 press a
++1 release a
+advance text 6000
+until idle 3000
++0 assert flag platinum:FLAG_RECEIVED_ETERNA_CITY_SOUTH_HOUSE_UPGRADE true
++0 assert flag platinum:FLAG_ACTIVATED_ROAMING_LEGENDARY_BIRDS true
++0 assert state roamers.slots[3].species "platinum:SPECIES_MOLTRES"
++0 assert state roamers.slots[4].species "platinum:SPECIES_ZAPDOS"
++0 assert state roamers.slots[5].species "platinum:SPECIES_ARTICUNO"
++0 assert state roamers.slots[5].level 60
++0 assert var platinum:VAR_ROAMING_MOLTRES_STATE 0

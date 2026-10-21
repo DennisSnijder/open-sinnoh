@@ -1,0 +1,100 @@
+# svc-bag, in the field on Route 201: pockets and order; a Potion on a
+# hurt Pokémon (HP up, one Potion used); a TM teaches its move through the forget-a-move flow; a Repel
+# starts its steps, and walking counts them down (no wild Pokémon below the lead's level appears); toss;
+# register a key item to Select. The bag is driven by taps, as on a touch screen, and by buttons.
+party 0 platinum:SPECIES_TURTWIG 20 platinum:MOVE_TACKLE platinum:MOVE_WITHDRAW platinum:MOVE_ABSORB platinum:MOVE_RAZOR_LEAF
+set state party[0].stats.hp 50
+set state party[0].hp 10
+give item platinum:ITEM_POTION 2
+give item platinum:ITEM_REPEL 1
+give item platinum:ITEM_POKE_BALL 5
+give item platinum:ITEM_TM09 1
+give item platinum:ITEM_POKE_RADAR 1
+warp platinum:MAP_HEADER_ROUTE_201 115 853 right
+until idle
+# the start menu (X), BAG
++1 press x
++1 release x
+until app start-menu
++1 tap entry:1
++1 assert app bag
+# MEDICINE: a Potion on Turtwig: 20 HP back, one Potion left, back in the bag
++1 tap pocket:1
++1 tap row:0
++1 tap menu:0
++1 assert app party
++1 tap slot:0
++1 assert state party[0].hp 30
++0 assert state bag.medicine [{"item":"platinum:ITEM_POTION","count":1}]
++0 screenshot potion
++1 press a
++1 release a
++1 assert app bag
+# TMs & HMs: TM09 (Bullet Seed) to Turtwig, who knows four moves: forget Tackle
++1 tap pocket:3
++1 tap row:0
++1 tap menu:0
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap yes
++1 assert app party
++1 tap slot:0
++1 press a
++1 release a
++1 press a
++1 release a
++1 tap yes
++1 press a
++1 release a
++1 assert app summary
++1 tap move:0
++1 tap move:0
++1 assert state party[0].moves ["platinum:MOVE_BULLET_SEED","platinum:MOVE_WITHDRAW","platinum:MOVE_ABSORB","platinum:MOVE_RAZOR_LEAF"]
++0 assert state bag.tmhms []
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 press a
++1 release a
++1 assert app bag
+# ITEMS: the Repel (100 steps)
++1 tap pocket:0
++1 tap row:0
++1 tap menu:0
++1 assert state repel 100
++0 assert state bag.items []
++1 press a
++1 release a
+# POKé BALLS: toss 2 of 5
++1 tap pocket:2
++1 tap row:0
++1 tap menu:1
++1 tap qty:+1
++1 tap ok
++1 tap yes
++1 assert state bag.balls [{"item":"platinum:ITEM_POKE_BALL","count":3}]
++1 press a
++1 release a
+# KEY ITEMS: register the Poké Radar to Select
++1 tap pocket:7
++1 tap row:0
++1 tap menu:1
++1 assert state registeredItem "platinum:ITEM_POKE_RADAR"
++0 screenshot registered
++1 press b
++1 release b
++1 press b
++1 release b
+until app none
+# walk 4 tiles in the grass: the Repel counts down, no battle starts
++1 press right
+until position 119 853
++0 release right
+until idle
++0 assert state repel 96
++0 assert battles wild 0

@@ -1,0 +1,20 @@
+from parts/walk-loops.replay
+# sys-movement: walk loops in the part. Here Route 210 North, Ninja Boy
+# Davido (local id 4, movement type 53 DISGUISE_ROCK, sight 1, facing down) hides at (499, 521). Walking
+# onto (499, 522) puts the player in sight: he reveals himself (reveal_trainer) and the battle runs.
+# The `disguise-*` screenshot lines are the browser spec's key beat: hidden under the rock, then drawn.
+# The battle is real: a level 60 lead (unit-style setup) wins it.
+party 0 platinum:SPECIES_EMPOLEON 60 platinum:MOVE_SURF
+warp platinum:MAP_HEADER_ROUTE_210_NORTH 500 522 left
+until idle
++0 screenshot disguise-hidden
++0 press left
+until position 499 522
++0 release left
+advance text
+battle auto 9000
+advance text
+until idle
++0 assert battle trainer platinum:TRAINER_NINJA_BOY_DAVIDO won
++0 assert flag platinum:FLAG_DEFEATED_TRAINER_NINJA_BOY_DAVIDO true
++0 screenshot disguise-revealed

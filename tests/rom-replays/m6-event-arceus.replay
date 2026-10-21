@@ -1,0 +1,58 @@
+from cp21f.replay
+# Event branch m6-event-arceus (docs/decisions.md: the dev-only event flag;
+# docs/research/postgame.md §6): the Azure Flute distribution (`event arceus`) from cp21f's end (its National Pokédex). Through Mt.
+# Coronet 6F into Spear Pillar: its on-transition sets VAR_HALL_OF_ORIGIN_STATE 1, so the top step (31, 52) asks to blow
+# the flute (common script 39); NO first. Then the flute from the bag on that step (the Azure Flute's field use: game
+# completed, the distribution, the National Pokédex, Spear Pillar): YES, the melody, the stairway to the Hall of Origin.
+# Up the stairs Arceus's scene and its L80 battle, caught with the Master Ball: FLAG_CAUGHT_ARCEUS, VAR_ARCEUS_EVENT_STATE 1.
+# Kept setup: the event flag and the warp (off the chain).
+event arceus
+warp platinum:MAP_HEADER_MT_CORONET_6F 7 6 up
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_SPEAR_PILLAR" 120
++0 release up
+until idle 600
++0 assert var platinum:VAR_HALL_OF_ORIGIN_STATE 1
++0 press up
+until position 31 52 120
++0 release up
+advance text 3000
++0 press b
++1 release b
+advance text 3000
+until idle 600
++1 press x
++1 release x
+until app start-menu
++1 tap entry:2
++1 assert app bag
++1 tap pocket:7
++1 tap row:11
++1 tap menu:0
+until app none 600
+advance text 3000
++0 press a
++1 release a
+advance text 6000
+until idle 6000
++0 assert state player.zone "platinum:MAP_HEADER_HALL_OF_ORIGIN"
++0 assert flag platinum:FLAG_HIDE_HALL_OF_ORIGIN_ARCEUS false
++0 press up
+until position 31 35 600
++0 release up
+advance text 6000
+battle catch platinum:ITEM_MASTER_BALL 20000
++0 assert battle scripted platinum:SPECIES_ARCEUS caught
+advance text 20000
+until idle 3000
++0 assert flag platinum:FLAG_CAUGHT_ARCEUS true
++0 assert var platinum:VAR_ARCEUS_EVENT_STATE 1
++0 assert var platinum:VAR_HALL_OF_ORIGIN_STATE 0
++0 assert party 5 platinum:SPECIES_ARCEUS
++0 assert state party[5].level 80
+# Back down the hall (the save round trip at the end).
++0 press down
+until position 31 40 600
++0 release down
+until idle 600

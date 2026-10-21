@@ -1,0 +1,22 @@
+# The Pokémon Mansion's office (scripts_pokemon_mansion_office.s PokemonMansionOffice_MrBacklot): with the National
+# Pokédex, Mr. Backlot asks whether the player envies his garden; YES adds a Pokémon to it (AddTrophyGardenMon) and
+# names it (GetTrophyGardenSlot1Species); FLAG_DAILY_ADDED_TROPHY_GARDEN_MON keeps it to one a day.
+# Setup: the National Pokédex.
+set state pokedex.national true
+party 0 platinum:SPECIES_GARCHOMP 50 platinum:MOVE_DRAGON_CLAW
+date 2009-03-22 12:00
+warp platinum:MAP_HEADER_POKEMON_MANSION_OFFICE 16 9 up
+until idle
++0 press a
++1 release a
+advance text
++0 assert text platinum:PokemonMansionOffice_Text_YouAreEnviousYes 5
++0 press a
++1 release a
+advance text
++0 assert text platinum:PokemonMansionOffice_Text_YouAreEnviousYes2 4
++0 press a
++1 release a
+advance text
+until idle
++0 assert flag platinum:FLAG_DAILY_ADDED_TROPHY_GARDEN_MON true

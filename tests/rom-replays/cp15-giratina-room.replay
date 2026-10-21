@@ -1,0 +1,115 @@
+from cp15-dw-cyrus.replay
+# CP15's story prefix: win Cyrus 404, take the north teleport, reveal the platforms and shadows,
+# and watch Giratina arrive. No scene setup: every progress flag and object comes from the story.
++0 reload
++0 wild flee
++0 evolve auto
+until idle 6000
+# Cyrus (DistortionWorldB7F_Cyrus): his battle (404); Cynthia heals the party after
++0 press a
++1 release a
+advance text 12000
+battle auto 30000
+advance text 30000
+until idle 6000
++0 assert battle trainer platinum:TRAINER_GALACTIC_BOSS_CYRUS_DISTORTION_WORLD won single
++0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_B7F","x":89,"z":68,"y":1040,"facing":"down"}
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 10
++0 assert state mapFeatures.support null
++0 press up
+until state player.z 67 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 press up
+until state player.z 66 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 press up
+until state player.z 65 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 press up
+until state player.z 64 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 press up
+until state player.z 63 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 press up
+until state player.z 60 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 press up
+until state player.z 59 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 press up
+until state player.z 58 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
++0 press up
+until state player.z 57 400
++0 release up
++8 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
++0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM","x":15,"z":25,"y":16,"facing":"up"}
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 10
++0 assert state mapFeatures.support null
+# dw-giratina-room's route: the platforms, the shadows, Giratina's arrival and battle, the portal to Sendoff Spring
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
++0 press up
+until state player.z 24 400
++0 release up
++8 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
++58 press a
++1 release a
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
++0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM","x":15,"z":24,"y":16,"facing":"up"}
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 11
++0 assert state mapFeatures.support null
++0 press up
+until state player.z 23 400
++0 release up
++8 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
++0 press up
+until state player.z 20 400
++0 release up
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
++0 press up
+until state player.z 17 400
++0 release up
++24 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
++0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM","x":15,"z":17,"y":16,"facing":"up"}
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 12
++0 assert state mapFeatures.support null
++0 press up
+until state player.z 14 400
++0 release up
++24 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
++397 press a
++1 release a
+until idle 6000
++6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
++0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM","x":15,"z":14,"y":16,"facing":"up"}
++0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 13
++0 assert state mapFeatures.support null
+# Save point for the caught/fled branches, after Giratina's actual arrival.
++0 assert flag platinum:FLAG_DISTORTION_WORLD_PUZZLE_FINISHED true
++0 assert flag platinum:FLAG_CAUGHT_GIRATINA false

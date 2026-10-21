@@ -1,0 +1,177 @@
+# svc-daycare: the Solaceon Day Care. The lady raises two Pikachu (the
+# daycare party menu: STORE), the player walks, the old man reports how the two get along, and the lady
+# gives one back: it gained a level by exp per step (and learned Tail Whip), for 100 + 100 per level.
+# Then she raises it again, so the daycare ends with both (svc-egg goes on from here).
+party 0 platinum:SPECIES_TURTWIG 20
+party 1 platinum:SPECIES_PIKACHU 4
+party 2 platinum:SPECIES_PIKACHU 4
+party 3 platinum:SPECIES_STARLY 8
+# A female (PID low byte 0) and a male (150) Pikachu, both with neutral natures; she holds a Light Ball.
+set state party[1].pid 256
+set state party[2].pid 150
+set state party[1].heldItem "platinum:ITEM_LIGHT_BALL"
+set money 3000
+warp platinum:MAP_HEADER_POKEMON_DAY_CARE 9 6 up
+until idle
+# The lady: "Would you like us to raise your Pokémon?" YES
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+until message
++1 press a
++1 release a
+until app party
++0 assert app party
+# The female Pikachu: STORE
++1 tap slot:1
++1 tap menu:0
+until app none
+advance text
++0 assert state daycare.mons[0].mon.pid 256
++0 assert state party.length 3
+# "Would you like us to raise another?" YES: the male (now slot 1)
++1 press a
++1 release a
+until message
++1 press a
++1 release a
+until app party
++1 tap slot:1
++1 tap menu:0
+until app none
+advance text
+until idle
++0 assert state daycare.mons[1].mon.pid 150
++0 assert state party.length 2
++0 assert state daycare.mons[0].steps 0
+# Out of the door and around Solaceon: 61 steps take the female from 64 exp (level 4) to 125 (level 5).
++0 press down
+until position 553 646
++0 release down
++0 press right
+until position 560 646
++0 release right
++0 press down
+until position 560 650
++0 release down
++0 press left
+until position 554 650
++0 release left
++0 assert state daycare.mons[0].steps 21
+# The old man (from below, facing up): both are doing fine, "The two seem to get along." (same species, same OT)
++0 press right
+until position 555 650
++0 release right
++0 press up
+until position 555 649
++0 release up
+until idle
++1 press a
++1 release a
+until message
++1 press a
++1 release a
+until message
++1 press a
++1 release a
+until message
++0 screenshot compatibility
+advance text
+until idle
+# Back and forth on the road below him: 43 more steps (66 in all)
++0 press down
+until position 555 650
++0 release down
++0 press right
+until position 562 650
++0 release right
++0 press left
+until position 555 650
++0 release left
++0 press right
+until position 562 650
++0 release right
++0 press left
+until position 555 650
++0 release left
++0 press right
+until position 562 650
++0 release right
++0 press left
+until position 555 650
++0 release left
++0 assert state daycare.mons[0].steps 66
++0 assert state daycare.mons[0].mon.level 4
+# In again to the lady: each "has grown by about 1"; she gives the female back for $200
++0 press right
+until position 560 650
++0 release right
++0 press up
+until position 560 646
++0 release up
++0 press left
+until position 553 646
++0 release left
++0 press up
+until state player.zone "platinum:MAP_HEADER_POKEMON_DAY_CARE"
++0 release up
+until idle
++0 press up
+until position 9 6
++0 release up
+until idle
++1 press a
++1 release a
+until message
++0 screenshot grown
+advance text
+# "Do you want your Pokémon back?" YES; the menu: the female (Lv. 5) first
++1 press a
++1 release a
+until menu
++0 screenshot take-back
++4 press a
++1 release a
+# "If you want your Pikachu back, it will cost $200." YES
+until yesno
++1 press a
++1 release a
+until state party.length 3
++0 assert state money 2800
++0 assert state party[2].pid 256
++0 assert state party[2].level 5
++0 assert state party[2].moves ["platinum:MOVE_THUNDER_SHOCK","platinum:MOVE_GROWL","platinum:MOVE_TAIL_WHIP"]
++0 assert state party[2].heldItem "platinum:ITEM_LIGHT_BALL"
++0 assert state daycare.mons[0].mon.pid 150
++0 assert state daycare.mons[1] null
+# "Do you want to take back the other one, too?" NO
+advance text
++1 press down
++1 release down
++1 press a
++1 release a
+advance text
+until idle
+# She raises the female again ("Would you like us to raise another?" YES; slot 2: STORE)
++1 press a
++1 release a
+advance text
++1 press a
++1 release a
+until message
++1 press a
++1 release a
+until app party
++1 tap slot:2
++1 tap menu:0
+until app none
+advance text
+until idle
++0 assert state party.length 2
++0 assert state daycare.mons[1].mon.pid 256
++0 assert state daycare.mons[1].steps 0
++1 reload
++0 assert state daycare.mons[0].steps 88
+until idle

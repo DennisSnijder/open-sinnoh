@@ -1,0 +1,11 @@
+from parts/safari-enter.replay
+# sys-safari-daily (docs/research/great-marsh.md): the Great Marsh's daily species follow SpecialEncounter marshDaily:
+# a new game's own value until the first day change, then the day's RecordMixedRNG value
+# (SpecialEncounter_SetMixedRecordDailies in FieldSystem_HandleDailyEvents). The clock rolls over to the next day in the
+# marsh; the test reads the daily species of each area before and after.
++0 date 2009-03-23 12:00
++0 press up
+until position 68 115
++0 release up
+until idle
++0 assert flag platinum:FLAG_SAFARI_GAME_ACTIVE true

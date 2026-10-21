@@ -1,0 +1,15 @@
+from parts/strength-push.replay
+# sys-strength: the push is in the part (Oreburgh Gate B1F). Here:
+# FLAG_STRENGTH_ACTIVE survives a save/load and is cleared by the next map change (decomp
+# FieldSystem_InitFlagsOnMapChange). Set up next to the 1F stairs down with Strength still active.
+warp platinum:MAP_HEADER_OREBURGH_GATE_1F 19 5 right
+until idle
++0 assert flag platinum:FLAG_STRENGTH_ACTIVE true
++0 reload
+until idle
++0 assert flag platinum:FLAG_STRENGTH_ACTIVE true
++0 press right
+until state player.zone "platinum:MAP_HEADER_OREBURGH_GATE_B1F"
++0 release right
+until idle
++0 assert flag platinum:FLAG_STRENGTH_ACTIVE false

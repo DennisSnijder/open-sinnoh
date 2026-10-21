@@ -1,0 +1,91 @@
+from cp11.replay
+set flag platinum:FLAG_DEFEATED_TRAINER_HIKER_DAMON true
+set flag platinum:FLAG_DEFEATED_TRAINER_HIKER_MAURICE true
+set flag platinum:FLAG_DEFEATED_TRAINER_BLACK_BELT_KENDAL true
+set flag platinum:FLAG_DEFEATED_TRAINER_BATTLE_GIRL_TYLER true
+set flag platinum:FLAG_DEFEATED_TRAINER_WORKER_BRENDON true
+set flag platinum:FLAG_DEFEATED_TRAINER_WORKER_QUENTIN true
+set flag platinum:FLAG_DEFEATED_TRAINER_ACE_TRAINER_JONAH true
+set flag platinum:FLAG_DEFEATED_TRAINER_ACE_TRAINER_BRENDA true
+warp platinum:MAP_HEADER_IRON_ISLAND_B2F_LEFT_ROOM 37 3 left
+# Optional branch: Riley's tag battle in Iron Island B2F. His coord event makes him
+# the walking partner (VAR_PARTNER_TRAINER_ID 609, a wild encounter on the way is a partner double, type 74); the
+# grunts' coord event starts TRAINER_GALACTIC_GRUNT_IRON_ISLAND_1 and _2 with the partner on (type 75, the partner
+# asserted by tests/integration/checkpoints-m5a.ts at the screenshot), then he gives the Riolu Egg and stops
+# following (scr_cmd_2b6). cp11 takes HM04 outside and skips the cave. Setup lines stage it from CP11's end: the
+# room's eight trainers beaten (the way is theirs), the player at the B1F stairs. Headless from the cp11 anchor
+# (tests/integration/checkpoints-m5b-branches.rom.test.ts).
++0 wild auto
++0 evolve cancel
+until idle
+# Riley's coord event (IronIslandB2FLeftRoom_CoordEvent_RileyStartFollowing): he walks with the player, partner 609
++0 press left
+until message 3000
++0 release left
+advance text 6000
+until idle 3000
++0 assert state hasPartner true
++0 assert var platinum:VAR_PARTNER_TRAINER_ID 609
++8 release select
++0 press up
+until position 35 2 6000
++0 release up
++0 press left
+until position 33 2 6000
++0 release left
++0 press down
+until position 33 4 6000
++0 release down
++0 press right
+until position 34 4 6000
++0 release right
++0 press down
+until position 34 14 6000
++0 release down
++0 press left
+until position 33 14 6000
++0 release left
++0 press down
+until position 33 20 6000
++0 release down
++0 press right
+until position 37 20 6000
++0 release right
++0 press down
+until position 37 32 6000
++0 release down
++0 press left
+until position 31 32 6000
++0 release left
++0 press up
+until position 31 26 6000
++0 release up
++0 press left
+until position 25 26 6000
++0 release left
++0 press down
+until position 25 40 6000
++0 release down
++0 press left
+until position 22 40 6000
++0 release left
++0 press left
+until message 3000
++0 release left
+advance text 6000
++12 screenshot iron-island-tag-riley
+battle auto 30000
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_IRON_ISLAND_1 won ai-partner
++0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_IRON_ISLAND_2 won ai-partner
+advance text 6000
+# "Would you take it with you?" YES: the Riolu Egg
++1 press a
++1 release a
+advance text 6000
+until idle 3000
++0 assert flag platinum:FLAG_RECEIVED_RIOLU_EGG_FROM_RILEY true
++0 assert var platinum:VAR_IRON_ISLAND_B2F_LEFT_ROOM_FOLLOWER_RILEY_STATE 2
++0 assert state hasPartner false
++0 assert state party.length 3
++0 assert state party[2].isEgg true
++8 release select

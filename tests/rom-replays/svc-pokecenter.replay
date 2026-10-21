@@ -1,0 +1,48 @@
+# svc-pokecenter: Jubilife Pokémon Center. The nurse's greeting (no gold
+# card: the normal branch), YES, the healing machine with one ball per non-egg Pokémon (2 of 3 here),
+# then HP, PP and status are restored (heal_party) and the nurse says goodbye.
+party 0 platinum:SPECIES_TURTWIG 9 platinum:MOVE_TACKLE platinum:MOVE_WITHDRAW
+party 1 platinum:SPECIES_STARLY 6
+party 2 platinum:SPECIES_BIDOOF 4
+# Max HP depends on the seed's IVs: fixed here so the heal can be asserted on every seed.
+set state party[0].stats.hp 30
+set state party[0].hp 4
+set state party[0].pp [2,0]
+set state party[0].status "poison"
+set state party[1].stats.hp 20
+set state party[1].hp 0
+set state party[2].isEgg true
+warp platinum:MAP_HEADER_JUBILIFE_CITY_POKECENTER_1F 8 6
+until idle
++0 assert facing player up
+# talk to the nurse over the counter: the greeting asks yes/no
++1 press a
++1 release a
+# the normal greeting branch (no gold trainer card: get_trainer_card_level is 0), then its question
+until message
++0 assert text platinum:CommonStrings_Text_PokecenterGreeting_Day 0
+advance text
++0 assert message open
++0 assert text platinum:CommonStrings_Text_PokecenterGreeting_Day 2
++0 assert flag platinum:FLAG_POKECENTER_GOLD_TRAINER_CARD_SEEN false
++1 press a
++1 release a
+# The nurse takes the party: she turns to the machine, which places one ball per non-egg Pokémon (balls
+# 1 and 2 at +118 and +135, each with SEQ_SE_DP_BOWA; the balls' and the screen's one-shots and the SEQ_ASA
+# jingle at +152; done once the 73-frame screen and the jingle's wait end); the browser checks the two balls
++140 screenshot heal-machine
+until state party[0].hp 30
++0 assert state party[0].pp [35,40]
++0 assert state party[0].status "none"
++0 assert state party[1].hp 20
+advance text
++0 assert message closed
+until idle
++0 assert position platinum:MAP_HEADER_JUBILIFE_CITY_POKECENTER_1F 8 6
+# A completed heal turns away; repeated confirms, even at speed-up, cannot talk to the nurse again.
++0 assert facing player down
++1 press a
++1 release a
++1 press a
++1 release a
++0 assert message closed

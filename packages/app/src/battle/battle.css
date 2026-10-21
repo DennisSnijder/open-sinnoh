@@ -1,0 +1,122 @@
+/*
+ * The battle scene canvas and the command card. The card is a slate panel in the in-game UI's window
+ * language (docs/ui/design.md); its buttons are the ROM's touch screen buttons as nine-slice border
+ * images (`--art`, `--slice`, `--slice-w` set per button), every length a multiple of --dot (one font and
+ * art pixel at the card's scale, which the card fits to its box). Text never wraps: a button's content is
+ * one line (two for a move), centred on the button's face, inside its padding.
+ */
+#battle-canvas { position: absolute; display: block; z-index: 1; image-rendering: pixelated; image-rendering: crisp-edges; }
+
+.battle-card {
+  --dot: 2px;
+  --n: calc(var(--dot) * 2);
+  position: absolute;
+  z-index: 3;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--dot) * 2);
+  padding: calc(var(--dot) * 3);
+  background: #283040;
+  box-shadow: inset 0 0 0 var(--dot) #10141c, inset 0 0 0 calc(var(--dot) * 2) #4a5670;
+  clip-path: polygon(var(--n) 0, calc(100% - var(--n)) 0, 100% var(--n), 100% calc(100% - var(--n)), calc(100% - var(--n)) 100%, var(--n) 100%, 0 calc(100% - var(--n)), 0 var(--n));
+  filter: drop-shadow(0 calc(var(--dot) * 2) 0 rgb(8 12 20 / 0.45));
+  animation: bc-in 120ms steps(3, end) both;
+  font: 13px/1.4 system-ui, sans-serif;
+}
+@keyframes bc-in { from { transform: translateY(calc(var(--dot) * 10)); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .battle-card { animation: none; } }
+.battle-card canvas { display: block; flex: none; image-rendering: pixelated; image-rendering: crisp-edges; }
+.battle-card .px { display: inline-flex; flex: none; align-items: center; }
+.battle-card .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* Wide screens: the card is the scene's bottom band, flush with its edges (a dark line on top, no corners cut, no shadow). */
+.battle-card.is-band { padding: var(--dot); gap: var(--dot); box-shadow: inset 0 var(--dot) 0 #10141c; clip-path: none; filter: none; }
+.battle-card.is-band .bc-moves, .battle-card.is-band .bc-command, .battle-card.is-band .bc-row, .battle-card.is-band .bc-yesno { gap: var(--dot); }
+
+.bc-head { display: flex; flex: none; align-items: center; min-width: 0; margin: 0 var(--dot); overflow: hidden; }
+
+/* A ROM button: its nine-slice art drawn over the whole box; the padding keeps the text on its face. */
+.bc-button {
+  all: unset;
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 44px;
+  padding: calc(var(--dot) * 8) calc(var(--dot) * 12) calc(var(--dot) * 3);
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  border: 0 solid transparent;
+  border-image-source: var(--art, none);
+  border-image-slice: var(--slice) fill;
+  border-image-width: var(--slice-w);
+  border-image-repeat: stretch;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+.battle-card.is-band .bc-button { min-height: 0; }
+.bc-button:disabled { cursor: default; filter: grayscale(0.85) brightness(0.8); }
+.bc-button:not(:disabled):active { transform: translateY(var(--dot)); }
+@media (hover: hover) { .bc-button:not(:disabled):hover { filter: brightness(1.08); } }
+.bc-button:focus-visible { outline: var(--dot) dashed #f8f8f0; outline-offset: calc(var(--dot) * -4); }
+/* The keyboard / gamepad cursor: a light frame over the button's outline. */
+.bc-button.is-cursor { outline: calc(var(--dot) * 2) solid #f8f8f0; outline-offset: calc(var(--dot) * -2); }
+
+/* The commands: FIGHT over BAG, RUN, POKéMON (RUN sits lower and is shorter, as on the DS). */
+.bc-command { display: grid; flex: 1; min-height: 0; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); gap: calc(var(--dot) * 2); }
+.battle-card.is-tall .bc-command { grid-template-rows: minmax(0, 3fr) minmax(0, 2fr); }
+.battle-card.is-tall .bc-yesno { grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(2, minmax(0, 1fr)); }
+.bc-row { display: grid; min-height: 0; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: calc(var(--dot) * 2); }
+.bc-run { margin-top: calc(var(--dot) * 3); }
+.bc-fight { padding-inline: calc(var(--dot) * 20); }
+
+/*
+ * The moves: four equal buttons, 2×2, with CANCEL (or, forgetting a move, the new move) in a column beside
+ * them; under the scene it is a bar under them, as on the DS.
+ */
+.bc-moves { display: grid; flex: 1; min-height: 0; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; grid-template-rows: repeat(2, minmax(0, 1fr)); gap: calc(var(--dot) * 2); }
+.bc-moves > .bc-back, .bc-moves > .bc-new { grid-column: 3; grid-row: 1 / span 2; }
+.bc-learn { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.battle-card.is-tall .bc-moves { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)) auto; }
+.battle-card.is-tall .bc-moves > .bc-back, .battle-card.is-tall .bc-moves > .bc-new { grid-column: 1 / span 2; grid-row: 3; }
+/* A move: the name on the cream panel, the type and PP over its lower band. */
+.bc-move { flex-direction: column; padding: calc(var(--dot) * 12) calc(var(--dot) * 14) calc(var(--dot) * 5); }
+.bc-name, .bc-info { display: flex; flex: none; align-items: center; justify-content: center; }
+.bc-info { gap: calc(var(--dot) * 3); }
+.bc-pp { display: inline-flex; gap: calc(var(--dot) * 2); }
+.bc-icon-pending { width: calc(var(--dot) * 32); height: calc(var(--dot) * 16); }
+.bc-move.is-empty { cursor: default; }
+.bc-back { padding-inline: calc(var(--dot) * 12); }
+/* The move to learn: a dashed frame on its panel (the cursor's frame is on the outline). */
+.bc-new::after { content: ''; position: absolute; inset: calc(var(--dot) * 12) calc(var(--dot) * 14) calc(var(--dot) * 5); outline: var(--dot) dashed #484848; pointer-events: none; }
+
+/* YES and NO side by side. */
+.bc-yesno { display: grid; flex: 1; min-height: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: calc(var(--dot) * 2); }
+.bc-answer { padding-inline: calc(var(--dot) * 20); }
+
+/*
+ * The target screen (doubles): enemy 2 and enemy 1 over player 1 and player 2 (the enemies' buttons taller, as on
+ * the DS), narrow tracks between them for a group's link bars, CANCEL in a column beside them (a bar under them
+ * when tall). A group lights all its buttons (the cursor frame on each).
+ */
+.bc-targets { display: grid; flex: 1; min-height: 0; grid-template-columns: minmax(0, 1fr) calc(var(--dot) * 6) minmax(0, 1fr) auto; grid-template-rows: minmax(0, 9fr) calc(var(--dot) * 3) minmax(0, 7fr); }
+.bc-t3 { grid-area: 1 / 1; }
+.bc-t1 { grid-area: 1 / 3; }
+.bc-t0 { grid-area: 3 / 1; }
+.bc-t2 { grid-area: 3 / 3; }
+.bc-targets > .bc-back { grid-column: 4; grid-row: 1 / span 3; margin-left: calc(var(--dot) * 2); padding-inline: calc(var(--dot) * 12); }
+.battle-card.is-tall .bc-targets { grid-template-columns: minmax(0, 1fr) calc(var(--dot) * 6) minmax(0, 1fr); grid-template-rows: minmax(0, 9fr) calc(var(--dot) * 3) minmax(0, 7fr) auto; }
+.battle-card.is-tall .bc-targets > .bc-back { grid-column: 1 / span 3; grid-row: 4; margin: calc(var(--dot) * 2) 0 0; }
+.bc-target { padding: calc(var(--dot) * 10) calc(var(--dot) * 14) calc(var(--dot) * 6); }
+.bc-target:disabled { filter: none; }
+.bc-t1, .bc-t3 { flex-direction: column; }
+.bc-target .mon-icon-box { flex: none; }
+.bc-link { background: var(--art) repeat; background-size: calc(var(--dot) * 8); image-rendering: pixelated; align-self: center; justify-self: center; pointer-events: none; }
+.bc-link-02 { grid-area: 3 / 2; width: 100%; height: 70%; }
+.bc-link-13 { grid-area: 1 / 2; width: 100%; height: 70%; }
+.bc-link-03 { grid-area: 2 / 1; width: 80%; height: 100%; }
+.bc-link-12 { grid-area: 2 / 3; width: 80%; height: 100%; }

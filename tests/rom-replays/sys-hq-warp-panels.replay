@@ -1,0 +1,20 @@
+# Same-map Galactic HQ panel pair: step travel, no bounce, reverse travel, idle save.
+warp platinum:MAP_HEADER_GALACTIC_HQ_3F 15 14 up
+until idle
++0 press up
+until position 6 14 1000
++0 release up
+until idle
++0 assert facing player down
++0 reload
+until idle
++0 assert position platinum:MAP_HEADER_GALACTIC_HQ_3F 6 14
++0 press down
+until position 6 15
++0 release down
+until idle
++0 press up
+until position 15 13 1000
++0 release up
+until idle
++0 assert facing player down

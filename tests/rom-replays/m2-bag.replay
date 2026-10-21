@@ -1,0 +1,48 @@
+# A Potion in battle, through the battle bag and party sheets
+# (the menu apps the game hosts), driven by keys and taps as in the browser. Piplup L8 at 5 HP; the
+# command card's cursor goes to BAG (down, left), A opens the bag on HP/PP RESTORE, the Potion asks
+# "Use on which Pokémon?", Piplup gets 20 HP back and the foe acts; then the battle is fought out.
+party 0 platinum:SPECIES_PIPLUP 8
+set state party[0].hp 5
+give item platinum:ITEM_POTION 1
+set var platinum:VAR_ROUTE_202_STATE 1
+warp platinum:MAP_HEADER_ROUTE_202 178 827 up
+until idle
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
++0 press up
++30 release up
++0 press down
++30 release down
+until battle 900
++0 press down
++1 release down
++0 press left
++1 release left
++0 press a
++1 release a
+until app bag 60
++0 assert state bag.medicine [{"item":"platinum:ITEM_POTION","count":1}]
++0 screenshot bag-in-battle
++0 tap row:0
+until app party 30
++0 screenshot bag-use-on
++0 tap slot:0
+until app none 30
+until battle 3000
+battle auto 9000
++0 assert battle wild * won
++0 assert state bag.medicine []
+until idle
++0 reload
+until idle

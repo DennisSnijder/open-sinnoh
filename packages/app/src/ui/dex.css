@@ -1,0 +1,75 @@
+/*
+ * The Pokédex on its DS screens (dex.ts): 256×192 boards at the UI unit (--unit per DS px), every part at its DS
+ * rect. The list plates move on the model's curve; only the forms use native scrolling. Stand-ins without the zukan art.
+ */
+.ui-layer[data-mode] .dex-board { --dex-ink: #2f4a3a; --dex-plate: #fbf8e4; --dex-plate-edge: #c9c39a; }
+.dex-css-screen { background: #cfeccc; }
+.dex-art-missing { display: inline-block; width: calc(var(--unit) * 8); height: calc(var(--unit) * 8); }
+.ui-layer[data-mode] .dex-board .dex-text { display: flex; align-items: flex-start; }
+.ui-layer[data-mode] .dex-board .dex-text.center { justify-content: center; }
+.ui-layer[data-mode] .dex-board .dex-text.right { justify-content: flex-end; }
+.dex-ball { position: relative; display: block; width: calc(var(--unit) * 8); height: calc(var(--unit) * 8); pointer-events: none; }
+.dex-ball > canvas { position: absolute; }
+
+/* --- List ------------------------------------------------------------------------------------ */
+.dex-showcase-pic { display: grid; place-items: center; }
+.dex-showcase-name { display: flex; justify-content: center; gap: calc(var(--unit) * 4); }
+.dex-list-head { display: grid; gap: 0; }
+.dex-count { display: flex; justify-content: space-between; height: calc(var(--unit) * 14); align-items: center; }
+.ui-layer[data-mode] .dex-board .dex-list { overflow: hidden; touch-action: none; user-select: none; }
+.ui-layer[data-mode] .dex-board .dex-row {
+  display: block; padding: 0; border: 0; background: var(--dex-plate); box-shadow: none;
+  isolation: isolate; overflow: visible;
+}
+.ui-layer[data-mode] .dex-board .dex-row.rom-plate { background: none; }
+.ui-layer[data-mode] .dex-board .dex-row::before, .ui-layer[data-mode] .dex-board .dex-row::after { display: none; }
+.dex-row-art { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.dex-row .dex-no { position: absolute; left: calc(var(--unit) * 22); top: 0; }
+.dex-row .dex-name { position: absolute; left: calc(var(--unit) * 49); top: 0; }
+.dex-row:focus-visible { outline: calc(var(--unit) * 1) solid #263d35; outline-offset: 0; }
+.dex-actions { display: flex; gap: calc(var(--unit) * 4); justify-content: flex-end; }
+.dex-action {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  background: var(--dex-plate); box-shadow: inset 0 0 0 var(--unit) var(--dex-plate-edge);
+}
+.dex-action:active { transform: translateY(var(--unit)); }
+
+/* --- Entry ----------------------------------------------------------------------------------- */
+.dex-tabs { display: flex; }
+.dex-tab { flex: 1; display: grid; place-items: center; }
+.dex-tab.on { background: rgb(255 255 255 / 0.35); }
+.dex-back, .dex-step { display: grid; place-items: center; }
+.dex-step::before { content: ''; width: calc(var(--unit) * 7); height: calc(var(--unit) * 4); background: var(--cursor); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.dex-step.next::before { clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.dex-pic { display: grid; place-items: center; pointer-events: none; }
+.dex-plate-text { display: flex; justify-content: center; gap: calc(var(--unit) * 6); }
+.dex-types { display: flex; gap: calc(var(--unit) * 18); }
+.dex-type-chip { padding: 0 calc(var(--unit) * 3); background: var(--paper-2); }
+.dex-foot { display: grid; place-items: center; }
+.dex-entry-text { display: flex; justify-content: center; align-items: flex-start; }
+.dex-stage { display: block; pointer-events: none; }
+.dex-stage > canvas { display: block; }
+.dex-unknown { display: grid; place-items: center; background: var(--dex-plate); box-shadow: inset 0 0 0 var(--unit) var(--dex-plate-edge); }
+.dex-times { display: grid; grid-auto-rows: 1fr; gap: 0; }
+.dex-time { display: flex; align-items: center; gap: calc(var(--unit) * 3); padding: 0 calc(var(--unit) * 3); background: var(--dex-plate); box-shadow: inset 0 0 0 var(--unit) var(--dex-plate-edge); }
+.dex-time.on { background: #fff; }
+.dex-size-who { display: grid; place-items: center; align-content: center; }
+.ui-layer[data-mode] .dex-board .dex-forms { overflow-y: auto; scrollbar-width: none; display: grid; align-content: start; }
+.dex-form { height: calc(var(--unit) * 16); display: flex; align-items: center; padding-left: calc(var(--unit) * 10); }
+.dex-cry { pointer-events: none; }
+.dex-cry-canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+
+/* --- Search ---------------------------------------------------------------------------------- */
+.dex-search { display: grid; grid-auto-rows: calc(var(--unit) * 22); }
+.dex-search-row { display: grid; grid-template-columns: calc(var(--unit) * 80) minmax(0, 1fr); align-items: center; padding: 0 calc(var(--unit) * 8); position: relative; }
+.dex-search-row.is-cursor { background: rgb(255 255 255 / 0.25); }
+.dex-search-row.is-cursor::before { content: ''; position: absolute; left: calc(var(--unit) * 2); top: 50%; width: calc(var(--unit) * 4); height: calc(var(--unit) * 7); margin-top: calc(var(--unit) * -3.5); background: var(--cursor); clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.dex-chips.stepper { display: grid; grid-template-columns: calc(var(--unit) * 16) minmax(0, 1fr) calc(var(--unit) * 16); align-items: center; height: 100%; }
+.dex-chip { height: 100%; display: flex; align-items: center; justify-content: center; }
+.dex-chip-step { height: 100%; display: grid; place-items: center; }
+.dex-chip-step::before { content: ''; width: calc(var(--unit) * 4); height: calc(var(--unit) * 7); background: #fff; clip-path: polygon(100% 0, 0 50%, 100% 100%); }
+.dex-chip-step.next::before { clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.dex-ok { display: grid; place-items: center; background: var(--dex-plate); box-shadow: inset 0 0 0 var(--unit) var(--dex-plate-edge); }
+.dex-ok.is-cursor { box-shadow: inset 0 0 0 calc(var(--unit) * 2) var(--cursor); }
+.dex-ok.is-cursor::before { display: none; }
+.ui-layer[data-mode] .dex-board .msg-box.rom-frame { padding: 0; min-height: 0; }

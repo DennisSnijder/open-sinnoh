@@ -1,0 +1,19 @@
+{
+  "name": "@opensinnoh/ui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": ["**/*.css"],
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.json": "./src/tokens.json",
+    "./fonts.css": "./src/fonts.css",
+    "./os.css": "./src/os.css"
+  },
+  "dependencies": {
+    "@fontsource/figtree": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource/pixelify-sans": "^5.3.0",
+    "@fontsource/silkscreen": "^5.3.0"
+  }
+}

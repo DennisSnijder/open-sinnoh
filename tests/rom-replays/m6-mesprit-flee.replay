@@ -1,0 +1,20 @@
+from m6-mesprit-roam.replay
+# Branch m6-mesprit-flee (decomp TryEncounterRoamer, AI_FLAG_ROAMING_POKEMON,
+# RoamerAfterBattle): the roaming Mesprit met in Route 201's grass. Staged as m6-cresselia-caught is: its route set to
+# Route 201, Repel with an L50 lead that knows Thunder Wave. The lead paralyses it; at its first chance it flees
+# (the battle ends as fled, as the roamer test reads it). Its status stays with the roamer (and its HP: tests/integration/m5-static.rom.test.ts measures that),
+# and it moves away (MoveRoamersOffMap). Still roaming, not defeated.
+set state roamers.routes[0] 0
+set state repel 250
+party 0 platinum:SPECIES_LUXRAY 50 platinum:MOVE_THUNDER_WAVE
+warp platinum:MAP_HEADER_ROUTE_201 119 853 left
+until idle
+until wild platinum:SPECIES_MESPRIT left right 60000
+until battle 3000
++0 battle move 1
+advance text 6000
+until idle 3000
++0 assert battle wild platinum:SPECIES_MESPRIT fled
++0 assert state roamers.slots[0].species "platinum:SPECIES_MESPRIT"
++0 assert state roamers.slots[0].status "paralysis"
++0 assert var platinum:VAR_ROAMING_MESPRIT_STATE 0

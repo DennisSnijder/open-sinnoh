@@ -1,0 +1,16 @@
+# Part of sys-static-lake-trio: Acuity Cavern. Uxie L50 (start_legendary_battle), fled from (Crobat outruns it):
+# check_won_battle TRUE, check_did_not_capture TRUE, so "Uxie disappeared"; the field's return hides and removes
+# Uxie all the same, and FLAG_CAUGHT_UXIE stays clear.
+from lake-azelf.replay
+warp platinum:MAP_HEADER_ACUITY_CAVERN 14 11 up
+until idle
++0 press a
++1 release a
+advance text
+until battle
++0 battle run
+advance text
+until idle
++0 assert battle scripted platinum:SPECIES_UXIE fled
++0 assert flag platinum:FLAG_CAUGHT_UXIE false
++0 assert flag platinum:FLAG_HIDE_ACUITY_CAVERN_UXIE true

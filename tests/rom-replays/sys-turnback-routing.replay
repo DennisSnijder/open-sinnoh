@@ -1,0 +1,63 @@
+# sys-turnback-routing, the third pillar (decomp ScrCmd_InitTurnbackCave). The seeded
+# walk from Sendoff Spring is tests/integration/m6-turnback.rom.test.ts. A constructed start: two
+# pillars seen, the player at the pillar room's south door (its onTransition adds the third pillar and a room).
+# Three pillars: every door but the one the player came by leads to the Giratina room. The Giratina room has no
+# init_turnback_cave: its doors keep the ROM's targets, the entrance, whose onTransition clears both counters.
+# Out by the entrance's south door to Sendoff Spring.
+set var platinum:VAR_TURNBACK_CAVE_PILLARS_SEEN 2
+set var platinum:VAR_TURNBACK_CAVE_ROOMS_VISITED 7
+warp platinum:MAP_HEADER_TURNBACK_CAVE_PILLAR_ROOM 11 20 up
+until idle
++0 assert var platinum:VAR_TURNBACK_CAVE_PILLARS_SEEN 3
++0 assert var platinum:VAR_TURNBACK_CAVE_ROOMS_VISITED 8
+# The west door (2,11): up a row, left to the aisle, up to the door's row, then left into it.
++0 press up
+until position 11 19
++0 release up
++0 press left
+until position 3 19
++0 release left
++0 press up
+until position 3 11
++0 release up
++0 press left
+until state player.zone "platinum:MAP_HEADER_TURNBACK_CAVE_GIRATINA_ROOM" 300
++0 release left
+until idle 300
++0 assert position platinum:MAP_HEADER_TURNBACK_CAVE_GIRATINA_ROOM 20 11
++0 assert var platinum:VAR_TURNBACK_CAVE_PILLARS_SEEN 3
+# Back by the east door: the entrance (ROM target), counters cleared.
++0 press right
+until state player.zone "platinum:MAP_HEADER_TURNBACK_CAVE_ENTRANCE" 300
++0 release right
+until idle 300
++0 assert position platinum:MAP_HEADER_TURNBACK_CAVE_ENTRANCE 2 11
++0 assert var platinum:VAR_TURNBACK_CAVE_PILLARS_SEEN 0
++0 assert var platinum:VAR_TURNBACK_CAVE_ROOMS_VISITED 0
+# Out to Sendoff Spring: up the west aisle, through the gap at the top, round the inscription to its south door (11,16).
++0 press right
+until position 3 11
++0 release right
++0 press up
+until position 3 3
++0 release up
++0 press right
+until position 11 3
++0 release right
++0 press down
+until position 11 12
++0 release down
++0 press left
+until position 7 12
++0 release left
++0 press down
+until position 7 15
++0 release down
++0 press right
+until position 11 15
++0 release right
++0 press down
+until state player.zone "platinum:MAP_HEADER_SENDOFF_SPRING" 300
++0 release down
+until idle 300
++0 assert map platinum:MAP_HEADER_SENDOFF_SPRING

@@ -1,0 +1,9 @@
+# demo-mod overrides the fixture guide's idle label (an IR label) with a new line.
+fixture:Town_Guide::
+  lock_all
+  face_player
+  message text(demo-mod:Text_GuideRemix)
+  wait_button
+  close_message
+  release_all
+  end

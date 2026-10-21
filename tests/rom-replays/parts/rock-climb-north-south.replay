@@ -1,0 +1,17 @@
+from rock-climb-refused.replay
+# Part of sys-rock-climb: with the Icicle Badge, Route 211 East north–south (x 430, z 515–518) up and
+# down (FIELD_MOVES 11), each ending on the first tile past the wall.
+give badge platinum:BADGE_ID_ICICLE
+until idle
++0 field move 0 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle
++0 assert position platinum:MAP_HEADER_ROUTE_211_EAST 430 514
++0 press down
++1 release down
+until idle
++0 field move 0 platinum:MOVE_ROCK_CLIMB
+advance text
+until idle
++0 assert position platinum:MAP_HEADER_ROUTE_211_EAST 430 519
++0 assert state playerState "walk"

@@ -1,0 +1,78 @@
+/*
+ * Title screen and main menu. The 3D is a DS-resolution canvas scaled by whole device pixels; the
+ * OpenSinnoh wordmark (pixel art at a whole scale) is over it. The menu uses the in-game UI's window language (ui.css) on the DS main
+ * menu's blue, with the focused window's frame cycling colour (--focus, set per frame).
+ */
+.title { position: fixed; inset: 0; z-index: 30; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, #12141f 0%, #000 70%); touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; cursor: pointer; }
+.title-3d { position: absolute; left: 0; top: 0; display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
+/* A soft vignette pulls the eye to the centre and keeps the wordmark and the note readable. */
+.title-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 75% 70% at 50% 45%, transparent 55%, rgb(0 0 0 / 0.65) 100%), linear-gradient(transparent 60%, rgb(0 0 0 / 0.35)); }
+
+/* The OpenSinnoh wordmark (@opensinnoh/ui, our brand in place of the game's logo) and the prompt in the lower third,
+   placed on whole pixels by index.ts. `--k` is one glyph pixel: the clear space is 2 of them all round. The scrim
+   is the dark theme's dialog scrim, faded out at the edges, so the ink reads over the bright art. */
+.title-brand { position: absolute; display: flex; flex-direction: column; align-items: center; gap: calc(var(--k) * 2); padding: calc(var(--k) * 2); pointer-events: none; background: radial-gradient(closest-side, var(--os-scrim), transparent); }
+.title-prompt { margin: 0; font: 500 20px/24px var(--os-font-px); font-variant-ligatures: none; letter-spacing: 2px; text-transform: uppercase; color: var(--os-ink); text-shadow: 2px 0 var(--os-ink-shadow), 0 2px var(--os-ink-shadow), 2px 2px var(--os-ink-shadow); }
+.title-legal { position: absolute; left: max(16px, var(--sal)); right: max(16px, var(--sar)); bottom: max(12px, var(--sab)); margin: 0; font: 11px / 1.4 system-ui, -apple-system, sans-serif; letter-spacing: 0.02em; text-align: center; text-wrap: balance; color: rgb(214 220 236 / 0.6); text-shadow: 0 1px 2px rgb(0 0 0 / 0.8); pointer-events: none; }
+.title-fade { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; }
+
+/* --- Main menu ---------------------------------------------------------------------------- */
+.title-menu {
+  --dot: 2px;
+  --paper: #f8f8f0;
+  --frame: #3a4256;
+  --frame-hi: #aab3c4;
+  --focus: rgb(255 230 165);
+  position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: auto;
+  padding: max(16px, var(--sat)) max(16px, var(--sar)) max(16px, var(--sab)) max(16px, var(--sal));
+  /* The DS menu blue (GX_RGB(12, 12, 31)) as a wash over the still-running title scene. */
+  background: linear-gradient(180deg, rgb(99 99 255 / 0.55), rgb(40 40 140 / 0.8));
+  cursor: default; font: 14px/1.4 system-ui, sans-serif; color: #2a2f3a;
+}
+@media (min-width: 900px) and (min-height: 700px) { .title-menu { --dot: 3px; } }
+.title-menu canvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
+.title-menu .px { display: inline-flex; align-items: center; }
+.tm-list { display: grid; gap: calc(var(--dot) * 8); width: min(100%, calc(var(--dot) * 224)); }
+.tm-list[inert] { opacity: 0.35; }
+.tm-window {
+  all: unset; box-sizing: border-box; display: grid; gap: calc(var(--dot) * 4); align-content: start;
+  min-height: 48px; padding: calc(var(--dot) * 7) calc(var(--dot) * 9);
+  background: var(--paper); cursor: pointer; -webkit-tap-highlight-color: transparent;
+  --n: calc(var(--dot) * 2);
+  box-shadow: inset 0 0 0 var(--dot) var(--frame), inset 0 0 0 calc(var(--dot) * 2) var(--frame-hi), 0 calc(var(--dot) * 2) 0 rgb(8 12 40 / 0.35);
+  clip-path: polygon(var(--n) 0, calc(100% - var(--n)) 0, 100% var(--n), 100% calc(100% - var(--n)), calc(100% - var(--n)) 100%, var(--n) 100%, 0 calc(100% - var(--n)), 0 var(--n));
+}
+.tm-window.is-focus { box-shadow: inset 0 0 0 var(--dot) var(--frame), inset 0 0 0 calc(var(--dot) * 3) var(--focus), 0 calc(var(--dot) * 2) 0 rgb(8 12 40 / 0.35); }
+.tm-window:focus-visible { outline: none; }
+@media (hover: hover) { .tm-window:hover:not(.is-focus) { background: #fff; } }
+.tm-info { display: grid; grid-template-columns: auto auto; justify-content: space-between; gap: calc(var(--dot) * 1) calc(var(--dot) * 8); margin: 0; padding-left: calc(var(--dot) * 8); }
+.tm-info dd { margin: 0; justify-self: end; }
+.tm-status { min-height: 1.4em; margin: 12px 0 0; color: #fff; font-weight: 600; text-align: center; text-shadow: 0 1px 0 rgb(0 0 0 / 0.4); }
+
+/* New game: a window over the menu. */
+.tm-sheet { position: absolute; width: min(calc(100% - 32px), calc(var(--dot) * 224)); cursor: default; gap: calc(var(--dot) * 5); box-shadow: inset 0 0 0 var(--dot) var(--frame), inset 0 0 0 calc(var(--dot) * 3) var(--focus), 0 calc(var(--dot) * 2) 0 rgb(8 12 40 / 0.35); }
+.tm-sheet h2 { margin: 0; }
+.tm-field { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.tm-field input { width: 10em; min-height: 40px; padding: 4px 10px; border: var(--dot) solid var(--frame-hi); border-radius: 0; background: #fff; color: #2a2f3a; font: 16px system-ui, sans-serif; }
+.tm-field input:focus-visible, .tm-radio input:focus-visible + span, .tm-button:focus-visible { outline: var(--dot) dashed #e0503c; outline-offset: var(--dot); }
+.tm-gender { display: flex; gap: 8px; align-items: center; margin: 0; padding: 0; border: 0; flex-wrap: wrap; }
+.tm-gender legend { float: left; margin-right: auto; padding: 0; }
+.tm-radio { position: relative; }
+.tm-radio input { position: absolute; opacity: 0; }
+.tm-radio span { display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; background: #ecece2; box-shadow: inset 0 0 0 var(--dot) var(--frame-hi); cursor: pointer; }
+.tm-radio input:checked + span { background: #3a4256; color: #f8f8f0; box-shadow: none; }
+.tm-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.tm-button { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; background: #ecece2; box-shadow: inset 0 0 0 var(--dot) var(--frame-hi); font-weight: 700; cursor: pointer; }
+.tm-button.primary { background: #3a4256; color: #f8f8f0; box-shadow: none; }
+.tm-note { margin: 0; color: #5d6474; font-size: 13px; }
+.tm-error { margin: 0; min-height: 1.2em; color: #b42318; font-weight: 600; }
+.tm-error:empty { display: none; }
+
+/* Options: the game's OPTIONS screen over the menu, the whole view (ui/ui.css lays out its frame). */
+.title-menu > .tm-options-flow { inset: 0; }
+
+/* The setup and Rowan's intro (new-game-flow.ts): one DS screen over everything, black around it. */
+.tm-flow { inset: 0; z-index: 5; }
+/* Mystery Gift and its Easy Chat: their board centred on the DS blue they are drawn on (mystery-gift.css). */
+.tm-flow[data-board] { background: rgb(99 99 255); }
+.tm-flow[data-naming], .tm-flow[data-board] { display: grid; place-items: center; box-sizing: border-box; padding: var(--sat) var(--sar) var(--sab) var(--sal); }

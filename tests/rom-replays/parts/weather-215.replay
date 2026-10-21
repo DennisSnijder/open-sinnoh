@@ -1,0 +1,7 @@
+from weather-217.replay
+# Part of sys-weather: ROUTE_215 has weather RAINING (header). The `weather-215` screenshot line marks the browser
+# spec's check that particles or fog change the frame against a clear one.
+warp platinum:MAP_HEADER_ROUTE_215 670 597 down
+until idle
++0 assert state weather "platinum:OVERWORLD_WEATHER_RAINING"
++0 screenshot weather-215

@@ -1,0 +1,22 @@
+from m6-cresselia.replay
+# Branch m6-cresselia-caught (decomp TryEncounterRoamer, RoamerAfterBattle):
+# Cresselia, roaming since m6-cresselia, met in Route 201's grass and caught with the Master Ball. Staged: its route
+# (seeded per game) is set to Route 201 (RoamerRouteIndex 0) and the player put in the grass west of Sandgem; pacing
+# runs from other wild Pokémon until the roamer comes (one encounter in two on its route). Each wild battle without
+# it sends it off the route 30% of the time (RoamerAfterBattle), so Repel (250 steps) keeps those away: the lead is
+# replaced by an L50 Staraptor, which Repel lets Cresselia (L50) past (RepelPreventsEncounter). The catch: the slot
+# empties and VAR_ROAMING_CRESSELIA_STATE is ROAMER_STATE_CAPTURED (1).
+set state roamers.routes[1] 0
+set state repel 250
+party 0 platinum:SPECIES_STARAPTOR 50 platinum:MOVE_QUICK_ATTACK
+warp platinum:MAP_HEADER_ROUTE_201 119 853 left
+until idle
+until wild platinum:SPECIES_CRESSELIA left right 60000
+battle catch platinum:ITEM_MASTER_BALL 20000
++0 assert battle wild platinum:SPECIES_CRESSELIA caught
+advance text 20000
+until idle 3000
++0 assert state roamers.slots[1] null
++0 assert var platinum:VAR_ROAMING_CRESSELIA_STATE 1
++0 assert party 5 platinum:SPECIES_CRESSELIA
++0 assert state party[5].level 50
