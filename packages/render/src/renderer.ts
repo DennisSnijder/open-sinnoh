@@ -12,6 +12,9 @@ import { AssetCache, disposeTree } from './assets.ts';
 import { cardFoot, restCards } from './cards.ts';
 import { billboardMaterial, billboardMatrix, faceCameraNodes, nodeBillboard, reflectionMaterial } from './billboard.ts';
 import { Composite, fieldOutputs } from './composite.ts';
+import { enhancedVisuals, needsPost, type EnhancedConfig } from './enhanced/config.ts';
+import { lampPoints, type LampPoint } from './enhanced/lamp-points.ts';
+import type { EnhancedPipeline } from './enhanced/pipeline.ts';
 import { FieldEffects } from './effects.ts';
 import { FeatureModels } from './gyms/index.ts';
 import { DISTORTION_FOG, DistortionProps, DistortionSky, distortionCamera } from './distortion/index.ts';
@@ -406,6 +409,11 @@ export interface RenderDebug {
   edges: boolean;
   /** Draws the field's polygon ID buffer (red = ID / 63) instead of the picture. */
   polygonIds: boolean;
+  /**
+   * Perf runs: each frame waits for the GPU (a one-pixel read) before `RenderStats.renderMs` times it, and the field's
+   * GPU time is measured with a timer query where the browser has one (`RenderStats.gpuMs`).
+   */
+  syncTiming: boolean;
 }
 
 /** Frame timings and scene sizes, for perf runs (`window.openSinnohRenderStats`). */
@@ -413,6 +421,8 @@ export interface RenderStats {
   frames: number;
   /** Milliseconds per `render` call, most recent last (at most 2048). */
   renderMs: number[];
+  /** GPU milliseconds per field frame while `RenderDebug.syncTiming` is on (EXT_disjoint_timer_query_webgl2), most recent last. */
+  gpuMs: number[];
   chunks: number;
   chunkBuilds: number;
   /** Door props in built chunks, and those posed by `FieldView.doors` this frame. */
@@ -522,6 +532,19 @@ class Field implements FieldRenderer {
   private viewHeight = 192;
   /** How far the view reaches on the ground from the camera target (world units, x and z), for chunk loading. */
   private reach = { minX: 0, maxX: 0, minZ: 0, maxZ: 0 };
+  /** The DS camera's own reach and FOV (`applyProjection`); the enhanced camera reaches farther. */
+  private baseReach = { minX: 0, maxX: 0, minZ: 0, maxZ: 0 };
+  private dsFov = 0;
+  /**
+   * Enhanced visuals (enhanced/; prototype): the lazy pipeline once a config (`enhancedVisuals`) turns an effect on,
+   * and the config it draws with. Null: the DS look, untouched.
+   */
+  private enhanced: EnhancedPipeline | null = null;
+  private enhancedConfig: EnhancedConfig | null = null;
+  private enhancedLoading = false;
+  private lamps: { key: string; list: LampPoint[] } = { key: '', list: [] };
+  /** `RenderDebug.syncTiming`'s GPU timer queries in flight (null: the browser has no timer query). */
+  private gpuQueries: { ext: { TIME_ELAPSED_EXT: number; GPU_DISJOINT_EXT: number } | null; pending: WebGLQuery[] } | null = null;
   private matrix: Id | null = null;
   /**
    * The area chunks bind to, fixed at each map load: the DS loads area data (textures, props, lights)
@@ -545,8 +568,8 @@ class Field implements FieldRenderer {
   /** A chunk build that threw: `loading()` rethrows it, so a broken scene fails instead of loading forever. */
   private failure: Error | null = null;
   private disposed = false;
-  readonly debug: RenderDebug = { spritesOnly: false, heldTextureAnimations: [], edges: true, polygonIds: false };
-  readonly stats: RenderStats = { frames: 0, renderMs: [], chunks: 0, chunkBuilds: 0, doors: 0, doorsPosed: 0, geometries: 0, textures: 0, cachedModels: 0, actors: [], weather: [] };
+  readonly debug: RenderDebug = { spritesOnly: false, heldTextureAnimations: [], edges: true, polygonIds: false, syncTiming: false };
+  readonly stats: RenderStats = { frames: 0, renderMs: [], gpuMs: [], chunks: 0, chunkBuilds: 0, doors: 0, doorsPosed: 0, geometries: 0, textures: 0, cachedModels: 0, actors: [], weather: [] };
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -667,6 +690,8 @@ class Field implements FieldRenderer {
     const loops: LoopingProp[] = [];
     const healBalls: HealPart[] = [];
     const elevators: ElevatorLights[] = [];
+    // Enhanced visuals' lamp glows (enhanced/): only with a config on, so the DS path does no work.
+    const lamps: LampPoint[] | null = enhancedVisuals() ? [] : null;
     const machine = [...this.reg.newGame.values()][0]?.healMachine;
     const lifts = [...this.reg.newGame.values()][0]?.platformLiftProps;
     const boat = [...this.reg.newGame.values()][0]?.boat;
@@ -693,6 +718,7 @@ class Field implements FieldRenderer {
         const geometry = mesh.geometry.index ? mesh.geometry.toNonIndexed() : mesh.geometry.clone();
         const material = await this.materials.convert(singleMaterial(mesh, modelId), set, 'color' in geometry.attributes, this.modelAnimations.get(modelId), ownSet);
         geometry.applyMatrix4(new THREE.Matrix4().multiplyMatrices(placement, mesh.matrixWorld));
+        if (lamps) lamps.push(...lampPoints(singleMaterial(mesh, modelId).name, geometry));
         // A card is a whole prop model; one quad of a larger model belongs to that model's shape.
         const foot = camera.projection === 'perspective' && meshes.length === 1 ? cardFoot(geometry, material) : null;
         if (foot) cards.push({ geometry, foot });
@@ -907,6 +933,7 @@ class Field implements FieldRenderer {
     }
     withTranslucentParts(out);
     out.userData.lightKey = lightKey;
+    if (lamps) out.userData.lamps = lamps;
     return { group: out, doors, loops, healBalls, elevators };
   }
 
@@ -1564,7 +1591,49 @@ class Field implements FieldRenderer {
       Object.assign(this.camera, { left: -w, right: w, top: h, bottom: -h });
     }
     this.camera.updateProjectionMatrix();
-    this.reach = groundReach(this.camera, rec);
+    this.baseReach = this.reach = groundReach(this.camera, rec);
+    if (this.camera instanceof THREE.PerspectiveCamera) this.dsFov = this.camera.fov;
+  }
+
+  /** Follows the enhanced config: loads the pipeline on first use, drops it (and its camera) when it is off. */
+  private syncEnhanced(): void {
+    const config = enhancedVisuals();
+    if (config === this.enhancedConfig) return;
+    const before = this.enhancedConfig;
+    this.enhancedConfig = config;
+    // The DS camera again: rebuilt from its record on this frame.
+    if (before && before.camera !== 'off' && (config?.camera ?? 'off') === 'off') this.cameraRecord = null;
+    this.reach = this.baseReach;
+    // Lamp glows read the chunks' lamps, found only while a config is on: build the chunks again.
+    if (config?.lamps && !before?.lamps) this.clearChunks();
+    if (!config) {
+      this.enhanced?.dispose();
+      this.enhanced = null;
+      for (const a of this.actors.values()) if (a.kind === 'billboard') a.shadow.rotation.y = 0;
+      return;
+    }
+    if (this.enhanced) return this.enhanced.setConfig(config);
+    if (this.enhancedLoading) return;
+    this.enhancedLoading = true;
+    void import('./enhanced/pipeline.ts')
+      .then(({ EnhancedPipeline }) => {
+        this.enhancedLoading = false;
+        const now = enhancedVisuals();
+        if (this.disposed || !now) return;
+        this.enhanced = new EnhancedPipeline(this.renderer, now);
+        this.enhancedConfig = now;
+        const buffer = this.renderer.getDrawingBufferSize(new THREE.Vector2());
+        this.enhanced.setSize(buffer.x, buffer.y);
+      })
+      .catch(this.failed('enhanced visuals'));
+  }
+
+  /** The lamps and windows of the built chunks (world), for the enhanced lamp glows. */
+  private lampList(): LampPoint[] {
+    const groups = [...this.chunks.values()].flatMap((c) => (c.group?.userData.lamps ? [c.group] : []));
+    const key = groups.map((g) => g.uuid).join();
+    if (key !== this.lamps.key) this.lamps = { key, list: groups.flatMap((g) => (g.userData.lamps as LampPoint[]).map((l) => ({ kind: l.kind, at: l.at.clone().add(g.position) }))) };
+    return this.lamps.list;
   }
 
   /**
@@ -1621,6 +1690,7 @@ class Field implements FieldRenderer {
     // A chunk, sprite or model that failed to load stops rendering loudly instead of leaving holes.
     if (this.failure) throw this.failure;
     const t0 = performance.now();
+    this.syncEnhanced();
     const view = this.world.view();
     if (view.matrix !== this.matrix) {
       this.clearChunks();
@@ -1636,6 +1706,7 @@ class Field implements FieldRenderer {
       // A map load sets the shadow look at once (the effect's init); a new area's light is picked below.
       this.shadowLook.tick = -1;
       this.effects.clear();
+      this.enhanced?.reset();
       this.grid = new MapGrid(this.reg, need(this.reg.matrices, view.matrix, 'matrix'), gridOffset(this.reg, view.zone));
       if (!this.shadowModel && !this.shadowPending && [...this.reg.fieldEffects.values()].some((e) => e.name === 'SHADOW')) void this.loadShadow().catch(this.failed('the shadow model'));
     }
@@ -1701,6 +1772,15 @@ class Field implements FieldRenderer {
       this.renderer.render(this.fadeScene, this.fadeCamera);
       return;
     }
+    const gl = this.renderer.getContext() as WebGL2RenderingContext;
+    let query: WebGLQuery | null = null;
+    if (this.debug.syncTiming) {
+      this.gpuQueries ??= { ext: gl.getExtension('EXT_disjoint_timer_query_webgl2') as { TIME_ELAPSED_EXT: number; GPU_DISJOINT_EXT: number } | null, pending: [] };
+      if (this.gpuQueries.ext) {
+        query = gl.createQuery()!;
+        gl.beginQuery(this.gpuQueries.ext.TIME_ELAPSED_EXT, query);
+      }
+    }
     const target = lerp3(view.camera.prev, view.camera.cur, alpha);
     this.updateChunks(view, target);
     this.updateFloors(dw?.floors ?? []);
@@ -1719,8 +1799,18 @@ class Field implements FieldRenderer {
         part.pose(view.healMachine?.frame);
       }
     }
-    this.placeCamera(target.clone().add(new THREE.Vector3(...view.cameraOffset)), view.cameraDistance ?? 0);
+    const aim = target.clone().add(new THREE.Vector3(...view.cameraOffset));
+    this.placeCamera(aim, view.cameraDistance ?? 0);
+    // Enhanced visuals stay out of the Distortion World (its own camera and sky).
+    const enhanced = dw ? null : this.enhanced;
+    if (enhanced) {
+      const velocity = new THREE.Vector3(...view.camera.cur).sub(new THREE.Vector3(...view.camera.prev));
+      const r = enhanced.placeCamera(this.camera, this.cameraRecord!, aim, velocity, this.dsFov, view.cameraDistance ?? 0);
+      const b = this.baseReach;
+      this.reach = r ? { minX: Math.min(b.minX, r.minX), maxX: Math.max(b.maxX, r.maxX), minZ: Math.min(b.minZ, r.minZ), maxZ: Math.max(b.maxZ, r.maxZ) } : b;
+    }
     this.drawActors(view, alpha);
+    if (enhanced) enhanced.stretchShadows([...this.actors.values()].flatMap((a) => (a.kind === 'billboard' ? [a.shadow] : [])), view.clock.seconds, zone);
     this.effects.update(view.effects, alpha, this.billboardColor);
     this.materials.animate(this.state.tick, this.debug.heldTextureAnimations, this.posedAnimations(view.features?.propPoses));
     const weather = need(this.reg.weathers, view.weather, 'weather');
@@ -1737,13 +1827,31 @@ class Field implements FieldRenderer {
     for (const c of this.chunks.values()) if (c.group) c.group.visible = !this.debug.spritesOnly;
     this.composite.clear(this.renderer);
     this.renderer.render(this.scene, this.camera);
-    this.renderer.setRenderTarget(null);
-    this.renderer.clear();
+    // Enhanced post: the composite goes to the pipeline's buffer, which draws it to the screen with its effects.
+    const post = enhanced && needsPost(this.enhancedConfig!) ? enhanced : null;
+    if (post) post.begin();
+    else {
+      this.renderer.setRenderTarget(null);
+      this.renderer.clear();
+    }
     if (dw) this.dwSky!.draw(this.renderer, dw.sky, this.viewHeight * this.aspect, this.viewHeight);
     this.composite.draw(this.renderer);
     if (view.storyScene?.kind === 'spear-field') {
       const pass = this.stories.pose(view.storyScene, this.aspect, this.lightTemplate);
       if (pass) this.renderer.render(pass.scene, this.camera);
+    }
+    if (post) {
+      const player = view.actors.find((a) => a.localId === 255);
+      post.finish({
+        camera: this.camera,
+        depth: this.composite.target.depthTexture!,
+        seconds: view.clock.seconds,
+        zone,
+        weather: this.weather.active(),
+        player: player ? lerp3(player.prev, player.cur, alpha) : null,
+        target: aim,
+        lamps: this.enhancedConfig!.lamps ? this.lampList() : [],
+      });
     }
     if (this.weather.active()) this.weather.draw(this.renderer);
     if (view.storyScene?.kind === 'spear-field' && view.storyScene.brightness !== 0) {
@@ -1764,6 +1872,18 @@ class Field implements FieldRenderer {
       this.fadeMaterial.opacity = this.fadeFlash.fade(fade.color === 'black' ? 'black' : 'white', fade.alpha);
       this.renderer.render(this.fadeScene, this.fadeCamera);
     } else this.fadeFlash.apply(0);
+    if (query) {
+      const q = this.gpuQueries!;
+      gl.endQuery(q.ext!.TIME_ELAPSED_EXT);
+      q.pending.push(query);
+      while (q.pending.length && gl.getQueryParameter(q.pending[0]!, gl.QUERY_RESULT_AVAILABLE)) {
+        const done = q.pending.shift()!;
+        if (!gl.getParameter(q.ext!.GPU_DISJOINT_EXT)) this.stats.gpuMs.push(Number(gl.getQueryParameter(done, gl.QUERY_RESULT)) / 1e6);
+        gl.deleteQuery(done);
+      }
+      if (this.stats.gpuMs.length > 2048) this.stats.gpuMs.shift();
+    }
+    if (this.debug.syncTiming) gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
     const s = this.stats;
     s.frames++;
     s.renderMs.push(performance.now() - t0);
@@ -1806,6 +1926,7 @@ class Field implements FieldRenderer {
     const buffer = this.renderer.getDrawingBufferSize(new THREE.Vector2());
     this.dsPixel = buffer.y / this.viewHeight;
     this.composite.setSize(buffer.x, buffer.y, this.dsPixel);
+    this.enhanced?.setSize(buffer.x, buffer.y);
     this.weather.setSize(buffer.x / this.dsPixel, buffer.y / this.dsPixel);
   }
 
@@ -1818,6 +1939,7 @@ class Field implements FieldRenderer {
     this.dwWarp.dispose();
     this.stories.dispose();
     this.composite.dispose();
+    this.enhanced?.dispose();
     this.weather.dispose();
     disposeTree(this.scene);
     disposeTree(this.fadeScene);

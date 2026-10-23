@@ -289,6 +289,10 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
 - **Cinematics draw the authored scenes** (ships, Spear Pillar, the Distortion World entry, the title)
   from their own models, cameras and animations, with no procedural stand-ins. Where a scene used both DS
   screens it is recomposed as one; sub-screen-only parts are left out.
+- **Enhanced visuals are an opt-in prototype** (`packages/render/src/enhanced/`, `?enhanced=subtle|cinematic|<switches>`):
+  an angled or follow camera, tilt-shift depth of field, particles, bloom, grading, depth AO, lamp glows and a sun. The
+  DS look stays the default and pays nothing (one null check per frame); the effects are a lazy chunk, and replays and
+  tests never turn them on. Lighting stays the DS's: the angled camera keeps the DS view space for the area light.
 - **Reduce flashing** caps white overlays at 25 % and eases them; black fades are untouched. It follows
   `prefers-reduced-motion` until chosen.
 
