@@ -15,5 +15,7 @@ export * from './easy-chat.ts';
 export * from './poffins.ts';
 export * from './fashion.ts';
 export * from './battle-tower.ts';
+export * from './battle-factory.ts';
+export * from './battle-hall.ts';
 export * from './contest.ts';
 export * from './contest-visual.ts';

@@ -53,6 +53,8 @@ the trainer card, the Pokédex, the Town Map and Fly, all 25 Pokétch apps, opti
   secret base (entering, leaving, moving it, the goods PC, decorating, the normal flag).
 - The Battle Tower: singles, doubles and multi, the Battle Salon partners, Palmer, BP and the exchange, on a second
   script VM for the Battle Frontier's scenes.
+- The Battle Factory (rentals and trades, Level 50 and Open Level, Thorton) and the Battle Hall (the type-rank
+  board, one Pokémon, Argenta, the species records and the record keeper), singles and doubles.
 - Mystery Gift with gift codes.
 
 **Audio.** The SDAT sequencer and DS synth in an AudioWorklet: field music by zone and time, fanfares, sound effects,
@@ -78,7 +80,8 @@ Pokémon, follower talk and the HGSS look.
 
 ## Next
 
-- **Battle Frontier:** the Factory, Hall, Castle and Arcade with their Brains, on the Frontier VM the Tower uses.
+- **Battle Frontier:** the Castle and Arcade with their Brains, on the Frontier VM the Tower uses; the records app;
+  the facilities' particle effects.
 - **Contests:** the Jubilife TV dress-up gallery; the dancers' outfits.
 - **Underground:** the placed traps' and tools' drawn details (the slide's sprite pose, the rock's floor shadow, the
   OK emote), the transition's hole and descent animations.

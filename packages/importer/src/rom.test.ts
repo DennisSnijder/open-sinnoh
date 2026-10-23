@@ -32,7 +32,7 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
     expect(pack.manifest).toMatchObject({ id: 'platinum', version: '0.1.0', engine: '^0.1.0' });
     expect(pack.provenance).toBe('rom-derived');
     expect([...stages]).toEqual(['verify', 'text', 'sound', 'zones', 'maps', 'data', 'scripts', 'assets', '2d art']);
-    expect(report.counts).toMatchObject({ zones: 593, matrices: 292, chunks: 666, areas: 75, props: 527, cameras: 17, lights: 4, models: 1365, sprites: 464, weathers: 36, fieldEffects: 99, fonts: 1, titleScreens: 1, species: 496, trainers: 928, ui2d: 1428, pokemonSprites: 494, trainerSprites: 105, battleBackgrounds: 23, battleTerrains: 24, aiScripts: 1, battleAnimations: 518, particleSystems: 485, battleAnimData: 1 });
+    expect(report.counts).toMatchObject({ zones: 593, matrices: 292, chunks: 666, areas: 75, props: 527, cameras: 17, lights: 4, models: 1365, sprites: 464, weathers: 36, fieldEffects: 99, fonts: 1, titleScreens: 1, species: 496, trainers: 928, ui2d: 1442, pokemonSprites: 494, trainerSprites: 105, battleBackgrounds: 23, battleTerrains: 24, aiScripts: 1, battleAnimations: 518, particleSystems: 485, battleAnimData: 1 });
     expect(report.unknowns.char).toBeUndefined();
   });
 

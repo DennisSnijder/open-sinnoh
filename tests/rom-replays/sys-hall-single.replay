@@ -1,0 +1,72 @@
+# A Battle Hall singles challenge (decomp scripts_battle_hall.s, frontier_scripts_battle_hall.s): the single
+# attendant, SINGLE, the party menu (PARTY_MENU_MODE_BATTLE_HALL: one Pokémon of level 30 or more), the save before
+# the challenge (both questions YES), the corridor and the battle room (frontier scenes, the Pokémon on the stage),
+# the type board: the first cell (Normal, rank 1), YES. The first battle won (the rank goes up, the Pokémon is
+# restored), then RETIRE (YES): the save on the loss (BattleHall_SaveOnLoss: the board's ranks reset, the current and
+# latest streak 1) and the species' win record (BattleHall_UpdateWinRecordForCurrentMon: Garchomp 1), the lobby's
+# goodbye. The opponent is drawn from the game's RNG, so it differs by seed; the battle's result does not.
+party 0 platinum:SPECIES_GARCHOMP 100 platinum:MOVE_EARTHQUAKE platinum:MOVE_DRAGON_CLAW platinum:MOVE_FIRE_FANG platinum:MOVE_CRUNCH
+warp platinum:MAP_HEADER_BATTLE_HALL 7 9 left
+until idle
++0 press a
++1 release a
+advance text
+until menu 600
+# SINGLE
++2 press a
++1 release a
+advance text
+until app party 600
++2 screenshot hall-party
++2 tap slot:0
++2 tap menu:0
++2 tap confirm
+until app none 300
+advance text
+until yesno 600
++2 press a
++1 release a
+advance text
+until yesno 600
++2 press a
++1 release a
++300 press a
++1 release a
++120 screenshot hall-corridor
+advance text 3000
+until app hall-board 3000
++0 screenshot hall-board
++10 tap cell:0
++10 tap entry:0
+until app none 300
++400 press a
++1 release a
++60 press a
++1 release a
+until battle 3000
++0 screenshot hall-battle
+battle auto 20000
+until menu 3000
++0 screenshot hall-room
+# RETIRE (the list's fourth)
++10 press down
++1 release down
++2 press down
++1 release down
++2 press down
++1 release down
++2 press a
++1 release a
+until yesno 600
++2 press up
++1 release up
++2 press a
++1 release a
+advance text 3000
+until idle 3000
+advance text 3000
++0 assert battles frontier 1
++0 assert battle frontier * won single
++0 assert state frontier.hall.streaks[0] {"current":1,"latest":1,"species":"platinum:SPECIES_GARCHOMP"}
++0 assert state frontier.hall.records[0] {"platinum:SPECIES_GARCHOMP":1}
++0 assert state frontier.hall.active[0] false

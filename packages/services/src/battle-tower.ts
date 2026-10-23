@@ -8,7 +8,7 @@
  * tower RNG at the challenge's start, so a streak's trainers and teams never take a draw from the game's streams.
  */
 import { createPokemon, dailyRandomOf, goodsPcHasRoom, readUnderground, isShiny, natureIndex, recalc, STATS, type Dex, type Id, type Pokemon, type Stats } from '@opensinnoh/core';
-import { canGiveItem, dexOf, giveItem, newGameRecord, type FrontierBattle, type FrontierBattleTrainer, type FrontierState, type FrontierTables, type GameState, type Registries } from '@opensinnoh/contracts';
+import { canGiveItem, dexOf, giveItem, newGameRecord, type FrontierBattle, type FrontierBattleTrainer, type FrontierSetData, type FrontierState, type FrontierTables, type GameState, type Registries } from '@opensinnoh/contracts';
 import { addToGameRecord, incrementTrainerScore } from './score.ts';
 import { MAX_TRANSACTION } from './mart.ts';
 
@@ -204,15 +204,16 @@ function hasDistinctChoice(list: { species: Id; item: Id | null }[], count: numb
 // ---------------------------------------------------------------- frontier Pokémon (decomp BattleTower_CopySetToPokemonDataDTO)
 
 /**
- * A frontier set as a level-50 Pokémon (decomp BattleTower_CopySetToPokemonDataDTO then FrontierPokemon_InitPokemon):
- * its species, form, moves (full PP, no PP Ups), item (or the reserved one), `ivs` in every stat, 510 EVs over its
- * flagged stats (at most 255 each), the ability from the PID's low bit, friendship 255 (0 with Frustration), the
- * species name, the trainer's OT id.
+ * A frontier set as a Pokémon (decomp BattleTower_CopySetToPokemonDataDTO or FrontierPokemon_Init, then
+ * FrontierPokemon_InitPokemon): its species, form, moves (full PP, no PP Ups), item (or the reserved one), `ivs` in every
+ * stat, 510 EVs over its flagged stats (at most 255 each), the ability from the PID's low bit, friendship 255 (0 with
+ * Frustration), the species name, the trainer's OT id, at `level` (the tower's 50 by default). `sets` is the facility's
+ * set table (`FrontierTables.sets`, or the Hall's).
  */
-export function frontierPokemon(dex: Dex, tables: FrontierTables, setId: number, o: { otId: number; pid: number; ivs: number; item: Id | null; otName: string; ball: Id }): Pokemon {
-  const set = tables.sets[setId];
-  if (!set) throw new Error(`battle tower: no frontier set ${setId}`);
-  const mon = createPokemon(dex, { species: set.species, form: set.form, level: FRONTIER_LEVEL, pid: o.pid, ivs: o.ivs, otId: o.otId, otName: o.otName, otGender: 'male', ball: o.ball, heldItem: o.item, moves: set.moves });
+export function frontierPokemon(dex: Dex, sets: readonly FrontierSetData[], setId: number, o: { otId: number; pid: number; ivs: number; item: Id | null; otName: string; ball: Id; level?: number }): Pokemon {
+  const set = sets[setId];
+  if (!set) throw new Error(`frontier: no set ${setId}`);
+  const mon = createPokemon(dex, { species: set.species, form: set.form, level: o.level ?? FRONTIER_LEVEL, pid: o.pid, ivs: o.ivs, otId: o.otId, otName: o.otName, otGender: 'male', ball: o.ball, heldItem: o.item, moves: set.moves });
   const flagged = STATS.filter((_, i) => set.evFlags & (1 << i));
   // Set 0 (a placeholder no trainer draws) has no flags: no EVs (the decomp would divide by zero).
   const evs = flagged.length ? Math.min(EV_MAX, Math.floor(EVS_TOTAL / flagged.length)) : 0;
@@ -450,7 +451,7 @@ export class BattleTower {
       let pid: number;
       do pid = (this.random() | (this.random() << 16)) >>> 0;
       while (natureIndex(dex, pid) !== nature || isShiny(otId, pid));
-      return frontierPokemon(dex, tables, setId, { otId, pid, ivs, item: reserved ? tables.tower.reservedItems[i]! : set.item, otName: name, ball });
+      return frontierPokemon(dex, tables.sets, setId, { otId, pid, ivs, item: reserved ? tables.tower.reservedItems[i]! : set.item, otName: name, ball });
     });
     return { trainer, sets: picks, party, otId, pids: party.map((m) => m.pid), reserved };
   }
@@ -461,7 +462,7 @@ export class BattleTower {
     const name = this.trainerName(trainer);
     const ball = newGameRecord(this.registries).pokeBall;
     const party = saved.sets.map((setId, i) =>
-      frontierPokemon(dexOf(this.registries), tables, setId, { otId: saved.otId, pid: saved.pids[i]!, ivs: towerIvs(trainer), item: saved.reserved ? tables.tower.reservedItems[i]! : tables.sets[setId]!.item, otName: name, ball }),
+      frontierPokemon(dexOf(this.registries), tables.sets, setId, { otId: saved.otId, pid: saved.pids[i]!, ivs: towerIvs(trainer), item: saved.reserved ? tables.tower.reservedItems[i]! : tables.sets[setId]!.item, otName: name, ball }),
     );
     return { trainer, sets: [...saved.sets], party, otId: saved.otId, pids: [...saved.pids], reserved: saved.reserved };
   }
@@ -651,7 +652,7 @@ export class BattleTower {
 }
 
 /** Decomp BattleFrontierSave_SetIfBetter (SetStat caps at 9999): the better value, a stored value past 9999 as 9999. */
-function setIfBetter(current: number, value: number): number {
+export function setIfBetter(current: number, value: number): number {
   if (current < value) return Math.min(STREAK_MAX, value);
   return current > STREAK_MAX ? STREAK_MAX : current;
 }

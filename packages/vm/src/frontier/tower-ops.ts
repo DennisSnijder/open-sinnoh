@@ -187,7 +187,7 @@ export function towerFrontierHandlers(): Record<string, FrontierHandler> {
 }
 
 /** Decomp BattleFrontier_PrintTrainerMessage: a FRONTIER_TRAINER_MESSAGES message, waiting for the printer. */
-function introMessage(f: FrontierRunner, c: FrontierContext, index: number): ReturnType<FrontierHandler> {
+export function introMessage(f: FrontierRunner, c: FrontierContext, index: number): ReturnType<FrontierHandler> {
   const bank = f.r.registries.textBanks.get(f.tables.trainerMessages);
   const id = bank?.messages[index];
   const text = id && f.r.registries.texts.get(id);

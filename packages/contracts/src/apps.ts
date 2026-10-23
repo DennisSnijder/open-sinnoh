@@ -121,7 +121,18 @@ export type AppRequest =
    * for the Battle Tower, then CONFIRM. Eggs and the Battle Frontier banlist (`FrontierTables.banlist`) are NOT ABLE; the
    * result is the party slots in the order picked, or null (CANCEL or B).
    */
-  | { app: 'party-order'; count: number }
+  | { app: 'party-order'; count: number; hall?: true }
+  /**
+   * 0.37.0. The Battle Factory's rental app (decomp battle_factory/main.c, BattleFactoryApp_*): `rent` picks the
+   * player's `count` Pokémon in order from `rentals` (the six rentals); `swap` offers to trade one of `rentals` (the
+   * player's) for one of `offers` (the beaten trainer's). Result `factory`.
+   */
+  | import('./frontier.ts').FactoryRequest
+  /**
+   * 0.37.0. The Battle Hall's type board (decomp battle_hall/main.c, BattleHallApp_*): the next battle's type. Result
+   * `hall-board`.
+   */
+  | import('./frontier.ts').HallBoardRequest
   /**
    * 0.12.0. The battle bag (decomp battle_bag.c, BattleBag_Init): the bag's items grouped by their
    * `battlePocket` bits into HP/PP, status, Poké Balls and battle items. A medicine asks for a party
@@ -319,6 +330,14 @@ export type AppResult =
   | { app: 'party'; slot: number | null }
   /** 0.34.0. The slots in the order entered, or null. */
   | { app: 'party-order'; order: number[] | null }
+  /**
+   * 0.37.0. `rent`: the rentals' indices in the order picked. `swap`: the player's slot and the offer taken, or null
+   * (no trade; decomp selectedAppSlots[0] 0xFF).
+   */
+  | { app: 'factory'; picks: number[] }
+  | { app: 'factory'; swap: [number, number] | null }
+  /** 0.37.0. The board cell picked (decomp selectedCell: 0–16 a type, 19 the Matron's). */
+  | { app: 'hall-board'; cell: number }
   | { app: 'storage' }
   | { app: 'pokedex-entry' }
   | { app: 'naming'; name: string | null }
@@ -515,7 +534,9 @@ export type AppView =
   | import('./underground.ts').UndergroundBaseView
   | import('./underground.ts').UndergroundPcView
   | import('./contests.ts').ContestView
-  | import('./contests.ts').ContestPhotoView;
+  | import('./contests.ts').ContestPhotoView
+  | import('./frontier.ts').FactoryView
+  | import('./frontier.ts').HallBoardView;
 export type AppName = AppView['app'];
 
 /**

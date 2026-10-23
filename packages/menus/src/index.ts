@@ -37,6 +37,7 @@ import { undergroundBaseScreen } from './ug-base.ts';
 import { undergroundPcScreen } from './ug-pc.ts';
 import { contestScreen } from './contest/contest.ts';
 import { contestPhotoScreen } from './contest/photo.ts';
+import { factoryScreen, hallBoardScreen } from './frontier.ts';
 
 export const createApp: CreateApp = (request, deps) => {
   const ctx = menuContext(deps);
@@ -52,7 +53,7 @@ export const createApp: CreateApp = (request, deps) => {
     case 'party':
       return new AppStack(partyScreen(ctx, { kind: 'select' }), { app: 'party', slot: null });
     case 'party-order':
-      return new AppStack(partyScreen(ctx, { kind: 'order', count: request.count }), { app: 'party-order', order: null });
+      return new AppStack(partyScreen(ctx, { kind: 'order', count: request.count, ...(request.hall ? { hall: true as const } : {}) }), { app: 'party-order', order: null });
     case 'storage':
       return new AppStack(storageScreen(ctx, request.mode), { app: 'storage' });
     case 'pokedex-entry':
@@ -107,6 +108,10 @@ export const createApp: CreateApp = (request, deps) => {
       return new AppStack(contestScreen(ctx), { app: 'contest' });
     case 'contest-photo':
       return new AppStack(contestPhotoScreen(ctx, request.slot), { app: 'contest-photo' });
+    case 'factory':
+      return new AppStack(factoryScreen(ctx, request), request.mode === 'rent' ? { app: 'factory', picks: [] } : { app: 'factory', swap: null });
+    case 'hall-board':
+      return new AppStack(hallBoardScreen(ctx, request), { app: 'hall-board', cell: request.cursor });
     case 'summary-teach':
       return new AppStack(summaryScreen(ctx, { party: () => deps.state.party, slot: request.slot, mode: { kind: 'teach', move: request.move, done: (forget) => ({ close: { app: 'summary-teach', forget } }) } }), { app: 'summary-teach', forget: null });
   }

@@ -110,6 +110,8 @@ export const MENU_TEXT = {
   partyNeeded4: 'PartyMenu_Text_FourMonAreNeeded',
   partyIdentical: 'PartyMenu_Text_IdenticalMonNotPermitted',
   partyIdenticalItems: 'PartyMenu_Text_SomeMonHoldingIdenticalItems',
+  /** 0.37.0. The Battle Hall's pick (PARTY_MENU_MODE_BATTLE_HALL): the two must be of one species. */
+  partySameKind: 'PartyMenu_Text_MustUseSameKindOfMon',
   /** The daycare party's STORE (decomp PARTY_MENU_STR_MAIL_STORE). */
   partyStore: 'PartyMenu_Text_MailStore',
   partyAble: 'PartyMenu_Text_AbleToLearn',

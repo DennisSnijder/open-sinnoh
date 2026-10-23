@@ -1,0 +1,93 @@
+# A Battle Factory singles challenge (decomp scripts_battle_factory.s, frontier_scripts_battle_factory.s): the single
+# attendant, SINGLE, LEVEL 50, the save before the challenge (both questions YES), the corridor (a frontier scene)
+# and the rental app: three of the six rentals picked in order, YES. The battle room, the first battle won, CONTINUE:
+# the next opponent's info, the trade (YES; the first rental given for the beaten trainer's first), the second
+# battle forfeited (RUN, a loss). The video question NO, the save on the loss (BattleFactory_SaveOnLoss: record and
+# latest streak 1, trades 2: the rental and the trade), the lobby's goodbye. Rentals and trainers are drawn from the
+# game's RNG, so they differ by seed; the battles' count and results do not.
+party 0 platinum:SPECIES_GARCHOMP 60 platinum:MOVE_EARTHQUAKE
+warp platinum:MAP_HEADER_BATTLE_FACTORY 21 7 up
+until idle
++0 press a
++1 release a
+advance text
+until menu 600
+# SINGLE
++2 press a
++1 release a
+advance text
+until menu 600
+# LEVEL 50
++2 press a
++1 release a
+advance text
+until yesno 600
++2 press a
++1 release a
+advance text
+until yesno 600
++2 press a
++1 release a
++300 press a
++1 release a
+advance text 3000
+until app factory 3000
++60 screenshot factory-rent
++0 tap ball:3
++2 tap entry:1
++2 tap ball:4
++2 tap entry:1
++2 tap ball:5
++2 tap entry:1
++2 tap entry:0
+until app none 300
++90 press a
++1 release a
++30 press a
++1 release a
++400 press a
++1 release a
++60 press a
++1 release a
+until battle 3000
++0 screenshot factory-battle
+battle auto 20000
+until menu 3000
++0 screenshot factory-corridor
+# CONTINUE
++10 press a
++1 release a
+advance text 3000
+until yesno 3000
+# The trade: YES
++2 press a
++1 release a
+until app factory 3000
++30 tap ball:0
++2 tap entry:1
++2 tap ball:0
++2 tap entry:1
++2 tap entry:0
+until app none 300
++90 press a
++1 release a
++30 press a
++1 release a
++400 press a
++1 release a
++60 press a
++1 release a
+until battle 3000
++0 battle run
+until battle 600
++0 battle answer yes
+until battle end 3000
+until yesno 3000
++2 press b
++1 release b
+advance text 3000
+until idle 3000
+advance text 3000
++0 assert battles frontier 2
++0 assert state frontier.factory.streaks[0] {"record":1,"latest":1,"recordTrades":2,"latestTrades":2}
++0 assert state frontier.factory.active[0] false

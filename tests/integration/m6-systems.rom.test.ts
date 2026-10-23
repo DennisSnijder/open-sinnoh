@@ -5,6 +5,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Id } from '@opensinnoh/core';
 import { createBattle } from '@opensinnoh/battle';
+import { createApp } from '@opensinnoh/menus';
 import { CountingStubLog, createGame, gameDriver, runReplay, type Game } from '@opensinnoh/game';
 import { BATTLEGROUND_GYM_LEADERS, BATTLEGROUND_STAT_TRAINERS, BATTLEGROUND_TRAINER_NONE, createScriptRunner } from '@opensinnoh/vm';
 import { createWorld } from '@opensinnoh/world';
@@ -26,7 +27,7 @@ const CHECKS: Record<string, (game: Game, logged: string[]) => void> = {
   },
   // The out-of-scope systems: each facility's or the Villa's own ops are logged stubs (counted), never silent.
   'sys-frontier-boundary': (_game, logged) => {
-    for (const op of ['call_battle_hall_lobby_function', 'call_battle_castle_lobby_function', 'call_battle_arcade_lobby_function'])
+    for (const op of ['call_battle_castle_lobby_function', 'call_battle_arcade_lobby_function'])
       expect(logged, op).toContain(`stub:${op}`);
   },
   'sys-villa-boundary': (_game, logged) => {
@@ -41,7 +42,7 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('system replays', () => {
     for (const seed of [1, 2, 3])
       it(`${file}: twice on seed ${seed}, save round trip`, async () => {
         const log = new CountingStubLog(() => {});
-        const game = createGame({ packs: [romSlice().pack], createWorld, createScriptRunner, createBattle, seed, log, now: () => '2009-03-22T12:00:00Z' });
+        const game = createGame({ packs: [romSlice().pack], createWorld, createScriptRunner, createBattle, createApp, seed, log, now: () => '2009-03-22T12:00:00Z' });
         const result = await runReplay(gameDriver(game), readReplay(`${file}.replay`), { name: `${file}.replay`, registries: game.registries, resolve: resolveReplay, seed, repeat: true });
         expect(result.error).toBeUndefined();
         expect(result).toMatchObject({ ok: true, determinism: 'identical', roundTrip: 'identical' });

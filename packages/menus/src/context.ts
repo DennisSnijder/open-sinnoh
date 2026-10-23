@@ -8,6 +8,7 @@ import { TRADE_MESSAGES } from './trade.ts';
 import { POFFIN_TEXTS } from './poffin-cooking.ts';
 import { CONTEST_APP_TEXTS } from './contest/contest.ts';
 import { CONTEST_ROUND_TEXTS } from './contest/rounds.ts';
+import { FRONTIER_APP_TEXTS } from './frontier.ts';
 
 /** What every screen gets: the live state, the records, the game's services and the labels. */
 export interface MenuContext {
@@ -36,7 +37,7 @@ export function menuContext(deps: { registries: Registries; state: GameState; lo
   let memory = memories.get(deps.state);
   if (!memory) memories.set(deps.state, (memory = { startEntry: 'bag', bagPocket: 0, battlePocket: 0 }));
   let text = texts.get(deps.registries);
-  if (!text) texts.set(deps.registries, (text = new MenuText(deps.registries, [...SUMMARY_MESSAGES, ...STORAGE_MESSAGES, ...EVOLUTION_STRINGS, ...MOVE_REMINDER_MESSAGES, ...TRADE_MESSAGES, ...POFFIN_TEXTS, ...CONTEST_APP_TEXTS, ...CONTEST_ROUND_TEXTS])));
+  if (!text) texts.set(deps.registries, (text = new MenuText(deps.registries, [...SUMMARY_MESSAGES, ...STORAGE_MESSAGES, ...EVOLUTION_STRINGS, ...MOVE_REMINDER_MESSAGES, ...TRADE_MESSAGES, ...POFFIN_TEXTS, ...CONTEST_APP_TEXTS, ...CONTEST_ROUND_TEXTS, ...FRONTIER_APP_TEXTS])));
   return { ...deps, text, memory };
 }
 
