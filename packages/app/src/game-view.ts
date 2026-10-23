@@ -48,7 +48,7 @@ declare global {
   interface Window {
     openSinnohGame?: AppBridge;
     /** Debug/test handle (always present once the game is mounted). */
-    openSinnohApp?: { lastInput: InputFrame | null; ticks: number; layout: Layout; overlayFrame(): DsFrame; game: Game; sceneLoading(): boolean; ui: InGameUi; battleScene(): BattleSceneInfo; audio: WebAudio; zoom(): { setting: Zoom; scale: number }; renderScale(): { setting: RenderScale; pixelRatio: number }; loop: LoopStats; hold(): { holding: boolean; ms: number; reason: string }; speed(): { fast: number; latched: boolean; active: boolean; speed: number } };
+    openSinnohApp?: { lastInput: InputFrame | null; ticks: number; layout: Layout; overlayFrame(): DsFrame; game: Game; sceneLoading(): boolean; ui: InGameUi; battleScene(): BattleSceneInfo; audio: WebAudio; zoom(): { setting: Zoom; scale: number }; renderScale(): { setting: RenderScale; pixelRatio: number }; loop: LoopStats; hold(): { holding: boolean; ms: number; reason: string }; speed(): { fast: number; latched: boolean; active: boolean; speed: number }; tileAt(x: number, y: number): { x: number; z: number } | null };
   }
 }
 
@@ -679,6 +679,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     loop: loopStats,
     hold: () => (battle.holding() ? { holding: true, ms: held, reason: battle.holdReason() } : { holding: revealing(), ms: held, reason: revealing() ? 'the field scene' : '' }),
     speed: () => ({ fast: fastForward.fast, latched: fastForward.latched, active: fastForward.active, speed: fastForward.speed() }),
+    tileAt: (x, y) => session.renderer.tileAt?.(x, y) ?? null,
   };
   // The title screen runs first (its own loop); the field shows and its loop starts once it is left.
   const titleRecord = opts.title ? [...session.game.registries.titleScreens.values()][0] : undefined;

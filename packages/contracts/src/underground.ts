@@ -91,7 +91,7 @@ export interface UndergroundBaseTables {
  * - `spheres`, `treasures` (mining ids), `traps` (trap ids), `goods` (the goods bag) and `goodsPc` (the goods PC):
  *   compact inventories in slot order, at most `UNDERGROUND_LIMITS`.
  * - `buried`: the buried spheres in slot order. `spots`: the mining spots, ordered by z then x (the DS's in-memory
- *   order, Mining_AddNewMiningSpot; a dug one goes). `spawnedTraps`: the spawned traps by index (null: none), for the traps to come.
+ *   order, Mining_AddNewMiningSpot; a dug one goes). `spawnedTraps`: the spawned traps by index (null: none: none spawned, or set off or dug up).
  * - `plates`: minedPlates (bit n: plate MINING_ID.plates + n was dug; none comes twice).
  * - `records`: the UndergroundRecord counts the solo game keeps (spheres, fossils and other treasure dug). `steps`:
  *   stepCount (0–99; its 50th step scores TRAINER_SCORE_EVENT_UNDERGROUND_100_STEPS).

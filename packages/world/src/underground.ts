@@ -784,7 +784,7 @@ export class UndergroundField {
       if (!id) continue;
       const x = (ox + t.x) * TILE + (g.width * TILE) / 2;
       const z = t.z * TILE + (g.depth * TILE) / 2;
-      out.push({ key: `ug-good-${t.index}`, prop: id, position: [x, 1, z], rotation: [0, 0, 0] });
+      out.push({ key: `ug-good-${t.index}-${t.good}`, prop: id, position: [x, 1, z], rotation: [0, 0, 0] });
     }
     const cursor = this.decoration?.cursor;
     const model = this.h.tables.base.cursor;
