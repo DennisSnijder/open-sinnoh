@@ -32,8 +32,8 @@ until yesno 600
 +1 release a
 advance text 3000
 until app factory 3000
-+0 screenshot factory-rent
-+30 tap ball:3
++60 screenshot factory-rent
++0 tap ball:3
 +2 tap entry:1
 +2 tap ball:4
 +2 tap entry:1
@@ -53,7 +53,7 @@ until battle 3000
 +0 screenshot factory-battle
 battle auto 20000
 until menu 3000
-+0 screenshot factory-room
++0 screenshot factory-corridor
 # CONTINUE
 +10 press a
 +1 release a

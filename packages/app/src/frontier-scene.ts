@@ -108,9 +108,14 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
     const fg = () => {
       if (!view.fg || view.fgHidden) return;
       const s = sheetOf(view.fg.sheet);
-      if (!view.fgFixed) return cell(s, 0, 0, 0);
-      const scroll = view.fgScroll ?? { x: 0, y: 0 };
-      for (const dy of [0, view.fg.height]) cell(s, 0, cam.x - scroll.x, cam.y - scroll.y + dy);
+      // The blend's weights as one alpha (BG2's `a`/16 over what is below; the DS also scales below by `b`/16).
+      if (view.fgBlend) ctx.globalAlpha = view.fgBlend.a / 16;
+      if (!view.fgFixed) cell(s, 0, 0, 0);
+      else {
+        const scroll = view.fgScroll ?? { x: 0, y: 0 };
+        for (const dy of [0, view.fg.height]) cell(s, 0, cam.x - scroll.x, cam.y - scroll.y + dy);
+      }
+      ctx.globalAlpha = 1;
     };
     if (view.fgBelow) fg();
     if (view.bg) cell(sheetOf(view.bg.sheet), 0, 0, 0);

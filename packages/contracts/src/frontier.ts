@@ -255,6 +255,8 @@ export interface FrontierView {
   fgBelow?: true;
   /** 0.37.0. BG2 stays put as the camera moves (`FrontierSceneData.fgFixed`). */
   fgFixed?: true;
+  /** 0.37.0. BG2 blended over the layers and sprites below (decomp G2_SetBlendAlpha: `a`/16 of BG2, `b`/16 of below). */
+  fgBlend?: { a: number; b: number };
   /** 0.37.0. BG2 hidden (decomp GXLayers_EngineAToggleLayers BG2 off: the Hall's light beams). */
   fgHidden?: true;
   /** 0.37.0. The whole screen's shake offset in px (decomp FrontierScrCmd_4C), absent when still. */

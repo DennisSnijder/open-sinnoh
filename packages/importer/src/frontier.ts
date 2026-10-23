@@ -154,8 +154,12 @@ export function importFrontier(fs: NitroFs, names: Names, rom: FrontierRomTables
 
   const bgNarc = readNarc(fs.file('/resource/eng/frontier_graphic/frontier_bg.narc'));
   const bgSheets = new Map<string, NonNullable<FrontierSceneData['bg']>>();
-  /** A room layer: the 8bpp affine-extended BG over its extended palettes (decomp ov104_0223CC74), black under BG3. */
-  const room = (tilemap: number, tiles: number, palette: number, backdrop: boolean): NonNullable<FrontierSceneData['bg']> => {
+  /**
+   * A room layer: the 8bpp affine-extended BG over its extended palettes (decomp ov104_0223CC74), colour 0 transparent
+   * (the backdrop, black after the scene's PaletteData_FillBufferRange, is the scene's: the Factory corridor's floor
+   * shows through BG3 from below).
+   */
+  const room = (tilemap: number, tiles: number, palette: number): NonNullable<FrontierSceneData['bg']> => {
     const key = `${tilemap}-${tiles}-${palette}`;
     const known = bgSheets.get(key);
     if (known) return known;
@@ -167,7 +171,7 @@ export function importFrontier(fs: NitroFs, names: Names, rom: FrontierRomTables
     const screen = readNscr(member(tilemap));
     const chars = readNcgr(member(tiles));
     const colors = readNclr(member(palette)).colors;
-    const sheet = deps.sheets.image(`frontier/room_${tilemap}`, { width: screen.width, height: screen.height, rgba: renderAffineExt(screen, chars, colors, backdrop) });
+    const sheet = deps.sheets.image(`frontier/room_${tilemap}`, { width: screen.width, height: screen.height, rgba: renderAffineExt(screen, chars, colors) });
     const out = { sheet, width: screen.width, height: screen.height };
     bgSheets.set(key, out);
     return out;
@@ -178,8 +182,8 @@ export function importFrontier(fs: NitroFs, names: Names, rom: FrontierRomTables
     const size = SCREEN_SIZES[s.screenSize];
     if (size === undefined) throw new Error(`frontier scene ${i}: screen size ${s.screenSize}`);
     const bgm = deps.sequences.find((q) => q.sourceIndex === s.bgm)?.id ?? null;
-    const bg = room(s.tilemap, s.tiles, s.palette, true);
-    const fg = s.subTilemap === 0xffff ? null : room(s.subTilemap, s.subTiles, s.subPalette, false);
+    const bg = room(s.tilemap, s.tiles, s.palette);
+    const fg = s.subTilemap === 0xffff ? null : room(s.subTilemap, s.subTiles, s.subPalette);
     if (s.fgFollows > 1) throw new Error(`frontier scene ${i}: FR_SCENE_FLAG_2 ${s.fgFollows}`);
     return { entry: `platinum:${frontierFileLabelName(FRONTIER_SCRIPT_FILES[s.script]!)}/0` as Id, textBank: deps.bankId(s.textBank), bgm, bg, fg, setup: s.setup, ...(fg && s.fgFollows === 0 ? { fgFixed: true as const } : {}) };
   });
@@ -303,15 +307,13 @@ export function frontierSceneEntry(scenes: Uint8Array, scene: number): Id | unde
 
 /**
  * An affine-extended BG (8bpp characters, a 16-bit entry per tile stored row by row, extended palettes picked by the
- * entry's palette bits) to RGBA. Colour 0 is transparent, or the backdrop (palette 0 colour 0, black after the
- * scene's PaletteData_FillBufferRange) under the lowest layer.
+ * entry's palette bits) to RGBA. Colour 0 is transparent.
  */
-function renderAffineExt(screen: Screen, chars: Characters, colors: Uint16Array, backdrop: boolean): Uint8Array {
+function renderAffineExt(screen: Screen, chars: Characters, colors: Uint16Array): Uint8Array {
   if (chars.bitDepth !== 8) throw new Error('frontier room: an extended BG needs 8bpp characters');
   const out = new Uint8Array(screen.width * screen.height * 4);
   const cols = screen.width / 8;
   if (screen.entries.length < cols * (screen.height / 8)) throw new Error(`frontier room: ${screen.entries.length} entries for ${screen.width}×${screen.height}`);
-  if (backdrop) for (let i = 3; i < out.length; i += 4) out[i] = 255;
   for (let ty = 0; ty < screen.height / 8; ty++)
     for (let tx = 0; tx < cols; tx++) {
       const e = screen.entries[ty * cols + tx]!;

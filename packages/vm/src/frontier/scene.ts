@@ -290,6 +290,7 @@ export class FrontierScene {
   corridorFloor = false;
   fgHidden = false;
   fgBelow = false;
+  fgBlend: { a: number; b: number } | null = null;
   /** Decomp unk_A4 (FrontierScrCmd_4C, ov104_0223319C): the shake offset, its frame counter, interval and swings left. */
   private shakeTask: { x: number; y: number; frame: number; every: number; left: number } | null = null;
   /** Decomp unk_B0 (FrontierScrCmd_4E, ov104_022331E8): window 0 after `delay` frames (or off), and the window now. */
@@ -571,6 +572,7 @@ export class FrontierScene {
       ...(this.fgScroll.x || this.fgScroll.y ? { fgScroll: { ...this.fgScroll } } : {}),
       ...(this.fgBelow ? { fgBelow: true as const } : {}),
       ...(this.data.fgFixed ? { fgFixed: true as const } : {}),
+      ...(this.fgBlend ? { fgBlend: { ...this.fgBlend } } : {}),
       ...(this.fgHidden ? { fgHidden: true as const } : {}),
       ...(this.shakeTask && (this.shakeTask.x || this.shakeTask.y) ? { shake: { x: this.shakeTask.x, y: this.shakeTask.y } } : {}),
       ...(this.window ? { window: { ...this.window } } : {}),

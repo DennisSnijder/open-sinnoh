@@ -24,12 +24,12 @@ import './frontier.css';
 
 const W = 256;
 const H = 192;
-/** Decomp BattleFactoryApp's windows (tiles → DS px). */
-const FACTORY_MESSAGE = { x: 16, y: 152, w: 136, h: 32 };
-const FACTORY_MENU = { x: 184, y: 136, w: 64, h: 48 };
-/** Decomp BattleHallApp_InitWindows: the message box, YES/NO, the name; the cells (ChangeCellBackground's rects). */
-const HALL_MESSAGE = { x: 16, y: 152, w: 216, h: 32 };
-const HALL_YES_NO = { x: 192, y: 104, w: 56, h: 32 };
+/** Decomp BattleFactoryApp's windows (tiles → DS px, with their 8 px frames). */
+const FACTORY_MESSAGE = { x: 8, y: 144, w: 160, h: 48 };
+const FACTORY_MENU = { x: 176, y: 128, w: 80, h: 64 };
+/** Decomp BattleHallApp_InitWindows: the message box and YES/NO (with their frames); the cells (ChangeCellBackground's rects). */
+const HALL_MESSAGE = { x: 8, y: 144, w: 240, h: 48 };
+const HALL_YES_NO = { x: 184, y: 96, w: 72, h: 48 };
 const HALL_ROWS = [
   { y: 0, h: 40 },
   { y: 40, h: 32 },
@@ -220,7 +220,7 @@ class FactoryScene extends FrontierScene<FactoryView> {
     }
     if (v.menu) {
       const w = framed(d, 'frontier-menu', ...v.menu.entries.map((e, i) => stop(d, `entry:${i}`, [d.text(e)], 'choice', v.menu!.cursor === i)));
-      place(w, { ...FACTORY_MENU, y: FACTORY_MENU.y + (3 - v.menu.entries.length) * 16, h: 16 * v.menu.entries.length });
+      place(w, FACTORY_MENU);
       parts.push(w);
     }
     return parts;
@@ -282,7 +282,7 @@ class HallBoardScene extends FrontierScene<HallBoardView> {
       parts.push(b);
       if (c.label) {
         const label = el('div', 'frontier-label', d.text(c.label));
-        place(label, { x: 9 + COL * col, y: 16 + ROW * row, w: 56, h: 16 });
+        place(label, { x: 9 + COL * col, y: 16 + ROW * row, w: 54, h: 16 });
         parts.push(label);
       }
       if (c.rank !== null) {

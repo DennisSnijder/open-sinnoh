@@ -32,6 +32,7 @@ until yesno 600
 +1 release a
 +300 press a
 +1 release a
++120 screenshot hall-corridor
 advance text 3000
 until app hall-board 3000
 +0 screenshot hall-board

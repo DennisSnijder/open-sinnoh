@@ -16,6 +16,7 @@ import { pageDriver } from '../../packages/cli/src/browser.ts';
 import { romSlice } from '../rom.ts';
 import { battleSceneStats, canvasStats } from './canvas.ts';
 import { screenProblems } from './fit.ts';
+import { frame, sceneProblems } from './frontier-scene.ts';
 import { seedRomImport } from './seed.ts';
 import { settle } from './settle.ts';
 import { readReplay, resolveReplay } from '../rom-replays/sys-replays.ts';
@@ -52,54 +53,7 @@ test('import the ROM', async () => {
   await page.waitForFunction(() => window.openSinnohGame?.ready === true, undefined, { timeout: 60_000 });
 });
 
-const frame = () => page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 const app = async () => (await page.evaluate(() => window.openSinnohGame!.snapshot().app)) as AppView | null;
-
-/**
- * The running frontier scene's frame problems (null when no scene runs), after a frame is drawn: device px throughout.
- * The frame is at the layout's unit, inside the room and centred in it, the largest whole scale that fits on touch
- * layouts (the phone's game area), inside the viewport and clear of the on-screen controls; nothing is drawn on the
- * overlay outside it (the rest is black).
- */
-async function sceneProblems(): Promise<{ scene: number; problems: string[] } | null> {
-  if (!(await page.evaluate(() => !!window.openSinnohApp!.game.scripts.view().frontier))) return null;
-  await frame();
-  return page.evaluate(() => {
-    const fr = window.openSinnohApp!.game.scripts.view().frontier;
-    if (!fr) return null;
-    const out: string[] = [];
-    const l = window.openSinnohApp!.layout;
-    const dpr = devicePixelRatio || 1;
-    const f = window.openSinnohApp!.overlayFrame();
-    const canvas = document.getElementById('overlay-canvas') as HTMLCanvasElement;
-    const [W, H, s] = [canvas.width, canvas.height, f.scale];
-    const [w, h] = [256 * s, 192 * s];
-    const [L, T, R, B] = [l.room.left, l.room.top, l.room.right, l.room.bottom].map((v) => Math.round(v * dpr)) as [number, number, number, number];
-    const at = `${w}×${h} at ${f.x},${f.y} in the room ${L},${T}–${W - R},${H - B}`;
-    if (s !== Math.max(1, Math.round(l.ui.unit * dpr))) out.push(`scale ${s} is not the layout's unit ${l.ui.unit} × ${dpr}`);
-    if (f.x < L || f.y < T || f.x + w > W - R || f.y + h > H - B) out.push(`frame ${at} leaves the room`);
-    if (Math.abs(f.x - L - (W - R - f.x - w)) > 1 || Math.abs(f.y - T - (H - B - f.y - h)) > 1) out.push(`frame ${at} is off centre`);
-    if (l.controls && 256 * (s + 1) <= W - L - R && 192 * (s + 1) <= H - T - B) out.push(`frame ${at}: scale ${s + 1} fits too`);
-    const box = canvas.getBoundingClientRect();
-    const css = new DOMRect(box.left + f.x / dpr, box.top + f.y / dpr, w / dpr, h / dpr);
-    if (css.left < -0.5 || css.top < -0.5 || css.right > innerWidth + 0.5 || css.bottom > innerHeight + 0.5) out.push(`frame ${at} leaves the ${innerWidth}×${innerHeight} viewport`);
-    for (const b of document.querySelectorAll<HTMLElement>('.controls button, .hud-button')) {
-      const r = b.getBoundingClientRect();
-      if (!r.width || getComputedStyle(b).visibility === 'hidden' || b.closest('[hidden]')) continue;
-      if (r.left < css.right && css.left < r.right && r.top < css.bottom && css.top < r.bottom) out.push(`frame ${at} is under the ${b.dataset.button ?? b.getAttribute('aria-label')} button`);
-    }
-    const px = canvas.getContext('2d')!.getImageData(0, 0, W, H).data;
-    let outside = 0;
-    for (let y = 0; y < H; y++)
-      for (let x = 0; x < W; x++) {
-        if (x >= f.x && x < f.x + w && y >= f.y && y < f.y + h) continue;
-        const i = (y * W + x) * 4;
-        if (px[i]! + px[i + 1]! + px[i + 2]! > 0 || px[i + 3] !== 255) outside++;
-      }
-    if (outside) out.push(`${outside} px drawn outside the frame ${at} (or not black)`);
-    return { scene: fr.scene, problems: out };
-  });
-}
 
 const CHECKS: Record<string, (name: string) => Promise<void>> = {
   async 'tower-party'(name) {
@@ -127,7 +81,7 @@ const CHECKS: Record<string, (name: string) => Promise<void>> = {
     expect(view?.background, name).toBe('platinum:BACKGROUND_BATTLE_TOWER');
     expect(view?.terrain, name).toBe('platinum:TERRAIN_BATTLE_TOWER');
     await page.waitForFunction(() => window.openSinnohApp?.sceneLoading() === false, undefined, { timeout: 120_000 });
-    await frame();
+    await frame(page);
     const pixels = await battleSceneStats(page);
     expect(pixels.colours, name).toBeGreaterThan(32);
     expect(pixels.lit, name).toBeGreaterThan(0.1);
@@ -136,7 +90,7 @@ const CHECKS: Record<string, (name: string) => Promise<void>> = {
     // The view returns from a full-screen battle through 8 ticks of black (battle/index.ts RETURN_TICKS); a replay
     // stops the clock at its screenshot line, so it plays them here (the menu waits).
     await page.evaluate(() => window.openSinnohGame!.advance(10));
-    await frame();
+    await frame(page);
     const fr = await page.evaluate(() => window.openSinnohGame!.snapshot().view.frontier);
     expect(fr?.scene, name).toBe(7);
     expect(fr?.actors.filter((a) => a.visible).length, name).toBeGreaterThan(1);
@@ -172,7 +126,7 @@ for (const file of ['sys-tower-single', 'sys-bp-exchange']) {
     const scenes = new Set<number>();
     const found: string[] = [];
     const sample = async () => {
-      const r = await sceneProblems();
+      const r = await sceneProblems(page);
       if (!r) return;
       scenes.add(r.scene);
       found.push(...r.problems.map((p) => `scene ${r.scene}: ${p}`));
@@ -186,7 +140,7 @@ for (const file of ['sys-tower-single', 'sys-bp-exchange']) {
         }
       },
       async screenshot(name: string) {
-        await frame();
+        await frame(page);
         await CHECKS[name]!(name);
         seen.push(name);
         return base.screenshot!(name);

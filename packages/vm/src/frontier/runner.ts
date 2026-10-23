@@ -102,15 +102,19 @@ export class FrontierRunner {
 
   /**
    * Decomp sFrontierScenes' setupFunc: the Factory corridor's BG2 under BG3 (BattleFactoryCorridorSceneSetup), the Hall
-   * battle room's BG2 off (BattleHallBattleRoomSceneSetup). Their colour effects (the Hall's light palette task
-   * ov104_0223D9E4, the Factory room's message blend) and the other facilities' setups are logged, not drawn.
+   * battle room's BG2 off and blended 8:9 over the room (BattleHallBattleRoomSceneSetup, ov104_0223D9E4's
+   * G2_SetBlendAlpha). Their animations (the Hall lights' tilemap and palette tasks), the Factory room's message blend
+   * and the other facilities' setups are logged, not drawn.
    */
   private setupScene(sceneId: number): void {
     if (sceneId === SCENE.factoryCorridor) {
       this.scene.fgBelow = true;
       return;
     }
-    if (sceneId === SCENE.hallBattleRoom) this.scene.fgHidden = true;
+    if (sceneId === SCENE.hallBattleRoom) {
+      this.scene.fgHidden = true;
+      this.scene.fgBlend = { a: 8, b: 9 };
+    }
     this.r.log.stub(`frontier:scene-setup:${sceneId}`, `frontier scene ${sceneId}'s setup effects (palette tasks, blends) are not drawn`);
   }
 
