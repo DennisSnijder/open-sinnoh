@@ -1,0 +1,433 @@
+# Game Corner slot machine 0 (decomp ScrCmd_267 → overlay 101; docs/research/game-corner.md): the main stream and the
+# daily random pinned, so every run seed plays the same session. Misses, a Moon Stone line with its bonus flag (the
+# Poké Ball opens, Clefairy comes out: standby), a 7 line (the bonus), three bonus rounds at +14 a spin with the stops
+# in Clefairy's order, the bonus end; then START. The coins come back to the field, the three rounds into
+# RECORD_UNK_014, the streak of 3 over VAR_CONSECUTIVE_BONUS_ROUND_WINS (set to 2 here; a new game starts it at 9).
+give item platinum:ITEM_COIN_CASE
+set state coins 300
+set var platinum:VAR_CONSECUTIVE_BONUS_ROUND_WINS 2
+set state rng {"seed": 3}
+set state gameTime.dailyRandom 1
+warp platinum:MAP_HEADER_GAME_CORNER 11 6 right
+until idle
++0 press a
++1 release a
+until app slots 600
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++1 tap stop:1
++1 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++1 tap stop:1
++1 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++1 tap stop:1
++1 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++1 tap stop:1
++1 tap stop:2
+until state app.prompt "bet" 3000
++0 screenshot standby
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++1 tap stop:1
++1 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++1 tap stop:1
++1 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:2
++2 tap stop:0
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++2 tap stop:2
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:1
++2 tap stop:0
++2 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++2 tap stop:2
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++2 tap stop:2
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 screenshot bonus
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:2
++2 tap stop:1
++2 tap stop:0
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++2 tap stop:2
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:1
++2 tap stop:0
++2 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:2
++2 tap stop:0
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++2 tap stop:2
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:2
++2 tap stop:0
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:2
++2 tap stop:1
++2 tap stop:0
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++2 tap stop:1
++2 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:1
++2 tap stop:0
++2 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:1
++2 tap stop:0
++2 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:2
++2 tap stop:0
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:1
++2 tap stop:0
++2 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:2
++2 tap stop:1
++2 tap stop:0
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:1
++2 tap stop:2
++2 tap stop:0
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:2
++2 tap stop:1
++2 tap stop:0
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:2
++2 tap stop:0
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:1
++2 tap stop:0
++2 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++2 tap stop:1
++2 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:1
++2 tap stop:0
++2 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++2 tap stop:2
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:2
++2 tap stop:0
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++2 tap stop:2
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:2
++2 tap stop:0
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:2
++2 tap stop:0
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:1
++2 tap stop:0
++2 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++2 tap stop:2
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++2 tap stop:2
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++2 tap stop:2
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:1
++2 tap stop:0
++2 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++2 tap stop:1
++2 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:2
++2 tap stop:0
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:1
++2 tap stop:2
++2 tap stop:0
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:2
++2 tap stop:1
++2 tap stop:0
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++2 tap stop:2
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:2
++2 tap stop:0
++2 tap stop:1
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:1
++2 tap stop:2
++2 tap stop:0
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:1
++2 tap stop:0
++2 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:1
++2 tap stop:2
++2 tap stop:0
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:0
++2 tap stop:1
++2 tap stop:2
+until state app.prompt "bet" 3000
++0 tap bet
+until state app.prompt "lever" 60
++0 tap spin
+until state app.prompt "stops" 60
++0 tap stop:1
++2 tap stop:0
++2 tap stop:2
+until state app.prompt "bet" 3000
++0 assert state app.credit 1027
++0 tap quit
+until app none 600
+until idle 600
++0 assert state coins 1027
++0 assert var platinum:VAR_CONSECUTIVE_BONUS_ROUND_WINS 3
++0 assert state records.counts[14] 3

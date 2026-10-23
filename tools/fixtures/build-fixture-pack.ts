@@ -19,7 +19,7 @@
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { GAME_RECORDS } from '@opensinnoh/contracts';
+import { GAME_RECORDS, SEALS } from '@opensinnoh/contracts';
 import { encodePng } from './png.ts';
 import { box, writeGltf, type FixturePrimitive } from './gltf.ts';
 import { fixtureTitleModel } from './title.ts';
@@ -548,6 +548,8 @@ const uiTexts = Object.entries({
       36: '{var 0} ({var 3}) costs\n{var 2} pt for {var 1}. Fine?',
       37: 'Sorry, you are short\non points.',
       38: '{var 0} pt',
+      13: 'The {var 0} went into\nthe sticker book.',
+      14: 'The sticker book has no room\nfor more of those.',
     }).map(([n, t]) => [`pl_msg_00000543_${String(n).padStart(5, '0')}`, t]),
   ),
   Bag_Text_ItemCountX: 'x',
@@ -1307,6 +1309,13 @@ const data = {
       ribbons: ribbonRecords.map((r) => ({ name: id(r.name), description: id(r.description) })),
       // Original game record tables: event e scores e + 1; even record ids cap at the high limit.
       gameRecords: { scoreIncrements: Array.from({ length: GAME_RECORDS.scoreEvents }, (_, e) => e + 1), highLimit: Array.from({ length: GAME_RECORDS.count }, (_, i) => i % 2 === 0) },
+      // Original sticker tables (contracts SealTables): stickers 1–49 sell for 40, a stand stock per weekday, no NPC shells.
+      seals: {
+        types: Array.from({ length: SEALS.count + 1 }, (_, i) => ({ sheet: 184 + Math.max(0, i - 1), name: i, particle: 37 + Math.max(0, i - 1), alphabet: i >= 50 && i <= 77, price: i >= 1 && i <= 49 ? 40 : 0, description: i >= 1 && i <= 49 ? i - 1 : 0 })),
+        marts: Array.from({ length: 7 }, (_, d) => [1 + d, 8 + d, 15 + d, 22 + d]),
+        trainerCapsules: [],
+        delays: [0, 4, 8, 12, 12, 10, 10],
+      },
     },
   ],
   zones: [

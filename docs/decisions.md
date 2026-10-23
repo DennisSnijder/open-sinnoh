@@ -520,6 +520,34 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
 - **Not built:** Pal Park (no GBA slot, no substitute), link and Wi-Fi features, battle videos.
 - **Hall of Fame and credits** follow the decomp's timings in one screen; the clear writes the save and
   reloads.
+- **Seals and Ball Capsules** (docs/research/seals.md): Platinum has no Solaceon seal shop or daily seal clerk; the
+  sources are the Solaceon east-house mother and Unown boy, the Sunyshore Market merchant's stock per weekday and
+  Mystery Gift, all run by the real seal ops. A party Pokémon carries a copy of its capsule (`Pokemon.capsule`), as the
+  DS does; boxes and the Day-Care never hold one (the PC refuses, the Day-Care and NPC trades ask to detach).
+- **The capsule editor** is one board: the DS touch screen plus a 48 px strip for the message the DS shows on its other
+  screen. Editing is touch-only on the DS; our keys add a hand that jumps between list seals, buttons and placed seals,
+  moves a held seal pixel by pixel with acceleration, drops it with A and returns it to the case with B. Its Test shows a
+  still image of the capsule around the Pokémon; the send-out effect lives in the battle package.
+- **The seals' send-out effect** runs in the battle on the battle's SPL, one system per seal, from the frame the ball
+  opens, with the ROM's delays by distance. Only a capsule holds the send-out until its seals end; the default ball burst
+  plays without holding, so battles without capsules keep their tick counts. Ball-particle SPAs share `particleSystems`
+  with `archive: 'ball'`. The ball-open sound is SDAT 1798.
+- **Slot machines** (docs/research/game-corner.md): the model steps the DS's 64 states and its tasks frame by frame, in
+  the DS's order, so a reel lands from the frame of its press and the timing rules match. The app has its own LCRNG,
+  seeded by one draw of the main stream at `scr_cmd_267` (the DS uses its global LCRNG); the machine's mode is the day's
+  shuffle of `dailyRandom`. DS quirks are kept (the payout is the last winning line's rate times the lines won; the
+  standby lottery checks one share twice).
+- **The slot screen** is one composition: the moonlit field above, the machine below, Clefairy and the ball on the
+  cabinet's top edge. Touch is ours: a reel's column stops it and the help bar's three parts bet, spin and quit. Lamp and
+  moon fades are alpha blends of separately imported lit or recoloured cells.
+- **The Villa's furniture** is a map feature built from its flags on each map load (props, player collision, a talk
+  hook after bg events), not hidden props: a purchase warps into the Villa again, so the new piece appears with that
+  load, as on the DS. The daily visitor uses the field stream after the daily level.
+- **The journal** rules are shared state edits in contracts, called at the decomp's hooks (map changes, battle ends,
+  marts, the PC, the Safari Game, field moves, `create_journal_event` for its few real types). Nothing is recorded
+  before FLAG_JOURNAL_ACQUIRED. The page rolls only at a load or at `give_journal`, never at midnight; the auto-open on
+  a load shows the pages as saved.
+- **One schema bump for the town extras:** v22 adds the Seal Case and the journal together.
 
 ## Mods
 

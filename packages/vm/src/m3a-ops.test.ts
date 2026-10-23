@@ -159,7 +159,7 @@ describe('apps opened by scripts', () => {
     const d = driver('test:Trade::\n  open_party_menu_for_trade\n  get_selected_party_slot var(test:VAR_A)\n  end\n');
     d.vm.start({ label: 'test:Trade' as Id, zone: 'fixture:TOWN', source: 'test' });
     d.tick();
-    expect(d.vm.view().app).toEqual({ app: 'party', mode: 'select' });
+    expect(d.vm.view().app).toEqual({ app: 'party', mode: 'trade' });
     d.vm.appDone({ app: 'party', slot: 2 });
     d.until(() => !d.vm.running());
     expect(d.state.vars['test:VAR_A' as Id]).toBe(2);

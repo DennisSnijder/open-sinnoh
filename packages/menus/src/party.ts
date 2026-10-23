@@ -11,11 +11,16 @@
  *   panels say FIRST… / NOT ENTERED / BANNED, CONFIRM returns the slots in the order entered, CANCEL or B none.
  * - `contest` (`contest-select`, decomp PARTY_MENU_MODE_CONTEST): the panels say ELIGIBLE / INELIGIBLE (CheckContestEligibility);
  *   ENTER (eligible only, sub_020801F0), SUMMARY, CANCEL; ENTER closes with the slot, B or CANCEL with none.
+ * - `trade` (an NPC trade's pick) and `daycare`'s STORE: a Pokémon with a Ball Capsule asks "The Ball Capsule will be
+ *   detached. Will that be OK?" (YES detaches it and goes on, NO stays).
+ * - `ball-seal` (the capsule editor's SET): SET, CANCEL on a non-Egg (an Egg buzzes); SET puts the capsule on, or says
+ *   "Two capsules can't be set." when it has one; then back to the editor.
+ * Every panel shows the Ball Capsule marker of a Pokémon with one.
  * The battle's party (`party-select`) and the battle bag's target are battle.ts.
  */
 import { evolutionTarget, maxPp, monGender, movesAtLevel, setMoveSlot, type Button, type Id, type Pokemon, type Stats } from '@opensinnoh/core';
 import { dexOf, itemCount, levelEvolutionTrigger, markCaught, takeItem as takeBagItem, type AppMenu, type AppResult, type PartyView } from '@opensinnoh/contracts';
-import { bySource, canShayminSky, contestEligible, frontierBanned, HALL, canUseItemOn, giveHeldItem, ITEM_GRACIDEA, itemPicksMove, itemRecord, setShayminForm, SHAYMIN_SKY, takeHeldItem, teachTm, tmCompatibility, useItemOnMon, type ItemUsedMessage } from '@opensinnoh/services';
+import { bySource, canShayminSky, contestEligible, detachCapsule, setCapsule, frontierBanned, HALL, canUseItemOn, giveHeldItem, ITEM_GRACIDEA, itemPicksMove, itemRecord, setShayminForm, SHAYMIN_SKY, takeHeldItem, teachTm, tmCompatibility, useItemOnMon, type ItemUsedMessage } from '@opensinnoh/services';
 import { menuSe, type MenuContext } from './context.ts';
 import { Dialog } from './dialog.ts';
 import { moveCursor, tapIndex, type Screen, type Step } from './stack.ts';
@@ -57,7 +62,11 @@ export type PartyMode =
    */
   | { kind: 'order'; count: number; hall?: true; castle?: true }
   /** 0.35.0. A contest's entry (decomp PARTY_MENU_MODE_CONTEST): ENTER (when eligible), SUMMARY, CANCEL. */
-  | { kind: 'contest'; rank: number; type: number };
+  | { kind: 'contest'; rank: number; type: number }
+  /** An NPC trade's pick (decomp PARTY_MENU_MODE_NPC_TRADE): as `select`, but a Ball Capsule must come off first (CheckForItemApplication). */
+  | { kind: 'trade' }
+  /** The capsule editor's SET (decomp PARTY_MENU_MODE_BALL_SEAL): capsule `index` onto a non-Egg Pokémon (SET, CANCEL); then `done`. */
+  | { kind: 'ball-seal'; index: number };
 
 /** A context or submenu entry: its label and what A does. */
 interface Entry {
@@ -80,6 +89,7 @@ export function slotView(ctx: MenuContext, m: Pokemon): NonNullable<PartyView['s
     gender: m.isEgg ? 'none' : monGender(dexOf(ctx.registries), m),
     status: m.hp === 0 ? 'fainted' : m.status,
     heldItem: m.heldItem,
+    ...(m.capsule ? { capsule: true as const } : {}),
   };
 }
 
@@ -145,7 +155,7 @@ export function partyScreen(ctx: MenuContext, mode: PartyMode, done: () => Step 
   const cancelStop = () => stops() - 1;
   const confirmStop = () => party().length;
   const close = (result: AppResult): Step => ({ close: result });
-  const cancel = (): Step => (mode.kind === 'contest' ? close({ app: 'contest-select', slot: null }) : mode.kind === 'select' ? close({ app: 'party', slot: null }) : mode.kind === 'feed' ? mode.pick(null) : ordering ? close({ app: 'party-order', order: null }) : 'pop');
+  const cancel = (): Step => (mode.kind === 'contest' ? close({ app: 'contest-select', slot: null }) : mode.kind === 'select' || mode.kind === 'trade' ? close({ app: 'party', slot: null }) : mode.kind === 'ball-seal' ? done() : mode.kind === 'feed' ? mode.pick(null) : ordering ? close({ app: 'party-order', order: null }) : 'pop');
   const name = (slot: number) => monName(ctx, party()[slot]!);
   const itemName = (id: Id) => itemRecord(ctx.registries, id).name;
   const moveName = (id: Id) => ctx.registries.moves.get(id)!.name;
@@ -215,10 +225,31 @@ export function partyScreen(ctx: MenuContext, mode: PartyMode, done: () => Step 
   // --- daycare: STORE, SUMMARY, CANCEL ---
   const daycareMenu = (slot: number): Step => {
     const mon = party()[slot]!;
-    const entries: Entry[] = mon.isEgg ? [] : [{ label: t.t('partyStore'), run: () => close({ app: 'daycare-select', slot }) }];
+    const entries: Entry[] = mon.isEgg ? [] : [{ label: t.t('partyStore'), run: () => ((menu = null), detachThen(slot, () => close({ app: 'daycare-select', slot }))) }];
     entries.push({ label: t.t('partySummary'), run: () => openSummary(slot) });
     return openMenu(t.t(mon.isEgg ? 'partyPromptEgg' : 'partyPromptMon', name(slot)), entries);
   };
+  // --- the Ball Capsule (decomp PartyMenu_SelectBallSeal, CheckForItemApplication, PartyMenu_SetBallCapsule) ---
+  /** Goes on at once without a capsule; with one asks to detach it (YES detaches and goes on, NO stays). */
+  const detachThen = (slot: number, go: () => Step): Step => {
+    const mon = party()[slot]!;
+    if (!mon.capsule) return go();
+    return dialog.confirm(t.pages('partyCapsuleDetached'), (yes) => {
+      if (!yes) return;
+      detachCapsule(mon);
+      return go();
+    });
+  };
+  const ballSealMenu = (slot: number, index: number): Step =>
+    openMenu(t.t('partyPromptCustomBall'), [
+      {
+        label: t.t('partySet'),
+        run: () => {
+          menu = null;
+          return say(setCapsule(ctx.state, slot, index) === 'set' ? 'partyCapsuleSet' : 'partyTwoCapsules', [], done);
+        },
+      },
+    ]);
   // --- contest: ENTER, SUMMARY, CANCEL ---
   const contestMenu = (slot: number, rank: number, type: number): Step => {
     const mon = party()[slot]!;
@@ -506,7 +537,7 @@ export function partyScreen(ctx: MenuContext, mode: PartyMode, done: () => Step 
     cursor = slot;
     if (transfer && slot !== cancelStop()) return transferTo(slot);
     // Decomp HandleSpecialInput: using an item, an Egg cannot be picked (SEQ_SE_DP_CUSTOM06, the party stays).
-    if (mode.kind === 'use' && slot !== cancelStop() && party()[slot]!.isEgg) return void menuSe(ctx, SE_CUSTOM06);
+    if ((mode.kind === 'use' || mode.kind === 'ball-seal') && slot !== cancelStop() && party()[slot]!.isEgg) return void menuSe(ctx, SE_CUSTOM06);
     menuSe(ctx, 1500);
     if (transfer) {
       transfer = null;
@@ -540,6 +571,10 @@ export function partyScreen(ctx: MenuContext, mode: PartyMode, done: () => Step 
         return daycareMenu(slot);
       case 'select':
         return close({ app: 'party', slot });
+      case 'trade':
+        return detachThen(slot, () => close({ app: 'party', slot }));
+      case 'ball-seal':
+        return ballSealMenu(slot, mode.index);
       case 'feed':
         // Decomp: an Egg plays SEQ_SE_DP_CUSTOM06 and stays.
         if (party()[slot]!.isEgg) return void menuSe(ctx, SE_CUSTOM06);
@@ -554,6 +589,7 @@ export function partyScreen(ctx: MenuContext, mode: PartyMode, done: () => Step 
   const prompt = (): string => {
     if (moving !== null) return t.t('partyMoveToWhere');
     if (ordering) return t.t(picks.length ? 'partyChooseAndConfirm' : 'partyChoose');
+    if (mode.kind === 'ball-seal') return t.t('partyChooseAndConfirm');
     if (transfer) return t.t('partyTransferWhich');
     switch (mode.kind) {
       case 'give':

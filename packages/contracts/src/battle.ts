@@ -394,6 +394,12 @@ export interface BattleView {
   fade: number;
   /** The battle animation playing (0.19.0: a move's or a common animation), or null. */
   anim: AnimView | null;
+  /**
+   * The send-out effect's particles (docs/research/seals.md §6): a Ball Capsule's seals, or the ball's default burst,
+   * from the frame the ball opens; drawn like `anim.particles`, over the battlers and under the healthboxes (and under
+   * an animation's own). Absent when none play.
+   */
+  sendOut?: AnimParticle[];
 }
 
 /**

@@ -8,7 +8,8 @@ import { Prng, type PrngState } from './prng.ts';
 import type { Pokemon } from './pokemon.ts';
 
 /** The native system vars these systems read and write, by `sourceIndex`. */
-export const FIELD_VARS = { battery: 16435, activeSteps: 16436, size: 16437, lotteryLow: 16444, lotteryHigh: 16445, level: 16449 } as const;
+/** `newsPress`: VAR_NEWS_PRESS_DEADLINE (system_vars.c SystemVars_GetNewsPressDeadline), counted down each day. */
+export const FIELD_VARS = { battery: 16435, activeSteps: 16436, size: 16437, newsPress: 16443, lotteryLow: 16444, lotteryHigh: 16445, level: 16449 } as const;
 /** FLAG_VS_SEEKER_USED. */
 export const SEEKER_USED = 2413;
 /** MOVEMENT_TYPE_VS_SEEKER_SPIN. */
@@ -210,9 +211,48 @@ export function initDailyLevel(reg: FieldSystemRegistries, s: FieldSystemState, 
   writeSystemVar(reg, s, FIELD_VARS.level, (next() % 98) + 2);
 }
 
+/**
+ * The Villa's daily visitor (contracts `VillaTables`): the furniture flags by type, the odds by owned-piece band, the
+ * visitor's vars and flags, and whether the player's saved map is neither the Resort Area nor the Villa.
+ */
+export interface VillaDaily {
+  furniture: readonly Id[];
+  chances: readonly number[];
+  counts: readonly number[];
+  visitorVar: Id;
+  messageVar: Id;
+  insideFlag: Id;
+  outsideFlag: Id;
+  away: boolean;
+}
+
+function setVarId(reg: Pick<FieldSystemRegistries, 'vars'>, s: Pick<FieldSystemState, 'vars'>, id: Id, value: number): void {
+  const r = reg.vars.get(id);
+  if (!r) throw new Error(`field systems: missing var ${id}`);
+  if ((value & 0xffff) === r.initial) delete s.vars[id];
+  else s.vars[id] = value & 0xffff;
+}
+
+/**
+ * SystemVars_UpdateVillaVisitor (CalcVillaVisitorIndex, InitVillaVisitor): away from the Resort Area and the Villa,
+ * both visitor flags clear; a roll above the band's chance (25, 75, 90 % by fewer than 8, 12, or more owned pieces)
+ * leaves no visitor (0xFF), else one of the band's first 4, 12 or 15; the message number is always rolled (0–4).
+ */
+export function updateVillaVisitor(reg: FieldSystemRegistries, s: FieldSystemState, v: VillaDaily, next: () => number): void {
+  if (!v.away) return;
+  clearFlag(reg, s, v.insideFlag);
+  clearFlag(reg, s, v.outsideFlag);
+  const owned = v.furniture.filter((f) => s.flags[f] ?? reg.flags.get(f)!.initial).length;
+  const band = owned >= 12 ? 2 : owned >= 8 ? 1 : 0;
+  const visitor = next() % 100 > v.chances[band]! ? 0xff : next() % v.counts[band]!;
+  setVarId(reg, s, v.visitorVar, visitor);
+  setVarId(reg, s, v.messageVar, next() % 5);
+}
+
 /** FieldSystem_HandleDailyEvents: day gaps advance RecordMixedRNG once per day (ARNG); level rolls
- * once per dispatch. The size record is initialized only by its script, never reset at midnight. */
-export function dailyEvents(reg: FieldSystemRegistries, s: FieldSystemState, days: number): void {
+ * once per dispatch. The size record is initialized only by its script, never reset at midnight. The News Press
+ * deadline counts down by the days passed; the Villa's visitor is chosen after the daily level (`villa`). */
+export function dailyEvents(reg: FieldSystemRegistries, s: FieldSystemState, days: number, villa?: VillaDaily): void {
   let random = dailyRandomOf(s);
   // Affine exponentiation preserves u32 overflow and bounds work for long offline gaps.
   let a = 1812433253,
@@ -233,8 +273,10 @@ export function dailyEvents(reg: FieldSystemRegistries, s: FieldSystemState, day
   for (const f of reg.flags.values()) {
     if (f.sourceIndex !== undefined && f.sourceIndex >= DAILY_FLAGS[0] && f.sourceIndex <= DAILY_FLAGS[1]) clearFlag(reg, s, f.id);
   }
+  writeSystemVar(reg, s, FIELD_VARS.newsPress, Math.max(0, readSystemVar(reg, s, FIELD_VARS.newsPress) - days));
   setLottery(reg, s, (Math.imul(random, 0x41c64e6d) + 12345) >>> 0);
   initDailyLevel(reg, s, () => nextFieldRandom(s));
+  if (villa) updateVillaVisitor(reg, s, villa, () => nextFieldRandom(s));
 }
 
 /** ScrCmd_CheckForJubilifeLotteryWinner: trailing decimal digits, eggs excluded, party wins ties,

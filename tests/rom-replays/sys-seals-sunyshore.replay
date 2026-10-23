@@ -1,0 +1,63 @@
+# Sunyshore Market's seal merchant (decomp scripts_sunyshore_market.s SunyshoreMarket_SealShop, docs/research/seals.md
+# §4.2) on a Monday: the day's stock (MART_SEAL_ID_SUNYSHORE_MONDAY: seal 1 first), three Heart Seal A bought into the
+# Seal Case, the money and RECORD_MONEY_SPENT; the Seal Case at 99 refuses more. The save keeps them.
+date 2009-03-23 12:00
+party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK
+give item platinum:ITEM_SEAL_CASE 1
+set money 10000
+warp platinum:MAP_HEADER_SUNYSHORE_MARKET 1 6 up
+until idle
++0 press a
++1 release a
+advance text
+until app mart 300
++0 assert state app.seals true
++0 assert state app.menu.length 2
++1 tap menu:0
++1 assert state app.rows[0].item "seal:1"
++1 assert state app.rows.length 7
++1 tap row:0
++1 tap qty:+1
++1 tap qty:+1
++1 tap ok
++1 tap yes
++1 assert state sealCase.counts[0] 3
++0 assert text platinum:pl_msg_00000543_00013 0
++1 tap next
++0 assert state money 9850
++0 assert state records.counts["35"] 150
+# 96 more Heart Seal A fill the case; one more is refused before the question (pl_msg_00000543_00014).
++1 tap row:0
++1 tap qty:+10
++1 tap qty:+10
++1 tap qty:+10
++1 tap qty:+10
++1 tap qty:+10
++1 tap qty:+10
++1 tap qty:+10
++1 tap qty:+10
++1 tap qty:+10
++1 tap qty:+1
++1 tap qty:+1
++1 tap qty:+1
++1 tap qty:+1
++1 tap qty:+1
++1 assert state app.quantity.count "x96"
++1 tap ok
++1 tap yes
++1 tap next
++1 assert state sealCase.counts[0] 99
++1 tap row:0
++1 tap ok
++1 assert text platinum:pl_msg_00000543_00014 0
++1 tap next
++1 assert state sealCase.counts[0] 99
++1 tap cancel
++1 tap menu:1
++1 tap next
+until app none 60
+advance text
+until idle
++0 reload
+until idle
++0 assert state sealCase.counts[0] 99

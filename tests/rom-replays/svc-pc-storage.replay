@@ -28,11 +28,10 @@ until app storage
 +1 assert state boxes[1].slots[0].species "platinum:SPECIES_STARLY"
 +0 assert state party.length 1
 +0 screenshot deposit
-# Turtwig is the last Pokémon able to battle: refused
+# Turtwig is the last Pokémon able to battle: STORE is refused before a box is chosen
 +1 tap party:0
 +1 tap menu:0
-+1 press a
-+1 release a
++1 assert text platinum:BoxText_LastMon 0
 +1 assert state party.length 1
 +1 press a
 +1 release a

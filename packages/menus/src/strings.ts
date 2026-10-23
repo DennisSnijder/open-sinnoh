@@ -16,6 +16,8 @@ const STAT_NAMES = Array.from({ length: 6 }, (_, i) => `pl_msg_00000551_${String
 const FRAME_TYPES = Array.from({ length: 20 }, (_, i) => `OptionsMenu_Text_MessageBoxStyle_${String(i + 1).padStart(2, '0')}`);
 /** Shop menu bank (decomp TEXT_BANK_UNK_0543, shop_menu.c). */
 const shop = (n: number) => `pl_msg_00000543_${String(n).padStart(5, '0')}`;
+/** The capsule editor's bank (decomp TEXT_BANK_UNK_0008, capsule_menu). */
+const capsule = (n: number) => `pl_msg_00000008_${String(n).padStart(5, '0')}`;
 
 /** Label key → message name. */
 export const MENU_TEXT = {
@@ -92,6 +94,12 @@ export const MENU_TEXT = {
   /** 0.35.0. The contest mode's panel notes (PrintMemberContestComment). */
   partyContestAble: 'PartyMenu_Text_EligibleForContest',
   partyContestUnable: 'PartyMenu_Text_IneligibleForContest',
+  /** The Ball Capsule (PARTY_MENU_MODE_BALL_SEAL, the detach prompt of STORE and NPC trades). */
+  partyPromptCustomBall: 'PartyMenu_Text_PromptCustomBall',
+  partySet: 'PartyMenu_Text_Set',
+  partyCapsuleSet: 'PartyMenu_Text_BallCapsuleWasSet',
+  partyTwoCapsules: 'PartyMenu_Text_TwoCapsulsesCantBeSet',
+  partyCapsuleDetached: 'PartyMenu_Text_BallCapsuleWillBeDetached',
   partyNoEntry: 'PartyMenu_Text_NoEntry',
   partyConfirm: 'PartyMenu_Text_ConfirmButton',
   partyChooseAndConfirm: 'PartyMenu_Text_ChooseMonAndConfirm',
@@ -264,6 +272,8 @@ export const MENU_TEXT = {
   bagConfirm: 'Bag_Text_Confirm',
   /** The Fashion Case's message (decomp Bag_Text_FashionCaseMessage: {var 0} accessories, {var 1} backdrops). */
   bagFashionCase: 'Bag_Text_FashionCaseMessage',
+  /** {var 0} = the seals owned (decomp CalcTotalBallSeals). */
+  bagSealCase: 'Bag_Text_SealCaseMessage',
   bagOpen: 'Bag_Text_Open',
   sumItem: 'PokemonSummary_Text_LabelItem',
   sumNone: 'PokemonSummary_Text_None',
@@ -328,6 +338,7 @@ export const MENU_TEXT = {
   boxMonWorried: 'BoxText_MonWasWorried',
   boxCantReleaseEgg: 'BoxText_CantReleaseEgg',
   boxRemoveMail: 'BoxText_RemoveMail',
+  boxDetachCapsule: 'BoxText_DetachBallCapsule',
   /** The compare panel's row names. */
   boxHp: 'BoxText_HP',
   boxAttack: 'BoxText_Attack',
@@ -506,6 +517,28 @@ export const MENU_TEXT = {
   bpConfirmTm: shop(36),
   bpNotEnough: shop(37),
   bpValue: shop(38),
+  /** The seal mart (MART_TYPE_SEAL): {var 0} = the seal (plural for more than one). */
+  martSealPlaced: shop(13),
+  martSealFull: shop(14),
+
+  /** The Ball Capsule editor (decomp TEXT_BANK_UNK_0008). */
+  capsuleEdit: capsule(0),
+  capsuleQuit: capsule(1),
+  capsuleSet: capsule(2),
+  capsuleRemove: capsule(3),
+  capsuleShift: capsule(4),
+  capsuleConfirm: capsule(5),
+  capsuleCancel: capsule(6),
+  capsuleChoose: capsule(7),
+  capsuleWhat: capsule(8),
+  capsuleRemoved: capsule(9),
+  capsuleSwitchWith: capsule(10),
+  capsuleSwitched: capsule(11),
+  capsuleFinished: capsule(12),
+  capsuleConfirming: capsule(13),
+  capsuleQuitAsk: capsule(14),
+  capsuleNoRoom: capsule(15),
+  capsuleNoSeals: capsule(16),
 
   /** {var 0} = Pokémon. */
   hatchHatched: 'EggHatch_Text_MonHatched',

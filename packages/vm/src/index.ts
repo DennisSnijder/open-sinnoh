@@ -1,5 +1,5 @@
 export { createScriptRunner, NATIVE_VARS, CALL_STACK_SLOTS } from './runner.ts';
-export { classificationReport, classifyOps, CONTEST_ROUNDS_STATUS, coverage, implementedOps, m5Progress, REAL_CONTESTS, REAL_M1B, REAL_M5, REAL_P, STUBBED, type Coverage, type M5Chunk, type M5Progress, type OpClassification } from './coverage.ts';
+export { classificationReport, classifyOps, CONTEST_ROUNDS_STATUS, coverage, implementedOps, m5Progress, REAL_CONTESTS, REAL_GAME_CORNER, REAL_SEALS, REAL_TOWN, REAL_M1B, REAL_M5, REAL_P, STUBBED, type Coverage, type M5Chunk, type M5Progress, type OpClassification } from './coverage.ts';
 export { BUCKETS, bucketOf, classifyOp, TRIAGE, type Bucket } from './classify.ts';
 export { CP_PATH_OPS, CP_PATH_OPS_M5A, CP_PATH_OPS_M5B, CP_PATH_OPS_M5C, CP_PATH_OPS_M6A, CP_PATH_OPS_M6B } from './cp-path.ts';
 export { BATTLEGROUND_GYM_LEADERS, BATTLEGROUND_STAT_TRAINERS, BATTLEGROUND_TRAINER_NONE } from './m6-ops.ts';

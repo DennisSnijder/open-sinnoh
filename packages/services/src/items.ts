@@ -9,7 +9,7 @@ import { dexOf, giveItem, itemCount, ITEM_WHEEL_SIZE, takeItem, type GameState, 
 import { heldItemChanged } from './forms.ts';
 
 /** Decomp ITEM_USE_FUNC_* (item.h) values the field uses. */
-export const FIELD_USE = { none: 0, healing: 1, explorerKit: 3, bicycle: 4, poffinCase: 9, pokeRadar: 11, sprayduck: 12, mulch: 13, honey: 14, vsSeeker: 15, oldRod: 16, goodRod: 17, superRod: 18, escapeRope: 21, tmHm: 6, berry: 8, bagMessage: 19, evoStone: 20, azureFlute: 22, gracidea: 24 } as const;
+export const FIELD_USE = { none: 0, healing: 1, townMap: 2, explorerKit: 3, journal: 5, bicycle: 4, poffinCase: 9, pokeRadar: 11, sprayduck: 12, mulch: 13, honey: 14, vsSeeker: 15, oldRod: 16, goodRod: 17, superRod: 18, escapeRope: 21, tmHm: 6, berry: 8, bagMessage: 19, evoStone: 20, azureFlute: 22, gracidea: 24 } as const;
 /** Decomp HEAL_FULL_HP / HEAL_HALF_HP / HEAL_QUARTER_HP and HEAL_FULL_PP. */
 const HEAL_FULL = 255;
 const HEAL_HALF = 254;
@@ -45,7 +45,7 @@ export function itemRecord(registries: Registries, id: Id): Item {
  * - `stub`: a use that is not implemented yet (logged by the caller);
  * - null: no USE entry (decomp ITEM_USE_FUNC_NONE).
  */
-export function fieldUseOf(registries: Registries, id: Id): 'party' | 'tm' | 'repel' | 'coins' | 'fashion' | 'poffin-case' | 'field' | 'stub' | null {
+export function fieldUseOf(registries: Registries, id: Id): 'party' | 'tm' | 'repel' | 'coins' | 'fashion' | 'seals' | 'poffin-case' | 'field' | 'stub' | null {
   const rec = itemRecord(registries, id);
   switch (rec.fieldUse) {
     case FIELD_USE.none:
@@ -62,6 +62,8 @@ export function fieldUseOf(registries: Registries, id: Id): 'party' | 'tm' | 're
     case FIELD_USE.gracidea:
       // Decomp UseGracideaFromMenu: the party picks the Shaymin (PartyMenu ApplyItemEffectOnPokemon).
       return 'party';
+    case FIELD_USE.townMap: // UseTownMapFromMenu: the Town Map to look at
+    case FIELD_USE.journal: // UseJournalFromMenu: the journal
     case FIELD_USE.explorerKit: // UseExplorerKitFromMenu: FieldTask_MapChangeToUnderground
     case FIELD_USE.bicycle:
     case FIELD_USE.pokeRadar: // UsePokeRadarFromMenu: RefreshRadarChain
@@ -80,6 +82,7 @@ export function fieldUseOf(registries: Registries, id: Id): 'party' | 'tm' | 're
     case FIELD_USE.bagMessage:
       if (localName(id) === 'ITEM_COIN_CASE') return 'coins';
       if (localName(id) === 'ITEM_FASHION_CASE') return 'fashion';
+      if (localName(id) === 'ITEM_SEAL_CASE') return 'seals';
       return REPELS.has(localName(id)) ? 'repel' : 'stub';
     default:
       return 'stub';

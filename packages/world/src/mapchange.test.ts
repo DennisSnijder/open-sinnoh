@@ -9,7 +9,7 @@ describe('FieldSystem_InitFlagsWarp', () => {
     const road = flagId(registries, FLAG_ON_CYCLING_ROAD);
     state.flags[gate] = true;
     state.flags[road] = true;
-    onWarp(registries, state, [...registries.zones.values()][0]!);
+    onWarp(registries, state, [...registries.zones.values()][0]!, [...registries.zones.values()][0]!);
     expect(state.flags[gate]).toBeUndefined();
     expect(state.flags[road]).toBeUndefined();
   });
@@ -23,7 +23,7 @@ describe('TryUnlockFlyLocationByMap', () => {
 
   it('a warp into a zone with a first-arrival flag sets it', () => {
     const state = newState();
-    onWarp(regs, state, town);
+    onWarp(regs, state, zones[1]!, town);
     expect(state.flags[flag]).toBe(true);
   });
 

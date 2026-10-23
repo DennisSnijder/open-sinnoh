@@ -44,7 +44,7 @@ export function animSupport(anim: BattleAnimation, registries: AnimRegistries, f
     const id = animSpriteSheetId(r);
     if (!registries.ui2d?.get(id)?.animations?.length) missing.push(`sprite/${id}`);
   }
-  const particles = new Set([...registries.particleSystems.values()].map((p) => p.sourceIndex));
+  const particles = new Set([...registries.particleSystems.values()].filter((p) => !p.archive).map((p) => p.sourceIndex));
   for (const p of use.particles) if (!particles.has(p)) missing.push(`particles/${p}`);
   if (registries.battleAnimData.size !== 1) missing.push('battleAnimData');
   return missing;

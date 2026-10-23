@@ -42,10 +42,15 @@ import { formHandlers } from './form-ops.ts';
 import { sideHandlers } from './side-ops.ts';
 import { poffinHandlers } from './poffin-ops.ts';
 import { contestHandlers } from './contest-ops.ts';
+import { sealHandlers } from './seal-ops.ts';
+import { gameCornerHandlers } from './game-corner-ops.ts';
 import { encounterHandlers } from './encounter-ops.ts';
 import { undergroundHandlers } from './underground-ops.ts';
 import { mysteryGiftHandlers } from './mystery-gift-ops.ts';
 import { hofHandlers } from './hof-ops.ts';
+import { villaHandlers } from './villa-ops.ts';
+import { journalHandlers } from './journal-ops.ts';
+import { npcHandlers } from './npc-ops.ts';
 
 /** Fixed native vars, looked up by `sourceIndex` in the vars registry. */
 export const NATIVE_VARS = { PLAYER_STARTER: 0x4030, SCRIPT_PARAMETER_0: 0x8000, LAST_TALKED: 0x800d } as const;
@@ -131,6 +136,8 @@ export class Runner implements ScriptRunner {
   tick = 0;
   readonly backgroundTasks = new Set<() => void>();
   lastTouch: InputFrame['touch'] = null;
+  /** This tick's input, for commands that read the keys directly (decomp gSystem.heldKeys: `check_ab_press`). */
+  input: InputFrame = { held: [], pressed: [], touch: null };
   ui: {
     message: { printer: TextPrinter } | null;
     buttonWait: boolean;
@@ -146,6 +153,8 @@ export class Runner implements ScriptRunner {
     pokemonPreview: NonNullable<ScriptView['pokemonPreview']> | null;
     /** The Battle Points window (frontier-field-ops show_battle_points … hide_battle_points). */
     bpWindow: NonNullable<ScriptView['bpWindow']> | null;
+    /** The coin window (game-corner-ops show_coins … hide_coins). */
+    coinWindow: NonNullable<ScriptView['coinWindow']> | null;
     /** The save info window (open_save_info … close_save_info). */
     saveInfo: NonNullable<ScriptView['saveInfo']> | null;
     savingIcon: boolean;
@@ -158,6 +167,7 @@ export class Runner implements ScriptRunner {
     moneyWindow: null,
     pokemonPreview: null,
     bpWindow: null,
+    coinWindow: null,
     saveInfo: null,
     savingIcon: false,
     signpost: null,
@@ -351,6 +361,7 @@ export class Runner implements ScriptRunner {
       ...(this.ui.moneyWindow ? { moneyWindow: { ...this.ui.moneyWindow } } : {}),
       ...(this.ui.pokemonPreview ? { pokemonPreview: { ...this.ui.pokemonPreview } } : {}),
       ...(this.ui.bpWindow ? { bpWindow: { ...this.ui.bpWindow } } : {}),
+      ...(this.ui.coinWindow ? { coinWindow: { ...this.ui.coinWindow } } : {}),
       ...(this.ui.saveInfo ? { saveInfo: this.ui.saveInfo } : {}),
       ...(this.ui.savingIcon ? { savingIcon: true } : {}),
       ...(this.frontier && !this.frontier.done ? { frontier: this.frontier.view() } : {}),
@@ -488,6 +499,7 @@ export class Runner implements ScriptRunner {
   }
 
   runThread(t: Thread, input: InputFrame): void {
+    this.input = input;
     // Index loop: a sub context created by the main context runs in the same tick.
     for (let i = 0; i < t.contexts.length; i++) {
       const c = t.contexts[i];
@@ -990,7 +1002,6 @@ export class Runner implements ScriptRunner {
       },
       // Decomp ScrCmd_GetRandom2 is the same handler as ScrCmd_GetRandom.
       get_random2: (t, c, a) => this.handlers.get_random!(t, c, a),
-      give_journal: stub('give_journal', 'journal not implemented'),
       ...m1aHandlers(this),
       ...m1bHandlers(this),
       ...partyHandlers(this),
@@ -1016,6 +1027,11 @@ export class Runner implements ScriptRunner {
       ...frontierFieldHandlers(this),
       ...undergroundHandlers(this),
       ...contestHandlers(this),
+      ...sealHandlers(this),
+      ...gameCornerHandlers(this),
+      ...villaHandlers(this),
+      ...journalHandlers(this),
+      ...npcHandlers(this),
     };
   }
 

@@ -2,7 +2,8 @@
  * The mart's buy screen panels (decomp overlay007/shop_menu.c Shop_LoadGraphics; /graphic/shop_gra.narc in
  * the res/graphics/shop_menu order): BG1 is `tilemap` NSCR 2 over `tiles` NCGR 0 with `default` NCLR 1, the
  * list's and the description's panels the windows print on. Sheet `shop/panel` (256×192; where the DS shows
- * the field through the panel, transparent); `shop/panel_frontier` is the exchange counters' (`frontier` NCLR 11).
+ * the field through the panel, transparent); `shop/panel_frontier` is the exchange counters' (`frontier` NCLR 11),
+ * `shop/panel_seal` the seal mart's (`tilemap_no_item` NSCR 3).
  */
 import { readNarc, type NitroFs } from '@opensinnoh/nds';
 import { crop } from './compose.ts';
@@ -17,4 +18,6 @@ export function importShopArt(fs: NitroFs, sheets: Sheets): void {
   sheets.image('shop/panel', crop(screenImage(narc, 2, 0, 1, false), 0, 0, 256, 192));
   // MART_TYPE_FRONTIER (the exchange counters) loads `frontier` NCLR 11 over the same panel.
   sheets.image('shop/panel_frontier', crop(screenImage(narc, 2, 0, 11, false), 0, 0, 256, 192));
+  // The other mart types (MART_TYPE_SEAL) load tilemap_no_item NSCR 3: no icon box.
+  sheets.image('shop/panel_seal', crop(screenImage(narc, 3, 0, 1, false), 0, 0, 256, 192));
 }

@@ -43,6 +43,8 @@ export class ScriptMenu {
   private top = 0;
   private delay = INPUT_DELAY_TICKS;
   private geometry: { x: number; y: number; width: number; rows: number } | null = null;
+  /** FieldMenuManager_ShowListMenuWithCursorPosition: the list starts at a remembered offset and cursor row. */
+  private remembered = false;
 
   constructor(
     private readonly anchor: { x: number; y: number },
@@ -59,18 +61,37 @@ export class ScriptMenu {
     this.entries.push(entry);
   }
 
-  /** Lays the window out (decomp FieldMenuManager_Show*). `measure` = text width in px. */
-  show(kind: MenuKind, measure: (s: string) => number, columns = 1): void {
+  /**
+   * Decomp FieldMenuManager_ShowListMenuWithCursorPosition: the list opens scrolled to `offset` with the cursor on row
+   * `row` of the window (ListMenu_New(…, listOffset, cursorPos)); the anchors are not moved by the right/bottom sides.
+   */
+  remember(offset: number, row: number): void {
+    this.top = offset;
+    this.cursor = offset + row;
+    this.remembered = true;
+  }
+
+  /** The list's scroll offset and the cursor's row in the window (what ListMenuCursorCallback writes back). */
+  listPosition(): { offset: number; row: number } {
+    return { offset: this.top, row: this.cursor - this.top };
+  }
+
+  /**
+   * Lays the window out (decomp FieldMenuManager_Show*). `measure` = text width in px. `width` (tiles) is
+   * FieldMenuManager_ShowListMenuWithWidth's: the given width, and the anchors are not applied.
+   */
+  show(kind: MenuKind, measure: (s: string) => number, columns = 1, width?: number): void {
     if (!this.entries.length) throw new Error('menu: shown with no entries');
     if (columns < 1) throw new Error(`menu: ${columns} columns`);
     this.kind = kind;
     this.columns = kind === 'multi' ? columns : 1;
-    const widthTiles = Math.ceil((Math.max(...this.entries.map((e) => measure(e.text))) + MENU_TEXT_X) / TILE);
+    if (width !== undefined && (kind !== 'list' || width < 1)) throw new Error(`menu: a set width ${width} on a ${kind} menu`);
+    const widthTiles = width ?? Math.ceil((Math.max(...this.entries.map((e) => measure(e.text))) + MENU_TEXT_X) / TILE);
     const rows = kind === 'list' ? Math.min(this.entries.length, LIST_MAX_ROWS) : Math.ceil(this.entries.length / this.columns);
     let x = this.anchor.x;
     let y = this.anchor.y;
     // Multi-column menus ignore the right/bottom anchors (decomp FieldMenuManager_ShowMultiColumnMenu).
-    if (kind !== 'multi') {
+    if (kind !== 'multi' && !this.remembered && width === undefined) {
       if (this.anchorRight) x -= widthTiles;
       if (this.anchorBottom) y -= rows * ROW_TILES;
     }

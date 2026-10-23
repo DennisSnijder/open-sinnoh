@@ -6,6 +6,7 @@
  * trainer score and the game records, card level, Pokédex completion, the signature app and the field money
  * window (decomp scrcmd_money.c).
  */
+import { JOURNAL_EVENT, journalEvent, journalMart } from '@opensinnoh/contracts';
 import { monGender, type Id, type Pokemon } from '@opensinnoh/core';
 import { dexOf, newGameRecord, STORAGE_MODES } from '@opensinnoh/contracts';
 import { addToGameRecord, cardStars, incrementTrainerScore, localDexCompleted, nationalDexCompleted } from '@opensinnoh/services';
@@ -39,7 +40,9 @@ export function m3aHandlers(r: Runner): Record<string, Handler> {
     // The greeting stays drawn (close_message_without_erasing); the mart shows it in its own box.
     const greeting = r.ui.message ? r.ui.message.printer.text() : null;
     r.ui.message = null;
-    return r.openApp(c, { app: 'mart', mart, countVar, greeting }, () => {});
+    return r.openApp(c, { app: 'mart', mart, countVar, greeting }, (result) => {
+      if (result.app === 'mart') journalMart(r.registries, r.state, result.bought ?? 0, result.sold ?? 0);
+    });
   };
 
   /**
@@ -86,9 +89,9 @@ export function m3aHandlers(r: Runner): Record<string, Handler> {
         if (result.app !== 'party') throw new Error(`select_move_tutor_pokemon: got a ${result.app} result`);
         picked = result.slot;
       }),
-    // Decomp ScrCmd_OpenPartyMenuForTrade: PARTY_MENU_MODE_NPC_TRADE, which picks like SELECT_NO_PROMPT (no ball seals here).
+    // Decomp ScrCmd_OpenPartyMenuForTrade: PARTY_MENU_MODE_NPC_TRADE, which picks like SELECT_NO_PROMPT after the Ball Capsule check.
     open_party_menu_for_trade: (_t, c) =>
-      r.openApp(c, { app: 'party', mode: 'select' }, (result) => {
+      r.openApp(c, { app: 'party', mode: 'trade' }, (result) => {
         if (result.app !== 'party') throw new Error(`open_party_menu_for_trade: got a ${result.app} result`);
         picked = result.slot;
       }),
@@ -139,7 +142,12 @@ export function m3aHandlers(r: Runner): Record<string, Handler> {
       const n = r.val(t, a[0]);
       const mode = STORAGE_MODES[n];
       if (!mode) throw new Error(`open_pokemon_storage: no box mode ${n}`);
-      return r.openApp(c, { app: 'storage', mode }, () => {});
+      // BoxAppMan_FlagRecordBoxUseInJournal: a session that changed the boxes or the party writes "used a PC box"
+      // (the DS flags each move, deposit, withdrawal and release; inferred: any change of either).
+      const before = JSON.stringify([r.state.boxes, r.state.party]);
+      return r.openApp(c, { app: 'storage', mode }, () => {
+        if (JSON.stringify([r.state.boxes, r.state.party]) !== before) journalEvent(r.registries, r.state, JOURNAL_EVENT.pcBox);
+      });
     },
     // Decomp ScrCmd_OpenPokemonNamingScreen → sub_0203DFE8: the party Pokémon's nickname; the var gets 1
     // when the name was left unchanged, else 0 and the nickname is set.

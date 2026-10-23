@@ -1,9 +1,8 @@
-# sys-villa-boundary. The Villa is out of scope. A constructed start in the Resort Area
-# beside the school kid's coord event: he offers the Villa, YES, he walks the player in (the TV segment op is a logged
-# stub), the door animation plays and the warp lands in the Villa, whose onTransition's furniture features
-# (init_persisted_map_features_for_villa) are a logged stub; the first-entry scene offers the free table (the only
-# entry), and the delivery scene runs (until then the school kid stops the player at the door). Then out by the door to
-# the Resort Area: no hang, no crash.
+# sys-villa-free. Getting the Villa (docs/research/villa-journal.md §1.1): a constructed start in the Resort Area beside
+# the school kid's coord event: he offers the Villa, YES, he walks the player in (the TV segment op is a logged stub),
+# the door animation plays and the warp lands in the Villa, whose onTransition selects the Villa's map features; the
+# first-entry scene offers the free Table in the order list (its only entry) and the delivery scene runs (until then the
+# school kid stops the player at the door). The Table is then a prop of the Villa; out by the door to the Resort Area.
 party 0 platinum:SPECIES_GARCHOMP 60 platinum:MOVE_EARTHQUAKE
 set flag platinum:FLAG_GAME_COMPLETED true
 date 2009-03-22 12:00
@@ -24,6 +23,8 @@ advance text 6000
 until idle 1200
 +0 assert map platinum:MAP_HEADER_VILLA
 +0 assert var platinum:VAR_VILLA_STATE 2
++0 assert flag platinum:FLAG_VILLA_FURNITURE_TABLE true
++0 assert state mapFeatures {"kind":"villa"}
 +0 press left
 until position 9 6 300
 +0 release left

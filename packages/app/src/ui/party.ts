@@ -63,6 +63,7 @@ const MENU = { x: 19, bottom: 23, width: 12 };
 export const STATUS_CELLS: Record<Exclude<PartySlotView['status'], 'none'>, number> = { paralysis: 1, freeze: 2, sleep: 3, poison: 4, toxic: 4, burn: 5, fainted: 6 };
 /** party/held cells: held item, mail, ball capsule. */
 const HELD_ITEM = 0;
+const HELD_CAPSULE = 2;
 
 /** A sprite: the sheet's cell drawn with its origin at (x, y) of the parent's DS px; null without the sheet. */
 export function sprite(d: DrawContext, path: string, cell: number | string, x: number, y: number, className: string): HTMLElement | null {
@@ -118,6 +119,11 @@ function slot(d: DrawContext, v: PartyView, i: number, m: PartySlotView, x: numb
     const held = sprite(d, 'party/held', HELD_ITEM, HELD.x, HELD.y, 'held-item') ?? at(el('span', 'held-item css'), HELD.x, HELD.y, 8, 8);
     held.title = d.registries.items.get(m.heldItem)?.name ?? '';
     parts.push(held);
+  }
+  // PartyMenu_AlignMemberBallSeal: the Ball Capsule marker 8 px right of the held item's place.
+  if (m.capsule) {
+    const capsule = sprite(d, 'party/held', HELD_CAPSULE, HELD.x + 8, HELD.y, 'held-capsule') ?? at(el('span', 'held-capsule css'), HELD.x + 8, HELD.y, 8, 8);
+    parts.push(capsule);
   }
   const ink = textColor(d, 'party/text', 'name', 'light');
   const name = atTiles(el('span', 'party-name', d.text(m.name, ink)), ...WIN.name);

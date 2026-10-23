@@ -1,0 +1,56 @@
+# Solaceon Town's east house (decomp scripts_solaceon_town_east_house.s, docs/research/seals.md §4.1): the mother gives
+# the Seal Case and five random seals (a Heart, two Stars, a Foamy, a Song: give_or_take_seal with get_random), then the
+# boy, shown a party Unown A, gives ten A Seals (seal 50). The Bag's Seal Case says "Seals: 15". The save keeps them.
+party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK
+party 1 platinum:SPECIES_UNOWN 10
+warp platinum:MAP_HEADER_SOLACEON_TOWN_EAST_HOUSE 2 6 up
+until idle
++0 assert state sealCase.counts[49] 0
++0 press a
++1 release a
+advance text
+until idle
++0 assert state flags["platinum:FLAG_RECEIVED_SOLACEON_TOWN_EAST_HOUSE_SEAL_CASE"] true
++0 assert state bag.key_items[0].item "platinum:ITEM_SEAL_CASE"
++0 assert app none
+# The boy (5, 5)
++0 press down
+until position 2 7 600
++0 release down
++0 press right
+until position 5 7 600
++0 release right
++0 press up
+until position 5 6 600
++0 release up
++0 press up
++2 release up
+until idle
++0 press a
++1 release a
+advance text
+until idle
++0 assert state sealCase.counts[49] 10
++0 assert app none
+# The Bag's Seal Case: "Seals: 15".
++0 press x
++1 release x
+until app start-menu
++1 tap entry:1
++1 assert app bag
++1 tap pocket:7
++1 tap row:0
++1 tap menu:0
++1 assert text platinum:Bag_Text_SealCaseMessage 0 0=15
++1 press b
++1 release b
++1 press b
++1 release b
++1 press b
++1 release b
+until app none 60
+until idle
++0 reload
+until idle
++0 assert state sealCase.counts[49] 10
++0 assert state flags["platinum:FLAG_RECEIVED_SOLACEON_TOWN_EAST_HOUSE_SEAL_CASE"] true

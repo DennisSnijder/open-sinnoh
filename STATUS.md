@@ -4,7 +4,7 @@ OpenSinnoh is in beta. Pokémon Platinum (US, rev 0) plays from a new game throu
 Fame and the credits, and on into the post-game. What's next is in [ROADMAP.md](ROADMAP.md); the design
 decisions are in [docs/decisions.md](docs/decisions.md).
 
-Versions: contracts 0.39.0, importer `platinum-102`, HeartGold follower add-on `hgss-followers-4`.
+Versions: contracts 0.40.0, importer `platinum-103`, HeartGold follower add-on `hgss-followers-4`.
 
 ## Works
 
@@ -30,6 +30,10 @@ Versions: contracts 0.39.0, importer `platinum-102`, HeartGold follower add-on `
   the Battle Castle and the Battle Arcade (singles and doubles, with Thorton, Argenta, Darach and Dahlia), the event legendaries through Mystery Gift, and the offline Super Contest circuit (reception, rivals, judging,
   results, ribbons, prizes, Master flags, the visual round's dress-up and judging, the lobby's photo frames, the Dance
   Competition and the acting round).
+- **Town extras:** Seals and Ball Capsules (the Seal Case, the Solaceon gifts, the Sunyshore seal shop, the PC's
+  capsule editor, capsules on party Pokémon and NPC trainers, the seals' effect at a battle send-out); the Veilstone
+  Game Corner (the slot machines with the DS's odds, reel control and bonus rounds, coins, the Prize Exchange); the
+  Villa (furniture, the daily visitors); the journal; the two Pokédex diplomas; and several small NPC rules.
 - **Audio:** the ROM's sound archive on a DS sequencer and synth in an AudioWorklet: zone music by day and
   night, sound effects, fanfares and cries.
 - **App:** the ROM import in the browser, saves with file export and import, the setup, Options, following
@@ -39,7 +43,7 @@ Versions: contracts 0.39.0, importer `platinum-102`, HeartGold follower add-on `
 ## Not yet
 
 - The Frontier records app; the facilities' particle effects; the Castle's bought-info flag marks.
-- The Villa, TV shows and the journal, Seals and Ball Capsules.
+- TV shows. The capsule editor's Test shows a still image, not the throw.
 - Wireless and Wi-Fi features: they answer as "no connection".
 - Mods beyond the current pack format (no editor or mod tooling yet).
 - HeartGold and SoulSilver as games (only the follower sprites are imported from HeartGold).

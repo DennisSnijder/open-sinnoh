@@ -11030,6 +11030,14 @@
    "text": "Take a Bonus Orb\nwith that, too."
   },
   {
+   "id": "fixture:pl_msg_00000543_00013",
+   "text": "The {var 0} went into\nthe sticker book."
+  },
+  {
+   "id": "fixture:pl_msg_00000543_00014",
+   "text": "The sticker book has no room\nfor more of those."
+  },
+  {
    "id": "fixture:pl_msg_00000543_00015",
    "text": "PURCHASE"
   },
@@ -12450,6 +12458,26 @@
    "text": "LEAVE"
   },
   {
+   "id": "fixture:PartyMenu_Text_PromptCustomBall",
+   "text": "Fit the shell?"
+  },
+  {
+   "id": "fixture:PartyMenu_Text_Set",
+   "text": "FIT"
+  },
+  {
+   "id": "fixture:PartyMenu_Text_BallCapsuleWasSet",
+   "text": "The shell is fitted."
+  },
+  {
+   "id": "fixture:PartyMenu_Text_TwoCapsulsesCantBeSet",
+   "text": "One shell per companion."
+  },
+  {
+   "id": "fixture:PartyMenu_Text_BallCapsuleWillBeDetached",
+   "text": "The shell comes off first.\nIs that fine?"
+  },
+  {
    "id": "fixture:EggHatch_Text_MonHatched",
    "text": "{var 0} broke out of the shell!"
   },
@@ -12868,6 +12896,10 @@
   {
    "id": "fixture:Bag_Text_FashionCaseMessage",
    "text": "Trinkets: {var 0}\nScenes: {var 1}"
+  },
+  {
+   "id": "fixture:Bag_Text_SealCaseMessage",
+   "text": "Stickers: {var 0}"
   },
   {
    "id": "fixture:Bag_Text_Open",
@@ -13588,6 +13620,934 @@
   {
    "id": "fixture:BoxText_RemoveMail",
    "text": "Take the letter off first."
+  },
+  {
+   "id": "fixture:BoxText_DetachBallCapsule",
+   "text": "Take the shell off first."
+  },
+  {
+   "id": "fixture:pl_msg_00000008_00000",
+   "text": "DESIGN"
+  },
+  {
+   "id": "fixture:pl_msg_00000008_00001",
+   "text": "DONE"
+  },
+  {
+   "id": "fixture:pl_msg_00000008_00002",
+   "text": "FIT"
+  },
+  {
+   "id": "fixture:pl_msg_00000008_00003",
+   "text": "TAKE OFF"
+  },
+  {
+   "id": "fixture:pl_msg_00000008_00004",
+   "text": "SWAP"
+  },
+  {
+   "id": "fixture:pl_msg_00000008_00005",
+   "text": "KEEP"
+  },
+  {
+   "id": "fixture:pl_msg_00000008_00006",
+   "text": "UNDO"
+  },
+  {
+   "id": "fixture:pl_msg_00000008_00007",
+   "text": "Pick a shell."
+  },
+  {
+   "id": "fixture:pl_msg_00000008_00008",
+   "text": "And this shell?"
+  },
+  {
+   "id": "fixture:pl_msg_00000008_00009",
+   "text": "The shell came off."
+  },
+  {
+   "id": "fixture:pl_msg_00000008_00010",
+   "text": "Swap it with which?"
+  },
+  {
+   "id": "fixture:pl_msg_00000008_00011",
+   "text": "Swapped."
+  },
+  {
+   "id": "fixture:pl_msg_00000008_00012",
+   "text": "Shell saved."
+  },
+  {
+   "id": "fixture:pl_msg_00000008_00013",
+   "text": "Checking..."
+  },
+  {
+   "id": "fixture:pl_msg_00000008_00014",
+   "text": "Drop the new design?"
+  },
+  {
+   "id": "fixture:pl_msg_00000008_00015",
+   "text": "The shell is full!"
+  },
+  {
+   "id": "fixture:pl_msg_00000008_00016",
+   "text": "None of those left."
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00000",
+   "text": "Sticker 0"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00001",
+   "text": "Sticker 1"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00002",
+   "text": "Sticker 2"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00003",
+   "text": "Sticker 3"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00004",
+   "text": "Sticker 4"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00005",
+   "text": "Sticker 5"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00006",
+   "text": "Sticker 6"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00007",
+   "text": "Sticker 7"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00008",
+   "text": "Sticker 8"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00009",
+   "text": "Sticker 9"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00010",
+   "text": "Sticker 10"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00011",
+   "text": "Sticker 11"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00012",
+   "text": "Sticker 12"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00013",
+   "text": "Sticker 13"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00014",
+   "text": "Sticker 14"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00015",
+   "text": "Sticker 15"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00016",
+   "text": "Sticker 16"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00017",
+   "text": "Sticker 17"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00018",
+   "text": "Sticker 18"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00019",
+   "text": "Sticker 19"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00020",
+   "text": "Sticker 20"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00021",
+   "text": "Sticker 21"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00022",
+   "text": "Sticker 22"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00023",
+   "text": "Sticker 23"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00024",
+   "text": "Sticker 24"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00025",
+   "text": "Sticker 25"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00026",
+   "text": "Sticker 26"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00027",
+   "text": "Sticker 27"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00028",
+   "text": "Sticker 28"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00029",
+   "text": "Sticker 29"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00030",
+   "text": "Sticker 30"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00031",
+   "text": "Sticker 31"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00032",
+   "text": "Sticker 32"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00033",
+   "text": "Sticker 33"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00034",
+   "text": "Sticker 34"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00035",
+   "text": "Sticker 35"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00036",
+   "text": "Sticker 36"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00037",
+   "text": "Sticker 37"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00038",
+   "text": "Sticker 38"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00039",
+   "text": "Sticker 39"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00040",
+   "text": "Sticker 40"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00041",
+   "text": "Sticker 41"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00042",
+   "text": "Sticker 42"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00043",
+   "text": "Sticker 43"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00044",
+   "text": "Sticker 44"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00045",
+   "text": "Sticker 45"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00046",
+   "text": "Sticker 46"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00047",
+   "text": "Sticker 47"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00048",
+   "text": "Sticker 48"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00049",
+   "text": "Sticker 49"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00050",
+   "text": "Sticker 50"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00051",
+   "text": "Sticker 51"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00052",
+   "text": "Sticker 52"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00053",
+   "text": "Sticker 53"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00054",
+   "text": "Sticker 54"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00055",
+   "text": "Sticker 55"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00056",
+   "text": "Sticker 56"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00057",
+   "text": "Sticker 57"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00058",
+   "text": "Sticker 58"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00059",
+   "text": "Sticker 59"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00060",
+   "text": "Sticker 60"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00061",
+   "text": "Sticker 61"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00062",
+   "text": "Sticker 62"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00063",
+   "text": "Sticker 63"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00064",
+   "text": "Sticker 64"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00065",
+   "text": "Sticker 65"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00066",
+   "text": "Sticker 66"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00067",
+   "text": "Sticker 67"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00068",
+   "text": "Sticker 68"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00069",
+   "text": "Sticker 69"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00070",
+   "text": "Sticker 70"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00071",
+   "text": "Sticker 71"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00072",
+   "text": "Sticker 72"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00073",
+   "text": "Sticker 73"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00074",
+   "text": "Sticker 74"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00075",
+   "text": "Sticker 75"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00076",
+   "text": "Sticker 76"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00077",
+   "text": "Sticker 77"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00078",
+   "text": "Sticker 78"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00079",
+   "text": "Sticker 79"
+  },
+  {
+   "id": "fixture:pl_msg_00000012_00080",
+   "text": "Sticker 80"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00000",
+   "text": "Stickers 0"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00001",
+   "text": "Stickers 1"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00002",
+   "text": "Stickers 2"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00003",
+   "text": "Stickers 3"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00004",
+   "text": "Stickers 4"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00005",
+   "text": "Stickers 5"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00006",
+   "text": "Stickers 6"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00007",
+   "text": "Stickers 7"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00008",
+   "text": "Stickers 8"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00009",
+   "text": "Stickers 9"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00010",
+   "text": "Stickers 10"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00011",
+   "text": "Stickers 11"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00012",
+   "text": "Stickers 12"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00013",
+   "text": "Stickers 13"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00014",
+   "text": "Stickers 14"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00015",
+   "text": "Stickers 15"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00016",
+   "text": "Stickers 16"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00017",
+   "text": "Stickers 17"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00018",
+   "text": "Stickers 18"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00019",
+   "text": "Stickers 19"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00020",
+   "text": "Stickers 20"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00021",
+   "text": "Stickers 21"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00022",
+   "text": "Stickers 22"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00023",
+   "text": "Stickers 23"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00024",
+   "text": "Stickers 24"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00025",
+   "text": "Stickers 25"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00026",
+   "text": "Stickers 26"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00027",
+   "text": "Stickers 27"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00028",
+   "text": "Stickers 28"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00029",
+   "text": "Stickers 29"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00030",
+   "text": "Stickers 30"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00031",
+   "text": "Stickers 31"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00032",
+   "text": "Stickers 32"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00033",
+   "text": "Stickers 33"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00034",
+   "text": "Stickers 34"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00035",
+   "text": "Stickers 35"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00036",
+   "text": "Stickers 36"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00037",
+   "text": "Stickers 37"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00038",
+   "text": "Stickers 38"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00039",
+   "text": "Stickers 39"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00040",
+   "text": "Stickers 40"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00041",
+   "text": "Stickers 41"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00042",
+   "text": "Stickers 42"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00043",
+   "text": "Stickers 43"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00044",
+   "text": "Stickers 44"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00045",
+   "text": "Stickers 45"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00046",
+   "text": "Stickers 46"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00047",
+   "text": "Stickers 47"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00048",
+   "text": "Stickers 48"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00049",
+   "text": "Stickers 49"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00050",
+   "text": "Stickers 50"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00051",
+   "text": "Stickers 51"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00052",
+   "text": "Stickers 52"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00053",
+   "text": "Stickers 53"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00054",
+   "text": "Stickers 54"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00055",
+   "text": "Stickers 55"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00056",
+   "text": "Stickers 56"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00057",
+   "text": "Stickers 57"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00058",
+   "text": "Stickers 58"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00059",
+   "text": "Stickers 59"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00060",
+   "text": "Stickers 60"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00061",
+   "text": "Stickers 61"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00062",
+   "text": "Stickers 62"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00063",
+   "text": "Stickers 63"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00064",
+   "text": "Stickers 64"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00065",
+   "text": "Stickers 65"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00066",
+   "text": "Stickers 66"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00067",
+   "text": "Stickers 67"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00068",
+   "text": "Stickers 68"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00069",
+   "text": "Stickers 69"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00070",
+   "text": "Stickers 70"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00071",
+   "text": "Stickers 71"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00072",
+   "text": "Stickers 72"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00073",
+   "text": "Stickers 73"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00074",
+   "text": "Stickers 74"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00075",
+   "text": "Stickers 75"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00076",
+   "text": "Stickers 76"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00077",
+   "text": "Stickers 77"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00078",
+   "text": "Stickers 78"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00079",
+   "text": "Stickers 79"
+  },
+  {
+   "id": "fixture:pl_msg_00000013_00080",
+   "text": "Stickers 80"
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00000",
+   "text": "A plain sticker, number 0."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00001",
+   "text": "A plain sticker, number 1."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00002",
+   "text": "A plain sticker, number 2."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00003",
+   "text": "A plain sticker, number 3."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00004",
+   "text": "A plain sticker, number 4."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00005",
+   "text": "A plain sticker, number 5."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00006",
+   "text": "A plain sticker, number 6."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00007",
+   "text": "A plain sticker, number 7."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00008",
+   "text": "A plain sticker, number 8."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00009",
+   "text": "A plain sticker, number 9."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00010",
+   "text": "A plain sticker, number 10."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00011",
+   "text": "A plain sticker, number 11."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00012",
+   "text": "A plain sticker, number 12."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00013",
+   "text": "A plain sticker, number 13."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00014",
+   "text": "A plain sticker, number 14."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00015",
+   "text": "A plain sticker, number 15."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00016",
+   "text": "A plain sticker, number 16."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00017",
+   "text": "A plain sticker, number 17."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00018",
+   "text": "A plain sticker, number 18."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00019",
+   "text": "A plain sticker, number 19."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00020",
+   "text": "A plain sticker, number 20."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00021",
+   "text": "A plain sticker, number 21."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00022",
+   "text": "A plain sticker, number 22."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00023",
+   "text": "A plain sticker, number 23."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00024",
+   "text": "A plain sticker, number 24."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00025",
+   "text": "A plain sticker, number 25."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00026",
+   "text": "A plain sticker, number 26."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00027",
+   "text": "A plain sticker, number 27."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00028",
+   "text": "A plain sticker, number 28."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00029",
+   "text": "A plain sticker, number 29."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00030",
+   "text": "A plain sticker, number 30."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00031",
+   "text": "A plain sticker, number 31."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00032",
+   "text": "A plain sticker, number 32."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00033",
+   "text": "A plain sticker, number 33."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00034",
+   "text": "A plain sticker, number 34."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00035",
+   "text": "A plain sticker, number 35."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00036",
+   "text": "A plain sticker, number 36."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00037",
+   "text": "A plain sticker, number 37."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00038",
+   "text": "A plain sticker, number 38."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00039",
+   "text": "A plain sticker, number 39."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00040",
+   "text": "A plain sticker, number 40."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00041",
+   "text": "A plain sticker, number 41."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00042",
+   "text": "A plain sticker, number 42."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00043",
+   "text": "A plain sticker, number 43."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00044",
+   "text": "A plain sticker, number 44."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00045",
+   "text": "A plain sticker, number 45."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00046",
+   "text": "A plain sticker, number 46."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00047",
+   "text": "A plain sticker, number 47."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00048",
+   "text": "A plain sticker, number 48."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00049",
+   "text": "A plain sticker, number 49."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00050",
+   "text": "A plain sticker, number 50."
+  },
+  {
+   "id": "fixture:pl_msg_00000542_00051",
+   "text": "A plain sticker, number 51."
   },
   {
    "id": "fixture:BoxText_HP",
@@ -23107,6 +24067,794 @@
      false,
      true,
      false
+    ]
+   },
+   "seals": {
+    "types": [
+     {
+      "sheet": 184,
+      "name": 0,
+      "particle": 37,
+      "alphabet": false,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 184,
+      "name": 1,
+      "particle": 37,
+      "alphabet": false,
+      "price": 40,
+      "description": 0
+     },
+     {
+      "sheet": 185,
+      "name": 2,
+      "particle": 38,
+      "alphabet": false,
+      "price": 40,
+      "description": 1
+     },
+     {
+      "sheet": 186,
+      "name": 3,
+      "particle": 39,
+      "alphabet": false,
+      "price": 40,
+      "description": 2
+     },
+     {
+      "sheet": 187,
+      "name": 4,
+      "particle": 40,
+      "alphabet": false,
+      "price": 40,
+      "description": 3
+     },
+     {
+      "sheet": 188,
+      "name": 5,
+      "particle": 41,
+      "alphabet": false,
+      "price": 40,
+      "description": 4
+     },
+     {
+      "sheet": 189,
+      "name": 6,
+      "particle": 42,
+      "alphabet": false,
+      "price": 40,
+      "description": 5
+     },
+     {
+      "sheet": 190,
+      "name": 7,
+      "particle": 43,
+      "alphabet": false,
+      "price": 40,
+      "description": 6
+     },
+     {
+      "sheet": 191,
+      "name": 8,
+      "particle": 44,
+      "alphabet": false,
+      "price": 40,
+      "description": 7
+     },
+     {
+      "sheet": 192,
+      "name": 9,
+      "particle": 45,
+      "alphabet": false,
+      "price": 40,
+      "description": 8
+     },
+     {
+      "sheet": 193,
+      "name": 10,
+      "particle": 46,
+      "alphabet": false,
+      "price": 40,
+      "description": 9
+     },
+     {
+      "sheet": 194,
+      "name": 11,
+      "particle": 47,
+      "alphabet": false,
+      "price": 40,
+      "description": 10
+     },
+     {
+      "sheet": 195,
+      "name": 12,
+      "particle": 48,
+      "alphabet": false,
+      "price": 40,
+      "description": 11
+     },
+     {
+      "sheet": 196,
+      "name": 13,
+      "particle": 49,
+      "alphabet": false,
+      "price": 40,
+      "description": 12
+     },
+     {
+      "sheet": 197,
+      "name": 14,
+      "particle": 50,
+      "alphabet": false,
+      "price": 40,
+      "description": 13
+     },
+     {
+      "sheet": 198,
+      "name": 15,
+      "particle": 51,
+      "alphabet": false,
+      "price": 40,
+      "description": 14
+     },
+     {
+      "sheet": 199,
+      "name": 16,
+      "particle": 52,
+      "alphabet": false,
+      "price": 40,
+      "description": 15
+     },
+     {
+      "sheet": 200,
+      "name": 17,
+      "particle": 53,
+      "alphabet": false,
+      "price": 40,
+      "description": 16
+     },
+     {
+      "sheet": 201,
+      "name": 18,
+      "particle": 54,
+      "alphabet": false,
+      "price": 40,
+      "description": 17
+     },
+     {
+      "sheet": 202,
+      "name": 19,
+      "particle": 55,
+      "alphabet": false,
+      "price": 40,
+      "description": 18
+     },
+     {
+      "sheet": 203,
+      "name": 20,
+      "particle": 56,
+      "alphabet": false,
+      "price": 40,
+      "description": 19
+     },
+     {
+      "sheet": 204,
+      "name": 21,
+      "particle": 57,
+      "alphabet": false,
+      "price": 40,
+      "description": 20
+     },
+     {
+      "sheet": 205,
+      "name": 22,
+      "particle": 58,
+      "alphabet": false,
+      "price": 40,
+      "description": 21
+     },
+     {
+      "sheet": 206,
+      "name": 23,
+      "particle": 59,
+      "alphabet": false,
+      "price": 40,
+      "description": 22
+     },
+     {
+      "sheet": 207,
+      "name": 24,
+      "particle": 60,
+      "alphabet": false,
+      "price": 40,
+      "description": 23
+     },
+     {
+      "sheet": 208,
+      "name": 25,
+      "particle": 61,
+      "alphabet": false,
+      "price": 40,
+      "description": 24
+     },
+     {
+      "sheet": 209,
+      "name": 26,
+      "particle": 62,
+      "alphabet": false,
+      "price": 40,
+      "description": 25
+     },
+     {
+      "sheet": 210,
+      "name": 27,
+      "particle": 63,
+      "alphabet": false,
+      "price": 40,
+      "description": 26
+     },
+     {
+      "sheet": 211,
+      "name": 28,
+      "particle": 64,
+      "alphabet": false,
+      "price": 40,
+      "description": 27
+     },
+     {
+      "sheet": 212,
+      "name": 29,
+      "particle": 65,
+      "alphabet": false,
+      "price": 40,
+      "description": 28
+     },
+     {
+      "sheet": 213,
+      "name": 30,
+      "particle": 66,
+      "alphabet": false,
+      "price": 40,
+      "description": 29
+     },
+     {
+      "sheet": 214,
+      "name": 31,
+      "particle": 67,
+      "alphabet": false,
+      "price": 40,
+      "description": 30
+     },
+     {
+      "sheet": 215,
+      "name": 32,
+      "particle": 68,
+      "alphabet": false,
+      "price": 40,
+      "description": 31
+     },
+     {
+      "sheet": 216,
+      "name": 33,
+      "particle": 69,
+      "alphabet": false,
+      "price": 40,
+      "description": 32
+     },
+     {
+      "sheet": 217,
+      "name": 34,
+      "particle": 70,
+      "alphabet": false,
+      "price": 40,
+      "description": 33
+     },
+     {
+      "sheet": 218,
+      "name": 35,
+      "particle": 71,
+      "alphabet": false,
+      "price": 40,
+      "description": 34
+     },
+     {
+      "sheet": 219,
+      "name": 36,
+      "particle": 72,
+      "alphabet": false,
+      "price": 40,
+      "description": 35
+     },
+     {
+      "sheet": 220,
+      "name": 37,
+      "particle": 73,
+      "alphabet": false,
+      "price": 40,
+      "description": 36
+     },
+     {
+      "sheet": 221,
+      "name": 38,
+      "particle": 74,
+      "alphabet": false,
+      "price": 40,
+      "description": 37
+     },
+     {
+      "sheet": 222,
+      "name": 39,
+      "particle": 75,
+      "alphabet": false,
+      "price": 40,
+      "description": 38
+     },
+     {
+      "sheet": 223,
+      "name": 40,
+      "particle": 76,
+      "alphabet": false,
+      "price": 40,
+      "description": 39
+     },
+     {
+      "sheet": 224,
+      "name": 41,
+      "particle": 77,
+      "alphabet": false,
+      "price": 40,
+      "description": 40
+     },
+     {
+      "sheet": 225,
+      "name": 42,
+      "particle": 78,
+      "alphabet": false,
+      "price": 40,
+      "description": 41
+     },
+     {
+      "sheet": 226,
+      "name": 43,
+      "particle": 79,
+      "alphabet": false,
+      "price": 40,
+      "description": 42
+     },
+     {
+      "sheet": 227,
+      "name": 44,
+      "particle": 80,
+      "alphabet": false,
+      "price": 40,
+      "description": 43
+     },
+     {
+      "sheet": 228,
+      "name": 45,
+      "particle": 81,
+      "alphabet": false,
+      "price": 40,
+      "description": 44
+     },
+     {
+      "sheet": 229,
+      "name": 46,
+      "particle": 82,
+      "alphabet": false,
+      "price": 40,
+      "description": 45
+     },
+     {
+      "sheet": 230,
+      "name": 47,
+      "particle": 83,
+      "alphabet": false,
+      "price": 40,
+      "description": 46
+     },
+     {
+      "sheet": 231,
+      "name": 48,
+      "particle": 84,
+      "alphabet": false,
+      "price": 40,
+      "description": 47
+     },
+     {
+      "sheet": 232,
+      "name": 49,
+      "particle": 85,
+      "alphabet": false,
+      "price": 40,
+      "description": 48
+     },
+     {
+      "sheet": 233,
+      "name": 50,
+      "particle": 86,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 234,
+      "name": 51,
+      "particle": 87,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 235,
+      "name": 52,
+      "particle": 88,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 236,
+      "name": 53,
+      "particle": 89,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 237,
+      "name": 54,
+      "particle": 90,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 238,
+      "name": 55,
+      "particle": 91,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 239,
+      "name": 56,
+      "particle": 92,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 240,
+      "name": 57,
+      "particle": 93,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 241,
+      "name": 58,
+      "particle": 94,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 242,
+      "name": 59,
+      "particle": 95,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 243,
+      "name": 60,
+      "particle": 96,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 244,
+      "name": 61,
+      "particle": 97,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 245,
+      "name": 62,
+      "particle": 98,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 246,
+      "name": 63,
+      "particle": 99,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 247,
+      "name": 64,
+      "particle": 100,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 248,
+      "name": 65,
+      "particle": 101,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 249,
+      "name": 66,
+      "particle": 102,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 250,
+      "name": 67,
+      "particle": 103,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 251,
+      "name": 68,
+      "particle": 104,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 252,
+      "name": 69,
+      "particle": 105,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 253,
+      "name": 70,
+      "particle": 106,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 254,
+      "name": 71,
+      "particle": 107,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 255,
+      "name": 72,
+      "particle": 108,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 256,
+      "name": 73,
+      "particle": 109,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 257,
+      "name": 74,
+      "particle": 110,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 258,
+      "name": 75,
+      "particle": 111,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 259,
+      "name": 76,
+      "particle": 112,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 260,
+      "name": 77,
+      "particle": 113,
+      "alphabet": true,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 261,
+      "name": 78,
+      "particle": 114,
+      "alphabet": false,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 262,
+      "name": 79,
+      "particle": 115,
+      "alphabet": false,
+      "price": 0,
+      "description": 0
+     },
+     {
+      "sheet": 263,
+      "name": 80,
+      "particle": 116,
+      "alphabet": false,
+      "price": 0,
+      "description": 0
+     }
+    ],
+    "marts": [
+     [
+      1,
+      8,
+      15,
+      22
+     ],
+     [
+      2,
+      9,
+      16,
+      23
+     ],
+     [
+      3,
+      10,
+      17,
+      24
+     ],
+     [
+      4,
+      11,
+      18,
+      25
+     ],
+     [
+      5,
+      12,
+      19,
+      26
+     ],
+     [
+      6,
+      13,
+      20,
+      27
+     ],
+     [
+      7,
+      14,
+      21,
+      28
+     ]
+    ],
+    "trainerCapsules": [],
+    "delays": [
+     0,
+     4,
+     8,
+     12,
+     12,
+     10,
+     10
+    ],
+    "ballOpen": [
+     {
+      "particle": 1,
+      "emitters": 1
+     },
+     {
+      "particle": 2,
+      "emitters": 1
+     },
+     {
+      "particle": 3,
+      "emitters": 1
+     },
+     {
+      "particle": 4,
+      "emitters": 1
+     },
+     {
+      "particle": 5,
+      "emitters": 1
+     },
+     {
+      "particle": 6,
+      "emitters": 1
+     },
+     {
+      "particle": 7,
+      "emitters": 1
+     },
+     {
+      "particle": 8,
+      "emitters": 1
+     },
+     {
+      "particle": 9,
+      "emitters": 1
+     },
+     {
+      "particle": 10,
+      "emitters": 1
+     },
+     {
+      "particle": 11,
+      "emitters": 1
+     },
+     {
+      "particle": 12,
+      "emitters": 1
+     },
+     {
+      "particle": 13,
+      "emitters": 1
+     },
+     {
+      "particle": 14,
+      "emitters": 1
+     },
+     {
+      "particle": 15,
+      "emitters": 1
+     },
+     {
+      "particle": 16,
+      "emitters": 1
+     },
+     {
+      "particle": 17,
+      "emitters": 1
+     },
+     {
+      "particle": 36,
+      "emitters": 1
+     },
+     {
+      "particle": 36,
+      "emitters": 1
+     },
+     {
+      "particle": 36,
+      "emitters": 1
+     }
     ]
    }
   }

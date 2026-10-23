@@ -337,6 +337,16 @@ export class BattleScene {
     if (view.trainer) this.drawTrainer(view.trainer, spots.player);
     if (view.partnerTrainer) this.drawTrainer(view.partnerTrainer, spots.partner);
     for (const b of drawOrder('player', view.battlers)) this.drawBattler(b, battlerTransform(view.anim, b.battler));
+    // The send-out effect's particles (a capsule's seals or the ball's burst), like an animation's.
+    // Kept to the scene: seals at the capsule's rim reach past its bottom edge, where the phone layout has no frame.
+    if (view.sendOut) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(this.origin.x, this.origin.y, SCENE.width * this.scale, SCENE.height * this.scale);
+      ctx.clip();
+      this.particles.draw(ctx, view.sendOut, this.origin, this.scale);
+      ctx.restore();
+    }
     if (view.anim) {
       // The move animation's sprite copies, then its particles, over the battlers and under the healthboxes.
       if (view.anim.curtain) {

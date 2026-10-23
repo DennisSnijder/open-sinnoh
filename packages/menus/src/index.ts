@@ -37,7 +37,13 @@ import { undergroundBaseScreen } from './ug-base.ts';
 import { undergroundPcScreen } from './ug-pc.ts';
 import { contestScreen } from './contest/contest.ts';
 import { contestPhotoScreen } from './contest/photo.ts';
+import { capsuleEditorScreen } from './capsule-editor.ts';
+import { sealMartScreen } from './seal-mart.ts';
 import { factoryScreen, hallBoardScreen } from './frontier.ts';
+import { slotsScreen } from './slots.ts';
+import { journalScreen } from './journal.ts';
+import { diplomaScreen } from './diploma.ts';
+import { townMapScreen } from './town-map.ts';
 import { castleScreen } from './frontier-castle.ts';
 import { arcadeScreen } from './frontier-arcade.ts';
 
@@ -47,13 +53,13 @@ export const createApp: CreateApp = (request, deps) => {
     case 'start-menu':
       return new AppStack(startMenu(ctx), { app: 'start-menu' });
     case 'mart':
-      return new AppStack(martScreen(ctx, request), { app: 'mart' });
+      return new AppStack('seals' in request ? sealMartScreen(ctx, request) : martScreen(ctx, request), { app: 'mart' });
     case 'bag-select':
       return new AppStack(battleBagScreen(ctx, request), { app: 'bag-select', item: null, target: null });
     case 'party-select':
       return new AppStack(battlePartyScreen(ctx, request), { app: 'party-select', slot: null });
     case 'party':
-      return new AppStack(partyScreen(ctx, { kind: 'select' }), { app: 'party', slot: null });
+      return new AppStack(partyScreen(ctx, { kind: request.mode }), { app: 'party', slot: null });
     case 'party-order':
       return new AppStack(partyScreen(ctx, { kind: 'order', count: request.count, ...(request.hall ? { hall: true as const } : {}), ...(request.castle ? { castle: true as const } : {}) }), { app: 'party-order', order: null });
     case 'storage':
@@ -70,6 +76,12 @@ export const createApp: CreateApp = (request, deps) => {
       return new AppStack(hatchScreen(ctx, request.slot), { app: 'hatch', nickname: null });
     case 'library-tv':
       return new AppStack(libraryTvScreen(), { app: 'library-tv' });
+    case 'journal':
+      return new AppStack(journalScreen(ctx), { app: 'journal' });
+    case 'diploma':
+      return new AppStack(diplomaScreen(ctx, request.national), { app: 'diploma' });
+    case 'town-map':
+      return new AppStack(townMapScreen(ctx, () => undefined, () => 'pop', true), { app: 'town-map' });
     case 'hall-of-fame':
       return new AppStack(request.mode === 'record' ? hallOfFameRecordScreen(ctx) : hallOfFamePcScreen(ctx), { app: 'hall-of-fame' });
     case 'credits':
@@ -110,10 +122,14 @@ export const createApp: CreateApp = (request, deps) => {
       return new AppStack(contestScreen(ctx), { app: 'contest' });
     case 'contest-photo':
       return new AppStack(contestPhotoScreen(ctx, request.slot), { app: 'contest-photo' });
+    case 'capsule-editor':
+      return new AppStack(capsuleEditorScreen(ctx), { app: 'capsule-editor' });
     case 'factory':
       return new AppStack(factoryScreen(ctx, request), request.mode === 'rent' ? { app: 'factory', picks: [] } : { app: 'factory', swap: null });
     case 'hall-board':
       return new AppStack(hallBoardScreen(ctx, request), { app: 'hall-board', cell: request.cursor });
+    case 'slots':
+      return new AppStack(slotsScreen(ctx, request), { app: 'slots', coins: ctx.state.coins, streak: 0, rounds: 0 });
     case 'castle':
       return new AppStack(castleScreen(ctx, request), { app: 'castle', party: request.party, opponents: request.opponents, unlocked: request.unlocked, slot: 0 });
     case 'arcade':
@@ -150,6 +166,7 @@ export function createRowanIntro(options: RowanIntroOptions): AppModel {
 
 export { INTRO_TEXT, type RowanIntroOptions } from './rowan-intro.ts';
 export { competitionRounds } from './contest/contest.ts';
+export { CAPSULE_BUTTONS, listSlotAt } from './capsule-editor.ts';
 export { createContestRound, placeholderRound } from './contest/rounds.ts';
 export { actingRound } from './contest/acting.ts';
 export * as actingRules from './contest/acting-rules.ts';
@@ -166,3 +183,4 @@ export { ParticleSystem } from './particles.ts';
 export { createPoketch } from './poketch/system.ts';
 export { calcDigit, calcEval, calcText, calcZero, type CalcValue } from './poketch/tools.ts';
 export { cellPosition, cellZone, flyLocationAt, foundHidden, locationCell, namedCell, startCell, townMapScreen, unlockedLocations } from './town-map.ts';
+export { printJournalPage } from './journal.ts';

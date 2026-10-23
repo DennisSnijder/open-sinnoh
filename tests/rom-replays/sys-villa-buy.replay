@@ -1,0 +1,65 @@
+# sys-villa-buy. The Villa's order form (docs/research/villa-journal.md §1.3): a constructed start in the Villa with the
+# free Table (the first entry done). The order form beside the Table opens a list at width 18 (show_list_menu_set_width):
+# the Table sold out first, then the Big Sofa; YES orders it; the delivery warps into the Villa again, so the new piece
+# is built at that map load. Then the Small Sofa, whose delivery brings the counterpart in as today's visitor.
+party 0 platinum:SPECIES_GARCHOMP 60 platinum:MOVE_EARTHQUAKE
+set flag platinum:FLAG_GAME_COMPLETED true
+set var platinum:VAR_RESORT_AREA_STATE 1
+set var platinum:VAR_VILLA_STATE 2
+set var platinum:VAR_RESORT_VILLA_VISITOR 255
+set flag platinum:FLAG_VILLA_FURNITURE_TABLE true
+set money 300000
+date 2009-03-22 12:00
+warp platinum:MAP_HEADER_VILLA 10 6 down
+until idle
++0 press down
+until position 10 7 300
++0 release down
+until idle
++0 press right
++2 release right
+until idle
++0 press a
++1 release a
+advance text 600
+until menu 600
++0 assert state player.zone "platinum:MAP_HEADER_VILLA"
++8 press down
++1 release down
++8 press a
++1 release a
+until yesno 600
++4 press a
++1 release a
+advance text 6000
+until idle 1200
++0 assert flag platinum:FLAG_VILLA_FURNITURE_BIG_SOFA true
++0 assert state money 180000
++0 assert map platinum:MAP_HEADER_VILLA
+# The Small Sofa: its delivery brings the counterpart (Villa_TryAddFurnitureVisitor).
++0 press down
+until position 10 7 300
++0 release down
+until idle
++0 press right
++2 release right
+until idle
++0 press a
++1 release a
+advance text 600
+until menu 600
++8 press down
++1 release down
++8 press down
++1 release down
++8 press a
++1 release a
+until yesno 600
++4 press a
++1 release a
+advance text 6000
+until idle 1200
++0 assert flag platinum:FLAG_VILLA_FURNITURE_SMALL_SOFA true
++0 assert state money 90000
++0 assert var platinum:VAR_RESORT_VILLA_VISITOR 1
++0 assert flag platinum:FLAG_VILLA_VISITOR_INSIDE true

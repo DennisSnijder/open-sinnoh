@@ -1092,6 +1092,20 @@ export interface NewGame {
   underground?: import('./underground.ts').UndergroundTables;
   /** 0.35.0. The Super Contests' tables (`ContestTables`). Absent: the contest ops fail loudly. */
   contests?: import('./contests.ts').ContestTables;
+  /** The seal tables (`SealTables`). Absent: the seal ops and the capsule editor fail loudly. */
+  seals?: import('./seals.ts').SealTables;
+  /** 0.37.0. The Game Corner's slot tables and prizes (`SlotTables`). Absent: the Game Corner ops fail loudly. */
+  slots?: import('./slots.ts').SlotTables;
+  /** 0.37.0. The Villa (`VillaTables`). Absent: the Villa's ops fail loudly. */
+  villa?: import('./villa.ts').VillaTables;
+  /** 0.37.0. The journal (`JournalTables`). Absent: no journal (`give_journal` fails loudly, nothing is recorded). */
+  journal?: import('./journal.ts').JournalTables;
+  /**
+   * 0.37.0. The diplomas (decomp applications/diploma.c): the composed 256×192 document sheets (`ui2d`) of the Sinnoh
+   * and National Pokédex diplomas and their texts (TEXT_BANK_DIPLOMA: the player line, the two bodies, the credit).
+   * Absent: the diploma ops fail loudly.
+   */
+  diploma?: { sinnoh: Id; national: Id; texts: { player: Id; sinnoh: Id; national: Id; credit: Id } };
 }
 
 /**
@@ -1490,8 +1504,13 @@ export interface BattleAnimation {
  */
 export interface ParticleSystem {
   id: Id;
-  /** The `waza_particle.narc` member (scripts' LoadParticleSystem operand). */
+  /** The member in its archive: `waza_particle.narc` (scripts' LoadParticleSystem operand), or `ball_particle.narc`. */
   sourceIndex: number;
+  /**
+   * The archive when it is not `waza_particle.narc`: `ball` = `ball_particle.narc`, the battle send-out effect's
+   * default ball bursts and seals (docs/research/seals.md §6).
+   */
+  archive?: 'ball';
   textures: Id;
   /** Per texture: the SPL texture's repeat and flip bits (param bits 12–15) and whether colour 0 is transparent. */
   textureParams: number[];

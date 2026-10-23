@@ -725,7 +725,7 @@ export class AnimVm {
   }
 
   private particleSystem(member: number): ParticleSystem {
-    for (const p of this.deps.registries.particleSystems.values()) if (p.sourceIndex === member) return p;
+    for (const p of this.deps.registries.particleSystems.values()) if (!p.archive && p.sourceIndex === member) return p;
     throw new Error(`battle anim: no particle system ${member} in the packs`);
   }
 

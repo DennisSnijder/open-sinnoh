@@ -117,6 +117,11 @@ export type AppRequest =
    */
   | { app: 'mart'; mart: Id; countVar: Id | null; greeting: string | null; currency?: 'bp' }
   /**
+   * Decomp ScrCmd_PokeMartSeal → Shop_Start(MART_TYPE_SEAL): the seal mart with `NewGame.seals.marts[seals]` (a
+   * MART_SEAL_ID: the Sunyshore merchant's day). BUY / CANCEL only; seals go to the Seal Case.
+   */
+  | { app: 'mart'; seals: number; greeting: string | null }
+  /**
    * 0.34.0. Decomp PARTY_MENU_MODE_BATTLE_TOWER (sub_0204A358 → sub_0206BBFC): the party picking `count` Pokémon in order
    * for the Battle Tower, then CONFIRM. Eggs and the Battle Frontier banlist (`FrontierTables.banlist`) are NOT ABLE; the
    * result is the party slots in the order picked, or null (CANCEL or B). 0.39.0: `castle`, the Castle's and the Arcade's
@@ -164,6 +169,11 @@ export type AppRequest =
    * A on a panel returns it at once (an Egg too), CANCEL or B returns null.
    */
   | { app: 'party'; mode: 'select' }
+  /**
+   * Decomp ScrCmd_OpenPartyMenuForTrade (PARTY_MENU_MODE_NPC_TRADE): picks like `select`, but a Pokémon with a Ball
+   * Capsule asks "The Ball Capsule will be detached. Will that be OK?" first (YES detaches it and picks, NO goes back).
+   */
+  | { app: 'party'; mode: 'trade' }
   /** Decomp ScrCmd_OpenPokemonStorage (enum BoxMode): the PC boxes in one mode (0.15.0; `compare` 0.20.0). */
   | { app: 'storage'; mode: StorageMode }
   /**
@@ -195,6 +205,15 @@ export type AppRequest =
    * news picture of Lake Valor through the TV frame and its scrolling scan lines, faded in and out; no input.
    */
   | { app: 'library-tv' }
+  /**
+   * 0.37.0. The journal (decomp journal_display, ITEM_USE_FUNC_JOURNAL and the auto-open on CONTINUE): today's page
+   * first, Left/B to newer pages, A/Right to older ones, B on page 0 or START closes.
+   */
+  | { app: 'journal' }
+  /** 0.37.0. A diploma (decomp ScrCmd_ShowDiplomaSinnoh / ShowDiplomaNationalDex → applications/diploma.c). */
+  | { app: 'diploma'; national: boolean }
+  /** 0.37.0. The Town Map to look at (decomp ScrCmd_OpenRegionMap → TOWN_MAP_MODE_WALL_MAP): no flying; B closes. */
+  | { app: 'town-map' }
   /**
    * 0.27.19. The Hall of Fame (docs/research/hall-of-fame-credits.md §3): `record` is the Champion's induction
    * (decomp HallOfFameManager, opened by `clear_game` over the live party), `pc` the PC's viewer of the saved
@@ -282,6 +301,10 @@ export type AppRequest =
   | { app: 'contest' }
   /** 0.35.1. Decomp ScrCmd_0A8 (the lobby's frames): the contest photo of type `slot` (`GameState.contestPhotos`). */
   | { app: 'contest-photo'; slot: number }
+  /** Decomp ScrCmd_OpenSealCapsuleEditor (the PC's BALL CAPSULES): the Ball Capsule editor (contracts `CapsuleEditorView`). */
+  | { app: 'capsule-editor' }
+  /** 0.37.0. Decomp ScrCmd_267: the Game Corner's slot machine (`SlotsRequest`). */
+  | import('./slots.ts').SlotsRequest
   | EvolutionRequest;
 
 /**
@@ -328,7 +351,11 @@ export interface NamingRequest {
 export type AppResult =
   /** 0.29.1: `retire`, RETIRE was picked (decomp StartMenu_SelectRetire: the menu closes and SAFARI_GAME 21 starts). */
   | { app: 'start-menu'; retire?: true }
-  | { app: 'mart' }
+  /**
+   * 0.37.0: `bought` and `sold`, the shop's purchase and sale counts for the journal (decomp itemPurchaseCount,
+   * itemSoldCount: +1 per single item, 2 once a purchase or sale is of more than one; the sales of the last SELL visit).
+   */
+  | { app: 'mart'; bought?: number; sold?: number }
   /** 0.23.0: `move`, the move slot a one-move PP item (Ether, Leppa Berry) restores. */
   | { app: 'bag-select'; item: Id | null; target: number | null; move?: number }
   | { app: 'party-select'; slot: number | null }
@@ -356,6 +383,9 @@ export type AppResult =
   | { app: 'hatch'; nickname: string | null }
   | { app: 'signature' }
   | { app: 'library-tv' }
+  | { app: 'journal' }
+  | { app: 'diploma' }
+  | { app: 'town-map' }
   | { app: 'hall-of-fame' }
   | { app: 'credits' }
   /** 0.28.1. The move slot to forget, or null (the new move, or B). 0.29.0: with no new move, the move slot picked. */
@@ -399,6 +429,9 @@ export type AppResult =
   | { app: 'contest' }
   /** 0.35.1. The photo viewer closed. */
   | { app: 'contest-photo' }
+  | { app: 'capsule-editor' }
+  /** 0.37.0. The slot machine closed (`SlotsResult`). */
+  | import('./slots.ts').SlotsResult
   /** 0.27.30. Rowan's intro (packages/menus `createRowanIntro`): the names and gender the new game starts with. */
   | { app: 'rowan-intro'; names: { player: string; rival: string }; gender: 'male' | 'female' };
 
@@ -524,6 +557,8 @@ export type AppView =
   | EvolutionView
   | HatchView
   | LibraryTvView
+  | JournalView
+  | DiplomaView
   | TownMapView
   | HallOfFameView
   | CreditsView
@@ -544,8 +579,10 @@ export type AppView =
   | import('./underground.ts').UndergroundPcView
   | import('./contests.ts').ContestView
   | import('./contests.ts').ContestPhotoView
+  | import('./seals.ts').CapsuleEditorView
   | import('./frontier.ts').FactoryView
   | import('./frontier.ts').HallBoardView
+  | import('./slots.ts').SlotsView
   | import('./frontier.ts').CastleView
   | import('./frontier.ts').ArcadeView;
 export type AppName = AppView['app'];
@@ -597,7 +634,7 @@ export interface SaveView {
 export interface PartyView {
   app: 'party';
   /** 0.34.0 `order`: the Battle Tower's pick (`party-order`): `notes` say each panel's entry or BANNED, `confirm` is set. */
-  mode: 'field' | 'give' | 'use' | 'teach' | 'battle' | 'daycare' | 'select' | 'feed' | 'order' | 'contest';
+  mode: 'field' | 'give' | 'use' | 'teach' | 'battle' | 'daycare' | 'select' | 'feed' | 'order' | 'contest' | 'trade' | 'ball-seal';
   title: string;
   slots: (PartySlotView | null)[];
   prompt: string;
@@ -630,6 +667,8 @@ export interface PartySlotView {
   /** Core StatusCondition; `fainted` at 0 HP (decomp SUMMARY_CONDITION_FAINTED). */
   status: 'none' | 'sleep' | 'poison' | 'toxic' | 'burn' | 'freeze' | 'paralysis' | 'fainted';
   heldItem: Id | null;
+  /** The Ball Capsule marker (decomp PartyMenu_DrawMemberBallSeal, `party/held` cell 2 at the item marker + 8 px). */
+  capsule?: true;
 }
 
 /**
@@ -1032,6 +1071,11 @@ export interface MartView {
    * (`money.label` empty: the BP window has one line), and the panel takes the frontier palette (`shop/panel_frontier`).
    */
   currency?: 'bp';
+  /**
+   * The seal mart (MART_TYPE_SEAL): BUY / CANCEL, no item icon (the panel `shop/panel_seal`); rows and `item` name a seal
+   * as `seal:<id>`; "In Bag" counts the seals owned.
+   */
+  seals?: true;
 }
 
 /** A Pokémon in the PC (box or party column): its icon and held item. */
@@ -1242,6 +1286,46 @@ export interface EvolutionParticleView {
 export interface LibraryTvView {
   app: 'library-tv';
   scanY: number;
+  black: number;
+}
+
+/**
+ * 0.37.0. The journal (decomp journal_display/journal_controller.c, journal_printer.c), stepped once per tick: one 256×192
+ * DS screen. Each page is the paper (`JournalTables.art` by gender, cell = the page number: page n's paper palette) and
+ * its text in the system font (colours 1/2): `title` at (16, 16) and `weekday` 12 px after it; `rows` in the events window
+ * at (32, 32) + (0, y). While a page turns, `turn` names the page on top and the wipe step (0–8) of
+ * `JournalTables.pageTurn`: destination tile column i shows the top page's column `pageTurn[step][i]`, or the page under
+ * it where that is 0xFF. `black` is the screen fade (0 shown, 16 black). Taps: `prev` (newer), `next` (older), `back`.
+ */
+export interface JournalView {
+  app: 'journal';
+  gender: 'male' | 'female';
+  /** The page shown (under a turn: the page under the wipe). */
+  page: JournalPageView;
+  turn: { step: number; page: JournalPageView } | null;
+  /** Newer and older pages exist (the taps' targets). */
+  newer: boolean;
+  older: boolean;
+  black: number;
+}
+
+/** One printed journal page: its number (the paper palette) and lines. */
+export interface JournalPageView {
+  index: number;
+  title: string;
+  weekday: string;
+  rows: { y: number; text: string }[];
+}
+
+/**
+ * 0.37.0. A diploma (decomp applications/diploma.c, Diploma_Main), stepped once per tick: the document sheet
+ * (`NewGame.diploma` sinnoh / national) with three lines in the system font (colours 1/2) at their DS positions;
+ * `black` the brightness fade (0 shown, 16 black). Taps: `next` (A, B or a touch once the document has settled).
+ */
+export interface DiplomaView {
+  app: 'diploma';
+  sheet: Id;
+  lines: { text: string; x: number; y: number }[];
   black: number;
 }
 

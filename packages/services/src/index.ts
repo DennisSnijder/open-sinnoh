@@ -21,3 +21,5 @@ export * from './battle-castle.ts';
 export * from './battle-arcade.ts';
 export * from './contest.ts';
 export * from './contest-visual.ts';
+export * from './seals.ts';
+export * from './slots.ts';

@@ -23,7 +23,10 @@ describe.skipIf(!romPath)('battle animations (OPENSINNOH_NDS_ROM)', () => {
   it('imports every move and common script, and each decodes with known commands only', () => {
     expect(anims.filter((a) => a.move !== undefined || a.common === undefined)).toHaveLength(468);
     expect(anims.filter((a) => a.common !== undefined)).toHaveLength(50);
-    expect(reg.particleSystems.size).toBe(485);
+    // waza_particle.narc's 485, and ball_particle.narc's send-out bursts (1–17, 36) and seals (37–116).
+    const ps = [...reg.particleSystems.values()];
+    expect(ps.filter((p) => !p.archive)).toHaveLength(485);
+    expect(ps.filter((p) => p.archive === 'ball').map((p) => p.sourceIndex)).toEqual([...Array.from({ length: 17 }, (_, i) => i + 1), ...Array.from({ length: 81 }, (_, i) => i + 36)]);
     for (const a of anims) if (a.code.length) expect(() => scriptUse(a.code), a.id).not.toThrow();
   });
 

@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { bucketOf, classifyOp, TRIAGE } from './classify.ts';
 import { COMMANDS, COMMAND_BY_NAME } from './commands.ts';
-import { classificationReport, classifyOps, implementedOps, m5Progress, M5_PATH, REAL_CONTESTS, REAL_M1B, REAL_M2A, REAL_M3B, REAL_M5, REAL_P, type M5Chunk } from './coverage.ts';
+import { classificationReport, classifyOps, implementedOps, m5Progress, M5_PATH, REAL_CONTESTS, REAL_SEALS, REAL_GAME_CORNER, REAL_TOWN, REAL_M1B, REAL_M2A, REAL_M3B, REAL_M5, REAL_P, type M5Chunk } from './coverage.ts';
 import { CP_PATH_OPS } from './cp-path.ts';
 
 describe('op classification', () => {
@@ -66,6 +66,12 @@ describe('op classification', () => {
     expect(classifyOps().filter((o) => o.real === 'M3b').length).toBe(REAL_M3B.length);
     expect(classifyOps().filter((o) => o.real === 'contests' && o.status !== 'implemented')).toEqual([]);
     expect(classifyOps().filter((o) => o.real === 'contests').length).toBe(REAL_CONTESTS.length);
+    expect(classifyOps().filter((o) => o.real === 'seals' && o.status !== 'implemented')).toEqual([]);
+    expect(classifyOps().filter((o) => o.real === 'seals').length).toBe(REAL_SEALS.length);
+    expect(classifyOps().filter((o) => o.real === 'game-corner' && o.status !== 'implemented')).toEqual([]);
+    expect(classifyOps().filter((o) => o.real === 'game-corner').length).toBe(REAL_GAME_CORNER.length);
+    expect(classifyOps().filter((o) => o.real === 'town' && o.status !== 'implemented')).toEqual([]);
+    expect(classifyOps().filter((o) => o.real === 'town').length).toBe(REAL_TOWN.length);
     expect(classifyOps().filter((o) => o.real === 'M1b').map((o) => o.op)).toEqual(COMMANDS.map((c) => c.name).filter((op) => REAL_M1B.includes(op)));
     for (const op of Object.keys(TRIAGE)) {
       expect(COMMAND_BY_NAME.has(op), op).toBe(true);

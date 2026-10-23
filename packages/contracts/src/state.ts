@@ -212,7 +212,7 @@ export interface GameState {
   fieldRng?: PrngState;
   /** FieldOverworldState exit location (not the elevator special location). Absent until an entrance is recorded. */
   escapeLocation?: { zone: Id; x: number; z: number; facing: Facing };
-  schemaVersion: 21;
+  schemaVersion: 22;
   packs: { id: string; version: string }[];
   names: { player: string; rival: string };
   gender: 'male' | 'female';
@@ -390,8 +390,18 @@ export interface GameState {
    * order): the last official win of that type, or null.
    */
   contestPhotos: (import('./contests.ts').ContestPhoto | null)[];
+  /**
+   * 0.37.0. The journal (schema v22; decomp JournalEntry × MAX_JOURNAL_ENTRIES, `journal.ts`): at most ten pages, page 0
+   * today's; empty until the journal is given. The online events are not kept.
+   */
+  journal: import('./journal.ts').JournalPage[];
   /** 0.35.0. The contest running between `new_contest` and `end_contest` (`ContestSession`); absent otherwise, so never in a save. */
   contest?: import('./contests.ts').ContestSession;
+  /**
+   * The Seal Case (schema v22; decomp SealCase, contracts `seals.ts`): the loose seals per id and the 12 Ball Capsules. A
+   * party Pokémon's `capsule` is a copy of one of them.
+   */
+  sealCase: import('./seals.ts').SealCase;
 }
 
 /** Decomp MAX_POFFINS. */

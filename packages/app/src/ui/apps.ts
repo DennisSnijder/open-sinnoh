@@ -15,6 +15,7 @@ import { drawPokedex } from './dex.ts';
 import { evolution } from './evolution.ts';
 import { hatch } from './hatch.ts';
 import { libraryTv } from './library-tv.ts';
+import { diploma, journal } from './journal.ts';
 import { townMap } from './town-map.ts';
 import { rowanIntro } from './rowan-intro.ts';
 import { moveReminder } from './move-reminder.ts';
@@ -26,6 +27,8 @@ import { mining, miningPrompt, undergroundBase, undergroundMenu, undergroundPc, 
 import { contestApp } from './contest.ts';
 import { contestDance } from './contest-dance.ts';
 import { contestPhoto } from './contest-visual.ts';
+import { capsuleEditor } from './capsule.ts';
+import { slots } from './slots.ts';
 import { arcadeApp, castleApp, factoryApp, hallBoard } from './frontier.ts';
 import { credits, hallOfFame } from './hall-of-fame.ts';
 import { icon, type IconName } from './icons.ts';
@@ -50,6 +53,8 @@ export interface DrawContext {
   frame: number;
   /** Width of a line in font pixels. */
   measure(s: string): number;
+  /** Draws one line in the game font onto a canvas at 1:1 (DS screens that paint their text: the journal). Absent: no text. */
+  paint?(g: CanvasRenderingContext2D, s: string, palette: Palette, x: number, y: number): void;
   /** The OPTIONS screen (its page, cursor and the app's settings); absent outside a game. */
   options?: OptionsScreen;
   /** CSS px per font pixel on the generic sheets (the dot grid): pixel art canvases are drawn at this scale. */
@@ -142,6 +147,10 @@ export function drawApp(d: DrawContext, v: AppView): Drawn {
       return { kind: 'scene', root: hatch(d, v) };
     case 'library-tv':
       return { kind: 'scene', root: libraryTv(d, v) };
+    case 'journal':
+      return { kind: 'scene', root: journal(d, v) };
+    case 'diploma':
+      return { kind: 'scene', root: diploma(d, v) };
     case 'town-map':
       return { kind: 'scene', root: townMap(d, v) };
     case 'hall-of-fame':
@@ -183,10 +192,14 @@ export function drawApp(d: DrawContext, v: AppView): Drawn {
       return contestApp(d, v);
     case 'contest-photo':
       return { kind: 'mart', root: contestPhoto(d, v) };
+    case 'capsule-editor':
+      return { kind: 'mart', root: capsuleEditor(d, v) };
     case 'factory':
       return { kind: 'scene', root: factoryApp(d, v) };
     case 'hall-board':
       return { kind: 'scene', root: hallBoard(d, v) };
+    case 'slots':
+      return { kind: 'scene', root: slots(d, v) };
     case 'castle':
       return { kind: 'scene', root: castleApp(d, v) };
     case 'arcade':
@@ -274,6 +287,9 @@ const MART_TILES = {
   moneyBp: [0, 0, 11, 4],
   list: [12, 2, 19, 14],
   description: [5, 18, 27, 6],
+  /** MART_TYPE_SEAL: the BUY / SEE YA! window (Shop_InitContextMenu, 13 × 4) and the description without an icon (sShop_NormalItemDescWindowTemplate). */
+  menuSeal: [0, 0, 15, 6],
+  descriptionSeal: [1, 18, 27, 6],
   message: [0, 18, 32, 6],
   inBag: [0, 14, 16, 4],
   quantity: [18, 12, 14, 6],
@@ -295,13 +311,13 @@ function mart(wide: DrawContext, v: MartView): HTMLElement {
   const root = board(`mart mart-${v.mode} mart-board${listing ? ' mart-screen' : ''}`);
   const message = v.message ? place(messageBox(d, v.message.text, v.message.waiting), 'message') : null;
   if (!listing) {
-    if (v.mode === 'menu') root.append(place(framed(d, 'mart-menu', ...v.menu.map((m, i) => stop(d, `menu:${i}`, [d.text(m)], 'menu-entry', i === v.menuCursor))), 'menu'));
+    if (v.mode === 'menu') root.append(place(framed(d, 'mart-menu', ...v.menu.map((m, i) => stop(d, `menu:${i}`, [d.text(m)], 'menu-entry', i === v.menuCursor))), v.seals ? 'menuSeal' : 'menu'));
     if (message) root.append(message);
     return root;
   }
   // A pack without the shop's art (the fixture): a CSS stand-in.
   const bp = v.currency === 'bp';
-  const panel = bgPicture(d, bp ? 'shop/panel_frontier' : 'shop/panel', 0, 0, 'mart-panel') ?? at(el('span', 'mart-css-panel'), 0, 0, 256, 192);
+  const panel = bgPicture(d, bp ? 'shop/panel_frontier' : v.seals ? 'shop/panel_seal' : 'shop/panel', 0, 0, 'mart-panel') ?? at(el('span', 'mart-css-panel'), 0, 0, 256, 192);
   const money = bp
     ? place(framed(d, 'money-window money-window-bp', el('span', 'money-value', d.text(v.money.value))), 'moneyBp')
     : place(framed(d, 'money-window', d.text(v.money.label), el('span', 'money-value', d.text(v.money.value))), 'money');
@@ -332,6 +348,7 @@ function mart(wide: DrawContext, v: MartView): HTMLElement {
   root.append(panel, money, listWindow);
   // The DS draws the message box over the description and the icon.
   if (message) root.append(message);
+  else if (v.item && v.seals) root.append(place(el('div', 'item-panel-text mart-description', d.flow(v.item.description, true, 'light')), 'descriptionSeal'));
   else if (v.item) {
     root.append(
       at(el('span', 'mart-item-icon', d.art.itemIcon(v.item.id as never, true)), MART_ICON.x - 16, MART_ICON.y - 16, 32, 32),

@@ -36,6 +36,8 @@ import { importBoxArt } from './box.ts';
 import { DANCE_PRESS_STEPS, DANCE_TIMELINE_TILES, importContestDanceArt } from './contest-dance.ts';
 import { importTownMapArt, type HiddenPatch } from './town-map.ts';
 import { importContestActingArt } from './contest-acting.ts';
+import { importSealArt } from './seals.ts';
+import { importDiplomaArt, importJournalArt } from './journal-diploma.ts';
 
 export * from './compose.ts';
 export * from './nanr.ts';
@@ -46,6 +48,7 @@ export * from './pokegra.ts';
 export { Sheets, sheetId } from './sheets.ts';
 export { importTrapArt, importUndergroundArt, miningObjectCell } from './underground.ts';
 export { accessoryPictures } from './contests.ts';
+export { importSlotArt } from './slots.ts';
 
 /** Code tables the 2D import reads, each verified by SHA1. */
 const TABLES = {
@@ -121,8 +124,11 @@ export async function importUi2d(fs: NitroFs, speciesIds: Id[], classIds: Id[], 
   importPoketchArt(fs, sheets);
   importBagArt(fs, sheets);
   importBoxArt(fs, sheets);
+  importSealArt(fs, sheets);
   importContestDanceArt(fs, sheets, await table('danceTimeline'), await table('dancePress'));
   const townMapPatches = importTownMapArt(fs, sheets);
+  importJournalArt(fs, sheets);
+  importDiplomaArt(fs, sheets);
   {
     const b = await table('contestButtonPalettes');
     importContestActingArt(fs, sheets, Array.from({ length: 5 }, (_, p) => Array.from({ length: 16 }, (_, c) => b[(p * 16 + c) * 2]! | (b[(p * 16 + c) * 2 + 1]! << 8))));

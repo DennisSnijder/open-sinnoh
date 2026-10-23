@@ -1,5 +1,5 @@
 /** Strict schemas for every registry in contracts `records.ts` (the pack boundary). */
-import { DW_PLATFORM_FLAGS, DW_PROP_KINDS, DW_PUZZLE_FLAGS, DW_SUPPORT_KINDS, GAME_RECORDS, parseTextMarkup, REGISTRIES, TRAINER_SCORE_MAX, type RegistryName } from '@opensinnoh/contracts';
+import { VILLA_FURNITURE_COUNT, DW_PLATFORM_FLAGS, DW_PROP_KINDS, DW_PUZZLE_FLAGS, DW_SUPPORT_KINDS, GAME_RECORDS, parseTextMarkup, REGISTRIES, SEALS, TRAINER_SCORE_MAX, type RegistryName } from '@opensinnoh/contracts';
 import { STATS, type RegistryRecord } from '@opensinnoh/core';
 import { arr, bool, collectRefs, dict, id, int, lit, nullable, num, obj, opt, ref, str, tagged, tuple, union, validate, type RefUse, type Schema } from './schema.ts';
 
@@ -795,6 +795,50 @@ const undergroundTables = obj({
   }, (v) => ([...(v.smoke as unknown[][]), v.bigSmoke as unknown[]].some((p) => p.length !== 32 * 24) ? 'a smoke pattern must have 32 × 24 tiles' : (v.marks as unknown[]).length !== 32 ? 'traps.marks must have the 32 trap ids' : undefined)),
   base: obj({ cursor: nullable(ref('models')), flags: obj({ created: ref('flags'), decorated: ref('flags') }) }),
 }, (v) => ((v.goods as unknown[]).length !== 139 ? 'goods must have the 139 goods' : (v.treasureItems as unknown[]).length !== 49 ? 'treasureItems must have the 49 treasures' : (v.trapPrices as unknown[]).length !== 34 ? 'trapPrices must have the 34 traps' : (v.treasurePrices as unknown[]).length !== 60 ? 'treasurePrices must have the 60 mining ids' : undefined));
+/** 0.37.0: the Game Corner's tables (contracts slots.ts SlotTables); sizes and ranges the slot model indexes are checked. */
+const pct = int(0, 100);
+const byMode = (row: Schema) => arr(row);
+const slotTables = obj({
+  modes: arr(int(0, 5)),
+  reels: arr(arr(int(0, 5))),
+  payouts: arr(int(0, 0xffff)),
+  bonusPayouts: arr(int(0, 0xffff)),
+  winChance: byMode(pct),
+  winFlags: byMode(arr(pct)),
+  hintChance: byMode(pct),
+  standbySmall: byMode(pct),
+  standbyFlags: byMode(arr(pct)),
+  bonusTypes: byMode(arr(obj({ chance: pct, type: int(0, 5), class: int(0, 2) }))),
+  continueStart: arr(pct),
+  clefairyKinds: byMode(arr(arr(obj({ chance: pct, kind: int(0, 2) })))),
+  redMoon: byMode(pct),
+  blueMoon: byMode(pct),
+  continueDrop: byMode(arr(pct)),
+  endTells: byMode(arr(obj({ min: pct, a: pct, b: pct }))),
+  bonusOrders: arr(obj({ buttons: arr(lit('y', 'b', 'a')), clefairy: arr(int(5, 7)) })),
+  lightShow: arr(obj({ mask: int(0, 0x7f), from: num, to: num, step: num })),
+  stopButtons: arr(obj({ x: int(0, 31), y: int(0, 23) })),
+  linePalettes: arr(int(0, 15)),
+  lineFlash: arr(arr(obj({ x: num, y: num }))),
+  messageWindow: obj({ x: int(0, 31), y: int(0, 23), width: int(1, 32), height: int(1, 24) }),
+  prizes: arr(obj({ item: ref('items'), price: int(0, 0xffff) })),
+  messages: arr(ref('texts')),
+  streakVar: ref('vars'),
+}, (v) => {
+  const t = v as unknown as import('@opensinnoh/contracts').SlotTables;
+  if (t.modes.length !== 12) return 'slots.modes must have the 12 machines';
+  if (t.reels.length !== 3 || t.reels.some((r) => r.length !== 21)) return 'slots.reels must be 3 strips of 21';
+  if (t.payouts.length !== 6 || t.bonusPayouts.length !== 6 || t.continueStart.length !== 6) return 'slots payouts and continue chances are by symbol or type (6)';
+  const modes = [t.winChance, t.winFlags, t.hintChance, t.standbySmall, t.standbyFlags, t.bonusTypes, t.clefairyKinds, t.redMoon, t.blueMoon, t.continueDrop, t.endTells];
+  if (modes.some((m) => m.length !== 6)) return 'slots tables by mode must have the 6 modes';
+  if (t.winFlags.some((r) => r.length !== 7) || t.standbyFlags.some((r) => r.length !== 4) || t.continueDrop.some((r) => r.length !== 2)) return 'slots flag tables have 7, 4 and 2 columns';
+  if (t.bonusTypes.some((r) => r.length !== 6) || t.clefairyKinds.some((m) => m.length !== 3 || m.some((c) => c.length !== 3)) || t.endTells.some((r) => r.length !== 9 || r.at(-1)!.min !== 0)) return 'slots bonus tables: 6 types, 3 × 3 Clefairy kinds, 9 tells ending at 0';
+  if (t.bonusOrders.length !== 6 || t.bonusOrders.some((o) => new Set(o.buttons).size !== 3 || o.clefairy.length !== 3)) return 'slots.bonusOrders must be the 6 stop orders';
+  if (t.stopButtons.length !== 3 || t.linePalettes.length !== 5 || t.lineFlash.length !== 5 || t.lineFlash.some((l) => l.length !== 3)) return 'slots presentation tables: 3 stop buttons, 5 lines × 3 reels';
+  if (!t.lightShow.length || t.lightShow.at(-1)!.mask !== 0x40) return 'slots.lightShow must end with its restart';
+  if (t.messages.length !== 3) return 'slots.messages must be the 3 slot messages';
+  return undefined;
+});
 const npcTrade = obj({
   species: ref('species'),
   requested: ref('species'),
@@ -1024,6 +1068,7 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
       tram: opt(ref('props')),
     }, (v) => ((v.zones as unknown[]).length !== 6 ? 'greatMarsh.zones must have the 6 areas' : (v.daily as { regional: unknown[]; national: unknown[] }).regional.length !== 32 || (v.daily as { national: unknown[] }).national.length !== 32 ? 'greatMarsh.daily tables must have 32 species' : undefined))),
     contestHallFlag: opt(ref('flags')),
+    slots: opt(slotTables),
     // 0.35.0: the Super Contests' tables (contracts ContestTables).
     contests: opt(obj({
       opponents: arr(obj({
@@ -1087,6 +1132,17 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
       // 0.35.1: the accessories' pictures (sizes and masks) for the visual round.
       accessories: arr(obj({ width: lit(16, 32, 64), height: lit(16, 32, 64), mask: str() })),
     }, (v) => ((v.themes as unknown[]).length !== 12 ? 'contests.themes must have the 12 themes' : (v.accessories as unknown[]).length !== 100 ? 'contests.accessories must have the 100 accessories' : undefined))),
+    // The seal tables (contracts SealTables): a row per seal id 0–80, the seal marts, the NPC trainers' capsules, the send-out delays.
+    seals: opt(obj({
+      types: arr(obj({ sheet: int(0, 0xffff), name: int(0, 255), particle: int(0, 255), alphabet: bool, price: int(0, 0xffff), description: int(0, 255) })),
+      marts: arr(arr(int(1, SEALS.count))),
+      trainerCapsules: arr(arr(obj({ seal: int(1, SEALS.count), x: int(0, 255), y: int(0, 255) }))),
+      delays: arr(int(0, 255)),
+      ballOpen: arr(obj({ particle: int(0, 255), emitters: int(1, 20) })),
+    }, (v) => {
+      if ((v.types as unknown[]).length !== SEALS.count + 1) return `seals.types must have ${SEALS.count + 1} rows`;
+      return (v.trainerCapsules as unknown[][]).some((c) => c.length > SEALS.perCapsule) ? `a capsule holds at most ${SEALS.perCapsule} seals` : undefined;
+    })),
     // 0.31.0: Amity Square (contracts AmitySquareTables): pools of ten accessories, the gifts' items then accessories.
     amitySquare: opt(obj({
       stepVar: ref('vars'),
@@ -1094,6 +1150,33 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
       gifts: arr(int(0, 0xffff)),
       itemGifts: int(0, 0xffff),
     }, (v) => ((v.finds as unknown[]).length ? undefined : 'amitySquare.finds is empty'))),
+    // 0.37.0: the Villa (contracts VillaTables): the 20 pieces, their placements and the visitor odds.
+    villa: opt(obj({
+      zone: ref('zones'),
+      resortArea: ref('zones'),
+      furniture: arr(obj({ flag: ref('flags'), prop: ref('props'), label: ref('labels') })),
+      rows: arr(obj({ type: int(0, VILLA_FURNITURE_COUNT - 1), collision: bool, position: tuple(num, num, num), box: obj({ left: int(0, 0xff), top: int(0, 0xff), right: int(0, 0xff), bottom: int(0, 0xff) }) })),
+      tvType: int(0, VILLA_FURNITURE_COUNT - 1),
+      visitors: obj({ chances: tuple(int(0, 100), int(0, 100), int(0, 100)), counts: tuple(int(1, 255), int(1, 255), int(1, 255)), visitorVar: ref('vars'), messageVar: ref('vars'), insideFlag: ref('flags'), outsideFlag: ref('flags') }),
+    }, (v) => ((v.furniture as unknown[]).length !== VILLA_FURNITURE_COUNT ? `villa.furniture must have the ${VILLA_FURNITURE_COUNT} pieces` : undefined))),
+    // 0.37.0: the journal (contracts JournalTables).
+    journal: opt(obj({
+      flag: ref('flags'),
+      gyms: arr(obj({ trainer: ref('trainers'), zone: ref('zones'), badge: id })),
+      buildings: arr(obj({ label: int(0, 0xffff), exited: bool })),
+      caveDeparted: arr(int(0, 0xffff)),
+      eliteFour: arr(ref('trainers')),
+      champion: arr(ref('trainers')),
+      home: ref('zones'),
+      lab: ref('zones'),
+      rivalClass: id,
+      banks: obj({ entries: ref('textBanks'), months: ref('textBanks'), gyms: ref('textBanks'), locations: ref('textBanks'), times: ref('textBanks') }),
+      pageTurn: arr(arr(int(0, 0xff))),
+      art: opt(obj({ male: ref('ui2d'), female: ref('ui2d') })),
+      martExcluded: obj({ label: int(0, 0xffff), zones: arr(ref('zones')) }),
+    }, (v) => ((v.pageTurn as number[][]).length !== 9 || (v.pageTurn as number[][]).some((r) => r.length !== 32) ? 'journal.pageTurn must be 9 steps of 32 columns' : undefined))),
+    // 0.37.0: the diplomas' documents and texts.
+    diploma: opt(obj({ sinnoh: ref('ui2d'), national: ref('ui2d'), texts: obj({ player: ref('texts'), sinnoh: ref('texts'), national: ref('texts'), credit: ref('texts') }) })),
   }, (v) => {
     const pieces = v.sizeIntervals as { start: number }[] | undefined;
     return pieces && (pieces.length !== 16 || pieces[0]!.start !== 0 || pieces.some((p, i) => i > 0 && p.start <= pieces[i - 1]!.start)) ? 'sizeIntervals must have 16 increasing intervals beginning at zero' : undefined;
@@ -1160,7 +1243,7 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
   }),
   battleAnimations: obj({ id, move: opt(ref('moves')), common: opt(str(/^[a-z0-9_]+$/)), sourceIndex: int(0), code: arr(int(-0x80000000, 0x7fffffff)) }),
   particleSystems: obj(
-    { id, sourceIndex: int(0), textures: ref('ui2d'), textureParams: arr(int(0)), emitters: arr(particleEmitter) },
+    { id, sourceIndex: int(0), archive: opt(lit('ball')), textures: ref('ui2d'), textureParams: arr(int(0)), emitters: arr(particleEmitter) },
     (v) => {
       const n = (v.textureParams as unknown[]).length;
       const bad = (v.emitters as { texture: number; texAnim?: { textures: number[] }; child?: { texture: number } }[]).find((e) => e.texture >= n || e.child?.texture !== undefined && e.child.texture >= n || e.texAnim?.textures.some((t) => t >= n));

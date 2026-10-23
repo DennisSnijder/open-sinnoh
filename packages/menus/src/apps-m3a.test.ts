@@ -503,8 +503,7 @@ describe('PC boxes (storage)', () => {
     expect(s.boxes[1]!.slots[0]!.species).toBe(id('SPECIES_DRIPLING'));
     expect(s.party).toHaveLength(1);
     tap(dep, 'party:0');
-    tap(dep, 'menu:0');
-    press(dep, 'a');
+    tap(dep, 'menu:0'); // STORE refuses before the box is chosen (STORE_MON_CHECK_CAN_STORE_MON)
     expect(view(dep).message!.text).toBe('That one is your last!');
     dismiss(dep);
     expect(press(dep, 'b')).toBeNull();

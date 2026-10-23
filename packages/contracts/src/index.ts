@@ -17,8 +17,12 @@ export * from './story-scenes.ts';
 export * from './frontier.ts';
 export * from './underground.ts';
 export * from './contests.ts';
+export * from './seals.ts';
+export * from './slots.ts';
+export * from './villa.ts';
+export * from './journal.ts';
 
 export * from './anim-script.ts';
 
-export const CONTRACTS_VERSION = '0.39.0';
+export const CONTRACTS_VERSION = '0.40.0';
 

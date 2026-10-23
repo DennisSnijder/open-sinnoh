@@ -1,0 +1,69 @@
+# The Veilstone Prize Exchange (decomp scripts_veilstone_city_prize_exchange.s): the coin window (show_coins), the 19
+# prizes listed from get_game_corner_prize_data with their prices, the list opening where it was left
+# (show_list_menu_remember_cursor): TM58 at row 5 bought twice for 2000 coins each (has_coins_from_var,
+# subtract_coins_from_var, update_coin_display), then NO THANKS (B). The guitarist names a Pokémon's Hidden Power type
+# (calc_hidden_power_type) for a Staravia picked from the party.
+give item platinum:ITEM_COIN_CASE
+set state coins 4000
+party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK
+warp platinum:MAP_HEADER_VEILSTONE_CITY_PRIZE_EXCHANGE 4 8 up
+until idle
++0 press up
+until position 4 6 600
++0 release up
+until idle
++4 press a
++1 release a
+advance text 600
+until menu 600
++4 press down
++1 release down
++2 press down
++1 release down
++2 press down
++1 release down
++2 press down
++1 release down
++2 press down
++1 release down
++2 press a
++1 release a
+until yesno 600
++0 assert text platinum:VeilstoneCityPrizeExchange_Text_IsYourChoiceThisTM 0
++4 press a
++1 release a
+advance text 600
+until menu 600
++0 assert state coins 2000
++0 assert state bag.tmhms[item="platinum:ITEM_TM58"].count 1
++4 press a
++1 release a
+until yesno 600
++4 press a
++1 release a
+advance text 600
+until menu 600
++0 assert state coins 0
++0 assert state bag.tmhms[item="platinum:ITEM_TM58"].count 2
++4 press b
++1 release b
+advance text 600
+until idle 600
++0 press left
+until position 2 6 600
++0 release left
+until idle
++0 press down
++1 release down
++4 press a
++1 release a
+advance text 3000
+until yesno 600
++4 press a
++1 release a
+until app party 600
++4 tap slot:0
+until app none 600
+advance text 3000
+until idle 600
++0 assert flag platinum:FLAG_TALKED_TO_VEILSTONE_CITY_PRIZE_EXCHANGE_GUITARIST true

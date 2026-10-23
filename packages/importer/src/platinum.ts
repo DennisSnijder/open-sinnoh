@@ -21,7 +21,7 @@ import { resolveUnscriptedClones } from './object-clones.ts';
 import { importShips } from './ships.ts';
 import { importTitle } from './title/index.ts';
 import { importCreditsRide } from './credits.ts';
-import { accessoryPictures, BACKGROUNDS, importTrapArt, importUi2d, importUndergroundArt, mapPopupSheet, MAP_POPUP_STYLES, Sheets } from './ui2d/index.ts';
+import { accessoryPictures, BACKGROUNDS, importSlotArt, importTrapArt, importUi2d, importUndergroundArt, mapPopupSheet, MAP_POPUP_STYLES, Sheets } from './ui2d/index.ts';
 import { HIDDEN_LOCATIONS, importPokedex } from './pokedex.ts';
 import { matrixVariants } from './matrix-variants.ts';
 import { flyDestinations, readTownMap } from './town-map.ts';
@@ -33,6 +33,7 @@ import namesFile from '../data/names.json' with { type: 'json' };
 import { readCameraTable } from './formats/camera.ts';
 import { readObjectGfxTable, readScriptEntryOffsets } from './formats/data.ts';
 import { importPokemonData, type PokemonData } from './pokemon-data.ts';
+import { readJournalTables, readVillaTables, VILLA_ROW_SIZE } from './town-extras.ts';
 import { berryTreeGfx, readBerryTables, readNpcTrades, readTutorTables, TUTOR_MASK_SIZE, TUTOR_MOVE_SIZE } from './side-systems.ts';
 import { readTrainerAi } from './trainer-ai.ts';
 import { readEncounters, REPLACEMENT_SLOTS, type RawWaterEncounters } from './formats/encounters.ts';
@@ -46,6 +47,8 @@ import { readZoneHeaders, type ZoneHeader } from './formats/zone-headers.ts';
 import { charTable, Names, type CharmapFile, type NamesFile } from './names.ts';
 import { convertBaseCursor, readUndergroundTables } from './underground.ts';
 import { readContestTables } from './contests.ts';
+import { readSealTables, SEAL_TYPE_SIZE } from './seals.ts';
+import { LIGHT_SHOW, readSlotTables, readSpriteMembers, SLOT_PRIZES } from './slots.ts';
 import { ACTING_MESSAGES, AI_RULE_SIZE, AI_RULES, BUTTON_PALETTES, CONTEST_EFFECTS, EFFECT_CLASS_SIZE, EFFECT_SIZE, readActingTables } from './contest-acting.ts';
 import { DANCE_BUTTONS, DANCE_CHOICE_SIZE, DANCE_LEVELS, DANCE_POSITIONS, DANCE_SONG_SIZE, DANCE_TINTS, DANCE_VARIANT_SIZE, readContestDance } from './contest-dance.ts';
 
@@ -85,8 +88,12 @@ const AMITY_FINDERS = [
 ];
 /** ScrCmd_CheckAmitySquareManGiftIsAccessory: gift ids below 9 are items. */
 const AMITY_ITEM_GIFTS = 9;
+/** The Villa's furniture build models (sVillaFurnitureModelIDs: 559–578), converted in a slice import too. */
+const VILLA_FURNITURE_MODELS = Array.from({ length: 20 }, (_, i) => 559 + i);
 /** MAP_HEADER_UNDERGROUND. */
 const UNDERGROUND_ZONE = 2;
+/** The badges by decomp BADGE_ID_* number. */
+const BADGE_IDS = ['COAL', 'FOREST', 'COBBLE', 'FEN', 'RELIC', 'MINE', 'ICICLE', 'BEACON'].map((b) => asId(`platinum:BADGE_ID_${b}`));
 
 /** ROM tables located inside arm9/overlays, each verified by SHA1 before use. */
 const TABLES = {
@@ -168,6 +175,14 @@ const TABLES = {
   martCommon: { where: 'arm9', offset: 0xebafc, count: 19, size: 4, sha1: '629e5850dc3cb17581aea879813e36eeed80c6ea' },
   /** mart_items.h PokeMartSpecialties: a pointer per MART_SPECIALTIES_ID_*. */
   martSpecialties: { where: 'arm9', offset: 0x100b1c, count: 20, size: 4, sha1: '26e5e6547df95770d129d816bae163fa3201b9f1' },
+  /** capsule_menu/main.c sealTypeValues: a row per seal id 0–80 (seals.ts). */
+  sealTypes: { where: 'arm9', offset: 0xf64d0, count: 81, size: SEAL_TYPE_SIZE, sha1: 'b722c8b73768aadb1bd5caba5a8c3477a9c43978' },
+  /** mart_items.h SunyshoreMarketDailyStocks: a pointer per MART_SEAL_ID_SUNYSHORE_* (Monday … Sunday) to a 0xFFFF-ended list. */
+  sealMarts: { where: 'arm9', offset: 0x100b00, count: 7, size: 4, sha1: '8c6bc435bd5fe5d257264b242e39f1dbeeb48252' },
+  /** ov12_02237EA0's delay table: a seal emitter's start delay in frames by distance step. */
+  sealDelays: { where: 12, offset: 0x1b420, count: 7, size: 1, sha1: 'f5af31e595e4a5912f406ed78354562d53375f26' },
+  /** ov12_02235E94.c Unk_ov12_0223AD70: the default ball-open burst per ball, {ball_particle member, emitter count} (s32 each). */
+  ballOpenParticles: { where: 12, offset: 0x1b150, count: 20, size: 8, sha1: 'ac2a9cc8d2e6ea4be7263237a5e198d19779bb93' },
   /** gTrainerAITable (overlay trainer_ai = 14): the AI flag table and bytecode, through Terminate's PopOrEnd. */
   aiScript: { where: 14, offset: 0x4c84, count: 10607, size: 4, sha1: '981183191070373d80362e94c09f8456f7f4f793' },
   /** trainer_ai.c sNoDamageCalcMoveEffects, sAltPowerMoveEffects (u16, 0xFFFF-ended) and sWeightToPower. */
@@ -297,6 +312,44 @@ const TABLES = {
   contestActingMessages: { where: 17, offset: 0x187b0, count: ACTING_MESSAGES, size: 4, sha1: 'efe260c58c8c545077b2b11c51bd1a44a95f1d0d' },
   contestAiRules: { where: 17, offset: 0x18af0, count: AI_RULES, size: AI_RULE_SIZE, sha1: 'fc154d44a628d2943337163a6fcccce44373db8a' },
   contestButtonPalettes: { where: 17, offset: 0x18378, count: BUTTON_PALETTES * 16, size: 2, sha1: '88229a78266a8e8de6b1f9f93f3fdee09ac60f55' },
+  /** The Game Corner (slots.ts, docs/research/game-corner.md §3): arm9's machine modes and prizes, then overlay 101's tables (RAM base 0x021D0D80). */
+  slotModes: { where: 'arm9', offset: 0xea17c, count: 12, size: 1, sha1: 'c24ba7efc829cc45b324f5a4b181897495e182f9' },
+  slotPrizes: { where: 'arm9', offset: 0xec018, count: SLOT_PRIZES, size: 4, sha1: '5dbdef6918073da6526d07dcc8014e4c65a00576' },
+  slotReels: { where: 101, offset: 0x8908, count: 3, size: 84, sha1: '3121f7360c16df1344591a6e68e2ba33221ede8d' },
+  slotPayouts: { where: 101, offset: 0x87d0, count: 6, size: 4, sha1: 'e1bd6f6fb960e5fd39be9585445e5b82100ab9b7' },
+  slotBonusPayouts: { where: 101, offset: 0x8770, count: 6, size: 4, sha1: 'c8ec2041187dd608dc149d69bb20e9838fecfc60' },
+  slotWinChance: { where: 101, offset: 0x87a0, count: 6, size: 4, sha1: '97bf9e77ebd371fcd83237504ad184ca39bd37da' },
+  slotWinFlags: { where: 101, offset: 0x8848, count: 6, size: 16, sha1: '45b0afa684fc577a16e1f343a24b79f41e8a0b86' },
+  slotHintChance: { where: 101, offset: 0x8758, count: 6, size: 4, sha1: '7d78874fa16072c936e6b652e18f933b2e2124f4' },
+  slotStandbySmall: { where: 101, offset: 0x87b8, count: 6, size: 4, sha1: '97bf9e77ebd371fcd83237504ad184ca39bd37da' },
+  slotStandbyFlags: { where: 101, offset: 0x88a8, count: 6, size: 16, sha1: '293cf9557e2f51f9280b53ba7f34b3e2f3f39a35' },
+  slotBonusTypes: { where: 101, offset: 0x8bb4, count: 6, size: 72, sha1: 'eabf869cce965162aa3ffb6247284ea97f5950dc' },
+  slotContinueStart: { where: 101, offset: 0x87e8, count: 6, size: 4, sha1: '9f9e7094ee66fdd3ea6786afd4ec1696bd2c9a77' },
+  slotClefairyKinds: { where: 101, offset: 0x8a04, count: 6, size: 72, sha1: '0f8643315300bb323da842d5302eda187f8c35c0' },
+  slotRedMoon: { where: 101, offset: 0x8788, count: 6, size: 4, sha1: '6b0b9ad4867b961b8cac17714afac273c219b7db' },
+  slotBlueMoon: { where: 101, offset: 0x8800, count: 6, size: 4, sha1: 'b5d6d05018a6fc3563add35ee2f46a9e4a427c08' },
+  slotContinueDrop: { where: 101, offset: 0x8818, count: 6, size: 8, sha1: 'a24f2e5c827f74097f907a5f601c036badd49d0e' },
+  slotEndTells: { where: 101, offset: 0x8d64, count: 6, size: 144, sha1: '3d7937809c53136636b0db175b94206dd1dd70fa' },
+  slotBonusOrders: { where: 101, offset: 0x7a28, count: 6, size: 24, sha1: '3a4b2b7f18c2088028e8da3d05858c31b071af11' },
+  slotStopButtons: { where: 101, offset: 0x79c0, count: 3, size: 8, sha1: '1c216e31ae69c1606894b667ad44597e11c91650' },
+  slotLightShow: { where: 101, offset: 0x7bb8, count: LIGHT_SHOW, size: 16, sha1: 'cc6c969829c25576ca495a481014306adb3ba40a' },
+  slotLinePalettes: { where: 101, offset: 0x90e0, count: 5, size: 4, sha1: '33559b68e604100d3ca8a843f696b543e58b9e10' },
+  slotSymbolAnims: { where: 101, offset: 0x84fc, count: 6, size: 4, sha1: 'db17e883a647963a26d973378923ef4649801319' },
+  slotHintSprites: { where: 101, offset: 0x8654, count: 5, size: 16, sha1: '5af1a80c79120193cf15b5957b9126eee685fa50' },
+  slotClefairySprites: { where: 101, offset: 0x8624, count: 3, size: 16, sha1: 'ec816e28bbb30185dff30aa69d6ea457721b0491' },
+  slotLineFlash: { where: 101, offset: 0x86a4, count: 15, size: 12, sha1: 'cabb6bf607c57d3f93d8784109c7b5426d053a75' },
+  slotMessageWindow: { where: 101, offset: 0x7808, count: 1, size: 8, sha1: 'fa57d7eedc5bce8216ff803b0a1e7d2b36c1bd8f' },
+  /** The Villa (town-extras.ts): overlay005/villa_furniture.c sVillaFurnitures, sVillaFurnitureModelIDs, sVillaFurnitureScriptIDs. */
+  villaFurnitures: { where: 5, offset: 0x30bac, count: 23, size: VILLA_ROW_SIZE, sha1: '1e4153890ff365b42efa8d7e5d946c0cc46f1264' },
+  villaFurnitureModels: { where: 5, offset: 0x30b0c, count: 20, size: 4, sha1: 'e6b588c1393645f83d637810a239d98986c23b57' },
+  villaFurnitureScripts: { where: 5, offset: 0x30b5c, count: 20, size: 4, sha1: '54b69a0e1b6256a20803f9872be96942df84faef' },
+  /** system_vars.c sNumPossibleVillaVisitors (u8 × 3) and sVillaVisitorPercentChances (u8 × 3). */
+  villaVisitorCounts: { where: 'arm9', offset: 0xefa6c, count: 3, size: 1, sha1: '137eb7237c866fe1409e7196a37aaf21ebf6470a' },
+  villaVisitorChances: { where: 'arm9', offset: 0xefa70, count: 3, size: 1, sha1: '6442add075d55961da0127e7affc33da9d54a58e' },
+  /** journal.c sGymsInfo and sMapsInfo; journal_controller.c Unk_ov81_021D33E8 (the page-turn wipe). */
+  journalGyms: { where: 'arm9', offset: 0xe5b50, count: 8, size: 8, sha1: '994042d1434960e8c09c39489b17751b43463803' },
+  journalBuildings: { where: 'arm9', offset: 0xe5b90, count: 27, size: 8, sha1: '9d43b00d536d0cbac0567ea6da46c9f2cf57250c' },
+  journalPageTurn: { where: 81, offset: 0x2668, count: 9, size: 32, sha1: '0a3da3dd9b74045457514423963c1a0415a08196' },
 } as const;
 
 /** Overlay 9 offsets of the Distortion World tables, inside `TABLES.distortionWorld`. */
@@ -1167,7 +1220,7 @@ export async function importPlatinum(
   onProgress('assets', 0, 1);
   const doorTable = new Reader(await table('doorModels'));
   const doorModels = new Set(Array.from({ length: TABLES.doorModels.count }, (_, i) => doorTable.i32(i * 4)));
-  const converted = importAssets(fs, { slice: options.slice ?? false, objectGfx, doorModels, sliceModels: new Set([...Object.values(HEAL_MACHINE), ...Object.values(PLATFORM_LIFT_PROPS), ...Object.values(PASTORIA_PROPS), ...CANALAVE_PROPS, 458, 459, 460, 461, 462, 463, 464, 496, BOAT_PROPS.ship, BOAT_PROPS.snowpointShip, ...BOAT_PROPS.bridges, SPECIAL_ENCOUNTERS.honeyTreeProp]) });
+  const converted = importAssets(fs, { slice: options.slice ?? false, objectGfx, doorModels, sliceModels: new Set([...Object.values(HEAL_MACHINE), ...Object.values(PLATFORM_LIFT_PROPS), ...Object.values(PASTORIA_PROPS), ...CANALAVE_PROPS, 458, 459, 460, 461, 462, 463, 464, 496, ...VILLA_FURNITURE_MODELS, BOAT_PROPS.ship, BOAT_PROPS.snowpointShip, ...BOAT_PROPS.bridges, SPECIAL_ENCOUNTERS.honeyTreeProp]) });
   for (const w of converted.warnings) unknown('asset', w);
   const assets = new Map(converted.assets);
   const font = importFont(readNarc(fs.file('/graphic/pl_font.narc'))[MESSAGE_FONT] as Uint8Array, chars, { id: asId('platinum:FONT_MESSAGE'), atlas: asId('platinum:fonts/message.png') });
@@ -1186,6 +1239,7 @@ export async function importPlatinum(
     (done, total) => onProgress('2d art', done, total),
   );
   for (const [path, bytes] of art.assets) assets.set(path, bytes);
+  const ui2dIds = new Set(art.ui2d.map((u) => u.id));
   for (const [path, bytes] of sound.assets) assets.set(path, bytes);
   // Battle animations: the scripts, the particle files (textures as ui2d sheets) and the VM's tables.
   const animSheets = new Sheets();
@@ -1194,6 +1248,7 @@ export async function importPlatinum(
   const starterSheets = new Sheets();
   const undergroundSheets = new Sheets();
   const undergroundModels: Model[] = [];
+  const slotSheets = new Sheets();
   const starter = importChooseStarter(fs, starterSheets);
   for (const [path, bytes] of [...starter.assets, ...starterSheets.assets]) assets.set(path, bytes);
   // The Battle Frontier (frontier.ts): its scenes' scripts join the IR; the tables, art and exchange marts.
@@ -1389,6 +1444,17 @@ export async function importPlatinum(
       ),
       accessories: accessoryPictures(fs),
     });
+    newGame.seals = readSealTables({
+      types: await table('sealTypes'),
+      marts: await table('sealMarts'),
+      arm9: fs.arm9(),
+      arm9Ram: fs.header.arm9RamAddress,
+      delays: await table('sealDelays'),
+      ballOpen: await table('ballOpenParticles'),
+      trainerCapsules: fs.file('/application/custom_ball/edit/pl_cb_data.narc'),
+      names: bankTexts[bankIndex('TEXT_BANK_BALL_SEAL_NAMES')]!.length,
+      descriptions: bankTexts[bankIndex('TEXT_BANK_UNK_0542')]!.length,
+    });
     const e = SPECIAL_ENCOUNTERS;
     const ints = (b: Uint8Array, n: number, what: string) => {
       if (b.length !== n * 4) throw new ImportError(`encdata_ex ${what}: ${b.length} bytes, expected ${n} species`);
@@ -1489,6 +1555,27 @@ export async function importPlatinum(
     importUndergroundArt(fs, undergroundSheets, newGame.underground.miningObjects);
     for (const [path, bytes] of undergroundSheets.assets) assets.set(path, bytes);
   }
+  {
+    // The Game Corner (slots.ts): the slot tables, the prizes, the slot messages and the streak var; the slot art.
+    const v = [...names.varNames].find(([, n]) => n === 'VAR_CONSECUTIVE_BONUS_ROUND_WINS');
+    if (!v) throw new ImportError('names: no VAR_CONSECUTIVE_BONUS_ROUND_WINS');
+    const bank = bankIndex('TEXT_BANK_UNK_0544');
+    newGame.slots = readSlotTables(
+      {
+        modes: await table('slotModes'), prizes: await table('slotPrizes'), reels: await table('slotReels'), payouts: await table('slotPayouts'),
+        bonusPayouts: await table('slotBonusPayouts'), winChance: await table('slotWinChance'), winFlags: await table('slotWinFlags'),
+        hintChance: await table('slotHintChance'), standbySmall: await table('slotStandbySmall'), standbyFlags: await table('slotStandbyFlags'),
+        bonusTypes: await table('slotBonusTypes'), continueStart: await table('slotContinueStart'), clefairyKinds: await table('slotClefairyKinds'),
+        redMoon: await table('slotRedMoon'), blueMoon: await table('slotBlueMoon'), continueDrop: await table('slotContinueDrop'),
+        endTells: await table('slotEndTells'), bonusOrders: await table('slotBonusOrders'), stopButtons: await table('slotStopButtons'),
+        lightShow: await table('slotLightShow'), linePalettes: await table('slotLinePalettes'), symbolAnims: await table('slotSymbolAnims'),
+        lineFlash: await table('slotLineFlash'), messageWindow: await table('slotMessageWindow'),
+      },
+      { item: (i) => names.item(i), messages: [0, 1, 2].map((n) => names.text(bank, n)), streakVar: names.var(v[0]) },
+    );
+    importSlotArt(fs, slotSheets, newGame.slots, { balls: readSpriteMembers(await table('slotHintSprites'), 5), clefairy: readSpriteMembers(await table('slotClefairySprites'), 3) });
+    for (const [path, bytes] of slotSheets.assets) assets.set(path, bytes);
+  }
   // The gym puzzles (gyms/index.ts): overlay 8 tables, the clock hand props, the gym field effects.
   const hands = { hour: names.prop(CLOCK_HAND_PROPS.hour), minute: names.prop(CLOCK_HAND_PROPS.minute) };
   const handsKept = keptProps.has(hands.hour) && keptProps.has(hands.minute);
@@ -1538,6 +1625,71 @@ export async function importPlatinum(
   newGame.gyms.sunyshore = readSunyshoreTables(await table('sunyshore'), m => names.prop(m));
   const containmentLookup = new Reader(readNarc(fs.file('/arc/bm_anime_list.narc'))[496]!);
   const containmentAnimations = readNarc(fs.file('/arc/bm_anime.narc'));
+  {
+    // The Villa and the journal (town-extras.ts): their ROM tables, flags, vars, zones and scripts.
+    const byName = (list: Iterable<[number, string]>, name: string) => {
+      const e = [...list].find(([, n]) => n === name);
+      if (!e) throw new ImportError(`names: no ${name}`);
+      return e[0];
+    };
+    const flag = (name: string) => names.flag(byName(names.flagNames, name));
+    const varId = (name: string) => names.var(byName(names.varNames, name));
+    const zoneNamed = (name: string) => {
+      const i = names.file.zones.indexOf(name);
+      if (i < 0) throw new ImportError(`names: no ${name}`);
+      return i;
+    };
+    const villaHeader = zoneNamed('MAP_HEADER_VILLA');
+    const furnitureStart = byName(names.flagNames, 'FLAG_VILLA_FURNITURE_TABLE');
+    newGame.villa = readVillaTables(await table('villaFurnitures'), await table('villaFurnitureModels'), await table('villaFurnitureScripts'), await table('villaVisitorChances'), await table('villaVisitorCounts'), {
+      zone: names.zone(villaHeader),
+      resortArea: names.zone(zoneNamed('MAP_HEADER_RESORT_AREA')),
+      flag: (type) => names.flag(furnitureStart + type),
+      prop: (model) => {
+        const p = names.prop(model);
+        if (!keptProps.has(p)) throw new ImportError(`the Villa furniture prop ${p} was not converted`);
+        return p;
+      },
+      label: (script) => {
+        const l = names.scriptLabel(script, headers[villaHeader]!.scripts);
+        if (!l) throw new ImportError(`the Villa furniture script ${script} has no label`);
+        return l;
+      },
+      visitors: { visitorVar: varId('VAR_RESORT_VILLA_VISITOR'), messageVar: varId('VAR_RESORT_VILLA_VISITOR_MESSAGE_NUM'), insideFlag: flag('FLAG_VILLA_VISITOR_INSIDE'), outsideFlag: flag('FLAG_VILLA_VISITOR_OUTSIDE') },
+    });
+    const trainerNamed = (name: string) => {
+      const i = names.file.trainers.indexOf(name);
+      if (i < 0) throw new ImportError(`names: no ${name}`);
+      return names.trainer(i);
+    };
+    const label = (name: string) => {
+      const m = textBanks[bankIndex('TEXT_BANK_LOCATION_NAMES')]!.messages.indexOf(asId(`platinum:${name}`));
+      if (m < 0) throw new ImportError(`names: no ${name}`);
+      return m;
+    };
+    const bank = (name: string) => textBanks[bankIndex(name)]!.id;
+    const classIndex = names.file.trainerClasses.indexOf('TRAINER_CLASS_RIVAL');
+    if (classIndex < 0) throw new ImportError('names: no TRAINER_CLASS_RIVAL');
+    newGame.journal = readJournalTables(await table('journalGyms'), await table('journalBuildings'), await table('journalPageTurn'), {
+      flag: flag('FLAG_JOURNAL_ACQUIRED'),
+      caveDeparted: ['LocationNames_Text_ValleyWindworks', 'LocationNames_Text_SnowpointTemple', 'LocationNames_Text_FuegoIronworks'].map(label),
+      eliteFour: ['AARON', 'AARON_REMATCH', 'BERTHA', 'BERTHA_REMATCH', 'FLINT', 'FLINT_REMATCH', 'LUCIAN', 'LUCIAN_REMATCH'].map((n) => trainerNamed(`TRAINER_ELITE_FOUR_${n}`)),
+      champion: [trainerNamed('TRAINER_CHAMPION_CYNTHIA'), trainerNamed('TRAINER_CHAMPION_CYNTHIA_REMATCH')],
+      home: names.zone(zoneNamed('MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_1F')),
+      lab: names.zone(zoneNamed('MAP_HEADER_SANDGEM_TOWN_POKEMON_RESEARCH_LAB')),
+      rivalClass: names.trainerClass(classIndex),
+      martExcluded: { label: label('LocationNames_Text_VeilstoneStore'), zones: [names.zone(zoneNamed('MAP_HEADER_ETERNA_CITY_HERB_SHOP')), names.zone(zoneNamed('MAP_HEADER_CELESTIC_TOWN_NORTHWEST_HOUSE'))] },
+      banks: { entries: bank('TEXT_BANK_JOURNAL_ENTRIES'), months: bank('TEXT_BANK_MONTH_NAMES'), gyms: bank('TEXT_BANK_GYM_NAMES'), locations: bank('TEXT_BANK_LOCATION_NAMES'), times: bank('TEXT_BANK_TIMES_OF_DAY') },
+      ...(ui2dIds.has('platinum:ui2d/journal/page-male') ? { art: { male: asId('platinum:ui2d/journal/page-male'), female: asId('platinum:ui2d/journal/page-female') } } : {}),
+      trainer: (i) => names.trainer(i),
+      zone: (i) => names.zone(i),
+      badge: (i) => BADGE_IDS[i] ?? (() => { throw new ImportError(`sGymsInfo: badge ${i}`); })(),
+    });
+    const diplomaBank = textBanks[bankIndex('TEXT_BANK_DIPLOMA')]!.messages;
+    if (ui2dIds.has('platinum:ui2d/diploma/sinnoh')) {
+      newGame.diploma = { sinnoh: asId('platinum:ui2d/diploma/sinnoh'), national: asId('platinum:ui2d/diploma/national'), texts: { player: diplomaBank[0]!, sinnoh: diplomaBank[1]!, national: diplomaBank[2]!, credit: diplomaBank[3]! } };
+    }
+  }
   newGame.containment = { prop: names.prop(496), loopFrames: animationFrames(containmentAnimations[containmentLookup.i32(4)]!), openingFrames: animationFrames(containmentAnimations[containmentLookup.i32(8)]!) };
   const spear = importSpearPillar(fs, assets, textBanks.find(b => b.id === 'platinum:TEXT_BANK_SPEAR_PILLAR')!.messages);
   newGame.spearPillar = spear.tables;
@@ -1658,7 +1810,7 @@ export async function importPlatinum(
     marts: [...mon.marts, ...frontier.marts],
     newGame: [newGame],
     titleScreens: [title.titleScreen],
-    ui2d: [...art.ui2d, ...starterSheets.records, ...animSheets.records, ...frontierSheets.records, ...undergroundSheets.records],
+    ui2d: [...art.ui2d, ...starterSheets.records, ...animSheets.records, ...frontierSheets.records, ...undergroundSheets.records, ...slotSheets.records],
     pokemonSprites: art.pokemonSprites,
     trainerSprites: art.trainerSprites,
     battleBackgrounds: art.battleBackgrounds,

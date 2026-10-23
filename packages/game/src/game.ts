@@ -2,7 +2,7 @@
  * Game composition: packs → registries/labels, GameState, VM + world, the fixed 30 Hz tick, saves.
  * Headless: no DOM. The app (packages/app) renders `world` and `scripts.view()` and drives input.
  */
-import { undergroundDaily, checkClock, dailyEvents, DEFAULT_CLOCK, elapseHoneyTrees, elapsePokerus, fieldSeed, hasFieldSystems, newDailyRandom, emptyBag, emptyDaycare, evolutionTarget, heal, Prng, withClock, type Button, type ClockTime, type Id, type LabelOverride, type PackData } from '@opensinnoh/core';
+import { DAY_PERIODS, dayPeriod, monGender, undergroundDaily, checkClock, dailyEvents, DEFAULT_CLOCK, elapseHoneyTrees, elapsePokerus, fieldSeed, hasFieldSystems, newDailyRandom, emptyBag, emptyDaycare, evolutionTarget, heal, Prng, withClock, type VillaDaily, type Button, type ClockTime, type Id, type LabelOverride, type PackData } from '@opensinnoh/core';
 import {
   BOX_SIZE,
   DEFAULT_DEVICE_OPTIONS,
@@ -18,6 +18,7 @@ import {
   markSeen,
   newGameRecord,
   newFashionCase,
+  newSealCase,
   storeInBox,
   trainerIdFor,
   type AppHost,
@@ -54,6 +55,16 @@ import {
   type EvolutionMode,
   type World,
   type AudioOutput,
+  JOURNAL_EVENT,
+  isWildKind,
+  journalDate,
+  journalOpensOnContinue,
+  journalOwned,
+  openJournalPage,
+  type JournalDate,
+  journalEvent,
+  journalMon,
+  journalTrainer,
 } from '@opensinnoh/contracts';
 import { elapseBerryMinutes, newBerryPatches, scoreBattle, scoreCatch, shayminClockRevert, shayminToLand } from '@opensinnoh/services';
 import { repelPrompt } from './repel-prompt.ts';
@@ -281,7 +292,7 @@ export function newGameState(record: NewGame, registries: Pick<Registries, 'zone
   const fieldRng = new Prng(fieldSeed(seed));
   const dailyRandom = newDailyRandom(fieldRng.next());
   return {
-    schemaVersion: 21,
+    schemaVersion: 22,
     packs: order.map((p) => ({ ...p })),
     names: { ...(options?.names ?? record.names) },
     gender: options?.gender ?? record.gender,
@@ -328,7 +339,9 @@ export function newGameState(record: NewGame, registries: Pick<Registries, 'zone
     berryPatches: record.berries ? newBerryPatches(record.berries) : [],
     poffins: [],
     fashionCase: newFashionCase(),
+    sealCase: newSealCase(),
     contestPhotos: [null, null, null, null, null],
+    journal: [],
   };
 }
 
@@ -420,7 +433,8 @@ export function createGame(options: GameOptions): Game {
    * The open menu app; `script` when a script op waits on it, `evolution` for the evolution scene after a
    * battle. Not saved (saves happen without one).
    */
-  let app: { model: AppModel; name: string; script: boolean; evolution?: true; underground?: true } | null = null;
+  /** `journalRoll`: the journal the load opened (Journal_CheckOpenOnContinue); today's page opens when it closes. */
+  let app: { model: AppModel; name: string; script: boolean; evolution?: true; underground?: true; journalRoll?: JournalDate } | null = null;
   /** The game clear (clear-game.ts): its phase and whether its credits may be skipped. Not saved (it ends in a reset). */
   let clear: (ClearPhase & { skippable: boolean }) | null = null;
   /** The save the clear wrote (kept across the reset for CONTINUE); also the Battle Tower's save before its reset. */
@@ -635,29 +649,69 @@ export function createGame(options: GameOptions): Game {
     }
     const error = fieldMoveError(registries, state, slot, move);
     if (error) throw new Error(`${move} cannot be used here (${error})`);
-    if (move.endsWith(':MOVE_SWEET_SCENT')) return world.sweetScent(slot);
+    // The journal's field-move entries (FIELD_MOVE_*): Sweet Scent and Dig on the map used, Fly on the destination
+    // (StartMenu_FlyTask), Teleport on the map it lands on (CreateJournalEntryForTeleport after ChangeMap).
+    const mapOf = (zone: Id) => registries.zones.get(zone)!.sourceIndex ?? 0;
+    if (move.endsWith(':MOVE_SWEET_SCENT')) {
+      journalEvent(registries, state, JOURNAL_EVENT.sweetScent, mapOf(state.player.zone));
+      return world.sweetScent(slot);
+    }
     // The map changes on foot (FieldTask_MapChangeFly, FieldTask_ChangeMapByFieldWarp): the bike's BGM ends.
     if (state.playerState === 'cycle') sound.setSpecialBgm(null);
     if (move.endsWith(':MOVE_FLY')) {
       if (location === undefined) throw new Error('Fly needs the Town Map\'s location');
-      world.fly(slot, flyDestination(registries, location));
-    } else if (move.endsWith(':MOVE_DIG')) world.teleport(slot, digDestination(state), 'dig');
-    else world.teleport(slot, teleportDestination(registries, state));
+      const dest = flyDestination(registries, location);
+      journalEvent(registries, state, JOURNAL_EVENT.fly, mapOf(dest.zone));
+      world.fly(slot, dest);
+    } else if (move.endsWith(':MOVE_DIG')) {
+      journalEvent(registries, state, JOURNAL_EVENT.dig, mapOf(state.player.zone));
+      world.teleport(slot, digDestination(state), 'dig');
+    } else {
+      const dest = teleportDestination(registries, state);
+      journalEvent(registries, state, JOURNAL_EVENT.teleport, mapOf(dest.zone));
+      world.teleport(slot, dest);
+    }
   };
   /** A field item used from the bag: its use runs once the app has closed (decomp FieldSystem_StartFieldMap, then the use). */
   let pendingFieldItem: Id | null = null;
   /** FieldSystem_HandleDailyEvents: the daily values and flags (core `dailyEvents`), then Party_UpdatePokerusStatus. */
   const onDaily = (days: number) => {
-    if (hasFieldSystems(registries)) dailyEvents(registries, state, days);
+    if (hasFieldSystems(registries)) dailyEvents(registries, state, days, villaDaily(registries, state));
     elapsePokerus(state.party, days);
     // Underground_HandleDailyEvents: buried spheres grow, the seed moves on, new spots are due.
     if (state.underground) undergroundDaily(state.underground, days);
   };
   const onMinutes = (minutes: number) => timedEvents(registries, state, minutes, clock());
-  const fieldItems = () => ({ registries, state, world, scripts, sound, log, ns: record.id.slice(0, record.id.indexOf(':')), openApp: (request: { app: 'poffin-case' }) => openApp(request, false) });
+  const fieldItems = () => ({ registries, state, world, scripts, sound, log, ns: record.id.slice(0, record.id.indexOf(':')), openApp: (request: { app: 'poffin-case' } | { app: 'journal' } | { app: 'town-map' }) => openApp(request, false) });
   // Follower talk (OpenSinnoh, with the HGSS add-on's data): the field's own task while it runs.
   const talk = followerTalk({ registries, state: () => state, world: () => world, scripts: () => scripts, sound, rng, ns: record.id.slice(0, record.id.indexOf(':')), on: () => device.options().followerTalk === 0 });
   const repel = repelPrompt({ registries, state: () => state, scripts: () => scripts, ns: record.id.slice(0, record.id.indexOf(':')), on: () => device.options().repelPrompt === 0 });
+  /**
+   * Decomp encounter.c's journal entries at a field battle's end: a won wild battle (wild, roamer, AI partner, Safari)
+   * from the fifth since the last map change (wildMonDefeated, reset by FieldMapChange_UpdateGameData: any map load
+   * here) writes the defeated line, a capture the caught line (the battle's time of day: the clock's period at the
+   * end, inferred); a won trainer or tag battle the trainer entry. The count is not saved: a load (a new world) starts
+   * it again, as the DS's field system does.
+   */
+  const wildDefeats: { world: unknown; loads: number; count: number } = { world: null, loads: -1, count: 0 };
+  const journalBattle = (setup: BattleSetup, result: BattleResult) => {
+    if (isWildKind(setup.kind)) {
+      const period = DAY_PERIODS.indexOf(dayPeriod(state.gameTime.now.hour));
+      const genderOf = (g: string | undefined) => (g === 'male' ? 0 : g === 'female' ? 1 : 2);
+      if (result.outcome === 'won') {
+        const loads = world.view().loads;
+        if (loads !== wildDefeats.loads || world !== wildDefeats.world) Object.assign(wildDefeats, { world, loads, count: 0 });
+        if (++wildDefeats.count >= 5) {
+          const foe = battle?.run?.view().battlers.find((x) => x.side === 'enemy');
+          if (foe) journalMon(registries, state, 'defeated', foe.species, genderOf(foe.gender), period);
+        }
+      } else if (result.outcome === 'caught' && result.caught) {
+        journalMon(registries, state, 'caught', result.caught.mon.species, genderOf(monGender(dexOf(registries), result.caught.mon)), period);
+      }
+    } else if ((setup.kind === 'trainer' || setup.kind === 'first') && result.outcome === 'won' && setup.trainers[0]) {
+      journalTrainer(registries, state, setup.trainers[0], state.player.zone);
+    }
+  };
   const host: AppHost = {
     // The DS options in SAVED_OPTIONS are saved with the game (GameState v6); text speed and the modern options are the device's.
     options: () => ({ ...device.options(), ...state.options }),
@@ -884,6 +938,7 @@ export function createGame(options: GameOptions): Game {
       if (result.outcome !== 'lost' && result.outcome !== 'draw' && state.hasPartner) for (const mon of state.party) heal(dexOf(registries), mon);
       // Decomp encounter.c UpdateGameRecords: only after a battle the player did not lose (CheckPlayerWonEncounter).
       if (result.outcome !== 'lost' && result.outcome !== 'draw') scoreBattle(state, registries, b.setup.kind, result.outcome, result.caught?.mon.species ?? null);
+      journalBattle(b.setup, result);
       // The field's return (decomp encounter.c FieldTransition_StartMap → FieldMap_Init), for every field battle:
       // unless the player lost or drew (the tutorial whatever its result), the field is rebuilt, which runs the
       // zone's on-load and on-resume scripts before the battle's script goes on. Scripts rely on it with
@@ -1081,8 +1136,9 @@ export function createGame(options: GameOptions): Game {
         }
         const result = app.model.step(frame);
         if (result) {
-          const { script, evolution, underground } = app;
+          const { script, evolution, underground, journalRoll } = app;
           app = null;
+          if (journalRoll) openJournalPage(state, journalRoll, state.player.zone);
           // An app the Underground's field opened: it hears the result; GO UP starts the return to the surface.
           if (underground) {
             world.undergroundAppDone(result);
@@ -1216,7 +1272,7 @@ export function createGame(options: GameOptions): Game {
         clock(),
         log,
         (days) => {
-          if (hasFieldSystems(registries)) dailyEvents(registries, next, days);
+          if (hasFieldSystems(registries)) dailyEvents(registries, next, days, villaDaily(registries, next));
           if (next.underground) undergroundDaily(next.underground, days);
         },
         (minutes) => timedEvents(registries, next, minutes, clock()),
@@ -1224,6 +1280,15 @@ export function createGame(options: GameOptions): Game {
       wire(next);
       world.enter(entry);
       hearZone(watchZone());
+      // FieldTask_LoadSavedGameMap: a journal two or more days old opens first, as saved (Journal_CheckOpenOnContinue);
+      // then today's page (Journal_GetSavedPage and its title, sub_02053494). Headless hosts without apps only roll.
+      if (journalOwned(registries, state)) {
+        const today = journalDate(clock());
+        if (options.createApp && journalOpensOnContinue(state, today)) {
+          openApp({ app: 'journal' }, false);
+          app!.journalRoll = today;
+        } else openJournalPage(state, today, state.player.zone);
+      }
     },
     onContinue() {
       world.continued();
@@ -1267,4 +1332,11 @@ function timedEvents(registries: Registries, state: GameState, minutes: number, 
   if (berries) elapseBerryMinutes(berries, state.berryPatches, minutes);
   if (state.encounters) elapseHoneyTrees(state.encounters, minutes);
   shayminClockRevert(registries, state.party, minutes, now);
+}
+
+/** The Villa's daily visitor inputs (core `VillaDaily`), or none when the pack has no Villa. */
+function villaDaily(registries: Registries, state: GameState): VillaDaily | undefined {
+  const v = newGameRecord(registries).villa;
+  if (!v) return undefined;
+  return { ...v.visitors, furniture: v.furniture.map((f) => f.flag), away: state.player.zone !== v.zone && state.player.zone !== v.resortArea };
 }

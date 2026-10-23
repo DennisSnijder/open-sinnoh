@@ -184,6 +184,21 @@ export interface Pokemon {
    * (services `feedPoffin`); Feebas evolves by its beauty (EVO_LEVEL_BEAUTY).
    */
   condition: Condition;
+  /**
+   * The Ball Capsule on a party Pokémon (decomp MON_DATA_BALL_CAPSULE_ID and MON_DATA_BALL_CAPSULE): `id` the capsule
+   * index + 1 (1–12) and a copy of its seals, which the send-out effect reads. Absent = none (a boxed Pokémon has none).
+   */
+  capsule?: { id: number; seals: BallSeal[] };
+}
+
+/**
+ * A seal placed on a Ball Capsule (decomp BallSeal): `seal` the seal id (1–80), `x`, `y` its centre on the editor's
+ * touch screen (the capsule circle is centred at (190, 70), radius 60).
+ */
+export interface BallSeal {
+  seal: number;
+  x: number;
+  y: number;
 }
 
 /** Decomp MON_DATA_COOL, BEAUTY, CUTE, SMART, TOUGH and SHEEN, in that order. */
@@ -661,7 +676,7 @@ export function movesAtLevel(dex: Dex, mon: Pokemon): Id[] {
 /**
  * Decomp Evolution_ProcessEvolutionEffects for EVO_LEVEL_NINJASK: a copy of the evolved Pokémon as
  * `species` (Shedinja) in `ball`, holding nothing, no nickname, no status, its ability and gender from the
- * PID, stats recalculated. Markings, ribbons, mail and ball capsules are not modelled. The caller checks for
+ * PID, stats recalculated, no Ball Capsule (evolution.c: a zeroed capsule). Markings, ribbons and mail are not modelled. The caller checks for
  * room and a Poké Ball, takes the ball and adds the copy.
  */
 export function shedinjaFrom(dex: Dex, mon: Pokemon, species: Id, ball: Id): Pokemon {
@@ -671,6 +686,7 @@ export function shedinjaFrom(dex: Dex, mon: Pokemon, species: Id, ball: Id): Pok
   copy.heldItem = null;
   copy.nickname = null;
   copy.status = 'none';
+  delete copy.capsule;
   copy.ability = abilityFor(dex.form(species, copy.form), copy.pid);
   recalc(dex, copy);
   return copy;
