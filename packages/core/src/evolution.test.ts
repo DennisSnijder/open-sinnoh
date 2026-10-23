@@ -229,10 +229,11 @@ describe('evolving', () => {
     expect(movesAtLevel(dex, n)).toEqual([]);
   });
 
-  it('shedinjaFrom: a copy as Shedinja, in the ball, no item, nickname or status, 1 HP, its own ability', () => {
-    const m = mon('NINCADA', 20, { nickname: 'Bug', heldItem: t('ITEM_OVAL'), status: 'poison' });
+  it('shedinjaFrom: a copy as Shedinja, in the ball, no item, nickname, status or Ball Capsule, 1 HP, its own ability', () => {
+    const m = mon('NINCADA', 20, { nickname: 'Bug', heldItem: t('ITEM_OVAL'), status: 'poison', capsule: { id: 2, seals: [{ seal: 1, x: 190, y: 70 }] } });
     evolve(dex, m, t('NINJASK'));
     const s = shedinjaFrom(dex, m, t('SHEDINJA'), t('ITEM_POKE_BALL'));
+    expect([s.capsule, m.capsule?.id]).toEqual([undefined, 2]);
     expect([s.species, s.ball, s.heldItem, s.nickname, s.status, s.stats.hp, s.hp, s.ability, s.level, s.exp]).toEqual([
       t('SHEDINJA'), t('ITEM_POKE_BALL'), null, null, 'none', 1, 1, t('ABILITY_WONDER'), 20, m.exp,
     ]);

@@ -676,7 +676,7 @@ export function movesAtLevel(dex: Dex, mon: Pokemon): Id[] {
 /**
  * Decomp Evolution_ProcessEvolutionEffects for EVO_LEVEL_NINJASK: a copy of the evolved Pokémon as
  * `species` (Shedinja) in `ball`, holding nothing, no nickname, no status, its ability and gender from the
- * PID, stats recalculated. Markings, ribbons, mail and ball capsules are not modelled. The caller checks for
+ * PID, stats recalculated, no Ball Capsule (evolution.c: a zeroed capsule). Markings, ribbons and mail are not modelled. The caller checks for
  * room and a Poké Ball, takes the ball and adds the copy.
  */
 export function shedinjaFrom(dex: Dex, mon: Pokemon, species: Id, ball: Id): Pokemon {
@@ -686,6 +686,7 @@ export function shedinjaFrom(dex: Dex, mon: Pokemon, species: Id, ball: Id): Pok
   copy.heldItem = null;
   copy.nickname = null;
   copy.status = 'none';
+  delete copy.capsule;
   copy.ability = abilityFor(dex.form(species, copy.form), copy.pid);
   recalc(dex, copy);
   return copy;
