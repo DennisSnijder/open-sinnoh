@@ -25,10 +25,10 @@ const CHECKS: Record<string, (game: Game, logged: string[]) => void> = {
     expect([...BATTLEGROUND_STAT_TRAINERS, BATTLEGROUND_TRAINER_NONE]).toContain(s);
     for (const n of [1, 2, 3, 4]) expect(v(game, `VAR_OBJ_GFX_ID_${n}`)).toBe(v(game, `VAR_BATTLEGROUND_TRAINER_${n}`));
   },
-  // The out-of-scope systems: each facility's or the Villa's own ops are logged stubs (counted), never silent.
+  // The out-of-scope systems: the Villa's own ops are logged stubs (counted), never silent. The five facilities' lobby
+  // ops are all real.
   'sys-frontier-boundary': (_game, logged) => {
-    for (const op of ['call_battle_castle_lobby_function', 'call_battle_arcade_lobby_function'])
-      expect(logged, op).toContain(`stub:${op}`);
+    expect(logged.filter((k) => /^stub:call_battle_\w+_function$/.test(k))).toEqual([]);
   },
   'sys-villa-boundary': (_game, logged) => {
     for (const op of ['save_tv_segment_home_and_manor_no_furniture', 'init_persisted_map_features_for_villa']) expect(logged, op).toContain(`stub:${op}`);

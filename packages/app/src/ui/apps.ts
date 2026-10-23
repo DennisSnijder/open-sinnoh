@@ -26,7 +26,7 @@ import { mining, miningPrompt, undergroundBase, undergroundMenu, undergroundPc, 
 import { contestApp } from './contest.ts';
 import { contestDance } from './contest-dance.ts';
 import { contestPhoto } from './contest-visual.ts';
-import { factoryApp, hallBoard } from './frontier.ts';
+import { arcadeApp, castleApp, factoryApp, hallBoard } from './frontier.ts';
 import { credits, hallOfFame } from './hall-of-fame.ts';
 import { icon, type IconName } from './icons.ts';
 import { party } from './party.ts';
@@ -187,6 +187,10 @@ export function drawApp(d: DrawContext, v: AppView): Drawn {
       return { kind: 'scene', root: factoryApp(d, v) };
     case 'hall-board':
       return { kind: 'scene', root: hallBoard(d, v) };
+    case 'castle':
+      return { kind: 'scene', root: castleApp(d, v) };
+    case 'arcade':
+      return { kind: 'scene', root: arcadeApp(d, v) };
   }
 }
 

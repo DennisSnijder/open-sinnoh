@@ -16,7 +16,7 @@
 import type { Arg, Command, Id } from '@opensinnoh/core';
 import type { AppRequest, AppResult, FrontierSceneData, FrontierTables, FrontierView, InputFrame, Ui2dAnimation } from '@opensinnoh/contracts';
 import { newGameRecord } from '@opensinnoh/contracts';
-import type { BattleFactory, BattleHall, BattleTower } from '@opensinnoh/services';
+import type { BattleArcade, BattleCastle, BattleFactory, BattleHall, BattleTower } from '@opensinnoh/services';
 import type { Runner } from '../runner.ts';
 import { FRONTIER_VARS } from './commands.ts';
 import { FrontierScene } from './scene.ts';
@@ -24,6 +24,8 @@ import { frontierHandlers } from './ops.ts';
 import { towerFrontierHandlers } from './tower-ops.ts';
 import { factoryFrontierHandlers } from './factory-ops.ts';
 import { hallFrontierHandlers } from './hall-ops.ts';
+import { castleFrontierHandlers } from './castle-ops.ts';
+import { arcadeFrontierHandlers } from './arcade-ops.ts';
 
 export type FrontierResult = 'continue' | 'yield';
 export type FrontierWait = (input: InputFrame) => boolean;
@@ -55,7 +57,7 @@ const MAX_COMMANDS = 100_000;
 /** Decomp NO_NEW_ENTRY_POINT (ChangeSceneWithinScript). */
 export const NO_NEW_ENTRY_POINT = 0xffff;
 /** Decomp FRONTIER_SCENE_FACTORY_CORRIDOR, _FACTORY_BATTLE_ROOM, _HALL_BATTLE_ROOM: the scenes whose setup runs here. */
-const SCENE = { factoryCorridor: 3, factoryBattleRoom: 4, hallBattleRoom: 10 } as const;
+const SCENE = { factoryCorridor: 3, factoryBattleRoom: 4, hallBattleRoom: 10, arcadeBattleRoom: 16 } as const;
 
 export class FrontierRunner {
   readonly tables: FrontierTables;
@@ -70,9 +72,13 @@ export class FrontierRunner {
   readonly slots: (string | undefined)[] = [];
   /** Decomp exitBattleFrontier. */
   exited = false;
+  /** Contexts waiting in FrontierScrCmd_WaitABPress (`FrontierView.waitsForAB`). */
+  abWaits = 0;
   /** The facility the scripts run (decomp BattleFrontier_SetFacilityStruct): the Factory's or the Hall's challenge. */
   factory: BattleFactory | null = null;
   hall: BattleHall | null = null;
+  castle: BattleCastle | null = null;
+  arcade: BattleArcade | null = null;
   /** Decomp changeScript and the app's states 5–6: the scene to load and its entry label (null: keep the scripts). */
   private change: { scene: number; entry: Id | null; frames: number } | null = null;
   /** The Battle Tower the challenge runs (decomp FieldFrontierDTO facilityData), shared with the field VM. */
@@ -85,7 +91,7 @@ export class FrontierRunner {
     const tables = newGameRecord(r.registries).frontier;
     if (!tables) throw new Error('launch_battle_frontier_scene: the packs have no Battle Frontier (NewGame.frontier)');
     this.tables = tables;
-    this.handlers = { ...frontierHandlers(), ...towerFrontierHandlers(), ...factoryFrontierHandlers(), ...hallFrontierHandlers() };
+    this.handlers = { ...frontierHandlers(), ...towerFrontierHandlers(), ...factoryFrontierHandlers(), ...hallFrontierHandlers(), ...castleFrontierHandlers(), ...arcadeFrontierHandlers() };
     // The field faded out before the scene (decomp: the frontier app starts on a black screen).
     this.loadScene(sceneId, { color: 'black', alpha: 1 });
     this.load(entry);
@@ -94,7 +100,8 @@ export class FrontierRunner {
   /** Decomp FrontierGraphics_New: the scene's room and music (the scene BGM plays again after a battle too). */
   loadScene(sceneId: number, screen: { color: 'black' | 'white'; alpha: number }): void {
     const data = this.sceneData(sceneId);
-    this.scene = new FrontierScene(sceneId, data, this.tables, (sheet) => this.animations(sheet), screen);
+    // Decomp BattleFrontier unk_24: the loaded 2D characters outlive the scene (FrontierGraphics is rebuilt).
+    this.scene = new FrontierScene(sceneId, data, this.tables, (sheet) => this.animations(sheet), screen, this.scene?.loaded);
     this.textBank = data.textBank;
     if (data.setup) this.setupScene(sceneId);
     if (data.bgm) this.r.audio.playBgm(data.bgm);
@@ -115,6 +122,8 @@ export class FrontierRunner {
       this.scene.fgHidden = true;
       this.scene.fgBlend = { a: 8, b: 9 };
     }
+    // Decomp BattleArcadeBattleRoomSceneSetup: BG2 (the effect screen) off until an effect shows.
+    if (sceneId === SCENE.arcadeBattleRoom) this.scene.fgHidden = true;
     this.r.log.stub(`frontier:scene-setup:${sceneId}`, `frontier scene ${sceneId}'s setup effects (palette tasks, blends) are not drawn`);
   }
 
@@ -184,6 +193,7 @@ export class FrontierRunner {
       if (entry !== null) {
         // ov104_0222E8C8/E8E8: the manager's vars survive the new script manager; its contexts are gone.
         this.contexts.fill(null);
+        this.abWaits = 0;
         this.slots.length = 0;
         this.load(entry);
       } else for (const c of this.contexts) if (c) c.textBank = this.textBank;
@@ -313,6 +323,6 @@ export class FrontierRunner {
   }
 
   view(): FrontierView {
-    return this.scene.view();
+    return { ...this.scene.view(), ...(this.abWaits ? { waitsForAB: true as const } : {}) };
   }
 }

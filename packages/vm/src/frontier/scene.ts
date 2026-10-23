@@ -272,8 +272,11 @@ interface ObjectSprite {
 }
 
 export class FrontierScene {
-  /** Decomp unk_24: the 2D character graphics loaded (FrontierScrCmd_22), by gfx. */
-  private readonly loaded = new Set<number>();
+  /**
+   * Decomp unk_24: the 2D character graphics loaded (FrontierScrCmd_22), by gfx. It is the frontier app's (BattleFrontier
+   * unk_24), not the scene's: a scene change keeps it (the Arcade's battle room places the player loaded in the corridor).
+   */
+  readonly loaded: Set<number>;
   /** Decomp unk_6C: the actors by object slot (32). */
   private readonly actors: (Actor | null)[] = Array(32).fill(null);
   /** Decomp the frontier_obj resources loaded (FrontierScrCmd_2A) and the sprites by slot (8). */
@@ -298,6 +301,15 @@ export class FrontierScene {
   private window: { x1: number; y1: number; x2: number; y2: number } | null = null;
   /** Decomp FrontierScrCmd_45's sprite (ov104_02232CE0), by its resource id. */
   private pokemon: { id: number; view: NonNullable<FrontierView['pokemon']> } | null = null;
+  /** The Castle's CP window (decomp scriptMan->castleHostInfoWin), the emblem patch on BG3 (BattleCastle_UpdateEmblemFrame). */
+  infoWindow: NonNullable<FrontierView['infoWindow']> | null = null;
+  bgPatch: NonNullable<FrontierView['bgPatch']> | null = null;
+  /** The Arcade's BG3 blend (BattleArcade_SetPalette), BG2's effect screen (UpdateBackgroundForEffect), actors' blends. */
+  bgDarken = 0;
+  fgOverride: FrontierSceneData['fg'] = null;
+  private readonly actorDarken = new Map<number, number>();
+  /** The Arcade's Pokémon icons and item marks (BattleArcade_CreateMonSprites), by side and slot (`p0`, `o2`). */
+  readonly icons = new Map<string, NonNullable<FrontierView['icons']>[number]>();
 
   constructor(
     readonly id: number,
@@ -306,7 +318,9 @@ export class FrontierScene {
     private readonly animationsOf: (sheet: Id) => readonly Ui2dAnimation[],
     /** The screen when the scene starts (the field faded out before the frontier; a sub-app returns faded out too). */
     fade: { color: 'black' | 'white'; alpha: number },
+    loaded: Set<number> = new Set(),
   ) {
+    this.loaded = loaded;
     this.fade = { ...fade, anim: null };
   }
 
@@ -474,6 +488,16 @@ export class FrontierScene {
     this.pokemon = null;
   }
 
+  /** Decomp BA_FUNC_UNK_44: an actor's palette blended `fraction`/16 toward black (by its local id). */
+  setActorDarken(localId: number, fraction: number): void {
+    this.actorDarken.set(localId, fraction);
+  }
+
+  /** Decomp BA_FUNC_UNK_44 with fraction 0: every sprite palette as loaded. */
+  clearActorDarken(): void {
+    this.actorDarken.clear();
+  }
+
   /** One frame in the decomp's SysTask order (see the module comment). */
   step(): void {
     // Decomp UpdateCorridorFloorBG: BG2 one px further down a frame, back to 0 past 255.
@@ -557,13 +581,13 @@ export class FrontierScene {
 
   view(): FrontierView {
     const actors: FrontierActorView[] = this.actors.flatMap((a) =>
-      a ? [{ localId: a.localId, sheet: a.sheet, x: a.position.x, y: a.position.y, facing: DIRS[a.dir]!, anim: a.anim.seq, frame: a.anim.frame, visible: a.visible }] : [],
+      a ? [{ localId: a.localId, sheet: a.sheet, x: a.position.x, y: a.position.y, facing: DIRS[a.dir]!, anim: a.anim.seq, frame: a.anim.frame, visible: a.visible, ...(this.actorDarken.get(a.localId) ? { darken: this.actorDarken.get(a.localId)! } : {}) }] : [],
     );
     const objects: FrontierObjectView[] = this.sprites.flatMap((s, slot) => (s ? [{ slot, sheet: s.sheet, x: s.x, y: s.y, anim: s.anim.seq, frame: s.anim.frame, visible: s.visible, ...(s.flip ? { flip: true as const } : {}) }] : []));
     return {
       scene: this.id,
       bg: this.data.bg,
-      fg: this.data.fg,
+      fg: this.fgOverride ?? this.data.fg,
       shadow: this.tables.shadow,
       camera: { ...this.camera },
       actors,
@@ -577,6 +601,10 @@ export class FrontierScene {
       ...(this.shakeTask && (this.shakeTask.x || this.shakeTask.y) ? { shake: { x: this.shakeTask.x, y: this.shakeTask.y } } : {}),
       ...(this.window ? { window: { ...this.window } } : {}),
       ...(this.pokemon ? { pokemon: { ...this.pokemon.view } } : {}),
+      ...(this.infoWindow ? { infoWindow: structuredClone(this.infoWindow) } : {}),
+      ...(this.bgPatch ? { bgPatch: { ...this.bgPatch } } : {}),
+      ...(this.bgDarken ? { bgDarken: this.bgDarken } : {}),
+      ...(this.icons.size ? { icons: [...this.icons.values()].map((i) => ({ ...i, item: { ...i.item } })) } : {}),
     };
   }
 }

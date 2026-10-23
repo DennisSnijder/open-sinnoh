@@ -12,7 +12,10 @@ import type { Id } from '@opensinnoh/core';
 import {
   BattleTower,
   battlePoints,
+  CASTLE,
   clearTowerSave,
+  deleteArcadeStreak,
+  deleteCastleStreak,
   deleteFactoryStreak,
   deleteHallStreak,
   enoughValidPokemon,
@@ -88,6 +91,8 @@ const BP_WINDOW = { width: 10, height: 2, text: 'platinum:pl_msg_00000361_00230'
 const COMM_CLUB_RET_CANCEL = 1;
 /** Decomp BH_LOBBY_FUNC_* (constants/battle_hall_functions.h). */
 const BH_LOBBY = { checkPartyEligible: 0, checkStreakActive: 1, currentStreakSpecies: 2, deleteActiveStreak: 3, selectPokemon: 4 } as const;
+/** Decomp BC_LOBBY_FUNC_* and BA_LOBBY_FUNC_* (constants/battle_castle_functions.h, battle_arcade_functions.h). */
+const CA_LOBBY = { checkPartyEligible: 0, checkStreakActive: 1, deleteActiveStreak: 3, selectPokemon: 4 } as const;
 /** Decomp PARTY_SLOT_NONE: no Pokémon picked. */
 const PARTY_SLOT_NONE = 0xff;
 /** Decomp MART_FRONTIER_ID_* (generated/mart_frontier_id.txt). */
@@ -104,6 +109,48 @@ export function frontierFieldHandlers(r: Runner): Record<string, Handler> {
   let picked: number[] | null | undefined;
   /** The Hall's party pick (the same script member) between BH_LOBBY_FUNC_SELECT_POKEMON and GetBattleHallSelectedSlots. */
   let hallPicked: number[] | null | undefined;
+  /** The Castle's and the Arcade's (SelectBattleCastleChallengers / SelectBattleArcadeChallengers, PARTY_MENU_MODE_BATTLE_CASTLE). */
+  let castlePicked: number[] | null | undefined;
+
+  /**
+   * Decomp ScrCmd_CallBattleCastleLobbyFunction / ScrCmd_CallBattleArcadeLobbyFunction: the party check (sub_02049EC4 with
+   * held items not counted), the streak flag, the streak's deletion, and the party menu (three Pokémon, no species twice;
+   * its SUMMARY in the menu).
+   */
+  const castleLobby = (name: string, active: (type: number) => boolean, deleteStreak: (type: number) => void): Handler => (t, c, a) => {
+    const fn = r.int(a[0]);
+    const arg = val(t, a[1]);
+    const out = (v: number) => dest(t, a[2], v);
+    switch (fn) {
+      case CA_LOBBY.checkPartyEligible:
+        out(enoughValidPokemon(r.state, r.registries, arg, false) ? 1 : 0);
+        break;
+      case CA_LOBBY.checkStreakActive:
+        if (arg > 2) throw new Error(`${name}: the Wi-Fi multi's streak (no wireless)`);
+        out(active(arg) ? 1 : 0);
+        break;
+      case CA_LOBBY.deleteActiveStreak:
+        deleteStreak(arg);
+        break;
+      case CA_LOBBY.selectPokemon:
+        if (arg > 1) throw new Error(`${name} SELECT_POKEMON: the multi challenge needs a link partner`);
+        return r.openApp(c, { app: 'party-order', count: CASTLE.partySize, castle: true }, (result) => {
+          if (result.app !== 'party-order') throw new Error(`${name} SELECT_POKEMON: got a ${result.app} result`);
+          castlePicked = result.order;
+        });
+      default:
+        throw new Error(`${name}: no lobby function ${fn}`);
+    }
+    return 'continue';
+  };
+  /** Decomp ScrCmd_GetBattleCastleSelectedSlots / ScrCmd_GetBattleArcadeSelectedSlots: the picks, or PARTY_SLOT_NONE in the first. */
+  const selectedSlots: Handler = (t, _c, a) => {
+    if (castlePicked === undefined) throw new Error('get_battle_castle/arcade_selected_slots: no party menu has run');
+    if (castlePicked === null) dest(t, a[0], PARTY_SLOT_NONE);
+    else castlePicked.forEach((slot, i) => dest(t, a[i], slot));
+    castlePicked = undefined;
+    return 'continue';
+  };
   /** A species' number (the scripts' species operands). */
   const speciesNumber = (id: Id) => {
     const n = r.registries.species.get(id)?.sourceIndex;
@@ -327,6 +374,13 @@ export function frontierFieldHandlers(r: Runner): Record<string, Handler> {
       return 'continue';
     },
     delete_active_battle_hall_streak: (t, _c, a) => (deleteHallStreak(r.state, val(t, a[0])), 'continue'),
+
+    call_battle_castle_lobby_function: castleLobby('call_battle_castle_lobby_function', (type) => r.state.frontier?.castle?.active[type] === true, (type) => deleteCastleStreak(r.state, type)),
+    get_battle_castle_selected_slots: selectedSlots,
+    delete_active_battle_castle_streak: (t, _c, a) => (deleteCastleStreak(r.state, val(t, a[0])), 'continue'),
+    call_battle_arcade_lobby_function: castleLobby('call_battle_arcade_lobby_function', (type) => r.state.frontier?.arcade?.active[type] === true, (type) => deleteArcadeStreak(r.state, type)),
+    get_battle_arcade_selected_slots: selectedSlots,
+    delete_active_battle_arcade_streak: (t, _c, a) => (deleteArcadeStreak(r.state, val(t, a[0])), 'continue'),
     get_num_species_with_battle_hall_records: (t, _c, a) => (dest(t, a[0], hallSpeciesWithRecords(r.state)), 'continue'),
     get_battle_hall_total_singles_record: (t, _c, a) => (dest(t, a[0], hallTotalSinglesRecord(r.state)), 'continue'),
     check_if_battle_hall_streak_is50: (t, _c, a) => (dest(t, a[0], hallStreakIs50(r.state) ? 1 : 0), 'continue'),

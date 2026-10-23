@@ -57,7 +57,7 @@ const RENTAL_OT_NAME = 'platinum:BattleFactoryOTName_Text_Unknown' as Id;
 export const lcrng = (f: FrontierRunner): Rand16 => () => f.r.rng() >>> 16;
 
 /** A record's number (the scripts' species, move and type operands). */
-export function numberOf(f: FrontierRunner, registry: 'species' | 'moves' | 'types', id: Id): number {
+export function numberOf(f: FrontierRunner, registry: 'species' | 'moves' | 'types' | 'items', id: Id): number {
   const n = f.r.registries[registry].get(id)?.sourceIndex;
   if (n === undefined) throw new Error(`frontier: ${id} has no number`);
   return n;
