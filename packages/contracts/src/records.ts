@@ -1094,6 +1094,8 @@ export interface NewGame {
   contests?: import('./contests.ts').ContestTables;
   /** The seal tables (`SealTables`). Absent: the seal ops and the capsule editor fail loudly. */
   seals?: import('./seals.ts').SealTables;
+  /** 0.37.0. The Game Corner's slot tables and prizes (`SlotTables`). Absent: the Game Corner ops fail loudly. */
+  slots?: import('./slots.ts').SlotTables;
 }
 
 /**

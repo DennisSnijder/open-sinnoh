@@ -116,6 +116,12 @@ export const drawScriptOverlay: DrawScriptOverlay = (ctx, view, font, scale, fra
     frame(w);
     text(w.text, w.x + w.width - textWidth(font, w.text), w.y);
   }
+  if (view.coinWindow) {
+    // Decomp FieldMenu_PrintCoinsToWindow: the coins right-aligned on the window's one line.
+    const w = view.coinWindow;
+    frame(w);
+    text(w.text, w.x + w.width - textWidth(font, w.text), w.y);
+  }
   if (view.saveInfo) {
     // Decomp SaveInfoWindow_PrintText: the map name, then each label at the left and its value right-aligned.
     const w = view.saveInfo;

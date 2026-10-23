@@ -755,6 +755,50 @@ const undergroundTables = obj({
   }, (v) => ([...(v.smoke as unknown[][]), v.bigSmoke as unknown[]].some((p) => p.length !== 32 * 24) ? 'a smoke pattern must have 32 × 24 tiles' : (v.marks as unknown[]).length !== 32 ? 'traps.marks must have the 32 trap ids' : undefined)),
   base: obj({ cursor: nullable(ref('models')), flags: obj({ created: ref('flags'), decorated: ref('flags') }) }),
 }, (v) => ((v.goods as unknown[]).length !== 139 ? 'goods must have the 139 goods' : (v.treasureItems as unknown[]).length !== 49 ? 'treasureItems must have the 49 treasures' : (v.trapPrices as unknown[]).length !== 34 ? 'trapPrices must have the 34 traps' : (v.treasurePrices as unknown[]).length !== 60 ? 'treasurePrices must have the 60 mining ids' : undefined));
+/** 0.37.0: the Game Corner's tables (contracts slots.ts SlotTables); sizes and ranges the slot model indexes are checked. */
+const pct = int(0, 100);
+const byMode = (row: Schema) => arr(row);
+const slotTables = obj({
+  modes: arr(int(0, 5)),
+  reels: arr(arr(int(0, 5))),
+  payouts: arr(int(0, 0xffff)),
+  bonusPayouts: arr(int(0, 0xffff)),
+  winChance: byMode(pct),
+  winFlags: byMode(arr(pct)),
+  hintChance: byMode(pct),
+  standbySmall: byMode(pct),
+  standbyFlags: byMode(arr(pct)),
+  bonusTypes: byMode(arr(obj({ chance: pct, type: int(0, 5), class: int(0, 2) }))),
+  continueStart: arr(pct),
+  clefairyKinds: byMode(arr(arr(obj({ chance: pct, kind: int(0, 2) })))),
+  redMoon: byMode(pct),
+  blueMoon: byMode(pct),
+  continueDrop: byMode(arr(pct)),
+  endTells: byMode(arr(obj({ min: pct, a: pct, b: pct }))),
+  bonusOrders: arr(obj({ buttons: arr(lit('y', 'b', 'a')), clefairy: arr(int(5, 7)) })),
+  lightShow: arr(obj({ mask: int(0, 0x7f), from: num, to: num, step: num })),
+  stopButtons: arr(obj({ x: int(0, 31), y: int(0, 23) })),
+  linePalettes: arr(int(0, 15)),
+  lineFlash: arr(arr(obj({ x: num, y: num }))),
+  messageWindow: obj({ x: int(0, 31), y: int(0, 23), width: int(1, 32), height: int(1, 24) }),
+  prizes: arr(obj({ item: ref('items'), price: int(0, 0xffff) })),
+  messages: arr(ref('texts')),
+  streakVar: ref('vars'),
+}, (v) => {
+  const t = v as unknown as import('@opensinnoh/contracts').SlotTables;
+  if (t.modes.length !== 12) return 'slots.modes must have the 12 machines';
+  if (t.reels.length !== 3 || t.reels.some((r) => r.length !== 21)) return 'slots.reels must be 3 strips of 21';
+  if (t.payouts.length !== 6 || t.bonusPayouts.length !== 6 || t.continueStart.length !== 6) return 'slots payouts and continue chances are by symbol or type (6)';
+  const modes = [t.winChance, t.winFlags, t.hintChance, t.standbySmall, t.standbyFlags, t.bonusTypes, t.clefairyKinds, t.redMoon, t.blueMoon, t.continueDrop, t.endTells];
+  if (modes.some((m) => m.length !== 6)) return 'slots tables by mode must have the 6 modes';
+  if (t.winFlags.some((r) => r.length !== 7) || t.standbyFlags.some((r) => r.length !== 4) || t.continueDrop.some((r) => r.length !== 2)) return 'slots flag tables have 7, 4 and 2 columns';
+  if (t.bonusTypes.some((r) => r.length !== 6) || t.clefairyKinds.some((m) => m.length !== 3 || m.some((c) => c.length !== 3)) || t.endTells.some((r) => r.length !== 9 || r.at(-1)!.min !== 0)) return 'slots bonus tables: 6 types, 3 × 3 Clefairy kinds, 9 tells ending at 0';
+  if (t.bonusOrders.length !== 6 || t.bonusOrders.some((o) => new Set(o.buttons).size !== 3 || o.clefairy.length !== 3)) return 'slots.bonusOrders must be the 6 stop orders';
+  if (t.stopButtons.length !== 3 || t.linePalettes.length !== 5 || t.lineFlash.length !== 5 || t.lineFlash.some((l) => l.length !== 3)) return 'slots presentation tables: 3 stop buttons, 5 lines × 3 reels';
+  if (!t.lightShow.length || t.lightShow.at(-1)!.mask !== 0x40) return 'slots.lightShow must end with its restart';
+  if (t.messages.length !== 3) return 'slots.messages must be the 3 slot messages';
+  return undefined;
+});
 const npcTrade = obj({
   species: ref('species'),
   requested: ref('species'),
@@ -984,6 +1028,7 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
       tram: opt(ref('props')),
     }, (v) => ((v.zones as unknown[]).length !== 6 ? 'greatMarsh.zones must have the 6 areas' : (v.daily as { regional: unknown[]; national: unknown[] }).regional.length !== 32 || (v.daily as { national: unknown[] }).national.length !== 32 ? 'greatMarsh.daily tables must have 32 species' : undefined))),
     contestHallFlag: opt(ref('flags')),
+    slots: opt(slotTables),
     // 0.35.0: the Super Contests' tables (contracts ContestTables).
     contests: opt(obj({
       opponents: arr(obj({

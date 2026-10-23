@@ -1,0 +1,48 @@
+# The Game Corner's clerk (decomp scripts_game_corner.s GameCorner_CoinsClerk): with the Coin Case, the coin and money
+# windows, 50 coins for $1000 and 500 for $10000 (check_can_add_coins, add_coins, update_coin_display), then NO THANKS.
+# A streak of ten bonus rounds (check_bonus_round_streak over VAR_CONSECUTIVE_BONUS_ROUND_WINS) earns TM64 first.
+give item platinum:ITEM_COIN_CASE
+give money 20000
+set var platinum:VAR_CONSECUTIVE_BONUS_ROUND_WINS 10
+warp platinum:MAP_HEADER_GAME_CORNER 5 10 up
+until idle
++0 press up
+until position 5 6 6000
++0 release up
++0 press left
+until position 2 6 6000
++0 release left
+until idle
++0 press up
++1 release up
++4 press a
++1 release a
+advance text 900
+until idle 600
++0 assert flag platinum:FLAG_RECEIVED_GAME_CORNER_TM64 true
++0 assert state bag.tmhms[item="platinum:ITEM_TM64"].count 1
++4 press a
++1 release a
+advance text 600
++0 assert state coins 0
++4 press a
++1 release a
+advance text 600
++0 assert state coins 50
++0 assert state money 22000
++4 press down
++1 release down
++4 press a
++1 release a
+advance text 600
++0 assert state coins 550
++0 assert state money 12000
++4 press down
++1 release down
++4 press down
++1 release down
++4 press a
++1 release a
+advance text 600
+until idle 600
++0 assert state coins 550

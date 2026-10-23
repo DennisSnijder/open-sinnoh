@@ -279,6 +279,19 @@ export function m1aHandlers(r: Runner): Record<string, Handler> {
     show_menu: showMenu('single'),
     show_menu_multi_column: showMenu('multi', (a) => int(a[0])),
     show_list_menu: showMenu('list'),
+    // Decomp ScrCmd_ShowListMenuRememberCursor: the list opens at the offset and row the two vars hold, and its cursor
+    // callback writes them back as the cursor moves (the Prize Exchange keeps its place between purchases).
+    show_list_menu_remember_cursor: (t, c, a) => {
+      const offsetVar = r.ref(a[0], 'var');
+      const rowVar = r.ref(a[1], 'var');
+      const m = menu();
+      m.remember(r.getVar(t, offsetVar), r.getVar(t, rowVar));
+      return showScriptMenu(r, t, c, m, 'list', undefined, () => {
+        const p = m.listPosition();
+        r.setVar(t, offsetVar, p.offset);
+        r.setVar(t, rowVar, p.row);
+      });
+    },
     set_menu_x_origin_side: (_t, _c, a) => ((menu().anchorRight = int(a[0]) === 1), 'yield'),
     set_menu_y_origin_side: (_t, _c, a) => ((menu().anchorBottom = int(a[0]) === 1), 'yield'),
 
@@ -333,13 +346,15 @@ function showAltText(r: Runner, t: Thread, m: ScriptMenu): void {
  * Shows a scripted menu (`r.ui.menu`) and waits for a choice, written to `t.menuVar` (decomp FieldMenuManager_Show*
  * and ListMenu input in their SysTasks). The move tutors' list uses it too.
  */
-export function showScriptMenu(r: Runner, t: Thread, c: Context, m: ScriptMenu, kind: MenuKind, columns?: number): Result {
+export function showScriptMenu(r: Runner, t: Thread, c: Context, m: ScriptMenu, kind: MenuKind, columns?: number, moved?: () => void): Result {
   m.show(kind, (s) => measureText(r, s), columns);
   if (kind === 'list') showAltText(r, t, m);
+  moved?.();
   return r.pause(c, (input: InputFrame) => {
     const touch = input.touch?.screen === 'main' && !r.lastTouch ? input.touch : null;
     const before = m.current;
     const result = m.step(input, touch);
+    if (m.current !== before) moved?.();
     if (m.current !== before || result !== null) r.playFieldSe(1500);
     if (result === null) {
       if (kind === 'list' && m.current !== before) showAltText(r, t, m);

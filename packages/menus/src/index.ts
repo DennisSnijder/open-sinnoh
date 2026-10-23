@@ -40,6 +40,7 @@ import { contestPhotoScreen } from './contest/photo.ts';
 import { capsuleEditorScreen } from './capsule-editor.ts';
 import { sealMartScreen } from './seal-mart.ts';
 import { factoryScreen, hallBoardScreen } from './frontier.ts';
+import { slotsScreen } from './slots.ts';
 
 export const createApp: CreateApp = (request, deps) => {
   const ctx = menuContext(deps);
@@ -116,6 +117,8 @@ export const createApp: CreateApp = (request, deps) => {
       return new AppStack(factoryScreen(ctx, request), request.mode === 'rent' ? { app: 'factory', picks: [] } : { app: 'factory', swap: null });
     case 'hall-board':
       return new AppStack(hallBoardScreen(ctx, request), { app: 'hall-board', cell: request.cursor });
+    case 'slots':
+      return new AppStack(slotsScreen(ctx, request), { app: 'slots', coins: ctx.state.coins, streak: 0, rounds: 0 });
     case 'summary-teach':
       return new AppStack(summaryScreen(ctx, { party: () => deps.state.party, slot: request.slot, mode: { kind: 'teach', move: request.move, done: (forget) => ({ close: { app: 'summary-teach', forget } }) } }), { app: 'summary-teach', forget: null });
   }

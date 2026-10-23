@@ -20,3 +20,4 @@ export * from './battle-hall.ts';
 export * from './contest.ts';
 export * from './contest-visual.ts';
 export * from './seals.ts';
+export * from './slots.ts';

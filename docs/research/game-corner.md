@@ -2,7 +2,7 @@
 
 2026-10-23. Research for the slot machine app (overlay 101), the launcher that opens it, the Game Corner and
 Prize Exchange scripts, and coins. This note is for whoever builds the headless slot model (seeded RNG, frame-stepped)
-and the DOM screen. Nothing here is built yet.
+and the DOM screen. Section 9 says what is built.
 
 Source: pret/pokeplatinum (local `reference-projects/pokeplatinum`), used for names, offsets and understanding only.
 Paths are relative to its root. Every ROM table was read and hashed from the user's Platinum (US) ROM with
@@ -570,3 +570,27 @@ The Coin Case's bag use ("Your Coins: n") is already implemented.
 8. The **single-screen composition** (where the bottom-screen Clefairy area and counters go) is a design task for the
    screen lane. Nothing on the DS requires both screens to be seen at once, apart from the 7s sliding from the top
    screen to the bottom one.
+
+## 9. What is built
+
+- **Import** (`packages/importer/src/slots.ts`, `ui2d/slots.ts`): every table of §3 by offset and SHA-1 into
+  `NewGame.slots` (contracts `SlotTables`), checked loudly (shares ≤ 100, rows summing to 100, the symbol animations an
+  identity, the light show ending in its restart). The art as `ui2d/slots/*` sheets: the machine with its lamps unlit
+  and a lit cell per line (a lamp's level is that cell at level/16), the stop buttons in palettes 5 and 6 (origins at
+  their tiles), the shading, the field in its four palette-1 colourings, the backdrops, and every OBJ set of §5.3.
+- **Rules** (`packages/services/src/slots.ts`): `SlotMachine` runs the 64 states, the reel tasks, the presentation
+  sequences (ball, sparkle, Pikachu pair, Clefairy, 7 flash, counters), the payout counter, the palette tasks and the
+  BGM switch frame by frame in the DS's task order. The draws, the lines and the payout are pure exported functions.
+  Sprite loads finish on the next frame (VBlank then AfterVBlank) **(inferred)**; the screen fades take 8 frames.
+- **Choices**: §8.1 confirmed (a session LCRNG seeded by one main-stream draw); §8.2 as written (the press frame's stop
+  is applied before that frame's movement); §8.3 kept. A tap is the same press as its key.
+- **App and screen** (`packages/menus/src/slots.ts`, `packages/app/src/ui/slots.ts`): one canvas, 256 × 368: the field
+  at the top, the machine from y 176 (the cabinet covers the field's bottom 16 px, so Clefairy and the ball stand on
+  its top); the GET counter moves to the field's top right. Touch: each reel's column stops it; the help bar's three
+  parts (reaching 28 px up into the field) bet, spin and quit. `SlotsView.prompt` says what the machine waits for.
+- **Ops** (`packages/vm/src/game-corner-ops.ts`): the coin commands and window (`ScriptView.coinWindow`), the prizes,
+  the streak check, `scr_cmd_267` (mode, trainer score, record 14, streak, a logged TV stub), Hidden Power, and
+  `show_list_menu_remember_cursor` in `ops.ts`. `create_journal_event` stays a counted stub.
+- **Not DS-exact**: the 2D affine rotation of the ball's wobble is drawn in degrees from the DS's angle units; the
+  palette fades are drawn as alpha blends of the lit cells (the same colours to within the DS's 5-bit rounding).
+- **Note**: a new game sets `VAR_CONSECUTIVE_BONUS_ROUND_WINS` to 9 (scripts_init_new_game.s), so the sign starts at 9.

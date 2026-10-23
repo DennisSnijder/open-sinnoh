@@ -18,6 +18,7 @@ export * from './frontier.ts';
 export * from './underground.ts';
 export * from './contests.ts';
 export * from './seals.ts';
+export * from './slots.ts';
 
 export * from './anim-script.ts';
 

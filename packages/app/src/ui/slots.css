@@ -1,0 +1,10 @@
+/*
+ * The slot machine (ui/slots.ts): one canvas; the touch targets are invisible buttons over its reels and help bar. The
+ * keys play the machine as the DS's buttons, so the targets show no hover band and no focus ring over the art.
+ */
+.slots-scene .ds-scene-canvas { touch-action: none; }
+.ui-layer .slots-scene .ds-scene-boxes > .slots-target,
+.ui-layer .slots-scene .ds-scene-boxes > .slots-target:is(:hover, :focus-visible, .is-cursor) {
+  position: absolute; min-width: 0; min-height: 0; padding: 0; border: 0; background: none; box-shadow: none; outline: none;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}

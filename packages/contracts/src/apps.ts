@@ -289,6 +289,8 @@ export type AppRequest =
   | { app: 'contest-photo'; slot: number }
   /** Decomp ScrCmd_OpenSealCapsuleEditor (the PC's BALL CAPSULES): the Ball Capsule editor (contracts `CapsuleEditorView`). */
   | { app: 'capsule-editor' }
+  /** 0.37.0. Decomp ScrCmd_267: the Game Corner's slot machine (`SlotsRequest`). */
+  | import('./slots.ts').SlotsRequest
   | EvolutionRequest;
 
 /**
@@ -403,6 +405,8 @@ export type AppResult =
   /** 0.35.1. The photo viewer closed. */
   | { app: 'contest-photo' }
   | { app: 'capsule-editor' }
+  /** 0.37.0. The slot machine closed (`SlotsResult`). */
+  | import('./slots.ts').SlotsResult
   /** 0.27.30. Rowan's intro (packages/menus `createRowanIntro`): the names and gender the new game starts with. */
   | { app: 'rowan-intro'; names: { player: string; rival: string }; gender: 'male' | 'female' };
 
@@ -550,7 +554,8 @@ export type AppView =
   | import('./contests.ts').ContestPhotoView
   | import('./seals.ts').CapsuleEditorView
   | import('./frontier.ts').FactoryView
-  | import('./frontier.ts').HallBoardView;
+  | import('./frontier.ts').HallBoardView
+  | import('./slots.ts').SlotsView;
 export type AppName = AppView['app'];
 
 /**

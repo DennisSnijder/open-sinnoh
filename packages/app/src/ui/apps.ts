@@ -28,6 +28,7 @@ import { contestDance } from './contest-dance.ts';
 import { contestPhoto } from './contest-visual.ts';
 import { capsuleEditor } from './capsule.ts';
 import { factoryApp, hallBoard } from './frontier.ts';
+import { slots } from './slots.ts';
 import { credits, hallOfFame } from './hall-of-fame.ts';
 import { icon, type IconName } from './icons.ts';
 import { party } from './party.ts';
@@ -190,6 +191,8 @@ export function drawApp(d: DrawContext, v: AppView): Drawn {
       return { kind: 'scene', root: factoryApp(d, v) };
     case 'hall-board':
       return { kind: 'scene', root: hallBoard(d, v) };
+    case 'slots':
+      return { kind: 'scene', root: slots(d, v) };
   }
 }
 
