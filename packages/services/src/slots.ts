@@ -76,6 +76,13 @@ const ST = {
   msgNoThree: 59, msgNoCoins: 60, msgFull: 61, msgWait: 62, quit: 63,
 } as const;
 
+/** What each waiting state asks for (`SlotsView.prompt`). */
+const PROMPTS: Partial<Record<number, SlotsView['prompt']>> = {
+  [ST.bet]: 'bet', [ST.standbyBet]: 'bet', [ST.roundBet]: 'bet',
+  [ST.lever]: 'lever', [ST.standbyLever]: 'lever', [ST.roundLever]: 'lever',
+  [ST.stops]: 'stops', [ST.standbyStops]: 'stops', [ST.roundStops]: 'stops',
+};
+
 interface Reel {
   /** The reel task (ov101_021D2C10): 0 still, 1 spinning, 2 stop pressed, 3 snapping and slipping, 4 bouncing. */
   task: number;
@@ -1716,6 +1723,7 @@ export class SlotMachine {
       app: 'slots',
       tick: this.tick,
       fade: this.fade,
+      prompt: this.phase !== 1 || this.message !== null ? null : PROMPTS[this.state] ?? null,
       reels,
       stops: [...this.stopPalettes],
       lamps: this.lamps.map((l) => Math.floor(l)),

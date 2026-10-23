@@ -96,6 +96,7 @@ export interface SlotsResult {
  * - `counters`: the bonus round's small counters (spins left, coins gained); `banner`: the round number shown at a
  *   round start; `summary`: the 2× counters at the bonus end (rounds, coins gained).
  * - `field`: the moonlit field's palette: `bonus` the blend toward the bonus colouring (0–16), `moon` a moon pulse.
+ * - `prompt`: what the machine waits for: a bet (X), the lever (↓ or X), the stops (Y, B, A), else null.
  * - `fade`: the screen's brightness fade (0 shown … 16 black). `message`: the message box (A or B closes it).
  * Taps: `stop:<0–2>` (Y, B, A), `bet` (X), `spin` (↓), `quit` (START), `next` (A).
  */
@@ -103,6 +104,7 @@ export interface SlotsView {
   app: 'slots';
   tick: number;
   fade: number;
+  prompt: 'bet' | 'lever' | 'stops' | null;
   reels: { y: number; symbol: number }[][];
   stops: ('armed' | 'pressed')[];
   lamps: number[];
