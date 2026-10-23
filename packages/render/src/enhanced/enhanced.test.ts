@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
-import { ENHANCED_PRESETS, enhancedVisuals, parseEnhanced, setEnhancedVisuals } from './config.ts';
+import type { Zone } from '@opensinnoh/contracts';
+import { cameraAllowed, ENHANCED_PRESETS, enhancedVisuals, parseEnhanced, setEnhancedVisuals, visualStyleConfig } from './config.ts';
 import { lampPoints } from './lamp-points.ts';
 import { goldenAt, gradeAt, nightAt, sunDirection } from './time.ts';
 
@@ -24,6 +25,24 @@ describe('enhanced visuals config', () => {
     expect(enhancedVisuals()).toEqual(ENHANCED_PRESETS.subtle);
     setEnhancedVisuals(null);
     expect(enhancedVisuals()).toBeNull();
+  });
+});
+
+describe('the Options visual style', () => {
+  it('maps DS, Subtle, Cinematic and the angled camera to configs', () => {
+    expect(visualStyleConfig('ds', false, false)).toBeNull();
+    expect(visualStyleConfig('ds', true, false)).toMatchObject({ camera: 'follow', bloom: false });
+    expect(visualStyleConfig('subtle', false, true)).toMatchObject({ camera: 'off', bloom: true, dof: false, lowPower: true });
+    expect(visualStyleConfig('cinematic', false, false)).toMatchObject({ camera: 'off', dof: true, sun: true });
+  });
+
+  it('keeps the DS camera in caves, buildings and fog', () => {
+    const zone = (mapType: Zone['mapType']) => ({ mapType }) as Zone;
+    expect(cameraAllowed(zone('route'), false)).toBe(true);
+    expect(cameraAllowed(zone('town'), false)).toBe(true);
+    expect(cameraAllowed(zone('route'), true)).toBe(false);
+    expect(cameraAllowed(zone('cave'), false)).toBe(false);
+    expect(cameraAllowed(zone('indoors'), false)).toBe(false);
   });
 });
 
@@ -61,5 +80,8 @@ describe('lamp points', () => {
     ]);
     expect(lampPoints('h_mado', geometry)[0]!.kind).toBe('window');
     expect(lampPoints('c1_b01_1', geometry)).toEqual([]);
+    // Other "light" materials are not lamps: a PC, the Pokémon Center floor, the caves' fittings.
+    for (const name of ['light', 'light_a', 'dun_light_lm1', 'bf_light_lm5', 'window01_mat']) expect(lampPoints(name, geometry)).toEqual([]);
+    expect(lampPoints('c5_light_lm1', geometry)[0]!.kind).toBe('lamp');
   });
 });

@@ -6,9 +6,13 @@ export interface LampPoint {
   kind: 'lamp' | 'window';
 }
 
-/** Map material names of lamps (Platinum `c1_lamp01`, `c5_light`, `dun_light`, build `light`) and windows (`h_mado`, `window`). */
-const LAMP = /lamp|light/i;
-const WINDOW = /mado|window/i;
+/**
+ * Map material names of street lamps (Platinum `c1_lamp01`, `lamp03`, `c5_light`) and buildings' windows (`h_mado`,
+ * `gingamado`). Other "light" and "window" materials are left out: a PC's screen, the Pokémon Center's glass doors and
+ * floor lights, rooftop beacons, the Battle Frontier's and the caves' fittings.
+ */
+const LAMP = /lamp|^c\d+_light/i;
+const WINDOW = /^h_mado|gingamado/i;
 
 /**
  * The lamps and windows a world-space geometry with material `name` holds: its vertices clustered on a 16-unit grid

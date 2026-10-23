@@ -45,7 +45,8 @@ export function sunDirection(hour: number): { x: number; y: number; z: number } 
 /** Bloom by the hour: subtle by day, strong at night (lamps and windows). */
 export function bloomAt(hour: number, lamps: boolean): { strength: number; threshold: number; radius: number } {
   const n = nightAt(hour);
-  return { strength: 0.18 + n * (lamps ? 0.42 : 0.32), threshold: 0.9 - n * 0.18, radius: 0.4 + n * 0.2 };
+  // By day only near-white glows (no noon grass or warp tiles); at night the lit windows and lamps.
+  return { strength: 0.18 + n * (lamps ? 0.42 : 0.32), threshold: 0.97 - n * 0.25, radius: 0.4 + n * 0.2 };
 }
 
 export interface Grade {

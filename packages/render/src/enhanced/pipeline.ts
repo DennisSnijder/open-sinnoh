@@ -88,7 +88,9 @@ export class EnhancedPipeline {
 
   setConfig(config: EnhancedConfig): void {
     if (config.camera !== this.config.camera) this.follow = null;
+    const resize = config.lowPower !== this.config.lowPower;
     this.config = config;
+    if (resize) this.setSize(this.size.x, this.size.y);
     this.ao.enabled = config.ao;
     this.bloom.enabled = config.bloom || config.lamps;
     this.sun.enabled = config.sun;
@@ -101,6 +103,8 @@ export class EnhancedPipeline {
   setSize(width: number, height: number): void {
     this.size.set(width, height);
     this.composer.setSize(width, height);
+    // Phones: the bloom's mip chain at a quarter of the pixels (UnrealBloomPass's mip count is fixed).
+    if (this.config.lowPower) this.bloom.setSize(Math.max(2, Math.round(width / 2)), Math.max(2, Math.round(height / 2)));
   }
 
   /** A new map: the follow camera snaps. */
@@ -112,10 +116,14 @@ export class EnhancedPipeline {
    * The angled camera, after the DS placed `camera` (`dsFov`: the DS preset's FOV widened to the view): lower pitch,
    * wider FOV, nearer, framing the same ground size at the target; `follow` lags and looks ahead of the target. The
    * view reaches farther, so the far plane moves out (the DS fog's depth table then lands nearer; no field map with
-   * fog uses this camera's look in the showcase). Returns how far the view reaches on the ground, for chunk loading.
+   * fog uses this camera's look in the showcase). Returns how far the view reaches on the ground, for chunk loading, or
+   * null when the DS camera stays: the camera is off, the preset is orthographic, or the zone is not `cameraAllowed`.
    */
-  placeCamera(camera: THREE.PerspectiveCamera | THREE.OrthographicCamera, rec: CameraRecord, target: THREE.Vector3, velocity: THREE.Vector3, dsFov: number, zoom: number): Reach | null {
-    if (this.config.camera === 'off' || !(camera instanceof THREE.PerspectiveCamera)) return null;
+  placeCamera(camera: THREE.PerspectiveCamera | THREE.OrthographicCamera, rec: CameraRecord, target: THREE.Vector3, velocity: THREE.Vector3, dsFov: number, zoom: number, allowed: boolean): Reach | null {
+    if (this.config.camera === 'off' || !allowed || !(camera instanceof THREE.PerspectiveCamera)) {
+      this.follow = null;
+      return null;
+    }
     const tan = Math.tan((dsFov / 2) * DEG) * FOV_SCALE;
     camera.fov = (2 * Math.atan(tan)) / DEG;
     camera.far = rec.far * 1.8;
@@ -195,8 +203,8 @@ export class EnhancedPipeline {
       const kinds = frame.weather ? [] : particleKinds(frame.zone, frame.seconds / 3600);
       this.particles.draw(r, camera, frame.target, kinds, depth, w, h, projScale, persp);
     }
-    // Lamps light at night outdoors; indoors and in caves they are always on, softer.
-    const lampLevel = outdoors ? night : 0.6;
+    // Lamps and windows light at night, outdoors only.
+    const lampLevel = outdoors ? night : 0;
     if (this.config.lamps && lampLevel > 0.05) this.lamps.draw(r, camera, frame.lamps, depth, w, h, projScale, persp, lampLevel);
 
     if (this.config.ao) {

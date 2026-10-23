@@ -12,7 +12,7 @@ import { AssetCache, disposeTree } from './assets.ts';
 import { cardFoot, restCards } from './cards.ts';
 import { billboardMaterial, billboardMatrix, faceCameraNodes, nodeBillboard, reflectionMaterial } from './billboard.ts';
 import { Composite, fieldOutputs } from './composite.ts';
-import { enhancedVisuals, needsPost, type EnhancedConfig } from './enhanced/config.ts';
+import { cameraAllowed, enhancedVisuals, needsPost, type EnhancedConfig } from './enhanced/config.ts';
 import { lampPoints, type LampPoint } from './enhanced/lamp-points.ts';
 import type { EnhancedPipeline } from './enhanced/pipeline.ts';
 import { FieldEffects } from './effects.ts';
@@ -438,6 +438,8 @@ export interface RenderStats {
    * and the atlas frame actually drawn (billboards only).
    */
   actors: { key: string; sprite: Id; at: Vec3; visible: boolean; object: string | null; kind: 'live' | 'departed' | 'preview'; onScreen: boolean; frame?: number }[];
+  /** The enhanced visuals drawn in the last frame (enhanced/config.ts), null for the DS look (or while their chunk loads). */
+  enhanced: EnhancedConfig | null;
   /** The weathers on screen in their fades (render/weather.ts): phase, live particles, and the fog's farthest density. */
   weather: { id: Id; phase: 'in' | 'steady' | 'out'; particles: number; fog: number | null }[];
 }
@@ -542,6 +544,8 @@ class Field implements FieldRenderer {
   private enhanced: EnhancedPipeline | null = null;
   private enhancedConfig: EnhancedConfig | null = null;
   private enhancedLoading = false;
+  /** The enhanced camera replaced the DS camera's projection last frame. */
+  private enhancedCamera = false;
   private lamps: { key: string; list: LampPoint[] } = { key: '', list: [] };
   /** `RenderDebug.syncTiming`'s GPU timer queries in flight (null: the browser has no timer query). */
   private gpuQueries: { ext: { TIME_ELAPSED_EXT: number; GPU_DISJOINT_EXT: number } | null; pending: WebGLQuery[] } | null = null;
@@ -569,7 +573,7 @@ class Field implements FieldRenderer {
   private failure: Error | null = null;
   private disposed = false;
   readonly debug: RenderDebug = { spritesOnly: false, heldTextureAnimations: [], edges: true, polygonIds: false, syncTiming: false };
-  readonly stats: RenderStats = { frames: 0, renderMs: [], gpuMs: [], chunks: 0, chunkBuilds: 0, doors: 0, doorsPosed: 0, geometries: 0, textures: 0, cachedModels: 0, actors: [], weather: [] };
+  readonly stats: RenderStats = { frames: 0, renderMs: [], gpuMs: [], enhanced: null, chunks: 0, chunkBuilds: 0, doors: 0, doorsPosed: 0, geometries: 0, textures: 0, cachedModels: 0, actors: [], weather: [] };
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -1602,7 +1606,10 @@ class Field implements FieldRenderer {
     const before = this.enhancedConfig;
     this.enhancedConfig = config;
     // The DS camera again: rebuilt from its record on this frame.
-    if (before && before.camera !== 'off' && (config?.camera ?? 'off') === 'off') this.cameraRecord = null;
+    if (before && before.camera !== 'off' && (config?.camera ?? 'off') === 'off') {
+      this.cameraRecord = null;
+      this.enhancedCamera = false;
+    }
     this.reach = this.baseReach;
     // Lamp glows read the chunks' lamps, found only while a config is on: build the chunks again.
     if (config?.lamps && !before?.lamps) this.clearChunks();
@@ -1805,7 +1812,14 @@ class Field implements FieldRenderer {
     const enhanced = dw ? null : this.enhanced;
     if (enhanced) {
       const velocity = new THREE.Vector3(...view.camera.cur).sub(new THREE.Vector3(...view.camera.prev));
-      const r = enhanced.placeCamera(this.camera, this.cameraRecord!, aim, velocity, this.dsFov, view.cameraDistance ?? 0);
+      const fog = !!(view.features?.fog ?? this.weather.fog());
+      const r = enhanced.placeCamera(this.camera, this.cameraRecord!, aim, velocity, this.dsFov, view.cameraDistance ?? 0, cameraAllowed(zone, fog));
+      // Back to the DS camera (a cave, fog, the switch off): its own projection and far plane again.
+      if (!r && this.enhancedCamera) {
+        this.camera.far = this.cameraRecord!.far;
+        this.applyProjection();
+      }
+      this.enhancedCamera = !!r;
       const b = this.baseReach;
       this.reach = r ? { minX: Math.min(b.minX, r.minX), maxX: Math.max(b.maxX, r.maxX), minZ: Math.min(b.minZ, r.minZ), maxZ: Math.max(b.maxZ, r.maxZ) } : b;
     }
@@ -1892,6 +1906,7 @@ class Field implements FieldRenderer {
     s.geometries = this.renderer.info.memory.geometries;
     s.textures = this.renderer.info.memory.textures;
     s.cachedModels = this.assets.sizes().models;
+    s.enhanced = this.enhanced ? this.enhancedConfig : null;
   }
 
   loading(): boolean {

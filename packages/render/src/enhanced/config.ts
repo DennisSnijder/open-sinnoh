@@ -1,11 +1,13 @@
 /**
- * Enhanced visuals (prototype, opt-in): effects the DS never drew, each switched on its own. The default is off and
- * the field draws the DS look with no extra cost; the pipeline (pipeline.ts) is a lazy chunk loaded only once a
- * config turns something on. Replays and tests never set one (the app passes `?enhanced=` only outside `?replay`).
+ * Enhanced visuals (opt-in, off by default): effects the DS never drew. The default draws the DS look with no extra
+ * cost; the pipeline (pipeline.ts) is a lazy chunk loaded only once a config turns something on. The app sets one
+ * from the Options' VISUAL STYLE and ANGLED CAMERA (`visualStyleConfig`); replays and tests never do.
  *
- * `?enhanced=` takes a preset (`subtle`, `cinematic`) or a list of switches: `camera` (angled), `follow` (angled with
- * lag and lookahead), `dof`, `particles`, `bloom`, `grade`, `ao`, `lamps`, `sun`.
+ * Dev and test builds also take a preset (`subtle`, `cinematic`) or a list of switches through `parseEnhanced`:
+ * `camera` (angled), `follow` (angled with lag and lookahead), `dof`, `particles`, `bloom`, `grade`, `ao`, `lamps`, `sun`.
  */
+import type { Zone } from '@opensinnoh/contracts';
+
 export interface EnhancedConfig {
   /** `angled`: lower pitch, wider FOV. `follow`: the same with a lagging, looking-ahead target. */
   camera: 'off' | 'angled' | 'follow';
@@ -23,19 +25,32 @@ export interface EnhancedConfig {
   lamps: boolean;
   /** Golden-hour light shafts, a lens flare, a stronger sunset tint and long character shadows. */
   sun: boolean;
+  /** A phone (coarse pointer): the bloom runs at a quarter of the pixels. */
+  lowPower: boolean;
 }
 
-export const ENHANCED_OFF: EnhancedConfig = { camera: 'off', dof: false, particles: false, bloom: false, grade: false, ao: false, lamps: false, sun: false };
+export const ENHANCED_OFF: EnhancedConfig = { camera: 'off', dof: false, particles: false, bloom: false, grade: false, ao: false, lamps: false, sun: false, lowPower: false };
 
+/** The Options' visual styles past the DS look (the camera is its own switch). */
 export const ENHANCED_PRESETS = {
   /** Phone-friendly: no full-resolution blur passes. */
-  subtle: { camera: 'off', dof: false, particles: true, bloom: true, grade: true, ao: false, lamps: true, sun: false },
-  cinematic: { camera: 'follow', dof: true, particles: true, bloom: true, grade: true, ao: true, lamps: true, sun: true },
+  subtle: { camera: 'off', dof: false, particles: true, bloom: true, grade: true, ao: false, lamps: true, sun: false, lowPower: false },
+  cinematic: { camera: 'off', dof: true, particles: true, bloom: true, grade: true, ao: true, lamps: true, sun: true, lowPower: false },
 } as const satisfies Record<string, EnhancedConfig>;
+
+export type VisualStyle = 'ds' | keyof typeof ENHANCED_PRESETS;
+export const VISUAL_STYLES: readonly VisualStyle[] = ['ds', 'subtle', 'cinematic'];
+
+/** The config for the Options' visual style and angled camera (the follow camera); null is the DS look. */
+export function visualStyleConfig(style: VisualStyle, angledCamera: boolean, lowPower: boolean): EnhancedConfig | null {
+  const base: EnhancedConfig = style === 'ds' ? { ...ENHANCED_OFF } : { ...ENHANCED_PRESETS[style] };
+  const config: EnhancedConfig = { ...base, camera: angledCamera ? 'follow' : 'off', lowPower };
+  return enhancedActive(config) ? config : null;
+}
 
 const SWITCHES = ['dof', 'particles', 'bloom', 'grade', 'ao', 'lamps', 'sun'] as const;
 
-/** `?enhanced=` (see above); null for none or an empty list. Throws on an unknown switch. */
+/** A preset or switch list (see above); null for none or an empty list. Throws on an unknown switch. */
 export function parseEnhanced(value: string | null): EnhancedConfig | null {
   if (!value) return null;
   if (value in ENHANCED_PRESETS) return { ...ENHANCED_PRESETS[value as keyof typeof ENHANCED_PRESETS] };
@@ -70,4 +85,13 @@ export function setEnhancedVisuals(config: EnhancedConfig | null): void {
 
 export function enhancedVisuals(): EnhancedConfig | null {
   return current;
+}
+
+/**
+ * Where the angled camera may replace the DS camera: outdoor towns, cities and routes without fog. Caves show the void
+ * past their rooms and props south of the player cover it; fog's depth table is the DS projection's (until fog reads
+ * linear depth); interiors are orthographic anyway.
+ */
+export function cameraAllowed(zone: Zone, fog: boolean): boolean {
+  return (['town', 'city', 'route', 'outdoors'] as Zone['mapType'][]).includes(zone.mapType) && !fog;
 }

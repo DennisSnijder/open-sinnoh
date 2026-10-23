@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_DEVICE_OPTIONS, DEVICE_OPTION_COUNTS, type DeviceOptions, type OptionsView } from '@opensinnoh/contracts';
 import type { RenderScale } from '../layout.ts';
+import type { Visuals } from '../visuals.ts';
 import type { Zoom } from '../zoom.ts';
 import { DEFAULT_OPTIONS, OPENSINNOH_OPTIONS, playerDefaults } from './options.ts';
 import { allSettings, pages, SECTIONS, SETTINGS, stepSetting, type DataActions, type SettingsEnv } from './settings.ts';
@@ -20,7 +21,7 @@ function fakeEnv(opts: { app?: boolean; where?: 'title' | 'game'; rom?: boolean 
   };
   const taps: string[] = [];
   const calls: string[] = [];
-  const app = { audio: { volume: 80, muted: false }, zoom: 'auto' as Zoom, renderScale: 'auto' as RenderScale, speed: 2, reports: true, addon: 'HeartGold (US, rev 0)' as string | null, phone: { size: 1, opacity: 100, haptics: true, keepAwake: true } };
+  const app = { audio: { volume: 80, muted: false }, zoom: 'auto' as Zoom, renderScale: 'auto' as RenderScale, visuals: { style: 'ds', angledCamera: false } as Visuals, speed: 2, reports: true, addon: 'HeartGold (US, rev 0)' as string | null, phone: { size: 1, opacity: 100, haptics: true, keepAwake: true } };
   const mods = [{ id: 'demo', name: 'Demo', on: false }];
   const data: DataActions = {
     exportSave: async () => (calls.push('export'), 'Exported.'),
@@ -47,6 +48,7 @@ function fakeEnv(opts: { app?: boolean; where?: 'title' | 'game'; rom?: boolean 
     audio: withApp ? { get: () => ({ volume: app.audio.volume, muted: app.audio.muted }), set: (s) => (app.audio = s) } : null,
     zoom: withApp ? { get: () => app.zoom, choices: () => ['auto', 3, 4, 5], set: (z) => (app.zoom = z) } : null,
     renderScale: withApp ? { get: () => app.renderScale, set: (s) => (app.renderScale = s) } : null,
+    visuals: withApp ? { get: () => app.visuals, set: (v) => (app.visuals = v), phone: true } : null,
     speed: withApp ? { get: () => app.speed, choices: () => [2, 3, 4, 8], set: (n) => (app.speed = n) } : null,
     data,
     reports: withApp ? { get: () => app.reports, set: (on) => (app.reports = on) } : null,
@@ -74,7 +76,7 @@ describe('the settings registry', () => {
     expect(storage).toEqual({
       textSpeed: 'device', sound: 'save', battleScene: 'save', battleStyle: 'save', buttonMode: 'save', frame: 'save',
       introSkip: 'device', suspend: 'device', repelPrompt: 'device', followerTalk: 'device', statView: 'device', summaryRename: 'device', dexNameSearch: 'device', spiritombVendors: 'device', character: 'device', autoRun: 'device', itemWheel: 'device',
-      zoom: 'device', renderScale: 'device', speed: 'device', followers: 'device', followerStyle: 'device', autoLowercase: 'device', volume: 'device', mute: 'device', tradeEvolution: 'device', theme: 'device', uiFrame: 'device', reduceFlashing: 'device',
+      zoom: 'device', renderScale: 'device', visualStyle: 'device', angledCamera: 'device', speed: 'device', followers: 'device', followerStyle: 'device', autoLowercase: 'device', volume: 'device', mute: 'device', tradeEvolution: 'device', theme: 'device', uiFrame: 'device', reduceFlashing: 'device',
       controlSize: 'device', controlOpacity: 'device', haptics: 'device', keepAwake: 'device',
       ...Object.fromEntries(['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'l', 'r', 'start', 'select', 'fast'].map((a) => [`bind/${a}`, 'device'])), deadZone: 'device', resetControls: 'none',
       exportSave: 'none', importSave: 'none', install: 'none', update: 'none', storage: 'none', reimport: 'none', addon: 'none', deleteRom: 'none',
@@ -88,7 +90,7 @@ describe('the settings registry', () => {
     expect(p.map((x) => x.section.id)).toEqual(['game', 'device', 'controls', 'data', 'privacy']);
     expect(p.map((x) => x.settings.map((s) => s.id))).toEqual([
       ['textSpeed', 'sound', 'battleScene', 'battleStyle', 'buttonMode', 'frame', 'repelPrompt', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'spiritombVendors', 'introSkip'],
-      ['zoom', 'renderScale', 'speed', 'followers', 'followerStyle', 'character', 'autoLowercase', 'volume', 'mute', 'tradeEvolution', 'theme', 'uiFrame', 'reduceFlashing', 'controlSize', 'controlOpacity', 'haptics', 'keepAwake'],
+      ['zoom', 'renderScale', 'speed', 'followers', 'followerStyle', 'character', 'autoLowercase', 'volume', 'mute', 'tradeEvolution', 'theme', 'uiFrame', 'reduceFlashing', 'visualStyle', 'angledCamera', 'controlSize', 'controlOpacity', 'haptics', 'keepAwake'],
       ['autoRun', 'itemWheel', ...['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'l', 'r', 'start', 'select', 'fast'].map((a) => `bind/${a}`), 'deadZone', 'resetControls'],
       ['exportSave', 'importSave', 'suspend', 'storage', 'reimport', 'addon', 'deleteRom', 'mod/demo'],
       ['reports'],
@@ -232,5 +234,19 @@ describe('the data actions', () => {
     const { env, calls } = fakeEnv();
     stepSetting(env, byId('exportSave'), 1);
     expect(calls).toEqual([]);
+  });
+});
+
+describe('the visual style', () => {
+  it('is the DS look by default, and Cinematic on a phone says it is heavier', () => {
+    const { env, app } = fakeEnv();
+    const style = allSettings(env).find((s) => s.id === 'visualStyle')!;
+    const camera = allSettings(env).find((s) => s.id === 'angledCamera')!;
+    expect(style.values(env)[style.get(env)]).toBe('DS');
+    expect(camera.get(env)).toBe(1);
+    style.set(env, 2);
+    camera.set(env, 0);
+    expect(app.visuals).toEqual({ style: 'cinematic', angledCamera: true });
+    expect(style.description(env)).toMatch(/Heavier/);
   });
 });
