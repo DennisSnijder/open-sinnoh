@@ -26,6 +26,7 @@ import { mining, miningPrompt, undergroundMenu, undergroundVendor } from './unde
 import { contestApp } from './contest.ts';
 import { contestDance } from './contest-dance.ts';
 import { contestPhoto } from './contest-visual.ts';
+import { factoryApp, hallBoard } from './frontier.ts';
 import { credits, hallOfFame } from './hall-of-fame.ts';
 import { icon, type IconName } from './icons.ts';
 import { party } from './party.ts';
@@ -174,6 +175,10 @@ export function drawApp(d: DrawContext, v: AppView): Drawn {
       return contestApp(d, v);
     case 'contest-photo':
       return { kind: 'mart', root: contestPhoto(d, v) };
+    case 'factory':
+      return { kind: 'scene', root: factoryApp(d, v) };
+    case 'hall-board':
+      return { kind: 'scene', root: hallBoard(d, v) };
   }
 }
 

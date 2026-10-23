@@ -1,0 +1,10 @@
+/*
+ * The Battle Frontier's DS screens (ui/frontier.ts): the Factory's rental app and the Hall's type board, a DS scene
+ * (evolution.css) with names, labels, buttons over the balls and cells, the menu and YES/NO at their DS places.
+ */
+.ds-scene-boxes > .frontier-name, .ds-scene-boxes > .frontier-label { line-height: 0; white-space: nowrap; pointer-events: none; }
+.ds-scene-boxes > .frontier-mon, .ds-scene-boxes > .frontier-icon { line-height: 0; pointer-events: none; }
+.ds-scene-boxes > .frontier-ball, .ds-scene-boxes > .frontier-cell { padding: 0; border: 0; background: none; cursor: pointer; }
+.ds-scene-boxes > .frontier-ball.is-cursor, .ds-scene-boxes > .frontier-cell.is-cursor { outline: none; }
+.ds-scene-boxes > .frontier-menu { display: grid; align-content: center; }
+.ui-layer[data-mode] .ds-scene .frontier-menu .choice { min-height: 0; min-width: 0; height: calc(var(--k) * 16); }

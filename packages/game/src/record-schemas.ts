@@ -660,12 +660,14 @@ const specialEncounterTables = obj({
   pokeRadar: obj({ labels: obj({ noCharge: label, quiet: label }), bgm: ref('sequences'), effects: obj({ soft: ref('fieldEffects'), hard: ref('fieldEffects'), shiny: ref('fieldEffects') }) }),
   sweetScent: obj({ labels: obj({ faded: label, nothing: label }), sound: ref('sequences') }),
 }, (v) => ((v.swarms as unknown[]).length !== 22 ? 'swarms must have the 22 swarm zones' : (v.trophyGarden as { species: unknown[] }).species.length !== 16 ? 'trophyGarden.species must have 16 species' : undefined));
-/** contracts `FrontierTables` (0.34.0). */
+/** contracts `FrontierTables` (0.34.0; 0.37.0 the Factory's and the Hall's). */
+const frontierSet = obj({ species: ref('species'), form: int(0, 31), moves: arr(ref('moves')), evFlags: int(0, 63), nature: ref('natures'), item: nullable(ref('items')) });
+const factoryPool = obj({ trainerMax: int(0), setMin: int(0), setMax: int(0), ivs: int(0, 31), upgradable: bool });
 const frontierRoom = nullable(obj({ sheet: ref('ui2d'), width: int(256, 512), height: int(256, 512) }));
 const frontierTables = obj({
-  scenes: arr(nullable(obj({ entry: str(/^[a-z][a-z0-9_-]*:[A-Za-z0-9_]+\/0$/), textBank: ref('textBanks'), bgm: nullable(ref('sequences')), bg: frontierRoom, fg: frontierRoom, setup: bool }))),
+  scenes: arr(nullable(obj({ entry: str(/^[a-z][a-z0-9_-]*:[A-Za-z0-9_]+\/0$/), textBank: ref('textBanks'), bgm: nullable(ref('sequences')), bg: frontierRoom, fg: frontierRoom, setup: bool, fgFixed: opt(bool) }))),
   trainers: arr(obj({ class: id, className: ref('texts'), name: ref('texts'), sets: arr(int(0)) })),
-  sets: arr(obj({ species: ref('species'), form: int(0, 31), moves: arr(ref('moves')), evFlags: int(0, 63), nature: ref('natures'), item: nullable(ref('items')) })),
+  sets: arr(frontierSet),
   trainerMessages: ref('textBanks'),
   tower: obj({
     ranges: arr(tuple(int(0), int(0))),
@@ -678,6 +680,37 @@ const frontierTables = obj({
     classObjects: arr(obj({ class: id, gfx: int(0, 0xffff) })),
     defaultObject: int(0, 0xffff),
   }, (v) => ((v.ranges as unknown[]).length !== 8 || (v.bossRanges as unknown[]).length !== 8 || (v.battlePoints as unknown[]).length !== 8 ? 'frontier.tower: the ranges and BP need a row per room 0–7' : undefined)),
+  factory: obj({
+    opponentRanges: arr(tuple(int(0), int(0), int(0), int(0))),
+    level50Pools: arr(factoryPool),
+    openOpponentPools: arr(factoryPool),
+    openPlayerPools: arr(factoryPool),
+    tradeUpgrades: arr(int(0)),
+    battlePoints: arr(int(0, 255)),
+    thorton: tuple(int(0), int(0)),
+    art: nullable(obj({ wheel: arr(ref('ui2d')), conveyor: ref('ui2d'), selection: ref('ui2d'), noScreens: ref('ui2d'), summary: ref('ui2d'), sprites: ref('ui2d'), unpicked: ref('ui2d') })),
+  }, (v) => ((v.opponentRanges as unknown[]).length !== 8 || (v.battlePoints as unknown[]).length !== 9 ? 'frontier.factory: 8 opponent ranges and 9 BP rows' : undefined)),
+  hall: obj({
+    sets: arr(frontierSet),
+    opponents: arr(ref('species')),
+    opponentTypes: arr(tuple(ref('types'), ref('types'))),
+    rankRanges: arr(tuple(int(1), int(1))),
+    groupRanges: arr(tuple(int(1), int(1))),
+    ivs: arr(int(0, 31)),
+    trainerClasses: arr(id),
+    classesByRank: arr(arr(id)),
+    classesByCell: arr(arr(id)),
+    grid: arr(str(/^(summary|[a-z][a-z0-9_-]*:TYPE_[A-Z]+)$/)),
+    battlePoints: arr(int(0, 255)),
+    milestones: arr(obj({ record: int(1), bp: int(0) })),
+    argenta: tuple(int(0), int(0)),
+    art: nullable(obj({ board: obj({ normal: ref('ui2d'), selected: ref('ui2d'), unselectable: ref('ui2d') }), cursor: ref('ui2d') })),
+  }, (v) => {
+    const h = v as { sets: unknown[]; opponents: unknown[]; opponentTypes: unknown[]; rankRanges: unknown[]; ivs: unknown[]; classesByRank: unknown[]; classesByCell: unknown[]; grid: unknown[]; battlePoints: unknown[] };
+    if (h.opponents.length !== h.opponentTypes.length || h.sets.length !== h.opponents.length + 1) return 'frontier.hall: an opponent and its types per set after set 0';
+    if (h.rankRanges.length !== 10 || h.ivs.length !== 10 || h.classesByRank.length !== 10) return 'frontier.hall: rank ranges, IVs and classes for ranks 0–9';
+    return h.classesByCell.length !== 18 || h.grid.length !== 20 || h.battlePoints.length !== 19 ? 'frontier.hall: 18 cells of classes, a 20-cell grid, 19 BP rows' : undefined;
+  }),
   characters: dict(str(/^\d+$/), ref('ui2d')),
   objects: dict(str(/^\d+$/), ref('ui2d')),
   shadow: ref('ui2d'),

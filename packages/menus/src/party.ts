@@ -15,7 +15,7 @@
  */
 import { evolutionTarget, maxPp, monGender, movesAtLevel, setMoveSlot, type Button, type Id, type Pokemon, type Stats } from '@opensinnoh/core';
 import { dexOf, itemCount, levelEvolutionTrigger, markCaught, takeItem as takeBagItem, type AppMenu, type AppResult, type PartyView } from '@opensinnoh/contracts';
-import { bySource, canShayminSky, contestEligible, frontierBanned, canUseItemOn, giveHeldItem, ITEM_GRACIDEA, itemPicksMove, itemRecord, setShayminForm, SHAYMIN_SKY, takeHeldItem, teachTm, tmCompatibility, useItemOnMon, type ItemUsedMessage } from '@opensinnoh/services';
+import { bySource, canShayminSky, contestEligible, frontierBanned, HALL, canUseItemOn, giveHeldItem, ITEM_GRACIDEA, itemPicksMove, itemRecord, setShayminForm, SHAYMIN_SKY, takeHeldItem, teachTm, tmCompatibility, useItemOnMon, type ItemUsedMessage } from '@opensinnoh/services';
 import { menuSe, type MenuContext } from './context.ts';
 import { Dialog } from './dialog.ts';
 import { moveCursor, tapIndex, type Screen, type Step } from './stack.ts';
@@ -50,8 +50,11 @@ export type PartyMode =
   | { kind: 'select' }
   /** 0.31.0. The Poffin Case's GIVE (decomp PARTY_MENU_MODE_FEED_POFFIN): A picks a Pokémon (an Egg buzzes), B gives up. */
   | { kind: 'feed'; pick: (slot: number | null) => Step }
-  /** 0.34.0. The Battle Tower's pick of `count` in order (decomp PARTY_MENU_MODE_BATTLE_TOWER, reqLevel 100). */
-  | { kind: 'order'; count: number }
+  /**
+   * 0.34.0. The Battle Tower's pick of `count` in order (decomp PARTY_MENU_MODE_BATTLE_TOWER, reqLevel 100). 0.37.0:
+   * `hall`, the Battle Hall's (PARTY_MENU_MODE_BATTLE_HALL: level 30 or more, all of one species).
+   */
+  | { kind: 'order'; count: number; hall?: true }
   /** 0.35.0. A contest's entry (decomp PARTY_MENU_MODE_CONTEST): ENTER (when eligible), SUMMARY, CANCEL. */
   | { kind: 'contest'; rank: number; type: number };
 
@@ -166,7 +169,9 @@ export function partyScreen(ctx: MenuContext, mode: PartyMode, done: () => Step 
   };
   // --- order: ENTER / NO ENTRY, SUMMARY, CANCEL (decomp sub_0208022C, PartyMenu_CheckEligibility) ---
   const count = mode.kind === 'order' ? mode.count : 0;
-  const eligible = (slot: number) => !party()[slot]!.isEgg && !frontierBanned(ctx.registries, party()[slot]!.species);
+  const hall = mode.kind === 'order' && mode.hall === true;
+  /** Decomp PartyMenu_CheckEligibility, PartyMenu_CheckBattleHallEligibility (level 30 or more: HALL.minLevel). */
+  const eligible = (slot: number) => !party()[slot]!.isEgg && !frontierBanned(ctx.registries, party()[slot]!.species) && (!hall || party()[slot]!.level >= HALL.minLevel);
   const orderMenu = (slot: number): Step => {
     const mon = party()[slot]!;
     const entries: Entry[] = [];
@@ -183,10 +188,17 @@ export function partyScreen(ctx: MenuContext, mode: PartyMode, done: () => Step 
     if (picks.length === count) cursor = confirmStop();
     return;
   };
-  /** Decomp HandleGameWindowEvent's CONFIRM: all places filled, no species or held item twice (CheckDuplicateValues). */
+  /**
+   * Decomp HandleGameWindowEvent's CONFIRM: all places filled; the tower's no species or held item twice
+   * (CheckDuplicateValues), the Hall's all of one species (CheckUniqueValues).
+   */
   const confirmOrder = (): Step => {
-    if (picks.length < count) return say(`partyNeeded${count}` as MenuKey, []);
+    if (picks.length < count) return say(count === 1 ? 'partyChoose' : (`partyNeeded${count}` as MenuKey), []);
     const mons = picks.map((s) => party()[s]!);
+    if (hall) {
+      if (mons.some((m) => m.species !== mons[0]!.species)) return say('partySameKind', []);
+      return close({ app: 'party-order', order: [...picks] });
+    }
     for (let i = 0; i < mons.length; i++) {
       for (let j = i + 1; j < mons.length; j++) {
         if (mons[i]!.species === mons[j]!.species) return say('partyIdentical', []);

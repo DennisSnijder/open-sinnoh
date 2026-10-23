@@ -1,9 +1,11 @@
 /**
  * Draws a running Battle Frontier scene (`ScriptView.frontier`, contracts `FrontierView`; decomp frontier_graphics.c and
  * overlay 63) on the overlay canvas, in its 256×192 DS frame centred in the layout's room (`frontierFrame`, as the
- * DS-art menus are): black around it (the frontier app owns the screen), the room's BG3 at the camera, the
- * frontier_obj sprites (the doors), each character's shadow and its 2D sprite, the BG2 layer above them, then the
- * brightness fade. The message, menu and yes/no boxes are drawn over it by
+ * DS-art menus are): black around it (the frontier app owns the screen), the room's BG3 at the camera (shaken by
+ * FrontierScrCmd_4C), the frontier_obj sprites (the doors), each character's shadow and its 2D sprite, a party
+ * Pokémon's sprite on the stage (FrontierScrCmd_45), the BG2 layer above them (or under BG3 in the Factory corridor,
+ * scrolled on its own where it does not follow the camera, hidden while toggled off), window 0 keeping the sprites out
+ * of its rect (FrontierScrCmd_4E), then the brightness fade. The message, menu and yes/no boxes are drawn over it by
  * `drawScriptOverlay` in the same frame. Sheets load on first use; until they have, their layer is not drawn.
  */
 import type { AssetRef, AssetSource, FrontierView, Registries, Ui2dSheet } from '@opensinnoh/contracts';
@@ -43,6 +45,34 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
     return s;
   };
 
+  /** Decomp ov104_02232CE0: the Pokémon's 80×80 battle front, its palette blended `darken`/16 toward black. */
+  const darkened = new Map<string, HTMLCanvasElement | null>();
+  const pokemon = (ctx: CanvasRenderingContext2D, p: NonNullable<FrontierView['pokemon']>, scale: number) => {
+    const key = `${p.species}|${p.form}|${p.female}|${p.shiny}|${p.darken}`;
+    if (!darkened.has(key)) {
+      darkened.set(key, null);
+      const f = registries().pokemonSprites.get(p.species)?.forms[p.form] ?? registries().pokemonSprites.get(p.species)?.forms[0];
+      if (!f) throw new Error(`frontier scene: no sprites for ${p.species}`);
+      const face = (p.female && f.frontFemale) || f.front;
+      void assets
+        .get(p.shiny ? f.shinyAtlas : f.atlas)
+        .then((blob) => createImageBitmap(blob))
+        .then((img) => {
+          const c = document.createElement('canvas');
+          c.width = 80;
+          c.height = 80;
+          const g = c.getContext('2d')!;
+          g.drawImage(img, 0, face.y, 80, 80, 0, 0, 80, 80);
+          g.globalCompositeOperation = 'source-atop';
+          g.fillStyle = `rgb(0 0 0 / ${p.darken / 16})`;
+          g.fillRect(0, 0, 80, 80);
+          darkened.set(key, c);
+        });
+    }
+    const c = darkened.get(key);
+    if (c) ctx.drawImage(c, 0, 0, 80, 80, (p.x - 40) * scale, (p.y - 40) * scale, 80 * scale, 80 * scale);
+  };
+
   return (ctx: CanvasRenderingContext2D, view: FrontierView | undefined, frame: DsFrame) => {
     if (!view) return;
     const scale = frame.scale;
@@ -55,7 +85,7 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
     ctx.beginPath();
     ctx.rect(0, 0, 256 * scale, 192 * scale);
     ctx.clip();
-    const cam = view.camera;
+    const cam = { x: view.camera.x + (view.shake?.x ?? 0), y: view.camera.y + (view.shake?.y ?? 0) };
     /** A cell of a sheet with its origin at room position x, y. */
     const cell = (sheet: Ui2dSheet, index: number, x: number, y: number, flip = false) => {
       const img = image(sheet.atlas);
@@ -74,7 +104,25 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
     };
     /** The cell an animation shows at its frame. */
     const animCell = (sheet: Ui2dSheet, anim: number, frame: number): number => sheet.animations?.[anim]?.frames[frame]?.cell ?? 0;
+    /** BG2: at the camera, or (decomp FR_SCENE_FLAG_2 0) at its own scroll, wrapping down its height. */
+    const fg = () => {
+      if (!view.fg || view.fgHidden) return;
+      const s = sheetOf(view.fg.sheet);
+      if (!view.fgFixed) return cell(s, 0, 0, 0);
+      const scroll = view.fgScroll ?? { x: 0, y: 0 };
+      for (const dy of [0, view.fg.height]) cell(s, 0, cam.x - scroll.x, cam.y - scroll.y + dy);
+    };
+    if (view.fgBelow) fg();
     if (view.bg) cell(sheetOf(view.bg.sheet), 0, 0, 0);
+    if (view.window) {
+      // Window 0: inside its rect only the BG layers show (G2_SetWnd0InsidePlane without OBJ).
+      const w = view.window;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, 256 * scale, 192 * scale);
+      ctx.rect(w.x1 * scale, w.y1 * scale, (w.x2 - w.x1) * scale, (w.y2 - w.y1) * scale);
+      ctx.clip('evenodd');
+    }
     for (const o of view.objects) {
       if (!o.visible || o.anim < 0) continue;
       const s = sheetOf(o.sheet);
@@ -87,7 +135,9 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
       const s = sheetOf(a.sheet);
       cell(s, animCell(s, a.anim, a.frame), a.x, a.y);
     }
-    if (view.fg) cell(sheetOf(view.fg.sheet), 0, 0, 0);
+    if (view.pokemon) pokemon(ctx, view.pokemon, scale);
+    if (view.window) ctx.restore();
+    if (!view.fgBelow) fg();
     if (view.fade) {
       ctx.globalAlpha = view.fade.alpha;
       ctx.fillStyle = view.fade.color === 'black' ? '#000' : '#fff';

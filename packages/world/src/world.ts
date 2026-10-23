@@ -3251,11 +3251,13 @@ export class FieldWorld implements OpenSinnohWorld {
       scene.background = this.get('battleBackgrounds', `${ns}:BACKGROUND_PLAIN` as Id).id;
       scene.terrain = this.get('battleTerrains', `${ns}:TERRAIN_PLAIN` as Id).id;
     }
-    // Decomp FieldBattleDTO_NewBattleTower: BACKGROUND_BATTLE_TOWER and TERRAIN_BATTLE_TOWER (the tower is indoors).
+    // Decomp FieldBattleDTO_NewBattleTower, BattleFactory_SetupBattle, BattleHall_SetupBattle: the facility's background
+    // and terrain (BACKGROUND_BATTLE_TOWER, _FACTORY, _HALL).
     if (request.frontier && scene.background) {
       const ns = scene.background.slice(0, scene.background.indexOf(':'));
-      scene.background = this.get('battleBackgrounds', `${ns}:BACKGROUND_BATTLE_TOWER` as Id).id;
-      scene.terrain = this.get('battleTerrains', `${ns}:TERRAIN_BATTLE_TOWER` as Id).id;
+      const facility = request.frontier.facility.toUpperCase();
+      scene.background = this.get('battleBackgrounds', `${ns}:BACKGROUND_BATTLE_${facility}` as Id).id;
+      scene.terrain = this.get('battleTerrains', `${ns}:TERRAIN_BATTLE_${facility}` as Id).id;
     }
     // Decomp Encounter_NewVsGiratinaOrigin: TERRAIN_GIRATINA (a pack with battle art has it).
     if (request.giratina && scene.terrain) scene.terrain = this.get('battleTerrains', `${scene.terrain.slice(0, scene.terrain.indexOf(':'))}:TERRAIN_GIRATINA` as Id).id;
