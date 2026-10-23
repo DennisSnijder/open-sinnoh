@@ -234,7 +234,7 @@ class SlotsScene {
   /** The room around the composition takes the sky's and the cabinet's edge colours (once the art has drawn). */
   private edges = false;
   private sampleEdges(): void {
-    if (this.edges || !this.art.sheet('slots/field') || [...this.images.values()].some((i) => i === null)) return;
+    if (this.edges || this.last?.v.fade || !this.art.sheet('slots/field') || [...this.images.values()].some((i) => i === null)) return;
     const px = (x: number, y: number) => {
       const [r, g, b] = this.g.getImageData(x, y, 1, 1).data;
       return `rgb(${r} ${g} ${b})`;
@@ -245,7 +245,7 @@ class SlotsScene {
 
   /** The message box and the touch targets (DOM, at composition px). */
   private drawBoxes(d: DrawContext, v: SlotsView): void {
-    const key = JSON.stringify([v.message, d.frame, d.scale, v.stops]);
+    const key = JSON.stringify([v.message, d.frame, d.scale]);
     if (key === this.boxesKey) return;
     this.boxesKey = key;
     const parts: HTMLElement[] = [];

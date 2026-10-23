@@ -46,6 +46,7 @@ until state app.prompt "stops" 60
 +1 tap stop:1
 +1 tap stop:2
 until state app.prompt "bet" 3000
++0 screenshot standby
 +0 tap bet
 until state app.prompt "lever" 60
 +0 tap spin
@@ -102,6 +103,7 @@ until state app.prompt "stops" 60
 +2 tap stop:2
 +2 tap stop:1
 until state app.prompt "bet" 3000
++0 screenshot bonus
 +0 tap bet
 until state app.prompt "lever" 60
 +0 tap spin
