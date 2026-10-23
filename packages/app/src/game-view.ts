@@ -7,6 +7,8 @@ import { DEFAULT_DEVICE_OPTIONS, PANEL_HEIGHT, PANEL_WIDTH, type GameState, type
 import { IndexedDbSaveStore, PackMismatchError, saveFromJson, TEXT_FRAME_DELAY, validateSave, type Game, type NewGameOptions, type TextSpeedOption } from '@opensinnoh/game';
 import { checkNewGame, readNewGame, storeNewGame } from './new-game.ts';
 import { createSession, warmBattleEngine, type Session } from './boot.ts';
+import { parseEnhanced, setEnhancedVisuals, visualStyleConfig, type EnhancedConfig } from '@opensinnoh/render';
+import { readVisuals, storeVisuals, type Visuals } from './visuals.ts';
 import { createBridge, type AppBridge } from './bridge.ts';
 import type { ReplayRecorder } from './recorder.ts';
 import { attachGamepadEvents, attachKeyboard, controls, FAST_FORWARD_TOGGLE, gamepadFastForward, InputState, pollGamepads } from './input.ts';
@@ -186,6 +188,12 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   };
   let session: Session = await open(mods, opts.replay ? 1 : randomSeed());
   attachAudio(session);
+  // The visual style and angled camera (visuals.ts; the renderer's enhanced visuals): the player's choice, applied
+  // live; replays keep the DS look whatever is stored. Dev and test builds also get a hook to set a config directly.
+  let visuals: Visuals = readVisuals();
+  const applyVisuals = () => setEnhancedVisuals(opts.replay ? null : visualStyleConfig(visuals.style, visuals.angledCamera, matchMedia('(pointer: coarse)').matches));
+  applyVisuals();
+  if (import.meta.env.DEV) (window as { openSinnohEnhanced?: (c: string | EnhancedConfig | null) => void }).openSinnohEnhanced = (c) => setEnhancedVisuals(typeof c === 'string' ? parseEnhanced(c) : c);
   if (import.meta.env.DEV && new URLSearchParams(location.search).get('debug') === '1') {
     const { mountDebugPanel } = await import('./debug/panel.ts');
     mountDebugPanel(() => session, () => input.clear('keyboard'));
@@ -278,6 +286,16 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
       },
     },
     speed: { get: () => fastForward.fast, choices: () => FAST_SPEEDS, set: setFastSpeed },
+    visuals: {
+      get: () => visuals,
+      set: (v) => {
+        visuals = v;
+        const err = storeVisuals(v);
+        if (err) session.game.log.stub('ui:visuals-storage', `the visual style is kept for this visit only: ${err}`);
+        applyVisuals();
+      },
+      phone: coarse.matches,
+    },
     data: dataActions,
     reports: {
       get: reportsEnabled,

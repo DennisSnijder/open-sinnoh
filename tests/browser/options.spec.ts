@@ -117,7 +117,7 @@ test('the title and the game open the same Options screen: five sections, the sa
   expect(Object.fromEntries(Object.entries(game.rows).map(([k, v]) => [k, v.map(([id]) => id)]))).toEqual(Object.fromEntries(Object.entries(title.rows).map(([k, v]) => [k, v.map(([id]) => id)])));
   expect(muted(game)).toEqual([]);
   // The phone rows are listed where the device has the feature: haptics and keep-screen-on in Chromium, the touch controls' size and opacity on a touch screen.
-  expect(title.rows.device!.map(([id]) => id)).toEqual(['zoom', 'renderScale', 'speed', 'followers', 'followerStyle', 'character', 'autoLowercase', 'volume', 'mute', 'tradeEvolution', 'theme', 'uiFrame', 'reduceFlashing', ...(info.project.name === 'phone' ? ['controlSize', 'controlOpacity'] : []), 'haptics', 'keepAwake']);
+  expect(title.rows.device!.map(([id]) => id)).toEqual(['zoom', 'renderScale', 'speed', 'followers', 'followerStyle', 'character', 'autoLowercase', 'volume', 'mute', 'tradeEvolution', 'theme', 'uiFrame', 'reduceFlashing', 'visualStyle', 'angledCamera', ...(info.project.name === 'phone' ? ['controlSize', 'controlOpacity'] : []), 'haptics', 'keepAwake']);
   expect(title.rows.data!.map(([id]) => id)).toEqual(['exportSave', 'importSave', 'suspend', 'mod/demo-mod']);
   // The QoL additions (OpenSinnoh): GAME after the DS's six, CONTROLS before the bindings.
   expect(title.rows.game!.map(([id]) => id)).toEqual(['textSpeed', 'sound', 'battleScene', 'battleStyle', 'buttonMode', 'frame', 'repelPrompt', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'spiritombVendors', 'introSkip']);

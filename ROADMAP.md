@@ -88,6 +88,8 @@ Pokémon, follower talk and the HGSS look.
   Battle Frontier, with its own checkpoint suite.
 - **Beyond the original (opt-in):** higher resolution, widescreen camera options, texture filtering, replacement
   model and texture packs.
+- **Enhanced visuals:** refine enhanced visuals (fog from linear depth so the angled camera works under fog, lamp
+  and window glows, phone cost); consider an onboarding choice.
 - **An original demo pack** that needs no ROM.
 - **Later:** the one-way cartridge `.sav` import, Diamond and Pearl, other ROM regions.
 

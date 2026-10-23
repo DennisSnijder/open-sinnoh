@@ -21,6 +21,7 @@ import { controls } from '../input.ts';
 import { CONTROL_SIZES, OPACITY_MIN, OPACITY_RANGE, type PhoneSettings } from '../phone.ts';
 import { RENDER_SCALES, type RenderScale } from '../layout.ts';
 import { zoomLabel, type Zoom } from '../zoom.ts';
+import { VISUAL_STYLES, type Visuals } from '../visuals.ts';
 
 export type SectionId = 'game' | 'device' | 'controls' | 'data' | 'privacy';
 
@@ -67,6 +68,8 @@ export interface AppSettings {
   zoom: { get(): Zoom; choices(): Zoom[]; set(zoom: Zoom): void } | null;
   /** The field's 3D resolution (layout.ts `RenderScale`). */
   renderScale: { get(): RenderScale; set(scale: RenderScale): void } | null;
+  /** The visual style and angled camera (visuals.ts); `phone`: a touch screen (Cinematic says it is heavier there). */
+  visuals: { get(): Visuals; set(v: Visuals): void; phone: boolean } | null;
   /** The fast-forward speed. */
   speed: { get(): number; choices(): readonly number[]; set(speed: number): void } | null;
   /** The DATA section's actions. */
@@ -378,6 +381,35 @@ export const SETTINGS: readonly Setting[] = [
       const err = chooseFlashing(v === 0);
       if (err) console.warn(`flashing: the setting is kept for this visit only: ${err}`);
     },
+  },
+  // The visual style (`lantern-nds:visual-style`, visuals.ts): the DS look, or the enhanced visuals. Presentation only.
+  {
+    id: 'visualStyle',
+    section: 'device',
+    kind: 'choice',
+    storage: 'device',
+    available: (env) => !!env.visuals,
+    label: () => 'VISUAL STYLE',
+    description: (env) =>
+      env.visuals!.get().style === 'cinematic' && env.visuals!.phone
+        ? 'Depth of field and light shafts too.\nHeavier: it may run slower on a phone.'
+        : 'DS draws the field as the DS did. SUBTLE\nadds glow, colour and particles.',
+    values: () => ['DS', 'SUBTLE', 'CINEMATIC'],
+    get: (env) => VISUAL_STYLES.indexOf(env.visuals!.get().style),
+    set: (env, v) => env.visuals!.set({ ...env.visuals!.get(), style: VISUAL_STYLES[v]! }),
+  },
+  // The angled camera (`lantern-nds:angled-camera`): outdoors only, the DS camera in caves, buildings and fog.
+  {
+    id: 'angledCamera',
+    section: 'device',
+    kind: 'toggle',
+    storage: 'device',
+    available: (env) => !!env.visuals,
+    label: () => 'ANGLED CAMERA',
+    description: () => 'A lower camera that follows you, in\ntowns and on routes. Caves keep the DS view.',
+    values: onOff,
+    get: (env) => (env.visuals!.get().angledCamera ? 0 : 1),
+    set: (env, v) => env.visuals!.set({ ...env.visuals!.get(), angledCamera: v === 0 }),
   },
   // The touch controls (this device, `lantern-nds:phone`): their size and how opaque they are.
   {
