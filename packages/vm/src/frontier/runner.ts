@@ -72,6 +72,8 @@ export class FrontierRunner {
   readonly slots: (string | undefined)[] = [];
   /** Decomp exitBattleFrontier. */
   exited = false;
+  /** Contexts waiting in FrontierScrCmd_WaitABPress (`FrontierView.waitsForAB`). */
+  abWaits = 0;
   /** The facility the scripts run (decomp BattleFrontier_SetFacilityStruct): the Factory's or the Hall's challenge. */
   factory: BattleFactory | null = null;
   hall: BattleHall | null = null;
@@ -98,7 +100,8 @@ export class FrontierRunner {
   /** Decomp FrontierGraphics_New: the scene's room and music (the scene BGM plays again after a battle too). */
   loadScene(sceneId: number, screen: { color: 'black' | 'white'; alpha: number }): void {
     const data = this.sceneData(sceneId);
-    this.scene = new FrontierScene(sceneId, data, this.tables, (sheet) => this.animations(sheet), screen);
+    // Decomp BattleFrontier unk_24: the loaded 2D characters outlive the scene (FrontierGraphics is rebuilt).
+    this.scene = new FrontierScene(sceneId, data, this.tables, (sheet) => this.animations(sheet), screen, this.scene?.loaded);
     this.textBank = data.textBank;
     if (data.setup) this.setupScene(sceneId);
     if (data.bgm) this.r.audio.playBgm(data.bgm);
@@ -190,6 +193,7 @@ export class FrontierRunner {
       if (entry !== null) {
         // ov104_0222E8C8/E8E8: the manager's vars survive the new script manager; its contexts are gone.
         this.contexts.fill(null);
+        this.abWaits = 0;
         this.slots.length = 0;
         this.load(entry);
       } else for (const c of this.contexts) if (c) c.textBank = this.textBank;
@@ -319,6 +323,6 @@ export class FrontierRunner {
   }
 
   view(): FrontierView {
-    return this.scene.view();
+    return { ...this.scene.view(), ...(this.abWaits ? { waitsForAB: true as const } : {}) };
   }
 }

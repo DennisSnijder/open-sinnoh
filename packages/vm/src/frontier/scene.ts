@@ -272,8 +272,11 @@ interface ObjectSprite {
 }
 
 export class FrontierScene {
-  /** Decomp unk_24: the 2D character graphics loaded (FrontierScrCmd_22), by gfx. */
-  private readonly loaded = new Set<number>();
+  /**
+   * Decomp unk_24: the 2D character graphics loaded (FrontierScrCmd_22), by gfx. It is the frontier app's (BattleFrontier
+   * unk_24), not the scene's: a scene change keeps it (the Arcade's battle room places the player loaded in the corridor).
+   */
+  readonly loaded: Set<number>;
   /** Decomp unk_6C: the actors by object slot (32). */
   private readonly actors: (Actor | null)[] = Array(32).fill(null);
   /** Decomp the frontier_obj resources loaded (FrontierScrCmd_2A) and the sprites by slot (8). */
@@ -315,7 +318,9 @@ export class FrontierScene {
     private readonly animationsOf: (sheet: Id) => readonly Ui2dAnimation[],
     /** The screen when the scene starts (the field faded out before the frontier; a sub-app returns faded out too). */
     fade: { color: 'black' | 'white'; alpha: number },
+    loaded: Set<number> = new Set(),
   ) {
+    this.loaded = loaded;
     this.fade = { ...fade, anim: null };
   }
 

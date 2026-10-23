@@ -1,0 +1,76 @@
+# A Battle Arcade singles challenge (decomp scripts_battle_arcade.s, frontier_scripts_battle_arcade.s): the single
+# attendant, SINGLE, the party menu (PARTY_MENU_MODE_BATTLE_CASTLE: three Pokémon), the save before the challenge
+# (both questions YES), the corridor and the battle room. The game board (battle_arcade/main.c): its panels turn over,
+# the cursor runs, STOP is touched; the effect it lands on (drawn from the game's RNG: it differs by seed) acts on the
+# battle; the first battle won, the party healed, then RETIRE (YES): the save on the loss (BattleArcade_SaveOnLoss:
+# the latest and record streak 1), the lobby's goodbye.
+party 0 platinum:SPECIES_GARCHOMP 100 platinum:MOVE_EARTHQUAKE platinum:MOVE_DRAGON_CLAW platinum:MOVE_FIRE_FANG platinum:MOVE_CRUNCH
+party 1 platinum:SPECIES_METAGROSS 100 platinum:MOVE_METEOR_MASH platinum:MOVE_EARTHQUAKE platinum:MOVE_ZEN_HEADBUTT platinum:MOVE_BULLET_PUNCH
+party 2 platinum:SPECIES_SALAMENCE 100 platinum:MOVE_DRAGON_CLAW platinum:MOVE_EARTHQUAKE platinum:MOVE_FLAMETHROWER platinum:MOVE_AERIAL_ACE
+warp platinum:MAP_HEADER_BATTLE_ARCADE 14 6 up
+until idle
++0 press a
++1 release a
+advance text
+until menu 600
+# SINGLE
++2 press a
++1 release a
+advance text
+until app party 600
++2 screenshot arcade-party
++2 tap slot:0
++2 tap menu:0
++2 tap slot:1
++2 tap menu:0
++2 tap slot:2
++2 tap menu:0
++2 tap confirm
+until app none 300
+advance text
+until yesno 600
++2 press a
++1 release a
+advance text
+until yesno 600
++2 press a
++1 release a
++300 press a
++1 release a
++120 screenshot arcade-corridor
+advance text 3000
+until app arcade 3000
++20 screenshot arcade-board
+until state app.button 0 600
++0 screenshot arcade-roulette
++37 tap stop
+until app none 300
++0 screenshot arcade-effect
+advance text 3000
+until battle 3000
++0 screenshot arcade-battle
+battle auto 20000
+advance text 3000
+until menu 3000
++0 screenshot arcade-after
+# RETIRE (the list's fourth)
++10 press down
++1 release down
++2 press down
++1 release down
++2 press down
++1 release down
++2 press a
++1 release a
+until yesno 600
++2 press up
++1 release up
++2 press a
++1 release a
+advance text 3000
+until idle 3000
+advance text 3000
++0 assert battles frontier 1
++0 assert battle frontier * won single
++0 assert state frontier.arcade.streaks[0] {"record":1,"latest":1}
++0 assert state frontier.arcade.active[0] false

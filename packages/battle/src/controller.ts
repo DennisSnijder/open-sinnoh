@@ -1872,6 +1872,11 @@ class BattleController implements Battle {
         }
         case '-item':
         case '-enditem': {
+          // Gen 4 Frisk names no target (a random foe's item: the sim's gen4 mod logs `-item||<item>`): only its line.
+          if (cmd === '-item' && from === 'ability: Frisk' && a === '') {
+            yield* this.say(this.text.get('PokemonFriskedItsFoeAndFoundOneItem', [this.ofSide(parts).view.name, this.itemName(b)], this.who(this.ofSide(parts))));
+            break;
+          }
           const target = this.sideOf(a);
           aiRevealHeldItem(this.memory, this.battlerOf(a), cmd === '-item' ? this.itemNumber(target.mon) : 0);
           if (cmd === '-item' && from === 'ability: Frisk') yield* this.say(this.text.get('PokemonFriskedItsFoeAndFoundOneItem', [this.ofSide(parts).view.name, this.itemName(b)], this.who(this.ofSide(parts))));

@@ -379,6 +379,11 @@ export interface FrontierView {
    * the Castle Points at 16, 16).
    */
   infoWindow?: { x: number; y: number; width: number; height: number; lines: { text: string; x: number; y: number }[] };
+  /**
+   * 0.39.0. A script waits for A or B (decomp FrontierScrCmd_WaitABPress): nothing on the screen shows it; replays'
+   * `advance text` presses A for it as for a message waiting for input.
+   */
+  waitsForAB?: true;
   /** 0.39.0. A patch of BG3 at room px (decomp BattleCastle_UpdateEmblemFrame: the battle room's emblem for the round). */
   bgPatch?: { sheet: Id; x: number; y: number };
   /** 0.39.0. BG3's palette blended `bgDarken`/16 toward black (decomp BattleArcade_SetPalette); absent at 0. */
