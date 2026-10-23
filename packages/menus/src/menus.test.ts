@@ -103,7 +103,7 @@ describe('mart app (headless model)', () => {
     expect(view(app)).toMatchObject({ mode: 'menu', message: { text: 'Anything else\nfor you today?' } });
     press(app, 'down', 'down', 'a');
     expect(view(app)).toMatchObject({ mode: 'exit', message: { text: 'Thanks, see you soon!', waiting: true } });
-    expect(press(app, 'a')).toEqual({ app: 'mart' });
+    expect(press(app, 'a')).toEqual({ app: 'mart', bought: 2, sold: 0 });
   });
 
   it('shows the stock for the badge count when it opens', () => {

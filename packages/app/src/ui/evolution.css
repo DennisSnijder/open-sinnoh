@@ -46,3 +46,5 @@
 /* The Town Map (town-map.ts): the name window's text, the fly location taps. */
 .ds-scene-boxes > .town-map-text { line-height: 0; white-space: nowrap; pointer-events: none; }
 .ds-scene-boxes > .town-map-town { padding: 0; border: 0; background: none; cursor: pointer; }
+/* The journal and the diplomas (journal.ts): page-turn and close taps over the page, the diploma's close tap. */
+.ds-scene-boxes > .journal-zone, .ds-scene-boxes > .diploma-next { padding: 0; border: 0; background: none; cursor: pointer; }

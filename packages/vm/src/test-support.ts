@@ -68,6 +68,7 @@ export function newState(): GameState {
     fashionCase: newFashionCase(),
     sealCase: newSealCase(),
     contestPhotos: [null, null, null, null, null],
+    journal: [],
     signature: null,
     options: { sound: 0, battleScene: 0, battleStyle: 0, buttonMode: 0, frame: 0 },
     daycare: emptyDaycare(),

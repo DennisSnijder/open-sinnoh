@@ -1,0 +1,35 @@
+# sys-journal. The journal (docs/research/villa-journal.md §2): Mom gives it once the Pokédex is had (give_journal opens
+# today's page with the map it starts on); leaving home writes "rested at home"; two days later a CONTINUE (reload)
+# opens the journal as saved, then today's page starts when it closes.
+party 0 platinum:SPECIES_PIPLUP 10 platinum:MOVE_POUND
+set flag platinum:FLAG_HAS_POKEDEX true
+set var platinum:VAR_PLAYER_HOUSE_STATE 5
+set flag platinum:FLAG_FIRST_ARRIVAL_TWINLEAF_TOWN true
+date 2009-03-22 12:00
+warp platinum:MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_1F 7 9 up
+until idle
++0 press a
++1 release a
+advance text 7000
+until idle 600
++0 assert flag platinum:FLAG_JOURNAL_ACQUIRED true
++0 assert state journal[0].zone "platinum:MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_1F"
++0 assert state journal[0].date {"year":9,"month":3,"day":22,"weekday":0}
++0 press left
+until position 6 9 300
++0 release left
++0 press down
+until state player.zone "platinum:MAP_HEADER_TWINLEAF_TOWN" 300
++0 release down
+until idle 600
++0 assert state journal[0].events [{"type":1,"value":0,"trainer":0}]
+# Two days on: the CONTINUE opens the journal as saved; closing it starts today's page.
++0 date 2009-03-24 12:00
++2 reload
+until app journal 60
++20 press b
++1 release b
+until idle 120
++0 assert state journal[0].date {"year":9,"month":3,"day":24,"weekday":2}
++0 assert state journal[0].zone "platinum:MAP_HEADER_TWINLEAF_TOWN"
++0 assert state journal[1].events [{"type":1,"value":0,"trainer":0}]

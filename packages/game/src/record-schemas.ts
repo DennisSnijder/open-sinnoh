@@ -1,5 +1,5 @@
 /** Strict schemas for every registry in contracts `records.ts` (the pack boundary). */
-import { DW_PLATFORM_FLAGS, DW_PROP_KINDS, DW_PUZZLE_FLAGS, DW_SUPPORT_KINDS, GAME_RECORDS, parseTextMarkup, REGISTRIES, SEALS, TRAINER_SCORE_MAX, type RegistryName } from '@opensinnoh/contracts';
+import { VILLA_FURNITURE_COUNT, DW_PLATFORM_FLAGS, DW_PROP_KINDS, DW_PUZZLE_FLAGS, DW_SUPPORT_KINDS, GAME_RECORDS, parseTextMarkup, REGISTRIES, SEALS, TRAINER_SCORE_MAX, type RegistryName } from '@opensinnoh/contracts';
 import { STATS, type RegistryRecord } from '@opensinnoh/core';
 import { arr, bool, collectRefs, dict, id, int, lit, nullable, num, obj, opt, ref, str, tagged, tuple, union, validate, type RefUse, type Schema } from './schema.ts';
 
@@ -1109,6 +1109,33 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
       gifts: arr(int(0, 0xffff)),
       itemGifts: int(0, 0xffff),
     }, (v) => ((v.finds as unknown[]).length ? undefined : 'amitySquare.finds is empty'))),
+    // 0.37.0: the Villa (contracts VillaTables): the 20 pieces, their placements and the visitor odds.
+    villa: opt(obj({
+      zone: ref('zones'),
+      resortArea: ref('zones'),
+      furniture: arr(obj({ flag: ref('flags'), prop: ref('props'), label: ref('labels') })),
+      rows: arr(obj({ type: int(0, VILLA_FURNITURE_COUNT - 1), collision: bool, position: tuple(num, num, num), box: obj({ left: int(0, 0xff), top: int(0, 0xff), right: int(0, 0xff), bottom: int(0, 0xff) }) })),
+      tvType: int(0, VILLA_FURNITURE_COUNT - 1),
+      visitors: obj({ chances: tuple(int(0, 100), int(0, 100), int(0, 100)), counts: tuple(int(1, 255), int(1, 255), int(1, 255)), visitorVar: ref('vars'), messageVar: ref('vars'), insideFlag: ref('flags'), outsideFlag: ref('flags') }),
+    }, (v) => ((v.furniture as unknown[]).length !== VILLA_FURNITURE_COUNT ? `villa.furniture must have the ${VILLA_FURNITURE_COUNT} pieces` : undefined))),
+    // 0.37.0: the journal (contracts JournalTables).
+    journal: opt(obj({
+      flag: ref('flags'),
+      gyms: arr(obj({ trainer: ref('trainers'), zone: ref('zones'), badge: id })),
+      buildings: arr(obj({ label: int(0, 0xffff), exited: bool })),
+      caveDeparted: arr(int(0, 0xffff)),
+      eliteFour: arr(ref('trainers')),
+      champion: arr(ref('trainers')),
+      home: ref('zones'),
+      lab: ref('zones'),
+      rivalClass: id,
+      banks: obj({ entries: ref('textBanks'), months: ref('textBanks'), gyms: ref('textBanks'), locations: ref('textBanks'), times: ref('textBanks') }),
+      pageTurn: arr(arr(int(0, 0xff))),
+      art: opt(obj({ male: ref('ui2d'), female: ref('ui2d') })),
+      martExcluded: obj({ label: int(0, 0xffff), zones: arr(ref('zones')) }),
+    }, (v) => ((v.pageTurn as number[][]).length !== 9 || (v.pageTurn as number[][]).some((r) => r.length !== 32) ? 'journal.pageTurn must be 9 steps of 32 columns' : undefined))),
+    // 0.37.0: the diplomas' documents and texts.
+    diploma: opt(obj({ sinnoh: ref('ui2d'), national: ref('ui2d'), texts: obj({ player: ref('texts'), sinnoh: ref('texts'), national: ref('texts'), credit: ref('texts') }) })),
   }, (v) => {
     const pieces = v.sizeIntervals as { start: number }[] | undefined;
     return pieces && (pieces.length !== 16 || pieces[0]!.start !== 0 || pieces.some((p, i) => i > 0 && p.start <= pieces[i - 1]!.start)) ? 'sizeIntervals must have 16 increasing intervals beginning at zero' : undefined;

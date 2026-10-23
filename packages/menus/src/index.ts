@@ -41,6 +41,9 @@ import { capsuleEditorScreen } from './capsule-editor.ts';
 import { sealMartScreen } from './seal-mart.ts';
 import { factoryScreen, hallBoardScreen } from './frontier.ts';
 import { slotsScreen } from './slots.ts';
+import { journalScreen } from './journal.ts';
+import { diplomaScreen } from './diploma.ts';
+import { townMapScreen } from './town-map.ts';
 
 export const createApp: CreateApp = (request, deps) => {
   const ctx = menuContext(deps);
@@ -71,6 +74,12 @@ export const createApp: CreateApp = (request, deps) => {
       return new AppStack(hatchScreen(ctx, request.slot), { app: 'hatch', nickname: null });
     case 'library-tv':
       return new AppStack(libraryTvScreen(), { app: 'library-tv' });
+    case 'journal':
+      return new AppStack(journalScreen(ctx), { app: 'journal' });
+    case 'diploma':
+      return new AppStack(diplomaScreen(ctx, request.national), { app: 'diploma' });
+    case 'town-map':
+      return new AppStack(townMapScreen(ctx, () => undefined, () => 'pop', true), { app: 'town-map' });
     case 'hall-of-fame':
       return new AppStack(request.mode === 'record' ? hallOfFameRecordScreen(ctx) : hallOfFamePcScreen(ctx), { app: 'hall-of-fame' });
     case 'credits':
@@ -168,3 +177,4 @@ export { ParticleSystem } from './particles.ts';
 export { createPoketch } from './poketch/system.ts';
 export { calcDigit, calcEval, calcText, calcZero, type CalcValue } from './poketch/tools.ts';
 export { cellPosition, cellZone, flyLocationAt, foundHidden, locationCell, namedCell, startCell, townMapScreen, unlockedLocations } from './town-map.ts';
+export { printJournalPage } from './journal.ts';

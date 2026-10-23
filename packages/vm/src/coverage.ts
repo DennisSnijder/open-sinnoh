@@ -30,8 +30,6 @@ export function implementedOps(): string[] {
  */
 export const STUBBED = [
   'set_step_flag',
-  'give_journal',
-  'create_journal_event',
   'check_tv_interview_eligible',
 ];
 
@@ -118,6 +116,18 @@ export const REAL_GAME_CORNER = [
   'show_coins', 'hide_coins', 'update_coin_display', 'get_coins_amount', 'add_coins', 'subtract_coins_from_value', 'subtract_coins_from_var',
   'has_coins_from_value', 'has_coins_from_var', 'check_can_add_coins', 'check_bonus_round_streak', 'get_game_corner_prize_data', 'scr_cmd_267',
   'show_list_menu_remember_cursor', 'calc_hidden_power_type',
+];
+
+/**
+ * The Villa, the journal, the diplomas and the small town and NPC rules (contracts 0.37, villa-ops.ts, journal-ops.ts,
+ * npc-ops.ts; docs/research/villa-journal.md): `real: 'town'` in the export; `opensinnoh coverage` fails if one is not
+ * implemented. The Villa's TV segments stay stubs (TV).
+ */
+export const REAL_TOWN = [
+  'init_persisted_map_features_for_villa', 'check_met_furniture_requirements', 'show_list_menu_set_width', 'check_ab_press',
+  'set_scene_play_bgm_music_box', 'set_field_scene', 'give_journal', 'create_journal_event', 'show_diploma_sinnoh', 'show_diploma_national_dex',
+  'open_region_map', 'survive_poison', 'check_is_department_store_regular', 'get_party_mon_contest_stat', 'check_party_combee_gender_count',
+  'change_deoxys_form', 'get_news_press_deadline', 'set_news_press_deadline', 'get_random_seen_species', 'get_spiritomb_counter', 'clear_spiritomb_counter',
 ];
 
 /**
@@ -217,7 +227,7 @@ export interface OpClassification {
   /** The M5 chunks whose story path reaches it; absent when none. */
   m5Path?: M5Chunk[];
   /** What makes this op real: M1b, P (the Pokémon model), M3a, M3b (the Pokétch), M2a or the clock (`opensinnoh coverage` fails if such an op is not implemented), or an M5 chunk (`REAL_M5`; progress, not a failure). */
-  real?: 'M1b' | 'P' | 'M3a' | 'M3b' | 'M2a' | 'clock' | 'contests' | 'seals' | 'game-corner' | M5Chunk;
+  real?: 'M1b' | 'P' | 'M3a' | 'M3b' | 'M2a' | 'clock' | 'contests' | 'seals' | 'game-corner' | 'town' | M5Chunk;
 }
 
 /** Classification of every native script command (the `coverage` verb prints it). */
@@ -234,13 +244,14 @@ export function classifyOps(): OpClassification[] {
   const contests = new Set(REAL_CONTESTS);
   const seals = new Set(REAL_SEALS);
   const gameCorner = new Set(REAL_GAME_CORNER);
+  const town = new Set(REAL_TOWN);
   const chunks = Object.keys(REAL_M5) as M5Chunk[];
   const m5 = new Map(chunks.flatMap((k) => REAL_M5[k].map((op) => [op as string, k] as const)));
   const paths = chunks.map((k) => [k, new Set(M5_PATH[k])] as const);
   return COMMANDS.map((c): OpClassification => {
     const bucket = bucketOf(c.name);
     const m5Path = paths.filter(([, ops]) => ops.has(c.name)).map(([k]) => k);
-    const real: OpClassification['real'] = m1b.has(c.name) ? 'M1b' : p.has(c.name) ? 'P' : m3a.has(c.name) ? 'M3a' : m3b.has(c.name) ? 'M3b' : m2a.has(c.name) ? 'M2a' : clock.has(c.name) ? 'clock' : contests.has(c.name) ? 'contests' : seals.has(c.name) ? 'seals' : gameCorner.has(c.name) ? 'game-corner' : m5.get(c.name);
+    const real: OpClassification['real'] = m1b.has(c.name) ? 'M1b' : p.has(c.name) ? 'P' : m3a.has(c.name) ? 'M3a' : m3b.has(c.name) ? 'M3b' : m2a.has(c.name) ? 'M2a' : clock.has(c.name) ? 'clock' : contests.has(c.name) ? 'contests' : seals.has(c.name) ? 'seals' : gameCorner.has(c.name) ? 'game-corner' : town.has(c.name) ? 'town' : m5.get(c.name);
     const base = { op: c.name, opcode: c.opcode, bucket, cpPath: cp.has(c.name), ...(m5Path.length ? { m5Path } : {}), ...(real ? { real } : {}) };
     if (impl.has(c.name)) return stand.has(c.name) ? { ...base, status: 'stubbed', milestone: TRIAGE[c.name]?.milestone ?? milestoneOf(c.name, bucket), default: 'stand-in (see the handler)' } : { ...base, status: 'implemented' };
     const f = classifyOp(c.name);
@@ -275,6 +286,8 @@ export function classificationReport(): string {
     realContestsNotImplemented: count((o) => o.real === 'contests' && o.status !== 'implemented'),
     realSeals: count((o) => o.real === 'seals'),
     realSealsNotImplemented: count((o) => o.real === 'seals' && o.status !== 'implemented'),
+    realTown: count((o) => o.real === 'town'),
+    realTownNotImplemented: count((o) => o.real === 'town' && o.status !== 'implemented'),
     contestRoundsPlaceholder: Object.values(CONTEST_ROUNDS_STATUS).filter((s) => s === 'placeholder').length,
     ...Object.fromEntries(
       (Object.keys(REAL_M5) as M5Chunk[]).flatMap((k) => [

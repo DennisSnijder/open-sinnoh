@@ -1,5 +1,5 @@
 /** Save boundary: strict envelope validation, pack-set match and id resolution. */
-import { ACCESSORIES, CONTEST_RANKS, CONTEST_TYPES, BERRY_STAGES, newFashionCase, newSealCase, SEALS, type SealCase, POFFIN_CASE_SIZE, POFFIN_TYPES, type FashionCase, BOX_SIZE, COINS_MAX, DW_PLATFORM_FLAGS, DW_PUZZLE_FLAGS, GAME_RECORDS, HALL_OF_FAME_ENTRIES, HALL_OF_FAME_TOTAL_MAX, DEFAULT_DEVICE_OPTIONS, ITEM_WHEEL_SIZE, DEFAULT_WALLPAPERS, DELIVERY_SLOTS, EXTRA_WALLPAPERS, TABLET_NAME_LENGTH, markSeen, MONEY_MAX, newPoketchState, newRoamerState, ROAMING_SLOTS, PLAY_HOURS_MAX, POKETCH_COLORS, POKETCH_DEFAULT_MARKERS, POKETCH_HISTORY_MAX, POKETCH_PEDOMETER_MAX, poketchAppIndex, seenFormOf, setupPidIvs, trainerIdFor, type GameState, type Labels, type MysteryGiftState, WONDER_CARD_SLOTS, type ObjectState, type PoketchState, type Registries, type SaveEnvelope } from '@opensinnoh/contracts';
+import { ACCESSORIES, JOURNAL_LOCATION_EVENTS, JOURNAL_PAGES, CONTEST_RANKS, CONTEST_TYPES, BERRY_STAGES, newFashionCase, newSealCase, SEALS, type SealCase, POFFIN_CASE_SIZE, POFFIN_TYPES, type FashionCase, BOX_SIZE, COINS_MAX, DW_PLATFORM_FLAGS, DW_PUZZLE_FLAGS, GAME_RECORDS, HALL_OF_FAME_ENTRIES, HALL_OF_FAME_TOTAL_MAX, DEFAULT_DEVICE_OPTIONS, ITEM_WHEEL_SIZE, DEFAULT_WALLPAPERS, DELIVERY_SLOTS, EXTRA_WALLPAPERS, TABLET_NAME_LENGTH, markSeen, MONEY_MAX, newPoketchState, newRoamerState, ROAMING_SLOTS, PLAY_HOURS_MAX, POKETCH_COLORS, POKETCH_DEFAULT_MARKERS, POKETCH_HISTORY_MAX, POKETCH_PEDOMETER_MAX, poketchAppIndex, seenFormOf, setupPidIvs, trainerIdFor, type GameState, type Labels, type MysteryGiftState, WONDER_CARD_SLOTS, type ObjectState, type PoketchState, type Registries, type SaveEnvelope } from '@opensinnoh/contracts';
 import { addItem, CONDITIONS, createPokemon, MAX_CONDITION, zeroCondition, DAYCARE_SLOTS, DEFAULT_CLOCK, Dex, emptyBag, emptyDaycare, HONEY_SLATHER_MINUTES, HONEY_TREES, isDate, PARTY_SIZE, RADAR_BATTERY_STEPS, RADAR_CHAIN_MAX, RADAR_RECORDS, STATS, UNDERGROUND_LIMITS, type Id, type Pokemon, type UndergroundState } from '@opensinnoh/core';
 import { newBerryPatches } from '@opensinnoh/services';
 import { arr, bool, collectRefs, dict, id, int, lit, nullable, num, obj, ref, str, opt, tagged, tuple, validate, ValidationError, type Schema } from './schema.ts';
@@ -308,6 +308,8 @@ const mapFeaturesSchema: Schema = nullable(
     'sunyshore-gym': obj({ kind: lit('sunyshore-gym'), roomID: int(0, 2), rotationState: int(0, 3) }),
     // 0.29.1 (decomp GreatMarshTramState); same schema v17: older saves hold none.
     'great-marsh': obj({ kind: lit('great-marsh'), tram: int(0, 2) }),
+    // 0.37.0 (decomp VillaPersistedData, a dummy int); in the v21 schema, older saves hold none.
+    villa: obj({ kind: lit('villa') }),
     // 0.27.18 (decomp DistWorldPersistedData); same schema v15: older saves hold none.
     'distortion-world': obj({
       kind: lit('distortion-world'),
@@ -629,7 +631,19 @@ const stateV22Check = (v: Record<string, unknown>) => {
   const ids = st.party.flatMap((m) => (m.capsule ? [m.capsule.id] : []));
   return new Set(ids).size === ids.length ? undefined : 'two party Pokémon hold the same Ball Capsule';
 };
-export const GAME_STATE_SCHEMA: Schema = obj({ ...stateV21Fields, schemaVersion: lit(SAVE_SCHEMA_VERSION), sealCase: sealCaseSchema }, stateV22Check);
+/** contracts `JournalPage` (schema v22; decomp JournalEntry without the online events). */
+const journalPageSchema: Schema = obj({
+  date: obj({ year: int(0, 99), month: int(1, 12), day: int(1, 31), weekday: int(0, 6) }),
+  zone: ref('zones'),
+  events: arr(obj({ type: int(1, 40), value: int(0, 0xffff), trainer: int(0, 0x3ff) })),
+  mon: nullable(obj({ result: lit('caught', 'defeated'), variant: int(0, 2), timeOfDay: int(0, 15), gender: int(0, 2), species: ref('species') })),
+  trainer: nullable(obj({ trainer: ref('trainers'), zone: ref('zones') })),
+}, (v) => ((v.events as unknown[]).length > JOURNAL_LOCATION_EVENTS ? `more than ${JOURNAL_LOCATION_EVENTS} location events` : undefined));
+
+export const GAME_STATE_SCHEMA: Schema = obj(
+  { ...stateV21Fields, schemaVersion: lit(SAVE_SCHEMA_VERSION), sealCase: sealCaseSchema, journal: arr(journalPageSchema) },
+  (v) => stateV22Check(v) ?? ((v.journal as unknown[]).length > JOURNAL_PAGES ? `more than ${JOURNAL_PAGES} journal pages` : undefined),
+);
 
 const envelope = (state: Schema): Schema =>
   obj({
@@ -691,7 +705,7 @@ type PokemonV18 = Omit<Pokemon, 'condition'>;
 /** v20 (the contest photos): the Underground without laid traps, a base or their records. */
 type UndergroundV20 = Omit<UndergroundState, 'placedTraps' | 'base' | 'records'> & { records: Omit<UndergroundState['records'], 'trapsTriggered' | 'baseMoves'> };
 /** v21 (the Underground's traps and base): no Seal Case. */
-type StateV21 = Omit<GameState, 'schemaVersion' | 'sealCase'> & { schemaVersion: 21 };
+type StateV21 = Omit<GameState, 'schemaVersion' | 'sealCase' | 'journal'> & { schemaVersion: 21 };
 type StateV20 = Omit<StateV21, 'schemaVersion' | 'underground'> & { schemaVersion: 20; underground?: UndergroundV20 };
 /** v19 (Poffins, the Fashion Case, the Underground): no contest photos. */
 type StateV19 = Omit<StateV20, 'schemaVersion' | 'contestPhotos' | 'contest'> & { schemaVersion: 19 };
@@ -959,9 +973,13 @@ export function migrateStateV20(v20: StateV20): StateV21 {
   return { ...rest, schemaVersion: 21, underground: { ...underground, records: { ...underground.records, trapsTriggered: 0, baseMoves: 0 }, placedTraps: [], base: null } };
 }
 
-/** v21 → v22 (the Seal Case): an empty case and no capsule on any Pokémon, as no seal could be had before (the seal ops were logged stubs). */
+/**
+ * v21 → v22 (the Seal Case, the journal): an empty case and no capsule on any Pokémon, as no seal could be had before
+ * (the seal ops were logged stubs); an empty journal (`give_journal` was a logged stub). A save that owns the journal
+ * (FLAG_JOURNAL_ACQUIRED) gets today's page at the load (Journal_GetSavedPage), as the DS opens one.
+ */
 export function migrateStateV21(v21: StateV21): GameState {
-  return { ...v21, schemaVersion: 22, sealCase: newSealCase() };
+  return { ...v21, schemaVersion: 22, sealCase: newSealCase(), journal: [] };
 }
 
 export class SaveError extends Error {}

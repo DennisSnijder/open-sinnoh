@@ -33,6 +33,7 @@ import namesFile from '../data/names.json' with { type: 'json' };
 import { readCameraTable } from './formats/camera.ts';
 import { readObjectGfxTable, readScriptEntryOffsets } from './formats/data.ts';
 import { importPokemonData, type PokemonData } from './pokemon-data.ts';
+import { readJournalTables, readVillaTables, VILLA_ROW_SIZE } from './town-extras.ts';
 import { berryTreeGfx, readBerryTables, readNpcTrades, readTutorTables, TUTOR_MASK_SIZE, TUTOR_MOVE_SIZE } from './side-systems.ts';
 import { readTrainerAi } from './trainer-ai.ts';
 import { readEncounters, REPLACEMENT_SLOTS, type RawWaterEncounters } from './formats/encounters.ts';
@@ -87,8 +88,12 @@ const AMITY_FINDERS = [
 ];
 /** ScrCmd_CheckAmitySquareManGiftIsAccessory: gift ids below 9 are items. */
 const AMITY_ITEM_GIFTS = 9;
+/** The Villa's furniture build models (sVillaFurnitureModelIDs: 559–578), converted in a slice import too. */
+const VILLA_FURNITURE_MODELS = Array.from({ length: 20 }, (_, i) => 559 + i);
 /** MAP_HEADER_UNDERGROUND. */
 const UNDERGROUND_ZONE = 2;
+/** The badges by decomp BADGE_ID_* number. */
+const BADGE_IDS = ['COAL', 'FOREST', 'COBBLE', 'FEN', 'RELIC', 'MINE', 'ICICLE', 'BEACON'].map((b) => asId(`platinum:BADGE_ID_${b}`));
 
 /** ROM tables located inside arm9/overlays, each verified by SHA1 before use. */
 const TABLES = {
@@ -296,6 +301,17 @@ const TABLES = {
   slotClefairySprites: { where: 101, offset: 0x8624, count: 3, size: 16, sha1: 'ec816e28bbb30185dff30aa69d6ea457721b0491' },
   slotLineFlash: { where: 101, offset: 0x86a4, count: 15, size: 12, sha1: 'cabb6bf607c57d3f93d8784109c7b5426d053a75' },
   slotMessageWindow: { where: 101, offset: 0x7808, count: 1, size: 8, sha1: 'fa57d7eedc5bce8216ff803b0a1e7d2b36c1bd8f' },
+  /** The Villa (town-extras.ts): overlay005/villa_furniture.c sVillaFurnitures, sVillaFurnitureModelIDs, sVillaFurnitureScriptIDs. */
+  villaFurnitures: { where: 5, offset: 0x30bac, count: 23, size: VILLA_ROW_SIZE, sha1: '1e4153890ff365b42efa8d7e5d946c0cc46f1264' },
+  villaFurnitureModels: { where: 5, offset: 0x30b0c, count: 20, size: 4, sha1: 'e6b588c1393645f83d637810a239d98986c23b57' },
+  villaFurnitureScripts: { where: 5, offset: 0x30b5c, count: 20, size: 4, sha1: '54b69a0e1b6256a20803f9872be96942df84faef' },
+  /** system_vars.c sNumPossibleVillaVisitors (u8 × 3) and sVillaVisitorPercentChances (u8 × 3). */
+  villaVisitorCounts: { where: 'arm9', offset: 0xefa6c, count: 3, size: 1, sha1: '137eb7237c866fe1409e7196a37aaf21ebf6470a' },
+  villaVisitorChances: { where: 'arm9', offset: 0xefa70, count: 3, size: 1, sha1: '6442add075d55961da0127e7affc33da9d54a58e' },
+  /** journal.c sGymsInfo and sMapsInfo; journal_controller.c Unk_ov81_021D33E8 (the page-turn wipe). */
+  journalGyms: { where: 'arm9', offset: 0xe5b50, count: 8, size: 8, sha1: '994042d1434960e8c09c39489b17751b43463803' },
+  journalBuildings: { where: 'arm9', offset: 0xe5b90, count: 27, size: 8, sha1: '9d43b00d536d0cbac0567ea6da46c9f2cf57250c' },
+  journalPageTurn: { where: 81, offset: 0x2668, count: 9, size: 32, sha1: '0a3da3dd9b74045457514423963c1a0415a08196' },
 } as const;
 
 /** Overlay 9 offsets of the Distortion World tables, inside `TABLES.distortionWorld`. */
@@ -1138,7 +1154,7 @@ export async function importPlatinum(
   onProgress('assets', 0, 1);
   const doorTable = new Reader(await table('doorModels'));
   const doorModels = new Set(Array.from({ length: TABLES.doorModels.count }, (_, i) => doorTable.i32(i * 4)));
-  const converted = importAssets(fs, { slice: options.slice ?? false, objectGfx, doorModels, sliceModels: new Set([...Object.values(HEAL_MACHINE), ...Object.values(PLATFORM_LIFT_PROPS), ...Object.values(PASTORIA_PROPS), ...CANALAVE_PROPS, 458, 459, 460, 461, 462, 463, 464, 496, BOAT_PROPS.ship, BOAT_PROPS.snowpointShip, ...BOAT_PROPS.bridges, SPECIAL_ENCOUNTERS.honeyTreeProp]) });
+  const converted = importAssets(fs, { slice: options.slice ?? false, objectGfx, doorModels, sliceModels: new Set([...Object.values(HEAL_MACHINE), ...Object.values(PLATFORM_LIFT_PROPS), ...Object.values(PASTORIA_PROPS), ...CANALAVE_PROPS, 458, 459, 460, 461, 462, 463, 464, 496, ...VILLA_FURNITURE_MODELS, BOAT_PROPS.ship, BOAT_PROPS.snowpointShip, ...BOAT_PROPS.bridges, SPECIAL_ENCOUNTERS.honeyTreeProp]) });
   for (const w of converted.warnings) unknown('asset', w);
   const assets = new Map(converted.assets);
   const font = importFont(readNarc(fs.file('/graphic/pl_font.narc'))[MESSAGE_FONT] as Uint8Array, chars, { id: asId('platinum:FONT_MESSAGE'), atlas: asId('platinum:fonts/message.png') });
@@ -1157,6 +1173,7 @@ export async function importPlatinum(
     (done, total) => onProgress('2d art', done, total),
   );
   for (const [path, bytes] of art.assets) assets.set(path, bytes);
+  const ui2dIds = new Set(art.ui2d.map((u) => u.id));
   for (const [path, bytes] of sound.assets) assets.set(path, bytes);
   // Battle animations: the scripts, the particle files (textures as ui2d sheets) and the VM's tables.
   const animSheets = new Sheets();
@@ -1541,6 +1558,71 @@ export async function importPlatinum(
   newGame.gyms.sunyshore = readSunyshoreTables(await table('sunyshore'), m => names.prop(m));
   const containmentLookup = new Reader(readNarc(fs.file('/arc/bm_anime_list.narc'))[496]!);
   const containmentAnimations = readNarc(fs.file('/arc/bm_anime.narc'));
+  {
+    // The Villa and the journal (town-extras.ts): their ROM tables, flags, vars, zones and scripts.
+    const byName = (list: Iterable<[number, string]>, name: string) => {
+      const e = [...list].find(([, n]) => n === name);
+      if (!e) throw new ImportError(`names: no ${name}`);
+      return e[0];
+    };
+    const flag = (name: string) => names.flag(byName(names.flagNames, name));
+    const varId = (name: string) => names.var(byName(names.varNames, name));
+    const zoneNamed = (name: string) => {
+      const i = names.file.zones.indexOf(name);
+      if (i < 0) throw new ImportError(`names: no ${name}`);
+      return i;
+    };
+    const villaHeader = zoneNamed('MAP_HEADER_VILLA');
+    const furnitureStart = byName(names.flagNames, 'FLAG_VILLA_FURNITURE_TABLE');
+    newGame.villa = readVillaTables(await table('villaFurnitures'), await table('villaFurnitureModels'), await table('villaFurnitureScripts'), await table('villaVisitorChances'), await table('villaVisitorCounts'), {
+      zone: names.zone(villaHeader),
+      resortArea: names.zone(zoneNamed('MAP_HEADER_RESORT_AREA')),
+      flag: (type) => names.flag(furnitureStart + type),
+      prop: (model) => {
+        const p = names.prop(model);
+        if (!keptProps.has(p)) throw new ImportError(`the Villa furniture prop ${p} was not converted`);
+        return p;
+      },
+      label: (script) => {
+        const l = names.scriptLabel(script, headers[villaHeader]!.scripts);
+        if (!l) throw new ImportError(`the Villa furniture script ${script} has no label`);
+        return l;
+      },
+      visitors: { visitorVar: varId('VAR_RESORT_VILLA_VISITOR'), messageVar: varId('VAR_RESORT_VILLA_VISITOR_MESSAGE_NUM'), insideFlag: flag('FLAG_VILLA_VISITOR_INSIDE'), outsideFlag: flag('FLAG_VILLA_VISITOR_OUTSIDE') },
+    });
+    const trainerNamed = (name: string) => {
+      const i = names.file.trainers.indexOf(name);
+      if (i < 0) throw new ImportError(`names: no ${name}`);
+      return names.trainer(i);
+    };
+    const label = (name: string) => {
+      const m = textBanks[bankIndex('TEXT_BANK_LOCATION_NAMES')]!.messages.indexOf(asId(`platinum:${name}`));
+      if (m < 0) throw new ImportError(`names: no ${name}`);
+      return m;
+    };
+    const bank = (name: string) => textBanks[bankIndex(name)]!.id;
+    const classIndex = names.file.trainerClasses.indexOf('TRAINER_CLASS_RIVAL');
+    if (classIndex < 0) throw new ImportError('names: no TRAINER_CLASS_RIVAL');
+    newGame.journal = readJournalTables(await table('journalGyms'), await table('journalBuildings'), await table('journalPageTurn'), {
+      flag: flag('FLAG_JOURNAL_ACQUIRED'),
+      caveDeparted: ['LocationNames_Text_ValleyWindworks', 'LocationNames_Text_SnowpointTemple', 'LocationNames_Text_FuegoIronworks'].map(label),
+      eliteFour: ['AARON', 'AARON_REMATCH', 'BERTHA', 'BERTHA_REMATCH', 'FLINT', 'FLINT_REMATCH', 'LUCIAN', 'LUCIAN_REMATCH'].map((n) => trainerNamed(`TRAINER_ELITE_FOUR_${n}`)),
+      champion: [trainerNamed('TRAINER_CHAMPION_CYNTHIA'), trainerNamed('TRAINER_CHAMPION_CYNTHIA_REMATCH')],
+      home: names.zone(zoneNamed('MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_1F')),
+      lab: names.zone(zoneNamed('MAP_HEADER_SANDGEM_TOWN_POKEMON_RESEARCH_LAB')),
+      rivalClass: names.trainerClass(classIndex),
+      martExcluded: { label: label('LocationNames_Text_VeilstoneStore'), zones: [names.zone(zoneNamed('MAP_HEADER_ETERNA_CITY_HERB_SHOP')), names.zone(zoneNamed('MAP_HEADER_CELESTIC_TOWN_NORTHWEST_HOUSE'))] },
+      banks: { entries: bank('TEXT_BANK_JOURNAL_ENTRIES'), months: bank('TEXT_BANK_MONTH_NAMES'), gyms: bank('TEXT_BANK_GYM_NAMES'), locations: bank('TEXT_BANK_LOCATION_NAMES'), times: bank('TEXT_BANK_TIMES_OF_DAY') },
+      ...(ui2dIds.has('platinum:ui2d/journal/page-male') ? { art: { male: asId('platinum:ui2d/journal/page-male'), female: asId('platinum:ui2d/journal/page-female') } } : {}),
+      trainer: (i) => names.trainer(i),
+      zone: (i) => names.zone(i),
+      badge: (i) => BADGE_IDS[i] ?? (() => { throw new ImportError(`sGymsInfo: badge ${i}`); })(),
+    });
+    const diplomaBank = textBanks[bankIndex('TEXT_BANK_DIPLOMA')]!.messages;
+    if (ui2dIds.has('platinum:ui2d/diploma/sinnoh')) {
+      newGame.diploma = { sinnoh: asId('platinum:ui2d/diploma/sinnoh'), national: asId('platinum:ui2d/diploma/national'), texts: { player: diplomaBank[0]!, sinnoh: diplomaBank[1]!, national: diplomaBank[2]!, credit: diplomaBank[3]! } };
+    }
+  }
   newGame.containment = { prop: names.prop(496), loopFrames: animationFrames(containmentAnimations[containmentLookup.i32(4)]!), openingFrames: animationFrames(containmentAnimations[containmentLookup.i32(8)]!) };
   const spear = importSpearPillar(fs, assets, textBanks.find(b => b.id === 'platinum:TEXT_BANK_SPEAR_PILLAR')!.messages);
   newGame.spearPillar = spear.tables;

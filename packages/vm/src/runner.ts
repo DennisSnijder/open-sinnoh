@@ -48,6 +48,9 @@ import { encounterHandlers } from './encounter-ops.ts';
 import { undergroundHandlers } from './underground-ops.ts';
 import { mysteryGiftHandlers } from './mystery-gift-ops.ts';
 import { hofHandlers } from './hof-ops.ts';
+import { villaHandlers } from './villa-ops.ts';
+import { journalHandlers } from './journal-ops.ts';
+import { npcHandlers } from './npc-ops.ts';
 
 /** Fixed native vars, looked up by `sourceIndex` in the vars registry. */
 export const NATIVE_VARS = { PLAYER_STARTER: 0x4030, SCRIPT_PARAMETER_0: 0x8000, LAST_TALKED: 0x800d } as const;
@@ -133,6 +136,8 @@ export class Runner implements ScriptRunner {
   tick = 0;
   readonly backgroundTasks = new Set<() => void>();
   lastTouch: InputFrame['touch'] = null;
+  /** This tick's input, for commands that read the keys directly (decomp gSystem.heldKeys: `check_ab_press`). */
+  input: InputFrame = { held: [], pressed: [], touch: null };
   ui: {
     message: { printer: TextPrinter } | null;
     buttonWait: boolean;
@@ -494,6 +499,7 @@ export class Runner implements ScriptRunner {
   }
 
   runThread(t: Thread, input: InputFrame): void {
+    this.input = input;
     // Index loop: a sub context created by the main context runs in the same tick.
     for (let i = 0; i < t.contexts.length; i++) {
       const c = t.contexts[i];
@@ -996,7 +1002,6 @@ export class Runner implements ScriptRunner {
       },
       // Decomp ScrCmd_GetRandom2 is the same handler as ScrCmd_GetRandom.
       get_random2: (t, c, a) => this.handlers.get_random!(t, c, a),
-      give_journal: stub('give_journal', 'journal not implemented'),
       ...m1aHandlers(this),
       ...m1bHandlers(this),
       ...partyHandlers(this),
@@ -1024,6 +1029,9 @@ export class Runner implements ScriptRunner {
       ...contestHandlers(this),
       ...sealHandlers(this),
       ...gameCornerHandlers(this),
+      ...villaHandlers(this),
+      ...journalHandlers(this),
+      ...npcHandlers(this),
     };
   }
 

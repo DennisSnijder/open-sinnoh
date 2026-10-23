@@ -89,7 +89,8 @@ export function locationCell(map: TownMap, i: number): [number, number] {
  * `pick(location)` runs when a fly location is chosen, `cancel()` on B (both after the wipe out): the party menu
  * flies or goes back to itself.
  */
-export function townMapScreen(ctx: MenuContext, pick: (location: number) => Step, cancel: () => Step): Screen {
+/** `view`: the Town Map to look at (`open_region_map`, the Town Map item): no prompt, A flies nowhere, B closes. */
+export function townMapScreen(ctx: MenuContext, pick: (location: number) => Step, cancel: () => Step, view = false): Screen {
   const map = newGameRecord(ctx.registries).townMap;
   if (!map) throw new Error('menus: the Town Map needs NewGame.townMap');
   const reg = ctx.registries;
@@ -162,6 +163,7 @@ export function townMapScreen(ctx: MenuContext, pick: (location: number) => Step
     frames = 0;
   };
   const choose = () => {
+    if (view) return false;
     const at = canFly();
     if (at === null) return false;
     leave(() => pick(at));
@@ -228,7 +230,7 @@ export function townMapScreen(ctx: MenuContext, pick: (location: number) => Step
       player: { ...cellPosition(startX, startZ), gender: ctx.state.gender },
       cursor: cellPosition(cursorX, cursorZ),
       tick,
-      prompt: ctx.text.text(map.flyToWhere),
+      prompt: view ? '' : ctx.text.text(map.flyToWhere),
       name,
       fade,
     }),

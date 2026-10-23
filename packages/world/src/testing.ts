@@ -106,6 +106,7 @@ export function newState(zone = 'ROOM', x = 14, z = 16, facing: Facing = 'up'): 
     fashionCase: newFashionCase(),
     sealCase: newSealCase(),
     contestPhotos: [null, null, null, null, null],
+    journal: [],
     signature: null,
     options: { sound: 0, battleScene: 0, battleStyle: 0, buttonMode: 0, frame: 0 },
     daycare: emptyDaycare(),

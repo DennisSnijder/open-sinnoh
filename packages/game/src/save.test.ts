@@ -16,6 +16,7 @@ function stripV11(save: { state: Record<string, unknown> }): { state: Record<str
   delete state.pokedex.forms;
   delete (state as Record<string, unknown>).contestPhotos;
   delete (state as Record<string, unknown>).sealCase;
+  delete (state as Record<string, unknown>).journal;
   const daycare = (state as unknown as { daycare: { mons: ({ mon: Record<string, unknown> } | null)[] } }).daycare.mons.map((d) => d?.mon ?? null);
   for (const m of [...state.party, ...state.boxes.flatMap((b) => b.slots), ...daycare]) {
     if (!m) continue;
@@ -47,6 +48,7 @@ const oldSave = (game: ReturnType<typeof createGame>) => {
 function asV18<T extends { state: Record<string, unknown> }>(save: T): T {
   delete save.state.contestPhotos;
   delete save.state.sealCase;
+  delete save.state.journal;
   delete save.state.poffins;
   delete save.state.fashionCase;
   const mons = [...(save.state.party as Record<string, unknown>[]), ...(save.state.boxes as { slots: (Record<string, unknown> | null)[] }[]).flatMap((b) => b.slots)];
@@ -476,6 +478,7 @@ describe('the contest photos (v20)', () => {
     const v19 = JSON.parse(JSON.stringify(game.save())) as { state: Record<string, unknown> };
     delete v19.state.contestPhotos;
     delete v19.state.sealCase;
+    delete v19.state.journal;
     v19.state.schemaVersion = 19;
     game.load(v19);
     expect(game.state.schemaVersion).toBe(22);
@@ -510,6 +513,7 @@ describe("the Underground's traps and secret base (v21)", () => {
     const v20 = JSON.parse(JSON.stringify(game.save())) as { state: Record<string, unknown> & { underground: Record<string, unknown> & { records: Record<string, number> } } };
     v20.state.schemaVersion = 20;
     delete v20.state.sealCase;
+    delete v20.state.journal;
     delete v20.state.underground.placedTraps;
     delete v20.state.underground.base;
     delete v20.state.underground.records.trapsTriggered;
@@ -546,10 +550,13 @@ describe('the Seal Case and Ball Capsules (v22)', () => {
     const v21 = JSON.parse(JSON.stringify(game.save())) as { state: Record<string, unknown> };
     v21.state.schemaVersion = 21;
     delete v21.state.sealCase;
+    delete v21.state.journal;
     game.load(v21);
     expect(game.state.schemaVersion).toBe(22);
     expect(game.state.sealCase).toEqual(newSealCase());
+    expect(game.state.journal).toEqual([]);
     expect(() => game.load({ ...v21, state: { ...v21.state, sealCase: newSealCase() } })).toThrow(/invalid save/);
+    expect(() => game.load({ ...v21, state: { ...v21.state, journal: [] } })).toThrow(/invalid save/);
 
     game.state.sealCase.counts[4] = 3;
     game.state.sealCase.capsules[2] = [{ seal: 5, x: 190, y: 70 }];
@@ -572,6 +579,33 @@ describe('the Seal Case and Ball Capsules (v22)', () => {
     expect(bad((s) => (s.party[0]!.capsule!.seals = Array.from({ length: 9 }, () => ({ seal: 1, x: 190, y: 70 }))))).toThrow(/at most 8 seals/);
     expect(bad((s) => s.party.push({ ...s.party[0]! }))).toThrow(/same Ball Capsule/);
     expect(bad((s) => (s.boxes[0]!.slots[0] = s.party[0]!))).toThrow(/box or the Day-Care has a Ball Capsule/);
+  });
+});
+
+describe('the journal (v22)', () => {
+  it('pages round-trip and are checked (at most 10 pages, 4 events each)', () => {
+    const game = newGame();
+    const page = {
+      date: { year: 9, month: 3, day: 22, weekday: 0 },
+      zone: 'fixture:TOWN' as Id,
+      events: [{ type: 13, value: 2, trainer: 0 }, { type: 10, value: 1, trainer: 300 }],
+      mon: { result: 'caught' as const, variant: 1, timeOfDay: 1, gender: 0, species: 'fixture:SPECIES_EMBERKIT' as Id },
+      trainer: null,
+    };
+    game.state.journal.push(page, { ...page, date: { ...page.date, day: 21, weekday: 6 }, mon: null });
+    const saved = JSON.parse(JSON.stringify(game.save())) as { state: { journal: (typeof page)[] } };
+    game.load(saved);
+    expect(game.save()).toEqual(saved);
+    const bad = (edit: (s: typeof saved) => void) => {
+      const s = JSON.parse(JSON.stringify(saved)) as typeof saved;
+      edit(s);
+      return () => game.load(s);
+    };
+    expect(bad((s) => (s.state.journal = Array.from({ length: 11 }, () => page)))).toThrow(/more than 10 journal pages/);
+    expect(bad((s) => s.state.journal[0]!.events.push(...page.events, ...page.events))).toThrow(/more than 4 location events/);
+    expect(bad((s) => (s.state.journal[0]!.events[0]!.type = 41))).toThrow(/invalid save/);
+    expect(bad((s) => (s.state.journal[0]!.zone = 'fixture:NOWHERE' as Id))).toThrow(/unknown zones/);
+    expect(bad((s) => (s.state.journal[0]!.date.month = 13))).toThrow(/invalid save/);
   });
 });
 

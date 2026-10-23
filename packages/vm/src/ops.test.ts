@@ -448,7 +448,7 @@ test:Sign::
 });
 
 describe('stubs with a return value', () => {
-  it('journal and TV are stubs; the game records are real (pack limits: even ids high)', () => {
+  it('TV is a stub, a journal event without an owned journal does nothing; the game records are real (pack limits: even ids high)', () => {
     const d = drive(`
 test:Stubs::
   create_journal_event 0, 0, 0, 0, 0
@@ -465,7 +465,9 @@ test:Stubs::
     d.until(() => !d.vm.running());
     expect(vars(d)['fixture:VAR_SCENE' as Id]).toBeUndefined();
     expect(d.state.records.counts).toEqual({ 3: 2, 34: 150005, 81: 9999 });
-    for (const k of ['create_journal_event', 'check_tv_interview_eligible']) expect(d.log.keys.get(`stub:${k}`), k).toBe(1);
+    expect(d.log.keys.get('stub:check_tv_interview_eligible')).toBe(1);
+    expect(d.log.keys.get('stub:create_journal_event')).toBeUndefined();
+    expect(d.state.journal).toEqual([]);
     expect(d.log.keys.get('stub:increment_game_record')).toBeUndefined();
   });
 });
@@ -523,5 +525,68 @@ test:Clock::
     expect(run(17, '2009-03-27')).toEqual([2, 17, 5]);
     expect(run(20, '2009-03-28')).toEqual([3, 20, 6]);
     expect(run(3, '2009-03-22')).toEqual([4, 3, 0]);
+  });
+});
+
+describe('the Villa commands (villa-ops.ts)', () => {
+  it('show_list_menu_set_width shows the list at the given width in tiles, the anchors not applied', () => {
+    const entries = Array.from({ length: 10 }, (_, i) => `  add_list_menu_entry 2, 255, ${i}`).join('\n');
+    const d = drive(`
+test:Width::
+  init_local_text_list_menu 1, 1, 0, 1, var(test:VAR_A), 900
+${entries}
+  set_menu_x_origin_side 1
+  show_list_menu_set_width 18
+  set_var_from_var var(fixture:VAR_SCENE), var(test:VAR_A)
+  end
+`);
+    d.vm.start({ label: 'test:Width', zone: 'fixture:TOWN', source: 'test' });
+    d.until(() => d.vm.view().menu !== null);
+    expect(d.vm.view().menu).toMatchObject({ x: 8, y: 8, width: 18 * 8, rows: 8 });
+    for (let i = 0; i < 3; i++) d.tick();
+    d.press('down');
+    d.press('down');
+    d.press('a');
+    d.until(() => !d.vm.running());
+    expect(vars(d)['fixture:VAR_SCENE' as Id]).toBe(2);
+  });
+
+  it('check_met_furniture_requirements: the gates of the Bust, the Piano and the Chandelier; any other piece TRUE', () => {
+    const d = drive(`
+test:Gates::
+  check_met_furniture_requirements 13, var(test:VAR_A)
+  check_met_furniture_requirements 15, var(test:VAR_B)
+  check_met_furniture_requirements 20, var(test:VAR_C)
+  set_var_from_var var(fixture:VAR_SCENE), var(test:VAR_A)
+  set_var_from_var var(fixture:VAR_ROOM_INTRO), var(test:VAR_B)
+  set_var_from_var var(fixture:VAR_PLAYER_STARTER), var(test:VAR_C)
+  end
+`);
+    const run = (counts: Record<number, number>) => {
+      d.state.records.counts = counts;
+      d.vm.start({ label: 'test:Gates', zone: 'fixture:TOWN', source: 'test' });
+      d.until(() => !d.vm.running());
+      return ['fixture:VAR_SCENE', 'fixture:VAR_ROOM_INTRO', 'fixture:VAR_PLAYER_STARTER'].map((v) => vars(d)[v as Id] ?? 0);
+    };
+    expect(run({})).toEqual([0, 0, 0]);
+    expect(run({ 29: 1, 60: 1, 61: 1, 62: 1, 63: 0, 73: 9, 0: 299999 })).toEqual([0, 0, 0]);
+    expect(run({ 29: 1, 60: 1, 61: 1, 62: 1, 63: 1, 73: 10, 0: 300000 })).toEqual([1, 1, 1]);
+  });
+
+  it('check_ab_press reads A or B held this frame', () => {
+    const d = drive(`
+test:Held::
+  wait_time 1, var(test:VAR_B)
+  check_ab_press var(test:VAR_A)
+  set_var_from_var var(fixture:VAR_SCENE), var(test:VAR_A)
+  end
+`);
+    const run = (held: ('a' | 'b' | 'up')[]) => {
+      d.vm.start({ label: 'test:Held', zone: 'fixture:TOWN', source: 'test' });
+      for (let i = 0; i < 4 && d.vm.running(); i++) d.tick({ held });
+      return vars(d)['fixture:VAR_SCENE' as Id] ?? 0;
+    };
+    expect(run(['up'])).toBe(0);
+    expect(run(['b'])).toBe(1);
   });
 });

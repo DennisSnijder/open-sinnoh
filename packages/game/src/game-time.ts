@@ -32,7 +32,7 @@ export function updateGameTime(t: GameTime, clock: ClockTime, log: StubLog, onDa
   // events run once per day even when less than a minute passed.
   const newDay = clockDay(clock) > clockDay(t.now);
   if (newDay && onDaily) onDaily(clockDay(clock) - clockDay(t.now));
-  if (newDay) log.stub('clock:daily-events', 'remaining daily events (villa, TV, …) are not implemented');
+  if (newDay) log.stub('clock:daily-events', 'remaining daily events (TV, the Jubilife lottery trainer sync, …) are not implemented');
   if (minutes > 0) {
     t.penaltyMinutes = Math.max(0, Math.min(t.penaltyMinutes, PENALTY_MINUTES) - minutes);
     // Decomp sub_02055B64: the berry patches, the honey trees and Shaymin's Sky Forme (onMinutes) are real; the rest is not.

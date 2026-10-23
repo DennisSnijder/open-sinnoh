@@ -1096,6 +1096,16 @@ export interface NewGame {
   seals?: import('./seals.ts').SealTables;
   /** 0.37.0. The Game Corner's slot tables and prizes (`SlotTables`). Absent: the Game Corner ops fail loudly. */
   slots?: import('./slots.ts').SlotTables;
+  /** 0.37.0. The Villa (`VillaTables`). Absent: the Villa's ops fail loudly. */
+  villa?: import('./villa.ts').VillaTables;
+  /** 0.37.0. The journal (`JournalTables`). Absent: no journal (`give_journal` fails loudly, nothing is recorded). */
+  journal?: import('./journal.ts').JournalTables;
+  /**
+   * 0.37.0. The diplomas (decomp applications/diploma.c): the composed 256×192 document sheets (`ui2d`) of the Sinnoh
+   * and National Pokédex diplomas and their texts (TEXT_BANK_DIPLOMA: the player line, the two bodies, the credit).
+   * Absent: the diploma ops fail loudly.
+   */
+  diploma?: { sinnoh: Id; national: Id; texts: { player: Id; sinnoh: Id; national: Id; credit: Id } };
 }
 
 /**

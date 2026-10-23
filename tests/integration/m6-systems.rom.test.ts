@@ -25,17 +25,14 @@ const CHECKS: Record<string, (game: Game, logged: string[]) => void> = {
     expect([...BATTLEGROUND_STAT_TRAINERS, BATTLEGROUND_TRAINER_NONE]).toContain(s);
     for (const n of [1, 2, 3, 4]) expect(v(game, `VAR_OBJ_GFX_ID_${n}`)).toBe(v(game, `VAR_BATTLEGROUND_TRAINER_${n}`));
   },
-  // The out-of-scope systems: each facility's or the Villa's own ops are logged stubs (counted), never silent.
+  // The out-of-scope systems: each facility's own ops are logged stubs (counted), never silent.
   'sys-frontier-boundary': (_game, logged) => {
     for (const op of ['call_battle_castle_lobby_function', 'call_battle_arcade_lobby_function'])
       expect(logged, op).toContain(`stub:${op}`);
   },
-  'sys-villa-boundary': (_game, logged) => {
-    for (const op of ['save_tv_segment_home_and_manor_no_furniture', 'init_persisted_map_features_for_villa']) expect(logged, op).toContain(`stub:${op}`);
-  },
 };
 
-const FILES = ['sys-turnback-routing', 'sys-turnback-timeout', 'sys-turnback-reload', 'sys-battleground', 'sys-survival-barry-weekend', 'sys-frontier-boundary', 'sys-villa-boundary', 'sys-snowpoint-temple', 'sys-fight-area-blockade', 'sys-regi-ruins-dots', 'sys-first-arrival'];
+const FILES = ['sys-turnback-routing', 'sys-turnback-timeout', 'sys-turnback-reload', 'sys-battleground', 'sys-survival-barry-weekend', 'sys-frontier-boundary', 'sys-snowpoint-temple', 'sys-fight-area-blockade', 'sys-regi-ruins-dots', 'sys-first-arrival'];
 
 describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('system replays', () => {
   for (const file of FILES)

@@ -40,6 +40,10 @@ export function martScreen(ctx: MenuContext, request: { mart: Id; countVar: Id |
   let pocket = 0;
   const pockets = t.pocketIds;
   const bp = request.currency === 'bp';
+  /** Decomp itemPurchaseCount and the bag's soldAmount (a new count each SELL visit): +1 per single item (to 255), 2 for more. */
+  let bought = 0;
+  let sold = 0;
+  const tally = (n: number, count: number) => (count > 1 ? 2 : Math.min(255, n + 1));
   /** The menu: BUY / SELL / SEE YA!, or the exchange counter's YES / NO (decomp Shop_InitOptionsMenu). */
   const menuKeys = bp ? (['bpMenuYes', 'bpMenuNo'] as const) : MENU;
   const exitIndex = menuKeys.length - 1;
@@ -80,6 +84,7 @@ export function martScreen(ctx: MenuContext, request: { mart: Id; countVar: Id |
     }
     const r = buy(ctx.state, ctx.registries, id, count, request.countVar);
     if (!r.ok) return message([t.t(r.reason === 'money' ? 'martNoMoney' : 'martNoRoom')], toList);
+    bought = tally(bought, count);
     const thanks = t.pages('martThanks', itemName(id, count), t.pocket(item(id).pocket));
     menuSe(ctx, 1604);
     return message(thanks, () => (r.premierBall ? message([t.t('martPremier')], toList) : toList()));
@@ -96,6 +101,7 @@ export function martScreen(ctx: MenuContext, request: { mart: Id; countVar: Id |
     const name = itemName(id, count);
     menuSe(ctx, 1604);
     sell(ctx.state, ctx.registries, id, count);
+    sold = tally(sold, count);
     const left = rows().length;
     if (cursor > left) cursor = left;
     return message([t.t('bagSold', name, String(total))], toList);
@@ -113,6 +119,7 @@ export function martScreen(ctx: MenuContext, request: { mart: Id; countVar: Id |
     menuCursor = i;
     if (i < exitIndex) {
       mode = i === 0 ? 'buy' : 'sell';
+      if (mode === 'sell') sold = 0;
       cursor = 0;
       menuMessage = null;
       return toList();
@@ -203,7 +210,7 @@ export function martScreen(ctx: MenuContext, request: { mart: Id; countVar: Id |
   };
 
   const run = (next: Phase | 'close'): Step => {
-    if (next === 'close') return { close: { app: 'mart' } };
+    if (next === 'close') return { close: { app: 'mart', ...(bp ? {} : { bought, sold }) } };
     phase = next;
     return;
   };

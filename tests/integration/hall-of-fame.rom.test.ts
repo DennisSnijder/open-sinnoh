@@ -41,9 +41,9 @@ const HOF_BEATS: Record<string, (v: AppView | null) => void> = {
 };
 
 /**
- * Logged stand-ins the path may hit: the slice's lift is timed only and the journal is not modelled.
+ * Logged stand-ins the path may hit: the slice's lift is timed only.
  */
-const STAND_INS = ['platform-lift-prop', 'stub:create_journal_event'];
+const STAND_INS = ['platform-lift-prop'];
 
 describe.skipIf(!ROM)('Hall of Fame and credits (OPENSINNOH_NDS_ROM)', () => {
   let pack: PackData;

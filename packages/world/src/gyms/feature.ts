@@ -35,6 +35,11 @@ export interface MapFeature {
   playerSight?(): { trainer: Actor; distance: number; dir: Facing } | null;
   /** HearthomeGym_SetTrainerPostBattleMovement: true when the feature set the trainer's movement itself. */
   trainerAfterBattle?(trainer: Actor): boolean;
+  /**
+   * The last check of an A press (after objects, bg events, honey trees, tile behaviours and field moves): the faced
+   * tile and the facing start a script of the feature (the Villa's furniture: FieldSystem_TrySetVillaFurnitureScript).
+   */
+  interact?(x: number, z: number, facing: Facing): Id | null;
   /** One tick of the feature's task, if any (before the actors move). */
   step(): void;
   /** A task runs: the field is not idle and the player takes no input. */
