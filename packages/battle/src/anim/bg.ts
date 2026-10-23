@@ -303,7 +303,7 @@ export class BattleBg {
       dy: this.offset.y,
       effect:
         e && sheet
-          ? { sheet, cell: e.reversed ? 1 : 0, alpha: this.effectAlpha, dx: this.offset.x + (this.move?.x ?? 0), dy: this.offset.y + (this.move?.y ?? 0), fade: eff.amount ? { ...eff } : null, rows }
+          ? { sheet, cell: this.vm.contest ? 2 : e.reversed ? 1 : 0, alpha: this.effectAlpha, dx: this.offset.x + (this.move?.x ?? 0), dy: this.offset.y + (this.move?.y ?? 0), fade: eff.amount ? { ...eff } : null, rows }
           : null,
       grayscale: this.grayscale,
     };

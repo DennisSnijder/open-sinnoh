@@ -19,14 +19,27 @@ export { ANIM_OPCODES } from './vm.ts';
 type AnimRegistries = Pick<Registries, 'battleAnimations' | 'particleSystems' | 'battleAnimData'> & Partial<Pick<Registries, 'ui2d'>>;
 
 /**
- * What keeps a script from playing for real: unimplemented commands, functions, sprite callbacks, missing particle
- * files. `friendlyFire`: on the path a move at the user's ally takes (JumpIfFriendlyFire's arm).
+ * The sprite callbacks whose decomp has a contest branch this port does not take yet (they place or flip their OBJs
+ * for the contest stage: script_funcs_0.c StringShot, Trick; script_funcs_3.c Fissure; script_funcs_4.c Taunt). A
+ * contest does not play a script that reaches one. The other contest branches are ported (vm.ts, callbacks.ts,
+ * tasks.ts `dirX`, MoveBattler) or belong to functions this port does not run at all.
  */
-export function animSupport(anim: BattleAnimation, registries: AnimRegistries, friendlyFire = false): string[] {
+export const CONTEST_UNPORTED_SPRITE_FUNCS = new Set(['StringShot', 'Trick', 'Fissure', 'Taunt']);
+
+/**
+ * What keeps a script from playing for real: unimplemented commands, functions, sprite callbacks, missing particle
+ * files. `friendlyFire`: on the path a move at the user's ally takes (JumpIfFriendlyFire's arm). `contest`: a
+ * contest's path (scriptUse's), and the sprite callbacks without their contest branch.
+ */
+export function animSupport(anim: BattleAnimation, registries: AnimRegistries, friendlyFire = false, contest = false): string[] {
   // The unused common slots (dummy23, dummy41 …) are empty files.
   if (!anim.code.length) return ['empty script'];
-  const use = scriptUse(anim.code, friendlyFire);
-  const missing = [...[...use.opcodes].filter((o) => !ANIM_OPCODES.has(o)), ...[...use.funcs].filter((f) => !ANIM_FUNCS.has(f)).map((f) => `Func_${f}`), ...[...use.spriteFuncs].filter((f) => !ANIM_SPRITE_FUNCS.has(f)).map((f) => `SpriteFunc_${f}`)];
+  const use = scriptUse(anim.code, friendlyFire, contest);
+  const missing = [
+    ...[...use.opcodes].filter((o) => !ANIM_OPCODES.has(o)),
+    ...[...use.funcs].filter((f) => !ANIM_FUNCS.has(f)).map((f) => `Func_${f}`),
+    ...[...use.spriteFuncs].filter((f) => !ANIM_SPRITE_FUNCS.has(f) || (contest && CONTEST_UNPORTED_SPRITE_FUNCS.has(f))).map((f) => `SpriteFunc_${f}`),
+  ];
   for (const r of use.spriteResources.values()) {
     const id = animSpriteSheetId(r);
     if (!registries.ui2d?.get(id)?.animations?.length) missing.push(`sprite/${id}`);
@@ -65,3 +78,4 @@ export function animCoverage(registries: AnimRegistries): { moves: number; real:
 }
 
 export { ANIM_SPRITE_FUNCS } from './sprite-callbacks.ts';
+export { createContestMoveAnimation, contestAnimCoverage } from './contest.ts';

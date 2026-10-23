@@ -46,6 +46,7 @@ import { readZoneHeaders, type ZoneHeader } from './formats/zone-headers.ts';
 import { charTable, Names, type CharmapFile, type NamesFile } from './names.ts';
 import { readUndergroundTables } from './underground.ts';
 import { readContestTables } from './contests.ts';
+import { ACTING_MESSAGES, AI_RULE_SIZE, AI_RULES, BUTTON_PALETTES, CONTEST_EFFECTS, EFFECT_CLASS_SIZE, EFFECT_SIZE, readActingTables } from './contest-acting.ts';
 import { DANCE_BUTTONS, DANCE_CHOICE_SIZE, DANCE_LEVELS, DANCE_POSITIONS, DANCE_SONG_SIZE, DANCE_TINTS, DANCE_VARIANT_SIZE, readContestDance } from './contest-dance.ts';
 
 /**
@@ -234,6 +235,13 @@ const TABLES = {
   frontierBanlist: { where: 'arm9', offset: 0xf05be, count: 18, size: 2, sha1: '6f80ec8e0e1576663aefacd8c3873739a5cb0cca' },
   /** ov5_021F6454.c sHighestIVMessageIndices: the judge's "best potential in …" message per stat (TEXT_BANK_BATTLE_TOWER). */
   judgeStatsMessages: { where: 5, offset: 0x2ff04, count: 6, size: 2, sha1: '1811b05e153df12434fa2e0d3e1d60b928360eec' },
+  /** The contests' acting round (contest-acting.ts): arm9 Unk_020F568C, then overlay 17's tables (RAM base 0x0223B140). */
+  contestEffects: { where: 'arm9', offset: 0xf568c, count: CONTEST_EFFECTS, size: EFFECT_SIZE, sha1: '59732b6c4721be3972a0bdbe2c49d50dad609b58' },
+  contestEffectClasses: { where: 17, offset: 0x189b8, count: CONTEST_EFFECTS, size: EFFECT_CLASS_SIZE, sha1: '5901df2f40af6d21e882144b5d717a6e3ab6f4c7' },
+  contestTypeMatch: { where: 17, offset: 0x18888, count: 25, size: 1, sha1: '43b0c5de31685d06cce74bc24ef8e252e3290862' },
+  contestActingMessages: { where: 17, offset: 0x187b0, count: ACTING_MESSAGES, size: 4, sha1: 'efe260c58c8c545077b2b11c51bd1a44a95f1d0d' },
+  contestAiRules: { where: 17, offset: 0x18af0, count: AI_RULES, size: AI_RULE_SIZE, sha1: 'fc154d44a628d2943337163a6fcccce44373db8a' },
+  contestButtonPalettes: { where: 17, offset: 0x18378, count: BUTTON_PALETTES * 16, size: 2, sha1: '88229a78266a8e8de6b1f9f93f3fdee09ac60f55' },
 } as const;
 
 /** Overlay 9 offsets of the Distortion World tables, inside `TABLES.distortionWorld`. */
@@ -1247,6 +1255,25 @@ export async function importPlatinum(
       judgeNames: bankTexts[judgeBank]!.length,
       playerGfx: { male: gfxNumber('OBJ_EVENT_GFX_PLAYER_M_CONTEST'), female: gfxNumber('OBJ_EVENT_GFX_PLAYER_F_CONTEST') },
       playerSprite: { male: playerGfx('OBJ_EVENT_GFX_PLAYER_M_CONTEST'), female: playerGfx('OBJ_EVENT_GFX_PLAYER_F_CONTEST') },
+      acting: await (async () => {
+        const banks = { effects: bankIndex('TEXT_BANK_CONTEST_EFFECTS'), outcomes: bankIndex('TEXT_BANK_CONTEST_ACTING_COMPETITION'), contest: bankIndex('TEXT_BANK_CONTEST_TEXT') };
+        return readActingTables(
+          {
+            effects: await table('contestEffects'),
+            classes: await table('contestEffectClasses'),
+            typeMatch: await table('contestTypeMatch'),
+            messages: await table('contestActingMessages'),
+            rules: await table('contestAiRules'),
+            palettes: await table('contestButtonPalettes'),
+          },
+          {
+            effectText: (n) => names.text(banks.effects, n),
+            outcomeText: (n) => names.text(banks.outcomes, n),
+            contestText: (n) => names.text(banks.contest, n),
+            counts: { effects: bankTexts[banks.effects]!.length, outcomes: bankTexts[banks.outcomes]!.length, contest: bankTexts[banks.contest]!.length },
+          },
+        );
+      })(),
       dance: readContestDance(
         { songs: await table('danceSongs'), choice: await table('danceChoice'), variants: await table('danceVariants'), aiJitter: await table('danceAiJitter'), aiRepeat: await table('danceAiRepeat'), stage: await table('danceStage'), grades: await table('danceGrades'), noteRows: await table('danceNoteRows'), tints: await table('danceTints'), shades: await table('danceShades'), buttons: await table('danceButtons') },
         (n) => {

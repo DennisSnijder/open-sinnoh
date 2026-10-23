@@ -73,8 +73,8 @@ export function battler(vm: AnimVm, target: number): MonSprite | null {
   return null;
 }
 
-/** BattleAnimUtil_GetTransformDirectionX: −1 for a battler on the enemy's side. */
-export const dirX = (battler: number) => (battler & 1 ? -1 : 1);
+/** BattleAnimUtil_GetTransformDirectionX: −1 for a battler on the enemy's side; in a contest for the player's (the performer faces left). */
+export const dirX = (vm: AnimVm, battler: number) => ((battler & 1) === (vm.contest ? 0 : 1) ? -1 : 1);
 
 /** A battler's side: the player's (even ids) or the enemy's (odd). */
 export const sideOf = (battler: number): Side => (battler & 1 ? 'enemy' : 'player');

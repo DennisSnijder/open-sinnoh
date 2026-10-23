@@ -223,7 +223,7 @@ export const MORE_FUNCS: Record<string, Func> = {
     const bx = s.x;
     const by = s.y;
     s.pivotY = 50;
-    let flip = dirX(vm.attacker) !== 1;
+    let flip = dirX(vm, vm.attacker) !== 1;
     let angle: ValueLerp;
     let hop = 0;
     let delay = 0;
@@ -294,7 +294,7 @@ export const MORE_FUNCS: Record<string, Func> = {
     const s = vm.sprite(vm.attacker);
     const ax = s.x;
     const ay = s.y - OVAL_RY;
-    const dir = dirX(vm.attacker);
+    const dir = dirX(vm, vm.attacker);
     const rev = ovalRevolution(1, 8);
     rev.rx *= dir;
     const copies = [vm.pokemonSprites[0] ?? null, vm.pokemonSprites[1] ?? null];
@@ -329,7 +329,7 @@ export const MORE_FUNCS: Record<string, Func> = {
     const [start, end, steps, mode, px, py] = vm.vars as [number, number, number, number, number, number];
     const side = mode === 0 || mode === 2 ? vm.defender : vm.attacker;
     const s = vm.sprite(side);
-    let dir = dirX(side);
+    let dir = dirX(vm, side);
     const lerp0 = new ValueLerp(start, end, steps);
     if (dir < 0) lerp0.negate();
     if (mode === 2) dir = -dir;

@@ -23,7 +23,7 @@ import { easyChat, mysteryGift } from './mystery-gift.ts';
 import { itemWheel } from './item-wheel.ts';
 import { poffinCase, poffinCooking, poffinFeed } from './poffin.ts';
 import { mining, miningPrompt, undergroundMenu, undergroundVendor } from './underground.ts';
-import { contest } from './contest.ts';
+import { contestApp } from './contest.ts';
 import { contestDance } from './contest-dance.ts';
 import { contestPhoto } from './contest-visual.ts';
 import { credits, hallOfFame } from './hall-of-fame.ts';
@@ -171,7 +171,7 @@ export function drawApp(d: DrawContext, v: AppView): Drawn {
       return { kind: 'mart', root: undergroundVendor(d, v) };
     case 'contest':
       if (v.round?.round === 'dance' && !v.round.placeholder) return { kind: 'scene', root: contestDance(d, v.round) };
-      return { kind: 'mart', root: contest(d, v) };
+      return contestApp(d, v);
     case 'contest-photo':
       return { kind: 'mart', root: contestPhoto(d, v) };
   }

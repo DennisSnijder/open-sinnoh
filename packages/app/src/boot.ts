@@ -103,7 +103,8 @@ export async function createSession(
   clock: (() => ClockTime) | undefined,
 ): Promise<Session> {
   // The battle engine (packages/battle with @pkmn/sim) is a lazy chunk, loaded on the first battle.
-  const game = createGame({ packs, createWorld, createScriptRunner, createApp, createPoketch, loadBattle: () => loadChunk(() => import('@opensinnoh/battle')).then((m) => m.createBattle), seed, device, ...(clock ? { clock } : {}) });
+  const battle = () => loadChunk(() => import('@opensinnoh/battle'));
+  const game = createGame({ packs, createWorld, createScriptRunner, createApp, createPoketch, loadBattle: () => battle().then((m) => m.createBattle), loadContestAnimation: () => battle().then((m) => m.createContestMoveAnimation), seed, device, ...(clock ? { clock } : {}) });
   const fontRecord = messageFontRecord(game);
   const chosen = newGame?.(fontRecord.chars);
   if (chosen) game.reset(seed, chosen);

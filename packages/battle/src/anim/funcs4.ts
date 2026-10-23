@@ -69,7 +69,7 @@ export const SPRITE_COMPANION_FUNCS: Record<string, Func> = {
   FaintAttack: (vm) => {
     const s = vm.sprite(vm.attacker);
     const x = s.x, y = s.y;
-    const direction = dirX(vm.attacker);
+    const direction = dirX(vm, vm.attacker);
     const restore = suppressCopies(vm, vm.attacker);
     timed(vm, 64, (t) => {
       s.alpha = t < 16 ? Math.round(31 * (1 - t / 16)) : t < 40 ? 0 : Math.round(31 * (t - 40) / 23);
@@ -93,9 +93,9 @@ export const SPRITE_COMPANION_FUNCS: Record<string, Func> = {
     const x = s.x, y = s.y;
     timed(vm, 48, (t) => {
       const p = Math.sin(t / 47 * Math.PI);
-      s.x = x + p * 48 * dirX(s.battler);
+      s.x = x + p * 48 * dirX(vm, s.battler);
       s.y = y - p * 12;
-      s.rotation = Math.round(p * dirX(s.battler) * 4096);
+      s.rotation = Math.round(p * dirX(vm, s.battler) * 4096);
     }, () => { s.x = x; s.y = y; s.rotation = 0; });
   },
   Swagger: (vm) => {
@@ -121,7 +121,7 @@ export function startBattlerSlideIn(vm: AnimVm, targets: number): void {
   const s = battler(vm, targets);
   if (!s) return;
   const x = s.baseX, y = s.baseY;
-  const start = x - dirX(s.battler) * 96;
+  const start = x - dirX(vm, s.battler) * 96;
   s.hide = false;
   s.y = y;
   s.cropBottom = 0;

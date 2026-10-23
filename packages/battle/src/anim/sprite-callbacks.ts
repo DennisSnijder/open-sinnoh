@@ -127,7 +127,7 @@ const CALLBACKS: Record<string, Callback> = {
     });
   },
   Swagger: (c) => attached(c, 1, (s, t) => {
-    s.x += dirX(c.vm.defender) * 16; s.y -= 26;
+    s.x += dirX(c.vm, c.vm.defender) * 16; s.y -= 26;
     s.scaleX = s.scaleY = 0.8 + Math.abs(Math.sin(t / 6)) * 0.4;
   }),
   MeanLook: (c) => attached(c, 1),
@@ -143,7 +143,7 @@ const CALLBACKS: Record<string, Callback> = {
   BatonPass: (c) => {
     const a = point(c.vm, 0);
     animate(c, 1, 56, (s, t) => {
-      s.x = a.x + t * dirX(c.vm.attacker);
+      s.x = a.x + t * dirX(c.vm, c.vm.attacker);
       s.y = a.y - ease(t / 56) * 56;
       s.rotation = t / 10;
       s.alpha = t > 40 ? (56 - t) / 16 : 1;
@@ -200,9 +200,9 @@ const CALLBACKS: Record<string, Callback> = {
   MetalClaw: (c) => {
     const b = point(c.vm, 1);
     animate(c, c.args[0] || 4, 68, (s, t, i) => {
-      s.x = b.x + (i - 1.5) * 8 * dirX(c.vm.attacker);
+      s.x = b.x + (i - 1.5) * 8 * dirX(c.vm, c.vm.attacker);
       s.y = b.y + (i - 1.5) * 6;
-      s.scaleX = dirX(c.vm.attacker);
+      s.scaleX = dirX(c.vm, c.vm.attacker);
     }, 4);
   },
   Ingrain: (c) => roots(c, 0, c.args[0] || 4, 72),
