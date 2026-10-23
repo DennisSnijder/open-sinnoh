@@ -8,7 +8,7 @@
 .acting-card.is-under { top: calc(var(--k) * 196); }
 .acting-card > * { position: absolute; box-sizing: border-box; margin: 0; }
 .acting-card-bg { inset: 0; line-height: 0; }
-.acting-card .acting-button { padding: 0; border: 0; background: none; cursor: pointer; text-align: left; line-height: 0; }
+.acting-card .acting-button { position: absolute; padding: 0; border: 0; background: none; cursor: pointer; text-align: left; line-height: 0; }
 .acting-card .acting-button.is-disabled { cursor: default; }
 .acting-card .acting-button > * { position: absolute; }
 .acting-card .acting-button-art { inset: 0; }

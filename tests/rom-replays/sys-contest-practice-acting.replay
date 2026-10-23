@@ -38,12 +38,15 @@ until app contest 6000
 until state contest.acting {"turn":0,"choosing":true} 6000
 +1 press b
 +1 release b
-+2 press a
++1 screenshot acting-move
++1 press a
 +1 release a
 +8 press right
 +1 release right
-+2 press a
++1 screenshot acting-judge
++1 press a
 +1 release a
++90 screenshot acting-stage
 # Turn 2: the cursor stays up after a pick by key; Quick Attack is right of Wing Attack (now off the menu). On the
 # judge menu B goes back to the moves; then Quick Attack again and the right-hand judge.
 until state contest.acting {"turn":1,"choosing":true} 9000

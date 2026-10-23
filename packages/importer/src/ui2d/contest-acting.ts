@@ -99,7 +99,8 @@ export function importContestActingArt(fs: NitroFs, sheets: Sheets, palettes: re
     ['star', 29, 0, 28, 27, 0],
     ['order', 23, 0, 22, 21, 0],
   ];
-  for (const [name, ncgr, nclr, ncer, nanr, paletteFrom] of objs) sheets.obj(`contest/acting/${name}`, obj, { ncgr, nclr, ncer, nanr, paletteFrom });
+  // SpriteSystem_NewSprite: the template's palette replaces every OAM's (Sprite_SetExplicitPalette).
+  for (const [name, ncgr, nclr, ncer, nanr, palette] of objs) sheets.obj(`contest/acting/${name}`, obj, { ncgr, nclr, ncer, nanr, palette });
   // The touch screen's menus (modes 2 and 3 of Unk_ov17_02253558: NCGR 11, palettes NCLR 40).
   const menuRam = new PaletteRam().load(readNclr(bg[40]!));
   const menuBg = layer(bg, 11, readNscr(bg[29]!), menuRam);
