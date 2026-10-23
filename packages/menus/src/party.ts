@@ -52,9 +52,10 @@ export type PartyMode =
   | { kind: 'feed'; pick: (slot: number | null) => Step }
   /**
    * 0.34.0. The Battle Tower's pick of `count` in order (decomp PARTY_MENU_MODE_BATTLE_TOWER, reqLevel 100). 0.37.0:
-   * `hall`, the Battle Hall's (PARTY_MENU_MODE_BATTLE_HALL: level 30 or more, all of one species).
+   * `hall`, the Battle Hall's (PARTY_MENU_MODE_BATTLE_HALL: level 30 or more, all of one species). 0.39.0: `castle`, the
+   * Castle's and the Arcade's (PARTY_MENU_MODE_BATTLE_CASTLE: no species twice; held items may repeat).
    */
-  | { kind: 'order'; count: number; hall?: true }
+  | { kind: 'order'; count: number; hall?: true; castle?: true }
   /** 0.35.0. A contest's entry (decomp PARTY_MENU_MODE_CONTEST): ENTER (when eligible), SUMMARY, CANCEL. */
   | { kind: 'contest'; rank: number; type: number };
 
@@ -170,6 +171,7 @@ export function partyScreen(ctx: MenuContext, mode: PartyMode, done: () => Step 
   // --- order: ENTER / NO ENTRY, SUMMARY, CANCEL (decomp sub_0208022C, PartyMenu_CheckEligibility) ---
   const count = mode.kind === 'order' ? mode.count : 0;
   const hall = mode.kind === 'order' && mode.hall === true;
+  const castle = mode.kind === 'order' && mode.castle === true;
   /** Decomp PartyMenu_CheckEligibility, PartyMenu_CheckBattleHallEligibility (level 30 or more: HALL.minLevel). */
   const eligible = (slot: number) => !party()[slot]!.isEgg && !frontierBanned(ctx.registries, party()[slot]!.species) && (!hall || party()[slot]!.level >= HALL.minLevel);
   const orderMenu = (slot: number): Step => {
@@ -202,6 +204,8 @@ export function partyScreen(ctx: MenuContext, mode: PartyMode, done: () => Step 
     for (let i = 0; i < mons.length; i++) {
       for (let j = i + 1; j < mons.length; j++) {
         if (mons[i]!.species === mons[j]!.species) return say('partyIdentical', []);
+        // Decomp CheckEqualityInArray (PARTY_MENU_MODE_BATTLE_CASTLE): species only.
+        if (castle) continue;
         if (mons[i]!.heldItem !== null && mons[i]!.heldItem === mons[j]!.heldItem) return say('partyIdenticalItems', []);
       }
     }

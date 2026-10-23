@@ -38,6 +38,8 @@ import { undergroundPcScreen } from './ug-pc.ts';
 import { contestScreen } from './contest/contest.ts';
 import { contestPhotoScreen } from './contest/photo.ts';
 import { factoryScreen, hallBoardScreen } from './frontier.ts';
+import { castleScreen } from './frontier-castle.ts';
+import { arcadeScreen } from './frontier-arcade.ts';
 
 export const createApp: CreateApp = (request, deps) => {
   const ctx = menuContext(deps);
@@ -53,7 +55,7 @@ export const createApp: CreateApp = (request, deps) => {
     case 'party':
       return new AppStack(partyScreen(ctx, { kind: 'select' }), { app: 'party', slot: null });
     case 'party-order':
-      return new AppStack(partyScreen(ctx, { kind: 'order', count: request.count, ...(request.hall ? { hall: true as const } : {}) }), { app: 'party-order', order: null });
+      return new AppStack(partyScreen(ctx, { kind: 'order', count: request.count, ...(request.hall ? { hall: true as const } : {}), ...(request.castle ? { castle: true as const } : {}) }), { app: 'party-order', order: null });
     case 'storage':
       return new AppStack(storageScreen(ctx, request.mode), { app: 'storage' });
     case 'pokedex-entry':
@@ -112,6 +114,10 @@ export const createApp: CreateApp = (request, deps) => {
       return new AppStack(factoryScreen(ctx, request), request.mode === 'rent' ? { app: 'factory', picks: [] } : { app: 'factory', swap: null });
     case 'hall-board':
       return new AppStack(hallBoardScreen(ctx, request), { app: 'hall-board', cell: request.cursor });
+    case 'castle':
+      return new AppStack(castleScreen(ctx, request), { app: 'castle', party: request.party, opponents: request.opponents, unlocked: request.unlocked, slot: 0 });
+    case 'arcade':
+      return new AppStack(arcadeScreen(ctx, request), { app: 'arcade', effect: 30, cursor: 0, random: 0 });
     case 'summary-teach':
       return new AppStack(summaryScreen(ctx, { party: () => deps.state.party, slot: request.slot, mode: { kind: 'teach', move: request.move, done: (forget) => ({ close: { app: 'summary-teach', forget } }) } }), { app: 'summary-teach', forget: null });
   }

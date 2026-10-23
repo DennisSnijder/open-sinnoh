@@ -2,9 +2,12 @@
  * Draws a running Battle Frontier scene (`ScriptView.frontier`, contracts `FrontierView`; decomp frontier_graphics.c and
  * overlay 63) on the overlay canvas, in its 256×192 DS frame centred in the layout's room (`frontierFrame`, as the
  * DS-art menus are): black around it (the frontier app owns the screen), the room's BG3 at the camera (shaken by
- * FrontierScrCmd_4C), the frontier_obj sprites (the doors), each character's shadow and its 2D sprite, a party
- * Pokémon's sprite on the stage (FrontierScrCmd_45), the BG2 layer above them (or under BG3 in the Factory corridor,
- * scrolled on its own where it does not follow the camera, hidden while toggled off), window 0 keeping the sprites out
+ * FrontierScrCmd_4C; blended toward black by `bgDarken`, BattleArcade_SetPalette) with its patch (the Castle's emblem,
+ * BattleCastle_UpdateEmblemFrame), the frontier_obj sprites (the doors), each character's shadow and its 2D sprite
+ * (blended toward black by its `darken`), a party Pokémon's sprite on the stage (FrontierScrCmd_45), the Pokémon icons
+ * and their held-item marks (the Arcade's columns, BattleFrontier_CreateMonSprite / _CreateItemSprite), the BG2 layer
+ * above them (or under BG3 in the Factory corridor, scrolled on its own where it does not follow the camera, hidden
+ * while toggled off), window 0 keeping the sprites out
  * of its rect (FrontierScrCmd_4E), then the brightness fade. The message, menu and yes/no boxes are drawn over it by
  * `drawScriptOverlay` in the same frame. Sheets load on first use; until they have, their layer is not drawn.
  */
@@ -38,6 +41,26 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
         .then((img) => images.set(atlas, img));
     }
     return images.get(atlas) ?? null;
+  };
+  /** An atlas with its colours blended `darken`/16 toward black (decomp palette blends), made once per level. */
+  const darkenedAtlas = new Map<string, HTMLCanvasElement>();
+  const darkImage = (atlas: AssetRef, darken: number): ImageBitmap | HTMLCanvasElement | null => {
+    const img = image(atlas);
+    if (!img || !darken) return img;
+    const key = `${atlas}|${darken}`;
+    let c = darkenedAtlas.get(key);
+    if (!c) {
+      c = document.createElement('canvas');
+      c.width = img.width;
+      c.height = img.height;
+      const g = c.getContext('2d')!;
+      g.drawImage(img, 0, 0);
+      g.globalCompositeOperation = 'source-atop';
+      g.fillStyle = `rgb(0 0 0 / ${darken / 16})`;
+      g.fillRect(0, 0, c.width, c.height);
+      darkenedAtlas.set(key, c);
+    }
+    return c;
   };
   const sheetOf = (id: Id): Ui2dSheet => {
     const s = registries().ui2d.get(id);
@@ -73,6 +96,27 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
     if (c) ctx.drawImage(c, 0, 0, 80, 80, (p.x - 40) * scale, (p.y - 40) * scale, 80 * scale, 80 * scale);
   };
 
+  /**
+   * Decomp BattleFrontier_CreateMonSprite / _CreateItemSprite: each Pokémon's party icon on its first frame (the top
+   * 32×32 of the icon) centred at x, y, and its held-item mark (`ui2d/party/held` cell 0, the party's) with its origin
+   * at item.x, item.y; screen px.
+   */
+  const icons = (ctx: CanvasRenderingContext2D, list: NonNullable<FrontierView['icons']>, shadow: Id, scale: number) => {
+    const held = sheetOf(`${shadow.split(':')[0]}:ui2d/party/held` as Id);
+    for (const i of list) {
+      if (i.visible) {
+        const sprites = registries().pokemonSprites.get(i.species);
+        if (!sprites) throw new Error(`frontier scene: no sprites for ${i.species}`);
+        const img = image((sprites.forms[i.form] ?? sprites.forms[0]!).icon);
+        if (img) ctx.drawImage(img, 0, 0, 32, 32, (i.x - 16) * scale, (i.y - 16) * scale, 32 * scale, 32 * scale);
+      }
+      if (!i.item.visible) continue;
+      const img = image(held.atlas);
+      const c = held.cells[0]!;
+      if (img) ctx.drawImage(img, c.x, c.y, c.w, c.h, (i.item.x - c.ox) * scale, (i.item.y - c.oy) * scale, c.w * scale, c.h * scale);
+    }
+  };
+
   return (ctx: CanvasRenderingContext2D, view: FrontierView | undefined, frame: DsFrame) => {
     if (!view) return;
     const scale = frame.scale;
@@ -86,9 +130,9 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
     ctx.rect(0, 0, 256 * scale, 192 * scale);
     ctx.clip();
     const cam = { x: view.camera.x + (view.shake?.x ?? 0), y: view.camera.y + (view.shake?.y ?? 0) };
-    /** A cell of a sheet with its origin at room position x, y. */
-    const cell = (sheet: Ui2dSheet, index: number, x: number, y: number, flip = false) => {
-      const img = image(sheet.atlas);
+    /** A cell of a sheet with its origin at room position x, y (its colours blended `darken`/16 toward black). */
+    const cell = (sheet: Ui2dSheet, index: number, x: number, y: number, flip = false, darken = 0) => {
+      const img = darkImage(sheet.atlas, darken);
       const c = sheet.cells[index];
       if (!img || !c) return;
       if (!flip) {
@@ -118,7 +162,8 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
       ctx.globalAlpha = 1;
     };
     if (view.fgBelow) fg();
-    if (view.bg) cell(sheetOf(view.bg.sheet), 0, 0, 0);
+    if (view.bg) cell(sheetOf(view.bg.sheet), 0, 0, 0, false, view.bgDarken ?? 0);
+    if (view.bgPatch) cell(sheetOf(view.bgPatch.sheet), 0, view.bgPatch.x, view.bgPatch.y, false, view.bgDarken ?? 0);
     if (view.window) {
       // Window 0: inside its rect only the BG layers show (G2_SetWnd0InsidePlane without OBJ).
       const w = view.window;
@@ -138,9 +183,10 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
       if (!a.visible || a.anim < 0) continue;
       cell(shadow, 0, a.x + SHADOW.dx, a.y + SHADOW.dy);
       const s = sheetOf(a.sheet);
-      cell(s, animCell(s, a.anim, a.frame), a.x, a.y);
+      cell(s, animCell(s, a.anim, a.frame), a.x, a.y, false, a.darken ?? 0);
     }
     if (view.pokemon) pokemon(ctx, view.pokemon, scale);
+    if (view.icons) icons(ctx, view.icons, view.shadow, scale);
     if (view.window) ctx.restore();
     if (!view.fgBelow) fg();
     if (view.fade) {

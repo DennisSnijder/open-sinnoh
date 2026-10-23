@@ -664,6 +664,7 @@ const specialEncounterTables = obj({
 const frontierSet = obj({ species: ref('species'), form: int(0, 31), moves: arr(ref('moves')), evFlags: int(0, 63), nature: ref('natures'), item: nullable(ref('items')) });
 const factoryPool = obj({ trainerMax: int(0), setMin: int(0), setMax: int(0), ivs: int(0, 31), upgradable: bool });
 const frontierRoom = nullable(obj({ sheet: ref('ui2d'), width: int(256, 512), height: int(256, 512) }));
+const castleRental = obj({ item: ref('items'), cp: int(0, 0xffff) });
 const frontierTables = obj({
   scenes: arr(nullable(obj({ entry: str(/^[a-z][a-z0-9_-]*:[A-Za-z0-9_]+\/0$/), textBank: ref('textBanks'), bgm: nullable(ref('sequences')), bg: frontierRoom, fg: frontierRoom, setup: bool, fgFixed: opt(bool) }))),
   trainers: arr(obj({ class: id, className: ref('texts'), name: ref('texts'), sets: arr(int(0)) })),
@@ -710,6 +711,45 @@ const frontierTables = obj({
     if (h.opponents.length !== h.opponentTypes.length || h.sets.length !== h.opponents.length + 1) return 'frontier.hall: an opponent and its types per set after set 0';
     if (h.rankRanges.length !== 10 || h.ivs.length !== 10 || h.classesByRank.length !== 10) return 'frontier.hall: rank ranges, IVs and classes for ranks 0–9';
     return h.classesByCell.length !== 18 || h.grid.length !== 20 || h.battlePoints.length !== 19 ? 'frontier.hall: 18 cells of classes, a 20-cell grid, 19 BP rows' : undefined;
+  }),
+  castle: obj({
+    opponentRanges: arr(tuple(int(0), int(0), int(0), int(0))),
+    battlePoints: arr(int(0, 255)),
+    darach: tuple(int(0), int(0)),
+    items: arr(castleRental),
+    berries: arr(castleRental),
+    itemsByRank: arr(int(0)),
+    berriesByRank: arr(int(0)),
+    healCosts: arr(int(0, 0xffff)),
+    rankUpCosts: arr(arr(int(0, 0xffff))),
+    art: nullable(obj({ self: obj({ main: ref('ui2d'), items: ref('ui2d'), summary: ref('ui2d'), moves: ref('ui2d') }), opponent: obj({ main: ref('ui2d'), summary: ref('ui2d'), moves: ref('ui2d') }), sprites: ref('ui2d'), emblems: arr(ref('ui2d')) })),
+  }, (v) => {
+    const c = v as { opponentRanges: unknown[]; battlePoints: unknown[]; items: unknown[]; berries: unknown[]; itemsByRank: number[]; berriesByRank: number[]; healCosts: unknown[]; rankUpCosts: unknown[][] };
+    if (c.opponentRanges.length !== 8 || c.battlePoints.length !== 9) return 'frontier.castle: 8 opponent ranges and 9 BP rows';
+    if (c.itemsByRank.length !== 3 || c.berriesByRank.length !== 3 || c.itemsByRank.some((n) => n > c.items.length) || c.berriesByRank.some((n) => n > c.berries.length)) return 'frontier.castle: a rental count per rank 1–3, within the lists';
+    return c.healCosts.length !== 3 || c.rankUpCosts.length !== 3 || c.rankUpCosts.some((r) => r.length !== 3) ? 'frontier.castle: 3 heal costs and 3 × 3 rank-up costs' : undefined;
+  }),
+  arcade: obj({
+    opponentRanges: arr(tuple(int(0), int(0), int(0), int(0))),
+    battlePoints: arr(int(0, 255)),
+    dahlia: tuple(int(0), int(0)),
+    rouletteSpeeds: arr(obj({ round: int(0, 255), speed: int(0, 7) })),
+    cursorTicks: arr(int(0, 255)),
+    effectsByRound: arr(int(0, 127)),
+    effectsByBattle: arr(int(0, 127)),
+    categoryWeights: arr(arr(int(0, 100))),
+    categoryThresholds: arr(int(0, 255)),
+    performance: obj({ status: arr(int(0, 255)), fainted: arr(int(0, 255)), turns: arr(obj({ turns: int(0, 255), score: int(0, 255) })) }),
+    itemPools: arr(arr(ref('items'))),
+    berryPools: arr(arr(ref('items'))),
+    art: nullable(obj({ initial: ref('ui2d'), roulette: ref('ui2d'), sprites: ref('ui2d'), button: ref('ui2d'), screens: arr(ref('ui2d')) })),
+  }, (v) => {
+    const a = v as { opponentRanges: unknown[]; battlePoints: unknown[]; cursorTicks: unknown[]; effectsByRound: unknown[]; effectsByBattle: unknown[]; categoryWeights: number[][]; categoryThresholds: unknown[]; itemPools: unknown[]; berryPools: unknown[]; art: { screens: unknown[] } | null };
+    if (a.opponentRanges.length !== 8 || a.battlePoints.length !== 9) return 'frontier.arcade: 8 opponent ranges and 9 BP rows';
+    if (a.cursorTicks.length !== 8 || a.effectsByRound.length !== 32 || a.effectsByBattle.length !== 7) return 'frontier.arcade: 8 speeds, 32 effects, 7 battle-gated effects';
+    if (a.categoryWeights.length !== a.categoryThresholds.length + 1 || a.categoryWeights.some((w) => w.length !== 4 || w.reduce((x, y) => x + y, 0) !== 100)) return 'frontier.arcade: a tier per threshold and one more, each 4 weights of 100';
+    if (a.itemPools.length !== 3 || a.berryPools.length !== 3) return 'frontier.arcade: 3 item and 3 berry pools';
+    return a.art && a.art.screens.length !== 32 ? 'frontier.arcade.art: a screen per effect' : undefined;
   }),
   characters: dict(str(/^\d+$/), ref('ui2d')),
   objects: dict(str(/^\d+$/), ref('ui2d')),

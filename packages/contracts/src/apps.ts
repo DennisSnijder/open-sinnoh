@@ -119,9 +119,10 @@ export type AppRequest =
   /**
    * 0.34.0. Decomp PARTY_MENU_MODE_BATTLE_TOWER (sub_0204A358 → sub_0206BBFC): the party picking `count` Pokémon in order
    * for the Battle Tower, then CONFIRM. Eggs and the Battle Frontier banlist (`FrontierTables.banlist`) are NOT ABLE; the
-   * result is the party slots in the order picked, or null (CANCEL or B).
+   * result is the party slots in the order picked, or null (CANCEL or B). 0.39.0: `castle`, the Castle's and the Arcade's
+   * (PARTY_MENU_MODE_BATTLE_CASTLE: no level limit, held items may repeat, no species twice).
    */
-  | { app: 'party-order'; count: number; hall?: true }
+  | { app: 'party-order'; count: number; hall?: true; castle?: true }
   /**
    * 0.37.0. The Battle Factory's rental app (decomp battle_factory/main.c, BattleFactoryApp_*): `rent` picks the
    * player's `count` Pokémon in order from `rentals` (the six rentals); `swap` offers to trade one of `rentals` (the
@@ -133,6 +134,10 @@ export type AppRequest =
    * `hall-board`.
    */
   | import('./frontier.ts').HallBoardRequest
+  /** 0.39.0. The Battle Castle's apps (decomp battle_castle/self_app.c, opponent_app.c). Result `castle`. */
+  | import('./frontier.ts').CastleRequest
+  /** 0.39.0. The Battle Arcade's game board (decomp battle_arcade/main.c). Result `arcade`. */
+  | import('./frontier.ts').ArcadeRequest
   /**
    * 0.12.0. The battle bag (decomp battle_bag.c, BattleBag_Init): the bag's items grouped by their
    * `battlePocket` bits into HP/PP, status, Poké Balls and battle items. A medicine asks for a party
@@ -338,6 +343,10 @@ export type AppResult =
   | { app: 'factory'; swap: [number, number] | null }
   /** 0.37.0. The board cell picked (decomp selectedCell: 0–16 a type, 19 the Matron's). */
   | { app: 'hall-board'; cell: number }
+  /** 0.39.0. The parties as the app left them, what it unlocked, and the slot it closed on (decomp selectedMonSlot). */
+  | { app: 'castle'; party: Pokemon[]; opponents: Pokemon[]; unlocked: import('./frontier.ts').CastleUnlocks; slot: number }
+  /** 0.39.0. The board's effect (ARCADE_EFFECT_*), its cursor and the random number the app drew (decomp randomIndex). */
+  | { app: 'arcade'; effect: number; cursor: number; random: number }
   | { app: 'storage' }
   | { app: 'pokedex-entry' }
   | { app: 'naming'; name: string | null }
@@ -536,7 +545,9 @@ export type AppView =
   | import('./contests.ts').ContestView
   | import('./contests.ts').ContestPhotoView
   | import('./frontier.ts').FactoryView
-  | import('./frontier.ts').HallBoardView;
+  | import('./frontier.ts').HallBoardView
+  | import('./frontier.ts').CastleView
+  | import('./frontier.ts').ArcadeView;
 export type AppName = AppView['app'];
 
 /**

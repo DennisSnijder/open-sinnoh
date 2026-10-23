@@ -452,6 +452,49 @@ const hallSchema: Schema = obj(
   },
 );
 
+/** contracts `CastleState` (0.39.0): decomp BattleCastleSave, BattleCastlePersistentSave, the castle's stats. */
+const statusSchema = str(/^(none|sleep|poison|toxic|burn|freeze|paralysis)$/);
+const castleSchema: Schema = obj(
+  {
+    active: arr(bool),
+    heardIntro: bool,
+    streaks: arr(obj({ record: int(0, 9999), latest: int(0, 9999), cp: int(0, 9999), recordCp: int(0, 9999), spentCp: int(0, 9999) })),
+    ranks: arr(arr(int(1, 3))),
+    save: obj({
+      saved: bool,
+      challengeType: int(0, 3),
+      battle: int(0, 6),
+      slots: arr(int(0, 5)),
+      trainers: arr(int(0, 0xffff)),
+      hp: arr(int(0, 0xffff)),
+      pp: arr(arr(int(0, 255))),
+      status: arr(statusSchema),
+      items: arr(nullable(ref('items'))),
+      sets: arr(int(0, 0xffff)),
+    }),
+  },
+  (v) => {
+    const c = v as { active: unknown[]; streaks: unknown[]; ranks: unknown[][]; save: { slots: unknown[]; trainers: unknown[]; hp: unknown[]; pp: unknown[][]; status: unknown[]; items: unknown[]; sets: unknown[] } };
+    if (c.active.length !== 4 || c.streaks.length !== 3 || c.ranks.length !== 3 || c.ranks.some((r) => r.length !== 3)) return 'frontier.castle: 4 streak flags, 3 streaks, 3 × 3 ranks';
+    const s = c.save;
+    if (s.slots.length !== 3 || s.trainers.length !== 14 || s.sets.length !== 14) return 'frontier.castle.save: 3 slots, 14 trainers, 14 sets';
+    return s.hp.length !== 4 || s.pp.length !== 4 || s.pp.some((p) => p.length !== 4) || s.status.length !== 4 || s.items.length !== 4 ? 'frontier.castle.save: HP, 4 PP, status and item for 4 Pokémon' : undefined;
+  },
+);
+/** contracts `ArcadeState` (0.39.0): decomp BattleArcadeSave, BattleArcadeStreakFlags, the arcade's stats. */
+const arcadeSchema: Schema = obj(
+  {
+    active: arr(bool),
+    streaks: arr(obj({ record: int(0, 9999), latest: int(0, 9999) })),
+    save: obj({ saved: bool, challengeType: int(0, 3), battle: int(0, 6), speed: int(0, 7), randomCursor: bool, slots: arr(int(0, 5)), items: arr(nullable(ref('items'))), trainers: arr(int(0, 0xffff)), sets: arr(int(0, 0xffff)) }),
+  },
+  (v) => {
+    const a = v as { active: unknown[]; streaks: unknown[]; save: { slots: unknown[]; items: unknown[]; trainers: unknown[]; sets: unknown[] } };
+    if (a.active.length !== 4 || a.streaks.length !== 3) return 'frontier.arcade: 4 streak flags and 3 streaks';
+    return a.save.slots.length !== 3 || a.save.items.length !== 4 || a.save.trainers.length !== 14 || a.save.sets.length !== 14 ? 'frontier.arcade.save: 3 slots, 4 items, 14 trainers, 14 sets' : undefined;
+  },
+);
+
 /** contracts `FrontierState` (0.34.0): the tower's saved part (decomp WifiBattleTowerRecord, WifiBattleTowerSave, tower stats). */
 const frontierSchema: Schema = obj(
   {
@@ -473,6 +516,9 @@ const frontierSchema: Schema = obj(
     // 0.37.0, optional (no schema bump): the Factory's and the Hall's saved parts.
     factory: opt(factorySchema),
     hall: opt(hallSchema),
+    // 0.39.0, optional (no schema bump): the Castle's and the Arcade's.
+    castle: opt(castleSchema),
+    arcade: opt(arcadeSchema),
   },
   (v) => {
     const f = v as { towerRooms: unknown[]; towerStreaks: unknown[]; towerSave: { slots: unknown[]; trainers: unknown[] } };

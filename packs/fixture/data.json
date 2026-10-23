@@ -14010,6 +14010,550 @@
    "text": "Calm"
   },
   {
+   "id": "fixture:BattleCastleSelfApp_Text_PlayerName",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_CastlePoints",
+   "text": "{var 0} PT"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_CastlePointsItemSelect",
+   "text": "{var 0} PT"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_ChoosePokemon",
+   "text": "Pick a partner."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_Exit",
+   "text": "LEAVE"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_Heal",
+   "text": "MEND"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_Rental",
+   "text": "BORROW"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_Summary",
+   "text": "DETAILS"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_Moves",
+   "text": "SKILLS"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_Cancel",
+   "text": "BACK"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_RestoreHPOrPP",
+   "text": "Mend health or skill uses."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_RentBerryOrItem",
+   "text": "Borrow a fruit or a tool."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_CheckStatsAndMore",
+   "text": "See its strengths."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_CheckMovesAndPP",
+   "text": "See its skills."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_GoBackToMonSelection",
+   "text": "Pick again."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_RestoreHP",
+   "text": "HEALTH"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_RestorePP",
+   "text": "SKILL USES"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_RestoreAll",
+   "text": "BOTH"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_RankUp",
+   "text": "GRADE UP"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_Cancel2",
+   "text": "BACK"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_WhichToUse",
+   "text": "Which one?"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_RankUpToRestorePP",
+   "text": "A higher grade mends skill uses."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_RankUpToRestoreHPAndPP",
+   "text": "A higher grade mends both."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_RankCannotBeRaised",
+   "text": "The grade is at the top."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_ReturnToPrevious",
+   "text": "Go back."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_Yes",
+   "text": "YES"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_No",
+   "text": "NO"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_NotEnoughCP",
+   "text": "Not enough points."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_HealRankTooLow",
+   "text": "The mending grade is too low."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_HPWillBeRestored",
+   "text": "{var 0} feels better."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_PPWillBeRestored",
+   "text": "{var 0} can use its skills again."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_HPAndPPWillBeRestored",
+   "text": "{var 0} is fully mended."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_NoBenefit",
+   "text": "That would do nothing."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_RankUpForCP",
+   "text": "Grade up for {var 0} PT?"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_NotEnoughCP2",
+   "text": "Not enough points."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_GainedAbilityToRestorePP",
+   "text": "{var 5} can mend skill uses now!"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_GainedAbilityToRestoreHPAndPP",
+   "text": "{var 5} can mend both now!"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_Berries",
+   "text": "FRUIT"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_Items",
+   "text": "TOOLS"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_RankUp2",
+   "text": "GRADE UP"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_Cancel3",
+   "text": "BACK"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_MayRentBerry",
+   "text": "Borrow a fruit."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_MayRentItem",
+   "text": "Borrow a tool."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_RankUpToRentItem",
+   "text": "A higher grade lends tools."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_RankUpToExpandChoices",
+   "text": "A higher grade lends more."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_RankCannotBeRaised2",
+   "text": "The grade is at the top."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_ReturnToPrevious2",
+   "text": "Go back."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_RentalRankTooLow",
+   "text": "The lending grade is too low."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_WillCostCP",
+   "text": "That is {var 0} PT.\nAll right?"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_ItemGivenToMon",
+   "text": "{var 0} now holds\nthe {var 1}."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_AlreadyHoldingItem",
+   "text": "{var 0} holds\n{var 1} already."
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_WantToSwitchItems",
+   "text": "Swap the two?"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_GainedAbilityToRentItems",
+   "text": "{var 5} can borrow tools now!"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_ExpandedItemRentals",
+   "text": "{var 5} can borrow more now!"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_Item",
+   "text": "Holds"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_ItemValue",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_Nature",
+   "text": "Mood"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_NatureValue",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_Ability",
+   "text": "Gift"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_AbilityValue",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_Attack",
+   "text": "Power"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_AttackValue",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_Defense",
+   "text": "Guard"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_DefenseValue",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_SpAttack",
+   "text": "Focus"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_SpAttackValue",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_SpDefense",
+   "text": "Calm"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_SpDefenseValue",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_Speed",
+   "text": "Pace"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_SpeedValue",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_MoveName1",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_MoveName2",
+   "text": "{var 1}"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_MoveName3",
+   "text": "{var 2}"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_MoveName4",
+   "text": "{var 3}"
+  },
+  {
+   "id": "fixture:BattleCastleSelfApp_Text_MovePP",
+   "text": "{var 4}/{var 5}"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_CheckWhichPokemon",
+   "text": "Look at which one?"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_Exit",
+   "text": "LEAVE"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_Check",
+   "text": "REVEAL"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_Level",
+   "text": "SIZE"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_Summary",
+   "text": "DETAILS"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_Cancel",
+   "text": "BACK"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_CheckIdentity",
+   "text": "Reveal who it is."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_ChangeLevel",
+   "text": "Change its size."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_ExamineStats",
+   "text": "Study it."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_GoBackToMonSelection",
+   "text": "Go back."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_IdentifyForCP",
+   "text": "Reveal it?\nThat is {var 0} PT."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_IdentityRevealed",
+   "text": "It is {var 0}."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_MayChangeLevel",
+   "text": "Change its size?"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_LevelUp5",
+   "text": "BIGGER"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_LevelDown5",
+   "text": "SMALLER"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_Cancel2",
+   "text": "BACK"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_WillCostCP",
+   "text": "That is {var 0} PT.\nAll right?"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_Yes",
+   "text": "YES"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_No",
+   "text": "NO"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_NotEnoughCP3",
+   "text": "Not enough points."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_LevelCantGoHigher",
+   "text": "It cannot grow more."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_LevelCantGoLower",
+   "text": "It cannot shrink more."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_LevelBoostedBy5",
+   "text": "It grew."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_LevelLoweredBy5",
+   "text": "It shrank."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_Summary2",
+   "text": "STRENGTHS"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_Moves",
+   "text": "SKILLS"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_RankUp",
+   "text": "GRADE UP"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_Cancel3",
+   "text": "BACK"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_CheckStats",
+   "text": "See its strengths."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_CheckMoveList",
+   "text": "See its skills."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_RankUpToCheckMoves",
+   "text": "A higher grade shows skills."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_CantRankUp",
+   "text": "The grade is at the top."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_ReturnToPreviousMenu",
+   "text": "Go back."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_TooLowForMoveList",
+   "text": "The grade is too low."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_CanCheckStats",
+   "text": "See its strengths?\nThat is {var 0} PT."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_NotEnoughCP",
+   "text": "Not enough points."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_MayCheckMoveList",
+   "text": "See its skills?\nThat is {var 0} PT."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_NotEnoughCP2",
+   "text": "Not enough points."
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_RankUpForCP",
+   "text": "Grade up for {var 0} PT?"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_GainedMoveListPurchasePower",
+   "text": "{var 5} can see skills now!"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_Item",
+   "text": "Holds"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_ItemValue",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_Nature",
+   "text": "Mood"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_NatureValue",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_Ability",
+   "text": "Gift"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_AbilityValue",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_Attack",
+   "text": "Power"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_AttackValue",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_Defense",
+   "text": "Guard"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_DefenseValue",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_SpAttack",
+   "text": "Focus"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_SpAttackValue",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_SpDefense",
+   "text": "Calm"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_SpDefenseValue",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_Speed",
+   "text": "Pace"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_SpeedValue",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_MoveName1",
+   "text": "{var 0}"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_MoveName2",
+   "text": "{var 1}"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_MoveName3",
+   "text": "{var 2}"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_MoveName4",
+   "text": "{var 3}"
+  },
+  {
+   "id": "fixture:BattleCastleOpponentApp_Text_MovePP",
+   "text": "{var 4}/{var 5}"
+  },
+  {
    "id": "fixture:Ribbon_Name_0",
    "text": "Lantern Sash"
   },

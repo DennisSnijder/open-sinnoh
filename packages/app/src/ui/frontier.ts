@@ -11,15 +11,22 @@
  * - The Hall's board (battle_hall/main.c): BG3 the grid, each cell in its palette (normal, selected, unselectable);
  *   the type names at (9 + 64 col, 16 + 36 row) and the ranks at (26 + 64 col, 4 + 36 row); the cursor box; the
  *   Pokémon's icon (160, 160) and name (80, 160); the message box (2, 19, 27 × 4) and YES/NO (24, 13, 7 × 4).
- * Packs without the art (the fixture) get flat colours in the same places.
+ * - The Castle's apps (battle_castle/self_app.c, opponent_app.c, windows.c): BG3 the layout, BG2 the item list or the
+ *   summary or moves panel over it; the slots' icons, HP bars, held-item marks or Poké Balls, the cursor; the header,
+ *   levels, HP and EXIT text; the menus, the prompt, message box and YES/NO.
+ * - The Arcade's board (battle_arcade/main.c): BG3 the board, the 16 panels and the cursor, the two columns of icons
+ *   and held-item marks; the touch screen's STOP button at half size in a corner of the one screen.
+ * The sprites animate on the canvas between views. Packs without the art (the fixture) get flat colours in the same
+ * places.
  */
-import { newGameRecord, type FactoryView, type HallBoardView, type Ui2dSheet } from '@opensinnoh/contracts';
+import { newGameRecord, type ArcadeView, type CastleMonView, type CastleView, type FactoryView, type HallBoardView, type Ui2dSheet } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
 import { framed, messageBox, stop, type DrawContext } from './apps.ts';
 import type { Art } from './art.ts';
-import { ICON_ANIM } from './art.ts';
+import { hpColor, ICON_ANIM } from './art.ts';
 import { el } from './core.ts';
 import { layoutScene, place, sceneContext } from './evolution.ts';
+import type { Palette } from './pixel-font.ts';
 import './frontier.css';
 
 const W = 256;
@@ -47,17 +54,22 @@ const FACTORY_ANIM = { ball: 6, shaking: 7, cursor: 8, menuCursor: 9 };
 
 type Img = HTMLImageElement;
 
-/** A sheet's animation frame at time `t` ticks (looping ones wrap, forward ones hold their last). */
-function animCell(sheet: Ui2dSheet, anim: number, t: number): number {
+/** The index of a sheet animation's frame at time `t` ticks (looping ones wrap, forward ones hold their last). */
+function animFrame(sheet: Ui2dSheet, anim: number, t: number): number {
   const a = sheet.animations?.[anim];
   if (!a?.frames.length) return 0;
   const total = a.frames.reduce((n, f) => n + f.ticks, 0) || 1;
   let left = a.mode === 'forward' ? Math.min(t, total - 1) : t % total;
-  for (const f of a.frames) {
-    if (left < f.ticks) return f.cell;
+  for (const [i, f] of a.frames.entries()) {
+    if (left < f.ticks) return i;
     left -= f.ticks;
   }
-  return a.frames.at(-1)!.cell;
+  return a.frames.length - 1;
+}
+
+/** A sheet's animation cell at time `t` ticks. */
+function animCell(sheet: Ui2dSheet, anim: number, t: number): number {
+  return sheet.animations?.[anim]?.frames[animFrame(sheet, anim, t)]?.cell ?? 0;
 }
 
 /** A canvas DS screen with DOM boxes over it (the frontier apps' common part). */
@@ -70,6 +82,9 @@ abstract class FrontierScene<V> {
   private readonly images = new Map<string, Img | null>();
   private boxKey = '';
   protected last: { d: DrawContext; v: V } | null = null;
+  /** The scene context and view last painted with the animation tick they were painted at; the repaint loop's frame. */
+  private painted: { d: DrawContext; v: V; tick: number } | null = null;
+  private loop = 0;
 
   constructor(
     protected readonly art: Art,
@@ -91,7 +106,7 @@ abstract class FrontierScene<V> {
     return d.registries.ui2d.get(id);
   }
 
-  private image(ref: Id): Img | null {
+  protected image(ref: Id): Img | null {
     if (this.images.has(ref)) return this.images.get(ref)!;
     this.images.set(ref, null);
     void this.art.image(ref).then((img) => {
@@ -114,18 +129,61 @@ abstract class FrontierScene<V> {
     return true;
   }
 
+  /**
+   * A Pokémon's party icon (`PokemonSpriteForm.icon`: two 32×32 frames, top first) on frame `frame`, centred at
+   * (x, y); a flat disc without its sprites (the fixture).
+   */
+  protected icon(d: DrawContext, species: Id, form: number, frame: number, x: number, y: number): void {
+    const sprites = d.registries.pokemonSprites.get(species);
+    if (!sprites) {
+      this.g.fillStyle = '#a8b0c0';
+      this.g.beginPath();
+      this.g.arc(x, y, 10, 0, Math.PI * 2);
+      this.g.fill();
+      return;
+    }
+    const img = this.image((sprites.forms[form] ?? sprites.forms[0]!).icon);
+    if (img) this.g.drawImage(img, 0, frame * 32, 32, 32, x - 16, y - 16, 32, 32);
+  }
+
+  /** The party's held-item mark (`ui2d/party/held` cell 0) with its origin at (x, y); a flat square without it. */
+  protected heldMark(d: DrawContext, x: number, y: number): void {
+    if (this.cell(d.art.sheet('party/held'), 0, x, y)) return;
+    this.g.fillStyle = '#f8f8f8';
+    this.g.fillRect(x - 4, y - 4, 8, 8);
+  }
+
   draw(ctx: DrawContext, v: V): void {
     this.last = { d: ctx, v };
     const d = sceneContext(ctx, layoutScene(ctx, this.root, this.stage));
-    this.g.imageSmoothingEnabled = false;
-    this.g.fillStyle = '#000';
-    this.g.fillRect(0, 0, W, H);
-    this.paint(d, v);
+    this.painted = { d, v, tick: animTicks() };
+    this.repaint();
+    // The sprites animate between views (presentation only): a repaint on each new tick while the scene is shown.
+    if (!this.loop) this.loop = requestAnimationFrame(this.frame);
     const key = JSON.stringify([this.boxesKey(v), d.frame, d.scale]);
     if (key === this.boxKey) return;
     this.boxKey = key;
     this.boxes.replaceChildren(...this.drawBoxes(d, v));
   }
+
+  private repaint(): void {
+    const p = this.painted!;
+    this.g.imageSmoothingEnabled = false;
+    this.g.fillStyle = '#000';
+    this.g.fillRect(0, 0, W, H);
+    this.paint(p.d, p.v);
+  }
+
+  private readonly frame = (): void => {
+    this.loop = 0;
+    if (!this.root.isConnected || !this.painted) return;
+    const tick = animTicks();
+    if (tick !== this.painted.tick) {
+      this.painted.tick = tick;
+      this.repaint();
+    }
+    this.loop = requestAnimationFrame(this.frame);
+  };
 
   protected abstract paint(d: DrawContext, v: V): void;
   protected abstract boxesKey(v: V): unknown;
@@ -312,8 +370,409 @@ class HallBoardScene extends FrontierScene<HallBoardView> {
   }
 }
 
+type Rect = { x: number; y: number; w: number; h: number };
+/** A window at tiles (x, y), w × h, with the standard frame's tile round it (BattleCastleApp_DrawWindow), in DS px. */
+const framedRect = (x: number, y: number, w: number, h: number): Rect => ({ x: x * 8 - 8, y: y * 8 - 8, w: w * 8 + 16, h: h * 8 + 16 });
+/** A message box at tiles (x, y), w × h, with its frame (one tile left, top and bottom, two right), in DS px. */
+const messageRect = (x: number, y: number, w: number, h: number): Rect => ({ x: x * 8 - 8, y: y * 8 - 8, w: w * 8 + 24, h: h * 8 + 16 });
+
+/** A line of text with its left edge, right edge or centre at DS (x, y). */
+function line(d: DrawContext, text: string, x: number, y: number, palette: Palette = 'ink', align: 'left' | 'right' | 'centre' = 'left'): HTMLElement {
+  const w = 160;
+  const n = el('div', `frontier-label frontier-line is-${align}`, d.text(text, palette));
+  place(n, { x: align === 'left' ? x : align === 'right' ? x - w : x - w / 2, y, w, h: 16 });
+  return n;
+}
+
+/** Decomp windows.c: the Castle apps' message boxes, YES/NO, the item list's player window, and each app's menus. */
+const CASTLE_WINDOWS = {
+  message: messageRect(2, 19, 27, 4),
+  prompt: messageRect(2, 19, 20, 4),
+  hint: messageRect(2, 19, 17, 4),
+  yesNo: framedRect(24, 13, 7, 4),
+  playerInfo: framedRect(1, 1, 8, 4),
+};
+const CASTLE_MENUS: Record<CastleView['mode'], Partial<Record<NonNullable<CastleView['menu']>['window'], Rect>>> = {
+  self: { options: framedRect(23, 13, 8, 10), heal: framedRect(20, 7, 11, 10), rental: framedRect(22, 9, 9, 8) },
+  opponent: { options: framedRect(23, 15, 8, 8), summary: framedRect(22, 9, 9, 8), level: framedRect(24, 11, 7, 6) },
+};
+/** Decomp sprites.h ANIM_ID_*. */
+const CASTLE_ANIM = { exitCursor: 0, monCursor: 1, listCursor: 3, upArrow: 4, downArrow: 5, shakingBall: 7, red: 13, yellow: 14, green: 15 };
+/**
+ * Decomp self_app.c / opponent_app.c, solo: slot i is 64 px right of slot 0 — its icon at (64, 58) (the selected one 3 px
+ * up on the icon's first frame, 1 down on its second: BattleCastle_UpdateMonSpritePosition), the HP bar at (64, 78),
+ * the held-item mark at the icon + (8, 4), an unchecked opponent's Poké Ball at (60, 62), the cursor at (72, 88); EXIT's
+ * cursor at (224, 160). The item list: the renting Pokémon's icon at (40, 80), the row cursor at (158, 24 + 16 row), the
+ * arrows at (160, 10) and (160, 124), the item's icon at (24, 162).
+ */
+const SLOT = 64;
+const CASTLE_AT = {
+  icon: { x: 64, y: 58 },
+  bar: { x: 64, y: 78 },
+  item: { x: 8, y: 4 },
+  ball: { x: 60, y: 62 },
+  cursor: { x: 72, y: 88 },
+  exit: { x: 224, y: 160 },
+  rentIcon: { x: 40, y: 80 },
+  listCursor: { x: 158, y: 24 },
+  upArrow: { x: 160, y: 10 },
+  downArrow: { x: 160, y: 124 },
+  bigItem: { x: 24, y: 162 },
+};
+/**
+ * Decomp windows.c and the Print* functions (window interiors in DS px): the header (2, 1) with the name at 28 and the
+ * CP right-aligned at 132; EXIT (26, 19) centred at 16, 5; the levels (0, 4) — the level mark at 40 + 64i (its number
+ * 16 on), the gender at 80 + 64i — and the HP (0, 9) at 36 + 64i (the current HP right-aligned to 24, the slash, the
+ * maximum from 32), all one row down; the item list (12, 2) six 16-px rows, the price right-aligned at 128; the player
+ * window (1, 1) with the name at 1, 1 and the CP at 16, 16; the renting Pokémon's level (1, 7) at 4 and gender at 48, its
+ * HP (1, 13) at 4; the item's name (5, 16) at 0, 6; the summary and moves panel (5, 10).
+ */
+const CASTLE_TEXT = {
+  header: { x: 16, y: 8, name: 28, cp: 132 },
+  exit: { x: 224, y: 157 },
+  levels: { y: 33, x: 40, gender: 80 },
+  hp: { y: 73, x: 36 },
+  list: { x: 96, y: 16, w: 152, rows: 6 },
+  info: { x: 8, y: 8 },
+  monLevel: { x: 12, y: 56, gender: 56 },
+  monHp: { x: 12, y: 104 },
+  itemName: { x: 40, y: 134 },
+  panel: { x: 40, y: 80 },
+};
+/** Taps over the art: the slots, EXIT's window, the panels' side strips and their body. */
+const CASTLE_TAPS = { slot: { x: 32, y: 22, w: 64, h: 76 }, exit: { x: 200, y: 152, w: 48, h: 24 }, pageLeft: { x: 0, y: 88, w: 32, h: 96 }, pageRight: { x: 224, y: 88, w: 32, h: 96 }, panel: { x: 32, y: 80, w: 192, h: 112 } };
+
+/** Decomp GetPokeIconAnimID / GetHpBarAnimID by HealthBar_Color. */
+function castleIconAnim(m: CastleMonView): number {
+  if (m.hp === 0) return ICON_ANIM.fainted;
+  return { max: ICON_ANIM.hpMax, green: ICON_ANIM.hpGreen, yellow: ICON_ANIM.hpYellow, red: ICON_ANIM.hpRed }[hpColor(m.hp, m.maxHp)];
+}
+function castleBarAnim(m: CastleMonView): number {
+  const c = hpColor(m.hp, m.maxHp);
+  return c === 'red' ? CASTLE_ANIM.red : c === 'yellow' ? CASTLE_ANIM.yellow : CASTLE_ANIM.green;
+}
+
+class CastleScene extends FrontierScene<CastleView> {
+  constructor(art: Art) {
+    super(art, 'castle-app', 'Battle Castle');
+  }
+
+  /** A sprite animation of the apps' sheet at (x, y), or the flat stand-in without the art. */
+  private sprite(sheet: Ui2dSheet | undefined, anim: number, t: number, x: number, y: number, flat: () => void): void {
+    if (sheet) this.cell(sheet, animCell(sheet, anim, t), x, y);
+    else flat();
+  }
+
+  private monIcon(d: DrawContext, m: CastleMonView, t: number, x: number, y: number, selected: boolean): void {
+    const frames = d.art.sheet('pokemon/icon_frames');
+    const anim = castleIconAnim(m);
+    const f = frames ? animFrame(frames, anim, t) : 0;
+    const cell = frames?.animations?.[anim]?.frames[f]?.cell ?? 0;
+    this.icon(d, m.species, m.form, cell, x, selected ? y + (f === 0 ? -3 : 1) : y);
+  }
+
+  protected paint(d: DrawContext, v: CastleView): void {
+    const art = newGameRecord(d.registries).frontier?.castle.art ?? null;
+    const g = this.g;
+    const t = animTicks();
+    const self = v.mode === 'self';
+    if (art) {
+      const layers: Partial<Record<CastleView['panel'], Id>> = self ? art.self : art.opponent;
+      this.cell(this.sheetOf(d, layers.main!), 0, 0, 0);
+      if (v.panel !== 'main') {
+        const panel = layers[v.panel];
+        if (!panel) throw new Error(`ui: the Castle's ${v.mode} app has no ${v.panel} panel`);
+        this.cell(this.sheetOf(d, panel), 0, 0, 0);
+      }
+    } else {
+      g.fillStyle = '#5848a8';
+      g.fillRect(0, 0, W, H);
+      g.fillStyle = '#f8f0b0';
+      if (v.panel === 'items') {
+        g.fillRect(80, 8, 160, 112);
+        g.fillRect(8, 48, 56, 72);
+        g.fillRect(0, 128, W, 56);
+      } else {
+        g.fillRect(16, 8, 232, 16);
+        g.fillRect(32, 32, 192, 48);
+        if (v.panel === 'main') g.fillRect(200, 152, 48, 24);
+        else g.fillRect(0, 84, W, 104);
+      }
+    }
+    const sheet = art ? this.sheetOf(d, art.sprites) : undefined;
+    const box = (r: Rect) => () => {
+      g.strokeStyle = '#f04040';
+      g.lineWidth = 2;
+      g.strokeRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2);
+    };
+    if (v.panel === 'items') {
+      const it = v.items!;
+      const m = v.mons[it.mon]!;
+      this.monIcon(d, m, t, CASTLE_AT.rentIcon.x, CASTLE_AT.rentIcon.y, false);
+      if (m.item) this.heldMark(d, CASTLE_AT.rentIcon.x + CASTLE_AT.item.x, CASTLE_AT.rentIcon.y + CASTLE_AT.item.y);
+      const row = it.cursor - it.top;
+      this.sprite(sheet, CASTLE_ANIM.listCursor, t, CASTLE_AT.listCursor.x, CASTLE_AT.listCursor.y + 16 * row, box({ x: 86, y: 16 + 16 * row, w: 148, h: 16 }));
+      // Decomp UpdateItemSelectMenuDisplay: the arrows where the list scrolls.
+      if (it.top > 0) this.sprite(sheet, CASTLE_ANIM.upArrow, t, CASTLE_AT.upArrow.x, CASTLE_AT.upArrow.y, () => {});
+      if (it.top + CASTLE_TEXT.list.rows < it.entries.length) this.sprite(sheet, CASTLE_ANIM.downArrow, t, CASTLE_AT.downArrow.x, CASTLE_AT.downArrow.y, () => {});
+      if (it.item) {
+        const rec = d.registries.items.get(it.item);
+        if (!rec) throw new Error(`ui: unknown item ${it.item}`);
+        const img = this.image(rec.icon);
+        if (img) g.drawImage(img, CASTLE_AT.bigItem.x - 16, CASTLE_AT.bigItem.y - 16);
+      }
+    } else {
+      v.mons.forEach((m, i) => {
+        const dx = SLOT * i;
+        if (m.hidden) {
+          this.sprite(sheet, CASTLE_ANIM.shakingBall, t, CASTLE_AT.ball.x + dx, CASTLE_AT.ball.y, () => {
+            g.fillStyle = '#e83830';
+            g.beginPath();
+            g.arc(CASTLE_AT.ball.x + dx, CASTLE_AT.ball.y, 8, 0, Math.PI * 2);
+            g.fill();
+          });
+          return;
+        }
+        this.sprite(sheet, castleBarAnim(m), t, CASTLE_AT.bar.x + dx, CASTLE_AT.bar.y, () => {
+          g.fillStyle = hpColor(m.hp, m.maxHp) === 'red' ? '#e85838' : hpColor(m.hp, m.maxHp) === 'yellow' ? '#e8c838' : '#58d080';
+          g.fillRect(CASTLE_AT.bar.x + dx - 24, CASTLE_AT.bar.y - 2, (48 * m.hp) / m.maxHp, 4);
+        });
+        this.monIcon(d, m, t, CASTLE_AT.icon.x + dx, CASTLE_AT.icon.y, i === v.cursor);
+        if (self && m.item) this.heldMark(d, CASTLE_AT.icon.x + dx + CASTLE_AT.item.x, CASTLE_AT.icon.y + CASTLE_AT.item.y);
+      });
+      if (v.cursor < v.mons.length) this.sprite(sheet, CASTLE_ANIM.monCursor, t, CASTLE_AT.cursor.x + SLOT * v.cursor, CASTLE_AT.cursor.y, box({ ...CASTLE_TAPS.slot, x: CASTLE_TAPS.slot.x + SLOT * v.cursor }));
+      else if (v.panel === 'main') this.sprite(sheet, CASTLE_ANIM.exitCursor, t, CASTLE_AT.exit.x, CASTLE_AT.exit.y, box(CASTLE_TAPS.exit));
+    }
+    if (v.sparkle && sheet) this.cell(sheet, animCell(sheet, v.sparkle.anim, v.sparkle.tick), v.sparkle.x, v.sparkle.y);
+  }
+
+  protected boxesKey(v: CastleView): unknown {
+    // The sparkles are the canvas's alone.
+    return { ...v, sparkle: undefined };
+  }
+
+  /** The level mark and number at x, the gender symbol at `gender` (decomp PrintMonLevelAndGender). */
+  private level(d: DrawContext, m: CastleMonView, x: number, gender: number, y: number): HTMLElement[] {
+    const parts = [line(d, 'Lv', x, y), line(d, String(m.level), x + 16, y)];
+    if (m.gender !== 'none') parts.push(line(d, m.gender === 'male' ? '♂' : '♀', gender, y, m.gender));
+    return parts;
+  }
+
+  /** The HP as current (right-aligned to 24), slash, maximum (from 32) (decomp PrintMonHP). */
+  private hp(d: DrawContext, m: CastleMonView, x: number, y: number): HTMLElement[] {
+    return [line(d, String(m.hp), x + 24, y, 'ink', 'right'), line(d, '/', x + 24, y), line(d, String(m.maxHp), x + 32, y)];
+  }
+
+  protected drawBoxes(d: DrawContext, v: CastleView): HTMLElement[] {
+    const parts: HTMLElement[] = [];
+    const exit = v.mons.length;
+    const playerInk: Palette = d.gender === 'female' ? 'female' : 'male';
+    const tap = (id: string, label: string, r: Rect, cursor = false) => {
+      const b = stop(d, id, [], 'frontier-tap', cursor);
+      b.setAttribute('aria-label', label);
+      place(b, r);
+      parts.push(b);
+    };
+    if (v.panel === 'items') {
+      const it = v.items!;
+      const m = v.mons[it.mon]!;
+      const info = framed(d, 'frontier-window');
+      place(info, CASTLE_WINDOWS.playerInfo);
+      parts.push(info, line(d, v.playerName, CASTLE_TEXT.info.x + 1, CASTLE_TEXT.info.y + 1, playerInk), line(d, it.cpLine, CASTLE_TEXT.info.x + 16, CASTLE_TEXT.info.y + 16));
+      parts.push(...this.level(d, m, CASTLE_TEXT.monLevel.x, CASTLE_TEXT.monLevel.gender, CASTLE_TEXT.monLevel.y), ...this.hp(d, m, CASTLE_TEXT.monHp.x, CASTLE_TEXT.monHp.y));
+      const L = CASTLE_TEXT.list;
+      it.entries.slice(it.top, it.top + L.rows).forEach((e, r) => {
+        const i = it.top + r;
+        const row = stop(d, `item:${i}`, [el('span', 'frontier-row-name', d.text(e.name)), el('span', 'frontier-row-cp', d.text(e.cp))], 'frontier-row', it.cursor === i);
+        place(row, { x: L.x, y: L.y + 16 * r, w: L.w, h: 16 });
+        parts.push(row);
+      });
+      if (it.item) parts.push(line(d, it.entries[it.cursor]!.name, CASTLE_TEXT.itemName.x, CASTLE_TEXT.itemName.y));
+    } else {
+      const hd = CASTLE_TEXT.header;
+      parts.push(line(d, v.playerName, hd.x + hd.name, hd.y, playerInk), line(d, v.cp, hd.x + hd.cp, hd.y, 'ink', 'right'));
+      v.mons.forEach((m, i) => {
+        const dx = SLOT * i;
+        parts.push(...this.level(d, m, CASTLE_TEXT.levels.x + dx, CASTLE_TEXT.levels.gender + dx, CASTLE_TEXT.levels.y));
+        if (!m.hidden) parts.push(...this.hp(d, m, CASTLE_TEXT.hp.x + dx, CASTLE_TEXT.hp.y));
+      });
+      if (v.panel === 'main') parts.push(line(d, v.exit, CASTLE_TEXT.exit.x, CASTLE_TEXT.exit.y, 'ink', 'centre'));
+      else {
+        const P = CASTLE_TEXT.panel;
+        for (const l of v.lines ?? []) parts.push(line(d, l.text, P.x + l.x, P.y + l.y, 'ink', l.align));
+        // The panel's taps: the side strips page through the Pokémon (left, right), the body goes back (A, B).
+        tap('page:-1', 'Previous Pokémon', CASTLE_TAPS.pageLeft);
+        tap('page:1', 'Next Pokémon', CASTLE_TAPS.pageRight);
+        tap('next', 'Back', CASTLE_TAPS.panel);
+      }
+    }
+    // Choosing a Pokémon or EXIT (taps `mon:<i>`, `exit`).
+    if (v.panel === 'main' && !v.menu && !v.message && !v.yesNo && !v.sparkle) {
+      v.mons.forEach((m, i) => tap(`mon:${i}`, m.hidden ? `Poké Ball ${i + 1}` : `Pokémon ${i + 1}, level ${m.level}`, { ...CASTLE_TAPS.slot, x: CASTLE_TAPS.slot.x + SLOT * i }, v.cursor === i));
+      tap('exit', v.exit, CASTLE_TAPS.exit, v.cursor === exit);
+    }
+    if (v.hint) {
+      const box = messageBox(d, v.hint, false);
+      box.classList.add('ds-scene-message');
+      place(box, v.menu?.window === 'options' ? CASTLE_WINDOWS.hint : CASTLE_WINDOWS.prompt);
+      parts.push(box);
+    }
+    if (v.message) {
+      const box = messageBox(d, v.message, !v.menu && !v.yesNo && !v.sparkle);
+      box.classList.add('ds-scene-message');
+      place(box, CASTLE_WINDOWS.message);
+      parts.push(box);
+    }
+    if (v.menu) {
+      const r = CASTLE_MENUS[v.mode][v.menu.window];
+      if (!r) throw new Error(`ui: the Castle's ${v.mode} app has no ${v.menu.window} menu`);
+      // Decomp: entries out of reach print in the grey colour.
+      const w = framed(d, 'frontier-menu', ...v.menu.entries.map((e, i) => stop(d, `entry:${i}`, [d.text(e.label, e.enabled ? 'ink' : 'muted')], 'choice', v.menu!.cursor === i)));
+      place(w, r);
+      parts.push(w);
+    }
+    if (v.yesNo) {
+      const yn = framed(d, 'yes-no ds-scene-yes-no', stop(d, 'answer:0', [d.text(v.yesNo.yes)], 'choice', v.yesNo.cursor === 0), stop(d, 'answer:1', [d.text(v.yesNo.no)], 'choice', v.yesNo.cursor === 1));
+      place(yn, CASTLE_WINDOWS.yesNo);
+      parts.push(yn);
+    }
+    return parts;
+  }
+}
+
+/**
+ * Decomp battle_arcade/main.c: tile i's centre (68 + 40 (i % 4), 36 + 40 (i / 4)), the cursor's the same; the icons at
+ * x 16 (the player's) and 238 (the opponent's), y 46 + 40i, their held-item marks at x 24 and 246, y 50 + 40i.
+ */
+const ARCADE_AT = { tile: { x: 68, y: 36, step: 40 }, icon: { player: 16, opponent: 238, y: 46, step: 40 }, item: { player: 24, opponent: 246, y: 50 } };
+/** Decomp ANIM_ID_CURSOR. */
+const ARCADE_CURSOR_ANIM = 35;
+/**
+ * The STOP button (the DS touch screen's sprite at its centre, 128, 96) at half size in the free corner under the
+ * opponent's icons, clear of the panels (their right edge is x 204): the round button (the 96-px plate's 48 px) centred
+ * at (232, 168), in the screen's corner; its art drawn on a box of 128 × 144 art px round the centre (the pressed
+ * ring's widest cell is 124 × 140).
+ */
+const ARCADE_STOP = { x: 232, y: 168, r: 24, art: { w: 128, h: 144 } };
+
+class ArcadeScene extends FrontierScene<ArcadeView> {
+  private readonly button = document.createElement('canvas');
+  /** The STOP button's state and the tick it took it (its pressed animation runs from there). */
+  private buttonState = { state: -1, since: 0 };
+
+  constructor(art: Art) {
+    super(art, 'arcade-app', 'Battle Arcade');
+    this.button.className = 'frontier-stop-art';
+    this.button.setAttribute('aria-hidden', 'true');
+  }
+
+  protected paint(d: DrawContext, v: ArcadeView): void {
+    const art = newGameRecord(d.registries).frontier?.arcade.art ?? null;
+    const g = this.g;
+    const t = animTicks();
+    if (art) this.cell(this.sheetOf(d, v.board === 'initial' ? art.initial : art.roulette), 0, 0, 0);
+    else {
+      g.fillStyle = '#181818';
+      g.fillRect(0, 0, 128, H);
+      g.fillStyle = '#c01818';
+      g.fillRect(128, 0, 128, H);
+      g.fillStyle = v.board === 'initial' ? '#d8e8c8' : '#282838';
+      g.fillRect(40, 8, 176, 180);
+    }
+    const sheet = art ? this.sheetOf(d, art.sprites) : undefined;
+    const A = ARCADE_AT.tile;
+    v.tiles.forEach((tile, i) => {
+      if (!tile.visible) return;
+      const x = A.x + A.step * (i % 4);
+      const y = A.y + A.step * Math.floor(i / 4);
+      if (sheet) this.cell(sheet, animCell(sheet, tile.anim, t), x, y);
+      else {
+        g.fillStyle = `hsl(${tile.anim * 11} 60% 55%)`;
+        g.fillRect(x - 16, y - 16, 32, 32);
+      }
+    });
+    if (v.cursor !== null) {
+      const x = A.x + A.step * (v.cursor % 4);
+      const y = A.y + A.step * Math.floor(v.cursor / 4);
+      if (sheet) this.cell(sheet, animCell(sheet, ARCADE_CURSOR_ANIM, t), x, y);
+      else {
+        g.strokeStyle = '#f8f800';
+        g.lineWidth = 2;
+        g.strokeRect(x - 19, y - 19, 38, 38);
+      }
+    }
+    // Decomp: the icons hold their first frame (BattleArcadeAppSprite_SetAnimateFlag FALSE).
+    const I = ARCADE_AT.icon;
+    const columns = [
+      { mons: v.player, x: I.player, item: ARCADE_AT.item.player },
+      { mons: v.opponents, x: I.opponent, item: ARCADE_AT.item.opponent },
+    ];
+    for (const c of columns)
+      c.mons.forEach((m, i) => {
+        this.icon(d, m.species, m.form, 0, c.x, I.y + I.step * i);
+        if (m.item) this.heldMark(d, c.item, ARCADE_AT.item.y + I.step * i);
+      });
+    this.paintButton(d, v, t);
+  }
+
+  private paintButton(d: DrawContext, v: ArcadeView, t: number): void {
+    if (v.button !== this.buttonState.state) this.buttonState = { state: v.button, since: t };
+    const art = newGameRecord(d.registries).frontier?.arcade.art ?? null;
+    const g = this.button.getContext('2d')!;
+    g.clearRect(0, 0, this.button.width, this.button.height);
+    if (!art) return;
+    const sheet = this.sheetOf(d, art.button);
+    const img = sheet ? this.image(sheet.atlas) : null;
+    const c = sheet?.cells[animCell(sheet, v.button, t - this.buttonState.since)];
+    if (!img || !c) return;
+    const n = this.button.width / ARCADE_STOP.art.w;
+    g.imageSmoothingEnabled = false;
+    g.drawImage(img, c.x, c.y, c.w, c.h, (ARCADE_STOP.art.w / 2 - c.ox) * n, (ARCADE_STOP.art.h / 2 - c.oy) * n, c.w * n, c.h * n);
+  }
+
+  protected boxesKey(v: ArcadeView): unknown {
+    return v.button;
+  }
+
+  protected drawBoxes(d: DrawContext, v: ArcadeView): HTMLElement[] {
+    const S = ARCADE_STOP;
+    // Half the art's size: whole device pixels per art pixel.
+    const n = Math.max(1, Math.round((d.scale * (devicePixelRatio || 1)) / 2));
+    if (this.button.width !== S.art.w * n) {
+      this.button.width = S.art.w * n;
+      this.button.height = S.art.h * n;
+      this.paintButton(d, v, animTicks());
+    }
+    place(this.button, { x: S.x - S.art.w / 4, y: S.y - S.art.h / 4, w: S.art.w / 2, h: S.art.h / 2 });
+    const art = newGameRecord(d.registries).frontier?.arcade.art ?? null;
+    // The touch screen's STOP (tap `stop`; A stops the board too).
+    const b = stop(d, 'stop', [], `frontier-stop${art ? '' : ' is-flat'}`, false);
+    b.setAttribute('aria-label', 'Stop');
+    b.dataset.state = String(v.button);
+    b.disabled = v.button !== 0;
+    place(b, { x: S.x - S.r, y: S.y - S.r, w: 2 * S.r, h: 2 * S.r });
+    return [this.button, b];
+  }
+}
+
 const factoryScenes = new WeakMap<Art, FactoryScene>();
 const hallScenes = new WeakMap<Art, HallBoardScene>();
+const castleScenes = new WeakMap<Art, CastleScene>();
+const arcadeScenes = new WeakMap<Art, ArcadeScene>();
+
+export function castleApp(d: DrawContext, v: CastleView): HTMLElement {
+  let s = castleScenes.get(d.art);
+  if (!s || !s.root.isConnected) castleScenes.set(d.art, (s = new CastleScene(d.art)));
+  s.draw(d, v);
+  return s.root;
+}
+
+export function arcadeApp(d: DrawContext, v: ArcadeView): HTMLElement {
+  let s = arcadeScenes.get(d.art);
+  if (!s || !s.root.isConnected) arcadeScenes.set(d.art, (s = new ArcadeScene(d.art)));
+  s.draw(d, v);
+  return s.root;
+}
 
 export function factoryApp(d: DrawContext, v: FactoryView): HTMLElement {
   let s = factoryScenes.get(d.art);

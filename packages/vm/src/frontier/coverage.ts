@@ -7,6 +7,8 @@ import { frontierHandlers } from './ops.ts';
 import { towerFrontierHandlers } from './tower-ops.ts';
 import { factoryFrontierHandlers } from './factory-ops.ts';
 import { hallFrontierHandlers } from './hall-ops.ts';
+import { castleFrontierHandlers } from './castle-ops.ts';
+import { arcadeFrontierHandlers } from './arcade-ops.ts';
 
 /**
  * Frontier handlers that are logged stand-ins: battle videos (the Vs. Recorder: none is saved, saving one fails), the
@@ -33,7 +35,7 @@ export interface FrontierOpClassification {
 }
 
 export function classifyFrontierOps(): FrontierOpClassification[] {
-  const handled = new Set(Object.keys({ ...frontierHandlers(), ...towerFrontierHandlers(), ...factoryFrontierHandlers(), ...hallFrontierHandlers() }));
+  const handled = new Set(Object.keys({ ...frontierHandlers(), ...towerFrontierHandlers(), ...factoryFrontierHandlers(), ...hallFrontierHandlers(), ...castleFrontierHandlers(), ...arcadeFrontierHandlers() }));
   return FRONTIER_COMMANDS.map((c) => ({
     op: c.name,
     opcode: c.opcode,

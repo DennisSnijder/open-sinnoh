@@ -432,7 +432,45 @@ export const menuTexts: Record<string, string> = {
   pl_msg_pokedex_wt: 'WT',
   ...Object.fromEntries(['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'].map((t, i) => [`pl_msg_00000414_${pad(i)}`, t])),
   ...Object.fromEntries(['HP', 'Power', 'Guard', 'Pace', 'Focus', 'Calm'].map((t, i) => [`pl_msg_00000551_${pad(i)}`, t])),
+  ...castleTexts(),
 };
+
+/** The Battle Castle's apps (packages/menus frontier-castle.ts): our own words in the ROM's slot layout. */
+function castleTexts(): Record<string, string> {
+  const self: Record<string, string> = {
+    PlayerName: '{var 0}', CastlePoints: '{var 0} PT', CastlePointsItemSelect: '{var 0} PT', ChoosePokemon: 'Pick a partner.', Exit: 'LEAVE',
+    Heal: 'MEND', Rental: 'BORROW', Summary: 'DETAILS', Moves: 'SKILLS', Cancel: 'BACK', RestoreHPOrPP: 'Mend health or skill uses.',
+    RentBerryOrItem: 'Borrow a fruit or a tool.', CheckStatsAndMore: 'See its strengths.', CheckMovesAndPP: 'See its skills.', GoBackToMonSelection: 'Pick again.',
+    RestoreHP: 'HEALTH', RestorePP: 'SKILL USES', RestoreAll: 'BOTH', RankUp: 'GRADE UP', Cancel2: 'BACK', WhichToUse: 'Which one?',
+    RankUpToRestorePP: 'A higher grade mends skill uses.', RankUpToRestoreHPAndPP: 'A higher grade mends both.', RankCannotBeRaised: 'The grade is at the top.', ReturnToPrevious: 'Go back.',
+    Yes: 'YES', No: 'NO', NotEnoughCP: 'Not enough points.', HealRankTooLow: 'The mending grade is too low.', HPWillBeRestored: '{var 0} feels better.',
+    PPWillBeRestored: '{var 0} can use its skills again.', HPAndPPWillBeRestored: '{var 0} is fully mended.', NoBenefit: 'That would do nothing.', RankUpForCP: 'Grade up for {var 0} PT?',
+    NotEnoughCP2: 'Not enough points.', GainedAbilityToRestorePP: '{var 5} can mend skill uses now!', GainedAbilityToRestoreHPAndPP: '{var 5} can mend both now!',
+    Berries: 'FRUIT', Items: 'TOOLS', RankUp2: 'GRADE UP', Cancel3: 'BACK', MayRentBerry: 'Borrow a fruit.', MayRentItem: 'Borrow a tool.',
+    RankUpToRentItem: 'A higher grade lends tools.', RankUpToExpandChoices: 'A higher grade lends more.', RankCannotBeRaised2: 'The grade is at the top.', ReturnToPrevious2: 'Go back.',
+    RentalRankTooLow: 'The lending grade is too low.', WillCostCP: 'That is {var 0} PT.\nAll right?', ItemGivenToMon: '{var 0} now holds\nthe {var 1}.',
+    AlreadyHoldingItem: '{var 0} holds\n{var 1} already.', WantToSwitchItems: 'Swap the two?', GainedAbilityToRentItems: '{var 5} can borrow tools now!', ExpandedItemRentals: '{var 5} can borrow more now!',
+  };
+  const opponent: Record<string, string> = {
+    CheckWhichPokemon: 'Look at which one?', Exit: 'LEAVE', Check: 'REVEAL', Level: 'SIZE', Summary: 'DETAILS', Cancel: 'BACK', CheckIdentity: 'Reveal who it is.',
+    ChangeLevel: 'Change its size.', ExamineStats: 'Study it.', GoBackToMonSelection: 'Go back.', IdentifyForCP: 'Reveal it?\nThat is {var 0} PT.', IdentityRevealed: 'It is {var 0}.',
+    MayChangeLevel: 'Change its size?', LevelUp5: 'BIGGER', LevelDown5: 'SMALLER', Cancel2: 'BACK', WillCostCP: 'That is {var 0} PT.\nAll right?', Yes: 'YES', No: 'NO',
+    NotEnoughCP3: 'Not enough points.', LevelCantGoHigher: 'It cannot grow more.', LevelCantGoLower: 'It cannot shrink more.', LevelBoostedBy5: 'It grew.', LevelLoweredBy5: 'It shrank.',
+    Summary2: 'STRENGTHS', Moves: 'SKILLS', RankUp: 'GRADE UP', Cancel3: 'BACK', CheckStats: 'See its strengths.', CheckMoveList: 'See its skills.',
+    RankUpToCheckMoves: 'A higher grade shows skills.', CantRankUp: 'The grade is at the top.', ReturnToPreviousMenu: 'Go back.', TooLowForMoveList: 'The grade is too low.',
+    CanCheckStats: 'See its strengths?\nThat is {var 0} PT.', NotEnoughCP: 'Not enough points.', MayCheckMoveList: 'See its skills?\nThat is {var 0} PT.', NotEnoughCP2: 'Not enough points.',
+    RankUpForCP: 'Grade up for {var 0} PT?', GainedMoveListPurchasePower: '{var 5} can see skills now!',
+  };
+  const both: Record<string, string> = {
+    Item: 'Holds', ItemValue: '{var 0}', Nature: 'Mood', NatureValue: '{var 0}', Ability: 'Gift', AbilityValue: '{var 0}', Attack: 'Power', AttackValue: '{var 0}',
+    Defense: 'Guard', DefenseValue: '{var 0}', SpAttack: 'Focus', SpAttackValue: '{var 0}', SpDefense: 'Calm', SpDefenseValue: '{var 0}', Speed: 'Pace', SpeedValue: '{var 0}',
+    MoveName1: '{var 0}', MoveName2: '{var 1}', MoveName3: '{var 2}', MoveName4: '{var 3}', MovePP: '{var 4}/{var 5}',
+  };
+  return {
+    ...Object.fromEntries(Object.entries({ ...self, ...both }).map(([k, v]) => [`BattleCastleSelfApp_Text_${k}`, v])),
+    ...Object.fromEntries(Object.entries({ ...opponent, ...both }).map(([k, v]) => [`BattleCastleOpponentApp_Text_${k}`, v])),
+  };
+}
 
 /** Card colours per level (0–5 stars, then before the Pokédex), our own: fill, row band, text ink and shadow. */
 const CARD_LEVELS: { name: string; fill: number[]; band: number[]; ink: string; shadow: string }[] = [

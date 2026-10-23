@@ -10,7 +10,8 @@
  * WifiBattleTowerSave and BattleFrontierStats' tower stats); the challenge itself (decomp BattleTower) lives in the
  * VM between the receptionist's InitBattleTower and FreeBattleTower, as on the DS.
  */
-import type { Gender, Id, Pokemon } from '@opensinnoh/core';
+import type { Gender, Id, Pokemon, StatusCondition } from '@opensinnoh/core';
+import type { BattleWeather } from './battle.ts';
 import type { Facing } from './records.ts';
 
 /** A frontier scene (decomp sFrontierScenes, overlay 104; FRONTIER_SCENE_*): its script, text bank, music and room. */
@@ -171,6 +172,101 @@ export interface HallAppArt {
   cursor: Id;
 }
 
+/** 0.39.0. A rentable item and its price in Castle Points (decomp sItemsForRent/sItemPrices, sBerriesForRent/sBerryPrices). */
+export interface CastleRental {
+  item: Id;
+  cp: number;
+}
+
+/**
+ * 0.39.0. The Battle Castle's tables (decomp overlay 104 battle_castle.c, battle_castle_helpers.c; overlay 107
+ * battle_castle_app self_app.c). Rounds count seven battles each; round 7 stands for every later round.
+ */
+export interface BattleCastleTables {
+  /** Decomp sBattleCastleOpponentPools: per round, [first, past-last) trainers of battles 1–6 and of the seventh. */
+  opponentRanges: [number, number, number, number][];
+  /** Decomp sBPPerRoundSolo (BattleCastle_GetEarnedBP): BP per round completed, by round 0–8. */
+  battlePoints: number[];
+  /** FRONTIER_TRAINER_CASTLE_VALET_DARACH_SILVER, _GOLD: the singles 21st and 49th opponents. */
+  darach: [number, number];
+  /** Decomp sItemsForRent, sBerriesForRent with their prices. */
+  items: CastleRental[];
+  berries: CastleRental[];
+  /** Decomp sItemsAvailableByRank, sBerriesAvailableByRank: how many of each list the rental rank 1–3 shows. */
+  itemsByRank: number[];
+  berriesByRank: number[];
+  /** Decomp sHealingCosts: restore HP, PP, all. */
+  healCosts: number[];
+  /** Decomp sRankUpCosts[rank type][rank]: the CP to raise the healing and rental ranks from rank 1, 2. */
+  rankUpCosts: number[][];
+  /** The apps' art and the battle room's emblem; null without 2D art. */
+  art: CastleAppArt | null;
+}
+
+/**
+ * 0.39.0. The Battle Castle's art (decomp battle_castle/self_app.c, opponent_app.c; battle_castle_helpers.c
+ * GetEmblemTiles): each layer a `ui2d` sheet of one 256×192 cell drawn with the app's BG palettes as loaded (the first
+ * four of battle_castle_self_app / _opponent_app NCLR): `main` BG3 (the solo layout), `items`, `summary` and `moves`
+ * BG2 (the panels over it). `sprites` are BATTLE_CASTLE_APP_SPRITES (frontier_obj 15–17, 39) with their animations
+ * (sprites.h ANIM_ID_*). `emblems` are the battle room's emblem frame for rounds 1–7 (10 × 3 tiles of the room's BG3
+ * at tile 11, 6).
+ */
+export interface CastleAppArt {
+  self: { main: Id; items: Id; summary: Id; moves: Id };
+  opponent: { main: Id; summary: Id; moves: Id };
+  sprites: Id;
+  emblems: Id[];
+}
+
+/**
+ * 0.39.0. The Battle Arcade's tables (decomp overlay 104 battle_arcade.c, battle_arcade_helpers.c; overlay 108
+ * battle_arcade_app main.c). Effects are ARCADE_EFFECT_* 0–31; rounds count seven battles each.
+ */
+export interface BattleArcadeTables {
+  /** Decomp sBattleArcadeOpponentPools (as the Castle's). */
+  opponentRanges: [number, number, number, number][];
+  /** Decomp sBPPerRoundSolo (BattleArcade_GetEarnedBP), by round 0–8. */
+  battlePoints: number[];
+  /** FRONTIER_TRAINER_ARCADE_STAR_DAHLIA_SILVER, _GOLD. */
+  dahlia: [number, number];
+  /** Decomp sRouletteSpeedByRound: from `round` on, the board starts at `speed`. */
+  rouletteSpeeds: { round: number; speed: number }[];
+  /** Decomp sCursorMoveFrames[speed][0]: the ticks between cursor steps at speed 0–7. */
+  cursorTicks: number[];
+  /** Decomp sEffectAvailabilityByRound: per effect, bit r for round r + 1 (round 7 for later ones). */
+  effectsByRound: number[];
+  /**
+   * Decomp sEffectAvailabilityByBattle: bit b for battle b + 1 of the round, for SWAP_MONS, SPEED_UP, SLOW_DOWN,
+   * RANDOMIZE_CURSOR, GET_1_BP, NO_BATTLE, GET_3_BP in that order.
+   */
+  effectsByBattle: number[];
+  /** Decomp sCategoryWeights[tier][category] (foe, ally, environment, bonus; in percent) and the tier thresholds. */
+  categoryWeights: number[][];
+  categoryThresholds: number[];
+  /** Decomp sPerformanceByNumWithStatus, sPerformanceByNumFainted, sPerformanceByTurnsElapsed. */
+  performance: { status: number[]; fainted: number[]; turns: { turns: number; score: number }[] };
+  /** Decomp sItemPools, sBerryPools: the item and berry an effect gives, by tier (rounds 1–3, 4–6, 7+). */
+  itemPools: Id[][];
+  berryPools: Id[][];
+  /** The board's and the battle room's art; null without 2D art. */
+  art: ArcadeAppArt | null;
+}
+
+/**
+ * 0.39.0. The Battle Arcade's art (decomp battle_arcade/main.c, battle_arcade.c sBattleArcadeScreenAssets): `initial`
+ * and `roulette` the board's BG3 (battle_arcade_app main NSCRs over the first seven palettes); `sprites`
+ * BATTLE_ARCADE_APP_SPRITES (frontier_obj 18–20, 40: animations 0–31 the effect tiles, 32–34 the turning tile, 35 the
+ * cursor); `button` the touch screen's STOP button (21–23, 41: 0 up, 1 pressed, 2 inactive); `screens` the battle
+ * room's BG2 per effect (256 × 192).
+ */
+export interface ArcadeAppArt {
+  initial: Id;
+  roulette: Id;
+  sprites: Id;
+  button: Id;
+  screens: Id[];
+}
+
 /** NewGame.frontier: the Battle Frontier tables (0.34.0). */
 export interface FrontierTables {
   /** By scene id (FRONTIER_SCENE_*); null for the unused scenes 0–2 (no script or op launches them). */
@@ -186,6 +282,10 @@ export interface FrontierTables {
   factory: BattleFactoryTables;
   /** 0.37.0. */
   hall: BattleHallTables;
+  /** 0.39.0. */
+  castle: BattleCastleTables;
+  /** 0.39.0. */
+  arcade: BattleArcadeTables;
   /**
    * The 2D characters (decomp overlay 63's gfx table into wifi2dchar): an object gfx number (decomp OBJ_EVENT_GFX_*,
    * as the frontier scripts and tables hold them, decimal) → its `ui2d` sheet with the overlay's animations.
@@ -221,6 +321,8 @@ export interface FrontierActorView {
   anim: number;
   frame: number;
   visible: boolean;
+  /** 0.39.0. Its palette blended `darken`/16 toward black (decomp BA_FUNC_UNK_44); absent at 0. */
+  darken?: number;
 }
 
 /** A frontier_obj sprite (FrontierScrCmd_2C): the tower's doors. `anim`/`frame` as `FrontierActorView`'s. */
@@ -271,6 +373,21 @@ export interface FrontierView {
    * at x, y (screen px), its palette blended `darken`/16 toward black.
    */
   pokemon?: { species: Id; form: number; female: boolean; shiny: boolean; x: number; y: number; darken: number };
+  /**
+   * 0.39.0. A framed window over the room (decomp FrontierScrCmd_ShowCastlePointsWindows: BG1 at tile 1, 1, 10 × 4, the
+   * standard frame): `x`/`y` its interior in screen px, each line at its offset inside it (the player's name at 0, 0,
+   * the Castle Points at 16, 16).
+   */
+  infoWindow?: { x: number; y: number; width: number; height: number; lines: { text: string; x: number; y: number }[] };
+  /** 0.39.0. A patch of BG3 at room px (decomp BattleCastle_UpdateEmblemFrame: the battle room's emblem for the round). */
+  bgPatch?: { sheet: Id; x: number; y: number };
+  /** 0.39.0. BG3's palette blended `bgDarken`/16 toward black (decomp BattleArcade_SetPalette); absent at 0. */
+  bgDarken?: number;
+  /**
+   * 0.39.0. Pokémon icons on the room (decomp BattleFrontier_CreateMonSprite / _CreateItemSprite: the Arcade's two
+   * columns): the icon's centre at x, y (screen px), still on its first frame, and its held-item mark.
+   */
+  icons?: { species: Id; form: number; x: number; y: number; visible: boolean; item: { x: number; y: number; visible: boolean } }[];
 }
 
 /** A frontier trainer in a battle (decomp FrontierTrainer, FieldBattleDTO_InitFrontierTrainer). */
@@ -289,8 +406,8 @@ export interface FrontierBattleTrainer {
  * entries; RUN asks to forfeit (a loss); the result's party is not written back.
  */
 export interface FrontierBattle {
-  /** 0.37.0: `factory` and `hall` (their backdrops, BACKGROUND_BATTLE_FACTORY and _HALL). */
-  facility: 'tower' | 'factory' | 'hall';
+  /** 0.37.0: `factory` and `hall` (their backdrops, BACKGROUND_BATTLE_FACTORY and _HALL); 0.39.0 `castle`, `arcade`. */
+  facility: 'tower' | 'factory' | 'hall' | 'castle' | 'arcade';
   party: Pokemon[];
   /** The enemy trainers (battlers 1 and, in multi, 3). */
   trainers: FrontierBattleTrainer[];
@@ -301,6 +418,14 @@ export interface FrontierBattle {
    * AI_FLAG_BASIC | EVAL_ATTACK | EXPERT.
    */
   ai?: number;
+  /** 0.39.0. The field condition the battle starts in (decomp battleDTO->fieldWeather: the Arcade's weather and Trick Room). */
+  weather?: BattleWeather;
+  /**
+   * 0.39.0. Sleep turns by party slot (decomp: a Pokémon's sleep status is its turns left; the Arcade's sleep effect
+   * gives 2–5), for the player's party and the first trainer's; 0 (or absent) leaves a sleeping Pokémon at the
+   * battle's default.
+   */
+  sleep?: { player: number[]; enemy: number[] };
 }
 
 /** Decomp BATTLE_TOWER_MODE_* (generated/battle_tower_modes.txt). */
@@ -344,6 +469,10 @@ export interface FrontierState {
   factory?: FactoryState;
   /** 0.37.0. The Battle Hall's saved part; absent until it is first written. */
   hall?: HallState;
+  /** 0.39.0. The Battle Castle's saved part; absent until it is first written. */
+  castle?: CastleState;
+  /** 0.39.0. The Battle Arcade's saved part; absent until it is first written. */
+  arcade?: ArcadeState;
 }
 
 /**
@@ -456,4 +585,167 @@ export interface HallBoardView {
   mon: { species: Id; form: number; gender: Gender; shiny: boolean; name: string };
   message: string | null;
   yesNo: { yes: string; no: string; cursor: number } | null;
+}
+
+/**
+ * 0.39.0. The Battle Castle's saved part (decomp BattleCastleSave, BattleCastlePersistentSave and the castle's
+ * BattleFrontierStats). Arrays index by challenge type (single, double, multi).
+ */
+export interface CastleState {
+  /** Decomp CASTLE_SAVE_STREAK_FLAGS. */
+  active: boolean[];
+  /** Decomp CASTLE_SAVE_HAVE_HEARD_INTRO: Darach's introduction heard (the first challenge's longer welcome). */
+  heardIntro: boolean;
+  /**
+   * Decomp STAT_CASTLE_RECORD_STREAK_*, LATEST_STREAK_*, LATEST_CP_* (the Castle Points), RECORD_CP_* (the CP when the
+   * record was set) and SPENT_CP_* (the CP spent this streak).
+   */
+  streaks: { record: number; latest: number; cp: number; recordCp: number; spentCp: number }[];
+  /** Decomp STAT_CASTLE_RANK_*: the healing, rental and opponent-summary ranks (1–3), by challenge type. */
+  ranks: number[][];
+  /**
+   * Decomp BattleCastleSave: the round in progress (written at each save of the challenge, read when it resumes after
+   * REST): the type, the battle, the party slots, the round's 14 trainers, the entered Pokémon's HP, PP, status and
+   * held items, the opponent's sets.
+   */
+  save: {
+    saved: boolean;
+    challengeType: number;
+    battle: number;
+    slots: number[];
+    trainers: number[];
+    hp: number[];
+    pp: number[][];
+    status: StatusCondition[];
+    items: (Id | null)[];
+    sets: number[];
+  };
+}
+
+/**
+ * 0.39.0. The Battle Arcade's saved part (decomp BattleArcadeSave, BattleArcadeStreakFlags and the arcade's
+ * BattleFrontierStats). Arrays index by challenge type.
+ */
+export interface ArcadeState {
+  /** Decomp ARCADE_SAVE_STREAK_FLAGS. */
+  active: boolean[];
+  /** Decomp STAT_ARCADE_CURRENT_STREAK_* (the best, set if better) and LATEST_STREAK_*. */
+  streaks: { record: number; latest: number }[];
+  /**
+   * Decomp BattleArcadeSave: the type, the battle, the board's speed, whether its cursor jumps, the party slots, the
+   * entered Pokémon's held items (the board's gifts), the round's 14 trainers and the opponent's sets.
+   */
+  save: {
+    saved: boolean;
+    challengeType: number;
+    battle: number;
+    speed: number;
+    randomCursor: boolean;
+    slots: number[];
+    items: (Id | null)[];
+    trainers: number[];
+    sets: number[];
+  };
+}
+
+/** 0.39.0. What the Castle's opponent app has bought for each opponent slot (decomp BattleCastleAppArgs). */
+export interface CastleUnlocks {
+  /** Decomp identityUnlocked: the Pokémon shown (CHECK). */
+  identity: boolean[];
+  /** Decomp levelAdjustments: LEVEL_ADJUSTMENT_NONE, _UP_5, _DOWN_5. */
+  level: ('none' | 'up' | 'down')[];
+  /** Decomp statsUnlocked, movesUnlocked. */
+  stats: boolean[];
+  moves: boolean[];
+}
+
+/**
+ * 0.39.0. Opens one of the Battle Castle's apps (decomp battle_castle/self_app.c, opponent_app.c): `self` heals and
+ * rents items for the player's Pokémon, `opponent` scouts and levels the next opponent's. The Castle Points and ranks
+ * are spent in the save as the app goes (decomp BattleCastle_SpendCastlePoints); the parties and the unlocks come back
+ * in the result (`castle`).
+ */
+export interface CastleRequest {
+  app: 'castle';
+  mode: 'self' | 'opponent';
+  challengeType: number;
+  /** The player's challenge party and the next opponent's (copies). */
+  party: Pokemon[];
+  opponents: Pokemon[];
+  unlocked: CastleUnlocks;
+}
+
+/** 0.39.0. A Pokémon on the Castle's apps: icon, level, gender, HP, a held item; `hidden` an opponent not yet checked (a Poké Ball). */
+export interface CastleMonView {
+  species: Id;
+  form: number;
+  gender: Gender;
+  shiny: boolean;
+  level: number;
+  hp: number;
+  maxHp: number;
+  item: boolean;
+  hidden: boolean;
+}
+
+/**
+ * 0.39.0. The Battle Castle's apps (decomp battle_castle/self_app.c, opponent_app.c, windows.c). `panel` is the BG2
+ * over the layout (`items` the rental list, `summary`, `moves`); `cp` the header's Castle Points line; `cursor` a slot
+ * or `mons.length` (EXIT); `menu` the open list in its window (decomp MON_OPTIONS_MENU, HEAL_MENU, RENTAL_MENU,
+ * SUMMARY_MENU, LEVEL_MENU); `hint` the small box beside the options menu or the selection prompt; `message` the
+ * message box; `items` the rental list (rows from `top`, `mon` the slot renting, `cpLine` the player's CP); `lines`
+ * the summary or moves panel's text at DS px inside its window (tile 5, 10). Taps: `mon:<i>`, `exit`, `entry:<i>`,
+ * `answer:<i>` (YES, NO), `item:<i>` (a list row), `next` (a message), `page:<-1|1>` (the panels' left and right).
+ */
+export interface CastleView {
+  app: 'castle';
+  mode: 'self' | 'opponent';
+  panel: 'main' | 'items' | 'summary' | 'moves';
+  playerName: string;
+  cp: string;
+  mons: CastleMonView[];
+  cursor: number;
+  exit: string;
+  menu: { window: 'options' | 'heal' | 'rental' | 'summary' | 'level'; entries: { label: string; enabled: boolean }[]; cursor: number } | null;
+  hint: string | null;
+  message: string | null;
+  yesNo: { yes: string; no: string; cursor: number } | null;
+  items: { entries: { name: string; cp: string }[]; cursor: number; top: number; item: Id | null; mon: number; cpLine: string } | null;
+  lines: { text: string; x: number; y: number; align: 'left' | 'right' | 'centre' }[] | null;
+  /** A purchase's sparkles (sprites.h ANIM_ID_HEAL_SPARKLES, _RENTAL_SPARKLES) at screen px, `tick` into the animation. */
+  sparkle?: { anim: number; x: number; y: number; tick: number };
+}
+
+/**
+ * 0.39.0. Opens the Battle Arcade's game board (decomp battle_arcade/main.c): its effects are drawn for the round, the
+ * battle and the last battle's performance; the cursor runs at `speed` (or jumps when `randomCursor`) until STOP or
+ * 30 seconds. Result `arcade`.
+ */
+export interface ArcadeRequest {
+  app: 'arcade';
+  challengeType: number;
+  round: number;
+  streak: number;
+  performance: number;
+  speed: number;
+  randomCursor: boolean;
+  /** The player's and the opponent's Pokémon (their icons and held items). */
+  party: Pokemon[];
+  opponents: Pokemon[];
+}
+
+/**
+ * 0.39.0. The Battle Arcade's board (decomp battle_arcade/main.c): `board` the BG3 tilemap (`initial`, then
+ * `roulette`); `tiles` the 16 panels' sprite animations (32–34 turning over, then their effects 0–31; the result's on
+ * every panel); `cursor` the panel under the cursor (null hidden); `button` the touch screen's STOP (0 up, 1 pressed,
+ * 2 inactive); the two columns of icons with their held items. Tap: `stop` (A stops it too).
+ */
+export interface ArcadeView {
+  app: 'arcade';
+  board: 'initial' | 'roulette';
+  tiles: { anim: number; visible: boolean }[];
+  cursor: number | null;
+  button: 0 | 1 | 2;
+  player: { species: Id; form: number; item: boolean }[];
+  opponents: { species: Id; form: number; item: boolean }[];
 }
