@@ -5,7 +5,7 @@
 # Competition danced, the acting round played by touch, the results; the winner's ceremony and the prize. Staravia
 # wins. It comes back with the Cool Ribbon, the photo in its White Fluff, the Red Barrette, the records and a little
 # friendship; the save keeps them.
-party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK platinum:MOVE_QUICK_ATTACK
+party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK platinum:MOVE_TAKE_DOWN
 set state party[0].condition {"cool":255,"beauty":255,"cute":0,"smart":0,"tough":255,"sheen":255}
 set flag platinum:FLAG_CONTEST_HALL_VISITED true
 set var platinum:VAR_CONTEST_HALL_LOBBY_STATE 1
@@ -142,7 +142,7 @@ until state app.round.message.waiting true 900
 +1 release a
 until state app.round.round "acting" 60
 +0 assert state contest.scores.dance[0] 12
-# The acting round: four turns, each a move (Wing Attack and Quick Attack in turn: last turn's move is off the menu)
+# The acting round: four turns, each a move (Wing Attack and Take Down in turn: last turn's move is off the menu)
 # and the main judge, by touch
 until state contest.acting {"turn":0,"choosing":true} 6000
 +1 tap move:0
