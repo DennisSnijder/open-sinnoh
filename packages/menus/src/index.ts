@@ -34,6 +34,7 @@ import { miningScreen } from './mining.ts';
 import { undergroundMenu, undergroundVendor } from './underground.ts';
 import { contestScreen } from './contest/contest.ts';
 import { contestPhotoScreen } from './contest/photo.ts';
+import { slotsScreen } from './slots.ts';
 
 export const createApp: CreateApp = (request, deps) => {
   const ctx = menuContext(deps);
@@ -98,6 +99,8 @@ export const createApp: CreateApp = (request, deps) => {
       return new AppStack(contestScreen(ctx), { app: 'contest' });
     case 'contest-photo':
       return new AppStack(contestPhotoScreen(ctx, request.slot), { app: 'contest-photo' });
+    case 'slots':
+      return new AppStack(slotsScreen(ctx, request), { app: 'slots', coins: ctx.state.coins, streak: 0, rounds: 0 });
     case 'summary-teach':
       return new AppStack(summaryScreen(ctx, { party: () => deps.state.party, slot: request.slot, mode: { kind: 'teach', move: request.move, done: (forget) => ({ close: { app: 'summary-teach', forget } }) } }), { app: 'summary-teach', forget: null });
   }

@@ -42,6 +42,7 @@ import { formHandlers } from './form-ops.ts';
 import { sideHandlers } from './side-ops.ts';
 import { poffinHandlers } from './poffin-ops.ts';
 import { contestHandlers } from './contest-ops.ts';
+import { gameCornerHandlers } from './game-corner-ops.ts';
 import { encounterHandlers } from './encounter-ops.ts';
 import { undergroundHandlers } from './underground-ops.ts';
 import { mysteryGiftHandlers } from './mystery-gift-ops.ts';
@@ -146,6 +147,8 @@ export class Runner implements ScriptRunner {
     pokemonPreview: NonNullable<ScriptView['pokemonPreview']> | null;
     /** The Battle Points window (frontier-field-ops show_battle_points … hide_battle_points). */
     bpWindow: NonNullable<ScriptView['bpWindow']> | null;
+    /** The coin window (game-corner-ops show_coins … hide_coins). */
+    coinWindow: NonNullable<ScriptView['coinWindow']> | null;
     /** The save info window (open_save_info … close_save_info). */
     saveInfo: NonNullable<ScriptView['saveInfo']> | null;
     savingIcon: boolean;
@@ -158,6 +161,7 @@ export class Runner implements ScriptRunner {
     moneyWindow: null,
     pokemonPreview: null,
     bpWindow: null,
+    coinWindow: null,
     saveInfo: null,
     savingIcon: false,
     signpost: null,
@@ -351,6 +355,7 @@ export class Runner implements ScriptRunner {
       ...(this.ui.moneyWindow ? { moneyWindow: { ...this.ui.moneyWindow } } : {}),
       ...(this.ui.pokemonPreview ? { pokemonPreview: { ...this.ui.pokemonPreview } } : {}),
       ...(this.ui.bpWindow ? { bpWindow: { ...this.ui.bpWindow } } : {}),
+      ...(this.ui.coinWindow ? { coinWindow: { ...this.ui.coinWindow } } : {}),
       ...(this.ui.saveInfo ? { saveInfo: this.ui.saveInfo } : {}),
       ...(this.ui.savingIcon ? { savingIcon: true } : {}),
       ...(this.frontier && !this.frontier.done ? { frontier: this.frontier.view() } : {}),
@@ -1016,6 +1021,7 @@ export class Runner implements ScriptRunner {
       ...frontierFieldHandlers(this),
       ...undergroundHandlers(this),
       ...contestHandlers(this),
+      ...gameCornerHandlers(this),
     };
   }
 

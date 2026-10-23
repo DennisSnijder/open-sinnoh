@@ -66,7 +66,6 @@ interface Triage {
   zero?: number[];
 }
 const TV = 'later (TV)';
-const GAME_CORNER = 'later (Game Corner)';
 const TOWER = 'later (Battle Tower)';
 const CHATTER = 'later (recording a Chatot cry needs the microphone)';
 const SAVE = 'M3 (save)';
@@ -79,9 +78,6 @@ export const TRIAGE: Record<string, Triage> = {
   scr_cmd_2b8: { bucket: 'other', milestone: TV, note: 'saves the Rate That Name Change TV segment' },
   set_news_press_deadline: { bucket: 'other', milestone: 'later (News Press)', note: 'stores the news press deadline' },
   get_news_press_deadline: { bucket: 'other', milestone: 'later (News Press)', note: 'reads the news press deadline' },
-  check_bonus_round_streak: { bucket: 'other', milestone: GAME_CORNER, note: 'slot machine bonus streak' },
-  get_game_corner_prize_data: { bucket: 'other', milestone: GAME_CORNER, note: 'prize item and price by index', zero: [1, 2] },
-  scr_cmd_267: { bucket: 'other', milestone: GAME_CORNER, note: 'opens the slot machine app' },
   check_is_department_store_regular: { bucket: 'other', milestone: 'later (Veilstone Store)', note: 'department store regular check' },
   check_met_furniture_requirements: { bucket: 'other', milestone: 'later (Villa)', note: 'Villa furniture requirements' },
   check_recorded_chatot_cry_is_playable: { bucket: 'party', milestone: CHATTER, note: 'Chatot cry recording' },

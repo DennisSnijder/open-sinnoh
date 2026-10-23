@@ -260,6 +260,8 @@ export type AppRequest =
   | { app: 'contest' }
   /** 0.35.1. Decomp ScrCmd_0A8 (the lobby's frames): the contest photo of type `slot` (`GameState.contestPhotos`). */
   | { app: 'contest-photo'; slot: number }
+  /** 0.37.0. Decomp ScrCmd_267: the Game Corner's slot machine (`SlotsRequest`). */
+  | import('./slots.ts').SlotsRequest
   | EvolutionRequest;
 
 /**
@@ -353,6 +355,8 @@ export type AppResult =
   | { app: 'contest' }
   /** 0.35.1. The photo viewer closed. */
   | { app: 'contest-photo' }
+  /** 0.37.0. The slot machine closed (`SlotsResult`). */
+  | import('./slots.ts').SlotsResult
   /** 0.27.30. Rowan's intro (packages/menus `createRowanIntro`): the names and gender the new game starts with. */
   | { app: 'rowan-intro'; names: { player: string; rival: string }; gender: 'male' | 'female' };
 
@@ -484,7 +488,8 @@ export type AppView =
   | import('./underground.ts').UndergroundMenuView
   | import('./underground.ts').UndergroundVendorView
   | import('./contests.ts').ContestView
-  | import('./contests.ts').ContestPhotoView;
+  | import('./contests.ts').ContestPhotoView
+  | import('./slots.ts').SlotsView;
 export type AppName = AppView['app'];
 
 /**

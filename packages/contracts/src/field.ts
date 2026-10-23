@@ -377,6 +377,12 @@ export interface ScriptView {
    */
   bpWindow?: { x: number; y: number; width: number; height: number; text: string };
   /**
+   * 0.37.0. The coin window (decomp ScrCmd_ShowCoins → FieldMenu_DrawCoinWindow, the standard field frame), shaped as the
+   * BP window: interior `x`/`y` (tilemap left/top × 8), 80×16, `text` (menu entries #197, the coins padded to 5 digits)
+   * right-aligned. Open from `show_coins` until `hide_coins`; `update_coin_display` reprints it. Absent = closed.
+   */
+  coinWindow?: { x: number; y: number; width: number; height: number; text: string };
+  /**
    * 0.34.0. The save info window (decomp SaveInfoWindow, `open_save_info` … `close_save_info`): the standard field frame,
    * interior at tile 1,1 (`x`/`y` 8, 8), `width`×`height` in px. `title` (the map name) is its first line; each later line
    * is a label at the left and its value right-aligned (player, badges, the Pokédex while obtained, the play time).

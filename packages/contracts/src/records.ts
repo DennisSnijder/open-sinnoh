@@ -1092,6 +1092,8 @@ export interface NewGame {
   underground?: import('./underground.ts').UndergroundTables;
   /** 0.35.0. The Super Contests' tables (`ContestTables`). Absent: the contest ops fail loudly. */
   contests?: import('./contests.ts').ContestTables;
+  /** 0.37.0. The Game Corner's slot tables and prizes (`SlotTables`). Absent: the Game Corner ops fail loudly. */
+  slots?: import('./slots.ts').SlotTables;
 }
 
 /**

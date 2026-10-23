@@ -1,0 +1,4 @@
+/* The slot machine (ui/slots.ts): one canvas; the touch targets are transparent buttons over its reels and help bar. */
+.slots-scene .ds-scene-canvas { touch-action: none; }
+.ds-scene-boxes > .slots-target { padding: 0; border: 0; background: none; cursor: pointer; border-radius: calc(var(--k) * 3); -webkit-tap-highlight-color: transparent; }
+.ds-scene-boxes > .slots-target:focus-visible { outline: calc(var(--k) * 1) solid #f0b030; outline-offset: calc(var(--k) * -1); }

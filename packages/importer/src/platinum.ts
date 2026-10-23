@@ -21,7 +21,7 @@ import { resolveUnscriptedClones } from './object-clones.ts';
 import { importShips } from './ships.ts';
 import { importTitle } from './title/index.ts';
 import { importCreditsRide } from './credits.ts';
-import { accessoryPictures, BACKGROUNDS, importUi2d, importUndergroundArt, mapPopupSheet, MAP_POPUP_STYLES, Sheets } from './ui2d/index.ts';
+import { accessoryPictures, BACKGROUNDS, importSlotArt, importUi2d, importUndergroundArt, mapPopupSheet, MAP_POPUP_STYLES, Sheets } from './ui2d/index.ts';
 import { HIDDEN_LOCATIONS, importPokedex } from './pokedex.ts';
 import { matrixVariants } from './matrix-variants.ts';
 import { flyDestinations, readTownMap } from './town-map.ts';
@@ -46,6 +46,7 @@ import { readZoneHeaders, type ZoneHeader } from './formats/zone-headers.ts';
 import { charTable, Names, type CharmapFile, type NamesFile } from './names.ts';
 import { readUndergroundTables } from './underground.ts';
 import { readContestTables } from './contests.ts';
+import { LIGHT_SHOW, readSlotTables, readSpriteMembers, SLOT_PRIZES } from './slots.ts';
 import { ACTING_MESSAGES, AI_RULE_SIZE, AI_RULES, BUTTON_PALETTES, CONTEST_EFFECTS, EFFECT_CLASS_SIZE, EFFECT_SIZE, readActingTables } from './contest-acting.ts';
 import { DANCE_BUTTONS, DANCE_CHOICE_SIZE, DANCE_LEVELS, DANCE_POSITIONS, DANCE_SONG_SIZE, DANCE_TINTS, DANCE_VARIANT_SIZE, readContestDance } from './contest-dance.ts';
 
@@ -242,6 +243,33 @@ const TABLES = {
   contestActingMessages: { where: 17, offset: 0x187b0, count: ACTING_MESSAGES, size: 4, sha1: 'efe260c58c8c545077b2b11c51bd1a44a95f1d0d' },
   contestAiRules: { where: 17, offset: 0x18af0, count: AI_RULES, size: AI_RULE_SIZE, sha1: 'fc154d44a628d2943337163a6fcccce44373db8a' },
   contestButtonPalettes: { where: 17, offset: 0x18378, count: BUTTON_PALETTES * 16, size: 2, sha1: '88229a78266a8e8de6b1f9f93f3fdee09ac60f55' },
+  /** The Game Corner (slots.ts, docs/research/game-corner.md §3): arm9's machine modes and prizes, then overlay 101's tables (RAM base 0x021D0D80). */
+  slotModes: { where: 'arm9', offset: 0xea17c, count: 12, size: 1, sha1: 'c24ba7efc829cc45b324f5a4b181897495e182f9' },
+  slotPrizes: { where: 'arm9', offset: 0xec018, count: SLOT_PRIZES, size: 4, sha1: '5dbdef6918073da6526d07dcc8014e4c65a00576' },
+  slotReels: { where: 101, offset: 0x8908, count: 3, size: 84, sha1: '3121f7360c16df1344591a6e68e2ba33221ede8d' },
+  slotPayouts: { where: 101, offset: 0x87d0, count: 6, size: 4, sha1: 'e1bd6f6fb960e5fd39be9585445e5b82100ab9b7' },
+  slotBonusPayouts: { where: 101, offset: 0x8770, count: 6, size: 4, sha1: 'c8ec2041187dd608dc149d69bb20e9838fecfc60' },
+  slotWinChance: { where: 101, offset: 0x87a0, count: 6, size: 4, sha1: '97bf9e77ebd371fcd83237504ad184ca39bd37da' },
+  slotWinFlags: { where: 101, offset: 0x8848, count: 6, size: 16, sha1: '45b0afa684fc577a16e1f343a24b79f41e8a0b86' },
+  slotHintChance: { where: 101, offset: 0x8758, count: 6, size: 4, sha1: '7d78874fa16072c936e6b652e18f933b2e2124f4' },
+  slotStandbySmall: { where: 101, offset: 0x87b8, count: 6, size: 4, sha1: '97bf9e77ebd371fcd83237504ad184ca39bd37da' },
+  slotStandbyFlags: { where: 101, offset: 0x88a8, count: 6, size: 16, sha1: '293cf9557e2f51f9280b53ba7f34b3e2f3f39a35' },
+  slotBonusTypes: { where: 101, offset: 0x8bb4, count: 6, size: 72, sha1: 'eabf869cce965162aa3ffb6247284ea97f5950dc' },
+  slotContinueStart: { where: 101, offset: 0x87e8, count: 6, size: 4, sha1: '9f9e7094ee66fdd3ea6786afd4ec1696bd2c9a77' },
+  slotClefairyKinds: { where: 101, offset: 0x8a04, count: 6, size: 72, sha1: '0f8643315300bb323da842d5302eda187f8c35c0' },
+  slotRedMoon: { where: 101, offset: 0x8788, count: 6, size: 4, sha1: '6b0b9ad4867b961b8cac17714afac273c219b7db' },
+  slotBlueMoon: { where: 101, offset: 0x8800, count: 6, size: 4, sha1: 'b5d6d05018a6fc3563add35ee2f46a9e4a427c08' },
+  slotContinueDrop: { where: 101, offset: 0x8818, count: 6, size: 8, sha1: 'a24f2e5c827f74097f907a5f601c036badd49d0e' },
+  slotEndTells: { where: 101, offset: 0x8d64, count: 6, size: 144, sha1: '3d7937809c53136636b0db175b94206dd1dd70fa' },
+  slotBonusOrders: { where: 101, offset: 0x7a28, count: 6, size: 24, sha1: '3a4b2b7f18c2088028e8da3d05858c31b071af11' },
+  slotStopButtons: { where: 101, offset: 0x79c0, count: 3, size: 8, sha1: '1c216e31ae69c1606894b667ad44597e11c91650' },
+  slotLightShow: { where: 101, offset: 0x7bb8, count: LIGHT_SHOW, size: 16, sha1: 'cc6c969829c25576ca495a481014306adb3ba40a' },
+  slotLinePalettes: { where: 101, offset: 0x90e0, count: 5, size: 4, sha1: '33559b68e604100d3ca8a843f696b543e58b9e10' },
+  slotSymbolAnims: { where: 101, offset: 0x84fc, count: 6, size: 4, sha1: 'db17e883a647963a26d973378923ef4649801319' },
+  slotHintSprites: { where: 101, offset: 0x8654, count: 5, size: 16, sha1: '5af1a80c79120193cf15b5957b9126eee685fa50' },
+  slotClefairySprites: { where: 101, offset: 0x8624, count: 3, size: 16, sha1: 'ec816e28bbb30185dff30aa69d6ea457721b0491' },
+  slotLineFlash: { where: 101, offset: 0x86a4, count: 15, size: 12, sha1: 'cabb6bf607c57d3f93d8784109c7b5426d053a75' },
+  slotMessageWindow: { where: 101, offset: 0x7808, count: 1, size: 8, sha1: 'fa57d7eedc5bce8216ff803b0a1e7d2b36c1bd8f' },
 } as const;
 
 /** Overlay 9 offsets of the Distortion World tables, inside `TABLES.distortionWorld`. */
@@ -1089,6 +1117,7 @@ export async function importPlatinum(
   for (const [path, bytes] of animSheets.assets) assets.set(path, bytes);
   const starterSheets = new Sheets();
   const undergroundSheets = new Sheets();
+  const slotSheets = new Sheets();
   const starter = importChooseStarter(fs, starterSheets);
   for (const [path, bytes] of [...starter.assets, ...starterSheets.assets]) assets.set(path, bytes);
   // The Battle Frontier (frontier.ts): its scenes' scripts join the IR; the tables, art and exchange marts.
@@ -1360,6 +1389,27 @@ export async function importPlatinum(
     importUndergroundArt(fs, undergroundSheets, newGame.underground.miningObjects);
     for (const [path, bytes] of undergroundSheets.assets) assets.set(path, bytes);
   }
+  {
+    // The Game Corner (slots.ts): the slot tables, the prizes, the slot messages and the streak var; the slot art.
+    const v = [...names.varNames].find(([, n]) => n === 'VAR_CONSECUTIVE_BONUS_ROUND_WINS');
+    if (!v) throw new ImportError('names: no VAR_CONSECUTIVE_BONUS_ROUND_WINS');
+    const bank = bankIndex('TEXT_BANK_UNK_0544');
+    newGame.slots = readSlotTables(
+      {
+        modes: await table('slotModes'), prizes: await table('slotPrizes'), reels: await table('slotReels'), payouts: await table('slotPayouts'),
+        bonusPayouts: await table('slotBonusPayouts'), winChance: await table('slotWinChance'), winFlags: await table('slotWinFlags'),
+        hintChance: await table('slotHintChance'), standbySmall: await table('slotStandbySmall'), standbyFlags: await table('slotStandbyFlags'),
+        bonusTypes: await table('slotBonusTypes'), continueStart: await table('slotContinueStart'), clefairyKinds: await table('slotClefairyKinds'),
+        redMoon: await table('slotRedMoon'), blueMoon: await table('slotBlueMoon'), continueDrop: await table('slotContinueDrop'),
+        endTells: await table('slotEndTells'), bonusOrders: await table('slotBonusOrders'), stopButtons: await table('slotStopButtons'),
+        lightShow: await table('slotLightShow'), linePalettes: await table('slotLinePalettes'), symbolAnims: await table('slotSymbolAnims'),
+        lineFlash: await table('slotLineFlash'), messageWindow: await table('slotMessageWindow'),
+      },
+      { item: (i) => names.item(i), messages: [0, 1, 2].map((n) => names.text(bank, n)), streakVar: names.var(v[0]) },
+    );
+    importSlotArt(fs, slotSheets, newGame.slots, { balls: readSpriteMembers(await table('slotHintSprites'), 5), clefairy: readSpriteMembers(await table('slotClefairySprites'), 3) });
+    for (const [path, bytes] of slotSheets.assets) assets.set(path, bytes);
+  }
   // The gym puzzles (gyms/index.ts): overlay 8 tables, the clock hand props, the gym field effects.
   const hands = { hour: names.prop(CLOCK_HAND_PROPS.hour), minute: names.prop(CLOCK_HAND_PROPS.minute) };
   const handsKept = keptProps.has(hands.hour) && keptProps.has(hands.minute);
@@ -1529,7 +1579,7 @@ export async function importPlatinum(
     marts: [...mon.marts, ...frontier.marts],
     newGame: [newGame],
     titleScreens: [title.titleScreen],
-    ui2d: [...art.ui2d, ...starterSheets.records, ...animSheets.records, ...frontierSheets.records, ...undergroundSheets.records],
+    ui2d: [...art.ui2d, ...starterSheets.records, ...animSheets.records, ...frontierSheets.records, ...undergroundSheets.records, ...slotSheets.records],
     pokemonSprites: art.pokemonSprites,
     trainerSprites: art.trainerSprites,
     battleBackgrounds: art.battleBackgrounds,
