@@ -159,7 +159,7 @@ const OPENS_MENU = ['x', 'start'] as const;
  * Underground's menus; OpenSinnoh's item wheel). Every other app replaces the field map (FieldMap_Exit), which stops
  * the weather's sound.
  */
-const FIELD_APPS: ReadonlySet<string> = new Set(['start-menu', 'save', 'mart', 'ug-menu', 'ug-vendor', 'item-wheel']);
+const FIELD_APPS: ReadonlySet<string> = new Set(['start-menu', 'save', 'mart', 'ug-menu', 'ug-vendor', 'ug-trap', 'ug-base', 'ug-pc', 'item-wheel']);
 /** The blackout screen's fades (decomp sub_020529C4: StartScreenFade 8 steps of 1 frame each way; ExecScreenFade runs once a tick). */
 const BLACK_OUT_FADE = 8;
 
@@ -281,7 +281,7 @@ export function newGameState(record: NewGame, registries: Pick<Registries, 'zone
   const fieldRng = new Prng(fieldSeed(seed));
   const dailyRandom = newDailyRandom(fieldRng.next());
   return {
-    schemaVersion: 20,
+    schemaVersion: 21,
     packs: order.map((p) => ({ ...p })),
     names: { ...(options?.names ?? record.names) },
     gender: options?.gender ?? record.gender,
@@ -687,6 +687,8 @@ export function createGame(options: GameOptions): Game {
     clock,
     undergroundAhead: () => world.undergroundAhead(),
     undergroundMiningRand: () => world.undergroundMiningRand(),
+    undergroundDecoration: (view) => world.undergroundDecoration(view),
+    undergroundPlace: () => world.undergroundPlace(),
     spiritombVendors: () => device.options().spiritombVendors === 0,
     get contestAnimation() {
       return contestAnimation ?? undefined;

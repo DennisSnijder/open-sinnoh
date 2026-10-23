@@ -35,6 +35,30 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('the Underground (OPENSINNOH_ND
     for (const sheet of ['mining_interface', 'mining_crack', 'mining_buttons', 'mining_dirt', 'mining_objects', 'mining_anims', 'mining_crack_end', 'radar_map', 'radar_markers'])
       expect(ui2d.get(`platinum:ui2d/underground/${sheet}` as Id), sheet).toBeDefined();
     expect(ui2d.get('platinum:ui2d/underground/mining_dirt' as Id)!.names).toEqual(['0', '1', '2', '3', '4', '5', '6']);
+    // goods.c sGoodData: the PCs 2×1 with the left two tiles solid, the boulder 2×2, the Plain Table 2×2, the Small
+    // Bookshelf's writing (records.c: UndergroundRecords_Text_SomethingWrittenFossilsDug, 37), the tools flat.
+    expect(u.goods[1]).toMatchObject({ width: 2, depth: 1, collision: [1, 1, 0, 0, 0, 0, 0, 0, 0], interact: 0 });
+    expect(u.goods[6]).toMatchObject({ width: 2, depth: 2, collision: [1, 1, 0, 1, 1, 0, 0, 0, 0] });
+    expect(u.goods[11]).toMatchObject({ width: 2, depth: 2, collision: [1, 1, 0, 1, 1, 0, 0, 0, 0] });
+    expect(u.goods[17]).toMatchObject({ width: 1, depth: 1, interact: 37 });
+    expect(u.goods.slice(56, 72).every((g) => g.width === 1 && g.depth === 1 && g.collision.every((c) => c === 0))).toBe(true);
+    // AreaDataManager_GetMapPropModelID: good n is the Underground area's prop n (the PCs from build model 316; the slice
+    // converts only the props its areas share, the full import every one: the browser specs draw them).
+    expect(u.goods[0]!.prop).toBeNull();
+    expect(u.goods.every((g) => g.prop === null || /^platinum:prop\/\d+$/.test(g.prop))).toBe(true);
+    // traps.c: the four smoke patterns and the big one (32 × 24 tiles, characters 0–5), the floor marks, VAR_UNDERGROUND_TRAPS_SET.
+    expect(u.traps.smoke).toHaveLength(4);
+    for (const p of [...u.traps.smoke, u.traps.bigSmoke]) {
+      expect(p).toHaveLength(32 * 24);
+      expect(p.every((e) => (e & 0x3ff) <= 5)).toBe(true);
+    }
+    expect(u.traps.marks[10]).toBe('platinum:FIELD_EFFECT_UG_FLOOR_TRAP_11');
+    expect(u.traps.hole).toBe('platinum:FIELD_EFFECT_UG_FLOOR_BLACK_CIRCLE');
+    expect(u.traps.vars.trapsSet).toBe('platinum:VAR_UNDERGROUND_TRAPS_SET');
+    expect(u.base.flags).toEqual({ created: 'platinum:FLAG_CREATED_SECRET_BASE', decorated: 'platinum:FLAG_DECORATED_SECRET_BASE' });
+    for (const sheet of ['trap_petal', 'trap_bubble', 'trap_smoke', 'trap_radar', 'trap_fire', 'trap_ember', 'trap_leaf', 'trap_boulder', 'trap_boulder_6'])
+      expect(ui2d.get(`platinum:ui2d/underground/${sheet}` as Id), sheet).toBeDefined();
+    expect(ui2d.get('platinum:ui2d/underground/trap_bubble' as Id)!.animations).toHaveLength(6);
   });
 
   undergroundReplay('sys-underground-kit');

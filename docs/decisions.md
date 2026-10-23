@@ -486,9 +486,19 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
 - **Battle Tower** runs on the frontier VM; the challenge's saved part is `GameState.frontier`. No
   wireless: link entries answer cancel and go back to their menus. The other facilities and Brains are
   planned.
-- **Underground (solo):** the Explorer Kit, mining from ROM tables, spheres, vendors, fossils. Seeds come
-  from the clock and the trainer id, not ticks, so boards are the same whatever replays wait. No link
-  play; traps and secret bases keep their state for later.
+- **Underground (solo):** the Explorer Kit, mining from ROM tables, spheres, vendors, fossils, traps and the
+  secret base. Seeds come from the clock and the trainer id, not ticks, so boards are the same whatever
+  replays wait. No link play: other players' traps, bases and flags have no stand-in.
+- **Underground traps:** the player's laid traps go off under them too (the DS's alone mode loads them like a
+  link's), as do the day's hidden ones; A digs either up. Each trap's screen is an app over the field; the
+  slide, the hole and the altered steps are the field's. The microphone traps take held A or a held touch as
+  a fixed blow. The escape games' rolls (bubbles, leaves, the smoke's pattern) take the visit's mining
+  generator, as the DS's CommSys_Seed does; the smoke's pattern is LCRNG on the DS.
+- **Secret base:** Platinum has one base layout (every base chunk is the same room). Solo, the base is drawn
+  in chunk (0, 0) with the entrance closed and (1, 0) with it open, as the DS's alone mode does; a loaded
+  save in a base knows which by the chunk. Flags come only from other players' bases, so the solo base keeps
+  the normal flag: ten goods, sixteen boulders that stay, no PC radar. The base and laid traps are saved
+  (schema v21); the DS cannot save underground, replays reload anywhere.
 - **Side systems:** berries (growth on whole clock minutes, "on screen" being the DS's 16×12 tiles, not
   our camera), honey trees, the Poké Radar, swarms, the Trophy Garden, the Great Marsh (the Safari battle
   runs in the battle controller), Poffins (stylus arc physics; keys stand in), condition, Amity Square,

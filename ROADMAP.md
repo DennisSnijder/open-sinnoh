@@ -48,7 +48,9 @@ the trainer card, the Pokédex, the Town Map and Fly, all 25 Pokétch apps, opti
   (songs, lead and backup steps, grading, the NPC dancers, the stage, the music on the beat); the acting round (the
   ROM's effect, voltage and AI tables, the judges, hearts and voltage meters, the move animations in the animation VM's
   contest mode); all behind one seam.
-- The Underground, solo: the Explorer Kit, the field and radar, mining, spheres, vendors, fossil revival.
+- The Underground, solo: the Explorer Kit, the field and radar, mining, spheres, vendors, fossil revival; traps (laying,
+  the day's hidden traps, their effects and escape games, digging them up, the touch radar); the Digger Drill and the
+  secret base (entering, leaving, moving it, the goods PC, decorating, the normal flag).
 - The Battle Tower: singles, doubles and multi, the Battle Salon partners, Palmer, BP and the exchange, on a second
   script VM for the Battle Frontier's scenes.
 - Mystery Gift with gift codes.
@@ -78,7 +80,8 @@ Pokémon, follower talk and the HGSS look.
 
 - **Battle Frontier:** the Factory, Hall, Castle and Arcade with their Brains, on the Frontier VM the Tower uses.
 - **Contests:** the Jubilife TV dress-up gallery; the dancers' outfits.
-- **Underground:** traps, the Digger Drill and secret bases.
+- **Underground:** the placed traps' and tools' drawn details (the slide's sprite pose, the rock's floor shadow, the
+  OK emote), the transition's hole and descent animations.
 - **Town extras:** the journal, the Game Corner, the Villa, TV, the diplomas, Seals and Ball Capsules, and the
   remaining small NPC rules.
 - **Polish:** the last move animations, the Frontier Brain cut-ins, the generic HM cut-in art.

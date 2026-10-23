@@ -26,6 +26,8 @@ const OFFSETS: [RegExp, Vec3][] = [
   [/^TRACK_SNOW_/, [0, 0, -2]],
   // ov5_021F31B4: the Poké Radar's patches stand half the tall grass's offset south of the tile centre.
   [/^RADAR_GRASS_/, [0, 0, 1]],
+  // ov5_021F4E08.c: the Underground's floor marks at (x·16 + 9, z·16) less (0.5, 1, −5): 0.5 east, 3 north of the centre.
+  [/^UG_FLOOR_/, [0.5, 0, -3]],
 ];
 /**
  * Flat models drawn at their own height over the anchor (the object position), as the DS draws them: the berry soil
@@ -240,6 +242,7 @@ export class FieldEffects {
     }
     if (name === 'SURF_BLOB' && !e.rotation) p.y += surfBob(e.tick);
     inst.object.position.set(p.x, p.y + (e.rotation ? 0 : inst.lift), p.z);
+    inst.object.scale.setScalar(e.scale ?? 1);
     if (e.rotation) inst.object.rotation.set(...e.rotation.map(v => v * Math.PI / 180) as [number, number, number], 'ZYX');
     else if (ROTATED.test(name) && e.facing) inst.object.rotation.set(0, (YAW[e.facing] * Math.PI) / 180, 0);
     if (FADES.test(name)) for (const m of inst.materials) m.opacity = fadeAlpha(e.tick);

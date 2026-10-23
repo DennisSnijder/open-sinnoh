@@ -3,12 +3,13 @@
  * field and the vendors' shops. DS windows over the field; their texts are TEXT_BANK_UNDERGROUND_* messages.
  * - The menu: TRAPS, SPHERES, GOODS, TREASURES, the player (the Underground records), GO UP, CLOSE. A sphere is buried in
  *   front of the player (core `burySphere`) or thrown away; a treasure goes into the bag (sMiningItems) or away; a trap
- *   or a good away. Laying a trap and the Digger Drill are not implemented yet: logged, and the menu closes as the DS's does.
+ *   is laid in front of the player (core `placeTrap`) or thrown away, the Digger Drill closes the menu for the field to
+ *   dig (UndergroundMenu_HandleTrapsMenu → SecretBases_UseDiggerDrill); a good goes away. GO UP is refused in a base.
  * - A vendor (vendors.c): the goods and traps vendors BUY (their five-item stock, paid with one sphere of the price's
  *   type and at least its size) and SELL (the player's own, for a sphere of half the rolled size); the treasure vendor
  *   only takes treasures. NOT DS: with the Spiritomb option on, a vendor's first talk on a visit counts toward Spiritomb.
  */
-import { burySphere, readUnderground, sellPrice, TRAP_DIGGER_DRILL, tryAddGood, tryAddSphere, tryAddTrap, underground, vendorStock, type Id, type UndergroundState, type VendorItem } from '@opensinnoh/core';
+import { burySphere, placeTrap, readUnderground, sellPrice, TRAP_DIGGER_DRILL, tryAddGood, tryAddSphere, tryAddTrap, underground, vendorStock, type Id, type UndergroundState, type VendorItem } from '@opensinnoh/core';
 import { canGiveItem, giveItem, newGameRecord, type AppMenu, type UndergroundMenuView, type UndergroundTables, type UndergroundVendorView } from '@opensinnoh/contracts';
 import { addToGameRecord } from '@opensinnoh/services';
 import { Dialog } from './dialog.ts';
@@ -19,7 +20,7 @@ import type { Screen, Step } from './stack.ts';
 /** UNDERGROUND_MENU_MAX_DISPLAY. */
 const VISIBLE = 6;
 /** SE_CONFIRM, SEQ_SE_DP_WIN_OPEN, SEQ_SE_DP_SELECT78, SEQ_SE_PL_SUTYA2, SEQ_SE_DP_PIRORIRO2. */
-const SE = { confirm: 1500, open: 1533, select: 1504, bury: 1367, obtained: 1507 };
+const SE = { confirm: 1500, open: 1533, select: 1504, bury: 1367, obtained: 1507, trapSet: 1571 };
 /** RECORD_SPHERES_BURIED (generated/game_records.txt). */
 const RECORD_SPHERES_BURIED = 46;
 /** MINING_TREASURE_REVIVE and _MAX_REVIVE: put into the bag's MEDICINE pocket. */
@@ -161,6 +162,29 @@ export function undergroundMenu(ctx: MenuContext): Screen {
     return after([t.message(REVIVES.includes(id) ? 'Common_Text_PlacedInMedicinePocket' : 'Common_Text_PlacedInItemsPocket', t.item(id))]);
   };
 
+  /** UndergroundMenu_HandleTrapSelectedMenu's BURY (Traps_TryPlaceTrap, Traps_ProcessPlaceTrapResult): the menu closes after its message. */
+  const layTrap = (slot: number, trap: number): Step => {
+    const at = ctx.host.undergroundAhead?.();
+    if (!at) throw new Error('underground menu: BURY off the Underground');
+    se(SE.bury);
+    selected = null;
+    const closeAfter = (text: string): Step => dialog.say([text], () => ({ close: { app: 'ug-menu', goUp: false } }));
+    switch (placeTrap(underground(ctx.state), trap, at)) {
+      case 'object':
+        return closeAfter(t.message('Common_Text_CantBePlacedThere'));
+      case 'secret-base':
+        return closeAfter(t.message('Common_Text_CantPutTrapInSecretBase'));
+      case 'wall':
+        return closeAfter(t.message('Common_Text_CantBuryInWall'));
+      case 'occupied':
+        return closeAfter(t.message('Common_Text_SomethingAlreadyBuried'));
+      case 'placed':
+        underground(ctx.state).traps.splice(slot, 1);
+        se(SE.trapSet);
+        return closeAfter(t.message('Common_Text_TrapWasSetInGround', '', '', '', t.trap(trap)));
+    }
+  };
+
   const trash = (kind: Kind, slot: number, id: number): Step => {
     const ug = underground(ctx.state);
     ({ spheres: ug.spheres, treasures: ug.treasures, traps: ug.traps, goods: ug.goods } as Record<Kind, unknown[]>)[kind].splice(slot, 1);
@@ -173,16 +197,10 @@ export function undergroundMenu(ctx: MenuContext): Screen {
   const select = (kind: Kind, slot: number) => {
     const row = rows(ctx, u(), kind)[slot]!;
     const label = (name: string) => t.message(`Common_Text_${name}`);
-    if (kind === 'traps' && row.id === TRAP_DIGGER_DRILL) {
-      ctx.log.stub('underground:digger-drill', 'the Digger Drill (a secret base) is not implemented yet');
-      return { close: { app: 'ug-menu' as const, goUp: false } };
-    }
+    if (kind === 'traps' && row.id === TRAP_DIGGER_DRILL) return { close: { app: 'ug-menu' as const, goUp: false, drill: slot } };
     const options =
       kind === 'spheres' ? [{ label: label('Bury'), run: () => bury(slot) }, { label: label('Trash'), run: () => trash(kind, slot, row.id) }]
-      : kind === 'traps' ? [{ label: label('Bury'), run: (): Step => {
-          ctx.log.stub('underground:place-trap', 'laying a trap is not implemented yet');
-          return { close: { app: 'ug-menu', goUp: false } };
-        } }, { label: label('Trash'), run: () => trash(kind, slot, row.id) }]
+      : kind === 'traps' ? [{ label: label('Bury'), run: () => layTrap(slot, row.id) }, { label: label('Trash'), run: () => trash(kind, slot, row.id) }]
       : kind === 'treasures' ? [{ label: label('PutInBag'), run: () => putInBag(slot, row.id) }, { label: label('Trash'), run: () => trash(kind, slot, row.id) }]
       : [{ label: label('Trash'), run: () => trash(kind, slot, row.id) }];
     options.push({ label: label('Cancel'), run: backToList });
@@ -298,9 +316,12 @@ export function undergroundMenu(ctx: MenuContext): Screen {
       case 'trainer':
         records = true;
         return;
-      case 'up':
-        // UndergroundMenu_GoUpCallback (not from a secret base: not implemented yet).
+      case 'up': {
+        // UndergroundMenu_GoUpCallback: not from a secret base.
+        const place = ctx.host.undergroundPlace?.();
+        if (place === 'open' || place === 'closed') return dialog.say([t.message('Common_Text_CantReturnFromSecretBase')], () => ({ close: { app: 'ug-menu', goUp: false } }));
         return dialog.confirm([t.message('Common_Text_WouldYouLikeToReturnToSurface')], (yes) => (yes ? { close: { app: 'ug-menu', goUp: true } } : undefined));
+      }
       default:
         openList(ENTRIES[pick] as Kind);
         return;

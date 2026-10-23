@@ -1,0 +1,37 @@
+from sys-underground-trap.replay
+# sys-underground-hole (traps.c Traps_HoleTrapClientTask, comm_player_manager.c holeMovementsLeft): a hidden trap of the
+# day's, a Hole Trap at (314, 341) (the day's traps are rolled on the save's seed: the same on every seed here). Stepped on,
+# the player sinks into it; eight turns (each a d-pad direction other than the facing) climb out.
+warp platinum:MAP_HEADER_UNDERGROUND 318 341 left
+until idle
++0 assert state underground.spawnedTraps[16] {"trap":11,"x":314,"z":341}
++0 press left
+until app ug-trap
++0 release left
++0 assert position platinum:MAP_HEADER_UNDERGROUND 314 341
++0 assert state underground.spawnedTraps[16] null
+until app none
++0 press up
++1 release up
++5 press down
++1 release down
++5 press up
++1 release up
++5 press down
++1 release down
++5 press up
++1 release up
++5 press down
++1 release down
++5 press up
++1 release up
++5 press down
++1 release down
+until idle
++0 assert position platinum:MAP_HEADER_UNDERGROUND 314 341
++0 assert state underground.records.trapsTriggered 3
+# Free again: the next step moves.
++0 press left
+until position 313 341
++0 release left
+until idle

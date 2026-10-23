@@ -2,7 +2,7 @@ import { doorSounds } from './assets/door-sounds.ts';
 import { importSpearPillar } from './spear-pillar.ts';
 import { animationFrames } from './gyms/index.ts';
 import { readSunyshoreTables, SUNYSHORE_REGION } from './gyms/sunyshore.ts';
-import type { Area, BgEvent, Light, LightTemplate, Camera, MapPopup, Chunk, CoordEvent, EncounterSlot, EncounterTable, Facing, Flag, Item, Matrix, NewGame, ObjectEvent, Prop, Sprite, Text, TextBank, TileBehavior, Var, WarpEvent, Weather, Zone } from '@opensinnoh/contracts';
+import type { Area, BgEvent, Model, Light, LightTemplate, Camera, MapPopup, Chunk, CoordEvent, EncounterSlot, EncounterTable, Facing, Flag, Item, Matrix, NewGame, ObjectEvent, Prop, Sprite, Text, TextBank, TileBehavior, Var, WarpEvent, Weather, Zone } from '@opensinnoh/contracts';
 import { GAME_RECORDS } from '@opensinnoh/contracts';
 import { asId, type Id, type PackData, type RegistryRecord } from '@opensinnoh/core';
 import { importFont } from '@opensinnoh/text';
@@ -21,7 +21,7 @@ import { resolveUnscriptedClones } from './object-clones.ts';
 import { importShips } from './ships.ts';
 import { importTitle } from './title/index.ts';
 import { importCreditsRide } from './credits.ts';
-import { accessoryPictures, BACKGROUNDS, importUi2d, importUndergroundArt, mapPopupSheet, MAP_POPUP_STYLES, Sheets } from './ui2d/index.ts';
+import { accessoryPictures, BACKGROUNDS, importTrapArt, importUi2d, importUndergroundArt, mapPopupSheet, MAP_POPUP_STYLES, Sheets } from './ui2d/index.ts';
 import { HIDDEN_LOCATIONS, importPokedex } from './pokedex.ts';
 import { matrixVariants } from './matrix-variants.ts';
 import { flyDestinations, readTownMap } from './town-map.ts';
@@ -44,7 +44,7 @@ import { decodeText } from './formats/text.ts';
 import { readWeatherBgs, readWeatherTasks, readYearlyWeather, WEATHER_BG_COUNT, weatherBgPng, weatherParts, WEATHER_TASK_COUNT, WEATHER_TASK_SIZE } from './formats/weather.ts';
 import { readZoneHeaders, type ZoneHeader } from './formats/zone-headers.ts';
 import { charTable, Names, type CharmapFile, type NamesFile } from './names.ts';
-import { readUndergroundTables } from './underground.ts';
+import { convertBaseCursor, readUndergroundTables } from './underground.ts';
 import { readContestTables } from './contests.ts';
 import { ACTING_MESSAGES, AI_RULE_SIZE, AI_RULES, BUTTON_PALETTES, CONTEST_EFFECTS, EFFECT_CLASS_SIZE, EFFECT_SIZE, readActingTables } from './contest-acting.ts';
 import { DANCE_BUTTONS, DANCE_CHOICE_SIZE, DANCE_LEVELS, DANCE_POSITIONS, DANCE_SONG_SIZE, DANCE_TINTS, DANCE_VARIANT_SIZE, readContestDance } from './contest-dance.ts';
@@ -1089,6 +1089,7 @@ export async function importPlatinum(
   for (const [path, bytes] of animSheets.assets) assets.set(path, bytes);
   const starterSheets = new Sheets();
   const undergroundSheets = new Sheets();
+  const undergroundModels: Model[] = [];
   const starter = importChooseStarter(fs, starterSheets);
   for (const [path, bytes] of [...starter.assets, ...starterSheets.assets]) assets.set(path, bytes);
   // The Battle Frontier (frontier.ts): its scenes' scripts join the IR; the tables, art and exchange marts.
@@ -1334,7 +1335,23 @@ export async function importPlatinum(
     const flag = (name: string) => byName(names.flagNames, name, (i) => names.flag(i));
     const varId = (name: string) => byName(names.varNames, name, (i) => names.var(i));
     const sparkle = asId('platinum:FIELD_EFFECT_BURIED_SPHERE_SPARKLE');
-    if (!converted.records.fieldEffects.some((f) => f.id === sparkle)) throw new ImportError(`underground: no field effect ${sparkle}`);
+    const fieldEffect = (name: string) => {
+      const id = asId(`platinum:FIELD_EFFECT_${name}`);
+      if (!converted.records.fieldEffects.some((f) => f.id === id)) throw new ImportError(`underground: no field effect ${id}`);
+      return id;
+    };
+    fieldEffect('BURIED_SPHERE_SPARKLE');
+    // AreaDataManager_GetMapPropModelID: the Underground area's prop list (area_build, its count first) at the good id.
+    const areaProps = new Reader(readNarc(fs.file('/fielddata/areadata/area_data.narc'))[headers[UNDERGROUND_ZONE]!.area]!).u16(0);
+    const propList = new Reader(readNarc(fs.file('/fielddata/areadata/area_build_model/area_build.narc'))[areaProps]!);
+    const goodProp = (good: number): Id | null => {
+      if (good > propList.u16(0)) throw new ImportError(`underground: good ${good} is past the Underground's prop list (${propList.u16(0)})`);
+      const prop = names.prop(propList.u16(good * 2));
+      return keptProps.has(prop) ? prop : null;
+    };
+    const trapArt = importTrapArt(fs, undergroundSheets);
+    const cursor = options.slice ? null : convertBaseCursor(fs, assets, (w) => unknown('asset', w));
+    if (cursor) undergroundModels.push(cursor);
     const ov23 = fs.overlays().find((o) => o.id === 23)!;
     newGame.underground = readUndergroundTables(
       {
@@ -1355,6 +1372,14 @@ export async function importPlatinum(
         flags: { entered: flag('FLAG_ENTERED_UNDERGROUND'), digging: flag('FLAG_DIGGING_FOR_FOSSILS'), sphereAcquired: flag('FLAG_SPHERE_ACQUIRED') },
         vars: { fossilsUnearthed: varId('VAR_UNDERGROUND_FOSSILS_UNEARTHED'), spiritomb: varId('VAR_SPIRITOMB_COUNTER') },
         sparkle,
+        goodProp,
+        traps: {
+          ...trapArt,
+          marks: Array.from({ length: 32 }, (_, i) => fieldEffect(`UG_FLOOR_TRAP_${i + 1}`)),
+          hole: fieldEffect('UG_FLOOR_BLACK_CIRCLE'),
+          vars: { trapsSet: varId('VAR_UNDERGROUND_TRAPS_SET') },
+        },
+        base: { cursor: cursor?.id ?? null, flags: { created: flag('FLAG_CREATED_SECRET_BASE'), decorated: flag('FLAG_DECORATED_SECRET_BASE') } },
       },
     );
     importUndergroundArt(fs, undergroundSheets, newGame.underground.miningObjects);
@@ -1508,7 +1533,7 @@ export async function importPlatinum(
     tileBehaviors,
     props,
     cameras: cameraRecords,
-    models: [...converted.records.models, ...title.models, ...creditsRide.models, ...ships.models, ...spear.models, ...starter.models, ...gymEffects.records.models, ...dwArt.models],
+    models: [...converted.records.models, ...title.models, ...creditsRide.models, ...ships.models, ...spear.models, ...starter.models, ...gymEffects.records.models, ...dwArt.models, ...undergroundModels],
     textureAnimations: [...converted.records.textureAnimations, ...gymEffects.records.textureAnimations, ...dwArt.textureAnimations],
     sprites,
     followers,

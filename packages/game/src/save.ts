@@ -359,7 +359,7 @@ const stateV17Fields: Record<string, Schema> = {
 export const GAME_STATE_V17_SCHEMA: Schema = obj(stateV17Fields, stateV7Check);
 
 /** The state version this build writes (older ones are migrated on load). */
-export const SAVE_SCHEMA_VERSION = 20;
+export const SAVE_SCHEMA_VERSION = 21;
 
 /** Decomp BerryPatch (0.29.0): an empty patch has no berry, stage none and no yield. */
 const berryPatchSchema: Schema = obj(
@@ -467,8 +467,7 @@ const fashionCaseSchema: Schema = obj({ accessories: arr(int(0, ACCESSORIES.maxN
  */
 const L = UNDERGROUND_LIMITS;
 const ugTile = { x: int(0, L.max.x), z: int(0, L.max.z) };
-const undergroundSchema: Schema = obj(
-  {
+const undergroundV19Fields: Record<string, Schema> = {
     seed: int(0, 0xffffffff),
     respawn: bool,
     mined: bool,
@@ -484,18 +483,50 @@ const undergroundSchema: Schema = obj(
     records: obj({ spheresDug: int(0, 999999), fossilsDug: int(0, 999999), otherDug: int(0, 999999) }),
     steps: int(0, 99),
     vendorTalks: arr(int(0, 19)),
+};
+const undergroundV19Check = (v: Record<string, unknown>) => {
+  const u = v as unknown as UndergroundState;
+  const over = (['spheres', 'treasures', 'traps', 'goods', 'goodsPc', 'buried', 'spots'] as const).find((k) => u[k].length > { spheres: L.spheres, treasures: L.treasures, traps: L.traps, goods: L.goods, goodsPc: L.goodsPc, buried: L.buried, spots: L.spots }[k]);
+  if (over) return `underground.${over} is over its limit`;
+  return u.spawnedTraps.length !== L.spawnedTraps ? `underground.spawnedTraps must have ${L.spawnedTraps} slots` : undefined;
+};
+/** The Underground of saves v19–v20 (no laid traps, no base). Only read to migrate. */
+const undergroundV19Schema: Schema = obj(undergroundV19Fields, undergroundV19Check);
+/** core `SecretBase`: the entrance on an Underground tile, 15 goods and 16 boulders on the base's tiles. */
+const baseTile = { x: int(0, 31), z: int(0, 31) };
+const secretBaseSchema: Schema = obj(
+  {
+    entrance: obj({ ...ugTile, dir: lit('up', 'down', 'left', 'right') }),
+    goods: arr(nullable(obj({ good: int(1, 138), ...baseTile, slot: int(0, L.goodsPc - 1) }))),
+    boulders: arr(nullable(obj(baseTile))),
+  },
+  (v) => ((v.goods as unknown[]).length !== L.placedGoods || (v.boulders as unknown[]).length !== L.boulders ? `underground.base must have ${L.placedGoods} goods and ${L.boulders} boulder slots` : undefined),
+);
+/**
+ * 0.37.0, schema v21: the Underground with the player's laid traps (`placedTraps`), the secret base (`base`) and the
+ * records of traps set off and base moves; every placed good's PC slot holds a good.
+ */
+const undergroundSchema: Schema = obj(
+  {
+    ...undergroundV19Fields,
+    records: obj({ spheresDug: int(0, 999999), fossilsDug: int(0, 999999), otherDug: int(0, 999999), trapsTriggered: int(0, 999999), baseMoves: int(0, 999999) }),
+    placedTraps: arr(obj({ trap: int(1, 31), ...ugTile })),
+    base: nullable(secretBaseSchema),
   },
   (v) => {
     const u = v as unknown as UndergroundState;
-    const over = (['spheres', 'treasures', 'traps', 'goods', 'goodsPc', 'buried', 'spots'] as const).find((k) => u[k].length > { spheres: L.spheres, treasures: L.treasures, traps: L.traps, goods: L.goods, goodsPc: L.goodsPc, buried: L.buried, spots: L.spots }[k]);
-    if (over) return `underground.${over} is over its limit`;
-    return u.spawnedTraps.length !== L.spawnedTraps ? `underground.spawnedTraps must have ${L.spawnedTraps} slots` : undefined;
+    const old = undergroundV19Check(v);
+    if (old) return old;
+    if (u.placedTraps.length > L.placedTraps) return 'underground.placedTraps is over its limit';
+    const slots = (u.base?.goods ?? []).flatMap((g) => (g ? [g.slot] : []));
+    if (slots.some((s) => s >= u.goodsPc.length)) return 'underground.base has a good whose PC slot is empty';
+    return new Set(slots).size === slots.length ? undefined : 'underground.base shows one PC slot twice';
   },
 );
 
 const stateV19Fields: Record<string, Schema> = {
     ...stateV18Fields,
-    underground: opt(undergroundSchema),
+    underground: opt(undergroundV19Schema),
     schemaVersion: lit(SAVE_SCHEMA_VERSION),
     party: arr(POKEMON_SCHEMA),
     boxes: arr(obj({ name: str(), wallpaper: int(0, 255), slots: arr(nullable(POKEMON_SCHEMA)) })),
@@ -526,14 +557,12 @@ const contestPhotoSchema: Schema = obj({
   dressUp: dressUpSchema,
 });
 
-export const GAME_STATE_SCHEMA: Schema = obj(
-  {
-    ...stateV19Fields,
-    schemaVersion: lit(SAVE_SCHEMA_VERSION),
-    contestPhotos: arr(nullable(contestPhotoSchema)),
-  },
-  (v) => stateV19Check(v) ?? ((v.contestPhotos as unknown[]).length !== CONTEST_TYPES.length ? `contestPhotos must have ${CONTEST_TYPES.length} slots` : undefined),
-);
+const stateV20Fields: Record<string, Schema> = { ...stateV19Fields, contestPhotos: arr(nullable(contestPhotoSchema)) };
+const stateV20Check = (v: Record<string, unknown>) => stateV19Check(v) ?? ((v.contestPhotos as unknown[]).length !== CONTEST_TYPES.length ? `contestPhotos must have ${CONTEST_TYPES.length} slots` : undefined);
+/** Saves of the contest photos (v20) before the Underground's traps and base. Only read to migrate. */
+export const GAME_STATE_V20_SCHEMA: Schema = obj({ ...stateV20Fields, schemaVersion: lit(20) }, stateV20Check);
+
+export const GAME_STATE_SCHEMA: Schema = obj({ ...stateV20Fields, schemaVersion: lit(SAVE_SCHEMA_VERSION), underground: opt(undergroundSchema) }, stateV20Check);
 
 const envelope = (state: Schema): Schema =>
   obj({
@@ -563,6 +592,7 @@ const OLD_SAVE_SCHEMAS: Record<number, Schema> = {
   17: envelope(GAME_STATE_V17_SCHEMA),
   18: envelope(GAME_STATE_V18_SCHEMA),
   19: envelope(GAME_STATE_V19_SCHEMA),
+  20: envelope(GAME_STATE_V20_SCHEMA),
 };
 
 /**
@@ -590,8 +620,11 @@ type PokemonV10 = Omit<Pokemon, 'markings' | 'ribbons'>;
 /** A Pokémon of schemas v11–v18 (no condition). */
 type PokemonV18 = Omit<Pokemon, 'condition'>;
 /** v18 (berries, Mystery Gift): no condition, no Poffin Case, no Fashion Case. */
+/** v20 (the contest photos): the Underground without laid traps, a base or their records. */
+type UndergroundV20 = Omit<UndergroundState, 'placedTraps' | 'base' | 'records'> & { records: Omit<UndergroundState['records'], 'trapsTriggered' | 'baseMoves'> };
+type StateV20 = Omit<GameState, 'schemaVersion' | 'underground'> & { schemaVersion: 20; underground?: UndergroundV20 };
 /** v19 (Poffins, the Fashion Case, the Underground): no contest photos. */
-type StateV19 = Omit<GameState, 'schemaVersion' | 'contestPhotos' | 'contest'> & { schemaVersion: 19 };
+type StateV19 = Omit<StateV20, 'schemaVersion' | 'contestPhotos' | 'contest'> & { schemaVersion: 19 };
 type StateV18 = Omit<StateV19, 'schemaVersion' | 'party' | 'boxes' | 'daycare' | 'poffins' | 'fashionCase'> & {
   schemaVersion: 18;
   party: PokemonV18[];
@@ -842,8 +875,18 @@ export function migrateStateV18(v18: StateV18): StateV19 {
 }
 
 /** v19 → v20 (the contest photos): none, as no contest could be won before (`end_contest` was a logged stub). */
-export function migrateStateV19(v19: StateV19): GameState {
+export function migrateStateV19(v19: StateV19): StateV20 {
   return { ...v19, schemaVersion: 20, contestPhotos: CONTEST_TYPES.map(() => null) };
+}
+
+/**
+ * v20 → v21 (the Underground's traps and secret base): no laid traps, no base and none set off or moved, as neither could
+ * be laid or dug before (both were logged stubs).
+ */
+export function migrateStateV20(v20: StateV20): GameState {
+  const { underground, ...rest } = v20;
+  if (!underground) return { ...rest, schemaVersion: 21 };
+  return { ...rest, schemaVersion: 21, underground: { ...underground, records: { ...underground.records, trapsTriggered: 0, baseMoves: 0 }, placedTraps: [], base: null } };
 }
 
 export class SaveError extends Error {}
@@ -900,7 +943,8 @@ export function validateSave(input: unknown, registries: Registries, packs: read
   const v17 = v16 ? migrateStateV16(v16) : version === 17 ? (state as StateV17) : null;
   const v18 = v17 ? migrateStateV17(v17, registries) : version === 18 ? (state as StateV18) : null;
   const v19 = v18 ? migrateStateV18(v18) : version === 19 ? (state as StateV19) : null;
-  const env: SaveEnvelope = v19 ? { ...(input as SaveEnvelope), state: migrateStateV19(v19) } : (input as SaveEnvelope);
+  const v20 = v19 ? migrateStateV19(v19) : version === 20 ? (state as StateV20) : null;
+  const env: SaveEnvelope = v20 ? { ...(input as SaveEnvelope), state: migrateStateV20(v20) } : (input as SaveEnvelope);
   // Cosmetic packs (art only) are not part of a save's identity: one made before such a pack was added, or
   // while it was loaded, still loads. A save from before the flag may list one; it is dropped here.
   const cosmetic = new Set(packs.filter((p) => p.cosmetic).map((p) => p.id));

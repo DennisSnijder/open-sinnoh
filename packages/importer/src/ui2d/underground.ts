@@ -14,6 +14,11 @@
  *   `underground/mining_crack_end`.
  * - The top screen (/data/underg_radar.narc: background NCLR 0 (two palettes), NCGR 1, NSCR 2) `underground/radar_map`;
  *   its markers (NCLR 3, NCGR 4, NCER 5, NANR 6) `underground/radar_markers`.
+ * - The traps' effects (/data/ug_trap.narc, res/graphics/trap_effects): the OBJ sets `underground/trap_<name>` (petals,
+ *   bubbles, the touch radar, fire, embers, leaves, the boulder and its six damaged stages, which keep the boulder's
+ *   cells and animations: SpriteTransfer_ReplaceCharData), the smoke's BG characters with their palette
+ *   `underground/trap_smoke` (cells named by character number) and the smoke patterns (NSCR 11–14 and the big one, 8),
+ *   returned as data: the first 32×24 entries (Graphics_LoadTilemapToBgLayer's 32 × 24 × 2 bytes).
  */
 import type { MiningObject } from '@opensinnoh/contracts';
 import { readNarc, type NitroFs } from '@opensinnoh/nds';
@@ -25,6 +30,27 @@ const FOSSIL = { path: '/data/ug_fossil.narc', count: 3 };
 const PARTS = { path: '/data/ug_parts.narc', dirt: 9 };
 const ANIM = { path: '/data/ug_anim.narc', count: 8 };
 const RADAR = { path: '/data/underg_radar.narc', count: 7 };
+/** res/graphics/trap_effects/trap_effects.order: the members by name. */
+const TRAP = {
+  path: '/data/ug_trap.narc',
+  count: 53,
+  objs: {
+    petal: { nanr: 0, ncer: 1, ncgr: 2, nclr: 3 },
+    bubble: { nanr: 4, ncer: 5, ncgr: 6, nclr: 7 },
+    radar: { nanr: 15, ncer: 16, ncgr: 17, nclr: 18 },
+    fire: { nanr: 20, ncer: 21, ncgr: 22, nclr: 19 },
+    ember: { nanr: 23, ncer: 24, ncgr: 25, nclr: 19 },
+    leaf: { nanr: 26, ncer: 27, ncgr: 28, nclr: 29 },
+    boulder: { nanr: 30, ncer: 31, ncgr: 32, nclr: 51 },
+  },
+  /** boulder_damaged_<k>.NCGR: member 32 + 3k. */
+  damaged: (k: number) => 32 + 3 * k,
+  bigSmoke: 8,
+  smokeTiles: { ncgr: 9, nclr: 10, count: 9 },
+  smoke: [11, 12, 13, 14],
+};
+/** BG_LAYER_MAIN_2's 32 × 24 tiles. */
+const SMOKE_TILES = 32 * 24;
 /** CRACK_START_TILEMAP_INDEX_ROW_1..4 (column 25 of rows 0–3) and MINING_BASE_TILE_CRACK_ROW_1..4. */
 const CRACK = { column: 25, bases: [11, 65, 119, 173] };
 /** Mining_DrawButton's rectangles and tiles. */
@@ -131,3 +157,23 @@ export function importUndergroundArt(fs: NitroFs, sheets: Sheets, miningObjects:
 
 /** The objects sheet's cell for a table entry and shine step. */
 export const miningObjectCell = (o: Pick<MiningObject, 'sprite' | 'palette'>, step: number): string => `${o.sprite}-${o.palette}-${step}`;
+
+/** The traps' 2D art (see the header) and the smoke patterns. */
+export function importTrapArt(fs: NitroFs, sheets: Sheets): { smoke: number[][]; bigSmoke: number[] } {
+  const narc = narcOf(fs, TRAP.path, TRAP.count);
+  for (const [name, m] of Object.entries(TRAP.objs)) sheets.obj(`underground/trap_${name}`, narc, m);
+  for (let k = 1; k <= 6; k++) sheets.obj(`underground/trap_boulder_${k}`, narc, { ...TRAP.objs.boulder, ncgr: TRAP.damaged(k) });
+  const chars = readNcgr(narc[TRAP.smokeTiles.ncgr]!);
+  const colors = readNclr(narc[TRAP.smokeTiles.nclr]!).colors;
+  const cells = Array.from({ length: TRAP.smokeTiles.count }, (_, t) => cell(tiles(chars, colors, 1, 1, [[t, 0, 0, 0]])));
+  sheets.add('underground/trap_smoke', cells, { names: cells.map((_, t) => String(t)) });
+  const pattern = (member: number): number[] => {
+    const s = readNscr(narc[member]!);
+    if (s.entries.length < SMOKE_TILES) throw new Error(`ug_trap ${member}: ${s.entries.length} entries, fewer than 32 × 24`);
+    const out = [...s.entries.subarray(0, SMOKE_TILES)];
+    const bad = out.find((e) => (e & 0x3ff) >= TRAP.smokeTiles.count || e >> 12 !== 0);
+    if (bad !== undefined) throw new Error(`ug_trap ${member}: entry 0x${bad.toString(16)} outside the smoke's characters or palette 0`);
+    return out;
+  };
+  return { smoke: TRAP.smoke.map(pattern), bigSmoke: pattern(TRAP.bigSmoke) };
+}

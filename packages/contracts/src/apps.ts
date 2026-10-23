@@ -250,6 +250,12 @@ export type AppRequest =
   | { app: 'ug-menu' }
   /** 0.33.0. Vendor `vendor`'s shop (decomp UndergroundVendors_StartShopMenuTask; `UndergroundTables.vendors` index). */
   | { app: 'ug-vendor'; vendor: number }
+  /** 0.37.0. A trap gone off under the player (`tool`: a tool on display in the base set it off): contracts `UndergroundTrapView`. */
+  | { app: 'ug-trap'; trap: number; tool: boolean }
+  /** 0.37.0. A secret base prompt (contracts `UndergroundBasePrompt`). */
+  | { app: 'ug-base'; prompt: import('./underground.ts').UndergroundBasePrompt }
+  /** 0.37.0. The secret base's PC (UndergroundPC_TryUsePC on the player's own PC). */
+  | { app: 'ug-pc' }
   /**
    * 0.35.0. Decomp ScrCmd_OpenPartyMenuForContest (PARTY_MENU_MODE_CONTEST): each panel says whether the Pokémon may
    * enter a `type` contest of `rank` (CheckContestEligibility: not an Egg, not fainted, at least `rank` ribbons of the
@@ -344,9 +350,21 @@ export type AppResult =
   | { app: 'poffin-case' }
   /** 0.33.0. The mining game ended (`dug`: YES was picked and the board played). */
   | { app: 'mining'; dug: boolean }
-  /** 0.33.0. The Underground's menu closed; `goUp`: GO UP was confirmed (the return to the surface starts). */
-  | { app: 'ug-menu'; goUp: boolean }
+  /**
+   * 0.33.0. The Underground's menu closed; `goUp`: GO UP was confirmed (the return to the surface starts). 0.37.0: `drill`:
+   * the trap slot of the Digger Drill picked (SecretBases_UseDiggerDrill: the field tries the wall in front).
+   */
+  | { app: 'ug-menu'; goUp: boolean; drill?: number }
   | { app: 'ug-vendor' }
+  /**
+   * 0.37.0. The trap's screen closed: `escaped` (its escape game was won, or the alert ended), else the field part of the
+   * trap begins (the slide, the hole, the altered steps).
+   */
+  | { app: 'ug-trap'; trap: number; escaped: boolean }
+  /** 0.37.0. The prompt's answer: `yes`/`no` (drill, exit), `open`/`close`/`no` (enter). */
+  | { app: 'ug-base'; prompt: import('./underground.ts').UndergroundBasePrompt; answer: 'yes' | 'no' | 'open' | 'close' }
+  /** 0.37.0. The PC was switched off (EXIT or B); `decorated`: the decoration ran (FLAG_DECORATED_SECRET_BASE). */
+  | { app: 'ug-pc'; decorated: boolean }
   /** 0.35.0. The slot entered, or null. */
   | { app: 'contest-select'; slot: number | null }
   /** 0.35.0. The contest app ended (its scores and placements are in `GameState.contest`). */
@@ -408,6 +426,16 @@ export interface AppHost {
   spiritombVendors?(): boolean;
   /** 0.33.0. The visit's mining generator (core `miningRand`, CommSys_Seed at the arrival): every board rolls on it in turn. */
   undergroundMiningRand?(): import('@opensinnoh/core').Rand32 | null;
+  /**
+   * 0.37.0. The decoration's field view (contracts `UndergroundDecorationView`), or null when it ends: the field draws
+   * the base's things from it and looks at the room from (15, 17) (UndergroundPC_MoveCamera) until then.
+   */
+  undergroundDecoration?(view: import('./underground.ts').UndergroundDecorationView | null): void;
+  /**
+   * 0.37.0. Where the player is in the Underground (UndergroundMan_AreCoordinatesInSecretBase): in their base with the
+   * entrance `open` or `closed` (CommServerClient_IsInClosedSecretBase), in the corridors (`corridor`), or null off it.
+   */
+  undergroundPlace?(): 'corridor' | 'open' | 'closed' | null;
   /**
    * 0.36.2. The contests' move animations (packages/battle `createContestMoveAnimation`). Absent in a game without the
    * battle engine (menu tests); a game that loads the engine lazily holds the contest app until it is in.
@@ -483,6 +511,9 @@ export type AppView =
   | import('./underground.ts').MiningView
   | import('./underground.ts').UndergroundMenuView
   | import('./underground.ts').UndergroundVendorView
+  | import('./underground.ts').UndergroundTrapView
+  | import('./underground.ts').UndergroundBaseView
+  | import('./underground.ts').UndergroundPcView
   | import('./contests.ts').ContestView
   | import('./contests.ts').ContestPhotoView;
 export type AppName = AppView['app'];

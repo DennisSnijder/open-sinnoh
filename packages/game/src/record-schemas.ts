@@ -706,13 +706,22 @@ const undergroundTables = obj({
   fossils: arr(obj({ item: ref('items'), species: ref('species') })),
   trapPrices: arr(spherePrice),
   treasurePrices: arr(spherePrice),
-  goods: arr(obj({ price: spherePrice, natDex: bool })),
+  goods: arr(obj({ price: spherePrice, natDex: bool, width: int(0, 3), depth: int(0, 3), collision: arr(int(0, 1)), interact: int(0, 255), prop: nullable(ref('props')) }, (v) => ((v.collision as unknown[]).length !== 9 ? 'a good\'s collision mask must be 3 × 3' : undefined))),
   vendors: arr(obj({ kind: lit('goods', 'traps', 'treasures'), x: int(0, 0xffff), z: int(0, 0xffff) })),
   spawnTraps: arr(int(1, 32)),
   flags: obj({ entered: ref('flags'), digging: ref('flags'), sphereAcquired: ref('flags') }),
   vars: obj({ fossilsUnearthed: ref('vars'), spiritomb: ref('vars') }),
   sparkle: ref('fieldEffects'),
-}, (v) => ((v.treasureItems as unknown[]).length !== 49 ? 'treasureItems must have the 49 treasures' : (v.trapPrices as unknown[]).length !== 34 ? 'trapPrices must have the 34 traps' : (v.treasurePrices as unknown[]).length !== 60 ? 'treasurePrices must have the 60 mining ids' : undefined));
+  // 0.37.0: traps and the secret base.
+  traps: obj({
+    smoke: arr(arr(int(0, 0xffff))),
+    bigSmoke: arr(int(0, 0xffff)),
+    marks: arr(ref('fieldEffects')),
+    hole: ref('fieldEffects'),
+    vars: obj({ trapsSet: ref('vars') }),
+  }, (v) => ([...(v.smoke as unknown[][]), v.bigSmoke as unknown[]].some((p) => p.length !== 32 * 24) ? 'a smoke pattern must have 32 × 24 tiles' : (v.marks as unknown[]).length !== 32 ? 'traps.marks must have the 32 trap ids' : undefined)),
+  base: obj({ cursor: nullable(ref('models')), flags: obj({ created: ref('flags'), decorated: ref('flags') }) }),
+}, (v) => ((v.goods as unknown[]).length !== 139 ? 'goods must have the 139 goods' : (v.treasureItems as unknown[]).length !== 49 ? 'treasureItems must have the 49 treasures' : (v.trapPrices as unknown[]).length !== 34 ? 'trapPrices must have the 34 traps' : (v.treasurePrices as unknown[]).length !== 60 ? 'treasurePrices must have the 60 mining ids' : undefined));
 const npcTrade = obj({
   species: ref('species'),
   requested: ref('species'),

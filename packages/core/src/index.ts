@@ -14,3 +14,5 @@ export * from './medicine.ts';
 export * from './field-systems.ts';
 export * from './special-encounters.ts';
 export * from './underground.ts';
+export * from './underground-base.ts';
+export * from './underground-traps.ts';

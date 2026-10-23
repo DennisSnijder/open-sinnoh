@@ -32,6 +32,9 @@ import { poffinCookingApp } from './poffin-cooking.ts';
 import { poffinCaseScreen } from './poffin-case.ts';
 import { miningScreen } from './mining.ts';
 import { undergroundMenu, undergroundVendor } from './underground.ts';
+import { undergroundTrapScreen } from './ug-trap.ts';
+import { undergroundBaseScreen } from './ug-base.ts';
+import { undergroundPcScreen } from './ug-pc.ts';
 import { contestScreen } from './contest/contest.ts';
 import { contestPhotoScreen } from './contest/photo.ts';
 
@@ -92,6 +95,12 @@ export const createApp: CreateApp = (request, deps) => {
       return new AppStack(undergroundMenu(ctx), { app: 'ug-menu', goUp: false });
     case 'ug-vendor':
       return new AppStack(undergroundVendor(ctx, request.vendor), { app: 'ug-vendor' });
+    case 'ug-trap':
+      return new AppStack(undergroundTrapScreen(ctx, request.trap), { app: 'ug-trap', trap: request.trap, escaped: false });
+    case 'ug-base':
+      return new AppStack(undergroundBaseScreen(ctx, request.prompt), { app: 'ug-base', prompt: request.prompt, answer: 'no' });
+    case 'ug-pc':
+      return new AppStack(undergroundPcScreen(ctx), { app: 'ug-pc', decorated: false });
     case 'contest-select':
       return new AppStack(partyScreen(ctx, { kind: 'contest', rank: request.rank, type: request.type }), { app: 'contest-select', slot: null });
     case 'contest':

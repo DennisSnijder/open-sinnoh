@@ -110,7 +110,7 @@ const PREVIEW_RANGE = 32;
  */
 
 export type { Vec3, ActorView, FieldView } from '@opensinnoh/contracts';
-import type { Vec3, ActorView, DwObject, EffectView, FeatureModelView, FieldView, FlySceneView, MapEntry } from '@opensinnoh/contracts';
+import type { Vec3, ActorView, DwObject, EffectView, FeatureModelView, FieldView, FlySceneView, MapEntry, UndergroundDecorationView } from '@opensinnoh/contracts';
 import { countPoketchStep } from '@opensinnoh/contracts';
 
 /** Kept as an alias: World now includes view(). */
@@ -300,8 +300,10 @@ export class FieldWorld implements OpenSinnohWorld {
   private honeyCell: string | null = null;
   /** The Underground's field (underground.ts) while the player is in it; built by the map load. */
   private ug: UndergroundField | null = null;
+  /** The Underground kept across a move to or from the secret base (a map load within the visit). */
+  private ugKeep: UndergroundField | null = null;
   /** The map change into or out of the Underground (`enterUnderground`, `exitUnderground`) while it runs. */
-  private ugTransit: { phase: 'out' | 'in'; zone: Id; x: number; z: number; down: boolean } | null = null;
+  private ugTransit: { phase: 'out' | 'in'; zone: Id; x: number; z: number; down: boolean; base?: { facing: Facing; then: () => void } } | null = null;
 
   constructor(
     private readonly reg: Registries,
@@ -418,7 +420,8 @@ export class FieldWorld implements OpenSinnohWorld {
   }
 
   private tileBlocked(tx: number, tz: number): boolean {
-    return this.grid.blocked(tx, tz);
+    // SecretBases_AreCoordinatesWalkable: the own base's goods (CommPlayer_CheckCollision in the Underground).
+    return this.grid.blocked(tx, tz) || !!this.ug?.baseBlocked(tx, tz);
   }
 
   private heightAt(wx: number, wz: number, current: number): number {
@@ -818,7 +821,9 @@ export class FieldWorld implements OpenSinnohWorld {
     this.avatar.reset();
     if (this.zone.mapScripts.onResume) this.scripts.runImmediate({ label: this.zone.mapScripts.onResume, zone: zoneId, source: 'resume' });
     this.pet.reset(savedPet);
-    this.ug = this.newUndergroundField(!!saved);
+    // A move to or from the secret base keeps the visit's Underground (SecretBases_MoveToFromSecretBaseTask).
+    this.ug = this.ugKeep ?? this.newUndergroundField(!!saved);
+    this.ugKeep = null;
 
     for (const a of this.allActors()) {
       this.updatePosition(a);
@@ -1046,6 +1051,12 @@ export class FieldWorld implements OpenSinnohWorld {
   }
 
   private updateCamera(): void {
+    // The secret base's decoration looks at the room from (15, 17) (UndergroundPC_MoveCamera).
+    const decorating = this.ug?.decorationCamera();
+    if (decorating) {
+      this.cameraCur = decorating;
+      return;
+    }
     const t = this.camera && this.cameraTracks ? this.camera : this.hero;
     this.cameraYHistory.push(t.cur[1]);
     while (this.cameraYHistory.length > CAMERA_Y_DELAY + 1) this.cameraYHistory.shift();
@@ -1120,7 +1131,8 @@ export class FieldWorld implements OpenSinnohWorld {
     const fx = p.x + dx;
     const fz = p.z + dz;
     if (input.pressed.includes('a')) {
-      // The Underground's own A (UndergroundMan_ProcessInteract): mining spots, vendors, buried spheres.
+      // The Underground's own A (UndergroundMan_ProcessInteract): traps, mining spots, the base's PC and goods, vendors,
+      // buried spheres.
       if (this.ug?.interact()) return;
       // Over a counter (TILE_BEHAVIOR_TABLE) the object one tile further is talked to (decomp sub_0203C9D4: nurses, clerks).
       const counter = this.grid.behaviour(fx, fz) === 'TABLE';
@@ -1155,6 +1167,8 @@ export class FieldWorld implements OpenSinnohWorld {
     }
 
     if (stepped) {
+      // The Underground's buried traps and the base's tools (CommPlayer_Move, before the player's next move).
+      if (this.ug?.stepped()) return;
       // Canalave Gym's platforms come first (Field_ProcessStep → CanalaveGym_CheckIfPlayerOnPlatform).
       if (this.feature?.stepped?.()) return;
       // Spin tiles take over before the step events (Field_ProcessStep → ov5_021E1154).
@@ -1191,6 +1205,8 @@ export class FieldWorld implements OpenSinnohWorld {
 
     // Pushing into a warp: a blocked warp tile ahead (doors), or a directional warp tile underfoot (mats).
     const held = inputDir(input);
+    // SecretBases_CheckForEnterExit: pushing into the base's entrance, or onto its exit.
+    if (held && held === p.facing && this.ug?.push(fx, fz)) return;
     if (held && held === p.facing) {
       // Field_CheckMapTransition: a map feature's push (Veilstone's bags) comes before the warps.
       if (this.feature?.push?.(held)) return;
@@ -1609,7 +1625,10 @@ export class FieldWorld implements OpenSinnohWorld {
     this.stepFade();
     if (this.warpState) this.stepWarp();
     if (this.ugTransit) this.stepUgTransit();
-    this.ug?.step();
+    this.ug?.step(input);
+    // A touch on the Underground's field: the touch radar (UndergroundMan_CheckForTouchInput).
+    const touched = input.tap?.match(/^tile:(\d+),(\d+)$/);
+    if (touched && this.ug && !this.warpState && !this.ugTransit && !this.scripts.running()) this.ug.touched(Number(touched[1]), Number(touched[2]));
     this.lookoutInput = input;
     if (this.lookout?.step()) this.lookout = null;
     if (this.safariScript && !this.warpState && !this.scripts.running()) {
@@ -1649,7 +1668,9 @@ export class FieldWorld implements OpenSinnohWorld {
     this.containment?.step();
     // The avatar task (an HM ride, a Strength push, deep mud, spin tiles) runs while a script waits on it.
     const task = !this.warpState && this.avatar.stepTask(input);
-    if (!task && !this.warpState && !this.ugTransit && !this.flyTask && !this.teleportTask && !this.scripts.running() && !p.script && !this.feature?.busy()) this.avatar.input(input);
+    // The Underground's traps hold the player or alter their steps (CommPlayer_Move, CommSys_ApplyMovementModifiers).
+    const moveInput = this.ug ? this.ug.input(input) : input;
+    if (moveInput && !task && !this.warpState && !this.ugTransit && !this.flyTask && !this.teleportTask && !this.scripts.running() && !p.script && !this.feature?.busy()) this.avatar.input(moveInput);
     // The Sprayduck task reads the held d-pad itself while its script waits (decomp BerryPatches_TaskMain).
     if (this.watering && !this.watering.done) this.watering.step(input.held);
     this.activatePatches();
@@ -2090,7 +2111,7 @@ export class FieldWorld implements OpenSinnohWorld {
       // Flash widening and the dark-map transition are not drawn yet; the radius is the weather's.
       darkness: weather.darkness ? { radius: weather.darkness.radius } : null,
       ...(Math.max(this.weatherTasks.flash(), this.cameraFlashLevel()) > 0 ? { lightning: Math.max(this.weatherTasks.flash(), this.cameraFlashLevel()) } : {}),
-      effects: [...this.effects.view(), ...(feature?.effects ?? []), ...soilEffects, ...this.radarEffects()],
+      effects: [...this.effects.view(), ...(feature?.effects ?? []), ...soilEffects, ...this.radarEffects(), ...(this.ug?.effects() ?? [])],
       cameraOffset: [this.cameraOffset[0] + this.cameraShake, this.cameraOffset[1], this.cameraOffset[2]],
       clock: { seconds: secondsSinceMidnight(clock), period: dayPeriod(clock.hour) },
       previews: this.previews(),
@@ -2130,6 +2151,7 @@ export class FieldWorld implements OpenSinnohWorld {
       };
       props.push(...this.honey.shakes.view(honey.prop, clip, this.state.tick));
     }
+    if (this.ug) props.push(...this.ug.props());
     if (props.length) view.props = props;
     const alpha = this.sweet?.alpha() ?? 0;
     if (alpha > 0) view.tint = { color: SWEET_SCENT_COLOR, alpha };
@@ -3107,11 +3129,16 @@ export class FieldWorld implements OpenSinnohWorld {
       state: this.state,
       scripts: this.scripts,
       tables,
-      player: () => ({ x: this.hero.x, z: this.hero.z, facing: this.hero.facing }),
-      blocked: (x, z) => this.tileBlocked(x, z),
-      objectAt: (x, z) => [...this.actors.values()].find((a) => a.x === x && a.z === z && a.visible)?.localId ?? null,
+      hero: () => this.hero,
+      blocked: (x, z) => this.grid.blocked(x, z),
+      heroBlocked: (x, z) => this.tileBlocked(x, z) || this.ugObjectAt(x, z) !== null,
+      objectAt: (x, z) => this.ugObjectAt(x, z),
       moving: () => !!this.hero.motion,
       matrix: () => ({ width: this.matrix.width, height: this.matrix.height }),
+      groundY: (x, z) => this.heightAt(tileCentre(x), tileCentre(z), this.hero.y),
+      baseMove: (x, z, facing, then) => this.startUgTransit(this.zone.id, x, z, false, { facing, then }),
+      trainerScore: (event) => this.addTrainerScore(event),
+      stub: (key, detail) => this.log.stub(key, detail),
       sparkle: (x, z) => void this.effects.add(SPARKLE_RENDERER, 'sparkle', [tileCentre(x), this.heightAt(tileCentre(x), tileCentre(z), this.hero.y), tileCentre(z)]),
       playSe: (name) => this.sound.playNamed(name),
       text: (id) => this.get('texts', id).text,
@@ -3119,6 +3146,11 @@ export class FieldWorld implements OpenSinnohWorld {
     });
     ug.arrive(load);
     return ug;
+  }
+
+  /** The visible object standing on an Underground tile (CommPlayer_CheckNPCCollision), its local id, or null. */
+  private ugObjectAt(x: number, z: number): number | null {
+    return [...this.actors.values()].find((a) => a.x === x && a.z === z && a.visible)?.localId ?? null;
   }
 
   /** GameRecords_IncrementTrainerScore (services' rule; the world does not depend on services). */
@@ -3165,13 +3197,14 @@ export class FieldWorld implements OpenSinnohWorld {
    * (Sound_FadeOutBGM 30 frames) and the screen with it, the map changes (facing down), the screen fades back in.
    * The hole's jump and the descent animations (underground_map_transition.c) are not drawn yet.
    */
-  private startUgTransit(zone: Id, x: number, z: number, down: boolean): void {
+  private startUgTransit(zone: Id, x: number, z: number, down: boolean, base?: { facing: Facing; then: () => void }): void {
     if (this.warpState || this.ugTransit) throw new Error('world: a map change is already under way');
     this.get('zones', zone);
     this.hero.motion = null;
     this.moving = false;
-    this.sound.audio.fadeOutBgm(0, 15);
-    this.ugTransit = { phase: 'out', zone, x, z, down };
+    // The secret base's move keeps the BGM (SecretBases_MoveToFromSecretBaseTask fades the screens only).
+    if (!base) this.sound.audio.fadeOutBgm(0, 15);
+    this.ugTransit = { phase: 'out', zone, x, z, down, ...(base ? { base } : {}) };
     this.fade('out', WARP_FADE_TICKS, 'black');
   }
 
@@ -3180,6 +3213,14 @@ export class FieldWorld implements OpenSinnohWorld {
     if (this.fadeAnim || this.sound.audio.fadeActive()) return;
     if (t.phase === 'in') {
       this.ugTransit = null;
+      t.base?.then();
+      return;
+    }
+    if (t.base) {
+      this.ugKeep = this.ug;
+      this.loadMap(t.zone, t.x, t.z, 0, t.base.facing);
+      t.phase = 'in';
+      this.fade('in', WARP_FADE_TICKS, 'black');
       return;
     }
     const zone = this.get('zones', t.zone);
@@ -3199,6 +3240,22 @@ export class FieldWorld implements OpenSinnohWorld {
   undergroundAppDone(result: AppResult): void {
     if (!this.ug) throw new Error(`world: an Underground app (${result.app}) closed outside the Underground`);
     this.ug.appDone(result);
+    // UndergroundMenu's Digger Drill (SecretBases_UseDiggerDrill).
+    if (result.app === 'ug-menu' && result.drill !== undefined) this.ug.drill(result.drill);
+  }
+
+  undergroundDecoration(view: UndergroundDecorationView | null): void {
+    if (!this.ug) throw new Error('world: the decoration ran outside the Underground');
+    this.ug.decoration = view;
+    // UndergroundPC_DecorateTask: the player is hidden while the camera looks at the room.
+    this.hero.visible = view === null;
+    this.cameraYHistory = [];
+    this.updateCamera();
+    this.cameraPrev = [...this.cameraCur];
+  }
+
+  undergroundPlace() {
+    return this.ug?.place() ?? null;
   }
 
   undergroundAhead() {

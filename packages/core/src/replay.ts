@@ -338,7 +338,7 @@ function parseAction(verb: string | undefined, rest: string[], tail: string, err
   if (verb === 'reset' && rest.length === 0) return { type: 'reset' };
   if (verb === 'open' && rest.length === 1 && rest[0] === 'mystery-gift') return { type: 'open', app: 'mystery-gift' };
   if (verb === 'date' || verb === 'time') return parseClock(verb, rest, err);
-  if (verb === 'tap' && rest.length === 1 && (/^[a-z-]+(:[a-z0-9+-]+)*$/.test(rest[0]!) || /^type:\S+$/.test(rest[0]!) || /^pen:-?\d+,-?\d+(;-?\d+,-?\d+)*$/.test(rest[0]!) || /^(spoon|hit):-?\d+,-?\d+$/.test(rest[0]!))) return { type: 'tap', id: rest[0]! };
+  if (verb === 'tap' && rest.length === 1 && (/^[a-z-]+(:[a-z0-9+-]+)*$/.test(rest[0]!) || /^type:\S+$/.test(rest[0]!) || /^pen:-?\d+,-?\d+(;-?\d+,-?\d+)*$/.test(rest[0]!) || /^(spoon|hit|tile|rub):-?\d+,-?\d+$/.test(rest[0]!))) return { type: 'tap', id: rest[0]! };
   if (verb === 'screenshot' && rest.length === 1 && /^[A-Za-z0-9_-]+$/.test(rest[0]!)) return { type: 'screenshot', name: rest[0]! };
   if (verb === 'viewport' && rest.length === 1) {
     const m = /^(\d+)x(\d+)$/.exec(rest[0]!) ?? err();

@@ -28,6 +28,10 @@ export const UNDERGROUND_LIMITS = {
   shop: 5,
   /** MAX_NORMAL_RADAR_BLIPS. */
   blips: 8,
+  /** MAX_PLACED_TRAPS, MAX_PLACED_GOODS, MAX_BASE_BOULDERS. */
+  placedTraps: 16,
+  placedGoods: 15,
+  boulders: 16,
 } as const;
 /**
  * Decomp enum MiningObjectID: 1–10 the spheres (small then large, in SphereType order), 11–59 the treasures
@@ -77,6 +81,32 @@ export interface BuriedSphere {
   growth: number;
 }
 
+/** A trap the player laid (decomp placedTrapIDs/placedTrapCoordinates), on an Underground tile. */
+export interface PlacedTrap {
+  trap: number;
+  x: number;
+  z: number;
+}
+
+/** A good on display in the secret base (decomp PlacedGood and its placedGoodSlots entry): base tiles, its goods PC slot. */
+export interface PlacedGood {
+  good: number;
+  x: number;
+  z: number;
+  slot: number;
+}
+
+/**
+ * The player's secret base (decomp SecretBase, the part a solo game uses): the entrance (the wall tile drilled, and
+ * the way out of it: SecretBase_SetEntrance's opposite of the facing), the goods on display by slot (MAX_PLACED_GOODS)
+ * and the boulders (MAX_BASE_BOULDERS; null: removed), in base tiles (0–31).
+ */
+export interface SecretBase {
+  entrance: { x: number; z: number; dir: 'up' | 'down' | 'left' | 'right' };
+  goods: (PlacedGood | null)[];
+  boulders: ({ x: number; z: number } | null)[];
+}
+
 /** The Underground's save block (contracts `UndergroundState` documents each field). */
 export interface UndergroundState {
   seed: number;
@@ -91,9 +121,11 @@ export interface UndergroundState {
   spots: { x: number; z: number }[];
   spawnedTraps: ({ trap: number; x: number; z: number } | null)[];
   plates: number;
-  records: { spheresDug: number; fossilsDug: number; otherDug: number };
+  records: { spheresDug: number; fossilsDug: number; otherDug: number; trapsTriggered: number; baseMoves: number };
   steps: number;
   vendorTalks: number[];
+  placedTraps: PlacedTrap[];
+  base: SecretBase | null;
 }
 
 // ---------------------------------------------------------------- the DS's generators
@@ -183,9 +215,11 @@ export function newUnderground(seed: number): UndergroundState {
     spots: [],
     spawnedTraps: Array.from({ length: UNDERGROUND_LIMITS.spawnedTraps }, () => null),
     plates: 0,
-    records: { spheresDug: 0, fossilsDug: 0, otherDug: 0 },
+    records: { spheresDug: 0, fossilsDug: 0, otherDug: 0, trapsTriggered: 0, baseMoves: 0 },
     steps: 0,
     vendorTalks: [],
+    placedTraps: [],
+    base: null,
   };
 }
 
