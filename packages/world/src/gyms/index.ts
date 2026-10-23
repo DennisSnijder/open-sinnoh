@@ -9,6 +9,7 @@ import { GreatMarshTram } from './great-marsh.ts';
 import { newGameRecord } from '@opensinnoh/contracts';
 import { gymTables, type FeatureHost, type MapFeature } from './feature.ts';
 import { DistortionWorld } from '../distortion/feature.ts';
+import { Villa } from '../villa.ts';
 
 export { SunyshoreGym } from './sunyshore.ts';
 export { EternaGym, type EternaClockTask } from './eterna.ts';
@@ -47,6 +48,9 @@ export function initMapFeatures(state: GameState, registries: Registries, kind: 
       // PersistedMapFeatures_InitForGreatMarsh: only when the slot is not the marsh's already (a connection keeps it).
       if (state.mapFeatures?.kind !== kind) state.mapFeatures = { kind, tram: 2 };
       return;
+    case 'villa':
+      state.mapFeatures = { kind };
+      return;
     case 'distortion-world':
       // PersistedMapFeatures_InitForDistortionWorld: cleared, not valid until the room's first load fills it.
       state.mapFeatures = { kind, valid: false, hiddenGhostGroups: 0, support: null, cameraAngle: [0, 0, 0], platformFlags: 0, puzzleFlags: 0, movingDir: state.player.facing, platforms: [] };
@@ -64,6 +68,7 @@ export function createMapFeature(host: FeatureHost): MapFeature | null {
   if (kind === 'pastoria-gym') return new PastoriaGym(host);
   if (kind === 'canalave-gym') return new CanalaveGym(host);
   if (kind === 'distortion-world') return new DistortionWorld(host);
+  if (kind === 'villa') return new Villa(host);
   if (kind === 'great-marsh') return new GreatMarshTram(host, newGameRecord(host.reg).greatMarsh?.tram ?? null);
   return null;
 }

@@ -1152,6 +1152,9 @@ export class FieldWorld implements OpenSinnohWorld {
       // Water, waterfalls and rock walls start their FIELD_MOVES script (Field_TileBehaviorToScript).
       const fieldMove = this.avatar.fieldMoveScript(fx, fz);
       if (fieldMove) return this.scripts.start({ label: fieldMove, zone, source: 'bg' });
+      // FieldSystem_TrySetVillaFurnitureScript: the map feature's own A (the Villa's furniture), last.
+      const featureScript = this.feature?.interact?.(fx, fz, p.facing);
+      if (featureScript) return this.scripts.start({ label: featureScript, zone, source: 'bg' });
     }
 
     if (stepped) {
@@ -1904,7 +1907,7 @@ export class FieldWorld implements OpenSinnohWorld {
         this.fade('out', WARP_FADE_TICKS, this.fadeColor);
         return;
       case 'out': {
-        onWarp(this.reg, this.state, this.get('zones', w.zone));
+        onWarp(this.reg, this.state, this.zone, this.get('zones', w.zone));
         // FieldMapChange_SetNewLocation: the location left becomes the previous one.
         this.state.previousZone = this.zone.id;
         this.loadMap(w.zone, w.x, w.z, 0, w.facing);
@@ -2651,7 +2654,7 @@ export class FieldWorld implements OpenSinnohWorld {
       hidePlayer: (hidden: boolean) => void (this.hero.visible = !hidden),
       changeMap: () => {
         this.state.playerState = 'walk';
-        onWarp(this.reg, this.state, this.get('zones', dest.zone));
+        onWarp(this.reg, this.state, this.zone, this.get('zones', dest.zone));
         this.state.previousZone = this.zone.id;
         this.loadMap(dest.zone, dest.x, dest.z, 0, 'down');
         onFlyOrTeleport(this.reg, this.state);
@@ -2690,7 +2693,7 @@ export class FieldWorld implements OpenSinnohWorld {
       face: (facing) => void (this.hero.facing = facing),
       changeMap: () => {
         this.state.playerState = 'walk';
-        onWarp(this.reg, this.state, this.get('zones', dest.zone));
+        onWarp(this.reg, this.state, this.zone, this.get('zones', dest.zone));
         this.state.previousZone = this.zone.id;
         this.loadMap(dest.zone, dest.x, dest.z, 0, kind === 'dig' ? (dest.facing ?? 'down') : 'down');
         if (kind === 'dig') onEscape(this.reg, this.state);
@@ -3183,7 +3186,7 @@ export class FieldWorld implements OpenSinnohWorld {
       return;
     }
     const zone = this.get('zones', t.zone);
-    onWarp(this.reg, this.state, zone);
+    onWarp(this.reg, this.state, this.zone, zone);
     this.state.previousZone = this.zone.id;
     this.loadMap(t.zone, t.x, t.z, 0, 'down');
     // CommManUnderground_EnterUnderground: TRAINER_SCORE_EVENT_UNDERGROUND_ENTERED.

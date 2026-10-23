@@ -17,7 +17,7 @@ import type { SoundSystem } from './sound.ts';
 import { useVsSeeker } from './vs-seeker.ts';
 
 /** Decomp ITEM_USE_FUNC_* (constants/items.h) the field checks or runs. */
-const USE = { none: 0, explorerKit: 3, bicycle: 4, berry: 8, poffinCase: 9, pokeRadar: 11, sprayduck: 12, mulch: 13, honey: 14, vsSeeker: 15, oldRod: 16, goodRod: 17, superRod: 18, bagMessage: 19, escapeRope: 21, azureFlute: 22 } as const;
+const USE = { none: 0, townMap: 2, explorerKit: 3, journal: 5, bicycle: 4, berry: 8, poffinCase: 9, pokeRadar: 11, sprayduck: 12, mulch: 13, honey: 14, vsSeeker: 15, oldRod: 16, goodRod: 17, superRod: 18, bagMessage: 19, escapeRope: 21, azureFlute: 22 } as const;
 /** Decomp MapHeader_IsAzureFluteAllowed: MAP_HEADER_SPEAR_PILLAR, _DIALGA, _PALKIA (`zones` sourceIndex). */
 const AZURE_FLUTE_ZONES = [220, 584, 585];
 /** Decomp FLAG_GAME_COMPLETED, DISTRIBUTION_EVENT_ARCEUS; the Azure Flute's script (UseAzureFluteInField: common script 39). */
@@ -40,8 +40,8 @@ export interface FieldItemDeps {
   log: StubLog;
   /** The base pack's namespace (the messages are its `Bag_Text_*` and `CommonStrings_Text_*` texts). */
   ns: string;
-  /** Opens a menu app over the field (the Poffin Case on Y). */
-  openApp(request: { app: 'poffin-case' }): void;
+  /** Opens a menu app over the field (the Poffin Case on Y, the journal, the Town Map). */
+  openApp(request: { app: 'poffin-case' } | { app: 'journal' } | { app: 'town-map' }): void;
 }
 
 const local = (id: Id) => id.slice(id.indexOf(':') + 1);
@@ -121,7 +121,7 @@ export function itemUseErrorText(error: ItemUseError, player: string): { name: s
 
 /** Whether the item's use runs on the field once the bag has closed (the rest are bag-side or stubs). */
 export function runsOnField(d: Pick<FieldItemDeps, 'registries'>, item: Id): boolean {
-  const uses: readonly number[] = [USE.explorerKit, USE.bicycle, USE.pokeRadar, USE.sprayduck, USE.mulch, USE.honey, USE.vsSeeker, USE.oldRod, USE.goodRod, USE.superRod, USE.escapeRope, USE.azureFlute];
+  const uses: readonly number[] = [USE.townMap, USE.journal, USE.explorerKit, USE.bicycle, USE.pokeRadar, USE.sprayduck, USE.mulch, USE.honey, USE.vsSeeker, USE.oldRod, USE.goodRod, USE.superRod, USE.escapeRope, USE.azureFlute];
   return uses.includes(fieldUse(d, item));
 }
 
@@ -133,6 +133,9 @@ export function runsOnField(d: Pick<FieldItemDeps, 'registries'>, item: Id): boo
 export function useFieldItem(d: FieldItemDeps, item: Id): void {
   const use = fieldUse(d, item);
   if (use === USE.vsSeeker) return useVsSeeker(d);
+  // UseJournalFromMenu / UseJournalInField and UseTownMapFromMenu / UseTownMapInField: their apps over the field.
+  if (use === USE.journal) return d.openApp({ app: 'journal' });
+  if (use === USE.townMap) return d.openApp({ app: 'town-map' });
   // UseExplorerKitFromMenu / UseExplorerKitInField: FieldTask_MapChangeToUnderground.
   if (use === USE.explorerKit) return d.world.enterUnderground();
   // Packs without the special encounters (the original fixture) have no Radar or Sweet Scent to run: logged.

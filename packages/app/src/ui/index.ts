@@ -234,7 +234,7 @@ export function mountUi(deps: UiDeps): InGameUi {
   /** Phones (portrait, or landscape with the side controls) show a DS screen full screen. */
   const phone = () => layer.dataset.mode === 'compact' || layer.dataset.controls === 'side';
   const build = (view: AppView, dot: number, u: number, entering: boolean) => {
-    const ctx: DrawContext = { text: (s, palette = 'ink', className, k = dot) => font().label(s, palette, k, className), flow: (s, lines, palette = 'ink', k = dot) => font().flow(s, palette, k, lines), measure: (s) => font().measure(s), tap: deps.tap, art, registries: deps.game().registries, frame: deps.frame(), scale: dot, unit: u, compact: layer.dataset.mode === 'compact', options, size: roomSize(), gender: deps.game().state.gender, sound: () => ({ tick: deps.game().state.tick, cryTicks: deps.game().sound.cryTicks() }) };
+    const ctx: DrawContext = { text: (s, palette = 'ink', className, k = dot) => font().label(s, palette, k, className), flow: (s, lines, palette = 'ink', k = dot) => font().flow(s, palette, k, lines), measure: (s) => font().measure(s), paint: (g, s, palette, x, y) => font().draw(g, s, palette, x, y), tap: deps.tap, art, registries: deps.game().registries, frame: deps.frame(), scale: dot, unit: u, compact: layer.dataset.mode === 'compact', options, size: roomSize(), gender: deps.game().state.gender, sound: () => ({ tick: deps.game().state.tick, cryTicks: deps.game().sound.cryTicks() }) };
     const { kind, root } = drawApp(ctx, view);
     // A view that patches itself in place (the Pokédex list keeps its rows and scroll position).
     if (root.isConnected) return null;

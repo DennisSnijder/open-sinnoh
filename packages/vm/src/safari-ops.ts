@@ -3,6 +3,7 @@
  * ScrCmd_StartEndSafariGame, ScrCmd_InitGreatMarshTram, ScrCmd_MoveGreatMarshTram, ScrCmd_CheckGreatMarshTramLocation,
  * ScrCmd_StartGreatMarshLookout; scrcmd_tv_broadcast.c ScrCmd_GetCurrentSafariGameCaughtNum). Names and behaviour only.
  */
+import { JOURNAL_EVENT, journalEvent } from '@opensinnoh/contracts';
 import { newGameRecord } from '@opensinnoh/contracts';
 import type { Handler, Runner } from './runner.ts';
 
@@ -29,7 +30,7 @@ export function safariHandlers(r: Runner): Record<string, Handler> {
     /**
      * ScrCmd_StartEndSafariGame: start sets FLAG_SAFARI_GAME_ACTIVE, 30 balls, 0 steps and resets the game's catch
      * count (TVBroadcast_ResetSafariGameData); end clears the flag, balls and steps (the catch count stays for
-     * get_current_safari_game_caught_num). The TV bulletin and the journal entry it also writes are those systems'.
+     * get_current_safari_game_caught_num). The end writes the journal's Safari Game entry; the TV bulletin is the TV's.
      */
     start_end_safari_game: (t, _c, a) => {
       const g = marsh();
@@ -40,7 +41,8 @@ export function safariHandlers(r: Runner): Record<string, Handler> {
       } else if (mode === SAFARI_GAME_INACTIVE) {
         r.setFlag(g.flag, false);
         r.state.safari = { balls: 0, steps: 0, caught: r.state.safari?.caught ?? 0 };
-        r.log.stub('safari:tv-journal', 'the Safari Game TV bulletin and journal entry are not recorded (TV and journal)');
+        r.log.stub('safari:tv', 'the Safari Game TV bulletin is not recorded (TV)');
+        journalEvent(r.registries, r.state, JOURNAL_EVENT.safari);
       } else throw new Error(`start_end_safari_game: mode ${mode}`);
       return 'continue';
     },

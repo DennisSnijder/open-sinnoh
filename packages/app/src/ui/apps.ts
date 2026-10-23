@@ -15,6 +15,7 @@ import { drawPokedex } from './dex.ts';
 import { evolution } from './evolution.ts';
 import { hatch } from './hatch.ts';
 import { libraryTv } from './library-tv.ts';
+import { diploma, journal } from './journal.ts';
 import { townMap } from './town-map.ts';
 import { rowanIntro } from './rowan-intro.ts';
 import { moveReminder } from './move-reminder.ts';
@@ -47,6 +48,8 @@ export interface DrawContext {
   frame: number;
   /** Width of a line in font pixels. */
   measure(s: string): number;
+  /** Draws one line in the game font onto a canvas at 1:1 (DS screens that paint their text: the journal). Absent: no text. */
+  paint?(g: CanvasRenderingContext2D, s: string, palette: Palette, x: number, y: number): void;
   /** The OPTIONS screen (its page, cursor and the app's settings); absent outside a game. */
   options?: OptionsScreen;
   /** CSS px per font pixel on the generic sheets (the dot grid): pixel art canvases are drawn at this scale. */
@@ -139,6 +142,10 @@ export function drawApp(d: DrawContext, v: AppView): Drawn {
       return { kind: 'scene', root: hatch(d, v) };
     case 'library-tv':
       return { kind: 'scene', root: libraryTv(d, v) };
+    case 'journal':
+      return { kind: 'scene', root: journal(d, v) };
+    case 'diploma':
+      return { kind: 'scene', root: diploma(d, v) };
     case 'town-map':
       return { kind: 'scene', root: townMap(d, v) };
     case 'hall-of-fame':

@@ -1,5 +1,5 @@
 import { hasFieldSystems, resetSeeker, type Id } from '@opensinnoh/core';
-import type { GameState, Registries, Zone } from '@opensinnoh/contracts';
+import { journalWarp, journalZoneConnection, type GameState, type Registries, type Zone } from '@opensinnoh/contracts';
 import { FLAG_STRENGTH_ACTIVE } from './avatar.ts';
 import { roamersOnContinue, roamersOnWarp, roamersOnZoneConnection } from './roamers.ts';
 
@@ -40,20 +40,32 @@ export function unlockFlyLocation(state: GameState, zone: Zone): void {
   if (zone.firstArrival) state.flags[zone.firstArrival] = true;
 }
 
-/** FieldSystem_InitFlagsOnMapChange (a zone connection into `zone`): Strength wears off; the fly location unlocks; the roamers move. */
+/** CreateFlyLocationJournalEvent's test: the zone has a fly location that is not unlocked yet (an arrival). */
+function firstArrival(reg: Registries, state: GameState, zone: Zone): boolean {
+  const f = zone.firstArrival;
+  return !!f && !(state.flags[f] ?? reg.flags.get(f)!.initial);
+}
+
+/**
+ * FieldSystem_InitFlagsOnMapChange (a zone connection into `zone`): the journal's arrival; Strength wears off; the fly
+ * location unlocks; the roamers move.
+ */
 export function onZoneConnection(reg: Registries, state: GameState, zone: Id): void {
+  const z = reg.zones.get(zone)!;
+  journalZoneConnection(reg, state, z, firstArrival(reg, state, z));
   if (hasFieldSystems(reg)) resetSeeker(reg, state);
   clearFlag(reg, state, FLAG_STRENGTH_ACTIVE);
-  unlockFlyLocation(state, reg.zones.get(zone)!);
+  unlockFlyLocation(state, z);
   roamersOnZoneConnection(reg, state, zone);
 }
 
 /**
- * FieldSystem_InitFlagsWarp (decomp src/field_map_change_flags.c), run for the destination of every warp:
- * the gate's forced bike and the Cycling Road flag clear; Strength wears off; the fly location unlocks; Flash and Defog wear off unless the new map is a cave; surfing becomes walking, and
+ * FieldSystem_InitFlagsWarp (decomp src/field_map_change_flags.c), run for the destination of every warp from `from`:
+ * the journal's arrival or map-transition entry; the gate's forced bike and the Cycling Road flag clear; Strength wears off; the fly location unlocks; Flash and Defog wear off unless the new map is a cave; surfing becomes walking, and
  * cycling becomes walking where the new map does not allow the bike; the roamers note the new zone.
  */
-export function onWarp(reg: Registries, state: GameState, dest: Zone): void {
+export function onWarp(reg: Registries, state: GameState, from: Zone, dest: Zone): void {
+  journalWarp(reg, state, from, dest, firstArrival(reg, state, dest));
   if (hasFieldSystems(reg)) resetSeeker(reg, state);
   // SystemFlag_HandleForceBikingInGate(CLEAR), SystemFlag_ClearOnCyclingRoad: a gate's forced bike ends with it.
   clearFlag(reg, state, FLAG_FORCE_BIKING_IN_GATE);

@@ -25,7 +25,7 @@ export function testMon(registries: Registries, species: string, level: number, 
 
 export function newState(): GameState {
   return {
-    schemaVersion: 20,
+    schemaVersion: 21,
     packs: [],
     names: { player: 'Ari', rival: 'Bo' },
     gender: 'male',
@@ -67,6 +67,7 @@ export function newState(): GameState {
     poffins: [],
     fashionCase: newFashionCase(),
     contestPhotos: [null, null, null, null, null],
+    journal: [],
     signature: null,
     options: { sound: 0, battleScene: 0, battleStyle: 0, buttonMode: 0, frame: 0 },
     daycare: emptyDaycare(),

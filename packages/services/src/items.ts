@@ -9,7 +9,7 @@ import { dexOf, giveItem, itemCount, ITEM_WHEEL_SIZE, takeItem, type GameState, 
 import { heldItemChanged } from './forms.ts';
 
 /** Decomp ITEM_USE_FUNC_* (item.h) values the field uses. */
-export const FIELD_USE = { none: 0, healing: 1, explorerKit: 3, bicycle: 4, poffinCase: 9, pokeRadar: 11, sprayduck: 12, mulch: 13, honey: 14, vsSeeker: 15, oldRod: 16, goodRod: 17, superRod: 18, escapeRope: 21, tmHm: 6, berry: 8, bagMessage: 19, evoStone: 20, azureFlute: 22, gracidea: 24 } as const;
+export const FIELD_USE = { none: 0, healing: 1, townMap: 2, explorerKit: 3, journal: 5, bicycle: 4, poffinCase: 9, pokeRadar: 11, sprayduck: 12, mulch: 13, honey: 14, vsSeeker: 15, oldRod: 16, goodRod: 17, superRod: 18, escapeRope: 21, tmHm: 6, berry: 8, bagMessage: 19, evoStone: 20, azureFlute: 22, gracidea: 24 } as const;
 /** Decomp HEAL_FULL_HP / HEAL_HALF_HP / HEAL_QUARTER_HP and HEAL_FULL_PP. */
 const HEAL_FULL = 255;
 const HEAL_HALF = 254;
@@ -62,6 +62,8 @@ export function fieldUseOf(registries: Registries, id: Id): 'party' | 'tm' | 're
     case FIELD_USE.gracidea:
       // Decomp UseGracideaFromMenu: the party picks the Shaymin (PartyMenu ApplyItemEffectOnPokemon).
       return 'party';
+    case FIELD_USE.townMap: // UseTownMapFromMenu: the Town Map to look at
+    case FIELD_USE.journal: // UseJournalFromMenu: the journal
     case FIELD_USE.explorerKit: // UseExplorerKitFromMenu: FieldTask_MapChangeToUnderground
     case FIELD_USE.bicycle:
     case FIELD_USE.pokeRadar: // UsePokeRadarFromMenu: RefreshRadarChain

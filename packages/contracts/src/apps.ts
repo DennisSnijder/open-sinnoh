@@ -180,6 +180,15 @@ export type AppRequest =
    */
   | { app: 'library-tv' }
   /**
+   * 0.37.0. The journal (decomp journal_display, ITEM_USE_FUNC_JOURNAL and the auto-open on CONTINUE): today's page
+   * first, Left/B to newer pages, A/Right to older ones, B on page 0 or START closes.
+   */
+  | { app: 'journal' }
+  /** 0.37.0. A diploma (decomp ScrCmd_ShowDiplomaSinnoh / ShowDiplomaNationalDex → applications/diploma.c). */
+  | { app: 'diploma'; national: boolean }
+  /** 0.37.0. The Town Map to look at (decomp ScrCmd_OpenRegionMap → TOWN_MAP_MODE_WALL_MAP): no flying; B closes. */
+  | { app: 'town-map' }
+  /**
    * 0.27.19. The Hall of Fame (docs/research/hall-of-fame-credits.md §3): `record` is the Champion's induction
    * (decomp HallOfFameManager, opened by `clear_game` over the live party), `pc` the PC's viewer of the saved
    * entries (decomp PCHallOfFameManager, `open_pc_hall_of_fame_screen`; read only).
@@ -306,7 +315,11 @@ export interface NamingRequest {
 export type AppResult =
   /** 0.29.1: `retire`, RETIRE was picked (decomp StartMenu_SelectRetire: the menu closes and SAFARI_GAME 21 starts). */
   | { app: 'start-menu'; retire?: true }
-  | { app: 'mart' }
+  /**
+   * 0.37.0: `bought` and `sold`, the shop's purchase and sale counts for the journal (decomp itemPurchaseCount,
+   * itemSoldCount: +1 per single item, 2 once a purchase or sale is of more than one; the sales of the last SELL visit).
+   */
+  | { app: 'mart'; bought?: number; sold?: number }
   /** 0.23.0: `move`, the move slot a one-move PP item (Ether, Leppa Berry) restores. */
   | { app: 'bag-select'; item: Id | null; target: number | null; move?: number }
   | { app: 'party-select'; slot: number | null }
@@ -322,6 +335,9 @@ export type AppResult =
   | { app: 'hatch'; nickname: string | null }
   | { app: 'signature' }
   | { app: 'library-tv' }
+  | { app: 'journal' }
+  | { app: 'diploma' }
+  | { app: 'town-map' }
   | { app: 'hall-of-fame' }
   | { app: 'credits' }
   /** 0.28.1. The move slot to forget, or null (the new move, or B). 0.29.0: with no new move, the move slot picked. */
@@ -468,6 +484,8 @@ export type AppView =
   | EvolutionView
   | HatchView
   | LibraryTvView
+  | JournalView
+  | DiplomaView
   | TownMapView
   | HallOfFameView
   | CreditsView
@@ -1179,6 +1197,46 @@ export interface EvolutionParticleView {
 export interface LibraryTvView {
   app: 'library-tv';
   scanY: number;
+  black: number;
+}
+
+/**
+ * 0.37.0. The journal (decomp journal_display/journal_controller.c, journal_printer.c), stepped once per tick: one 256×192
+ * DS screen. Each page is the paper (`JournalTables.art` by gender, cell = the page number: page n's paper palette) and
+ * its text in the system font (colours 1/2): `title` at (16, 16) and `weekday` 12 px after it; `rows` in the events window
+ * at (32, 32) + (0, y). While a page turns, `turn` names the page on top and the wipe step (0–8) of
+ * `JournalTables.pageTurn`: destination tile column i shows the top page's column `pageTurn[step][i]`, or the page under
+ * it where that is 0xFF. `black` is the screen fade (0 shown, 16 black). Taps: `prev` (newer), `next` (older), `back`.
+ */
+export interface JournalView {
+  app: 'journal';
+  gender: 'male' | 'female';
+  /** The page shown (under a turn: the page under the wipe). */
+  page: JournalPageView;
+  turn: { step: number; page: JournalPageView } | null;
+  /** Newer and older pages exist (the taps' targets). */
+  newer: boolean;
+  older: boolean;
+  black: number;
+}
+
+/** One printed journal page: its number (the paper palette) and lines. */
+export interface JournalPageView {
+  index: number;
+  title: string;
+  weekday: string;
+  rows: { y: number; text: string }[];
+}
+
+/**
+ * 0.37.0. A diploma (decomp applications/diploma.c, Diploma_Main), stepped once per tick: the document sheet
+ * (`NewGame.diploma` sinnoh / national) with three lines in the system font (colours 1/2) at their DS positions;
+ * `black` the brightness fade (0 shown, 16 black). Taps: `next` (A, B or a touch once the document has settled).
+ */
+export interface DiplomaView {
+  app: 'diploma';
+  sheet: Id;
+  lines: { text: string; x: number; y: number }[];
   black: number;
 }
 

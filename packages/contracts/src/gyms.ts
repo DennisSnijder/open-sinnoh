@@ -48,7 +48,12 @@ export type MapFeatures =
    */
   | { kind: 'great-marsh'; tram: number }
   /** The Distortion World (0.27.18; `distortion.ts`). */
-  | import('./distortion.ts').DistortionWorldFeature;
+  | import('./distortion.ts').DistortionWorldFeature
+  /**
+   * 0.37.0. The Villa (decomp InitPersistedMapFeaturesForVilla: a dummy int, zeroed): the furniture is built from its
+   * flags on every map load (`villa.ts`).
+   */
+  | { kind: 'villa' };
 
 /** Eterna Gym's flower clock (gym_features.c, EternaGym_*). States index every table (ETERNA_CLOCK_MAX = 5). */
 export interface EternaGymTables {

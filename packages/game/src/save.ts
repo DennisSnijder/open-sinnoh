@@ -1,5 +1,5 @@
 /** Save boundary: strict envelope validation, pack-set match and id resolution. */
-import { ACCESSORIES, CONTEST_RANKS, CONTEST_TYPES, BERRY_STAGES, newFashionCase, POFFIN_CASE_SIZE, POFFIN_TYPES, type FashionCase, BOX_SIZE, COINS_MAX, DW_PLATFORM_FLAGS, DW_PUZZLE_FLAGS, GAME_RECORDS, HALL_OF_FAME_ENTRIES, HALL_OF_FAME_TOTAL_MAX, DEFAULT_DEVICE_OPTIONS, ITEM_WHEEL_SIZE, DEFAULT_WALLPAPERS, DELIVERY_SLOTS, EXTRA_WALLPAPERS, TABLET_NAME_LENGTH, markSeen, MONEY_MAX, newPoketchState, newRoamerState, ROAMING_SLOTS, PLAY_HOURS_MAX, POKETCH_COLORS, POKETCH_DEFAULT_MARKERS, POKETCH_HISTORY_MAX, POKETCH_PEDOMETER_MAX, poketchAppIndex, seenFormOf, setupPidIvs, trainerIdFor, type GameState, type Labels, type MysteryGiftState, WONDER_CARD_SLOTS, type ObjectState, type PoketchState, type Registries, type SaveEnvelope } from '@opensinnoh/contracts';
+import { ACCESSORIES, JOURNAL_LOCATION_EVENTS, JOURNAL_PAGES, CONTEST_RANKS, CONTEST_TYPES, BERRY_STAGES, newFashionCase, POFFIN_CASE_SIZE, POFFIN_TYPES, type FashionCase, BOX_SIZE, COINS_MAX, DW_PLATFORM_FLAGS, DW_PUZZLE_FLAGS, GAME_RECORDS, HALL_OF_FAME_ENTRIES, HALL_OF_FAME_TOTAL_MAX, DEFAULT_DEVICE_OPTIONS, ITEM_WHEEL_SIZE, DEFAULT_WALLPAPERS, DELIVERY_SLOTS, EXTRA_WALLPAPERS, TABLET_NAME_LENGTH, markSeen, MONEY_MAX, newPoketchState, newRoamerState, ROAMING_SLOTS, PLAY_HOURS_MAX, POKETCH_COLORS, POKETCH_DEFAULT_MARKERS, POKETCH_HISTORY_MAX, POKETCH_PEDOMETER_MAX, poketchAppIndex, seenFormOf, setupPidIvs, trainerIdFor, type GameState, type Labels, type MysteryGiftState, WONDER_CARD_SLOTS, type ObjectState, type PoketchState, type Registries, type SaveEnvelope } from '@opensinnoh/contracts';
 import { addItem, CONDITIONS, createPokemon, MAX_CONDITION, zeroCondition, DAYCARE_SLOTS, DEFAULT_CLOCK, Dex, emptyBag, emptyDaycare, HONEY_SLATHER_MINUTES, HONEY_TREES, isDate, PARTY_SIZE, RADAR_BATTERY_STEPS, RADAR_CHAIN_MAX, RADAR_RECORDS, STATS, UNDERGROUND_LIMITS, type Id, type Pokemon, type UndergroundState } from '@opensinnoh/core';
 import { newBerryPatches } from '@opensinnoh/services';
 import { arr, bool, collectRefs, dict, id, int, lit, nullable, num, obj, ref, str, opt, tagged, tuple, validate, ValidationError, type Schema } from './schema.ts';
@@ -295,6 +295,8 @@ const mapFeaturesSchema: Schema = nullable(
     'sunyshore-gym': obj({ kind: lit('sunyshore-gym'), roomID: int(0, 2), rotationState: int(0, 3) }),
     // 0.29.1 (decomp GreatMarshTramState); same schema v17: older saves hold none.
     'great-marsh': obj({ kind: lit('great-marsh'), tram: int(0, 2) }),
+    // 0.37.0 (decomp VillaPersistedData, a dummy int); in the v21 schema, older saves hold none.
+    villa: obj({ kind: lit('villa') }),
     // 0.27.18 (decomp DistWorldPersistedData); same schema v15: older saves hold none.
     'distortion-world': obj({
       kind: lit('distortion-world'),
@@ -359,7 +361,7 @@ const stateV17Fields: Record<string, Schema> = {
 export const GAME_STATE_V17_SCHEMA: Schema = obj(stateV17Fields, stateV7Check);
 
 /** The state version this build writes (older ones are migrated on load). */
-export const SAVE_SCHEMA_VERSION = 20;
+export const SAVE_SCHEMA_VERSION = 21;
 
 /** Decomp BerryPatch (0.29.0): an empty patch has no berry, stage none and no yield. */
 const berryPatchSchema: Schema = obj(
@@ -526,13 +528,23 @@ const contestPhotoSchema: Schema = obj({
   dressUp: dressUpSchema,
 });
 
+const stateV20Fields: Record<string, Schema> = { ...stateV19Fields, schemaVersion: lit(20), contestPhotos: arr(nullable(contestPhotoSchema)) };
+const stateV20Check = (v: Record<string, unknown>) => stateV19Check(v) ?? ((v.contestPhotos as unknown[]).length !== CONTEST_TYPES.length ? `contestPhotos must have ${CONTEST_TYPES.length} slots` : undefined);
+/** Saves with the contest photos (v20) before the journal. Only read to migrate. */
+export const GAME_STATE_V20_SCHEMA: Schema = obj(stateV20Fields, stateV20Check);
+
+/** contracts `JournalPage` (schema v21; decomp JournalEntry without the online events). */
+const journalPageSchema: Schema = obj({
+  date: obj({ year: int(0, 99), month: int(1, 12), day: int(1, 31), weekday: int(0, 6) }),
+  zone: ref('zones'),
+  events: arr(obj({ type: int(1, 40), value: int(0, 0xffff), trainer: int(0, 0x3ff) })),
+  mon: nullable(obj({ result: lit('caught', 'defeated'), variant: int(0, 2), timeOfDay: int(0, 15), gender: int(0, 2), species: ref('species') })),
+  trainer: nullable(obj({ trainer: ref('trainers'), zone: ref('zones') })),
+}, (v) => ((v.events as unknown[]).length > JOURNAL_LOCATION_EVENTS ? `more than ${JOURNAL_LOCATION_EVENTS} location events` : undefined));
+
 export const GAME_STATE_SCHEMA: Schema = obj(
-  {
-    ...stateV19Fields,
-    schemaVersion: lit(SAVE_SCHEMA_VERSION),
-    contestPhotos: arr(nullable(contestPhotoSchema)),
-  },
-  (v) => stateV19Check(v) ?? ((v.contestPhotos as unknown[]).length !== CONTEST_TYPES.length ? `contestPhotos must have ${CONTEST_TYPES.length} slots` : undefined),
+  { ...stateV20Fields, schemaVersion: lit(SAVE_SCHEMA_VERSION), journal: arr(journalPageSchema) },
+  (v) => stateV20Check(v) ?? ((v.journal as unknown[]).length > JOURNAL_PAGES ? `more than ${JOURNAL_PAGES} journal pages` : undefined),
 );
 
 const envelope = (state: Schema): Schema =>
@@ -563,6 +575,7 @@ const OLD_SAVE_SCHEMAS: Record<number, Schema> = {
   17: envelope(GAME_STATE_V17_SCHEMA),
   18: envelope(GAME_STATE_V18_SCHEMA),
   19: envelope(GAME_STATE_V19_SCHEMA),
+  20: envelope(GAME_STATE_V20_SCHEMA),
 };
 
 /**
@@ -591,7 +604,9 @@ type PokemonV10 = Omit<Pokemon, 'markings' | 'ribbons'>;
 type PokemonV18 = Omit<Pokemon, 'condition'>;
 /** v18 (berries, Mystery Gift): no condition, no Poffin Case, no Fashion Case. */
 /** v19 (Poffins, the Fashion Case, the Underground): no contest photos. */
-type StateV19 = Omit<GameState, 'schemaVersion' | 'contestPhotos' | 'contest'> & { schemaVersion: 19 };
+/** v20 (the contest photos): no journal. */
+type StateV20 = Omit<GameState, 'schemaVersion' | 'journal'> & { schemaVersion: 20 };
+type StateV19 = Omit<StateV20, 'schemaVersion' | 'contestPhotos' | 'contest'> & { schemaVersion: 19 };
 type StateV18 = Omit<StateV19, 'schemaVersion' | 'party' | 'boxes' | 'daycare' | 'poffins' | 'fashionCase'> & {
   schemaVersion: 18;
   party: PokemonV18[];
@@ -842,8 +857,16 @@ export function migrateStateV18(v18: StateV18): StateV19 {
 }
 
 /** v19 → v20 (the contest photos): none, as no contest could be won before (`end_contest` was a logged stub). */
-export function migrateStateV19(v19: StateV19): GameState {
+export function migrateStateV19(v19: StateV19): StateV20 {
   return { ...v19, schemaVersion: 20, contestPhotos: CONTEST_TYPES.map(() => null) };
+}
+
+/**
+ * v20 → v21 (the journal): an empty journal. A save that owns it (FLAG_JOURNAL_ACQUIRED) gets today's page at the load
+ * (Journal_GetSavedPage), as the DS opens one; `give_journal` was a logged stub before, so nothing was recorded.
+ */
+export function migrateStateV20(v20: StateV20): GameState {
+  return { ...v20, schemaVersion: 21, journal: [] };
 }
 
 export class SaveError extends Error {}
@@ -866,7 +889,7 @@ export class PackMismatchError extends SaveError {
 
 /**
  * Validates an untrusted save against the loaded packs. Throws SaveError naming the field.
- * v1–v19 saves are migrated to v20 (`migrateStateV1` … `migrateStateV19`) after validation. `packs` is the current load order; a save must have been made with the same packs and versions, cosmetic packs aside.
+ * v1–v20 saves are migrated to v21 (`migrateStateV1` … `migrateStateV20`) after validation. `packs` is the current load order; a save must have been made with the same packs and versions, cosmetic packs aside.
  */
 export function validateSave(input: unknown, registries: Registries, packs: readonly { id: string; version: string; cosmetic?: true }[], labels: Labels): SaveEnvelope {
   if (typeof input !== 'object' || input === null || (input as { format?: unknown }).format !== 'lantern-nds-save') throw new NotASaveError('This file is not an OpenSinnoh save.');
@@ -900,7 +923,8 @@ export function validateSave(input: unknown, registries: Registries, packs: read
   const v17 = v16 ? migrateStateV16(v16) : version === 17 ? (state as StateV17) : null;
   const v18 = v17 ? migrateStateV17(v17, registries) : version === 18 ? (state as StateV18) : null;
   const v19 = v18 ? migrateStateV18(v18) : version === 19 ? (state as StateV19) : null;
-  const env: SaveEnvelope = v19 ? { ...(input as SaveEnvelope), state: migrateStateV19(v19) } : (input as SaveEnvelope);
+  const v20 = v19 ? migrateStateV19(v19) : version === 20 ? (state as StateV20) : null;
+  const env: SaveEnvelope = v20 ? { ...(input as SaveEnvelope), state: migrateStateV20(v20) } : (input as SaveEnvelope);
   // Cosmetic packs (art only) are not part of a save's identity: one made before such a pack was added, or
   // while it was loaded, still loads. A save from before the flag may list one; it is dropped here.
   const cosmetic = new Set(packs.filter((p) => p.cosmetic).map((p) => p.id));
