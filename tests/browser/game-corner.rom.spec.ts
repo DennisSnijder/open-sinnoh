@@ -154,6 +154,7 @@ test('sys-game-corner-slots in the app: Clefairy on the field in standby, the bo
       if (name === 'bonus') expect(v.counters, name).not.toBeNull();
       await composition(`replay-${name}`);
       seen.push(name);
+      return base.screenshot!(name);
     },
   };
   const result = await runReplay(driver, readReplay('sys-game-corner-slots.replay'), { registries, seed: 1, name: 'sys-game-corner-slots.replay', resolve: resolveReplay, repeat: false });
