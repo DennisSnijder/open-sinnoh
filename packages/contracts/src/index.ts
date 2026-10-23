@@ -21,5 +21,5 @@ export * from './seals.ts';
 
 export * from './anim-script.ts';
 
-export const CONTRACTS_VERSION = '0.37.0';
+export const CONTRACTS_VERSION = '0.38.0';
 

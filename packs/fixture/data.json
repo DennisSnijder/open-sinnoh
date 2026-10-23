@@ -11930,6 +11930,86 @@
    "text": "Two hold the same gear."
   },
   {
+   "id": "fixture:PartyMenu_Text_MustUseSameKindOfMon",
+   "text": "Both must be one kind."
+  },
+  {
+   "id": "fixture:BattleFactoryApp_Text_ChoosePokemon",
+   "text": "Pick rental\nnumber {var 0}."
+  },
+  {
+   "id": "fixture:BattleFactoryApp_Text_OkWithSelection",
+   "text": "Keep these\n{var 0} rentals?"
+  },
+  {
+   "id": "fixture:BattleFactoryApp_Text_Yes",
+   "text": "KEEP"
+  },
+  {
+   "id": "fixture:BattleFactoryApp_Text_No",
+   "text": "UNDO"
+  },
+  {
+   "id": "fixture:BattleFactoryApp_Text_Summary",
+   "text": "DETAILS"
+  },
+  {
+   "id": "fixture:BattleFactoryApp_Text_Rent",
+   "text": "TAKE"
+  },
+  {
+   "id": "fixture:BattleFactoryApp_Text_Cancel",
+   "text": "BACK"
+  },
+  {
+   "id": "fixture:BattleFactoryApp_Text_Remove",
+   "text": "DROP"
+  },
+  {
+   "id": "fixture:BattleFactoryApp_Text_ChooseExchange",
+   "text": "Which one goes\nback?"
+  },
+  {
+   "id": "fixture:BattleFactoryApp_Text_CancelTrade",
+   "text": "Skip the\nswap?"
+  },
+  {
+   "id": "fixture:BattleFactoryApp_Text_ChooseReceive",
+   "text": "Which one do\nyou want?"
+  },
+  {
+   "id": "fixture:BattleFactoryApp_Text_AcceptPokemon",
+   "text": "Take this\none?"
+  },
+  {
+   "id": "fixture:BattleFactoryApp_Text_Exchange",
+   "text": "SWAP"
+  },
+  {
+   "id": "fixture:BattleFactoryApp_Text_Back",
+   "text": "RETURN"
+  },
+  {
+   "id": "fixture:BattleHallScene_Text_ConfirmSelection",
+   "text": "Face the {var 0} tile,\nlevel {var 1}?"
+  },
+  {
+   "id": "fixture:BattleHallScene_Text_BattleHallMatron",
+   "text": "Face the hall keeper?"
+  },
+  {
+   "id": "fixture:BattleHallScene_Text_HallMatronApproaching",
+   "text": "One moment!\nThe hall keeper wants a match."
+  },
+  {
+   "id": "fixture:BattleHallScene_Text_Yes",
+   "text": "YES"
+  },
+  {
+   "id": "fixture:BattleHallScene_Text_No",
+   "text": "NO"
+  },
+  {
    "id": "fixture:PartyMenu_Text_EligibleForContest",
    "text": "READY"
   },

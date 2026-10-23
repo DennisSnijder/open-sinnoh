@@ -14,14 +14,16 @@
  * - Unimplemented commands log once (`frontier:<op>`) and do nothing, as the field VM's.
  */
 import type { Arg, Command, Id } from '@opensinnoh/core';
-import type { FrontierSceneData, FrontierTables, FrontierView, InputFrame, Ui2dAnimation } from '@opensinnoh/contracts';
+import type { AppRequest, AppResult, FrontierSceneData, FrontierTables, FrontierView, InputFrame, Ui2dAnimation } from '@opensinnoh/contracts';
 import { newGameRecord } from '@opensinnoh/contracts';
-import type { BattleTower } from '@opensinnoh/services';
+import type { BattleFactory, BattleHall, BattleTower } from '@opensinnoh/services';
 import type { Runner } from '../runner.ts';
 import { FRONTIER_VARS } from './commands.ts';
 import { FrontierScene } from './scene.ts';
 import { frontierHandlers } from './ops.ts';
 import { towerFrontierHandlers } from './tower-ops.ts';
+import { factoryFrontierHandlers } from './factory-ops.ts';
+import { hallFrontierHandlers } from './hall-ops.ts';
 
 export type FrontierResult = 'continue' | 'yield';
 export type FrontierWait = (input: InputFrame) => boolean;
@@ -52,6 +54,8 @@ const MANAGER_VARS = 8;
 const MAX_COMMANDS = 100_000;
 /** Decomp NO_NEW_ENTRY_POINT (ChangeSceneWithinScript). */
 export const NO_NEW_ENTRY_POINT = 0xffff;
+/** Decomp FRONTIER_SCENE_FACTORY_CORRIDOR, _FACTORY_BATTLE_ROOM, _HALL_BATTLE_ROOM: the scenes whose setup runs here. */
+const SCENE = { factoryCorridor: 3, factoryBattleRoom: 4, hallBattleRoom: 10 } as const;
 
 export class FrontierRunner {
   readonly tables: FrontierTables;
@@ -66,6 +70,9 @@ export class FrontierRunner {
   readonly slots: (string | undefined)[] = [];
   /** Decomp exitBattleFrontier. */
   exited = false;
+  /** The facility the scripts run (decomp BattleFrontier_SetFacilityStruct): the Factory's or the Hall's challenge. */
+  factory: BattleFactory | null = null;
+  hall: BattleHall | null = null;
   /** Decomp changeScript and the app's states 5–6: the scene to load and its entry label (null: keep the scripts). */
   private change: { scene: number; entry: Id | null; frames: number } | null = null;
   /** The Battle Tower the challenge runs (decomp FieldFrontierDTO facilityData), shared with the field VM. */
@@ -78,7 +85,7 @@ export class FrontierRunner {
     const tables = newGameRecord(r.registries).frontier;
     if (!tables) throw new Error('launch_battle_frontier_scene: the packs have no Battle Frontier (NewGame.frontier)');
     this.tables = tables;
-    this.handlers = { ...frontierHandlers(), ...towerFrontierHandlers() };
+    this.handlers = { ...frontierHandlers(), ...towerFrontierHandlers(), ...factoryFrontierHandlers(), ...hallFrontierHandlers() };
     // The field faded out before the scene (decomp: the frontier app starts on a black screen).
     this.loadScene(sceneId, { color: 'black', alpha: 1 });
     this.load(entry);
@@ -89,8 +96,40 @@ export class FrontierRunner {
     const data = this.sceneData(sceneId);
     this.scene = new FrontierScene(sceneId, data, this.tables, (sheet) => this.animations(sheet), screen);
     this.textBank = data.textBank;
-    if (data.setup) this.r.log.stub(`frontier:scene-setup:${sceneId}`, `frontier scene ${sceneId}'s setup task (its room effects) is not built`);
+    if (data.setup) this.setupScene(sceneId);
     if (data.bgm) this.r.audio.playBgm(data.bgm);
+  }
+
+  /**
+   * Decomp sFrontierScenes' setupFunc: the Factory corridor's BG2 under BG3 (BattleFactoryCorridorSceneSetup), the Hall
+   * battle room's BG2 off and blended 8:9 over the room (BattleHallBattleRoomSceneSetup, ov104_0223D9E4's
+   * G2_SetBlendAlpha). Their animations (the Hall lights' tilemap and palette tasks), the Factory room's message blend
+   * and the other facilities' setups are logged, not drawn.
+   */
+  private setupScene(sceneId: number): void {
+    if (sceneId === SCENE.factoryCorridor) {
+      this.scene.fgBelow = true;
+      return;
+    }
+    if (sceneId === SCENE.hallBattleRoom) {
+      this.scene.fgHidden = true;
+      this.scene.fgBlend = { a: 8, b: 9 };
+    }
+    this.r.log.stub(`frontier:scene-setup:${sceneId}`, `frontier scene ${sceneId}'s setup effects (palette tasks, blends) are not drawn`);
+  }
+
+  /** Decomp BattleFrontier_RunSubApp with an application (the Factory's and the Hall's apps): the script waits for it. */
+  openApp(c: FrontierContext, request: AppRequest, done: (result: AppResult) => void): FrontierResult {
+    if (this.r.app) throw new Error(`frontier: open ${request.app} while ${this.r.app.request.app} is open`);
+    this.r.app = { request, result: null };
+    return this.pause(c, () => {
+      const result = this.r.app?.result;
+      if (!result) return false;
+      this.r.app = null;
+      done(result);
+      this.afterSubApp();
+      return true;
+    });
   }
 
   /** Decomp BattleFrontier_RunSubApp's return: the scene's music again (the room and its characters are kept). */

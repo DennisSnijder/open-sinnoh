@@ -434,6 +434,37 @@ const encountersSchema: Schema = obj(
   (v) => ((v.honeyTrees as unknown[]).length !== HONEY_TREES ? `the honey trees must be ${HONEY_TREES}` : (v.radarRecords as unknown[]).length !== RADAR_RECORDS ? `the Poké Radar records must be ${RADAR_RECORDS}` : undefined),
 );
 
+/** contracts `FactoryState` (0.37.0): decomp BattleFactorySave, BattleFactoryStreakFlags, the factory's stats. */
+const factoryMonRow = obj({ set: int(0, 0xffff), pid: int(0, 0xffffffff), ivs: int(0, 31) });
+const factorySchema: Schema = obj(
+  {
+    active: arr(bool),
+    streaks: arr(obj({ record: int(0, 9999), latest: int(0, 9999), recordTrades: int(0, 9999), latestTrades: int(0, 9999) })),
+    save: obj({ saved: bool, challengeType: int(0, 3), openLevel: bool, battle: int(0, 6), trainers: arr(int(0, 0xffff)), player: arr(factoryMonRow), opponent: arr(factoryMonRow) }),
+  },
+  (v) => {
+    const f = v as { active: unknown[]; streaks: unknown[]; save: { trainers: unknown[]; player: unknown[]; opponent: unknown[] } };
+    if (f.active.length !== 8 || f.streaks.length !== 8) return 'frontier.factory: 8 streak flags and 8 streaks';
+    return f.save.trainers.length !== 14 || f.save.player.length !== 4 || f.save.opponent.length !== 4 ? 'frontier.factory.save: 14 trainers and 4 Pokémon a side' : undefined;
+  },
+);
+/** contracts `HallState` (0.37.0): decomp BattleHallSave, BattleHallStreakFlags, the hall's stats, BattleHallWinRecords. */
+const hallSchema: Schema = obj(
+  {
+    active: arr(bool),
+    streaks: arr(obj({ current: int(0, 9999), latest: int(0, 9999), species: nullable(ref('species')) })),
+    ranks: arr(arr(int(0, 10))),
+    save: obj({ saved: bool, challengeType: int(0, 3), battle: int(0, 9), slots: arr(int(0, 5)), trainers: arr(int(0, 0xffff)), opponents: arr(int(0, 0xffff)) }),
+    records: arr(dict(ref('species'), int(1, 9999))),
+  },
+  (v) => {
+    const h = v as { active: unknown[]; streaks: unknown[]; ranks: unknown[][]; save: { slots: unknown[]; trainers: unknown[]; opponents: unknown[] }; records: unknown[] };
+    if (h.active.length !== 4 || h.streaks.length !== 3 || h.records.length !== 3) return 'frontier.hall: 4 streak flags, 3 streaks and 3 record tables';
+    if (h.ranks.length !== 3 || h.ranks.some((r) => r.length !== 18)) return 'frontier.hall.ranks: 18 ranks for each of 3 challenge types';
+    return h.save.slots.length !== 2 || h.save.trainers.length !== 20 || h.save.opponents.length !== 20 ? 'frontier.hall.save: 2 slots, 20 trainers, 20 opponents' : undefined;
+  },
+);
+
 /** contracts `FrontierState` (0.34.0): the tower's saved part (decomp WifiBattleTowerRecord, WifiBattleTowerSave, tower stats). */
 const frontierSchema: Schema = obj(
   {
@@ -452,6 +483,9 @@ const frontierSchema: Schema = obj(
       partner: int(0, 7),
       partnerParty: opt(obj({ otId: int(0, 0xffffffff), sets: arr(int(0, 0xffff)), pids: arr(int(0, 0xffffffff)), reserved: bool })),
     }),
+    // 0.37.0, optional (no schema bump): the Factory's and the Hall's saved parts.
+    factory: opt(factorySchema),
+    hall: opt(hallSchema),
   },
   (v) => {
     const f = v as { towerRooms: unknown[]; towerStreaks: unknown[]; towerSave: { slots: unknown[]; trainers: unknown[] } };

@@ -4,7 +4,7 @@ OpenSinnoh is in beta. Pokémon Platinum (US, rev 0) plays from a new game throu
 Fame and the credits, and on into the post-game. What's next is in [ROADMAP.md](ROADMAP.md); the design
 decisions are in [docs/decisions.md](docs/decisions.md).
 
-Versions: contracts 0.37.0, importer `platinum-100`, HeartGold follower add-on `hgss-followers-4`.
+Versions: contracts 0.38.0, importer `platinum-101`, HeartGold follower add-on `hgss-followers-4`.
 
 ## Works
 
@@ -26,7 +26,8 @@ Versions: contracts 0.37.0, importer `platinum-100`, HeartGold follower add-on `
 - **Side and post-game systems:** berries, move tutors, the move relearner and deleter, NPC trades, honey
   trees, the Poké Radar, swarms, the Trophy Garden, Poffins and Amity Square, the Underground played solo
   (mining, spheres, vendors, fossil revival, traps and their escape games, the secret base and its decoration),
-  legendaries, roamers and forms, the Battle Tower (singles, doubles, multi), the event legendaries through Mystery Gift, and the offline Super Contest circuit (reception, rivals, judging,
+  legendaries, roamers and forms, the Battle Tower (singles, doubles, multi), the Battle Factory and the Battle Hall
+  (singles and doubles, with Thorton and Argenta), the event legendaries through Mystery Gift, and the offline Super Contest circuit (reception, rivals, judging,
   results, ribbons, prizes, Master flags, the visual round's dress-up and judging, the lobby's photo frames, the Dance
   Competition and the acting round).
 - **Audio:** the ROM's sound archive on a DS sequencer and synth in an AudioWorklet: zone music by day and
@@ -37,7 +38,7 @@ Versions: contracts 0.37.0, importer `platinum-100`, HeartGold follower add-on `
 
 ## Not yet
 
-- The Battle Frontier's other facilities (Factory, Hall, Castle, Arcade).
+- The Battle Frontier's Castle and Arcade; the Frontier records app; the Factory's and Hall's particle effects.
 - The Villa, TV shows and the journal, Seals and Ball Capsules.
 - Wireless and Wi-Fi features: they answer as "no connection".
 - Mods beyond the current pack format (no editor or mod tooling yet).

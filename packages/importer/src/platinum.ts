@@ -240,6 +240,25 @@ const TABLES = {
   frontierMartLeft: { where: 'arm9', offset: 0xeac20, count: 27, size: 2, sha1: '60fb58b301acf716e6a7cdcf3b4711bfd31f9add' },
   frontierMartRight: { where: 'arm9', offset: 0xeabb8, count: 16, size: 2, sha1: '8a10d46ff0675f5d9d90e584c2bb9776e402c880' },
   frontierBanlist: { where: 'arm9', offset: 0xf05be, count: 18, size: 2, sha1: '6f80ec8e0e1576663aefacd8c3873739a5cb0cca' },
+  /** The Battle Factory (frontier.ts `FrontierRomTables.factory`): overlay 104 battle_factory_helpers.c and battle_factory.c. */
+  factoryOpponentPools: { where: 104, offset: 0x1251c, count: 8, size: 8, sha1: '2ab5c1509c794cb56e58c3bb555d0b5df1f3ac9b' },
+  factoryTradeUpgrades: { where: 104, offset: 0x12508, count: 5, size: 4, sha1: '255973581dd007f803c7fd4498c221f17dc9a37e' },
+  factoryOpenPlayerPools: { where: 104, offset: 0x1255c, count: 10, size: 8, sha1: '1a7492ee6bfc76a6849e0aa84f0d032cdfb04c8b' },
+  factoryLevel50Pools: { where: 104, offset: 0x125ac, count: 10, size: 8, sha1: '983c03995645a07f02a9fb3cd2e388248ca864fe' },
+  factoryOpenOpponentPools: { where: 104, offset: 0x125fc, count: 10, size: 8, sha1: '2e1275a5c83ad0d2e38e200a5c1d85d0842c3415' },
+  factoryBattlePoints: { where: 104, offset: 0x11d54, count: 9, size: 1, sha1: 'ab2a051f7a39a4f72ada20693b1f26a8ffed3191' },
+  /** The Battle Hall (frontier.ts `FrontierRomTables.hall`): overlay 104 battle_hall_helpers.c and battle_hall.c, arm9 scrcmd_battle_hall.c. */
+  hallBattlePoints: { where: 104, offset: 0x11d7c, count: 19, size: 1, sha1: 'dd72b4325f5c993ad927c0693d743f88261a4091' },
+  hallIvs: { where: 104, offset: 0x1265c, count: 10, size: 4, sha1: 'f9fcb2b99eb52071083d0f4d001f8abbd0480b39' },
+  hallGroupRanges: { where: 104, offset: 0x1264c, count: 4, size: 4, sha1: '95bccd3b2d8d22f027544470c7ae7997264c874b' },
+  hallRankRanges: { where: 104, offset: 0x12684, count: 10, size: 4, sha1: '5c59e4d6f37f83493daccfca7225b74a0e9c5ce1' },
+  hallGrid: { where: 104, offset: 0x13564, count: 20, size: 1, sha1: '8c466468bfadeafcc0392d65924c10c7e46c2333' },
+  hallOpponents: { where: 104, offset: 0x12a34, count: 477, size: 2, sha1: 'd955029c4b9af0b65477d2220b4b28245a1b6ce4' },
+  hallOpponentTypes: { where: 104, offset: 0x12dee, count: 477, size: 4, sha1: '7a907864f9a5e3b8dbf95adc8c01b2bd5cd98cf0' },
+  hallMilestones: { where: 'arm9', offset: 0xec078, count: 47, size: 8, sha1: '683ca120ae558ed840c9778f87bbde73940f78e1' },
+  hallClassesByRank: { where: 104, offset: 0x1273c, count: 10, size: 16, sha1: 'bf311dd5c5c7e454e19f4171dd097fbd74000efb' },
+  hallClassesByCell: { where: 104, offset: 0x126ac, count: 18, size: 8, sha1: '8aee14452d6802f4cbc7f47c08dac9afe58e6626' },
+  hallTrainerClasses: { where: 104, offset: 0x127dc, count: 300, size: 2, sha1: 'c80f888edd52fa7c3d52ae3cffc3f132d06b2f9e' },
   /** ov5_021F6454.c sHighestIVMessageIndices: the judge's "best potential in …" message per stat (TEXT_BANK_BATTLE_TOWER). */
   judgeStatsMessages: { where: 5, offset: 0x2ff04, count: 6, size: 2, sha1: '1811b05e153df12434fa2e0d3e1d60b928360eec' },
   /** The contests' acting round (contest-acting.ts): arm9 Unk_020F568C, then overlay 17's tables (RAM base 0x0223B140). */
@@ -1052,6 +1071,27 @@ export async function importPlatinum(
     martLeft: await table('frontierMartLeft'),
     martRight: await table('frontierMartRight'),
     banlist: await table('frontierBanlist'),
+    factory: {
+      opponentPools: await table('factoryOpponentPools'),
+      tradeUpgrades: await table('factoryTradeUpgrades'),
+      openPlayerPools: await table('factoryOpenPlayerPools'),
+      level50Pools: await table('factoryLevel50Pools'),
+      openOpponentPools: await table('factoryOpenOpponentPools'),
+      battlePoints: await table('factoryBattlePoints'),
+    },
+    hall: {
+      battlePoints: await table('hallBattlePoints'),
+      ivs: await table('hallIvs'),
+      groupRanges: await table('hallGroupRanges'),
+      rankRanges: await table('hallRankRanges'),
+      grid: await table('hallGrid'),
+      opponents: await table('hallOpponents'),
+      opponentTypes: await table('hallOpponentTypes'),
+      milestones: await table('hallMilestones'),
+      classesByRank: await table('hallClassesByRank'),
+      classesByCell: await table('hallClassesByCell'),
+      trainerClasses: await table('hallTrainerClasses'),
+    },
   };
   const decoded = decodeScripts({
     members: scriptMembers,

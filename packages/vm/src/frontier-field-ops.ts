@@ -9,7 +9,30 @@
  * goodbye.
  */
 import type { Id } from '@opensinnoh/core';
-import { BattleTower, battlePoints, clearTowerSave, enoughValidPokemon, frontierTables, giveBattlePoints, judgeStats, removeBattlePoints, towerQuitWithoutSaving, towerSaveInProgress, towerTrophy, towerTrophyDue, TOWER_MODE } from '@opensinnoh/services';
+import {
+  BattleTower,
+  battlePoints,
+  clearTowerSave,
+  deleteFactoryStreak,
+  deleteHallStreak,
+  enoughValidPokemon,
+  frontierTables,
+  giveBattlePoints,
+  hallPartyEligible,
+  hallPartySize,
+  hallRecordKeeper,
+  hallSpeciesWithRecords,
+  hallStreakIs50,
+  hallStreakSpecies,
+  hallTotalSinglesRecord,
+  judgeStats,
+  removeBattlePoints,
+  towerQuitWithoutSaving,
+  towerSaveInProgress,
+  towerTrophy,
+  towerTrophyDue,
+  TOWER_MODE,
+} from '@opensinnoh/services';
 import { formatNumber, PADDING_SPACES } from './m1b-ops.ts';
 import { FrontierRunner } from './frontier/runner.ts';
 import type { Handler, Runner, Thread } from './runner.ts';
@@ -63,6 +86,10 @@ const SAVE_INFO = { bank: 534, map: 0, labels: [1, 2, 3, 4], values: [5, 6, 7, 8
 const BP_WINDOW = { width: 10, height: 2, text: 'platinum:pl_msg_00000361_00230' as Id, digits: 5 } as const;
 /** Decomp COMM_CLUB_RET_CANCEL: the link club closed without a group. */
 const COMM_CLUB_RET_CANCEL = 1;
+/** Decomp BH_LOBBY_FUNC_* (constants/battle_hall_functions.h). */
+const BH_LOBBY = { checkPartyEligible: 0, checkStreakActive: 1, currentStreakSpecies: 2, deleteActiveStreak: 3, selectPokemon: 4 } as const;
+/** Decomp PARTY_SLOT_NONE: no Pokémon picked. */
+const PARTY_SLOT_NONE = 0xff;
 /** Decomp MART_FRONTIER_ID_* (generated/mart_frontier_id.txt). */
 const FRONTIER_MARTS = ['platinum:MART_FRONTIER_ID_EXCHANGE_SERVICE_CORNER_RIGHT', 'platinum:MART_FRONTIER_ID_EXCHANGE_SERVICE_CORNER_LEFT'] as Id[];
 
@@ -75,6 +102,14 @@ export function frontierFieldHandlers(r: Runner): Record<string, Handler> {
   };
   /** The party menu's pick (decomp SCRIPT_MANAGER_PARTY_MANAGEMENT_DATA) between BT_FUNC_UNK_30 and _31. */
   let picked: number[] | null | undefined;
+  /** The Hall's party pick (the same script member) between BH_LOBBY_FUNC_SELECT_POKEMON and GetBattleHallSelectedSlots. */
+  let hallPicked: number[] | null | undefined;
+  /** A species' number (the scripts' species operands). */
+  const speciesNumber = (id: Id) => {
+    const n = r.registries.species.get(id)?.sourceIndex;
+    if (n === undefined) throw new Error(`frontier: species ${id} has no number`);
+    return n;
+  };
 
   const bpText = () => {
     const text = r.textOf(BP_WINDOW.text);
@@ -240,6 +275,76 @@ export function frontierFieldHandlers(r: Runner): Record<string, Handler> {
           r.log.stub(`battle-tower:fn-${fn}`, `Battle Tower function ${fn} is not built yet (returns 0)`);
           out(0);
       }
+      return 'continue';
+    },
+
+    // Decomp ScrCmd_DeleteActiveBattleFactoryStreak: the lobby's "you didn't save" ends that streak.
+    delete_active_battle_factory_streak: (t, _c, a) => (deleteFactoryStreak(r.state, val(t, a[0]), val(t, a[1]) === 1), 'continue'),
+
+    // Decomp ScrCmd_CallBattleHallLobbyFunction.
+    call_battle_hall_lobby_function: (t, c, a) => {
+      const fn = r.int(a[0]);
+      const arg = val(t, a[1]);
+      const out = (v: number) => dest(t, a[2], v);
+      switch (fn) {
+        case BH_LOBBY.checkPartyEligible:
+          out(hallPartyEligible(r.state, r.registries, arg) ? 1 : 0);
+          break;
+        case BH_LOBBY.checkStreakActive:
+          out(r.state.frontier?.hall?.active[arg] ? 1 : 0);
+          break;
+        case BH_LOBBY.currentStreakSpecies: {
+          const species = hallStreakSpecies(r.state, arg);
+          out(species ? speciesNumber(species) : 0);
+          break;
+        }
+        case BH_LOBBY.deleteActiveStreak:
+          deleteHallStreak(r.state, arg);
+          break;
+        // Decomp SelectBattleHallChallengers: the party menu (PARTY_MENU_MODE_BATTLE_HALL, level 30, one or two of a
+        // kind), its SUMMARY in the menu; the pick is read by GetBattleHallSelectedSlots.
+        case BH_LOBBY.selectPokemon: {
+          if (arg > 1) throw new Error('BH_LOBBY_FUNC_SELECT_POKEMON: the multi challenge needs a link partner');
+          return r.openApp(c, { app: 'party-order', count: hallPartySize(arg), hall: true }, (result) => {
+            if (result.app !== 'party-order') throw new Error(`BH_LOBBY_FUNC_SELECT_POKEMON: got a ${result.app} result`);
+            hallPicked = result.order;
+          });
+        }
+        default:
+          throw new Error(`call_battle_hall_lobby_function: no lobby function ${fn}`);
+      }
+      return 'continue';
+    },
+    // Decomp ScrCmd_GetBattleHallSelectedSlots: the picks, or PARTY_SLOT_NONE in the first when cancelled.
+    get_battle_hall_selected_slots: (t, _c, a) => {
+      if (hallPicked === undefined) throw new Error('get_battle_hall_selected_slots: no party menu has run');
+      if (hallPicked === null) dest(t, a[0], PARTY_SLOT_NONE);
+      else {
+        dest(t, a[0], hallPicked[0]!);
+        dest(t, a[1], hallPicked[1] ?? 0);
+      }
+      hallPicked = undefined;
+      return 'continue';
+    },
+    delete_active_battle_hall_streak: (t, _c, a) => (deleteHallStreak(r.state, val(t, a[0])), 'continue'),
+    get_num_species_with_battle_hall_records: (t, _c, a) => (dest(t, a[0], hallSpeciesWithRecords(r.state)), 'continue'),
+    get_battle_hall_total_singles_record: (t, _c, a) => (dest(t, a[0], hallTotalSinglesRecord(r.state)), 'continue'),
+    check_if_battle_hall_streak_is50: (t, _c, a) => (dest(t, a[0], hallStreakIs50(r.state) ? 1 : 0), 'continue'),
+    // Decomp ScrCmd_GetBattleHallRecordKeeperStats: the singles total against the milestones; the BP for those reached.
+    get_battle_hall_record_keeper_stats: (t, _c, a) => {
+      const [total, passed, upcoming, earned] = [0, 1, 2, 3].map((i) => r.int(a[i]));
+      const records = r.state.frontier?.hall?.records[0] ?? {};
+      const sum = Object.values(records).reduce((x, y) => x + y, 0);
+      const k = hallRecordKeeper(frontierTables(r.registries).hall, sum, val(t, a[4]));
+      t.slots[total!] = String(sum);
+      dest(t, a[4], k.next);
+      // Decomp: RECORD_BATTLE_POINTS_RECEIVED and the BP (none when no milestone was reached).
+      giveBattlePoints(r.state, r.registries, k.bp);
+      dest(t, a[5], k.response);
+      if (k.response === 3) return 'continue';
+      t.slots[passed!] = String(k.passed);
+      t.slots[upcoming!] = String(k.upcoming ?? 0);
+      t.slots[earned!] = String(k.bp);
       return 'continue';
     },
 

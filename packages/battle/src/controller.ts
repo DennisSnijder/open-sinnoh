@@ -415,7 +415,8 @@ class BattleController implements Battle {
     const ball = newGameRecord(reg).pokeBall;
 
     // A frontier battle's trainers are its own (FieldBattleDTO_InitFrontierTrainer): a battle `Trainer` per frontier
-    // trainer, AI_FLAG_BASIC | EVAL_ATTACK | EXPERT, no items, its party as built by the facility.
+    // trainer, the facility's AI flags (the tower's AI_FLAG_BASIC | EVAL_ATTACK | EXPERT), no items, its party as built by
+    // the facility.
     const frontier = setup.frontier;
     if (frontier && (setup.kind !== 'trainer' || setup.trainers.length || setup.wild.length || setup.partner)) {
       throw new Error('battle: a frontier battle is a trainer battle with only its frontier trainers');
@@ -423,7 +424,7 @@ class BattleController implements Battle {
     const frontierTrainers = new Map<Id, Trainer>();
     this.frontier = frontier ? new Map() : null;
     const frontierTrainer = (ft: NonNullable<BattleSetup['frontier']>['trainers'][number], key: string): Id => {
-      const t: Trainer = { id: `frontier:${key}:${ft.id}` as Id, name: ft.name, class: ft.class, className: ft.className, gender: 'none', double: false, party: [], items: [], ai: FRONTIER_AI, classPrize: 0, messages: {} };
+      const t: Trainer = { id: `frontier:${key}:${ft.id}` as Id, name: ft.name, class: ft.class, className: ft.className, gender: 'none', double: false, party: [], items: [], ai: frontier!.ai ?? FRONTIER_AI, classPrize: 0, messages: {} };
       frontierTrainers.set(t.id, t);
       this.frontier!.set(t, { id: ft.id, party: ft.party });
       return t.id;

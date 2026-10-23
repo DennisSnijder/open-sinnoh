@@ -285,6 +285,19 @@ export class FrontierScene {
   private camera = { x: 0, y: 0 };
   /** The brightness fade: from, to, ticks, elapsed; `alpha` 1 = full colour. */
   private fade: { color: 'black' | 'white'; alpha: number; anim: { from: number; to: number; ticks: number; elapsed: number } | null };
+  /** BG2: its scroll, the Factory corridor's floor task (UpdateCorridorFloorBG), shown or not, drawn under BG3. */
+  private fgScroll = { x: 0, y: 0 };
+  corridorFloor = false;
+  fgHidden = false;
+  fgBelow = false;
+  fgBlend: { a: number; b: number } | null = null;
+  /** Decomp unk_A4 (FrontierScrCmd_4C, ov104_0223319C): the shake offset, its frame counter, interval and swings left. */
+  private shakeTask: { x: number; y: number; frame: number; every: number; left: number } | null = null;
+  /** Decomp unk_B0 (FrontierScrCmd_4E, ov104_022331E8): window 0 after `delay` frames (or off), and the window now. */
+  private windowTask: { rect: { x1: number; y1: number; x2: number; y2: number }; delay: number; on: boolean } | null = null;
+  private window: { x1: number; y1: number; x2: number; y2: number } | null = null;
+  /** Decomp FrontierScrCmd_45's sprite (ov104_02232CE0), by its resource id. */
+  private pokemon: { id: number; view: NonNullable<FrontierView['pokemon']> } | null = null;
 
   constructor(
     readonly id: number,
@@ -429,8 +442,58 @@ export class FrontierScene {
     return { color: this.fade.color, alpha: this.fade.alpha };
   }
 
+  /** Decomp FrontierScrCmd_4C: the screen shakes by ±x, ±y, swapping every `every` + 1 frames, `count` + 1 times. */
+  startShake(x: number, y: number, every: number, count: number): void {
+    if (this.shakeTask) throw new Error('frontier: a shake starts while one runs');
+    this.shakeTask = { x, y, frame: 0, every, left: count };
+  }
+
+  shakeDone(): boolean {
+    return this.shakeTask === null;
+  }
+
+  /** Decomp FrontierScrCmd_4E: after `delay` frames, window 0 over `rect` (characters hidden in it), or none. */
+  startWindow(rect: { x1: number; y1: number; x2: number; y2: number }, delay: number, on: boolean): void {
+    if (this.windowTask) throw new Error('frontier: a window task starts while one runs');
+    this.windowTask = { rect, delay, on };
+  }
+
+  windowDone(): boolean {
+    return this.windowTask === null;
+  }
+
+  /** Decomp FrontierScrCmd_45: a party Pokémon's front sprite (resource `id`) centred at x, y. */
+  showPokemon(id: number, view: NonNullable<FrontierView['pokemon']>): void {
+    if (this.pokemon) throw new Error(`frontier: a Pokémon sprite (${this.pokemon.id}) is already shown`);
+    this.pokemon = { id, view };
+  }
+
+  /** Decomp FrontierScrCmd_46. */
+  hidePokemon(id: number): void {
+    if (this.pokemon?.id !== id) throw new Error(`frontier: no Pokémon sprite ${id}`);
+    this.pokemon = null;
+  }
+
   /** One frame in the decomp's SysTask order (see the module comment). */
   step(): void {
+    // Decomp UpdateCorridorFloorBG: BG2 one px further down a frame, back to 0 past 255.
+    if (this.corridorFloor) this.fgScroll.y = this.fgScroll.y >= 255 ? 0 : this.fgScroll.y + 1;
+    const shake = this.shakeTask;
+    if (shake && ++shake.frame > shake.every) {
+      shake.frame = 0;
+      if (--shake.left < 0) this.shakeTask = null;
+      else {
+        shake.x = -shake.x;
+        shake.y = -shake.y;
+      }
+    }
+    const w = this.windowTask;
+    if (w) {
+      if (w.delay <= 0) {
+        this.window = w.on ? w.rect : null;
+        this.windowTask = null;
+      } else w.delay--;
+    }
     for (const a of this.actors) a?.step();
     this.stepMovements();
     for (const a of this.actors) a?.updateSprite();
@@ -506,6 +569,14 @@ export class FrontierScene {
       actors,
       objects,
       fade: this.fade.alpha > 0 ? { color: this.fade.color, alpha: this.fade.alpha } : null,
+      ...(this.fgScroll.x || this.fgScroll.y ? { fgScroll: { ...this.fgScroll } } : {}),
+      ...(this.fgBelow ? { fgBelow: true as const } : {}),
+      ...(this.data.fgFixed ? { fgFixed: true as const } : {}),
+      ...(this.fgBlend ? { fgBlend: { ...this.fgBlend } } : {}),
+      ...(this.fgHidden ? { fgHidden: true as const } : {}),
+      ...(this.shakeTask && (this.shakeTask.x || this.shakeTask.y) ? { shake: { x: this.shakeTask.x, y: this.shakeTask.y } } : {}),
+      ...(this.window ? { window: { ...this.window } } : {}),
+      ...(this.pokemon ? { pokemon: { ...this.pokemon.view } } : {}),
     };
   }
 }

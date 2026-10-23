@@ -1,0 +1,13 @@
+/*
+ * The Battle Frontier's DS screens (ui/frontier.ts): the Factory's rental app and the Hall's type board, a DS scene
+ * (evolution.css) with names, labels, the menu and YES/NO at their DS places. The balls and the cells are invisible
+ * buttons over the canvas (the ROM's cursor sprite shows the cursor), placed like the other boxes.
+ */
+.ds-scene-boxes > .frontier-name, .ds-scene-boxes > .frontier-label { line-height: 0; white-space: nowrap; pointer-events: none; }
+.ds-scene-boxes > .frontier-mon, .ds-scene-boxes > .frontier-icon { line-height: 0; pointer-events: none; }
+.ds-scene .ds-scene-boxes > :is(.frontier-ball, .frontier-cell) { position: absolute; padding: 0; border: 0; background: none; box-shadow: none; cursor: pointer; }
+.ds-scene .ds-scene-boxes > :is(.frontier-ball, .frontier-cell).is-cursor::before { display: none; }
+.ds-scene .ds-scene-boxes > :is(.frontier-ball, .frontier-cell):hover { background: none; }
+.ds-scene .ds-scene-boxes > :is(.frontier-ball, .frontier-cell):focus-visible:not(.is-cursor) { outline: calc(var(--k) * 1) solid #f0b030; outline-offset: calc(var(--k) * -1); }
+.ds-scene-boxes > .frontier-menu { display: grid; align-content: center; }
+.ui-layer[data-mode] .ds-scene .frontier-menu .choice { min-height: 0; min-width: 0; height: calc(var(--k) * 16); }
