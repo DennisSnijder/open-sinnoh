@@ -203,6 +203,10 @@ export class SlotMachine {
   private bonusMode = false;
   private timer = 0;
   private flags = 0;
+  /** The last spin's flags (kept after the next bet clears `flags`) and its window when the lines were checked. */
+  private spinFlags = 0;
+  private resultWindow: number[][] = [];
+  private resultFlags = 0;
   private fullSlip = false;
   private control = false;
   private result: number = SYM.none;
@@ -614,6 +618,7 @@ export class SlotMachine {
         return 0;
       case s.roundSpin:
         this.flags = BIT(SLOT_FLAG.replay);
+        this.spinFlags = this.flags;
         this.control = true;
         this.fullSlip = true;
         this.armStops();
@@ -646,6 +651,8 @@ export class SlotMachine {
         this.stops(input, true, s.roundSettle);
         return 0;
       case s.roundResult: {
+        this.resultWindow = this.window();
+        this.resultFlags = this.flags;
         const middle = this.lineSymbol(LINES[1]!.rows);
         this.lines = 0;
         if (middle !== SYM.none) {
@@ -766,6 +773,7 @@ export class SlotMachine {
 
   /** ov101_021D1BD0 / ov101_021D2228: the switches, the hint, the reels start. */
   private startSpin(next: number): void {
+    this.spinFlags = this.flags;
     this.fullSlip = (this.flags & FULL_SLIP_FLAGS) !== 0;
     this.control = this.flags !== 0;
     this.armStops();
@@ -808,116 +816,57 @@ export class SlotMachine {
     return this.tables.reels[r]![((at % SLOT.strip) + SLOT.strip) % SLOT.strip]!;
   }
 
+  /** The symbols in the window: [reel][row 1–3]. */
+  private window(): number[][] {
+    return [0, 1, 2].map((r) => [1, 2, 3].map((k) => this.sym(r, k)));
+  }
+
   private lineSymbol(rows: number[]): number {
-    const [a, b, c] = rows.map((k, r) => this.sym(r, k)) as [number, number, number];
-    return a === SYM.cherry || (a === b && a === c) ? a : SYM.none;
+    return lineSymbol(rows.map((k, r) => this.sym(r, k)));
   }
 
-  /** ov101_021D5778: the lines that won (unk_48) and the last winning line's symbol (unk_44). */
   private checkLines(): void {
-    this.lines = 0;
-    this.result = SYM.none;
-    for (const line of LINES) {
-      const s = this.lineSymbol(line.rows);
-      if (s === SYM.none) continue;
-      this.result = s;
-      this.lines |= BIT(line.bit);
-    }
+    this.resultWindow = this.window();
+    this.resultFlags = this.flags;
+    const w = slotLines(this.resultWindow);
+    this.result = w.result;
+    this.lines = w.lines;
   }
 
-  /** ov101_021D597C: the last line's symbol's rate times the lines won (even if they won with different symbols). */
   private linePayout(): number {
-    if (this.result === SYM.none) throw new Error('slots: a payout without a line');
-    let n = 0;
-    for (let b = 0; b < LINES.length; b++) if (this.lines & BIT(b)) n++;
-    return this.tables.payouts[this.result]! * n;
+    return slotPayout(this.tables.payouts, this.result, this.lines);
   }
 
-  // ------------------------------------------------------------------ lotteries
+  // ------------------------------------------------------------------ lotteries (the pure draws are below the class)
 
-  /** ov101_021D40A8 and ov101_021D41EC: the win gate, the flag, the hint. */
   private drawFlags(): void {
-    this.flags = 0;
-    if (this.tables.winChance[this.mode]! > this.percent()) {
-      let v = this.percent();
-      const shares = this.tables.winFlags[this.mode]!;
-      let bit = 0;
-      for (let i = 0; i < WIN_ORDER.length; i++) {
-        if (v < shares[i]!) {
-          bit = WIN_ORDER[i]!;
-          break;
-        }
-        v -= shares[i]!;
-      }
-      this.flags = BIT(bit);
-    }
+    const gate = this.percent();
+    this.flags = this.tables.winChance[this.mode]! > gate ? winFlag(this.tables, this.mode, this.percent()) : 0;
     if (this.flags) {
       this.seq.hint = this.percent() < this.tables.hintChance[this.mode]! ? hintKind(this.flags) : 4;
       this.startSeq(SEQ.ballIn);
     }
   }
 
-  /** ov101_021D4394: the pick, then the gate (the pick is drawn first); entry 1 is checked twice (the DS's own odds). */
   private drawStandbyFlags(): void {
-    const shares = this.tables.standbyFlags[this.mode]!;
-    let v = this.percent();
-    this.flags = 0;
-    if (!(this.percent() < this.tables.standbySmall[this.mode]!)) {
-      this.flags = BIT(this.bonusType < 3 ? SLOT_FLAG.red7 : SLOT_FLAG.galactic7);
-      return;
-    }
-    for (const [share, bit] of [[shares[0]!, SLOT_FLAG.cherry], [shares[1]!, SLOT_FLAG.moon], [shares[1]!, SLOT_FLAG.pikachu]] as const) {
-      if (v < share) {
-        this.flags = BIT(bit);
-        return;
-      }
-      v = Math.max(0, v - share);
-    }
-    this.flags = BIT(SLOT_FLAG.replay);
+    const pick = this.percent();
+    this.flags = standbyFlag(this.tables, this.mode, this.bonusType, pick, this.percent());
   }
 
-  /** ov101_021D4210 and ov101_021D42D0: the bonus type, its class and continue chance, then Clefairy's kind. */
   private drawBonus(): void {
-    let v = this.percent();
-    const row = this.tables.bonusTypes[this.mode]!.find((t) => {
-      if (v < t.chance) return true;
-      v -= t.chance;
-      return false;
-    });
-    if (!row) throw new Error('slots: the bonus type draw found no row');
-    this.bonusType = row.type;
-    this.bonusClass = row.class;
-    this.chance = this.tables.continueStart[row.type]!;
-    let k = this.percent();
-    const kind = this.tables.clefairyKinds[this.mode]![row.class]!.find((c) => {
-      if (k < c.chance) return true;
-      k -= c.chance;
-      return false;
-    });
-    if (!kind) throw new Error('slots: the Clefairy draw found no kind');
-    this.seq.kind = kind.kind;
+    const b = bonusDraw(this.tables, this.mode, this.percent());
+    this.bonusType = b.type;
+    this.bonusClass = b.class;
+    this.chance = this.tables.continueStart[b.type]!;
+    this.seq.kind = clefairyKind(this.tables, this.mode, b.class, this.percent());
   }
 
-  /** ov101_021D44FC: the continue chance drops after a round (by 10 when the red moon was hit). */
   private dropChance(): void {
-    let v = this.chance;
-    const roll = this.percent();
-    const [p10, p5] = this.tables.continueDrop[this.mode]! as [number, number];
-    if (this.redMoon === 2) v -= 10;
-    else if (roll < p10) v -= 10;
-    else if (roll - p10 < p5) v -= 5;
-    this.chance = Math.max(0, v);
+    this.chance = continueDrop(this.tables, this.mode, this.chance, this.redMoon === 2, this.percent());
   }
 
-  /** ov101_021D4550: the tell, from the first row whose minimum is at most the chance. */
-  private drawTell(): 'ball' | 'cry' | 'pikachu' {
-    let v = this.percent();
-    const row = this.tables.endTells[this.mode]!.find((t) => this.chance >= t.min);
-    if (!row) throw new Error(`slots: no end tell row for ${this.chance}%`);
-    if (v < row.a) return 'ball';
-    v -= row.a;
-    if (v < row.b) return 'cry';
-    return 'pikachu';
+  private drawTell(): SlotTell {
+    return endTell(this.tables, this.mode, this.chance, this.percent());
   }
 
   // ------------------------------------------------------------------ the reels
@@ -1743,12 +1692,110 @@ export class SlotMachine {
   }
 
   /** For tests and the app: where the machine is (state index, the decomp's), the flags drawn, the bonus. */
-  debug(): { state: number; flags: number; lines: number; result: number; chance: number; roundCount: number; bonusType: number; bonusClass: number; spinsLeft: number; gained: number; reels: { pos: number; px: number; target: number; slip: number }[] } {
+  /**
+   * For tests and tools: the decomp state index, the flags (cleared at each bet; `spinFlags` keeps the last spin's), the
+   * lines and symbol of the last result, the bonus, each reel's index, scroll, target row and slip, and the window of the last result ([reel][row 1–3]).
+   */
+  debug(): { state: number; flags: number; spinFlags: number; resultFlags: number; lines: number; result: number; chance: number; roundCount: number; bonusType: number; bonusClass: number; spinsLeft: number; gained: number; reels: { pos: number; px: number; target: number; slip: number }[]; window: number[][] } {
     return {
-      state: this.state, flags: this.flags, lines: this.lines, result: this.result, chance: this.chance, roundCount: this.roundCount, bonusType: this.bonusType, bonusClass: this.bonusClass,
-      spinsLeft: this.spinsLeft, gained: this.gained, reels: this.reels.map((r) => ({ pos: r.pos, px: r.px, target: r.target, slip: r.slip })),
+      state: this.state, flags: this.flags, spinFlags: this.spinFlags, resultFlags: this.resultFlags, lines: this.lines, result: this.result, chance: this.chance, roundCount: this.roundCount, bonusType: this.bonusType,
+      bonusClass: this.bonusClass, spinsLeft: this.spinsLeft, gained: this.gained, reels: this.reels.map((r) => ({ pos: r.pos, px: r.px, target: r.target, slip: r.slip })), window: this.resultWindow,
     };
   }
+}
+
+/** One line's symbol (left, middle, right): it wins when its left symbol is cherries or all three are equal. */
+export function lineSymbol(symbols: readonly number[]): number {
+  const [a, b, c] = symbols as [number, number, number];
+  return a === SYM.cherry || (a === b && a === c) ? a : SYM.none;
+}
+
+/**
+ * ov101_021D5778 over the window ([reel][row 1–3]): the lines that won (bits, unk_48) and the symbol of the last winning
+ * line in check order (top, middle, bottom, diagonal down, diagonal up).
+ */
+export function slotLines(window: readonly (readonly number[])[]): { result: number; lines: number } {
+  let result: number = SYM.none;
+  let lines = 0;
+  for (const line of LINES) {
+    const s = lineSymbol(line.rows.map((k, r) => window[r]![k - 1]!));
+    if (s === SYM.none) continue;
+    result = s;
+    lines |= BIT(line.bit);
+  }
+  return { result, lines };
+}
+
+/** ov101_021D597C: the result symbol's rate times the lines won (even when they won with different symbols). */
+export function slotPayout(payouts: readonly number[], result: number, lines: number): number {
+  if (result === SYM.none) throw new Error('slots: a payout without a line');
+  let n = 0;
+  for (let b = 0; b < LINES.length; b++) if (lines & BIT(b)) n++;
+  return payouts[result]! * n;
+}
+
+/** ov101_021D406C's walk: the first share the roll falls under (each share taken off the roll in turn, not below 0), or -1. */
+function share(shares: readonly number[], roll: number): number {
+  let v = roll;
+  for (let i = 0; i < shares.length; i++) {
+    if (v < shares[i]!) return i;
+    v = Math.max(0, v - shares[i]!);
+  }
+  return -1;
+}
+
+/** ov101_021D40A8 after its gate: the win flag for a `pick` roll (0–99); what the shares leave is REPLAY (bit 0). */
+export function winFlag(tables: Pick<SlotTables, 'winFlags'>, mode: number, pick: number): number {
+  const i = share(tables.winFlags[mode]!, pick);
+  return BIT(i < 0 ? SLOT_FLAG.replay : WIN_ORDER[i]!);
+}
+
+/**
+ * ov101_021D4394: a standby spin's flag from its `pick` roll and its `gate` roll (drawn in that order). Under the gate
+ * (`standbySmall`) a small flag: cherries, Moon Stone, then Pikachu by the table's shares, entry 1 checked twice as the
+ * DS does; else REPLAY. Over it, the bonus type's 7 (types 0–2 red, 3–5 Galactic).
+ */
+export function standbyFlag(tables: Pick<SlotTables, 'standbyFlags' | 'standbySmall'>, mode: number, bonusType: number, pick: number, gate: number): number {
+  if (!(gate < tables.standbySmall[mode]!)) return BIT(bonusType < 3 ? SLOT_FLAG.red7 : SLOT_FLAG.galactic7);
+  const s = tables.standbyFlags[mode]!;
+  const i = share([s[0]!, s[1]!, s[1]!], pick);
+  return BIT(i < 0 ? SLOT_FLAG.replay : [SLOT_FLAG.cherry, SLOT_FLAG.moon, SLOT_FLAG.pikachu][i]!);
+}
+
+/** ov101_021D4210: the bonus type and class for a roll. */
+export function bonusDraw(tables: Pick<SlotTables, 'bonusTypes'>, mode: number, roll: number): { type: number; class: number } {
+  const rows = tables.bonusTypes[mode]!;
+  const i = share(rows.map((r) => r.chance), roll);
+  if (i < 0) throw new Error('slots: the bonus type draw found no row');
+  return { type: rows[i]!.type, class: rows[i]!.class };
+}
+
+/** ov101_021D42D0: Clefairy's kind for the bonus class and a roll. */
+export function clefairyKind(tables: Pick<SlotTables, 'clefairyKinds'>, mode: number, cls: number, roll: number): number {
+  const rows = tables.clefairyKinds[mode]![cls]!;
+  const i = share(rows.map((r) => r.chance), roll);
+  if (i < 0) throw new Error('slots: the Clefairy draw found no kind');
+  return rows[i]!.kind;
+}
+
+/** ov101_021D44FC: the continue chance after a round: −10 when the red moon was hit, else by the roll (−10, −5); not below 0. */
+export function continueDrop(tables: Pick<SlotTables, 'continueDrop'>, mode: number, chance: number, redMoonHit: boolean, roll: number): number {
+  const [p10, p5] = tables.continueDrop[mode]! as [number, number];
+  let v = chance;
+  if (redMoonHit) v -= 10;
+  else if (roll < p10) v -= 10;
+  else if (roll - p10 < p5) v -= 5;
+  return Math.max(0, v);
+}
+
+/** The tell between rounds (presentation only): Clefairy back into the ball, only its cry, or the Pikachu pair. */
+export type SlotTell = 'ball' | 'cry' | 'pikachu';
+/** ov101_021D4550: the tell from the first row whose minimum the chance reaches. */
+export function endTell(tables: Pick<SlotTables, 'endTells'>, mode: number, chance: number, roll: number): SlotTell {
+  const row = tables.endTells[mode]!.find((t) => chance >= t.min);
+  if (!row) throw new Error(`slots: no end tell row for ${chance}%`);
+  const i = share([row.a, row.b], roll);
+  return i === 0 ? 'ball' : i === 1 ? 'cry' : 'pikachu';
 }
 
 /** ov101_021D5618: the symbol a flag lines up. */
