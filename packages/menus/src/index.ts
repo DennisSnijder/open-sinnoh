@@ -44,6 +44,8 @@ import { slotsScreen } from './slots.ts';
 import { journalScreen } from './journal.ts';
 import { diplomaScreen } from './diploma.ts';
 import { townMapScreen } from './town-map.ts';
+import { castleScreen } from './frontier-castle.ts';
+import { arcadeScreen } from './frontier-arcade.ts';
 
 export const createApp: CreateApp = (request, deps) => {
   const ctx = menuContext(deps);
@@ -59,7 +61,7 @@ export const createApp: CreateApp = (request, deps) => {
     case 'party':
       return new AppStack(partyScreen(ctx, { kind: request.mode }), { app: 'party', slot: null });
     case 'party-order':
-      return new AppStack(partyScreen(ctx, { kind: 'order', count: request.count, ...(request.hall ? { hall: true as const } : {}) }), { app: 'party-order', order: null });
+      return new AppStack(partyScreen(ctx, { kind: 'order', count: request.count, ...(request.hall ? { hall: true as const } : {}), ...(request.castle ? { castle: true as const } : {}) }), { app: 'party-order', order: null });
     case 'storage':
       return new AppStack(storageScreen(ctx, request.mode), { app: 'storage' });
     case 'pokedex-entry':
@@ -128,6 +130,10 @@ export const createApp: CreateApp = (request, deps) => {
       return new AppStack(hallBoardScreen(ctx, request), { app: 'hall-board', cell: request.cursor });
     case 'slots':
       return new AppStack(slotsScreen(ctx, request), { app: 'slots', coins: ctx.state.coins, streak: 0, rounds: 0 });
+    case 'castle':
+      return new AppStack(castleScreen(ctx, request), { app: 'castle', party: request.party, opponents: request.opponents, unlocked: request.unlocked, slot: 0 });
+    case 'arcade':
+      return new AppStack(arcadeScreen(ctx, request), { app: 'arcade', effect: 30, cursor: 0, random: 0 });
     case 'summary-teach':
       return new AppStack(summaryScreen(ctx, { party: () => deps.state.party, slot: request.slot, mode: { kind: 'teach', move: request.move, done: (forget) => ({ close: { app: 'summary-teach', forget } }) } }), { app: 'summary-teach', forget: null });
   }

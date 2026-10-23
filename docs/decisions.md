@@ -491,7 +491,14 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   opponents and their types, ranks, milestones) are read from overlay 104 and arm9, checked against pl_btdpm,
   pl_bsdpm and pl_btdtr. Link-only commands (the multi challenges) are left unimplemented; no single-player path
   reaches them. The rental app and the type board are DS scenes from the ROM's art; the facilities' particle
-  effects are logged stand-ins. The Castle and the Arcade are planned.
+  effects are logged stand-ins.
+- **Battle Castle and Battle Arcade** follow the same pattern (`FrontierState.castle`, `.arcade`; tables from
+  overlays 104, 107 and 108). The Castle's CP spends and rank-ups happen inside its app, as on the DS; a resumed
+  challenge rebuilds the opponents from their trainer's IVs (the DS reads an uninitialised list there). The Arcade's
+  board is one screen with its STOP button at half size in the free corner (the DS has it alone on the touch screen);
+  A stops the board too. Its effects reach the battle as `FrontierBattle.weather` and `.sleep` (the DS's sleep turns)
+  besides the parties. Frontier scripts' A/B waits show in `FrontierView.waitsForAB`, so replays' `advance text` presses
+  through them, and loaded characters stay loaded across scene changes (the decomp keeps them in one table).
 - **Underground (solo):** the Explorer Kit, mining from ROM tables, spheres, vendors, fossils, traps and the
   secret base. Seeds come from the clock and the trainer id, not ticks, so boards are the same whatever
   replays wait. No link play: other players' traps, bases and flags have no stand-in.

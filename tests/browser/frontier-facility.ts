@@ -1,8 +1,8 @@
 /**
  * A Battle Frontier facility's challenge in the app on the real ROM (frontier-factory.rom.spec.ts,
- * frontier-hall.rom.spec.ts): its sys replay through `window.openSinnohGame`, the facility's own checks at each
- * screenshot line, and every frontier scene sampled as it is drawn (frontier-scene.ts). Screenshots go to
- * test-artifacts (ROM content, never commit).
+ * frontier-hall.rom.spec.ts, frontier-castle.rom.spec.ts, frontier-arcade.rom.spec.ts): its sys replay through
+ * `window.openSinnohGame`, the facility's own checks at each screenshot line, and every frontier scene sampled as it
+ * is drawn (frontier-scene.ts). Screenshots go to test-artifacts (ROM content, never commit).
  */
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import type { AppView, Registries } from '@opensinnoh/contracts';
@@ -60,7 +60,7 @@ export async function dsAppDrawn(page: Page, name: string, app: string, buttons:
 }
 
 /** A frontier battle on the facility's backdrop (the world's BACKGROUND_BATTLE_*). */
-export async function facilityBattle(page: Page, name: string, facility: 'FACTORY' | 'HALL'): Promise<void> {
+export async function facilityBattle(page: Page, name: string, facility: 'FACTORY' | 'HALL' | 'CASTLE' | 'ARCADE'): Promise<void> {
   const view = await page.evaluate(() => window.openSinnohGame!.battleView());
   expect(view?.background, name).toBe(`platinum:BACKGROUND_BATTLE_${facility}`);
   expect(view?.terrain, name).toBe(`platinum:TERRAIN_BATTLE_${facility}`);

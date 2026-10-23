@@ -199,7 +199,14 @@ export function frontierHandlers(): Record<string, FrontierHandler> {
       f.r.ui.message = null;
       return 'continue';
     },
-    fr_wait_ab_press: (f, c) => f.pause(c, (input) => has(input, 'a') || has(input, 'b')),
+    fr_wait_ab_press: (f, c) => {
+      f.abWaits++;
+      return f.pause(c, (input) => {
+        if (!has(input, 'a') && !has(input, 'b')) return false;
+        f.abWaits--;
+        return true;
+      });
+    },
     fr_wait_ab_press_time: (f, c, a) => {
       c.data[0] = val(f, c, a[0]);
       return f.pause(c, (input) => {

@@ -98,6 +98,12 @@ export const drawScriptOverlay: DrawScriptOverlay = (ctx, view, font, scale, fra
     if (view.message.waitingForInput) drawArrow(px, at.x + at.width - 8, at.y + at.height - 5, 'down');
     ctx.restore();
   }
+  if (view.frontier?.infoWindow) {
+    // Decomp BattleCastle_ShowPlayerInfoWindows: the standard frame, each line at its place inside it.
+    const w = view.frontier.infoWindow;
+    frame(w);
+    for (const line of w.lines) text(line.text, w.x + line.x, w.y + line.y);
+  }
   if (view.floorWindow) {
     const w = view.floorWindow;
     frame(w);

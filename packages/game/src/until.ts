@@ -51,7 +51,7 @@ function holds(t: UntilTarget, until: UntilCondition): boolean {
       throw new Error('until idle is counted in runUntil');
     case 'message': {
       const view = t.view();
-      return view.message?.waitingForInput === true && !choosing(view);
+      return (view.message?.waitingForInput === true || view.frontier?.waitsForAB === true) && !choosing(view);
     }
     case 'yesno':
       return t.view().yesNo !== null;
@@ -129,7 +129,7 @@ export function advanceText(t: UntilTarget, max: number): number | null {
       down = false;
     } else if (!playsEvolution(t)) {
       const view = t.view();
-      if ((view.message?.waitingForInput && !choosing(view)) || t.blackOutWaiting()) {
+      if (((view.message?.waitingForInput || view.frontier?.waitsForAB) && !choosing(view)) || t.blackOutWaiting()) {
         t.press('a');
         down = true;
       }

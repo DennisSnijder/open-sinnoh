@@ -1,13 +1,29 @@
 /*
- * The Battle Frontier's DS screens (ui/frontier.ts): the Factory's rental app and the Hall's type board, a DS scene
- * (evolution.css) with names, labels, the menu and YES/NO at their DS places. The balls and the cells are invisible
- * buttons over the canvas (the ROM's cursor sprite shows the cursor), placed like the other boxes.
+ * The Battle Frontier's DS screens (ui/frontier.ts): the Factory's rental app, the Hall's type board, the Castle's apps
+ * and the Arcade's board, a DS scene (evolution.css) with names, labels, the menus and YES/NO at their DS places. The
+ * balls, cells, slots and panels are invisible buttons over the canvas (the ROM's cursor sprite shows the cursor),
+ * placed like the other boxes.
  */
 .ds-scene-boxes > .frontier-name, .ds-scene-boxes > .frontier-label { line-height: 0; white-space: nowrap; pointer-events: none; }
 .ds-scene-boxes > .frontier-mon, .ds-scene-boxes > .frontier-icon { line-height: 0; pointer-events: none; }
-.ds-scene .ds-scene-boxes > :is(.frontier-ball, .frontier-cell) { position: absolute; padding: 0; border: 0; background: none; box-shadow: none; cursor: pointer; }
-.ds-scene .ds-scene-boxes > :is(.frontier-ball, .frontier-cell).is-cursor::before { display: none; }
-.ds-scene .ds-scene-boxes > :is(.frontier-ball, .frontier-cell):hover { background: none; }
-.ds-scene .ds-scene-boxes > :is(.frontier-ball, .frontier-cell):focus-visible:not(.is-cursor) { outline: calc(var(--k) * 1) solid #f0b030; outline-offset: calc(var(--k) * -1); }
+.ds-scene .ds-scene-boxes > :is(.frontier-ball, .frontier-cell, .frontier-tap, .frontier-row, .frontier-stop) { position: absolute; padding: 0; border: 0; background: none; box-shadow: none; cursor: pointer; }
+.ds-scene .ds-scene-boxes > :is(.frontier-ball, .frontier-cell, .frontier-tap, .frontier-row, .frontier-stop).is-cursor::before { display: none; }
+.ds-scene .ds-scene-boxes > :is(.frontier-ball, .frontier-cell, .frontier-tap, .frontier-row, .frontier-stop):hover { background: none; }
+.ds-scene .ds-scene-boxes > :is(.frontier-ball, .frontier-cell, .frontier-tap, .frontier-row, .frontier-stop):focus-visible:not(.is-cursor) { outline: calc(var(--k) * 1) solid #f0b030; outline-offset: calc(var(--k) * -1); }
 .ds-scene-boxes > .frontier-menu { display: grid; align-content: center; }
 .ui-layer[data-mode] .ds-scene .frontier-menu .choice { min-height: 0; min-width: 0; height: calc(var(--k) * 16); }
+/* Text at a DS place: its left edge, right edge or centre there. */
+.ds-scene-boxes > .frontier-line { display: flex; align-items: flex-start; }
+.ds-scene-boxes > .frontier-line.is-right { justify-content: flex-end; }
+.ds-scene-boxes > .frontier-line.is-centre { justify-content: center; }
+/* The Castle's item list: the name at the row's left, the price right-aligned at x 128 of the 152-px row. */
+.ds-scene-boxes > .frontier-row { line-height: 0; text-align: left; }
+.frontier-row > .frontier-row-name, .frontier-row > .frontier-row-cp { position: absolute; top: 0; }
+.frontier-row > .frontier-row-name { left: 0; }
+.frontier-row > .frontier-row-cp { right: calc(var(--k) * 24); }
+/* The Arcade's STOP: a round button; its art is the canvas under it (larger than the button: the pressed ring). */
+.ds-scene-boxes > .frontier-stop-art { pointer-events: none; image-rendering: pixelated; image-rendering: crisp-edges; }
+.ds-scene .ds-scene-boxes > .frontier-stop { border-radius: 50%; }
+.ds-scene .ds-scene-boxes > .frontier-stop:disabled { cursor: default; }
+.ds-scene .ds-scene-boxes > .frontier-stop.is-flat { background: #f07890; box-shadow: inset 0 0 0 calc(var(--k) * 4) #382828; }
+.ds-scene .ds-scene-boxes > .frontier-stop.is-flat:not([data-state="0"]) { background: #808080; }

@@ -55,6 +55,8 @@ the trainer card, the Pokédex, the Town Map and Fly, all 25 Pokétch apps, opti
   script VM for the Battle Frontier's scenes.
 - The Battle Factory (rentals and trades, Level 50 and Open Level, Thorton) and the Battle Hall (the type-rank
   board, one Pokémon, Argenta, the species records and the record keeper), singles and doubles.
+- The Battle Castle (Castle Points, healing and rentals, scouting the opponent, ranks, Darach) and the Battle Arcade
+  (the game board and its effects, Dahlia), singles and doubles.
 - Mystery Gift with gift codes.
 
 **Town extras.** Seals and Ball Capsules with the editor and the battle send-out effect; the Game Corner's slots,
@@ -84,8 +86,8 @@ Pokémon, follower talk and the HGSS look.
 
 ## Next
 
-- **Battle Frontier:** the Castle and Arcade with their Brains, on the Frontier VM the Tower uses; the records app;
-  the facilities' particle effects.
+- **Battle Frontier:** the records app; the facilities' particle effects; the Castle app's flag marks for bought
+  stats and moves.
 - **Contests:** the Jubilife TV dress-up gallery; the dancers' outfits.
 - **Underground:** the placed traps' and tools' drawn details (the slide's sprite pose, the rock's floor shadow, the
   OK emote), the transition's hole and descent animations.

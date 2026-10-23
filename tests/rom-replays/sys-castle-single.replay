@@ -1,0 +1,155 @@
+# A Battle Castle singles challenge (decomp scripts_battle_castle.s, frontier_scripts_battle_castle.s): the single
+# attendant, SINGLE, the party menu (PARTY_MENU_MODE_BATTLE_CASTLE: three Pokémon), the save before the challenge
+# (both questions YES), the corridor and the battle room's menu with the Castle Points window (10 CP to start). The
+# opponent app: CHECK the first Pokémon (1 CP), LEVEL +5 (1 CP); the player's app: RENTAL, BERRIES, the first berry
+# for the first Pokémon (2 CP). The first battle won (its CP received), then RETIRE (YES): the save on the loss
+# (BattleCastle_SaveOnLoss: the ranks back to 1, the latest and record streak 1), the lobby's goodbye. The opponent is
+# drawn from the game's RNG, so it differs by seed; the battle's result does not.
+party 0 platinum:SPECIES_GARCHOMP 100 platinum:MOVE_EARTHQUAKE platinum:MOVE_DRAGON_CLAW platinum:MOVE_FIRE_FANG platinum:MOVE_CRUNCH
+party 1 platinum:SPECIES_METAGROSS 100 platinum:MOVE_METEOR_MASH platinum:MOVE_EARTHQUAKE platinum:MOVE_ZEN_HEADBUTT platinum:MOVE_BULLET_PUNCH
+party 2 platinum:SPECIES_SALAMENCE 100 platinum:MOVE_DRAGON_CLAW platinum:MOVE_EARTHQUAKE platinum:MOVE_FLAMETHROWER platinum:MOVE_AERIAL_ACE
+warp platinum:MAP_HEADER_BATTLE_CASTLE 6 9 left
+until idle
++0 press a
++1 release a
+advance text
+until menu 600
+# SINGLE
++2 press a
++1 release a
+advance text
+until app party 600
++2 screenshot castle-party
++2 tap slot:0
++2 tap menu:0
++2 tap slot:1
++2 tap menu:0
++2 tap slot:2
++2 tap menu:0
++2 tap confirm
+until app none 300
+advance text
+until yesno 600
++2 press a
++1 release a
+advance text
+until yesno 600
++2 press a
++1 release a
++300 press a
++1 release a
++120 screenshot castle-corridor
+advance text 3000
+until menu 3000
++0 screenshot castle-room
++0 assert state frontier.castle.streaks[0].cp 10
+# OPPONENT
++2 press down
++1 release down
++2 press a
++1 release a
+until app castle 600
++40 screenshot castle-opponent
+# CHECK, YES, the identity
++0 press a
++1 release a
++2 press a
++1 release a
++2 press a
++1 release a
++2 press a
++1 release a
+# LEVEL, +5, YES
++2 press a
++1 release a
++2 press down
++1 release down
++2 press a
++1 release a
++2 press a
++1 release a
++2 press a
++1 release a
++2 press a
++1 release a
++0 assert state frontier.castle.streaks[0].cp 8
+# EXIT
++2 press b
++1 release b
++2 press a
++1 release a
+until app none 300
+until menu 600
+# SELF
++30 press a
++1 release a
+until app castle 600
++40 screenshot castle-self
+# RENTAL, BERRIES, the first berry, YES
++0 press a
++1 release a
++2 press down
++1 release down
++2 press a
++1 release a
++2 press a
++1 release a
++2 screenshot castle-rental
++0 press a
++1 release a
++2 press a
++1 release a
++120 press a
++1 release a
++0 assert state frontier.castle.streaks[0].cp 6
++2 press b
++1 release b
++2 press a
++1 release a
+until app none 300
+until menu 600
+# BATTLE
++30 press down
++1 release down
++2 press down
++1 release down
++2 press a
++1 release a
++90 press a
++1 release a
++500 press a
++1 release a
++200 press a
++1 release a
+until battle 3000
++0 screenshot castle-battle
+battle auto 20000
++200 press a
++1 release a
+advance text 3000
+until menu 3000
++0 screenshot castle-after
+# RETIRE (the list's fourth)
++10 press down
++1 release down
++2 press down
++1 release down
++2 press down
++1 release down
++2 press a
++1 release a
+until yesno 600
++2 press up
++1 release up
++2 press a
++1 release a
+advance text 3000
+until idle 3000
+advance text 3000
++0 assert battles frontier 1
++0 assert battle frontier * won single
++0 assert state frontier.castle.streaks[0].record 1
++0 assert state frontier.castle.streaks[0].latest 1
++0 assert state frontier.castle.ranks[0] [1,1,1]
++0 assert state frontier.castle.active[0] false
++0 assert state party[0].heldItem null

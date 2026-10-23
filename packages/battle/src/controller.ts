@@ -1939,6 +1939,11 @@ class BattleController implements Battle {
         }
         case '-item':
         case '-enditem': {
+          // Gen 4 Frisk names no target (a random foe's item: the sim's gen4 mod logs `-item||<item>`): only its line.
+          if (cmd === '-item' && from === 'ability: Frisk' && a === '') {
+            yield* this.say(this.text.get('PokemonFriskedItsFoeAndFoundOneItem', [this.ofSide(parts).view.name, this.itemName(b)], this.who(this.ofSide(parts))));
+            break;
+          }
           const target = this.sideOf(a);
           aiRevealHeldItem(this.memory, this.battlerOf(a), cmd === '-item' ? this.itemNumber(target.mon) : 0);
           if (cmd === '-item' && from === 'ability: Frisk') yield* this.say(this.text.get('PokemonFriskedItsFoeAndFoundOneItem', [this.ofSide(parts).view.name, this.itemName(b)], this.who(this.ofSide(parts))));
@@ -2728,6 +2733,8 @@ class BattleController implements Battle {
     const alive = this.expAlive.get(this.activeSim(this.teams[defeated.id]!));
     if (!alive) throw new Error('battle: foe faint has no EXP eligibility snapshot');
     this.own.sims.forEach((s, i) => s && this.pullSim(this.own, i));
+    // A frontier battle's enemy party comes back too (the Arcade's SWAP_MONS keeps its Pokémon's held items from it).
+    if (this.frontier) this.foe.sims.forEach((s, i) => s && this.pullSim(this.foe, i));
     const fought = [...this.participants[defeated.id]!].filter((i) => alive.has(i));
     const holders = party.map((_, i) => i).filter((i) => alive.has(i) && this.dex.holdEffect(party[i]!.heldItem).holdEffect === 'EXP_SHARE');
     if (!fought.length) return;
@@ -2954,7 +2961,7 @@ class BattleController implements Battle {
     const levelled = this.setup.kind === 'tutorial' ? [] : [...this.levelled].sort((a, b) => a - b);
     // A roamer's HP and status go back to the field (decomp RoamerAfterBattle_UpdateRoamers reads the enemy party).
     const roamer = this.battleType === BATTLE_TYPE_ROAMER ? this.roamerAfter() : {};
-    this.result = { outcome: this.outcome!, turns: this.turns, party, money: this.money, bag: this.bag, caught: this.caught, seen: this.seen, levelled, ...roamer, ...(this.safari ? { safariBalls: this.safari.balls } : {}) };
+    this.result = { outcome: this.outcome!, turns: this.turns, party, money: this.money, bag: this.bag, caught: this.caught, seen: this.seen, levelled, ...roamer, ...(this.safari ? { safariBalls: this.safari.balls } : {}), ...(this.frontier ? { enemyParty: this.foe.party } : {}) };
     for (;;) yield;
   }
 
@@ -3771,7 +3778,8 @@ class BattleController implements Battle {
       if (mon.hp === 0) sim.fainted = true;
       const status = STATUS_TO_SIM[mon.status];
       sim.status = status as never;
-      sim.statusState = this.sim.initEffectState({ id: status, target: sim, ...(status === 'slp' ? { startTime: 3, time: 3 } : {}) } as never);
+      const turns = status === 'slp' ? this.sleepTurns(team, index) : 0;
+      sim.statusState = this.sim.initEffectState({ id: status, target: sim, ...(status === 'slp' ? { startTime: turns, time: turns } : {}) } as never);
     }
     sim.baseMoveSlots = mon.moves.map((id, i) => {
       const m = this.sim.dex.moves.get(this.data.move(id));
@@ -3814,6 +3822,16 @@ class BattleController implements Battle {
   }
 
   /** Sim → party: HP, status, PP, the held item. */
+  /**
+   * A sleeping Pokémon's turns at the start: a frontier battle's own (contracts `FrontierBattle.sleep`: the Arcade's
+   * sleep effect, 2–5), else 3.
+   */
+  private sleepTurns(team: Team, index: number): number {
+    const sleep = this.setup.frontier?.sleep;
+    const turns = sleep && (team === this.own ? sleep.player : team === this.foe ? sleep.enemy : null)?.[index];
+    return turns || 3;
+  }
+
   private pullSim(team: Team, index: number): void {
     this.pull(team.party[index]!, team.sims[index]!);
   }

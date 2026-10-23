@@ -165,6 +165,8 @@ export interface BattleResult {
   roamer?: { hp: number; status: StatusCondition };
   /** 0.29.1. A `safari` battle: the Safari Balls left (decomp UpdateFieldSystemFromDTO). */
   safariBalls?: number;
+  /** 0.39.0. A frontier battle: the first trainer's party at the end (decomp dto->parties[BATTLER_ENEMY_1]). */
+  enemyParty?: Pokemon[];
 }
 
 /**

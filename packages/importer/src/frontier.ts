@@ -5,7 +5,7 @@
  * Shop_GetItemBPPrice), and the scenes' 2D art: the rooms (frontier_bg), the 2D characters (wifi2dchar through
  * overlay 63's gfx table) and the frontier_obj sprites.
  */
-import type { BattleFactoryTables, BattleHallTables, FactoryPool, FrontierSceneData, FrontierSetData, FrontierTables, FrontierTrainerData, Mart, Movement, Sequence } from '@opensinnoh/contracts';
+import type { BattleArcadeTables, BattleCastleTables, BattleFactoryTables, BattleHallTables, FactoryPool, FrontierSceneData, FrontierSetData, FrontierTables, FrontierTrainerData, Mart, Movement, Sequence } from '@opensinnoh/contracts';
 import { asId, type Command, type Id } from '@opensinnoh/core';
 import { readNarc, Reader, type NitroFs } from '@opensinnoh/nds';
 import { decodeFrontierScripts, FRONTIER_SCRIPT_FILES, frontierFileLabelName } from '@opensinnoh/vm';
@@ -67,6 +67,36 @@ export interface FrontierRomTables {
     classesByCell: Uint8Array;
     trainerClasses: Uint8Array;
   };
+  /**
+   * overlay 104 battle_castle_helpers.c sBattleCastleOpponentPools (u16 × 4 per round), battle_castle.c sBPPerRoundSolo
+   * (u8 × 9); overlay 107 self_app.c sItemsForRent, sItemPrices (u16 × 27), sBerriesForRent, sBerryPrices (u16 × 32),
+   * sItemsAvailableByRank, sBerriesAvailableByRank, sHealingCosts (u16 × 3), sRankUpCosts (u16 × 3 × 3).
+   */
+  castle: { opponentPools: Uint8Array; battlePoints: Uint8Array; items: Uint8Array; itemPrices: Uint8Array; berries: Uint8Array; berryPrices: Uint8Array; itemsByRank: Uint8Array; berriesByRank: Uint8Array; healCosts: Uint8Array; rankUpCosts: Uint8Array };
+  /**
+   * overlay 104 battle_arcade_helpers.c sBattleArcadeOpponentPools; battle_arcade.c sBPPerRoundSolo (u8 × 9),
+   * sRouletteSpeedByRound ({u8 round, u8 speed} × 3), sPerformanceByNumWithStatus, sPerformanceByNumFainted (u8 × 5),
+   * sPerformanceByTurnsElapsed ({u8 turns, u8 score} × 5), sBerryPoolTier1–3, sItemPoolTier1–3 (u16s),
+   * sBattleArcadeScreenAssets ({u16 tiles, tilemap, palette} × 32); overlay 108 main.c sCursorMoveFrames ({u8, u8} × 8),
+   * sEffectAvailabilityByRound (a u8 bitfield × 32), sEffectAvailabilityByBattle (× 7), sCategoryWeights (u8 × 4 × 5),
+   * sCategoryTierPerformanceThresholds (u8 × 4).
+   */
+  arcade: {
+    opponentPools: Uint8Array;
+    battlePoints: Uint8Array;
+    rouletteSpeeds: Uint8Array;
+    performanceStatus: Uint8Array;
+    performanceFainted: Uint8Array;
+    performanceTurns: Uint8Array;
+    berryPools: Uint8Array[];
+    itemPools: Uint8Array[];
+    screens: Uint8Array;
+    cursorFrames: Uint8Array;
+    effectsByRound: Uint8Array;
+    effectsByBattle: Uint8Array;
+    categoryWeights: Uint8Array;
+    categoryThresholds: Uint8Array;
+  };
 }
 
 /** FRONTIER_TRAINER_TOWER_TYCOON_PALMER_SILVER, _GOLD and FRONTIER_TRAINER_TRAINER_CHERYL_CHERYL (generated/frontier_trainers.txt). */
@@ -74,6 +104,9 @@ const PALMER = [305, 306] as const;
 /** FRONTIER_TRAINER_HALL_MATRON_ARGENTA_SILVER, _GOLD and FRONTIER_TRAINER_FACTORY_HEAD_THORTON_SILVER, _GOLD. */
 const ARGENTA = [307, 308] as const;
 const THORTON = [309, 310] as const;
+/** FRONTIER_TRAINER_ARCADE_STAR_DAHLIA_SILVER, _GOLD and FRONTIER_TRAINER_CASTLE_VALET_DARACH_SILVER, _GOLD. */
+const DAHLIA = [311, 312] as const;
+const DARACH = [313, 314] as const;
 /** Decomp sBattleHallAppGridOrder's BATTLE_HALL_MON_SUMMARY cells. */
 const HALL_SUMMARY_CELL = 0xfe;
 /**
@@ -85,6 +118,21 @@ const HALL_APP = { ncgr: 23, nscr: 24, nclr: 134, palettes: 6 } as const;
 /** frontier_obj members (narc_frontier_obj.h): BATTLE_FACTORY_APP_SPRITES, BATTLE_HALL_APP_CURSOR_BOX. */
 const FACTORY_APP_SPRITES = { ncgr: 0, nanr: 1, ncer: 2, nclr: 36 } as const;
 const HALL_APP_CURSOR = { ncgr: 12, nanr: 13, ncer: 14, nclr: 38 } as const;
+/**
+ * frontier_bg members of the Castle's apps (battle_castle_self_app / _opponent_app NCGR, their solo, items, summary and
+ * moves NSCRs and NCLRs; LoadPalette loads four palettes) and the Arcade's board (battle_arcade_app NCGR, main initial
+ * and roulette NSCRs, NCLR: seven palettes); frontier_obj BATTLE_CASTLE_APP_SPRITES, BATTLE_ARCADE_APP_SPRITES and
+ * _SUB_SPRITES (the STOP button).
+ */
+const CASTLE_SELF_APP = { ncgr: 34, main: 35, items: 37, summary: 38, moves: 39, nclr: 137, palettes: 4 } as const;
+const CASTLE_OPPONENT_APP = { ncgr: 44, main: 40, summary: 42, moves: 43, nclr: 138, palettes: 4 } as const;
+const CASTLE_APP_SPRITES = { ncgr: 15, nanr: 16, ncer: 17, nclr: 39 } as const;
+const ARCADE_APP = { ncgr: 120, initial: 116, roulette: 117, nclr: 167, palettes: 7 } as const;
+const ARCADE_APP_SPRITES = { ncgr: 18, nanr: 19, ncer: 20, nclr: 40 } as const;
+const ARCADE_APP_BUTTON = { ncgr: 21, nanr: 22, ncer: 23, nclr: 41 } as const;
+/** Decomp FRONTIER_SCENE_CASTLE_BATTLE_ROOM and GetEmblemTiles: the emblem's 10 × 3 tiles at tile 11, 6, per round 0–6. */
+const CASTLE_BATTLE_ROOM = 12;
+const EMBLEM = { x: 11, y: 6, w: 10, h: 3, rounds: 7, roundTiles: 96, firstTile: 16, rowTiles: 32 } as const;
 const FIRST_PARTNER = 300;
 /** The BP after beating Palmer (decomp BattleTower_GiveBattlePointsReward: `battlePoints = 20`). */
 const PALMER_BP = 20;
@@ -259,6 +307,9 @@ export function importFrontier(fs: NitroFs, names: Names, rom: FrontierRomTables
   // --- the Battle Factory and the Battle Hall ---
   const factory = importFactory(rom.factory, objNarc, bgNarc, deps.sheets);
   const hall = importHall(rom.hall, readSets('/battle/b_pl_stage/pl_bsdpm.narc'), trainers, names, objNarc, bgNarc, deps.sheets);
+  const castleRoom = sceneRows[CASTLE_BATTLE_ROOM]!;
+  const castle = importCastle(rom.castle, names, objNarc, bgNarc, deps.sheets, { tiles: castleRoom.tiles, palette: castleRoom.palette });
+  const arcade = importArcade(rom.arcade, names, objNarc, bgNarc, deps.sheets);
 
   // --- the Battle Tower ---
   const bp = [...rom.battlePoints];
@@ -280,6 +331,8 @@ export function importFrontier(fs: NitroFs, names: Names, rom: FrontierRomTables
     },
     factory,
     hall,
+    castle,
+    arcade,
     characters,
     objects,
     shadow,
@@ -447,4 +500,107 @@ function importHall(rom: FrontierRomTables['hall'], sets: FrontierSetData[], tra
       cursor: sheets.obj('frontier/hall_app_cursor', objNarc, HALL_APP_CURSOR),
     },
   };
+}
+
+/** The Battle Castle's tables (overlays 104, 107), its apps' art and the battle room's emblems. */
+function importCastle(rom: FrontierRomTables['castle'], names: Names, objNarc: Uint8Array[], bgNarc: Uint8Array[], sheets: Sheets, room: { tiles: number; palette: number }): BattleCastleTables {
+  const member = (i: number) => {
+    const b = bgNarc[i];
+    if (!b) throw new Error(`frontier_bg has no member ${i}`);
+    return b;
+  };
+  const rentals = (items: Uint8Array, prices: Uint8Array) => {
+    const p = u16sOf(prices);
+    return u16sOf(items).map((item, i) => ({ item: names.item(item), cp: p[i]! }));
+  };
+  const app = (key: string, a: typeof CASTLE_SELF_APP | typeof CASTLE_OPPONENT_APP) => {
+    // Decomp LoadPalette: the app's first four palettes at BG palette 0.
+    const ram = new PaletteRam().load(readNclr(member(a.nclr)), 0, a.palettes * 32);
+    const chars = readNcgr(member(a.ncgr));
+    return (path: string, nscr: number) => sheets.image(`frontier/castle_${key}_${path}`, textBg(readNscr(member(nscr)), chars, ram));
+  };
+  const self = app('self', CASTLE_SELF_APP);
+  const opponent = app('opponent', CASTLE_OPPONENT_APP);
+  // Decomp GetEmblemTiles: the round's 5 columns from tile 96 × round + 16, mirrored for the other 5, three rows.
+  const roomChars = readNcgr(member(room.tiles));
+  const roomColors = readNclr(member(room.palette)).colors;
+  const emblems = Array.from({ length: EMBLEM.rounds }, (_, round) => {
+    const entries = new Uint16Array(EMBLEM.w * EMBLEM.h);
+    const half = EMBLEM.w / 2;
+    for (let y = 0; y < EMBLEM.h; y++)
+      for (let x = 0; x < EMBLEM.w; x++) {
+        const column = x < half ? x : EMBLEM.w - 1 - x;
+        entries[y * EMBLEM.w + x] = (EMBLEM.roundTiles * round + EMBLEM.firstTile + y * EMBLEM.rowTiles + column) | (x >= half ? 0x400 : 0);
+      }
+    return sheets.image(`frontier/castle_emblem_${round}`, { width: EMBLEM.w * 8, height: EMBLEM.h * 8, rgba: renderAffineExt({ width: EMBLEM.w * 8, height: EMBLEM.h * 8, entries }, roomChars, roomColors) });
+  });
+  return {
+    opponentRanges: rows(u16sOf(rom.opponentPools), 4) as [number, number, number, number][],
+    battlePoints: [...rom.battlePoints],
+    darach: [...DARACH],
+    items: rentals(rom.items, rom.itemPrices),
+    berries: rentals(rom.berries, rom.berryPrices),
+    itemsByRank: u16sOf(rom.itemsByRank),
+    berriesByRank: u16sOf(rom.berriesByRank),
+    healCosts: u16sOf(rom.healCosts),
+    rankUpCosts: rows(u16sOf(rom.rankUpCosts), 3),
+    art: {
+      self: { main: self('main', CASTLE_SELF_APP.main), items: self('items', CASTLE_SELF_APP.items), summary: self('summary', CASTLE_SELF_APP.summary), moves: self('moves', CASTLE_SELF_APP.moves) },
+      opponent: { main: opponent('main', CASTLE_OPPONENT_APP.main), summary: opponent('summary', CASTLE_OPPONENT_APP.summary), moves: opponent('moves', CASTLE_OPPONENT_APP.moves) },
+      sprites: sheets.obj('frontier/castle_app_sprites', objNarc, CASTLE_APP_SPRITES),
+      emblems,
+    },
+  };
+}
+
+/** The Battle Arcade's tables (overlays 104, 108), its board's art and the battle room's effect screens. */
+function importArcade(rom: FrontierRomTables['arcade'], names: Names, objNarc: Uint8Array[], bgNarc: Uint8Array[], sheets: Sheets): BattleArcadeTables {
+  const member = (i: number) => {
+    const b = bgNarc[i];
+    if (!b) throw new Error(`frontier_bg has no member ${i}`);
+    return b;
+  };
+  // Decomp LoadPalette: the board's first seven palettes at BG palette 0.
+  const ram = new PaletteRam().load(readNclr(member(ARCADE_APP.nclr)), 0, ARCADE_APP.palettes * 32);
+  const chars = readNcgr(member(ARCADE_APP.ncgr));
+  const board = (path: string, nscr: number) => sheets.image(`frontier/arcade_app_${path}`, textBg(readNscr(member(nscr)), chars, ram));
+  // Decomp BattleArcade_UpdateBackgroundForEffect: BG2 from the effect's tiles, tilemap and extended palette.
+  const known = new Map<string, Id>();
+  const screens = rows(u16sOf(rom.screens), 3).map(([tiles, tilemap, palette]) => {
+    const key = `${tiles}_${tilemap}_${palette}`;
+    let id = known.get(key);
+    if (!id) {
+      const screen = readNscr(member(tilemap!));
+      known.set(key, (id = sheets.image(`frontier/arcade_screen_${tilemap}`, { width: screen.width, height: screen.height, rgba: renderAffineExt(screen, readNcgr(member(tiles!)), readNclr(member(palette!)).colors) })));
+    }
+    return id;
+  });
+  const pairs = (b: Uint8Array) => rows([...b], 2);
+  return {
+    opponentRanges: rows(u16sOf(rom.opponentPools), 4) as [number, number, number, number][],
+    battlePoints: [...rom.battlePoints],
+    dahlia: [...DAHLIA],
+    rouletteSpeeds: pairs(rom.rouletteSpeeds).map(([round, speed]) => ({ round: round!, speed: speed! })),
+    cursorTicks: pairs(rom.cursorFrames).map(([ticks]) => ticks!),
+    effectsByRound: [...rom.effectsByRound],
+    effectsByBattle: [...rom.effectsByBattle],
+    categoryWeights: rows([...rom.categoryWeights], 4),
+    categoryThresholds: [...rom.categoryThresholds],
+    performance: { status: [...rom.performanceStatus], fainted: [...rom.performanceFainted], turns: pairs(rom.performanceTurns).map(([turns, score]) => ({ turns: turns!, score: score! })) },
+    itemPools: rom.itemPools.map((b) => u16sOf(b).map((i) => names.item(i))),
+    berryPools: rom.berryPools.map((b) => u16sOf(b).map((i) => names.item(i))),
+    art: {
+      initial: board('initial', ARCADE_APP.initial),
+      roulette: board('roulette', ARCADE_APP.roulette),
+      sprites: sheets.obj('frontier/arcade_app_sprites', objNarc, ARCADE_APP_SPRITES),
+      button: sheets.obj('frontier/arcade_app_button', objNarc, ARCADE_APP_BUTTON),
+      screens,
+    },
+  };
+}
+
+/** `v` cut into rows of `n`. */
+function rows(v: number[], n: number): number[][] {
+  if (v.length % n) throw new Error(`frontier: ${v.length} values do not make rows of ${n}`);
+  return Array.from({ length: v.length / n }, (_, i) => v.slice(i * n, (i + 1) * n));
 }

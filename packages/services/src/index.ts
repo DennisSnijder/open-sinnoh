@@ -17,6 +17,8 @@ export * from './fashion.ts';
 export * from './battle-tower.ts';
 export * from './battle-factory.ts';
 export * from './battle-hall.ts';
+export * from './battle-castle.ts';
+export * from './battle-arcade.ts';
 export * from './contest.ts';
 export * from './contest-visual.ts';
 export * from './seals.ts';

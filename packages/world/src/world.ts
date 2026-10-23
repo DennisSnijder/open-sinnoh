@@ -3321,7 +3321,8 @@ export class FieldWorld implements OpenSinnohWorld {
     }
     // Decomp Encounter_NewVsGiratinaOrigin: TERRAIN_GIRATINA (a pack with battle art has it).
     if (request.giratina && scene.terrain) scene.terrain = this.get('battleTerrains', `${scene.terrain.slice(0, scene.terrain.indexOf(':'))}:TERRAIN_GIRATINA` as Id).id;
-    this.battles.start({ ...request, ...scene, weather: battleWeather(this.get('weathers', this.state.weather).name) });
+    // Decomp FieldBattleDTO_InitFromGameState: the field's weather; the Arcade sets its own (battleDTO->fieldWeather).
+    this.battles.start({ ...request, ...scene, weather: request.frontier?.weather ?? battleWeather(this.get('weathers', this.state.weather).name) });
   }
 
   activateRoamer(slot: number): void {
