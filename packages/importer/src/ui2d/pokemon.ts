@@ -174,7 +174,11 @@ export async function importPokemon(fs: NitroFs, speciesIds: Id[], iconPalettes:
       const iconIndex = form && o?.icon ? o.icon(form) : species === SPECIES_EGG ? ICON.egg : species;
       // PokeIconPaletteIndex takes Unown's palette from ICON_UNOWN_A + form − 1, one entry before its picture.
       assets.set(`pokemon/${name}-icon.png`, icon(iconIndex, species === UNOWN_SPECIES && form ? iconIndex - 1 : iconIndex));
-      const face = (k: (typeof order)[number]) => ({ y: order.indexOf(k) * MON_HEIGHT, yOffset: faces[k]!.yOffset });
+      const face = (k: (typeof order)[number]) => ({
+        y: order.indexOf(k) * MON_HEIGHT,
+        yOffset: faces[k]!.yOffset,
+        ...(k === 'front' || k === 'frontFemale' ? { opaque: opaqueRuns(indexes.subarray(order.indexOf(k) * MON_WIDTH * MON_HEIGHT)) } : {}),
+      });
       forms.push({
         ...(o ? { name: o.forms[form]! } : {}),
         atlas: asId(`platinum:pokemon/${name}.png`),
@@ -201,4 +205,22 @@ export async function importPokemon(fs: NitroFs, speciesIds: Id[], iconPalettes:
     });
   }
   return { records, assets };
+}
+
+/**
+ * The first frame's opaque pixels (contracts `PokemonFace.opaque`): per row of 80, the run count and each run's first
+ * x and end x, as base64.
+ */
+function opaqueRuns(picture: Uint8Array): string {
+  const bytes: number[] = [];
+  for (let y = 0; y < MON_HEIGHT; y++) {
+    const runs: number[] = [];
+    for (let x = 0; x < MON_WIDTH / 2; x++) {
+      if (!picture[y * MON_WIDTH + x]) continue;
+      if (runs.length && runs[runs.length - 1] === x) runs[runs.length - 1] = x + 1;
+      else runs.push(x, x + 1);
+    }
+    bytes.push(runs.length / 2, ...runs);
+  }
+  return btoa(String.fromCharCode(...bytes));
 }

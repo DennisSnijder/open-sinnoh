@@ -258,6 +258,8 @@ export type AppRequest =
   | { app: 'contest-select'; rank: number; type: number }
   /** 0.35.0. Decomp ScrCmd_RunContestApplication: the running contest's rounds and results (`GameState.contest`). */
   | { app: 'contest' }
+  /** 0.35.1. Decomp ScrCmd_0A8 (the lobby's frames): the contest photo of type `slot` (`GameState.contestPhotos`). */
+  | { app: 'contest-photo'; slot: number }
   | EvolutionRequest;
 
 /**
@@ -349,6 +351,8 @@ export type AppResult =
   | { app: 'contest-select'; slot: number | null }
   /** 0.35.0. The contest app ended (its scores and placements are in `GameState.contest`). */
   | { app: 'contest' }
+  /** 0.35.1. The photo viewer closed. */
+  | { app: 'contest-photo' }
   /** 0.27.30. Rowan's intro (packages/menus `createRowanIntro`): the names and gender the new game starts with. */
   | { app: 'rowan-intro'; names: { player: string; rival: string }; gender: 'male' | 'female' };
 
@@ -474,7 +478,8 @@ export type AppView =
   | import('./underground.ts').MiningView
   | import('./underground.ts').UndergroundMenuView
   | import('./underground.ts').UndergroundVendorView
-  | import('./contests.ts').ContestView;
+  | import('./contests.ts').ContestView
+  | import('./contests.ts').ContestPhotoView;
 export type AppName = AppView['app'];
 
 /**

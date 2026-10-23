@@ -6,3 +6,15 @@
 .contest-board .contest-cell { justify-self: end; }
 .contest-board .contest-who { min-width: 0; overflow: hidden; white-space: nowrap; }
 .contest-board .contest-row.is-winner { background: rgb(248 216 104 / 0.45); }
+
+/* The visual round and the lobby's photo (ui/contest-visual.ts): one canvas board, the ROM-font windows over it. */
+.contest-board .contest-canvas { image-rendering: pixelated; touch-action: none; }
+.contest-board.contest-visual { touch-action: none; user-select: none; }
+.contest-board .contest-canvas-fade { background: #000; opacity: 0; pointer-events: none; }
+.contest-board .contest-canvas-boxes { pointer-events: none; }
+.contest-board .contest-canvas-boxes .msg-box { pointer-events: auto; }
+.contest-board .contest-dress-line { display: flex; align-items: center; white-space: nowrap; overflow: hidden; }
+.contest-board .contest-dress-clock { display: flex; align-items: center; justify-content: flex-end; gap: calc(var(--dot) * 6); }
+.contest-board .contest-dress-clock > :last-child { transform: scale(var(--pulse, 1)); transform-origin: center; }
+.contest-board .contest-done-label, .contest-board .contest-photo-line { display: flex; justify-content: center; align-items: center; }
+.contest-board .contest-theme { display: flex; align-items: center; }

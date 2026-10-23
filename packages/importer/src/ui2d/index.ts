@@ -25,6 +25,7 @@ import { importEggHatchArt } from './egg-hatch.ts';
 import { importLibraryTvArt } from './library-tv.ts';
 import { importMoveReminderArt, importTradeArt } from './side-screens.ts';
 import { importPoffinArt } from './poffins.ts';
+import { importContestArt } from './contests.ts';
 import { importIntroArt } from './intro.ts';
 import { importHallOfFameArt } from './hall-of-fame.ts';
 import { importShopArt } from './shop.ts';
@@ -42,6 +43,7 @@ export * from './png.ts';
 export * from './pokegra.ts';
 export { Sheets, sheetId } from './sheets.ts';
 export { importUndergroundArt, miningObjectCell } from './underground.ts';
+export { accessoryPictures } from './contests.ts';
 
 /** Code tables the 2D import reads, each verified by SHA1. */
 const TABLES = {
@@ -104,6 +106,7 @@ export async function importUi2d(fs: NitroFs, speciesIds: Id[], classIds: Id[], 
   importMoveReminderArt(fs, sheets);
   importTradeArt(fs, sheets);
   importPoffinArt(fs, sheets);
+  importContestArt(fs, sheets);
   importIntroArt(fs, sheets);
   importHallOfFameArt(fs, sheets);
   importShopArt(fs, sheets);

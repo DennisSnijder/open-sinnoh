@@ -94,7 +94,6 @@ export const TRIAGE: Record<string, Triage> = {
   scr_cmd_2b2: { bucket: 'menus', milestone: SAVE, note: 'FieldSystem_SaveObjects before a save' },
   scr_cmd_258: { bucket: 'menus', milestone: SAVE, note: 'starts the save-pose player task' },
   scr_cmd_259: { bucket: 'menus', milestone: SAVE, note: 'ends the save-pose player task' },
-  scr_cmd_0a8: { bucket: 'contest', note: 'contest party selection', zero: [1] },
   scr_cmd_1e1: { bucket: 'battle', milestone: TOWER, note: 'Battle Tower command' },
   scr_cmd_1e2: { bucket: 'battle', milestone: TOWER, note: 'Battle Tower save task' },
   scr_cmd_1e3: { bucket: 'battle', milestone: TOWER, note: 'Wi-Fi tower match indices', zero: [0, 1] },

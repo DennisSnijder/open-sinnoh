@@ -1,0 +1,37 @@
+# The Contest Hall lobby's photo frames (decomp scripts_contest_hall_lobby.s ContestHallLobby_Frame0/1, ScrCmd_0A8,
+# ov22_0225B660): the empty Beauty frame is only a photo frame; the Cool frame holds a winner photo (set here: Staravia
+# in two accessories on backdrop 4), so A there opens the photo viewer, and A closes it again.
+party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK platinum:MOVE_QUICK_ATTACK
+set flag platinum:FLAG_CONTEST_HALL_VISITED true
+set var platinum:VAR_CONTEST_HALL_LOBBY_STATE 1
+set state contestPhotos[0] {"mon":{"species":"platinum:SPECIES_STARAVIA","form":0,"pid":7,"otId":12345,"nickname":null},"trainerName":"Lucas","rank":1,"dressUp":{"accessories":[{"accessory":0,"x":118,"y":92,"priority":-1},{"accessory":30,"x":104,"y":120,"priority":-2}],"monPriority":-3,"backdrop":4}}
+warp platinum:MAP_HEADER_CONTEST_HALL_LOBBY 4 12 up
+until idle
+# The Beauty frame: no photo
++0 press a
++1 release a
+until message 600
+advance text 600
+until idle 600
++0 assert app none
+# The Cool frame: the viewer
++0 press left
+until position 2 12 600
++0 release left
+until idle
++0 press up
++1 release up
+until idle
++0 press a
++1 release a
+until app contest-photo 600
++0 assert state app.type 0
++0 assert state app.picture.backdrop 4
++0 assert state app.picture.accessories[0].accessory 30
++0 assert state app.picture.monAt 0
++2 screenshot contest-photo
++2 press a
++1 release a
+until app none 600
+until idle 600
++0 assert state contestPhotos[0].trainerName "Lucas"

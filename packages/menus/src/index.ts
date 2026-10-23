@@ -33,6 +33,7 @@ import { poffinCaseScreen } from './poffin-case.ts';
 import { miningScreen } from './mining.ts';
 import { undergroundMenu, undergroundVendor } from './underground.ts';
 import { contestScreen } from './contest/contest.ts';
+import { contestPhotoScreen } from './contest/photo.ts';
 
 export const createApp: CreateApp = (request, deps) => {
   const ctx = menuContext(deps);
@@ -95,6 +96,8 @@ export const createApp: CreateApp = (request, deps) => {
       return new AppStack(partyScreen(ctx, { kind: 'contest', rank: request.rank, type: request.type }), { app: 'contest-select', slot: null });
     case 'contest':
       return new AppStack(contestScreen(ctx), { app: 'contest' });
+    case 'contest-photo':
+      return new AppStack(contestPhotoScreen(ctx, request.slot), { app: 'contest-photo' });
     case 'summary-teach':
       return new AppStack(summaryScreen(ctx, { party: () => deps.state.party, slot: request.slot, mode: { kind: 'teach', move: request.move, done: (forget) => ({ close: { app: 'summary-teach', forget } }) } }), { app: 'summary-teach', forget: null });
   }
@@ -128,6 +131,7 @@ export function createRowanIntro(options: RowanIntroOptions): AppModel {
 export { INTRO_TEXT, type RowanIntroOptions } from './rowan-intro.ts';
 export { competitionRounds } from './contest/contest.ts';
 export { createContestRound, placeholderRound } from './contest/rounds.ts';
+export { contestPicture } from './contest/picture.ts';
 export { MENU_TEXT, MenuText, plainPages, plainText, type MenuKey } from './strings.ts';
 export { moveCursor, REPEAT_DELAY, REPEAT_EVERY } from './stack.ts';
 export { BODY_SHAPES, dexLists, numericalRows, searchDex, NO_QUERY, TYPED_NAME, type DexEntry, type DexQuery } from './pokedex.ts';

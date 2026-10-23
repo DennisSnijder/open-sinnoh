@@ -1,12 +1,18 @@
 # A Normal Rank Cool Contest, offline (decomp scripts_contests.s, contest.c; docs/research/contests.md): the official
 # receptionist, ENTER, NORMAL RANK, COOL CONTEST, the party in contest mode (ENTER on Staravia), the entry, the attire, the
-# stage and its introductions, the contest app (three placeholder rounds scored from condition, then the results), the
-# winner's ceremony and the prize. Staravia's condition wins every round. It comes back with the Cool Ribbon, the photo,
-# the Red Barrette, the records and a little friendship; the save keeps them.
+# stage and its introductions, the contest app: the visual round (the host's messages, the dress-up by keys: Y to the
+# Fashion Case's first White Fluff, A, Y to Staravia's head, A, X for DONE; then the judging's messages), the dance and
+# acting placeholders (scored from condition), the results; the winner's ceremony and the prize. Staravia's condition
+# wins. It comes back with the Cool Ribbon, the photo in its White Fluff, the Red Barrette, the records and a little
+# friendship; the save keeps them.
 party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK platinum:MOVE_QUICK_ATTACK
 set state party[0].condition {"cool":255,"beauty":255,"cute":0,"smart":0,"tough":255,"sheen":255}
 set flag platinum:FLAG_CONTEST_HALL_VISITED true
 set var platinum:VAR_CONTEST_HALL_LOBBY_STATE 1
+set state fashionCase.accessories[0] 2
+set state fashionCase.accessories[3] 1
+set state fashionCase.accessories[30] 1
+set state fashionCase.backdrops [4]
 warp platinum:MAP_HEADER_CONTEST_HALL_LOBBY 16 5 up
 until idle
 +0 press a
@@ -36,11 +42,74 @@ until app contest 6000
 +0 assert state contest.entrants[0].mon.species "platinum:SPECIES_STARAVIA"
 +0 assert state contest.rank 0
 +0 assert state contest.type 0
+# The visual round: the host's six pages, then the stage fades in
+until state app.round.message.waiting true 120
 +2 screenshot contest-round
-# The three placeholder rounds, one A each
-+2 press a
++0 press a
 +1 release a
-+2 press a
+until state app.round.message.waiting true 60
++0 press a
++1 release a
+until state app.round.message.waiting true 60
++0 press a
++1 release a
+until state app.round.message.waiting true 60
++0 press a
++1 release a
+until state app.round.message.waiting true 60
++0 press a
++1 release a
+until state app.round.message.waiting true 60
++0 press a
++1 release a
+until state app.round.dress.seconds 59 60
++1 press y
++1 release y
++1 press a
++1 release a
++1 press y
++1 release y
++1 press a
++1 release a
++1 assert state app.round.dress.placed 1
++1 screenshot contest-dress
++1 press x
++1 release x
+# The judging: its ten pages (the start, two per entrant, the dance's announcement) between the photos and hearts
+until state app.round.message.waiting true 300
++2 screenshot contest-judging
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+# The dance and acting placeholders, one A each
+until state app.round.round "dance" 60
++1 press a
 +1 release a
 +2 press a
 +1 release a
@@ -79,6 +148,8 @@ until idle 9000
 +0 assert state fashionCase.accessories[73] 1
 +0 assert state contestPhotos[0].mon.species "platinum:SPECIES_STARAVIA"
 +0 assert state contestPhotos[0].rank 0
++0 assert state contestPhotos[0].dressUp.accessories[0].accessory 0
++0 assert state contestPhotos[0].dressUp.backdrop 0
 +0 assert state records.counts["90"] 1
 +0 assert state records.counts["92"] 1
 +0 assert state records.counts["94"] 1

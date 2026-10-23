@@ -567,8 +567,9 @@ export function checkAssert(a: Assert, snap: GameSnapshot, registries: Registrie
       return expect(`facing ${a.target}`, a.facing, objects[0]!.facing);
     }
     case 'state': {
-      // `battles…` reads the battle log and `mapPopup…` the popup next to the state; everything else reads GameState.
-      const actual = readStatePath(a.path[0] === 'battles' ? { battles: snap.battles } : a.path[0] === 'mapPopup' ? { mapPopup: snap.mapPopup } : s, a.path);
+      // `battles…` reads the battle log, `mapPopup…` the popup and `app…` the open app's view next to the state; everything else reads GameState.
+      const root = a.path[0] === 'battles' ? { battles: snap.battles } : a.path[0] === 'mapPopup' ? { mapPopup: snap.mapPopup } : a.path[0] === 'app' ? { app: snap.app } : s;
+      const actual = readStatePath(root, a.path);
       return jsonEqual(a.value, actual) ? undefined : `assert state ${a.source}: expected ${JSON.stringify(a.value)}, got ${actual === undefined ? 'nothing' : JSON.stringify(actual)}`;
     }
     case 'battle': {

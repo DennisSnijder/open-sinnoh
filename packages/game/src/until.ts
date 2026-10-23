@@ -68,7 +68,8 @@ function holds(t: UntilTarget, until: UntilCondition): boolean {
     case 'battle-end':
       return !t.inBattle();
     case 'state': {
-      const actual = readStatePath(until.path[0] === 'battles' ? { battles: t.battles() } : until.path[0] === 'mapPopup' ? { mapPopup: t.mapPopup() } : t.state(), until.path);
+      const root = until.path[0] === 'battles' ? { battles: t.battles() } : until.path[0] === 'mapPopup' ? { mapPopup: t.mapPopup() } : until.path[0] === 'app' ? { app: t.appView() } : t.state();
+      const actual = readStatePath(root, until.path);
       return jsonEqual(until.value, actual);
     }
     case 'app': {

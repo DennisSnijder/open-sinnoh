@@ -4,7 +4,7 @@
  * twelve visual themes' accessory points (members 3–14, ov17_02252A70). Strictly checked: an unexpected size, id or
  * bit fails the import.
  */
-import { ACCESSORIES, CONTEST_THEMES, type ContestDressUp, type ContestJudge, type ContestOpponent, type ContestTables } from '@opensinnoh/contracts';
+import { ACCESSORIES, CONTEST_THEMES, type ContestAccessory, type ContestDressUp, type ContestJudge, type ContestOpponent, type ContestTables } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
 import { Reader, readNarc } from '@opensinnoh/nds';
 
@@ -25,6 +25,8 @@ export interface ContestContext {
   judgeNames: number;
   playerGfx: { male: number; female: number };
   playerSprite: { male: Id; female: Id };
+  /** The accessories' pictures (ui2d/contests.ts `accessoryPictures`). */
+  accessories: ContestAccessory[];
 }
 
 const s8 = (b: number) => (b << 24) >> 24;
@@ -89,5 +91,6 @@ export function readContestTables(narc: Uint8Array, ctx: ContestContext): Contes
     if (t.length !== ACCESSORIES.count) throw new Error(`contest_data theme ${k}: ${t.length} bytes, expected ${ACCESSORIES.count}`);
     return [...t];
   });
-  return { opponents, judges, dressUps, themes, playerGfx: ctx.playerGfx, playerSprite: ctx.playerSprite };
+  if (ctx.accessories.length !== ACCESSORIES.count) throw new Error(`contest accessories: ${ctx.accessories.length} pictures, expected ${ACCESSORIES.count}`);
+  return { opponents, judges, dressUps, themes, playerGfx: ctx.playerGfx, playerSprite: ctx.playerSprite, accessories: ctx.accessories };
 }

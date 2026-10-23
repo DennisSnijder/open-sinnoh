@@ -21,7 +21,7 @@ import { resolveUnscriptedClones } from './object-clones.ts';
 import { importShips } from './ships.ts';
 import { importTitle } from './title/index.ts';
 import { importCreditsRide } from './credits.ts';
-import { BACKGROUNDS, importUi2d, importUndergroundArt, mapPopupSheet, MAP_POPUP_STYLES, Sheets } from './ui2d/index.ts';
+import { accessoryPictures, BACKGROUNDS, importUi2d, importUndergroundArt, mapPopupSheet, MAP_POPUP_STYLES, Sheets } from './ui2d/index.ts';
 import { HIDDEN_LOCATIONS, importPokedex } from './pokedex.ts';
 import { matrixVariants } from './matrix-variants.ts';
 import { flyDestinations, readTownMap } from './town-map.ts';
@@ -1231,6 +1231,7 @@ export async function importPlatinum(
       judgeNames: bankTexts[judgeBank]!.length,
       playerGfx: { male: gfxNumber('OBJ_EVENT_GFX_PLAYER_M_CONTEST'), female: gfxNumber('OBJ_EVENT_GFX_PLAYER_F_CONTEST') },
       playerSprite: { male: playerGfx('OBJ_EVENT_GFX_PLAYER_M_CONTEST'), female: playerGfx('OBJ_EVENT_GFX_PLAYER_F_CONTEST') },
+      accessories: accessoryPictures(fs),
     });
     const e = SPECIAL_ENCOUNTERS;
     const ints = (b: Uint8Array, n: number, what: string) => {
