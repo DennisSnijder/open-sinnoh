@@ -32,7 +32,7 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
     expect(pack.manifest).toMatchObject({ id: 'platinum', version: '0.1.0', engine: '^0.1.0' });
     expect(pack.provenance).toBe('rom-derived');
     expect([...stages]).toEqual(['verify', 'text', 'sound', 'zones', 'maps', 'data', 'scripts', 'assets', '2d art']);
-    expect(report.counts).toMatchObject({ zones: 593, matrices: 292, chunks: 666, areas: 75, props: 527, cameras: 17, lights: 4, models: 1365, sprites: 464, weathers: 36, fieldEffects: 99, fonts: 1, titleScreens: 1, species: 496, trainers: 928, ui2d: 1455, pokemonSprites: 494, trainerSprites: 105, battleBackgrounds: 23, battleTerrains: 24, aiScripts: 1, battleAnimations: 518, particleSystems: 485, battleAnimData: 1 });
+    expect(report.counts).toMatchObject({ zones: 593, matrices: 292, chunks: 666, areas: 75, props: 527, cameras: 17, lights: 4, models: 1365, sprites: 464, weathers: 36, fieldEffects: 99, fonts: 1, titleScreens: 1, species: 496, trainers: 928, ui2d: 1483, pokemonSprites: 494, trainerSprites: 105, battleBackgrounds: 23, battleTerrains: 24, aiScripts: 1, battleAnimations: 518, particleSystems: 485, battleAnimData: 1 });
     expect(report.unknowns.char).toBeUndefined();
   });
 
@@ -264,6 +264,11 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
         amitySquare: expect.objectContaining({ stepVar: 'platinum:VAR_AMITY_SQUARE_STEP_COUNT' }),
         seals: expect.objectContaining({ types: expect.toSatisfy((t: unknown[]) => t.length === 81), marts: expect.toSatisfy((m: unknown[]) => m.length === 7) }),
         underground: expect.objectContaining({ zone: 'platinum:MAP_HEADER_UNDERGROUND' }),
+        // The Game Corner, the Villa, the journal and the diplomas (game-corner.rom.test.ts and villa-journal.rom.test.ts check them).
+        slots: expect.objectContaining({ modes: expect.toSatisfy((m: unknown[]) => m.length === 12) }),
+        villa: expect.any(Object),
+        journal: expect.objectContaining({ gyms: expect.toSatisfy((g: unknown[]) => g.length === 8) }),
+        diploma: expect.objectContaining({ sinnoh: 'platinum:ui2d/diploma/sinnoh', national: 'platinum:ui2d/diploma/national' }),
         contestHallFlag: 'platinum:FLAG_CONTEST_HALL_VISITED',
         // The contests' tables (tests/integration/contests.rom.test.ts checks them).
         contests: expect.objectContaining({ playerSprite: { male: 'platinum:OBJ_EVENT_GFX_PLAYER_M_CONTEST', female: 'platinum:OBJ_EVENT_GFX_PLAYER_F_CONTEST' } }),
@@ -320,7 +325,7 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
     const missing = new Set<string>();
     // Trainer classes, egg groups and battle effects are plain ids with no registry.
     const walk = (v: JsonValue, key: string) => {
-      if (typeof v === 'string' && /^platinum:[A-Z_]|^platinum:[a-z]+\/\d/.test(v) && key !== 'id' && key !== 'class' && key !== 'eggGroups' && key !== 'effect' && key !== 'battleEffects' && key !== 'relicBadge' && !known.has(v)) missing.add(v);
+      if (typeof v === 'string' && /^platinum:[A-Z_]|^platinum:[a-z]+\/\d/.test(v) && key !== 'id' && key !== 'class' && key !== 'eggGroups' && key !== 'effect' && key !== 'battleEffects' && key !== 'relicBadge' && key !== 'badge' && !known.has(v)) missing.add(v);
       else if (Array.isArray(v)) v.forEach((x) => walk(x, key));
       else if (v && typeof v === 'object') Object.entries(v).forEach(([k, x]) => walk(x, k));
     };
