@@ -1,0 +1,99 @@
+# The PC's BALL CAPSULES (decomp scripts_common.s CommonScript_PlayersPC, applications/capsule_menu; docs/research/seals.md
+# §5): the editor opens from <player>'s PC, a Heart Seal A and an A Seal are placed on capsule 1 by the stylus and the keys,
+# CONFIRM saves it, SET puts it on Staravia through the party's BALL_SEAL mode (the party shows the capsule's marker).
+# The save keeps the case and the capsule.
+party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK
+party 1 platinum:SPECIES_PIPLUP 15 platinum:MOVE_POUND
+give item platinum:ITEM_SEAL_CASE 1
+set state sealCase.counts[0] 3
+set state sealCase.counts[49] 1
+warp platinum:MAP_HEADER_OREBURGH_CITY_POKECENTER_1F 12 4 up
+until idle
++0 press a
++1 release a
+advance text
+# "Access which PC?": <player>'s PC, then BALL CAPSULES.
+until menu
++5 press down
++1 release down
++5 press a
++1 release a
+advance text
+until menu
++5 press down
++1 release down
++5 press a
++1 release a
+until app capsule-editor 300
++0 assert state app.screen "select"
++0 screenshot capsule-select
+# EDIT capsule 1 (A, then EDIT: an empty capsule's menu is EDIT, SHIFT, QUIT).
++1 press a
++1 release a
++1 assert state app.menu.entries.length 3
++1 press a
++1 release a
++1 assert state app.screen "edit"
+# The stylus: Heart Seal A (list slot 0) dragged onto the capsule.
++1 tap seal:16,24
++1 tap seal:120,60
++1 tap seal:170,58
++1 tap seal-up
++1 assert state app.seals.length 1
++0 assert state app.seals[0].x 170
++0 assert state app.seals[0].y 58
++0 assert state sealCase.counts[0] 2
+# The keys: the hand over the A Seal (list slot 1), A takes it out at the capsule's centre, the D-pad moves it, A drops it.
++1 press up
++1 release up
++1 press right
++1 release right
++1 assert state app.hand {"x":75,"y":23,"grabbing":false}
++1 press a
++1 release a
++1 press down
++10 release down
++1 press a
++1 release a
++1 assert state sealCase.counts[49] 0
++0 screenshot capsule-edit
+# CONFIRM saves the capsule front first.
++1 tap seal:104,171
++1 tap seal-up
++1 assert state sealCase.capsules[0].length 2
++0 assert state sealCase.capsules[0][1] {"seal":1,"x":170,"y":58}
+until state app.message.text "Choose a capsule." 60
+# SET: the party in its BALL_SEAL mode, SET on Staravia.
++1 press a
++1 release a
++1 assert state app.menu.entries.length 4
++1 press a
++1 release a
++1 assert app party
++1 assert state app.mode "ball-seal"
++1 tap slot:0
++1 tap menu:0
++1 assert text platinum:PartyMenu_Text_BallCapsuleWasSet 0
++1 assert state app.slots[0].capsule true
++0 assert state party[0].capsule.id 1
++1 tap next
++1 assert app capsule-editor
++1 assert state app.capsules[0].holder.species "platinum:SPECIES_STARAVIA"
+# Leave the editor (B) and the PC.
++1 press b
++1 release b
+until app none 60
+# Back at the PC's menus: B twice switches it off.
+until menu
++5 press b
++1 release b
+advance text
+until menu
++5 press b
++1 release b
+advance text
+until idle
++0 reload
+until idle
++0 assert state party[0].capsule.seals.length 2
++0 assert state sealCase.capsules[0].length 2

@@ -1,0 +1,15 @@
+/* The Ball Capsule editor (ui/capsule.ts): one canvas board, the ROM-font windows and touch targets over it. */
+.capsule-board { touch-action: none; user-select: none; }
+.capsule-board .capsule-canvas { image-rendering: pixelated; touch-action: none; }
+.capsule-board .capsule-boxes { pointer-events: none; }
+.capsule-board .capsule-boxes .msg-box,
+.capsule-board .capsule-boxes .capsule-menu,
+.capsule-board .capsule-boxes .yes-no,
+.capsule-board .capsule-boxes .capsule-cell { pointer-events: auto; }
+.capsule-board .capsule-cell { background: none; border: 0; padding: 0; cursor: pointer; }
+.capsule-board .capsule-cell:focus-visible { outline: calc(var(--unit) * 1) solid #f8d058; outline-offset: calc(var(--unit) * -2); }
+.capsule-board .capsule-count { display: flex; justify-content: flex-end; align-items: center; white-space: pre; }
+.capsule-board .capsule-button-label { display: flex; justify-content: center; align-items: center; }
+.capsule-board .capsule-holder { pointer-events: none; }
+/* The message's arrow sits in the frame's corner, so a full DS line fits on one line. */
+.capsule-board .capsule-boxes .msg-box.waiting::after { position: absolute; right: calc(var(--dot) * 8); bottom: calc(var(--dot) * 6); }

@@ -26,6 +26,7 @@ import { mining, miningPrompt, undergroundBase, undergroundMenu, undergroundPc, 
 import { contestApp } from './contest.ts';
 import { contestDance } from './contest-dance.ts';
 import { contestPhoto } from './contest-visual.ts';
+import { capsuleEditor } from './capsule.ts';
 import { credits, hallOfFame } from './hall-of-fame.ts';
 import { icon, type IconName } from './icons.ts';
 import { party } from './party.ts';
@@ -182,6 +183,8 @@ export function drawApp(d: DrawContext, v: AppView): Drawn {
       return contestApp(d, v);
     case 'contest-photo':
       return { kind: 'mart', root: contestPhoto(d, v) };
+    case 'capsule-editor':
+      return { kind: 'mart', root: capsuleEditor(d, v) };
   }
 }
 
@@ -265,6 +268,9 @@ const MART_TILES = {
   moneyBp: [0, 0, 11, 4],
   list: [12, 2, 19, 14],
   description: [5, 18, 27, 6],
+  /** MART_TYPE_SEAL: the BUY / SEE YA! window (Shop_InitContextMenu, 13 × 4) and the description without an icon (sShop_NormalItemDescWindowTemplate). */
+  menuSeal: [0, 0, 15, 6],
+  descriptionSeal: [1, 18, 27, 6],
   message: [0, 18, 32, 6],
   inBag: [0, 14, 16, 4],
   quantity: [18, 12, 14, 6],
@@ -286,13 +292,13 @@ function mart(wide: DrawContext, v: MartView): HTMLElement {
   const root = board(`mart mart-${v.mode} mart-board${listing ? ' mart-screen' : ''}`);
   const message = v.message ? place(messageBox(d, v.message.text, v.message.waiting), 'message') : null;
   if (!listing) {
-    if (v.mode === 'menu') root.append(place(framed(d, 'mart-menu', ...v.menu.map((m, i) => stop(d, `menu:${i}`, [d.text(m)], 'menu-entry', i === v.menuCursor))), 'menu'));
+    if (v.mode === 'menu') root.append(place(framed(d, 'mart-menu', ...v.menu.map((m, i) => stop(d, `menu:${i}`, [d.text(m)], 'menu-entry', i === v.menuCursor))), v.seals ? 'menuSeal' : 'menu'));
     if (message) root.append(message);
     return root;
   }
   // A pack without the shop's art (the fixture): a CSS stand-in.
   const bp = v.currency === 'bp';
-  const panel = bgPicture(d, bp ? 'shop/panel_frontier' : 'shop/panel', 0, 0, 'mart-panel') ?? at(el('span', 'mart-css-panel'), 0, 0, 256, 192);
+  const panel = bgPicture(d, bp ? 'shop/panel_frontier' : v.seals ? 'shop/panel_seal' : 'shop/panel', 0, 0, 'mart-panel') ?? at(el('span', 'mart-css-panel'), 0, 0, 256, 192);
   const money = bp
     ? place(framed(d, 'money-window money-window-bp', el('span', 'money-value', d.text(v.money.value))), 'moneyBp')
     : place(framed(d, 'money-window', d.text(v.money.label), el('span', 'money-value', d.text(v.money.value))), 'money');
@@ -323,6 +329,7 @@ function mart(wide: DrawContext, v: MartView): HTMLElement {
   root.append(panel, money, listWindow);
   // The DS draws the message box over the description and the icon.
   if (message) root.append(message);
+  else if (v.item && v.seals) root.append(place(el('div', 'item-panel-text mart-description', d.flow(v.item.description, true, 'light')), 'descriptionSeal'));
   else if (v.item) {
     root.append(
       at(el('span', 'mart-item-icon', d.art.itemIcon(v.item.id as never, true)), MART_ICON.x - 16, MART_ICON.y - 16, 32, 32),

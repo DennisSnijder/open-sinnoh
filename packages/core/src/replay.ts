@@ -29,7 +29,8 @@ import { isId, type Id } from './ids.ts';
  *   <tick> tap <id>                   taps an element of the open menu app (AppView tap ids; `type:<text>`
  *                                     types text on the naming screen, no spaces; `pen:<x>,<y>;<x>,<y>…`
  *                                     draws a pen stroke on the trainer card's signature; `spoon:<x>,<y>` puts
- *                                     the stylus on the Poffin pot until `spoon-up`)
+ *                                     the stylus on the Poffin pot until `spoon-up`; `seal:<x>,<y>` the capsule
+ *                                     editor's stylus until `seal-up`)
  *   until app <name>|none [max]       … until that menu app is open (`mart`, `start-menu`, `bag`, …) or none
  *   assert app <name>|none            the open menu app
  *   assert text <json string>         the message box's text as drawn now (the current page, in full; the
@@ -338,7 +339,7 @@ function parseAction(verb: string | undefined, rest: string[], tail: string, err
   if (verb === 'reset' && rest.length === 0) return { type: 'reset' };
   if (verb === 'open' && rest.length === 1 && rest[0] === 'mystery-gift') return { type: 'open', app: 'mystery-gift' };
   if (verb === 'date' || verb === 'time') return parseClock(verb, rest, err);
-  if (verb === 'tap' && rest.length === 1 && (/^[a-z-]+(:[a-z0-9+-]+)*$/.test(rest[0]!) || /^type:\S+$/.test(rest[0]!) || /^pen:-?\d+,-?\d+(;-?\d+,-?\d+)*$/.test(rest[0]!) || /^(spoon|hit|tile|rub):-?\d+,-?\d+$/.test(rest[0]!))) return { type: 'tap', id: rest[0]! };
+  if (verb === 'tap' && rest.length === 1 && (/^[a-z-]+(:[a-z0-9+-]+)*$/.test(rest[0]!) || /^type:\S+$/.test(rest[0]!) || /^pen:-?\d+,-?\d+(;-?\d+,-?\d+)*$/.test(rest[0]!) || /^(spoon|hit|tile|rub|seal):-?\d+,-?\d+$/.test(rest[0]!))) return { type: 'tap', id: rest[0]! };
   if (verb === 'screenshot' && rest.length === 1 && /^[A-Za-z0-9_-]+$/.test(rest[0]!)) return { type: 'screenshot', name: rest[0]! };
   if (verb === 'viewport' && rest.length === 1) {
     const m = /^(\d+)x(\d+)$/.exec(rest[0]!) ?? err();
