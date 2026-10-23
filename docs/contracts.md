@@ -36,6 +36,13 @@ a reviewed step: bump `CONTRACTS_VERSION` and add a line below.
   replays, stepped by `date`/`time` lines. Periods are core `dayPeriod(hour)` (decomp TimeOfDayForHour).
 
 ## Changelog
+- 0.39.0 (the Battle Castle and the Battle Arcade, on 0.38.0; same schema v21, optional fields; importer platinum-102):
+  `FrontierTables.castle` (`BattleCastleTables`, `CastleRental`, `CastleAppArt`) and `.arcade` (`BattleArcadeTables`,
+  `ArcadeAppArt`); `FrontierView` gains `infoWindow?`, `bgPatch?`, `bgDarken?`, `icons?`, `waitsForAB?`,
+  `FrontierActorView.darken?`; `FrontierBattle.facility` `castle` | `arcade`, `weather?`, `sleep?`;
+  `FrontierState.castle?` (`CastleState`) and `.arcade?` (`ArcadeState`); apps `castle` (`CastleRequest`,
+  `CastleView`, `CastleMonView`, `CastleUnlocks`) and `arcade` (`ArcadeRequest`, `ArcadeView`); `party-order` request
+  `castle?`; `BattleResult.enemyParty?`.
 - 0.38.0 (the Battle Factory and the Battle Hall, on 0.37.0; same schema v21, optional fields; importer platinum-101): `FrontierTables.factory`
   (`BattleFactoryTables`, `FactoryPool`, `FactoryAppArt`) and `.hall` (`BattleHallTables`, `HallAppArt`);
   `FrontierSceneData.fgFixed?`; `FrontierView` gains `fgScroll?`, `fgBelow?`, `fgFixed?`, `fgBlend?`, `fgHidden?`,

@@ -373,12 +373,13 @@ class HallBoardScene extends FrontierScene<HallBoardView> {
 type Rect = { x: number; y: number; w: number; h: number };
 /** A window at tiles (x, y), w × h, with the standard frame's tile round it (BattleCastleApp_DrawWindow), in DS px. */
 const framedRect = (x: number, y: number, w: number, h: number): Rect => ({ x: x * 8 - 8, y: y * 8 - 8, w: w * 8 + 16, h: h * 8 + 16 });
-/** A message box at tiles (x, y), w × h, with its frame (one tile left, top and bottom, two right), in DS px. */
-const messageRect = (x: number, y: number, w: number, h: number): Rect => ({ x: x * 8 - 8, y: y * 8 - 8, w: w * 8 + 24, h: h * 8 + 16 });
+/** A message box at tiles (x, y), w × h, with its frame (two tiles left, three right, one top and bottom: decomp render_window.c), in DS px. */
+const messageRect = (x: number, y: number, w: number, h: number): Rect => ({ x: x * 8 - 16, y: y * 8 - 8, w: w * 8 + 40, h: h * 8 + 16 });
 
 /** A line of text with its left edge, right edge or centre at DS (x, y). */
 function line(d: DrawContext, text: string, x: number, y: number, palette: Palette = 'ink', align: 'left' | 'right' | 'centre' = 'left'): HTMLElement {
-  const w = 160;
+  // The line's box: up to 160 px wide, inside the screen.
+  const w = align === 'left' ? Math.min(160, W - x) : align === 'right' ? Math.min(160, x) : 2 * Math.min(80, x, W - x);
   const n = el('div', `frontier-label frontier-line is-${align}`, d.text(text, palette));
   place(n, { x: align === 'left' ? x : align === 'right' ? x - w : x - w / 2, y, w, h: 16 });
   return n;
@@ -650,10 +651,10 @@ const ARCADE_CURSOR_ANIM = 35;
 /**
  * The STOP button (the DS touch screen's sprite at its centre, 128, 96) at half size in the free corner under the
  * opponent's icons, clear of the panels (their right edge is x 204): the round button (the 96-px plate's 48 px) centred
- * at (232, 168), in the screen's corner; its art drawn on a box of 128 × 144 art px round the centre (the pressed
- * ring's widest cell is 124 × 140).
+ * at (232, 168), in the screen's corner; its art drawn on the screen's corner box (192, 120)–(256, 192) (the pressed
+ * ring's widest cell, 124 × 140 art px, is 62 × 70 here: its outer glow past the screen's edge is cut).
  */
-const ARCADE_STOP = { x: 232, y: 168, r: 24, art: { w: 128, h: 144 } };
+const ARCADE_STOP = { x: 232, y: 168, r: 24, art: { x: 192, y: 120, w: 64, h: 72 } };
 
 class ArcadeScene extends FrontierScene<ArcadeView> {
   private readonly button = document.createElement('canvas');
@@ -725,9 +726,11 @@ class ArcadeScene extends FrontierScene<ArcadeView> {
     const img = sheet ? this.image(sheet.atlas) : null;
     const c = sheet?.cells[animCell(sheet, v.button, t - this.buttonState.since)];
     if (!img || !c) return;
-    const n = this.button.width / ARCADE_STOP.art.w;
+    // n device pixels per art pixel (half a DS pixel).
+    const S = ARCADE_STOP;
+    const n = this.button.width / (2 * S.art.w);
     g.imageSmoothingEnabled = false;
-    g.drawImage(img, c.x, c.y, c.w, c.h, (ARCADE_STOP.art.w / 2 - c.ox) * n, (ARCADE_STOP.art.h / 2 - c.oy) * n, c.w * n, c.h * n);
+    g.drawImage(img, c.x, c.y, c.w, c.h, (2 * (S.x - S.art.x) - c.ox) * n, (2 * (S.y - S.art.y) - c.oy) * n, c.w * n, c.h * n);
   }
 
   protected boxesKey(v: ArcadeView): unknown {
@@ -738,12 +741,12 @@ class ArcadeScene extends FrontierScene<ArcadeView> {
     const S = ARCADE_STOP;
     // Half the art's size: whole device pixels per art pixel.
     const n = Math.max(1, Math.round((d.scale * (devicePixelRatio || 1)) / 2));
-    if (this.button.width !== S.art.w * n) {
-      this.button.width = S.art.w * n;
-      this.button.height = S.art.h * n;
+    if (this.button.width !== 2 * S.art.w * n) {
+      this.button.width = 2 * S.art.w * n;
+      this.button.height = 2 * S.art.h * n;
       this.paintButton(d, v, animTicks());
     }
-    place(this.button, { x: S.x - S.art.w / 4, y: S.y - S.art.h / 4, w: S.art.w / 2, h: S.art.h / 2 });
+    place(this.button, S.art);
     const art = newGameRecord(d.registries).frontier?.arcade.art ?? null;
     // The touch screen's STOP (tap `stop`; A stops the board too).
     const b = stop(d, 'stop', [], `frontier-stop${art ? '' : ' is-flat'}`, false);
