@@ -534,3 +534,32 @@ formula, the capsule menu layouts, the Test sprite position (192, 48), the 30-fr
   Either export the SPL from a shared package or keep the test in the battle package's reach; the simple
   `menus/particles.ts` does not model everything the seal SPAs may use (behaviours, texture animation).
 - Frontier: (inferred) the player's capsules show there; not checked in the frontier code.
+
+## 11. What is built
+
+- **Importer.** `NewGame.seals` (importer `seals.ts`): the seal table (`sealTypes`), the Sunyshore stock per weekday
+  through `sealMarts`' pointers, `pl_cb_data` member 0 as `trainerCapsules` (empty slots dropped), `sealDelays`. The
+  editor's art (`ui2d/seals.ts`): `capsule/main2`, `main3`, `sub1`, `sub3`, `capsules`, `cursor`, `page_up`,
+  `page_down`, `test`, `button`, `arrows` (each sprite with its template's explicit palette) and `capsule/seals` (one
+  cell per NCGR 184–264, NCER 93); `shop/panel_seal` (tilemap_no_item).
+- **Rules** (services `seals.ts`): owned, give/take, the editor's drop-off (`returnSeal`), unique and total counts, the
+  list, the circle, SET/REMOVE/SHIFT/CONFIRM on party Pokémon, detach, the seal mart's purchase (money,
+  RECORD_MONEY_SPENT 35). Contracts `trainerCapsule` for the battle.
+- **Script ops** (vm `seal-ops.ts`): the five ops, `real: 'seals'`. The Solaceon mother and Unown boy and the
+  Sunyshore merchant run through them; the PC's BALL CAPSULES opens the editor.
+- **Menus.** The seal mart (`seal-mart.ts`, `MartView.seals`), the capsule editor (`capsule-editor.ts`), the party's
+  `ball-seal` and `trade` modes, the Day-Care STORE and trade detach prompt, the PC's refusals (deposit and move out:
+  mail, then capsule, checked at STORE before the box is chosen; release), the Bag's "Seals: N", the party's capsule
+  marker (`party/held` cell 2).
+- **Battle.** NPC trainers' Pokémon with `ballSeal` n carry `{ id: 1, seals: trainerCapsules[n − 1] }`.
+- **Save.** `GameState.sealCase` and `Pokemon.capsule` in schema v22 (migration: an empty case). Boxed and Day-Care
+  Pokémon may not hold a capsule; no two party Pokémon share one.
+- **Screen.** One board: the DS screen (grid, editor or Test) and a 48 px strip under it, in the art's bottom colour,
+  for the message box the DS shows on the other screen. Keys: a hand over the list, arrows, buttons and placed seals
+  (the D-pad jumps to the nearest in that direction); A presses (a list seal comes out at the capsule's centre); a held
+  seal moves 1 px a tick (2 after 8, 4 after 24); A drops, B puts it back; otherwise B is CANCEL, L/R the pages,
+  START CONFIRM, SELECT Test.
+- **Not built.** The Test plays no throw or particles: it shows a still of the Pokémon with the seals at the send-out
+  effect's offsets (the battle lane's effect can replace it). The selection screen does not preview the current
+  capsule's design (the DS's bottom screen). No TV Seal Club segment (TV is a stub). Mystery Gift has no seal gift hook.
+  Link trade and GTS capsule clearing are out of scope.
