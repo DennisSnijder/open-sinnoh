@@ -229,6 +229,19 @@ export function contestHandlers(r: Runner): Record<string, Handler> {
       pick = undefined;
       return 'continue';
     },
+    /**
+     * ScrCmd_0A8 (the lobby's frames): the contest photo of type `slot` in the photo viewer (ov22_0225B660); the var is
+     * 1 when the slot is empty (no viewer), else 0.
+     */
+    scr_cmd_0a8: (t, c, a) => {
+      const slot = val(t, a[0]);
+      if (!r.state.contestPhotos[slot]) {
+        dest(t, a[1], 1);
+        return 'continue';
+      }
+      dest(t, a[1], 0);
+      return r.openApp(c, { app: 'contest-photo', slot }, () => {});
+    },
     /** ImageClipsSlotHasData(…, contest photos, slot). */
     contest_photo_has_data: (t, _c, a) => (dest(t, a[1], r.state.contestPhotos[val(t, a[0])] ? 1 : 0), 'continue'),
     /** Offline, MessageSynchronized is ScriptMessage_Show as Message. */

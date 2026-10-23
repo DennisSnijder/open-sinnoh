@@ -25,6 +25,7 @@ import { poffinCase, poffinCooking, poffinFeed } from './poffin.ts';
 import { mining, miningPrompt, undergroundMenu, undergroundVendor } from './underground.ts';
 import { contest } from './contest.ts';
 import { contestDance } from './contest-dance.ts';
+import { contestPhoto } from './contest-visual.ts';
 import { credits, hallOfFame } from './hall-of-fame.ts';
 import { icon, type IconName } from './icons.ts';
 import { party } from './party.ts';
@@ -171,6 +172,8 @@ export function drawApp(d: DrawContext, v: AppView): Drawn {
     case 'contest':
       if (v.round?.round === 'dance' && !v.round.placeholder) return { kind: 'scene', root: contestDance(d, v.round) };
       return { kind: 'mart', root: contest(d, v) };
+    case 'contest-photo':
+      return { kind: 'mart', root: contestPhoto(d, v) };
   }
 }
 

@@ -45,7 +45,8 @@ import { isId, type Id } from './ids.ts';
  *   until message [max]               … until a message box waits for input (no yes/no, menu or choice up)
  *   until yesno|menu|choice [max]     … until the yes/no box, a script menu or the panel choice is up
  *   until position <x> <z> [max]      … until the player's tile is x,z (set when a step starts)
- *   until state <path> <json> [max]   … until the GameState value (or `battles…`, `mapPopup…`) equals the JSON; a path
+ *   until state <path> <json> [max]   … until the GameState value (or `battles…`, `mapPopup…`, the open app's view
+ *                                     `app…`) equals the JSON; a path
  *                                     can pick an array element by a field: `objects[localId=24].x`
  *   until radar <count> [catch <ball>] [max]  … until the Poké Radar's chain is at `count`: walks into a live patch
  *                                     that keeps the chain (the outermost first, round the other live patches), fights
@@ -198,7 +199,7 @@ export type ReplayAction =
   | { type: 'assert'; what: 'text-id'; id: Id; page: number; vars: Record<number, string> }
   /** `assert facing player <dir>` or `assert facing <localId> <dir>` (an object in the current zone). */
   | { type: 'assert'; what: 'facing'; target: 'player' | number; facing: ReplayFacing }
-  /** `assert state <path> <json>`: the GameState value (or the battle log for `battles…`) equals the JSON. */
+  /** `assert state <path> <json>`: the GameState value (or the battle log for `battles…`, the open app's view for `app…`) equals the JSON. */
   | { type: 'assert'; what: 'state'; path: StatePath; source: string; value: unknown }
   /** `assert battle <kind> <id|*> <result> [topology]`: `match` is a trainer or species id, null for `*`. */
   | { type: 'assert'; what: 'battle'; kind: LogBattleKind; match: Id | null; result: LogBattleResult; topology?: LogBattleTopology }

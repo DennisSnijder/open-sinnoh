@@ -446,6 +446,12 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   screen, logged once (`contest:placeholder:<round>`) and counted in the coverage report (`CONTEST_ROUNDS_STATUS`).
 - **The contest's DS screens** (reception, results) are DS windows in the ROM's frames and font; the results table is
   one line per entry (the DS's results screen art is the visual lane's).
+- **The visual round** follows overlay022/017 frame by frame (docs/research/contests.md §5): accessories are picked
+  by their pixels, go "on the Pokémon" by its pixels (each front picture carries its opaque runs,
+  `PokemonFace.opaque`), and the photo keeps those and what touches them. The case's scatter uses a local LCRNG seeded
+  from the contest RNG's state without drawing (the DS uses MTRNG); the judging draws from the contest RNG as the DS
+  does. The DS has no keys here: the PC's hand stands in for the stylus (Y jumps to the next item or the Pokémon's
+  head), so replays dress up by keys. Its one screen folds the top screen's clock, theme and count into a line.
 - **Offline equivalences:** without a link, the decomp's comm syncs pass at once and `message_synchronized` is a plain
   message (ScrCmd_MessageSynchronized without CommSys); HBlank start/stop and the network icon do nothing here.
 

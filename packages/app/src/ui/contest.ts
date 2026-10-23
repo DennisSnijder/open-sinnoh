@@ -8,12 +8,15 @@ import type { ContestPlaceholderRoundView, ContestView } from '@opensinnoh/contr
 import { framed, messageBox, type DrawContext } from './apps.ts';
 import { atTiles, board, boardContext } from './board.ts';
 import { el } from './core.ts';
+import { contestVisual } from './contest-visual.ts';
 import './contest.css';
 
 /** The message box's tiles, as the field's (decomp 2, 19, 27 × 4 in its frame). */
 const MESSAGE_TILES = [1, 18, 30, 6] as const;
 
 export function contest(wide: DrawContext, v: ContestView): HTMLElement {
+  // The visual round draws its own screens (contest-visual.ts).
+  if (v.round && !v.round.placeholder && v.round.round === 'visual') return contestVisual(wide, v.round);
   const d = boardContext(wide);
   const root = board('mart mart-board contest-board');
   root.append(atTiles(framed(d, 'contest-heading', el('div', 'contest-rank', d.text(v.heading.rank)), el('div', 'contest-type', d.text(v.heading.type))), 1, 1, 30, 4));
@@ -40,6 +43,6 @@ export function contest(wide: DrawContext, v: ContestView): HTMLElement {
 function round(d: DrawContext, r: ContestPlaceholderRoundView): HTMLElement {
   const box = atTiles(messageBox(d, r.message.text, r.message.waiting), ...MESSAGE_TILES);
   box.dataset.round = r.round;
-  if (r.placeholder) box.dataset.placeholder = '';
+  box.dataset.placeholder = '';
   return box;
 }

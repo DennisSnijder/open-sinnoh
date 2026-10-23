@@ -25,13 +25,14 @@ practice receptionist did the same without the prize.
 | Script ops | vm `contest-ops.ts` (`REAL_CONTESTS` in coverage.ts) | every op the Hall's scripts use offline (scrcmd_contests.c, the contest party menu, `message_synchronized`, the attire spin, the camera flashes, `contest_photo_has_data`) |
 | Session | `GameState.contest` (contracts `ContestSession`) | from `new_contest` to `end_contest`; never in a save (saves happen between scripts) |
 | App | menus `contest/contest.ts`, app `ui/contest.ts` | the rounds in order through the seam, then the final scoring and the results (ROM frames, font, `TEXT_BANK_CONTEST_RESULTS`, `SEQ_CON_TEST`, `SEQ_CO_KEKKA`, `SEQ_CO_FANFA`) |
-| Rounds | menus `contest/rounds.ts` | the seam's registry; the dance is built (§6.8), visual and acting are placeholders |
+| Rounds | menus `contest/rounds.ts` | the seam's registry: the visual round (`contest/visual.ts`, §5.8), the dance (`contest/dance.ts`, §6.8), acting a placeholder |
 | Party | menus `party.ts` mode `contest` (app `contest-select`) | ELIGIBLE/INELIGIBLE notes, ENTER/SUMMARY/CANCEL |
-| Saves | schema v20 `contestPhotos` | the winner photo per type (the outfit is the visual lane's) |
+| Saves | schema v20 `contestPhotos` | the winner photo per type, with the visual round's outfit |
+| Photo frames | menus `contest/photo.ts`, vm `scr_cmd_0a8` | the lobby's frames show a type's winner photo (§5.8) |
 
-Still stubs: the lobby's photo viewer (`scr_cmd_0a8`, visual lane), the TV segment (`tv:contest-hall`), link ops.
+Still stubs: the TV segment (`tv:contest-hall`), link ops.
 
-**Placeholder rounds** (visual and acting today). Each logs `contest:placeholder:<round>` once ("contest round visual: placeholder …"), counted
+**Placeholder rounds** (acting today). Each logs `contest:placeholder:<round>` once ("contest round visual: placeholder …"), counted
 in the stub log, and `CONTEST_ROUNDS_STATUS` (vm coverage.ts) puts them in the coverage report
 (`contestRoundsPlaceholder`); a ROM test checks the status against the registry. A placeholder shows the round's name
 and "Placeholder: scored by condition." and ends on A. Its outcome: visual dress-up points 0 (so the visual value is the
@@ -63,7 +64,7 @@ with every bank. Sequences by SDAT index: SEQ_CON_TEST 1135 (CONTEST_DRESSING_RO
 1176, KASHI 1177, UTSUK 1178, TAKUMA 1179, KAKKO 1180, KEKKA 1181, FANFA 1182, SEQ_SE_DP_KATI 1527 (shutter),
 SEQ_SE_DP_CON_* 1759–1787. Not imported yet (round lanes): the per-effect table Unk_020F568C (arm9, src/unk_02094EDC.c:34:
 base appeal and message ids), Unk_ov17_02253AF8 (overlay 17: effect classes), the dance song table, the acting AI
-rules, contest_bg.narc, contest_obj.narc, imageclip.narc art.
+rules, the dance and acting rounds' contest_bg/contest_obj art (the visual round's is imported, §5.8).
 
 ## 4. The round seam (contracts `contests.ts`)
 
@@ -212,6 +213,41 @@ Normal to Master; link play allows 20. There is also a finish button.
   - `TEXT_BANK_CONTEST_VISUAL_COMPETITION`.
   - `TEXT_BANK_CONTEST_ACCESSORY_NAMES` and `TEXT_BANK_CONTEST_BACKDROP_NAMES` sit next to bank 385 **(inferred: used by
     the case UI)**.
+
+### 5.8 What is built (the visual round)
+
+- **Model** (menus `contest/visual.ts`, rules in services `contest-visual.ts`): the intro (the BGM's 30-frame fade, bank
+  385 messages 26/28, 29 + theme, 42/41 with the limit), the dress-up and the judging, frame by frame as §5.2.
+- **Fashion Case** (ov22_022567FC, ov22_02257F50.c): each accessory held, as often as held, on its page (14 pages by id,
+  ov22_02257FB0) at a random place; backdrops nine to a page in the order received. NEXT/BACK turn to the next page
+  that holds something; the ACCESSORIES/BACKDROPS tabs switch lists. The scatter and the "back to a random place" use
+  a local LCRNG seeded from the contest RNG's state (the DS: MTRNG); the dress-up draws nothing from the contest RNG.
+- **Stylus** (ov22_022589E0.c): a touch picks the stage's first hit (on-Pokémon list, then the Pokémon itself picks
+  nothing in a contest, then the others), else the shown page's; accessories by their pixels within ±4 px
+  (ov22_02254E54). A drop with the picture's inner rectangle (margins 0/10/20 for 16/32/64 px) wholly in the stage
+  places it if fewer than the limit are there (5/10/15/20), else "There is no more space." and it slides back over 4
+  frames; a drop wholly in the case stays; anything else slides back (from the stage: to a random place). An accessory
+  is on the Pokémon when one of its 16 sample points hits the front picture's opaque pixels (`PokemonFace.opaque`); the
+  Pokémon is centred at (192, 101 + height). A backdrop is chosen by picking it up.
+- **Photo** (ov22_02256FD8): on the Pokémon plus everything whose rectangle a kept accessory's sample point falls in,
+  repeatedly; in the photo's coordinates (dress-up screen + (−64, +40)); priorities −1… on the Pokémon, then the
+  Pokémon, then 8 lower the others. Dress-up points: the photo's accessories' theme points. NPC photos: their outfit
+  for the theme.
+- **Judging**: one contest-RNG draw a frame (VisualCompetitionScoring_Main), the entry messages, the photo with the
+  Pokémon's centre at (128, 64 + height) (no backdrop), hearts from the RNG (ov17_02247F8C: 4 or 5 draws each), the
+  closing message in a full contest.
+- **Screens** (app `ui/contest-visual.ts`, art importer `ui2d/contests.ts`): the intro is the top screen's clock; the
+  dress-up is the touch screen with the top screen folded into one line (theme or held accessory's name, placed/limit,
+  seconds); the judging is the stage, curtain, photo and hearts. Keys (not on the DS): the PC's hand; Y jumps to the
+  next item of the page, or with one held to the Pokémon's head; A picks/drops, B puts back, L/R pages, SELECT tabs,
+  X/START DONE.
+- **Photo frames** (ScrCmd_0A8, ov22_0225B660): the photo at (72, 16) with its backdrop, the type's banner and bank 385
+  messages 43 and 44; A or B closes it.
+- **Deviations**: Platinum front pictures (the DS uses the DP ones here); backdrop icons are picked by their
+  rectangle; the case's page turn and the clock's pulse are drawn simply; the end waits fixed frames (45) for MAZYO.
+- **Tests**: services `contest-visual.test.ts` (fixtures), `tests/integration/contest-visual.rom.test.ts`, replays
+  `sys-contest-normal-cool` (official, by keys), `sys-contest-hall-story` (practice), `sys-contest-photo`, browser
+  `contests.rom.spec.ts` (keys and a mouse/finger drag).
 
 ---
 
@@ -673,8 +709,7 @@ Camera-flash timings for the field scene (`src/contest.c:127`) depend on rank.
   read `unk_1B26`, the link-forced-song flag, which looks odd.
 - PITY_POINTS compares snapshots taken at different moments; the exact tie behaviour depends on order.
 - AI rules that test "turn == 4" probably never fire.
-- How the photo save treats accessories that are placed but not on the Pokémon (`ov22_02257778` takes nodes with
-  `unk_04 == 0` from two lists) was not traced.
+- The photo save (`ov22_02256FD8`) was traced for the visual round: §5.8.
 - Most graphics member ids are loaded through open-NARC helpers; only some are listed here. Each app's
   `*_LoadGraphics` functions need a full pass.
 - Acting presentation timings (animations, message waits) live in `ov17_02243C28.c` and `ov17_022413D8.c`. They were
@@ -690,7 +725,7 @@ member in `ContestRoundView` (contracts `contests.ts`, a CONTRACTS_VERSION bump)
 `CONTEST_ROUNDS_STATUS`, replace its placeholder in `sys-contest-normal-cool.replay` (and give it a practice replay),
 and keep the draws on `ctx.rng` in the decomp's order.
 
-- **Visual:** the dress-up app (overlay022: Fashion Case accessories, the rank's limit, the 1800-frame timer, the
+- **Visual:** done (§5.8). It was: the dress-up app (overlay022: Fashion Case accessories, the rank's limit, the 1800-frame timer, the
   backdrop), the dress-up points from `ContestTables.themes`, the scoring presentation (§5), the NPC outfits from
   `dressUps`, the outfit into `outcome.outfit` (the winner photo), and the lobby's photo viewer (`scr_cmd_0a8`) and the
   Jubilife TV gallery if wanted. Import imageclip.narc and contest_bg/obj art.
