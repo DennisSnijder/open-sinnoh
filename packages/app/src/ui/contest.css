@@ -1,0 +1,8 @@
+/* The contest app's windows (ui/contest.ts), on the mart's board over the faded field. */
+.contest-board .contest-heading { display: grid; grid-template-columns: 1fr 1fr; align-items: center; }
+.contest-board .contest-type { justify-self: end; }
+.contest-board .contest-results { display: grid; align-content: start; gap: 0; }
+.contest-board .contest-row { display: grid; grid-template-columns: 1fr repeat(4, calc(var(--dot) * 36)); column-gap: calc(var(--dot) * 4); align-items: center; min-height: calc(var(--dot) * 16); }
+.contest-board .contest-cell { justify-self: end; }
+.contest-board .contest-who { min-width: 0; overflow: hidden; white-space: nowrap; }
+.contest-board .contest-row.is-winner { background: rgb(248 216 104 / 0.45); }

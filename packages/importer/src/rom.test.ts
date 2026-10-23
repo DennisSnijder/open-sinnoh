@@ -264,6 +264,8 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
         amitySquare: expect.objectContaining({ stepVar: 'platinum:VAR_AMITY_SQUARE_STEP_COUNT' }),
         underground: expect.objectContaining({ zone: 'platinum:MAP_HEADER_UNDERGROUND' }),
         contestHallFlag: 'platinum:FLAG_CONTEST_HALL_VISITED',
+        // The contests' tables (tests/integration/contests.rom.test.ts checks them).
+        contests: expect.objectContaining({ playerSprite: { male: 'platinum:OBJ_EVENT_GFX_PLAYER_M_CONTEST', female: 'platinum:OBJ_EVENT_GFX_PLAYER_F_CONTEST' } }),
         specialEncounters: expect.objectContaining({ swarms: expect.toSatisfy((z: unknown[]) => z.length === 22) }),
         moveTutors: expect.objectContaining({ shards: ['platinum:ITEM_RED_SHARD', 'platinum:ITEM_BLUE_SHARD', 'platinum:ITEM_YELLOW_SHARD', 'platinum:ITEM_GREEN_SHARD'] }),
         npcTrades: expect.toSatisfy((t: unknown[]) => t.length === 4),

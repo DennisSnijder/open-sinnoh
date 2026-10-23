@@ -431,6 +431,19 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
 
 ## Post-game and side systems
 
+- **Super Contests, offline** (docs/research/contests.md): the Hall's scripts run as on the DS; the running contest is
+  `GameState.contest`, plain JSON that lives from `new_contest` to `end_contest` (saves happen between scripts, so no
+  save holds one); only the winner photos are new save data (schema v20). The contest app runs the rounds through one
+  seam (`CreateContestRound`) and owns the final scoring and results, so each round lane works behind it alone.
+- **Contest randomness:** its own LCRNG in the session, seeded by one draw of the main stream at entry (the DS reseeds
+  from the clock); the rounds draw from it in a fixed order, so a contest replays exactly.
+- **Placeholder rounds** stand in until the round lanes land: no gameplay, scored from condition only, labelled on
+  screen, logged once (`contest:placeholder:<round>`) and counted in the coverage report (`CONTEST_ROUNDS_STATUS`).
+- **The contest's DS screens** (reception, results) are DS windows in the ROM's frames and font; the results table is
+  one line per entry (the DS's results screen art is the visual lane's).
+- **Offline equivalences:** without a link, the decomp's comm syncs pass at once and `message_synchronized` is a plain
+  message (ScrCmd_MessageSynchronized without CommSys); HBlank start/stop and the network icon do nothing here.
+
 - **Story and post-game** follow the ROM's scripts; branches (starter, gender, losses, legendary
   outcomes) are covered by branch replays.
 - **Legendary events:** Platinum's own Mystery Gift flow (unlocked in game, gifts from the Poké Mart

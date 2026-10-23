@@ -89,6 +89,9 @@ export const MENU_TEXT = {
   partyContextCancel: 'PartyMenu_Text_ContextCancel',
   /** The Battle Tower's order pick (PARTY_MENU_MODE_BATTLE_TOWER): ENTER / NO ENTRY, CONFIRM, the panel comments, the refusals. */
   partyEnter: 'PartyMenu_Text_Enter',
+  /** 0.35.0. The contest mode's panel notes (PrintMemberContestComment). */
+  partyContestAble: 'PartyMenu_Text_EligibleForContest',
+  partyContestUnable: 'PartyMenu_Text_IneligibleForContest',
   partyNoEntry: 'PartyMenu_Text_NoEntry',
   partyConfirm: 'PartyMenu_Text_ConfirmButton',
   partyChooseAndConfirm: 'PartyMenu_Text_ChooseMonAndConfirm',

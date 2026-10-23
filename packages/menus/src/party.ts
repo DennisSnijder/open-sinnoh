@@ -9,11 +9,13 @@
  * - `select` (a script's `select_move_tutor_pokemon`): A on a panel returns its slot at once.
  * - `order` (`party-order`, decomp PARTY_MENU_MODE_BATTLE_TOWER): ENTER / NO ENTRY and SUMMARY per panel, the
  *   panels say FIRST… / NOT ENTERED / BANNED, CONFIRM returns the slots in the order entered, CANCEL or B none.
+ * - `contest` (`contest-select`, decomp PARTY_MENU_MODE_CONTEST): the panels say ELIGIBLE / INELIGIBLE (CheckContestEligibility);
+ *   ENTER (eligible only, sub_020801F0), SUMMARY, CANCEL; ENTER closes with the slot, B or CANCEL with none.
  * The battle's party (`party-select`) and the battle bag's target are battle.ts.
  */
 import { evolutionTarget, maxPp, monGender, movesAtLevel, setMoveSlot, type Button, type Id, type Pokemon, type Stats } from '@opensinnoh/core';
 import { dexOf, itemCount, levelEvolutionTrigger, markCaught, takeItem as takeBagItem, type AppMenu, type AppResult, type PartyView } from '@opensinnoh/contracts';
-import { bySource, canShayminSky, frontierBanned, canUseItemOn, giveHeldItem, ITEM_GRACIDEA, itemPicksMove, itemRecord, setShayminForm, SHAYMIN_SKY, takeHeldItem, teachTm, tmCompatibility, useItemOnMon, type ItemUsedMessage } from '@opensinnoh/services';
+import { bySource, canShayminSky, contestEligible, frontierBanned, canUseItemOn, giveHeldItem, ITEM_GRACIDEA, itemPicksMove, itemRecord, setShayminForm, SHAYMIN_SKY, takeHeldItem, teachTm, tmCompatibility, useItemOnMon, type ItemUsedMessage } from '@opensinnoh/services';
 import { menuSe, type MenuContext } from './context.ts';
 import { Dialog } from './dialog.ts';
 import { moveCursor, tapIndex, type Screen, type Step } from './stack.ts';
@@ -49,7 +51,9 @@ export type PartyMode =
   /** 0.31.0. The Poffin Case's GIVE (decomp PARTY_MENU_MODE_FEED_POFFIN): A picks a Pokémon (an Egg buzzes), B gives up. */
   | { kind: 'feed'; pick: (slot: number | null) => Step }
   /** 0.34.0. The Battle Tower's pick of `count` in order (decomp PARTY_MENU_MODE_BATTLE_TOWER, reqLevel 100). */
-  | { kind: 'order'; count: number };
+  | { kind: 'order'; count: number }
+  /** 0.35.0. A contest's entry (decomp PARTY_MENU_MODE_CONTEST): ENTER (when eligible), SUMMARY, CANCEL. */
+  | { kind: 'contest'; rank: number; type: number };
 
 /** A context or submenu entry: its label and what A does. */
 interface Entry {
@@ -137,7 +141,7 @@ export function partyScreen(ctx: MenuContext, mode: PartyMode, done: () => Step 
   const cancelStop = () => stops() - 1;
   const confirmStop = () => party().length;
   const close = (result: AppResult): Step => ({ close: result });
-  const cancel = (): Step => (mode.kind === 'select' ? close({ app: 'party', slot: null }) : mode.kind === 'feed' ? mode.pick(null) : ordering ? close({ app: 'party-order', order: null }) : 'pop');
+  const cancel = (): Step => (mode.kind === 'contest' ? close({ app: 'contest-select', slot: null }) : mode.kind === 'select' ? close({ app: 'party', slot: null }) : mode.kind === 'feed' ? mode.pick(null) : ordering ? close({ app: 'party-order', order: null }) : 'pop');
   const name = (slot: number) => monName(ctx, party()[slot]!);
   const itemName = (id: Id) => itemRecord(ctx.registries, id).name;
   const moveName = (id: Id) => ctx.registries.moves.get(id)!.name;
@@ -196,6 +200,13 @@ export function partyScreen(ctx: MenuContext, mode: PartyMode, done: () => Step 
   const daycareMenu = (slot: number): Step => {
     const mon = party()[slot]!;
     const entries: Entry[] = mon.isEgg ? [] : [{ label: t.t('partyStore'), run: () => close({ app: 'daycare-select', slot }) }];
+    entries.push({ label: t.t('partySummary'), run: () => openSummary(slot) });
+    return openMenu(t.t(mon.isEgg ? 'partyPromptEgg' : 'partyPromptMon', name(slot)), entries);
+  };
+  // --- contest: ENTER, SUMMARY, CANCEL ---
+  const contestMenu = (slot: number, rank: number, type: number): Step => {
+    const mon = party()[slot]!;
+    const entries: Entry[] = contestEligible(mon, rank, type) ? [{ label: t.t('partyEnter'), run: () => close({ app: 'contest-select', slot }) }] : [];
     entries.push({ label: t.t('partySummary'), run: () => openSummary(slot) });
     return openMenu(t.t(mon.isEgg ? 'partyPromptEgg' : 'partyPromptMon', name(slot)), entries);
   };
@@ -519,6 +530,8 @@ export function partyScreen(ctx: MenuContext, mode: PartyMode, done: () => Step 
         return mode.pick(slot);
       case 'order':
         return orderMenu(slot);
+      case 'contest':
+        return contestMenu(slot, mode.rank, mode.type);
     }
   };
 
@@ -546,6 +559,7 @@ export function partyScreen(ctx: MenuContext, mode: PartyMode, done: () => Step 
       if (ordering) return picks.includes(i) ? t.t(`partyEntered${picks.indexOf(i) + 1}` as MenuKey) : t.t(eligible(i) ? 'partyNotEntered' : 'partyBanned');
       // Decomp PartyMenu_PrintMemberComment_CanUseEvoItem: ABLE! / UNABLE! (an egg is unable).
       if (mode.kind === 'use' && evolveItem) return t.t(!m.isEgg && evolutionTarget(dexOf(ctx.registries), m, { kind: 'item', item: mode.item }) ? 'partyAbleEvolve' : 'partyUnableEvolve');
+      if (mode.kind === 'contest') return t.t(contestEligible(m, mode.rank, mode.type) ? 'partyContestAble' : 'partyContestUnable');
       if (mode.kind !== 'teach') return null;
       const c = tmCompatibility(ctx.registries, m, mode.item);
       return t.t(c === 'able' ? 'partyAble' : c === 'unable' ? 'partyUnable' : 'partyLearnedNote');

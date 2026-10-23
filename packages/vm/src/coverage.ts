@@ -96,6 +96,29 @@ export const REAL_M2A = ['start_trainer_battle', 'start_first_battle', 'start_ca
 export const REAL_CLOCK = ['get_time_of_day', 'get_hour', 'get_day_of_week'];
 
 /**
+ * The Super Contest ops, offline (contracts 0.35, contest-ops.ts): `real: 'contests'` in the export; `opensinnoh coverage`
+ * fails if one is not implemented. The lobby's photo viewer (scr_cmd_0a8) and the link ops stay stubs.
+ */
+export const REAL_CONTESTS = [
+  'new_contest', 'end_contest', 'buffer_judge_name', 'buffer_contestant_trainer_name', 'buffer_contestant_mon_name',
+  'buffer_contest_registration_entry_number', 'run_contest_application', 'buffer_contest_rank', 'buffer_contest_type',
+  'buffer_winning_contestant_trainer_name', 'buffer_winning_contestant_mon_name', 'get_player_contest_placement',
+  'get_winning_contestant_entry_num', 'get_contest_registration_entry_num', 'get_contestant_obj_event_gfx',
+  'get_contestant_mon_contest_fame', 'get_contest_mode', 'get_contest_info', 'check_player_mon_has_ribbon', 'set_ribbon_name',
+  'get_first_time_victory_accessory', 'start_contest_camera_flash_task', 'wait_for_contest_camera_flash_task',
+  'get_should_skip_award_ceremony', 'start_contest_comm_sync', 'wait_for_comm_sync_state', 'lock_auto_scroll_for_link_contests',
+  'lock_text_speed', 'change_into_contest_attire', 'open_party_menu_for_contest', 'get_contest_party_menu_result',
+  'contest_photo_has_data', 'message_synchronized', 'stop_h_blank', 'start_h_blank',
+];
+
+/**
+ * The contest rounds behind the round seam (packages/menus contest/rounds.ts), by status. Each round lane flips its
+ * entry to 'real' with its model; a test checks this list against the rounds' `placeholder` flags. The coverage
+ * report counts the placeholders.
+ */
+export const CONTEST_ROUNDS_STATUS: Record<'visual' | 'dance' | 'acting', 'placeholder' | 'real'> = { visual: 'placeholder', dance: 'placeholder', acting: 'placeholder' };
+
+/**
  * The ops made real over the Pokémon model (party, bag, money, Pokédex): `real: 'P'` in the export;
  * `opensinnoh coverage` fails if one is not implemented.
  */
@@ -185,7 +208,7 @@ export interface OpClassification {
   /** The M5 chunks whose story path reaches it; absent when none. */
   m5Path?: M5Chunk[];
   /** What makes this op real: M1b, P (the Pokémon model), M3a, M3b (the Pokétch), M2a or the clock (`opensinnoh coverage` fails if such an op is not implemented), or an M5 chunk (`REAL_M5`; progress, not a failure). */
-  real?: 'M1b' | 'P' | 'M3a' | 'M3b' | 'M2a' | 'clock' | M5Chunk;
+  real?: 'M1b' | 'P' | 'M3a' | 'M3b' | 'M2a' | 'clock' | 'contests' | M5Chunk;
 }
 
 /** Classification of every native script command (the `coverage` verb prints it). */
@@ -199,13 +222,14 @@ export function classifyOps(): OpClassification[] {
   const m3b = new Set(REAL_M3B);
   const m2a = new Set(REAL_M2A);
   const clock = new Set(REAL_CLOCK);
+  const contests = new Set(REAL_CONTESTS);
   const chunks = Object.keys(REAL_M5) as M5Chunk[];
   const m5 = new Map(chunks.flatMap((k) => REAL_M5[k].map((op) => [op as string, k] as const)));
   const paths = chunks.map((k) => [k, new Set(M5_PATH[k])] as const);
   return COMMANDS.map((c): OpClassification => {
     const bucket = bucketOf(c.name);
     const m5Path = paths.filter(([, ops]) => ops.has(c.name)).map(([k]) => k);
-    const real: OpClassification['real'] = m1b.has(c.name) ? 'M1b' : p.has(c.name) ? 'P' : m3a.has(c.name) ? 'M3a' : m3b.has(c.name) ? 'M3b' : m2a.has(c.name) ? 'M2a' : clock.has(c.name) ? 'clock' : m5.get(c.name);
+    const real: OpClassification['real'] = m1b.has(c.name) ? 'M1b' : p.has(c.name) ? 'P' : m3a.has(c.name) ? 'M3a' : m3b.has(c.name) ? 'M3b' : m2a.has(c.name) ? 'M2a' : clock.has(c.name) ? 'clock' : contests.has(c.name) ? 'contests' : m5.get(c.name);
     const base = { op: c.name, opcode: c.opcode, bucket, cpPath: cp.has(c.name), ...(m5Path.length ? { m5Path } : {}), ...(real ? { real } : {}) };
     if (impl.has(c.name)) return stand.has(c.name) ? { ...base, status: 'stubbed', milestone: TRIAGE[c.name]?.milestone ?? milestoneOf(c.name, bucket), default: 'stand-in (see the handler)' } : { ...base, status: 'implemented' };
     const f = classifyOp(c.name);
@@ -236,6 +260,9 @@ export function classificationReport(): string {
     realM2aNotImplemented: count((o) => o.real === 'M2a' && o.status !== 'implemented'),
     realClock: count((o) => o.real === 'clock'),
     realClockNotImplemented: count((o) => o.real === 'clock' && o.status !== 'implemented'),
+    realContests: count((o) => o.real === 'contests'),
+    realContestsNotImplemented: count((o) => o.real === 'contests' && o.status !== 'implemented'),
+    contestRoundsPlaceholder: Object.values(CONTEST_ROUNDS_STATUS).filter((s) => s === 'placeholder').length,
     ...Object.fromEntries(
       (Object.keys(REAL_M5) as M5Chunk[]).flatMap((k) => [
         [`real${k}`, count((o) => o.real === k)],

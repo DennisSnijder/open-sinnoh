@@ -41,6 +41,7 @@ import { staticHandlers } from './static-ops.ts';
 import { formHandlers } from './form-ops.ts';
 import { sideHandlers } from './side-ops.ts';
 import { poffinHandlers } from './poffin-ops.ts';
+import { contestHandlers } from './contest-ops.ts';
 import { encounterHandlers } from './encounter-ops.ts';
 import { undergroundHandlers } from './underground-ops.ts';
 import { mysteryGiftHandlers } from './mystery-gift-ops.ts';
@@ -1014,6 +1015,7 @@ export class Runner implements ScriptRunner {
       ...encounterHandlers(this),
       ...frontierFieldHandlers(this),
       ...undergroundHandlers(this),
+      ...contestHandlers(this),
     };
   }
 

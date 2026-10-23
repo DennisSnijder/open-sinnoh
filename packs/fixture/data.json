@@ -11922,6 +11922,110 @@
    "text": "Two hold the same gear."
   },
   {
+   "id": "fixture:PartyMenu_Text_EligibleForContest",
+   "text": "READY"
+  },
+  {
+   "id": "fixture:PartyMenu_Text_IneligibleForContest",
+   "text": "NOT READY"
+  },
+  {
+   "id": "fixture:Contest_Text_CoolContest",
+   "text": "SHARP SHOW"
+  },
+  {
+   "id": "fixture:Contest_Text_BeautyContest",
+   "text": "GRACE SHOW"
+  },
+  {
+   "id": "fixture:Contest_Text_CuteContest",
+   "text": "CHARM SHOW"
+  },
+  {
+   "id": "fixture:Contest_Text_SmartContest",
+   "text": "WIT SHOW"
+  },
+  {
+   "id": "fixture:Contest_Text_ToughContest",
+   "text": "GRIT SHOW"
+  },
+  {
+   "id": "fixture:Contest_Text_NormalRank",
+   "text": "TIER 1"
+  },
+  {
+   "id": "fixture:Contest_Text_GreatRank",
+   "text": "TIER 2"
+  },
+  {
+   "id": "fixture:Contest_Text_UltraRank",
+   "text": "TIER 3"
+  },
+  {
+   "id": "fixture:Contest_Text_MasterRank",
+   "text": "TIER 4"
+  },
+  {
+   "id": "fixture:Contest_Text_Practice",
+   "text": "REHEARSAL"
+  },
+  {
+   "id": "fixture:Contest_Text_Contest",
+   "text": "SHOW"
+  },
+  {
+   "id": "fixture:ContestCommon_Text_VisualCompetition",
+   "text": "LOOKS ROUND"
+  },
+  {
+   "id": "fixture:ContestCommon_Text_DanceCompetition",
+   "text": "STEPS ROUND"
+  },
+  {
+   "id": "fixture:ContestCommon_Text_ActingCompetition",
+   "text": "STAGE ROUND"
+  },
+  {
+   "id": "fixture:ContestResults_Text_JudgingCompleted",
+   "text": "Scoring is done.{clear}Here come the results!"
+  },
+  {
+   "id": "fixture:ContestResults_Text_VisualCompetitionResults",
+   "text": "The looks round first."
+  },
+  {
+   "id": "fixture:ContestResults_Text_DanceCompetitionResults",
+   "text": "Then the steps round."
+  },
+  {
+   "id": "fixture:ContestResults_Text_ActingCompetitionResults",
+   "text": "And the stage round."
+  },
+  {
+   "id": "fixture:ContestResults_Text_TheWinnerIs",
+   "text": "Top spot: No. {var 0}!\n{var 1} and {var 2}!"
+  },
+  {
+   "id": "fixture:Lantern_Contest_Placeholder",
+   "text": "{var 0}\nStand-in round: scored by condition."
+  },
+  {
+   "id": "fixture:Lantern_Contest_Visual",
+   "text": "LOOKS"
+  },
+  {
+   "id": "fixture:Lantern_Contest_Dance",
+   "text": "STEPS"
+  },
+  {
+   "id": "fixture:Lantern_Contest_Acting",
+   "text": "STAGE"
+  },
+  {
+   "id": "fixture:Lantern_Contest_Total",
+   "text": "SUM"
+  },
+  {
    "id": "fixture:PartyMenu_Text_AbleToLearn",
    "text": "CAN!"
   },
