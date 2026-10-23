@@ -162,7 +162,8 @@ describe('battle message speed (decomp RenderText, battle render flags)', () => 
   it('a press that ends the {clear} early plays SE_CONFIRM once; the auto-scroll running out and the post-message wait are silent', () => {
     const heard = (input: (n: number) => InputFrame, kind: 'wild' | 'tutorial' = 'wild') => {
       const se: number[] = [];
-      gap(input, kind, (seq) => se.push(seq));
+      // The send-out's ball-open sound (1798) is not the printer's.
+      gap(input, kind, (seq) => seq !== 1798 && se.push(seq));
       return se;
     };
     expect(heard(at(2, press('a')))).toEqual([1500]);

@@ -42,13 +42,16 @@ export interface SealType {
  * The seal tables (`NewGame.seals`): `types` indexed by seal id (0 is the dummy row), `marts` the Sunyshore seal
  * merchant's stock per MART_SEAL_ID (Monday … Sunday), `trainerCapsules` the NPC trainers' capsules
  * (pl_cb_data.narc; a trainer's `ballSeal` n ≥ 1 uses capsule n − 1), `delays` the send-out effect's start delays
- * by distance step (ov12_02237EA0's table).
+ * by distance step (ov12_02237EA0's table), `ballOpen` the default burst of a send-out without a capsule (decomp
+ * Unk_ov12_0223AD70, row ball − 1 for balls 1–17; rows 17–19 unused): the `ball_particle.narc` member and how many
+ * of its emitters (0 … n − 1) start.
  */
 export interface SealTables {
   types: SealType[];
   marts: number[][];
   trainerCapsules: BallSeal[][];
   delays: number[];
+  ballOpen: { particle: number; emitters: number }[];
 }
 
 /** Decomp trainer_data.c → Pokemon_SetBallSeal: an NPC trainer's Pokémon with cbSeal n ≥ 1 has capsule id 1 and a copy of trainer capsule n − 1. */

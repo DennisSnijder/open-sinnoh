@@ -1098,6 +1098,7 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
       marts: arr(arr(int(1, SEALS.count))),
       trainerCapsules: arr(arr(obj({ seal: int(1, SEALS.count), x: int(0, 255), y: int(0, 255) }))),
       delays: arr(int(0, 255)),
+      ballOpen: arr(obj({ particle: int(0, 255), emitters: int(1, 20) })),
     }, (v) => {
       if ((v.types as unknown[]).length !== SEALS.count + 1) return `seals.types must have ${SEALS.count + 1} rows`;
       return (v.trainerCapsules as unknown[][]).some((c) => c.length > SEALS.perCapsule) ? `a capsule holds at most ${SEALS.perCapsule} seals` : undefined;
@@ -1202,7 +1203,7 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
   }),
   battleAnimations: obj({ id, move: opt(ref('moves')), common: opt(str(/^[a-z0-9_]+$/)), sourceIndex: int(0), code: arr(int(-0x80000000, 0x7fffffff)) }),
   particleSystems: obj(
-    { id, sourceIndex: int(0), textures: ref('ui2d'), textureParams: arr(int(0)), emitters: arr(particleEmitter) },
+    { id, sourceIndex: int(0), archive: opt(lit('ball')), textures: ref('ui2d'), textureParams: arr(int(0)), emitters: arr(particleEmitter) },
     (v) => {
       const n = (v.textureParams as unknown[]).length;
       const bad = (v.emitters as { texture: number; texAnim?: { textures: number[] }; child?: { texture: number } }[]).find((e) => e.texture >= n || e.child?.texture !== undefined && e.child.texture >= n || e.texAnim?.textures.some((t) => t >= n));

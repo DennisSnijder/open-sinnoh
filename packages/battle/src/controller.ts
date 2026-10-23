@@ -85,6 +85,7 @@ import {
   type InputFrame,
   type Item,
   type Move,
+  type ParticleSystem,
   type Trainer,
 } from '@opensinnoh/contracts';
 import { canEscape, EXP_PIXELS, gaugeFrame, gaugeTemp, HP_PIXELS, levelUpFriendship, moneyPenalty, prizeMoney } from './formulas.ts';
@@ -98,6 +99,8 @@ import type { AiMemory } from './ai/view.ts';
 import { createAiView } from './controller/ai-view.ts';
 import { TARGET_CANCEL, targetCursor } from './controller/target-screen.ts';
 import { AnimVm, animSupport, commonAnimation, moveAnimation, type AnimSound } from './anim/index.ts';
+import { SendOutEffect } from './anim/send-out.ts';
+import { SplRandom } from './anim/spl.ts';
 import { TextPrinter, toPrintOps } from '@opensinnoh/text';
 
 /**
@@ -144,6 +147,11 @@ const SE_PINPON = 1521;
 const SE_CONFIRM = 1500;
 /** The sound of a wild Pokémon running off (subscript_enemy_escape's PlaySound 1791). */
 const SE_ESCAPE = 1791;
+/**
+ * The ball opening at a send-out (decomp SEQ_SE_DP_SLOT01_sseq_1: the second sequence on SEQ_SE_DP_SLOT01.sseq, which
+ * in the US ROM's SDAT is 1798 SEQ_SE_DP_BOWA2; 1744 SEQ_SE_DP_SLOT01 is the first).
+ */
+const SE_BALL_OPEN = 1798;
 /** The catching tutorial's wait before the ball (decomp GetCatchTutorialLowHPInput: 60 frames). */
 const TUTORIAL_WAIT = 30;
 
@@ -390,6 +398,9 @@ class BattleController implements Battle {
   /** The battle animation playing, and how many have played (each seeds its particles). */
   private anim: AnimVm | null = null;
   private animCount = 0;
+  /** The send-out effects by battler (a capsule's seals or the ball's burst), on their own particle stream. */
+  private readonly sendOuts = new Map<number, SendOutEffect>();
+  private sendOutRng: SplRandom | null = null;
   /** Battlers whose two-turn move charged (decomp: the attack turn's animation runs with effect chance 1). */
   private readonly charged = new Set<Side>();
   /** A multi-hit move: its animation plays again before each later hit (decomp LoopMultiHit). */
@@ -706,6 +717,10 @@ class BattleController implements Battle {
     this.input = input;
     if (this.prompt) this.navigate(input);
     this.script.next();
+    for (const [battler, fx] of this.sendOuts) {
+      fx.tick();
+      if (!fx.active) this.sendOuts.delete(battler);
+    }
     this.touchedBefore = input.touch !== null;
     this.tick++;
   }
@@ -901,6 +916,7 @@ class BattleController implements Battle {
       ball: this.ball && { ...this.ball },
       ...(this.safari ? { safari: { balls: this.safari.balls, healthbox: { ...this.safari.healthbox } } } : {}),
       anim: this.anim ? this.anim.view() : null,
+      ...(this.sendOuts.size ? { sendOut: [...this.sendOuts.values()].flatMap((fx) => fx.particles) } : {}),
     };
   }
 
@@ -1148,12 +1164,54 @@ class BattleController implements Battle {
       side.view.clip = 0;
       side.view.flash = true;
     }
+    this.openBalls(sides);
     for (let t = 1; t <= 8; t++) {
       for (const side of sides) side.view.scale = t / 8;
       this.printStep();
       yield;
     }
     for (const side of sides) side.view.flash = false;
+    while (this.sealsPlaying(sides)) {
+      this.printStep();
+      yield;
+    }
+  }
+
+  /**
+   * The frame the ball opens (decomp Task_ShowEncounter, Task_ShowPokemon): the ball-open sound and the send-out
+   * effect (ov12_022363B4): a capsule's seals, else the ball's default burst. Packs without the seal tables have
+   * neither effect (a capsule then cannot have reached the battle: the trainer build and the party need them).
+   */
+  private openBalls(sides: Side[]): void {
+    const reg = this.deps.registries;
+    const tables = newGameRecord(reg).seals;
+    const data = [...reg.battleAnimData.values()][0];
+    for (const side of sides) {
+      this.deps.sound?.se?.(SE_BALL_OPEN);
+      if (!tables || !data) {
+        if (side.mon.capsule) throw new Error('battle: a Pokémon with a ball capsule, but the packs have no seal tables or battle animation data');
+        continue;
+      }
+      const source = side.mon.capsule ? { capsule: side.mon.capsule } : { ball: this.deps.registries.items.get(side.mon.ball)?.sourceIndex ?? 0 };
+      this.sendOutRng ??= new SplRandom((this.deps.seed ^ 0x5eed0b11) >>> 0);
+      // BattleAnimUtil_GetBattlerType: solo player 0 and enemy 1 in singles, battler + 2 in doubles.
+      const type = this.doubles ? side.id + 2 : side.id;
+      this.sendOuts.set(side.id, new SendOutEffect(tables, data.positions, type, source, (member) => this.ballParticles(member), this.sendOutRng));
+    }
+  }
+
+  /** A `ball_particle.narc` system record. */
+  private ballParticles(member: number): ParticleSystem {
+    for (const p of this.deps.registries.particleSystems.values()) if (p.archive === 'ball' && p.sourceIndex === member) return p;
+    throw new Error(`battle: no ball_particle system ${member} in the packs`);
+  }
+
+  /** The Pokémon's cry and animation wait while its capsule's seals play (decomp: every seal system finished). */
+  private sealsPlaying(sides: Side[]): boolean {
+    return sides.some((s) => {
+      const fx = this.sendOuts.get(s.id);
+      return fx !== undefined && fx.holds && fx.active;
+    });
   }
 
   /** "Go! X!" (or a send-out line): the throw (when the trainer is on screen), the send-out flash, the healthboxes. */
@@ -1183,6 +1241,7 @@ class BattleController implements Battle {
       side.view.visible = true;
       side.view.flash = true;
     }
+    this.openBalls(sides);
     for (let t = 1; t <= 8; t++) {
       for (const side of sides) side.view.scale = t / 8;
       slideOff();
@@ -1190,7 +1249,7 @@ class BattleController implements Battle {
       yield;
     }
     for (const side of sides) side.view.flash = false;
-    while (throwers.some((t) => t.dx > -160)) {
+    while (throwers.some((t) => t.dx > -160) || this.sealsPlaying(sides)) {
       slideOff();
       this.printStep();
       yield;

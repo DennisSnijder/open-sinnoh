@@ -2,7 +2,8 @@
  * The seal tables (docs/research/seals.md §3.2, §4.2, §6.2, §9): the seal table (capsule_menu/main.c sealTypeValues,
  * arm9), the Sunyshore seal merchant's stock per weekday (mart_items.h SunyshoreMarketDailyStocks: a pointer per
  * MART_SEAL_ID to a 0xFFFF-ended list), the NPC trainers' capsules (pl_cb_data.narc member 0, 128 decomp BallCapsules)
- * and the send-out effect's delay table (ov12_02237EA0). Strictly checked: an unexpected size, id or position fails.
+ * and the send-out effect's delay table (ov12_02237EA0) and default ball bursts (Unk_ov12_0223AD70). Strictly checked:
+ * an unexpected size, id or position fails.
  */
 import type { BallSeal } from '@opensinnoh/core';
 import { SEALS, type SealTables, type SealType } from '@opensinnoh/contracts';
@@ -17,6 +18,8 @@ export const TRAINER_CAPSULES = 128;
 /** cb_data.narc's seal NCGRs (§5.5) and ball_particle.narc's seal SPAs (§6.1). */
 const SEAL_MEMBERS = { first: 184, last: 264 };
 const SEAL_PARTICLES = { first: 37, last: 116 };
+/** ball_particle.narc's default bursts (§6.1): members 1–17 and 36. */
+const BURST_PARTICLES = new Set([...Array.from({ length: 17 }, (_, i) => i + 1), 36]);
 
 export interface SealRomTables {
   types: Uint8Array;
@@ -25,6 +28,8 @@ export interface SealRomTables {
   arm9: Uint8Array;
   arm9Ram: number;
   delays: Uint8Array;
+  /** ov12_02235E94.c Unk_ov12_0223AD70: {s32 ball_particle member, s32 emitter count} per ball. */
+  ballOpen: Uint8Array;
   /** /application/custom_ball/edit/pl_cb_data.narc. */
   trainerCapsules: Uint8Array;
   /** The name and description banks' sizes (12 and 542). */
@@ -74,5 +79,12 @@ export function readSealTables(t: SealRomTables): SealTables {
     return seals;
   });
 
-  return { types, marts, trainerCapsules, delays: [...t.delays] };
+  const open = new Reader(t.ballOpen);
+  const ballOpen = Array.from({ length: t.ballOpen.length / 8 }, (_, k) => {
+    const row = { particle: open.u32(k * 8), emitters: open.u32(k * 8 + 4) };
+    if (!BURST_PARTICLES.has(row.particle) || row.emitters < 1 || row.emitters > 20) throw new Error(`ball open burst ${k}: member ${row.particle}, ${row.emitters} emitters`);
+    return row;
+  });
+
+  return { types, marts, trainerCapsules, delays: [...t.delays], ballOpen };
 }

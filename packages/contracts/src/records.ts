@@ -1504,8 +1504,13 @@ export interface BattleAnimation {
  */
 export interface ParticleSystem {
   id: Id;
-  /** The `waza_particle.narc` member (scripts' LoadParticleSystem operand). */
+  /** The member in its archive: `waza_particle.narc` (scripts' LoadParticleSystem operand), or `ball_particle.narc`. */
   sourceIndex: number;
+  /**
+   * The archive when it is not `waza_particle.narc`: `ball` = `ball_particle.narc`, the battle send-out effect's
+   * default ball bursts and seals (docs/research/seals.md §6).
+   */
+  archive?: 'ball';
   textures: Id;
   /** Per texture: the SPL texture's repeat and flip bits (param bits 12–15) and whether colour 0 is transparent. */
   textureParams: number[];

@@ -24229,6 +24229,88 @@
      12,
      10,
      10
+    ],
+    "ballOpen": [
+     {
+      "particle": 1,
+      "emitters": 1
+     },
+     {
+      "particle": 2,
+      "emitters": 1
+     },
+     {
+      "particle": 3,
+      "emitters": 1
+     },
+     {
+      "particle": 4,
+      "emitters": 1
+     },
+     {
+      "particle": 5,
+      "emitters": 1
+     },
+     {
+      "particle": 6,
+      "emitters": 1
+     },
+     {
+      "particle": 7,
+      "emitters": 1
+     },
+     {
+      "particle": 8,
+      "emitters": 1
+     },
+     {
+      "particle": 9,
+      "emitters": 1
+     },
+     {
+      "particle": 10,
+      "emitters": 1
+     },
+     {
+      "particle": 11,
+      "emitters": 1
+     },
+     {
+      "particle": 12,
+      "emitters": 1
+     },
+     {
+      "particle": 13,
+      "emitters": 1
+     },
+     {
+      "particle": 14,
+      "emitters": 1
+     },
+     {
+      "particle": 15,
+      "emitters": 1
+     },
+     {
+      "particle": 16,
+      "emitters": 1
+     },
+     {
+      "particle": 17,
+      "emitters": 1
+     },
+     {
+      "particle": 36,
+      "emitters": 1
+     },
+     {
+      "particle": 36,
+      "emitters": 1
+     },
+     {
+      "particle": 36,
+      "emitters": 1
+     }
     ]
    }
   }

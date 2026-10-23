@@ -36,6 +36,10 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('Seals (OPENSINNOH_NDS_ROM)', (
     }
     // The send-out delays (ov12_02237EA0) and the 128 trainer capsules of at most 8 seals.
     expect(t.delays).toEqual([0, 8, 14, 20, 20, 16, 16]);
+    // The default bursts (Unk_ov12_0223AD70): {ball_particle member, emitters} per ball; rows 17–19 unused.
+    expect(t.ballOpen.map((r) => [r.particle, r.emitters])).toEqual([
+      [1, 5], [2, 4], [3, 3], [4, 3], [5, 3], [6, 4], [7, 3], [8, 4], [9, 3], [10, 5], [11, 4], [12, 3], [13, 3], [14, 3], [15, 4], [16, 4], [17, 3], [1, 5], [1, 5], [36, 2],
+    ]);
     expect(t.trainerCapsules).toHaveLength(128);
     expect(t.trainerCapsules.every((c) => c.length <= SEALS.perCapsule)).toBe(true);
     expect(t.trainerCapsules.some((c) => c.length > 0)).toBe(true);

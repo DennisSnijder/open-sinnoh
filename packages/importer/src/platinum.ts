@@ -181,6 +181,8 @@ const TABLES = {
   sealMarts: { where: 'arm9', offset: 0x100b00, count: 7, size: 4, sha1: '8c6bc435bd5fe5d257264b242e39f1dbeeb48252' },
   /** ov12_02237EA0's delay table: a seal emitter's start delay in frames by distance step. */
   sealDelays: { where: 12, offset: 0x1b420, count: 7, size: 1, sha1: 'f5af31e595e4a5912f406ed78354562d53375f26' },
+  /** ov12_02235E94.c Unk_ov12_0223AD70: the default ball-open burst per ball, {ball_particle member, emitter count} (s32 each). */
+  ballOpenParticles: { where: 12, offset: 0x1b150, count: 20, size: 8, sha1: 'ac2a9cc8d2e6ea4be7263237a5e198d19779bb93' },
   /** gTrainerAITable (overlay trainer_ai = 14): the AI flag table and bytecode, through Terminate's PopOrEnd. */
   aiScript: { where: 14, offset: 0x4c84, count: 10607, size: 4, sha1: '981183191070373d80362e94c09f8456f7f4f793' },
   /** trainer_ai.c sNoDamageCalcMoveEffects, sAltPowerMoveEffects (u16, 0xFFFF-ended) and sWeightToPower. */
@@ -1384,6 +1386,7 @@ export async function importPlatinum(
       arm9: fs.arm9(),
       arm9Ram: fs.header.arm9RamAddress,
       delays: await table('sealDelays'),
+      ballOpen: await table('ballOpenParticles'),
       trainerCapsules: fs.file('/application/custom_ball/edit/pl_cb_data.narc'),
       names: bankTexts[bankIndex('TEXT_BANK_BALL_SEAL_NAMES')]!.length,
       descriptions: bankTexts[bankIndex('TEXT_BANK_UNK_0542')]!.length,

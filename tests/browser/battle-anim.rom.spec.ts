@@ -4,6 +4,7 @@
  * on Route 202 from a Piplup that knows the move. While the animation plays, its particles are drawn
  * where the decomp puts them (the defender, or the attacker for Growl): the scene with the animation's
  * particles differs from the same frame without them, most of all around that battler.
+ * A Ball Capsule's seals at the player's send-out are drawn around the player's Pokémon (docs/research/seals.md §6).
  * With OPENSINNOH_ANIM_SHOTS set, frame strips of each animation go there (ROM content, never commit).
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -67,7 +68,7 @@ const battleView = () => page.evaluate(() => window.openSinnohGame!.battleView()
  * The scene pixels (device px of the scene's rect) and the same frame drawn without the animation's
  * effect layer: the count of changed pixels and their centre in DS px.
  */
-async function animationDiff(kind: 'particles' | 'sprites' | 'battlers'): Promise<{ changed: number; x: number; y: number }> {
+async function animationDiff(kind: 'particles' | 'sprites' | 'battlers' | 'send-out'): Promise<{ changed: number; x: number; y: number }> {
   return page.evaluate(async (kind) => {
     const app = window.openSinnohApp!;
     const grab = () => {
@@ -89,6 +90,7 @@ async function animationDiff(kind: 'particles' | 'sprites' | 'battlers'): Promis
     const view = battle.__view;
     battle.view = () => {
       const v = view();
+      if (kind === 'send-out') return { ...v, sendOut: [] };
       return { ...v, anim: v.anim && { ...v.anim, ...(kind === 'particles' ? { particles: [] } : kind === 'sprites' ? { sprites: v.anim.sprites.filter((s) => s.kind !== 'cell') } : { battlers: [] }) } };
     };
     await frame();
@@ -204,3 +206,66 @@ for (const proof of PROOF) {
     expect(errors).toEqual([]);
   });
 }
+
+/** The capsule set on the lead: seals around the circle's centre (190, 70) and one alphabet seal. */
+const CAPSULE = { id: 1, seals: [[1, 190, 70], [7, 160, 50], [13, 220, 50], [19, 160, 95], [25, 220, 95], [31, 190, 22], [37, 190, 118], [50, 140, 70]].map(([seal, x, y]) => ({ seal, x, y })) };
+
+test("a Ball Capsule's seals play at the player's send-out, around the Pokémon", async () => {
+  test.setTimeout(300_000);
+  const project = test.info().project.name;
+  let best = { changed: 0, x: 0, y: 0 };
+  let ticks = 0;
+  const strip = { frames: 0 };
+  let done = false;
+  const driver = pageDriver(page, SHOTS ?? 'test-artifacts/battle-anim', `${project}-capsule`);
+  const capsuleReplay = replay('MOVE_TACKLE').replace('set var', `set state party[0].capsule ${JSON.stringify(CAPSULE)}\nset var`).replace('+0 battle move 1\n+0 screenshot anim\n', '');
+  const result = await runReplay(driver, capsuleReplay, {
+    registries,
+    name: 'capsule-send-out.replay',
+    seed: 1,
+    repeat: false,
+    async beforeLine() {
+      // Once the battle has started (it starts during a walking line, its intro outlasts the line): step to the
+      // player's send-out, then through its seals.
+      if (done) return;
+      const started = await page.evaluate(() => {
+        const g = window.openSinnohGame!;
+        if (!g.battleView()) return false;
+        for (let i = 0; i < 900 && !g.battleView()?.battlers.some((b) => b.side === 'player' && b.visible); i++) g.advance(1);
+        return true;
+      });
+      if (!started) return;
+      done = true;
+      await waitForScene(page);
+      for (let i = 0; i < 200; i++) {
+        const v = await battleView();
+        if (v?.prompt) break;
+        if (v?.sendOut?.length) {
+          ticks++;
+          if (SHOTS && strip.frames < 64) {
+            await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+            await stripFrame(strip);
+          }
+          if (ticks % 3 === 0) {
+            await waitForScene(page);
+            const d = await animationDiff('send-out');
+            if (d.changed > best.changed) {
+              best = d;
+              await page.screenshot({ path: `test-artifacts/battle-anim/${project}-capsule-send-out.png` });
+            }
+          }
+        }
+        await page.evaluate(() => window.openSinnohGame!.advance(1));
+      }
+      if (SHOTS) await saveStrip('capsule-send-out');
+    },
+  });
+  expect(result.error).toBeUndefined();
+  expect(result.ok).toBe(true);
+  // Seven seals start within 20 frames of the ball opening and the alphabet seal after 8; the send-out waits for them.
+  expect(ticks, 'the seals played').toBeGreaterThan(20);
+  expect(best.changed, 'the seals are drawn').toBeGreaterThan(200);
+  // Around the player's Pokémon: the effect's anchor is (64, 112) less (10, 16), the seals centred 30 px above it.
+  expect(Math.hypot(best.x - 54, best.y - 66), `the seals are around the player's Pokémon (centre ${best.x.toFixed(0)}, ${best.y.toFixed(0)})`).toBeLessThan(48);
+  expect(errors).toEqual([]);
+});
