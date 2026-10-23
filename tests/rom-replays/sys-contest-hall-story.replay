@@ -1,7 +1,8 @@
 # The Contest Hall's story with contests in the engine (decomp scripts_contest_hall_lobby.s): the first entry (Keira and
 # Mom, the Glitter Powder, the tuxedo, FLAG_CONTEST_HALL_VISITED), then Fantina, who leaves for her gym
 # (FLAG_HIDE_HEARTHOME_CITY_GYM_GUIDE). No contest is needed for either. Then a practice Visual Competition at the
-# practice receptionist (scored by the placeholder round), its verdict and NO to another try.
+# practice receptionist (the dress-up: R to the Glitter Powder's page of the Fashion Case, Y, A, Y to Staravia's head,
+# A, X for DONE; the judging), its verdict and NO to another try.
 party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK platinum:MOVE_QUICK_ATTACK
 set var platinum:VAR_HEARTHOME_CITY_STATE 1
 warp platinum:MAP_HEADER_CONTEST_HALL_LOBBY 16 13 up
@@ -59,7 +60,74 @@ advance text 6000
 until app contest 6000
 +0 assert state contest.mode "practice"
 +0 assert state contest.competition 3
-+2 press a
+until state app.round.message.waiting true 120
++0 press a
++1 release a
+until state app.round.message.waiting true 60
++0 press a
++1 release a
+until state app.round.message.waiting true 60
++0 press a
++1 release a
+until state app.round.message.waiting true 60
++0 press a
++1 release a
+until state app.round.message.waiting true 60
++0 press a
++1 release a
+until state app.round.message.waiting true 60
++0 press a
++1 release a
+until state app.round.dress.seconds 59 60
++1 press r
++1 release r
++1 press y
++1 release y
++1 press a
++1 release a
++1 press y
++1 release y
++1 press a
++1 release a
++1 assert state app.round.dress.placed 1
++1 assert state app.round.dress.page 8
++1 press x
++1 release x
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
++1 release a
+until state app.round.message.waiting true 300
++0 press a
 +1 release a
 until app none 600
 advance text 6000

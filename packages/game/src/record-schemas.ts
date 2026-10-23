@@ -139,7 +139,7 @@ const ui2dAnimation = obj({
   loopStart: int(0),
   frames: arr(obj({ cell: int(0), ticks: int(0), dx: opt(num), dy: opt(num), scaleX: opt(num), scaleY: opt(num), rotation: opt(num) })),
 });
-const pokemonFace = obj({ y: int(0), yOffset: int() });
+const pokemonFace = obj({ y: int(0), yOffset: int(), opaque: opt(str()) });
 const pokemonSpriteForm = obj({
   name: opt(str()),
   atlas: ref('assets'),
@@ -967,7 +967,7 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
       themes: arr(arr(int(0, 255))),
       playerGfx: obj({ male: int(0, 0xffff), female: int(0, 0xffff) }),
       playerSprite: obj({ male: ref('sprites'), female: ref('sprites') }),
-      // 0.36.0: the acting round's tables (contracts ContestActingTables).
+      // 0.36.1: the acting round's tables (contracts ContestActingTables).
       acting: opt(obj({
         effects: arr(obj({
           description: arr(ref('texts')),
@@ -981,7 +981,9 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
         rules: arr(obj({ slot: int(1, 4), condition: int(1, 28), target: int(0, 255), judges: int(0, 3), weights: arr(int(-0x8000, 0x7fff)) })),
         buttonPalettes: arr(arr(int(0, 0xffff))),
       }, (v) => ((v.effects as unknown[]).length !== 24 ? 'contests.acting.effects must have the 24 effects' : (v.typeMatch as unknown[]).length !== 5 ? 'contests.acting.typeMatch must be 5 × 5' : undefined))),
-    }, (v) => ((v.themes as unknown[]).length !== 12 ? 'contests.themes must have the 12 themes' : undefined))),
+      // 0.35.1: the accessories' pictures (sizes and masks) for the visual round.
+      accessories: arr(obj({ width: lit(16, 32, 64), height: lit(16, 32, 64), mask: str() })),
+    }, (v) => ((v.themes as unknown[]).length !== 12 ? 'contests.themes must have the 12 themes' : (v.accessories as unknown[]).length !== 100 ? 'contests.accessories must have the 100 accessories' : undefined))),
     // 0.31.0: Amity Square (contracts AmitySquareTables): pools of ten accessories, the gifts' items then accessories.
     amitySquare: opt(obj({
       stepVar: ref('vars'),

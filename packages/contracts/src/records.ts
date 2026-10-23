@@ -1380,6 +1380,12 @@ export interface PokemonSpriteForm {
 export interface PokemonFace {
   y: number;
   yOffset: number;
+  /**
+   * 0.35.1. Front faces only: the first frame's opaque pixels, as base64 of 80 rows, each a run count n then n
+   * pairs of u8 (first x, end x exclusive). The visual round's tests against the Pokémon's pixels read it
+   * (decomp ov22_022592F0).
+   */
+  opaque?: string;
 }
 
 /** Decomp SpeciesSpriteAnim: frames (picture 0/1, ticks, x/y shift), the transform animation id (pl_poke_anm) and delays in ticks. */
@@ -1572,7 +1578,7 @@ export interface BattleAnimData {
   positions: [number, number, number][][][];
   /** EmitterAxisConfigs1–8: [config][from battler type][to battler type] → [x, y, z]. */
   axes: [number, number, number][][][];
-  /** The switched backgrounds (SwitchBg's 0–57): `ui2d` sheets, cell 0 as drawn for the player's side, cell 1 mirrored, cell 2 (0.36.0) a contest's screen. */
+  /** The switched backgrounds (SwitchBg's 0–57): `ui2d` sheets, cell 0 as drawn for the player's side, cell 1 mirrored, cell 2 (0.36.1) a contest's screen. */
   backgrounds: Id[];
   /** The stat change patterns (StatChangeUp, Down, Heal, Metal: sStatChangeNarcMemberTable): `ui2d` sheets. */
   statChange: Id[];

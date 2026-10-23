@@ -10,6 +10,7 @@ import type { ContestDressUp, ContestRound, ContestRoundContext, ContestRoundKin
 import { conditionPoints } from '@opensinnoh/services';
 import { plainText } from '../strings.ts';
 import { actingRound } from './acting.ts';
+import { visualRound } from './visual.ts';
 
 /** ContestCommon_Text_VisualCompetition, …Dance…, …Acting… (the receptionist's names for the rounds). */
 const ROUND_NAMES: Record<ContestRoundKind, string> = { visual: 'ContestCommon_Text_VisualCompetition', dance: 'ContestCommon_Text_DanceCompetition', acting: 'ContestCommon_Text_ActingCompetition' };
@@ -21,6 +22,7 @@ const EMPTY_OUTFIT: ContestDressUp = { accessories: [], monPriority: 0, backdrop
 export const createContestRound: CreateContestRound = (kind, ctx) => {
   switch (kind) {
     case 'visual':
+      return visualRound(ctx);
     case 'dance':
       return placeholderRound(kind, ctx);
     case 'acting':

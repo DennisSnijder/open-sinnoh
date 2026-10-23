@@ -97,7 +97,7 @@ export const REAL_CLOCK = ['get_time_of_day', 'get_hour', 'get_day_of_week'];
 
 /**
  * The Super Contest ops, offline (contracts 0.35, contest-ops.ts): `real: 'contests'` in the export; `opensinnoh coverage`
- * fails if one is not implemented. The lobby's photo viewer (scr_cmd_0a8) and the link ops stay stubs.
+ * fails if one is not implemented (0.35.1: the lobby's photo viewer, scr_cmd_0a8). The link ops stay stubs.
  */
 export const REAL_CONTESTS = [
   'new_contest', 'end_contest', 'buffer_judge_name', 'buffer_contestant_trainer_name', 'buffer_contestant_mon_name',
@@ -108,7 +108,7 @@ export const REAL_CONTESTS = [
   'get_first_time_victory_accessory', 'start_contest_camera_flash_task', 'wait_for_contest_camera_flash_task',
   'get_should_skip_award_ceremony', 'start_contest_comm_sync', 'wait_for_comm_sync_state', 'lock_auto_scroll_for_link_contests',
   'lock_text_speed', 'change_into_contest_attire', 'open_party_menu_for_contest', 'get_contest_party_menu_result',
-  'contest_photo_has_data', 'message_synchronized', 'stop_h_blank', 'start_h_blank',
+  'contest_photo_has_data', 'message_synchronized', 'stop_h_blank', 'start_h_blank', 'scr_cmd_0a8',
 ];
 
 /**
@@ -116,7 +116,7 @@ export const REAL_CONTESTS = [
  * entry to 'real' with its model; a test checks this list against the rounds' `placeholder` flags. The coverage
  * report counts the placeholders.
  */
-export const CONTEST_ROUNDS_STATUS: Record<'visual' | 'dance' | 'acting', 'placeholder' | 'real'> = { visual: 'placeholder', dance: 'placeholder', acting: 'real' };
+export const CONTEST_ROUNDS_STATUS: Record<'visual' | 'dance' | 'acting', 'placeholder' | 'real'> = { visual: 'real', dance: 'placeholder', acting: 'real' };
 
 /**
  * The ops made real over the Pokémon model (party, bag, money, Pokédex): `real: 'P'` in the export;
