@@ -184,6 +184,21 @@ export interface Pokemon {
    * (services `feedPoffin`); Feebas evolves by its beauty (EVO_LEVEL_BEAUTY).
    */
   condition: Condition;
+  /**
+   * The Ball Capsule on a party Pokémon (decomp MON_DATA_BALL_CAPSULE_ID and MON_DATA_BALL_CAPSULE): `id` the capsule
+   * index + 1 (1–12) and a copy of its seals, which the send-out effect reads. Absent = none (a boxed Pokémon has none).
+   */
+  capsule?: { id: number; seals: BallSeal[] };
+}
+
+/**
+ * A seal placed on a Ball Capsule (decomp BallSeal): `seal` the seal id (1–80), `x`, `y` its centre on the editor's
+ * touch screen (the capsule circle is centred at (190, 70), radius 60).
+ */
+export interface BallSeal {
+  seal: number;
+  x: number;
+  y: number;
 }
 
 /** Decomp MON_DATA_COOL, BEAUTY, CUTE, SMART, TOUGH and SHEEN, in that order. */
