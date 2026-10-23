@@ -25,7 +25,7 @@ practice receptionist did the same without the prize.
 | Script ops | vm `contest-ops.ts` (`REAL_CONTESTS` in coverage.ts) | every op the Hall's scripts use offline (scrcmd_contests.c, the contest party menu, `message_synchronized`, the attire spin, the camera flashes, `contest_photo_has_data`) |
 | Session | `GameState.contest` (contracts `ContestSession`) | from `new_contest` to `end_contest`; never in a save (saves happen between scripts) |
 | App | menus `contest/contest.ts`, app `ui/contest.ts` | the rounds in order through the seam, then the final scoring and the results (ROM frames, font, `TEXT_BANK_CONTEST_RESULTS`, `SEQ_CON_TEST`, `SEQ_CO_KEKKA`, `SEQ_CO_FANFA`) |
-| Rounds | menus `contest/rounds.ts` | the seam's registry; today three placeholders |
+| Rounds | menus `contest/rounds.ts` | the seam's registry: the acting round (`contest/acting.ts`, §7.8), visual and dance placeholders |
 | Party | menus `party.ts` mode `contest` (app `contest-select`) | ELIGIBLE/INELIGIBLE notes, ENTER/SUMMARY/CANCEL |
 | Saves | schema v20 `contestPhotos` | the winner photo per type (the outfit is the visual lane's) |
 
@@ -61,9 +61,8 @@ backdrop names are text banks 386–388; theme names TEXT_BANK_UNK_0385 messages
 TEXT_BANK_CONTEST_{TEXT, VISUAL_COMPETITION, DANCE_COMPETITION, ACTING_COMPETITION, EFFECTS, RESULTS} — all imported
 with every bank. Sequences by SDAT index: SEQ_CON_TEST 1135 (CONTEST_DRESSING_ROOM), SEQ_CO_DRESS 1169, SEQ_CO_KAWAI
 1176, KASHI 1177, UTSUK 1178, TAKUMA 1179, KAKKO 1180, KEKKA 1181, FANFA 1182, SEQ_SE_DP_KATI 1527 (shutter),
-SEQ_SE_DP_CON_* 1759–1787. Not imported yet (round lanes): the per-effect table Unk_020F568C (arm9, src/unk_02094EDC.c:34:
-base appeal and message ids), Unk_ov17_02253AF8 (overlay 17: effect classes), the dance song table, the acting AI
-rules, contest_bg.narc, contest_obj.narc, imageclip.narc art.
+SEQ_SE_DP_CON_* 1759–1787. The acting round's tables and art are imported (§7.8). Not imported yet (round lanes): the dance song table,
+imageclip.narc and the visual and dance rounds' contest_bg/contest_obj art.
 
 ## 4. The round seam (contracts `contests.ts`)
 
@@ -571,6 +570,39 @@ Classes: 5 for DOUBLED_JUDGE, UNIQUE_JUDGE and ALL_SAME_JUDGE; 6 for PITY_POINTS
 
 ---
 
+### 7.8 What is built
+
+- **Tables** (importer `contest-acting.ts`, `ContestTables.acting`), each SHA1-checked: arm9 `Unk_020F568C` at 0xF568C
+  (24 × 26 B: description lines, appeal, five outcome lines with their argument modes); overlay 17 (RAM base 0x0223B140)
+  `Unk_ov17_02253AF8` at 0x189B8 (24 × 8 B: class, announce), `Unk_ov17_022539C8` at 0x18888 (the 5 × 5 type table),
+  `sActingCompetitionMessages` at 0x187B0 (47 × 4 B), `Unk_ov17_02253C30` at 0x18AF0 (165 × 12 B), `Unk_ov17_022534B8`
+  at 0x18378 (the move buttons' five palettes). The effect handlers and the AI's 28 conditions are code keyed by id.
+- **Rules** (menus `contest/acting-rules.ts`): the decomp's turn state and steps (§7.3), the first order (§6.7), the
+  next-turn order, the move menu's rule, the AI (§7.4). Corrections to §7.3/§7.4 found while porting:
+  - PITY_POINTS: each other act's snapshot is its score before *its own* last step (the class-5 step for those later
+    in the order, the pity step for those earlier); the act's own is its score before the pity step. Ported as is.
+  - FIRST/LAST_NEXT_TURN push every forced contestant, whatever its kind, and the 2-bit slot wraps (4 → 0); a push
+    below 0 is dropped (u8 0xFF is skipped).
+  - AI condition 2 reads the previous turn's carried-in double (`unk_30.unk_A0`), not this turn's.
+  - The AI scores disabled moves as effect 0, type Cool: in a Cool contest "has a Cool move" holds whenever a move is
+    disabled.
+  - ActingCompetition_Main draws the contest LCRNG once every frame, so the AI's tie-breaks depend on when the player
+    chose. The round does the same.
+- **Flow and presentation** (menus `contest/acting.ts`): the state machine (Unk_ov17_02252E10) and its presentation
+  commands (ov17_02243C28.c Unk_ov17_022539E4) with their frame counts, sounds and lines: entry (11 frames, 7 to slide),
+  the judge's look and hop, the move line, the animation, the hearts (10 points every 3 frames), the voltage (the star
+  to the meter, the full meter's pips to the panel), the judges by popularity, the class-5 and pity lines, the
+  attention line, the hearts gathering, the next-turn line. Messages print at the text speed and go on by themselves
+  (ov17_02242ECC). The menus: touch or keys (the first key shows the cursor; a pick by key keeps it up).
+- **Animations**: the animation VM's contest mode (`AnimDeps.contest`): the contestant positions (216,112 / 80,42),
+  the contest world-position rows (types 6, 7), JumpIfContest, the turned pans and X directions
+  (BattleAnimUtil_GetTransformDirectionX), MoveBattler's Y, SwitchBgEx's contest background and the backgrounds'
+  contest screen (NSCR3), the generic emitter callback's contest spots, axes and camera angle. Not ported: the contest
+  branches of the sprite callbacks StringShot, Trick, Fissure, Taunt (scripts that reach them play no animation,
+  logged). On the ROM 453 of 468 move scripts play in a contest.
+- **Screen** (app `ui/contest-acting.ts`): the main screen on one canvas from contest_bg 0–5/30 and contest_obj
+  12–41; the touch screen's menus (contest_bg 6, 10, 29 with NCLR 40 and the type palettes) as a card.
+
 ## 8. Final scoring and results (`src/overlay017/ov17_02250744.c`, `ov17_0224F4D4.c`, `ov17_02251D6C.c`)
 
 **Weights** (`ov17_02251860` `:879`):
@@ -633,14 +665,14 @@ Camera-flash timings for the field scene (`src/contest.c:127`) depend on rank.
 - `Unk_ov17_02252FC4.unk_00` (14 / 15) is not explained.
 - In the dance backup AI, the spacing terms of `ov17_0224EC24` are dead code. The link-forced Cute/Smart multipliers
   read `unk_1B26`, the link-forced-song flag, which looks odd.
-- PITY_POINTS compares snapshots taken at different moments; the exact tie behaviour depends on order.
+- PITY_POINTS compares snapshots taken at different moments (ported as the DS keeps them, §7.8).
 - AI rules that test "turn == 4" probably never fire.
 - How the photo save treats accessories that are placed but not on the Pokémon (`ov22_02257778` takes nodes with
   `unk_04 == 0` from two lists) was not traced.
 - Most graphics member ids are loaded through open-NARC helpers; only some are listed here. Each app's
   `*_LoadGraphics` functions need a full pass.
-- Acting presentation timings (animations, message waits) live in `ov17_02243C28.c` and `ov17_022413D8.c`. They were
-  not extracted.
+- Acting presentation: the hearts' gathering spiral (ov17_0224331C) and the panels' two-step blend (ov17_022426E8) are
+  approximated in their timing; the heart sound's rising pitch is not played.
 - The camera flash brightness curve is approximated (+4/16 white fading over 6 frames through `FieldView.lightning`).
 - Friendship on a win skips the met-location bonus (the Pokémon model keeps no egg location), as the battle code does.
 
@@ -659,6 +691,5 @@ and keep the draws on `ctx.rng` in the decomp's order.
 - **Dance:** the song table and variants (overlay 17 data), the sequencer-driven clock (§6.2: our AudioHost must expose
   the sequence position deterministically or the round must keep its own tick clock from the BPM — a decision for the
   lane), the four rounds of lead/backup, the grading windows, the NPC AI with its own ARNG per NPC, `points` = unk_04.
-- **Acting:** the per-effect table Unk_020F568C (arm9) and the classes Unk_ov17_02253AF8 (overlay 17), voltage, the
-  judge-share and class-5/6 effects, the next-turn order, the first order from visual + dance (§7.2), the 165-row AI rule
-  table, move animations through the battle animation VM (contest arms of JumpIfContest), `points` = unk_06.
+- **Acting:** done (§7.8). Replays: `sys-contest-normal-cool` (by touch), `sys-contest-practice-acting` (keys and
+  touch, with the move menu's EXIT).

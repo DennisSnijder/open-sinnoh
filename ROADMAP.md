@@ -44,7 +44,9 @@ the trainer card, the Pokédex, the Town Map and Fly, all 25 Pokétch apps, opti
 - Honey trees, the Poké Radar, swarms, the Trophy Garden, Pokérus.
 - Poffins, condition, Feebas into Milotic, the Fashion Case, Amity Square.
 - Super Contests, offline: reception, practice, rivals and judges from the ROM, final scoring, results, ribbons, prizes,
-  Master flags and winner photos; the rounds are placeholders behind one seam.
+  Master flags and winner photos; the rounds behind one seam.
+- The contests' acting round: the ROM's effect, voltage and AI tables, the judges, hearts and voltage meters, the
+  move animations in the animation VM's contest mode.
 - The Underground, solo: the Explorer Kit, the field and radar, mining, spheres, vendors, fossil revival.
 - The Battle Tower: singles, doubles and multi, the Battle Salon partners, Palmer, BP and the exchange, on a second
   script VM for the Battle Frontier's scenes.
@@ -74,7 +76,7 @@ Pokémon, follower talk and the HGSS look.
 ## Next
 
 - **Battle Frontier:** the Factory, Hall, Castle and Arcade with their Brains, on the Frontier VM the Tower uses.
-- **Contests:** the visual (dress-up and photos), dance and acting rounds behind the contest round seam.
+- **Contests:** the visual (dress-up and photos) and dance rounds behind the contest round seam.
 - **Underground:** traps, the Digger Drill and secret bases.
 - **Town extras:** the journal, the Game Corner, the Villa, TV, the diplomas, Seals and Ball Capsules, and the
   remaining small NPC rules.
