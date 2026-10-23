@@ -39,7 +39,7 @@ export function contest(wide: DrawContext, v: ContestView): HTMLElement {
   return root;
 }
 
-/** A round's view. The placeholder rounds are a message box only. */
+/** A placeholder round's view: a message box only (the rounds with their own screens draw them: contest-dance.ts). */
 function round(d: DrawContext, r: ContestPlaceholderRoundView): HTMLElement {
   const box = atTiles(messageBox(d, r.message.text, r.message.waiting), ...MESSAGE_TILES);
   box.dataset.round = r.round;

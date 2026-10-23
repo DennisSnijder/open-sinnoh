@@ -1,0 +1,14 @@
+/* The Dance Competition (ui/contest-dance.ts): the stage and the step buttons' card, side by side or stacked. */
+.contest-dance-scene .dance-room { display: flex; align-items: center; justify-content: center; gap: 0; }
+.contest-dance-scene .dance-room.stacked { flex-direction: column; }
+.contest-dance-scene .dance-pad { position: relative; visibility: hidden; }
+.contest-dance-scene .dance-pad.shown { visibility: visible; }
+.contest-dance-scene .dance-pad .board { position: absolute; inset: 0; }
+.contest-dance-scene .dance-buttons { touch-action: none; user-select: none; -webkit-user-select: none; }
+.contest-dance-scene .dance-step { cursor: pointer; border-radius: 50%; }
+.contest-dance-scene .dance-pad-art > .ds-picture { position: absolute; inset: 0; width: 100%; height: 100%; }
+.contest-dance-scene .dance-pad-art:not(.rom) ~ .dance-step { background: rgb(248 248 248 / 0.4); box-shadow: inset 0 0 0 var(--dot) #404040; }
+.contest-dance-scene .dance-label { display: flex; justify-content: center; align-items: center; line-height: 0; pointer-events: none; }
+.contest-dance-scene .dance-dim[hidden] { display: none; }
+.contest-dance-scene .dance-dim { background: rgb(0 0 0 / calc(var(--dim) * 1)); pointer-events: none; }
+.ds-scene-boxes > .dance-grade { display: flex; justify-content: center; align-items: center; line-height: 0; white-space: nowrap; pointer-events: none; }

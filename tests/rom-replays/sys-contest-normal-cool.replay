@@ -1,10 +1,10 @@
 # A Normal Rank Cool Contest, offline (decomp scripts_contests.s, contest.c; docs/research/contests.md): the official
 # receptionist, ENTER, NORMAL RANK, COOL CONTEST, the party in contest mode (ENTER on Staravia), the entry, the attire, the
 # stage and its introductions, the contest app: the visual round (the host's messages, the dress-up by keys: Y to the
-# Fashion Case's first White Fluff, A, Y to Staravia's head, A, X for DONE; then the judging's messages), the dance and
-# acting placeholders (scored from condition), the results; the winner's ceremony and the prize. Staravia's condition
-# wins. It comes back with the Cool Ribbon, the photo in its White Fluff, the Red Barrette, the records and a little
-# friendship; the save keeps them.
+# Fashion Case's first White Fluff, A, Y to Staravia's head, A, X for DONE; then the judging's messages), the Dance
+# Competition danced, the acting placeholder (scored from condition), the results; the winner's ceremony and the prize.
+# Staravia's condition wins. It comes back with the Cool Ribbon, the photo in its White Fluff, the Red Barrette, the
+# records and a little friendship; the save keeps them.
 party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK platinum:MOVE_QUICK_ATTACK
 set state party[0].condition {"cool":255,"beauty":255,"cute":0,"smart":0,"tough":255,"sheen":255}
 set flag platinum:FLAG_CONTEST_HALL_VISITED true
@@ -109,10 +109,40 @@ until state app.round.message.waiting true 300
 until state app.round.message.waiting true 300
 +0 press a
 +1 release a
-# The dance and acting placeholders, one A each
+# The Dance Competition (song 0, 120 BPM: a beat is 15 ticks, a measure 240): the MC's three pages, then the song.
+# Staravia leads the last round and dances three steps a measure on the beats; it copies no one, so its points are
+# exactly the lead's 2 × 3 × 2 on every seed.
 until state app.round.round "dance" 60
-+1 press a
+until state app.round.message.waiting true 60
++2 press a
 +1 release a
++4 press a
++1 release a
++4 press a
++1 release a
++1964 press down
++1 release down
++29 press left
++1 release left
++29 press right
++1 release right
++179 press down
++1 release down
++29 press left
++1 release left
++29 press right
++1 release right
+# The song ends; the MC names the leader (three pages)
+until state app.round.message.waiting true 900
++2 press a
++1 release a
++4 press a
++1 release a
++4 press a
++1 release a
+until state app.round.round "acting" 60
++0 assert state contest.scores.dance[0] 12
+# The acting round (a placeholder), one A
 +2 press a
 +1 release a
 # The results (the table before the announcements), then the judging, the three rounds' columns and the winner
