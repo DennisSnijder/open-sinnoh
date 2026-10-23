@@ -58,6 +58,8 @@ const dance = async () => {
 
 /** The stage: 256 × 192 DS px at a whole number of device pixels per DS pixel, inside the viewport, on the ROM's art. */
 async function stage(name: string) {
+  // The ROM's backdrop is drawn once its picture has loaded.
+  await page.waitForSelector('.contest-dance-scene.rom', { timeout: 20_000 });
   const s = await page.evaluate(() => {
     const r = document.querySelector('.contest-dance-scene .dance-stage')!.getBoundingClientRect();
     return { x: r.x, y: r.y, w: r.width, h: r.height, vw: innerWidth, vh: innerHeight, dpr: devicePixelRatio, rom: document.querySelector('.contest-dance-scene')!.classList.contains('rom') };

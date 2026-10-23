@@ -29,9 +29,10 @@ advance text 6000
 until app contest 6000
 +0 assert state contest.mode "practice"
 +0 assert state contest.competition 5
-+12 screenshot dance-intro
+until state app.round.message.waiting true 60
++2 screenshot dance-intro
 # The MC's five pages, then the song (120 BPM: a beat is 15 ticks, a measure 240)
-+10 press a
++2 press a
 +1 release a
 +4 press a
 +1 release a
