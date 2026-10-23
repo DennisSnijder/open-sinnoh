@@ -690,16 +690,17 @@ export function createGame(options: GameOptions): Game {
    * Decomp encounter.c's journal entries at a field battle's end: a won wild battle (wild, roamer, AI partner, Safari)
    * from the fifth since the last map change (wildMonDefeated, reset by FieldMapChange_UpdateGameData: any map load
    * here) writes the defeated line, a capture the caught line (the battle's time of day: the clock's period at the
-   * end, inferred); a won trainer or tag battle the trainer entry.
+   * end, inferred); a won trainer or tag battle the trainer entry. The count is not saved: a load (a new world) starts
+   * it again, as the DS's field system does.
    */
-  const wildDefeats = { loads: -1, count: 0 };
+  const wildDefeats: { world: unknown; loads: number; count: number } = { world: null, loads: -1, count: 0 };
   const journalBattle = (setup: BattleSetup, result: BattleResult) => {
     if (isWildKind(setup.kind)) {
       const period = DAY_PERIODS.indexOf(dayPeriod(state.gameTime.now.hour));
       const genderOf = (g: string | undefined) => (g === 'male' ? 0 : g === 'female' ? 1 : 2);
       if (result.outcome === 'won') {
         const loads = world.view().loads;
-        if (loads !== wildDefeats.loads) Object.assign(wildDefeats, { loads, count: 0 });
+        if (loads !== wildDefeats.loads || world !== wildDefeats.world) Object.assign(wildDefeats, { world, loads, count: 0 });
         if (++wildDefeats.count >= 5) {
           const foe = battle?.run?.view().battlers.find((x) => x.side === 'enemy');
           if (foe) journalMon(registries, state, 'defeated', foe.species, genderOf(foe.gender), period);
