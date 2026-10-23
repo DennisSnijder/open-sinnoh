@@ -48,6 +48,7 @@ import { mysteryGiftHandlers } from './mystery-gift-ops.ts';
 import { hofHandlers } from './hof-ops.ts';
 import { villaHandlers } from './villa-ops.ts';
 import { journalHandlers } from './journal-ops.ts';
+import { npcHandlers } from './npc-ops.ts';
 
 /** Fixed native vars, looked up by `sourceIndex` in the vars registry. */
 export const NATIVE_VARS = { PLAYER_STARTER: 0x4030, SCRIPT_PARAMETER_0: 0x8000, LAST_TALKED: 0x800d } as const;
@@ -1022,6 +1023,7 @@ export class Runner implements ScriptRunner {
       ...contestHandlers(this),
       ...villaHandlers(this),
       ...journalHandlers(this),
+      ...npcHandlers(this),
     };
   }
 

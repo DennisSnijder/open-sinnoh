@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dailyRandomOf, FIELD_VARS, fieldSeed, hasFieldSystems, isFeebasTile, newDailyRandom, SEEKER_USED, type FieldSystemRegistries } from './field-systems.ts';
+import { dailyRandomOf, FIELD_VARS, fieldSeed, hasFieldSystems, isFeebasTile, newDailyRandom, SEEKER_USED, updateVillaVisitor, type FieldSystemRegistries } from './field-systems.ts';
 import type { Id } from './ids.ts';
 import { Prng } from './prng.ts';
 
@@ -42,5 +42,47 @@ describe('field systems', () => {
     const hits = tiles.filter((t) => isFeebasTile(tiles, random, t));
     expect(hits).toEqual([101, 103, 107, 108]);
     expect(() => isFeebasTile([1, 2, 3], random, 1)).toThrow(/four groups/);
+  });
+});
+
+describe('the Villa visitor (SystemVars_UpdateVillaVisitor)', () => {
+  const furniture = Array.from({ length: 20 }, (_, i) => id(`t:F${i}`));
+  const reg: FieldSystemRegistries = {
+    ...registries('platinum', { vars: true, flag: true, item: true }),
+    flags: new Map([...furniture, id('t:IN'), id('t:OUT')].map((f) => [f, { id: f, initial: false }])),
+    vars: new Map([id('t:VISITOR'), id('t:MESSAGE')].map((v) => [v, { id: v, initial: 0 }])),
+  };
+  const villa = (away: boolean) => ({ furniture, chances: [25, 75, 90], counts: [4, 12, 15], visitorVar: id('t:VISITOR'), messageVar: id('t:MESSAGE'), insideFlag: id('t:IN'), outsideFlag: id('t:OUT'), away });
+  const roll = (owned: number, seed: number) => {
+    const s = { seed: 0, vars: {} as Record<Id, number>, flags: Object.fromEntries([...furniture.slice(0, owned), id('t:IN'), id('t:OUT')].map((f) => [f, true])) as Record<Id, boolean>, gameTime: {} };
+    const rng = new Prng(seed);
+    updateVillaVisitor(reg, s, villa(true), () => rng.next());
+    return s;
+  };
+
+  it('clears both visitor flags and rolls a visitor and a message; nothing at the Resort Area or the Villa', () => {
+    const s = roll(3, 5);
+    expect(s.flags[id('t:IN')]).toBeUndefined();
+    expect(s.flags[id('t:OUT')]).toBeUndefined();
+    expect(s.vars[id('t:MESSAGE')] ?? 0).toBeLessThan(5);
+    const kept = { seed: 0, vars: {}, flags: { [id('t:IN')]: true }, gameTime: {} };
+    updateVillaVisitor(reg, kept, villa(false), () => 0);
+    expect(kept).toEqual({ seed: 0, vars: {}, flags: { [id('t:IN')]: true }, gameTime: {} });
+  });
+
+  it('visits 26, 76 and 91 % of days by owned-piece band, among the first 4, 12 and 15 visitors', () => {
+    for (const [owned, odds, count] of [[3, 0.26, 4], [9, 0.76, 12], [15, 0.91, 15]] as const) {
+      const seen = new Set<number>();
+      let visits = 0;
+      const runs = 4000;
+      for (let seed = 1; seed <= runs; seed++) {
+        const v = roll(owned, seed).vars[id('t:VISITOR')] ?? 0;
+        if (v === 0xff) continue;
+        visits++;
+        seen.add(v);
+      }
+      expect(Math.abs(visits / runs - odds)).toBeLessThan(0.03);
+      expect([...seen].sort((a, b) => a - b)).toEqual(Array.from({ length: count }, (_, i) => i));
+    }
   });
 });

@@ -8,9 +8,8 @@ import { Prng, type PrngState } from './prng.ts';
 import type { Pokemon } from './pokemon.ts';
 
 /** The native system vars these systems read and write, by `sourceIndex`. */
-export const FIELD_VARS = { battery: 16435, activeSteps: 16436, size: 16437, lotteryLow: 16444, lotteryHigh: 16445, level: 16449 } as const;
-/** VAR_NEWS_PRESS_DEADLINE (system_vars.c SystemVars_GetNewsPressDeadline). */
-export const NEWS_PRESS_DEADLINE = 16443;
+/** `newsPress`: VAR_NEWS_PRESS_DEADLINE (system_vars.c SystemVars_GetNewsPressDeadline), counted down each day. */
+export const FIELD_VARS = { battery: 16435, activeSteps: 16436, size: 16437, newsPress: 16443, lotteryLow: 16444, lotteryHigh: 16445, level: 16449 } as const;
 /** FLAG_VS_SEEKER_USED. */
 export const SEEKER_USED = 2413;
 /** MOVEMENT_TYPE_VS_SEEKER_SPIN. */
@@ -274,7 +273,7 @@ export function dailyEvents(reg: FieldSystemRegistries, s: FieldSystemState, day
   for (const f of reg.flags.values()) {
     if (f.sourceIndex !== undefined && f.sourceIndex >= DAILY_FLAGS[0] && f.sourceIndex <= DAILY_FLAGS[1]) clearFlag(reg, s, f.id);
   }
-  writeSystemVar(reg, s, NEWS_PRESS_DEADLINE, Math.max(0, readSystemVar(reg, s, NEWS_PRESS_DEADLINE) - days));
+  writeSystemVar(reg, s, FIELD_VARS.newsPress, Math.max(0, readSystemVar(reg, s, FIELD_VARS.newsPress) - days));
   setLottery(reg, s, (Math.imul(random, 0x41c64e6d) + 12345) >>> 0);
   initDailyLevel(reg, s, () => nextFieldRandom(s));
   if (villa) updateVillaVisitor(reg, s, villa, () => nextFieldRandom(s));
