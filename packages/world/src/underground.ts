@@ -352,7 +352,7 @@ export class UndergroundField {
     return true;
   }
 
-  /** UndergroundRecords_PrintEntryForDecoration: the record a good's writing shows, the number in slot 0. */
+  /** UndergroundRecords_PrintEntryForDecoration: the record a good's writing shows, the number in slot 6 (UndergroundTextPrinter_SetNumber). */
   private writing(message: number): void {
     const bank = this.h.reg.textBanks.get(this.textId('TEXT_BANK_UNDERGROUND_RECORDS'));
     const first = bank?.messages.indexOf(this.textId(WRITING_FIRST)) ?? -1;
@@ -363,7 +363,7 @@ export class UndergroundField {
     const values = [this.h.state.records.score, 0, 0, 0, u.records.spheresDug, u.records.fossilsDug, 0, u.records.trapsTriggered, 0, 0, 0, 0, u.records.baseMoves, 0];
     const value = values[message - first];
     if (value === undefined) throw new Error(`underground: writing ${message} has no record`);
-    this.notices.push({ text: id, slots: [String(value)] });
+    this.notices.push({ text: id, slots: ['', '', '', '', '', '', String(value)] });
   }
 
   takeRequest(): UndergroundRequest | null {
@@ -462,7 +462,8 @@ export class UndergroundField {
       case 'hole': {
         const depth = e.pit ? HOLE_DEPTH.pit : HOLE_DEPTH.hole;
         p.lift = -depth;
-        this.running = { ...run, phase: 'hole', moves: e.pit ? HOLE_MOVES.pit : HOLE_MOVES.hole, cooldown: TURN_TICKS, depth };
+        // CommPlayerMan_PutPlayerInHole's 15-tick wait has run out during the trap's screen.
+        this.running = { ...run, phase: 'hole', moves: e.pit ? HOLE_MOVES.pit : HOLE_MOVES.hole, cooldown: 0, depth };
         return;
       }
       case 'altered':

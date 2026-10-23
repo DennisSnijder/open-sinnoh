@@ -1,0 +1,72 @@
+from parts/underground-down.replay
+# sys-underground-trap (traps.c, comm_player_manager.c): the first mission's traps. The Leaf Trap is laid in front of the
+# player (TRAPS, BURY) and stepped on: its leaves are blown away (held A: the microphone's stand-in). The Move Up Trap is
+# laid and stepped on: the player slides north to the wall. The Bubble Trap is laid and dug up again with A; a touch on
+# the field runs the touch radar.
++0 assert position platinum:MAP_HEADER_UNDERGROUND 168 264
++0 assert facing player down
++0 press x
++1 release x
+until app ug-menu
++1 tap entry:0
++1 tap row:2
++1 tap menu:0
++1 assert state underground.placedTraps [{"trap":28,"x":168,"z":265}]
++0 assert state underground.traps [1,23]
++0 tap next
+until app none
+until idle
+# Onto the Leaf Trap: "Oops!", then the leaves until all are blown off the screen.
++0 press down
+until app ug-trap
++0 release down
++0 assert position platinum:MAP_HEADER_UNDERGROUND 168 265
++0 assert state underground.placedTraps []
++0 assert state underground.records.trapsTriggered 1
++0 assert var platinum:VAR_UNDERGROUND_TRAPS_SET 1
+until state app.game "leaf"
++1 screenshot leaf-trap
++0 press a
+until app none
++0 release a
+until idle
+# The Move Up Trap, laid south and stepped on: the slide north ends against the wall (z 261).
++0 press x
++1 release x
+until app ug-menu
++1 tap entry:0
++1 tap row:0
++1 tap menu:0
++1 tap next
+until app none
+until idle
++0 press down
+until app ug-trap
++0 release down
+until app none
+until idle
++0 assert position platinum:MAP_HEADER_UNDERGROUND 168 262
++0 assert facing player down
++0 assert state underground.records.trapsTriggered 2
+# The Bubble Trap, laid and dug up again: back in the trap inventory.
++0 press x
++1 release x
+until app ug-menu
++1 tap entry:0
++1 tap row:0
++1 tap menu:0
++1 assert state underground.placedTraps [{"trap":23,"x":168,"z":263}]
++0 tap next
+until app none
+until idle
++0 press a
++1 release a
+until message
++0 assert state underground.traps [23]
++0 assert state underground.placedTraps []
+advance text
+until idle
+# The touch radar on the tile below.
++0 tap tile:168,263
++1 assert state underground.traps [23]
+until idle
