@@ -25,7 +25,7 @@ export function testMon(registries: Registries, species: string, level: number, 
 
 export function newState(): GameState {
   return {
-    schemaVersion: 20,
+    schemaVersion: 21,
     packs: [],
     names: { player: 'Ari', rival: 'Bo' },
     gender: 'male',

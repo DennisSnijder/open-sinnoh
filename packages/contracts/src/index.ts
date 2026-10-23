@@ -20,5 +20,5 @@ export * from './contests.ts';
 
 export * from './anim-script.ts';
 
-export const CONTRACTS_VERSION = '0.36.2';
+export const CONTRACTS_VERSION = '0.37.0';
 

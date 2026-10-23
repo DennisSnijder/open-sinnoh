@@ -42,8 +42,34 @@ export function createRadarDrawer(assets: AssetSource, registries: () => Registr
     }
     return a.frames.at(-1)!.cell;
   };
-  return (ctx: CanvasRenderingContext2D, view: UndergroundFieldView | null, font: LoadedFont, fieldScale: number, tick: number) => {
+  /**
+   * The touch radar (TouchRadar_DrawEffects, on the field): the ring at the touched tile growing to twice its size and
+   * fading, a light sparkle on each trap found, a sparkle on each mining spot and buried sphere (`underground/trap_radar`
+   * animations 0–2), at the tiles' places on the field (`screenOf`, CSS px of the field canvas; `ratio` device px each).
+   */
+  const drawTouchRadar = (ctx: CanvasRenderingContext2D, t: NonNullable<UndergroundFieldView['touchRadar']>, s: number, ratio: number, screenOf: (x: number, z: number) => { x: number; y: number } | null) => {
+    const radar = sheet('underground/trap_radar');
+    const img = image(radar);
+    if (!radar || !img) return;
+    const put = (x: number, z: number, anim: number, scale: number) => {
+      const p = screenOf(x, z);
+      const cell = p ? frame(radar, anim, t.tick) : null;
+      const c = cell === null ? undefined : radar.cells[cell];
+      if (!p || !c) return;
+      const k = s * scale;
+      ctx.drawImage(img, c.x, c.y, c.w, c.h, p.x * ratio - c.ox * k, p.y * ratio - c.oy * k, c.w * k, c.h * k);
+    };
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, (16 - t.tick / 2) / 16);
+    put(t.x, t.z, 0, t.tick / 10);
+    ctx.globalAlpha = 1;
+    for (const p of t.traps) put(p.x, p.z, 1, 1);
+    for (const p of [...t.spots, ...t.spheres]) put(p.x, p.z, 2, 1);
+    ctx.restore();
+  };
+  return (ctx: CanvasRenderingContext2D, view: UndergroundFieldView | null, font: LoadedFont, fieldScale: number, tick: number, screenOf?: (x: number, z: number) => { x: number; y: number } | null) => {
     if (!view) return;
+    if (view.touchRadar && screenOf) drawTouchRadar(ctx, view.touchRadar, fieldScale, ctx.canvas.width / (ctx.canvas.clientWidth || ctx.canvas.width), screenOf);
     const map = sheet('underground/radar_map');
     const markers = sheet('underground/radar_markers');
     const bg = image(map);

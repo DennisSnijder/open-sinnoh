@@ -7,13 +7,15 @@
  *   interface with its crack, the side buttons, the buried objects (their shine's palette), the dirt, the tools'
  *   sprites and the crack's end, shaken and faded as the view says; the message box over it. The stylus is the pointer
  *   (`hit:<x>,<y>` in DS px); the keys' cursor (an addition) is a frame around its cell.
+ * - 0.37.0: a trap's screen (its escape game on a canvas over the field), the secret base's prompts and its PC (the goods
+ *   lists, CHECK FLAGS and the decoration's menus; the floor takes touches while a good is placed).
  * Packs without the art (the fixture) get plain shapes in the same places.
  */
-import type { MiningView, Ui2dSheet, UndergroundMenuView, UndergroundVendorView } from '@opensinnoh/contracts';
+import type { MiningView, Ui2dSheet, UndergroundBaseView, UndergroundMenuView, UndergroundPcView, UndergroundTrapView, UndergroundVendorView } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
 import { messageBox, stop, type DrawContext } from './apps.ts';
 import type { Art } from './art.ts';
-import { atTiles, board, boardContext, DS_HEIGHT, DS_WIDTH } from './board.ts';
+import { at, atTiles, board, boardContext, DS_HEIGHT, DS_WIDTH } from './board.ts';
 import { el } from './core.ts';
 import { layoutScene, place, sceneContext } from './evolution.ts';
 import './underground.css';
@@ -252,6 +254,208 @@ const miningScenes = new WeakMap<Art, MiningScene>();
 export function mining(d: DrawContext, v: MiningView): HTMLElement {
   let scene = miningScenes.get(d.art);
   if (!scene || !scene.root.isConnected) miningScenes.set(d.art, (scene = new MiningScene(d.art)));
+  scene.draw(d, v);
+  return scene.root;
+}
+
+// ---------------------------------------------------------------- the secret base's prompts and PC
+
+/** SecretBases' sLeaveOpenOrCloseWindowTemplate (16, 13, 15 × 4). */
+const ENTRANCE_MENU_TILES = [15, 12, 16, 6] as const;
+
+/** A secret base prompt (contracts `UndergroundBaseView`): the message, YES/NO and the entrance's two choices. */
+export function undergroundBase(wide: DrawContext, v: UndergroundBaseView): HTMLElement {
+  const d = boardContext(wide);
+  const root = board('mart mart-board ug-board ug-base');
+  if (v.menu) root.append(atTiles(ugFramed(d, 'mart-menu ug-entrance-menu', ...v.menu.entries.map((e, i) => stop(d, `menu:${i}`, [d.text(e.label)], 'menu-entry', v.menu!.cursor === i))), ...ENTRANCE_MENU_TILES));
+  if (v.message) root.append(message(d, v.message));
+  if (v.yesNo) root.append(yesNo(d, v.yesNo));
+  return root;
+}
+
+/**
+ * The secret base's PC (contracts `UndergroundPcView`): the PC menu (UndergroundPC_InitMenu: 17, 3, 14 × n·2), the goods
+ * lists with their heading window (1, 1, 8 × 4), CHECK FLAGS, the decoration's menu (19, 3, 12 × 8, DECOR at 1, 1),
+ * the descriptions in the message box, the fades; while a good is placed or picked, a touch on the floor is a
+ * `tile:<x>,<z>` tap (DrawContext.fieldTile).
+ */
+export function undergroundPc(wide: DrawContext, v: UndergroundPcView): HTMLElement {
+  const d = boardContext(wide);
+  const root = board('mart mart-board ug-board ug-pc');
+  if (v.placing && d.fieldTile) {
+    const floor = el('div', 'ug-floor-touch');
+    floor.setAttribute('aria-hidden', 'true');
+    floor.addEventListener('pointerdown', (e) => {
+      const tile = d.fieldTile!(e.clientX, e.clientY);
+      if (tile) d.tap(`tile:${tile.x},${tile.z}`);
+    });
+    root.append(floor);
+  }
+  if (v.entries) root.append(atTiles(ugFramed(d, 'mart-menu ug-pc-menu', ...v.entries.map((e, i) => stop(d, `entry:${i}`, [d.text(e.label)], 'menu-entry', v.cursor === i))), 16, 2, 16, 2 + v.entries.length * 2));
+  if (v.list) {
+    const l = v.list;
+    const rows = el('div', 'item-list ug-list');
+    const all = [...l.rows.map((r, i) => ({ ...r, i })), { name: l.close, placed: false, i: l.rows.length }];
+    for (const r of all.slice(l.top, l.top + l.visible)) rows.append(stop(d, r.i === l.rows.length ? 'close' : `row:${r.i}`, [el('span', 'item-name', d.text(r.name, r.placed ? 'muted' : 'ink'))], `item-row${r.i === l.rows.length ? ' cancel' : ''}`, l.cursor === r.i));
+    root.append(atTiles(ugFramed(d, 'ug-list-window ug-pc-list', rows), 18, 2, 14, 2 + l.visible * 2));
+    root.append(atTiles(ugFramed(d, 'ug-heading', d.flow(l.heading, true)), 0, 0, 10, 6));
+    if (!v.message) root.append(atTiles(el('div', 'ug-description', ugFramed(d, 'ug-description-box', d.flow(l.description, true))), ...MESSAGE_TILES));
+  }
+  if (v.flags) {
+    const rows = v.flags.rows.map((r) => el('div', 'ug-record', d.text(r.label), el('span', 'ug-record-value', d.text(r.value))));
+    const w = stop(d, 'back', [el('div', 'ug-record-title', d.text(v.flags.title)), ...rows], 'ug-records', false);
+    root.append(atTiles(ugFramed(d, 'ug-records-window ug-flags', w), 2, 1, 28, 18));
+  }
+  if (v.decoration) {
+    const m = v.decoration.menu;
+    root.append(atTiles(ugFramed(d, 'mart-menu ug-decor-menu', ...m.entries.map((e, i) => stop(d, `menu:${i}`, [d.text(e.label)], 'menu-entry', m.cursor === i))), 18, 2, 14, 2 + m.entries.length * 2));
+    root.append(atTiles(ugFramed(d, 'ug-heading', d.text(v.decoration.heading)), 0, 0, 9, 4));
+  }
+  if (v.message) root.append(message(d, v.message));
+  if (v.yesNo) root.append(yesNo(d, v.yesNo));
+  if (v.fade) {
+    const fade = at(el('div', 'ug-fade'), 0, 0, W, H);
+    fade.style.opacity = String(v.fade / 16);
+    root.append(fade);
+  }
+  return root;
+}
+
+// ---------------------------------------------------------------- a trap's screen
+
+/** A cell of a sheet at its origin point, scaled about it, mirrored by `flip` (BG tiles: bit 0 h, bit 1 v). */
+function drawCell(g: CanvasRenderingContext2D, img: Img, c: Ui2dSheet['cells'][number], x: number, y: number, scale = 1, flip = 0): void {
+  g.save();
+  g.translate(x, y);
+  if (scale !== 1) g.scale(scale, scale);
+  if (flip) g.scale(flip & 1 ? -1 : 1, flip & 2 ? -1 : 1);
+  g.drawImage(img, c.x, c.y, c.w, c.h, -c.ox, -c.oy, c.w, c.h);
+  g.restore();
+}
+
+/**
+ * A trap's screen over the field (contracts `UndergroundTrapView`), one 256×192 DS canvas on the board: the flash or
+ * dimming, the smoke tiles (`underground/trap_smoke`), the sprites (`underground/trap_*`, translucent ones at the
+ * DS's blend), the keys' stylus, the message box. The stylus: a press is `hit:<x>,<y>`, a held one `rub:<x>,<y>` each
+ * move and `blow:on` until it lifts (`rub:end`, `blow:off`).
+ */
+class TrapScene {
+  readonly root = board('mart mart-board ug-board ug-trap');
+  private readonly canvas = document.createElement('canvas');
+  private readonly boxes = el('div', 'ug-trap-boxes');
+  private readonly g: CanvasRenderingContext2D;
+  private readonly images = new Map<string, Img | null>();
+  private last: { d: DrawContext; v: UndergroundTrapView } | null = null;
+  private boxKey = '';
+  private down = false;
+
+  constructor(private readonly art: Art) {
+    this.canvas.width = W;
+    this.canvas.height = H;
+    this.canvas.className = 'ug-trap-canvas';
+    this.canvas.setAttribute('aria-hidden', 'true');
+    this.g = this.canvas.getContext('2d')!;
+    this.root.append(at(this.canvas, 0, 0, W, H), this.boxes);
+    this.root.setAttribute('aria-label', 'Underground trap');
+    const point = (e: PointerEvent) => {
+      const r = this.canvas.getBoundingClientRect();
+      return `${Math.max(0, Math.min(W - 1, Math.floor(((e.clientX - r.left) / r.width) * W)))},${Math.max(0, Math.min(H - 1, Math.floor(((e.clientY - r.top) / r.height) * H)))}`;
+    };
+    this.canvas.addEventListener('pointerdown', (e) => {
+      if (!this.last) return;
+      e.preventDefault();
+      this.canvas.setPointerCapture(e.pointerId);
+      this.down = true;
+      const d = this.last.d;
+      const p = point(e);
+      d.tap(`hit:${p}`);
+      d.tap(`rub:${p}`);
+      d.tap('blow:on');
+    });
+    this.canvas.addEventListener('pointermove', (e) => {
+      if (!this.down || !this.last) return;
+      this.last.d.tap(`rub:${point(e)}`);
+    });
+    const up = () => {
+      if (!this.down || !this.last) return;
+      this.down = false;
+      this.last.d.tap('rub:end');
+      this.last.d.tap('blow:off');
+    };
+    this.canvas.addEventListener('pointerup', up);
+    this.canvas.addEventListener('pointercancel', up);
+  }
+
+  private image(ref: Id): Img | null {
+    if (this.images.has(ref)) return this.images.get(ref)!;
+    this.images.set(ref, null);
+    void this.art.image(ref).then((img) => {
+      this.images.set(ref, img);
+      if (this.last && this.root.isConnected) this.draw(this.last.d, this.last.v);
+    });
+    return null;
+  }
+
+  draw(wide: DrawContext, v: UndergroundTrapView): void {
+    this.last = { d: wide, v };
+    const g = this.g;
+    g.imageSmoothingEnabled = false;
+    g.clearRect(0, 0, W, H);
+    if (v.smoke) {
+      const sheet = this.art.sheet('underground/trap_smoke');
+      const img = sheet ? this.image(sheet.atlas) : null;
+      v.smoke.forEach((e, i) => {
+        const tile = e & 0xff;
+        if (!tile) return;
+        const x = (i % 32) * 8;
+        const y = Math.floor(i / 32) * 8;
+        const c = sheet?.cells[tile];
+        if (img && c) drawCell(g, img, c, x + 4, y + 4, 1, (e >> 10) & 3);
+        else if (!sheet) {
+          g.fillStyle = `rgba(200, 200, 200, ${0.25 + (5 - tile) * 0.15})`;
+          g.fillRect(x, y, 8, 8);
+        }
+      });
+    }
+    for (const s of v.sprites) {
+      const sheet = this.art.sheet(`underground/${s.sheet}`);
+      const img = sheet ? this.image(sheet.atlas) : null;
+      const cell = sheet ? animFrame(sheet, s.anim, s.tick) : null;
+      const c = cell === null ? undefined : sheet!.cells[cell];
+      g.globalAlpha = s.translucent ? 14 / 16 : 1;
+      if (img && c) drawCell(g, img, c, s.x, s.y, s.scale);
+      else if (!sheet) {
+        g.fillStyle = '#d8e8f8';
+        g.beginPath();
+        g.arc(s.x, s.y, 12 * s.scale, 0, Math.PI * 2);
+        g.fill();
+      }
+      g.globalAlpha = 1;
+    }
+    if (v.cursor) {
+      g.strokeStyle = '#f8f8f8';
+      g.lineWidth = 2;
+      g.beginPath();
+      g.arc(v.cursor.x, v.cursor.y, 6, 0, Math.PI * 2);
+      g.stroke();
+    }
+    this.root.style.setProperty('--ug-brightness', String(v.brightness / 16));
+    this.root.classList.toggle('is-bright', v.brightness > 0);
+    this.root.classList.toggle('is-dim', v.brightness < 0);
+    this.root.classList.toggle('is-blowing', v.blowing);
+    const d = boardContext(wide);
+    const key = JSON.stringify([v.message, d.frame, d.unit]);
+    if (key === this.boxKey) return;
+    this.boxKey = key;
+    this.boxes.replaceChildren(...(v.message ? [message(d, v.message)] : []));
+  }
+}
+
+const trapScenes = new WeakMap<Art, TrapScene>();
+
+export function undergroundTrap(d: DrawContext, v: UndergroundTrapView): HTMLElement {
+  let scene = trapScenes.get(d.art);
+  if (!scene || !scene.root.isConnected) trapScenes.set(d.art, (scene = new TrapScene(d.art)));
   scene.draw(d, v);
   return scene.root;
 }

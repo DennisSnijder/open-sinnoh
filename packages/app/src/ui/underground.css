@@ -20,3 +20,13 @@
 .ug-mining-scene .ug-tool.is-cursor { outline: none; background: none; box-shadow: none; }
 .ug-mining-scene .ug-tool.is-cursor::before { display: none; }
 .ug-mining-scene .ds-scene-canvas { touch-action: none; }
+/* The secret base's PC: the floor under the board takes the decoration's touches; the fades cover the board. */
+.ug-pc .ug-floor-touch { position: fixed; inset: 0; pointer-events: auto; touch-action: none; }
+.ug-pc .ug-fade { background: #000; pointer-events: none; }
+/* A trap's screen: the canvas over the field, the flash (white) or the dimming (black) over the field behind it. */
+.ug-trap { pointer-events: none; }
+.ug-trap .ug-trap-canvas { pointer-events: auto; touch-action: none; image-rendering: pixelated; }
+.ug-trap.is-bright::before, .ug-trap.is-dim::before { content: ''; position: fixed; inset: 0; pointer-events: none; }
+.ug-trap.is-bright::before { background: #fff; opacity: var(--ug-brightness); }
+.ug-trap.is-dim::before { background: #000; opacity: calc(var(--ug-brightness) * -1); }
+.ug-trap .ug-trap-boxes { position: absolute; inset: 0; pointer-events: none; }

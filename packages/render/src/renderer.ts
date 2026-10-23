@@ -1689,9 +1689,36 @@ class Field implements FieldRenderer {
     cameraOffset(rec, this.camera.position, zoom).add(target);
     this.camera.lookAt(target);
     if (rec.angle[2]) this.camera.rotateZ(rec.angle[2] * DEG);
+    this.cameraTarget.copy(target);
   }
 
+  /** The camera's last target (the ground plane the touch picks on: ov5_GetPositionFromTouchCoordinates). */
+  private readonly cameraTarget = new THREE.Vector3();
+
   // ---------- FieldRenderer ----------
+
+  tileAt(x: number, y: number): { x: number; z: number } | null {
+    if (!this.cameraRecord) return null;
+    const el = this.renderer.domElement;
+    const ndc = new THREE.Vector2((x / el.clientWidth) * 2 - 1, 1 - (y / el.clientHeight) * 2);
+    this.camera.updateMatrixWorld();
+    const near = new THREE.Vector3(ndc.x, ndc.y, -1).unproject(this.camera);
+    const far = new THREE.Vector3(ndc.x, ndc.y, 1).unproject(this.camera);
+    const h = this.cameraTarget.y;
+    if ((near.y - h) * (far.y - h) > 0) return null;
+    const p = near.lerp(far, (near.y - h) / (near.y - far.y));
+    const tx = Math.floor(p.x / TILE);
+    const tz = Math.floor(p.z / TILE);
+    return tx < 0 || tz < 0 ? null : { x: tx, z: tz };
+  }
+
+  screenOf(x: number, z: number): { x: number; y: number } | null {
+    if (!this.cameraRecord) return null;
+    const el = this.renderer.domElement;
+    this.camera.updateMatrixWorld();
+    const p = new THREE.Vector3(x * TILE + TILE / 2, this.cameraTarget.y, z * TILE + TILE / 2).project(this.camera);
+    return { x: ((p.x + 1) / 2) * el.clientWidth, y: ((1 - p.y) / 2) * el.clientHeight };
+  }
 
   render(alpha: number): void {
     // A chunk, sprite or model that failed to load stops rendering loudly instead of leaving holes.

@@ -7,13 +7,15 @@
  * - scrcmd_fossil.c sFossilItemToSpeciesMapping (arm9): {u16 item, u16 species} × 7.
  * - trap_prices.c sTrapPrices, treasure_prices.c sTreasurePrices (overlay 23): SpherePrice {u8 type, u8 min, u8 max}.
  * - goods.c sGoodData (arm9): 28 bytes each {u8 width, u8 depth, u8 collision[9], SpherePrice, int moneyPrice,
- *   int interactMessageID, u8 natDexRequired, u8 ungiftable}.
+ *   int interactMessageID, u8 natDexRequired, u8 ungiftable}; the interact message is a TEXT_BANK_UNDERGROUND_RECORDS
+ *   entry (SomethingWrittenTotalScore … FlagsRegistered) or 0.
  * - vendors.c sUndergroundVendors (overlay 23): {u16 vendorType, u16 x, u16 z} × 20.
  * - traps.c Traps_SpawnRandomTrap's `traps` (overlay 23): u8 trap id × 26.
  */
-import type { MiningObject, SpherePrice, UndergroundTables } from '@opensinnoh/contracts';
+import type { MiningObject, Model, SpherePrice, UndergroundBaseTables, UndergroundTables, UndergroundTrapTables } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
-import { Reader } from '@opensinnoh/nds';
+import { modelToGltf, readModels, readTex0 } from '@opensinnoh/g3d';
+import { Reader, type NitroFs } from '@opensinnoh/nds';
 
 export const MINING_OBJECTS = 85;
 export const MINING_OBJECT_SIZE = 20;
@@ -74,9 +76,23 @@ export function readMiningObjects(table: Uint8Array, shapes: UndergroundRegions[
   });
 }
 
+/** records.c DECORATION_MESSAGES_START … _MAX: the goods' A messages in TEXT_BANK_UNDERGROUND_RECORDS. */
+const INTERACT = { first: 32, last: 45 };
+
 export function readUndergroundTables(
   b: UndergroundRegions,
-  ids: { zone: Id; item: (i: number) => Id; species: (i: number) => Id; flags: UndergroundTables['flags']; vars: UndergroundTables['vars']; sparkle: Id },
+  ids: {
+    zone: Id;
+    item: (i: number) => Id;
+    species: (i: number) => Id;
+    flags: UndergroundTables['flags'];
+    vars: UndergroundTables['vars'];
+    sparkle: Id;
+    /** The good's prop (the Underground area's prop list at the good id), null when not converted. */
+    goodProp: (good: number) => Id | null;
+    traps: UndergroundTrapTables;
+    base: UndergroundBaseTables;
+  },
 ): UndergroundTables {
   const items = new Reader(b.treasureItems);
   const fossils = new Reader(b.fossils);
@@ -90,9 +106,17 @@ export function readUndergroundTables(
     trapPrices: Array.from({ length: TRAPS }, (_, i) => price(b.trapPrices, i * 3)),
     treasurePrices: Array.from({ length: MINING_IDS }, (_, i) => price(b.treasurePrices, i * 3)),
     goods: Array.from({ length: GOODS }, (_, i) => {
-      const nat = goods.u8(i * GOOD_SIZE + 24);
+      const o = i * GOOD_SIZE;
+      const nat = goods.u8(o + 24);
       if (nat > 1) throw new Error(`good ${i}: natDexRequired ${nat}`);
-      return { price: price(b.goods, i * GOOD_SIZE + 11), natDex: nat === 1 };
+      const width = goods.u8(o);
+      const depth = goods.u8(o + 1);
+      if (width > 3 || depth > 3) throw new Error(`good ${i}: ${width}×${depth} is over MAX_GOOD_WIDTH × MAX_GOOD_DEPTH`);
+      const collision = Array.from({ length: 9 }, (_, k) => goods.u8(o + 2 + k));
+      if (collision.some((c) => c > 1)) throw new Error(`good ${i}: collision ${collision.join(',')}`);
+      const interact = goods.u32(o + 20);
+      if (interact !== 0 && (interact < INTERACT.first || interact > INTERACT.last)) throw new Error(`good ${i}: interact message ${interact} outside the records' decoration messages`);
+      return { price: price(b.goods, o + 11), natDex: nat === 1, width, depth, collision, interact, prop: i === 0 ? null : ids.goodProp(i) };
     }),
     vendors: Array.from({ length: VENDORS }, (_, i) => {
       const kind = VENDOR_KINDS[vendors.u16(i * 6)];
@@ -103,5 +127,23 @@ export function readUndergroundTables(
     flags: ids.flags,
     vars: ids.vars,
     sparkle: ids.sparkle,
+    traps: ids.traps,
+    base: ids.base,
   };
+}
+
+/** /data/ug_base_cur.nsbmd: the decoration's cursor (DecorateCursor_Init), its embedded textures. */
+const BASE_CURSOR = { path: '/data/ug_base_cur.nsbmd', id: 'platinum:MODEL_UG_BASE_CURSOR', dir: 'models/underground/base_cursor' };
+
+/** The decoration cursor as a model record, its glTF and textures written to `assets`. */
+export function convertBaseCursor(fs: NitroFs, assets: Map<string, Uint8Array>, warn: (w: string) => void): Model {
+  const bytes = fs.file(BASE_CURSOR.path);
+  const [model, ...rest] = readModels(bytes);
+  if (!model || rest.length) throw new Error(`${BASE_CURSOR.path}: expected one model`);
+  const tex0 = readTex0(bytes);
+  const res = modelToGltf(model, tex0 ? { embed: tex0 } : {});
+  res.warnings.forEach(warn);
+  for (const [file, png] of res.images) assets.set(`${BASE_CURSOR.dir}/${file}`, png);
+  assets.set(`${BASE_CURSOR.dir}/model.gltf`, new TextEncoder().encode(JSON.stringify(res.gltf)));
+  return { id: BASE_CURSOR.id as Id, gltf: `platinum:${BASE_CURSOR.dir}/model.gltf` };
 }

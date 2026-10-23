@@ -44,7 +44,7 @@ export * from './nitro2d.ts';
 export * from './png.ts';
 export * from './pokegra.ts';
 export { Sheets, sheetId } from './sheets.ts';
-export { importUndergroundArt, miningObjectCell } from './underground.ts';
+export { importTrapArt, importUndergroundArt, miningObjectCell } from './underground.ts';
 export { accessoryPictures } from './contests.ts';
 
 /** Code tables the 2D import reads, each verified by SHA1. */

@@ -94,6 +94,8 @@ export interface EffectView {
   facing?: import('./records.ts').Facing;
   /** Fully resolved model pose; bypasses the ordinary effect offsets and facing. Degrees, X then Y then Z. */
   rotation?: Vec3;
+  /** 0.37.0. A uniform scale (ov5_DrawFloorTexture's size: the Underground's floor marks and holes); absent = 1. */
+  scale?: number;
 }
 
 /**
@@ -343,6 +345,10 @@ export interface World extends FieldHost {
   undergroundView(): import('./underground.ts').UndergroundFieldView | null;
   /** 0.33.0. The visit's mining generator (`AppHost.undergroundMiningRand`); null off the Underground. */
   undergroundMiningRand(): import('@opensinnoh/core').Rand32 | null;
+  /** 0.37.0. The decoration's field view (`AppHost.undergroundDecoration`); null ends it. */
+  undergroundDecoration(view: import('./underground.ts').UndergroundDecorationView | null): void;
+  /** 0.37.0. Where the player is in the Underground (`AppHost.undergroundPlace`). */
+  undergroundPlace(): 'corridor' | 'open' | 'closed' | null;
   /**
    * 0.32.1. Talking to the following Pokémon (OpenSinnoh's follower talk; HGSS scr_seq_0163 FollowMonFacePlayer): when
    * the idle player faces the party follower, it turns to face the player and this returns its facing and the
@@ -426,6 +432,13 @@ export interface ScriptSaves {
 /** Renderer for the main surface. `alpha` interpolates between the last two ticks. */
 export interface FieldRenderer {
   render(alpha: number): void;
+  /**
+   * 0.37.0. The map tile under a point of the canvas (CSS px from its top-left; ov5_GetPositionFromTouchCoordinates: the
+   * ground plane under the camera), or null off the map or before the map has loaded.
+   */
+  tileAt?(x: number, y: number): { x: number; z: number } | null;
+  /** 0.37.0. Where a tile's centre on the ground is drawn (CSS px from the canvas' top-left; NNS_G3dWorldPosToScrPos). */
+  screenOf?(x: number, z: number): { x: number; y: number } | null;
   /** True while map geometry, textures or sprites for the current view are still loading. */
   loading(): boolean;
   /**
