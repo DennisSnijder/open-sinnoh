@@ -48,7 +48,7 @@ declare global {
   interface Window {
     openSinnohGame?: AppBridge;
     /** Debug/test handle (always present once the game is mounted). */
-    openSinnohApp?: { lastInput: InputFrame | null; ticks: number; layout: Layout; overlayFrame(): DsFrame; game: Game; sceneLoading(): boolean; ui: InGameUi; battleScene(): BattleSceneInfo; audio: WebAudio; zoom(): { setting: Zoom; scale: number }; renderScale(): { setting: RenderScale; pixelRatio: number }; loop: LoopStats; hold(): { holding: boolean; ms: number; reason: string }; speed(): { fast: number; latched: boolean; active: boolean; speed: number } };
+    openSinnohApp?: { lastInput: InputFrame | null; ticks: number; layout: Layout; overlayFrame(): DsFrame; game: Game; sceneLoading(): boolean; ui: InGameUi; battleScene(): BattleSceneInfo; audio: WebAudio; zoom(): { setting: Zoom; scale: number }; renderScale(): { setting: RenderScale; pixelRatio: number }; loop: LoopStats; hold(): { holding: boolean; ms: number; reason: string }; speed(): { fast: number; latched: boolean; active: boolean; speed: number }; tileAt(x: number, y: number): { x: number; z: number } | null };
   }
 }
 
@@ -321,6 +321,10 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     assets: () => source.assets,
     pulse,
     tap: (id) => input.tap(id),
+    fieldTile: (x, y) => {
+      const r = mainCanvas.getBoundingClientRect();
+      return session.renderer.tileAt?.(x - r.left, y - r.top) ?? null;
+    },
     // The message box frame is saved with the game (GameState v6 options).
     frame: () => session.game.state.options.frame,
     settings: appSettings,
@@ -511,6 +515,12 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   panel.addEventListener('pointercancel', panelUp);
   // A scripted menu (ScriptView.menu) is a box over the field: touches on it go to the VM in the overlay's DS frame.
   mainCanvas.addEventListener('pointerdown', (e) => {
+    // The Underground's field: a touch is the touch radar on the tile under it (UndergroundMan_CheckForTouchInput).
+    if (session.game.world.undergroundView()) {
+      const r = mainCanvas.getBoundingClientRect();
+      const tile = session.renderer.tileAt?.(e.clientX - r.left, e.clientY - r.top);
+      if (tile) input.tap(`tile:${tile.x},${tile.z}`);
+    }
     if (!session.game.scripts.view().menu) return;
     input.setTouch('overlay', toOverlayPoint(e.clientX, e.clientY, mainCanvas.getBoundingClientRect(), overlay, overlayFrame()));
   });
@@ -669,6 +679,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     loop: loopStats,
     hold: () => (battle.holding() ? { holding: true, ms: held, reason: battle.holdReason() } : { holding: revealing(), ms: held, reason: revealing() ? 'the field scene' : '' }),
     speed: () => ({ fast: fastForward.fast, latched: fastForward.latched, active: fastForward.active, speed: fastForward.speed() }),
+    tileAt: (x, y) => session.renderer.tileAt?.(x, y) ?? null,
   };
   // The title screen runs first (its own loop); the field shows and its loop starts once it is left.
   const titleRecord = opts.title ? [...session.game.registries.titleScreens.values()][0] : undefined;

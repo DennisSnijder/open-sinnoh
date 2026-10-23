@@ -19,6 +19,7 @@ const STUBS: Record<string, string[]> = {
   'sys-sphere-growth': DAY,
   'sys-underground-vendor': DAY,
   'sys-underground-treasure': [...DAY, 'tv:underground-treasures'],
+  'sys-underground-base': [...DAY, 'journal:secret-base'],
 };
 
 export function undergroundReplay(file: string): void {

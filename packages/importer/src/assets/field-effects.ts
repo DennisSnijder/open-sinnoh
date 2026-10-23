@@ -39,6 +39,10 @@ const MODEL_EFFECTS: { name: string; renderer: number; member: number; pattern?:
   ...['VERY_DRY', 'DRY', 'MOIST'].map((d, i) => ({ name: `BERRY_PATCH_SOIL_${d}`, renderer: 0x0c, member: 77 - i })),
   // ov5_021F575C.c ov5_DisplayBuriedSphereSparkle (renderer 9): model 92 with pattern 164, played once at a buried sphere.
   { name: 'BURIED_SPHERE_SPARKLE', renderer: 0x09, member: 92, pattern: { use: 'sparkle', member: 164 } },
+  // ov5_021F4E08.c ov5_LoadFloorTextures (renderer 3): the Underground's floor marks, one per trap id (26 + trap − 1:
+  // FLOOR_TEXTURE_TRAP_*), and the hole's black circle (25).
+  ...Array.from({ length: 32 }, (_, i) => ({ name: `UG_FLOOR_TRAP_${i + 1}`, renderer: 0x03, member: 26 + i })),
+  { name: 'UG_FLOOR_BLACK_CIRCLE', renderer: 0x03, member: 25 },
 ];
 
 /**

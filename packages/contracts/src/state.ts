@@ -212,7 +212,7 @@ export interface GameState {
   fieldRng?: PrngState;
   /** FieldOverworldState exit location (not the elevator special location). Absent until an entrance is recorded. */
   escapeLocation?: { zone: Id; x: number; z: number; facing: Facing };
-  schemaVersion: 20;
+  schemaVersion: 21;
   packs: { id: string; version: string }[];
   names: { player: string; rival: string };
   gender: 'male' | 'female';

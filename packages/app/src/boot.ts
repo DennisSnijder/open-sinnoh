@@ -131,6 +131,8 @@ export async function createSession(
   /** Stable handle over the current renderer. */
   const current: FieldRenderer = {
     render: (alpha) => renderer.render(alpha),
+    tileAt: (x, y) => renderer.tileAt?.(x, y) ?? null,
+    screenOf: (x, z) => renderer.screenOf?.(x, z) ?? null,
     loading: () => renderer.loading(),
     resize(width, height, pixelRatio, scale) {
       size = [width, height, pixelRatio, scale];
@@ -148,7 +150,7 @@ export async function createSession(
     drawOverlay(ctx, frame, fieldScale) {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       drawFly(ctx, game.world.flyScene(), game.world.fadeState(), fieldScale);
-      drawRadar(ctx, game.world.undergroundView(), font, fieldScale, game.state.tick);
+      drawRadar(ctx, game.world.undergroundView(), font, fieldScale, game.state.tick, (x, z) => renderer.screenOf?.(x, z) ?? null);
       const view = game.scripts.view();
       const scale = frame.scale;
       drawFrontier(ctx, view.frontier, frame);

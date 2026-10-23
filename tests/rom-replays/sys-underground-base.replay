@@ -1,0 +1,195 @@
+from sys-sphere-growth.replay
+# sys-underground-base (secret_bases.c, base_decoration.c, pc.c): the Underground Man's fourth
+# mission; down under Eterna City, the Digger Drill digs a base into the wall north of the arrival (the wall and the
+# tiles beside it must be walls), the base is made and entered with its entrance closed.
++0 press left
+until position 4 6
++0 release left
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY"
++0 release down
+until idle
++0 press y
++1 release y
+until state player.zone "platinum:MAP_HEADER_UNDERGROUND"
+until idle
++0 press up
+until position 168 262
++0 release up
+until idle
++0 press up
++1 release up
+until idle
++0 assert facing player up
++0 press x
++1 release x
+until app ug-menu
++1 tap entry:0
++1 tap row:3
+until app ug-base
++1 screenshot drill
++40 tap next
++1 assert state app.yesNo.cursor 0
++0 tap yes
+until app none
+until message
++0 assert flag platinum:FLAG_CREATED_SECRET_BASE true
++0 assert state underground.traps [1,23,28]
++0 assert state underground.base.entrance {"x":168,"z":261,"dir":"down"}
++0 assert position platinum:MAP_HEADER_UNDERGROUND 15 23
++0 press a
++1 release a
+until idle
+# Out by the exit (with the entrance closed: open the door, the wireless notice), to the tile below the entrance.
++0 press down
+until app ug-base
++0 release down
++1 tap yes
++1 tap yes
+until app none
+until idle
++0 assert position platinum:MAP_HEADER_UNDERGROUND 168 262
++0 assert facing player down
+# Up again: the fourth mission (FLAG_CREATED_SECRET_BASE) sends four goods to the PC.
++0 press x
++1 release x
+until app ug-menu
++1 tap entry:5
++1 tap yes
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY"
+until idle
++0 press up
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY_UNDERGROUND_MAN_HOUSE"
++0 release up
+until idle
++0 press up
+until position 4 6
++0 release up
+until idle
++0 press right
+until position 6 6
++0 release right
+until idle
++0 press up
++1 release up
++4 press a
++5 release a
+advance text
+until idle
++0 assert flag platinum:FLAG_HAS_ACTIVE_UNDERGROUND_MISSION true
+# The mission (make a base) is already done: talking again rewards it.
++0 press a
++1 release a
+advance text
+until idle
++0 assert var platinum:VAR_CURRENT_UNDERGROUND_MISSION 4
++0 assert state underground.goodsPc [11,9,17,113]
+# Down again; into the entrance, closing it to decorate.
++0 press left
+until position 4 6
++0 release left
+until idle
++0 press down
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY"
++0 release down
+until idle
++0 press y
++1 release y
+until state player.zone "platinum:MAP_HEADER_UNDERGROUND"
+until idle
++0 press up
+until app ug-base
++0 release up
++1 tap yes
++1 tap next
++1 assert state app.menu.entries.length 2
++0 tap menu:1
+until app none
+until message
++0 assert position platinum:MAP_HEADER_UNDERGROUND 15 23
++0 press a
++1 release a
+until idle
+# To the PC (15, 12), facing north: DECORATE.
++0 press up
+until position 15 13
++0 release up
+until idle
++0 press a
++1 release a
+until app ug-pc
++1 screenshot pc
++0 tap entry:0
++20 assert state app.decoration.menu.cursor 0
++0 screenshot decoration
++0 tap menu:0
++1 tap row:0
+# The Plain Table (2×2) by a touch on the floor, at (10, 14).
++1 tap tile:10,14
++40 assert state underground.goodsPc [11,9,17,113]
++0 tap menu:0
++1 tap row:2
+# The Small Bookshelf by the keys, from (16, 13) to (20, 18).
++1 press right
++1 release right
++1 press right
++1 release right
++1 press right
++1 release right
++1 press right
++1 release right
++1 press down
++1 release down
++1 press down
++1 release down
++1 press down
++1 release down
++1 press down
++1 release down
++1 press down
++1 release down
++1 screenshot placing
++1 press a
++1 release a
++40 tap menu:3
++20 assert state app.entries.length 5
++0 assert flag platinum:FLAG_DECORATED_SECRET_BASE true
++0 assert state underground.base.goods[0] {"good":11,"x":10,"z":14,"slot":0}
++0 assert state underground.base.goods[1] {"good":17,"x":20,"z":18,"slot":2}
++0 tap entry:4
+until app none
+until idle
+# Saved and loaded: the base and its goods stay; the bookshelf's writing (FossilsDug).
++0 reload
++0 assert state underground.base.goods[1] {"good":17,"x":20,"z":18,"slot":2}
++0 press down
+until position 15 19
++0 release down
+until idle
++0 press right
+until position 20 19
++0 release right
+until idle
++0 press up
++1 release up
+until idle
++0 assert position platinum:MAP_HEADER_UNDERGROUND 20 19
++0 press a
++1 release a
+until message
+advance text
+until idle
+# Out again, the entrance closed behind.
++0 press left
+until position 15 19
++0 release left
+until idle
++0 press down
+until app ug-base
++0 release down
++1 tap yes
++1 tap yes
+until app none
+until idle
++0 assert position platinum:MAP_HEADER_UNDERGROUND 168 262

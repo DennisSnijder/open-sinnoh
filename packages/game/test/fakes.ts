@@ -308,6 +308,10 @@ export const createFakeWorld: CreateWorld = ({ registries, state, scripts }) => 
     undergroundAppDone() {},
     undergroundAhead: () => null,
     undergroundMiningRand: () => null,
+    undergroundDecoration: () => {
+      throw new Error('fake world: no Underground');
+    },
+    undergroundPlace: () => null,
     undergroundView: () => null,
     talkToFollower: () => null,
     followerTalkPose: () => fail('follower talk'),

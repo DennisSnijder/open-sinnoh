@@ -22,7 +22,7 @@ import { trade } from './trade.ts';
 import { easyChat, mysteryGift } from './mystery-gift.ts';
 import { itemWheel } from './item-wheel.ts';
 import { poffinCase, poffinCooking, poffinFeed } from './poffin.ts';
-import { mining, miningPrompt, undergroundMenu, undergroundVendor } from './underground.ts';
+import { mining, miningPrompt, undergroundBase, undergroundMenu, undergroundPc, undergroundTrap, undergroundVendor } from './underground.ts';
 import { contestApp } from './contest.ts';
 import { contestDance } from './contest-dance.ts';
 import { contestPhoto } from './contest-visual.ts';
@@ -42,6 +42,8 @@ export interface DrawContext {
   /** Text that wraps to its box (PixelFont.flow): `lines` keeps its line breaks (messages), else it reflows (descriptions). */
   flow(s: string, lines: boolean, palette?: Palette, scale?: number): HTMLSpanElement;
   tap(id: string): void;
+  /** 0.37.0. The field's tile under a page point (the secret base's decoration takes touches on the floor). */
+  fieldTile?(clientX: number, clientY: number): { x: number; z: number } | null;
   art: Art;
   registries: Registries;
   /** The message box frame option (0–19). */
@@ -170,6 +172,12 @@ export function drawApp(d: DrawContext, v: AppView): Drawn {
       return { kind: 'mart', root: undergroundMenu(d, v) };
     case 'ug-vendor':
       return { kind: 'mart', root: undergroundVendor(d, v) };
+    case 'ug-trap':
+      return { kind: 'mart', root: undergroundTrap(d, v) };
+    case 'ug-base':
+      return { kind: 'mart', root: undergroundBase(d, v) };
+    case 'ug-pc':
+      return { kind: 'mart', root: undergroundPc(d, v) };
     case 'contest':
       if (v.round?.round === 'dance' && !v.round.placeholder) return { kind: 'scene', root: contestDance(d, v.round) };
       return contestApp(d, v);

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_CLOCK, Dex, monGender, type ClockTime, type Id } from '@opensinnoh/core';
+import { createUnderground, DEFAULT_CLOCK, Dex, monGender, type ClockTime, type Id, type UndergroundState } from '@opensinnoh/core';
 import { newFashionCase, newPoketchState, newRoamerState, setupPidIvs, setupPokemon, trainerIdFor } from '@opensinnoh/contracts';
 import { createGame } from './game.ts';
 import { clockChanged, newGameTime, updateGameTime } from './game-time.ts';
@@ -75,7 +75,7 @@ describe('save migration', () => {
     const game = newGame();
     game.load(v1);
     expect(game.state).toMatchObject({
-      schemaVersion: 20,
+      schemaVersion: 21,
       seed: 12345,
       trainerId: trainerIdFor(12345),
       flags: { 'fixture:FLAG_TALKED_TO_HELPER': true },
@@ -110,7 +110,7 @@ describe('save migration', () => {
     expect(game.state).toMatchObject({ previousZone: null, platformLift: null });
     // The migrated state saves as v16 and loads again unchanged.
     const saved = game.save();
-    expect(saved.state.schemaVersion).toBe(20);
+    expect(saved.state.schemaVersion).toBe(21);
     game.load(JSON.parse(JSON.stringify(saved)));
     expect(game.save()).toEqual(saved);
   });
@@ -123,7 +123,7 @@ describe('save migration', () => {
     v2.state.follower = null;
     const game = newGame();
     game.load(v2);
-    expect(game.state).toMatchObject({ schemaVersion: 20, seed: 777, rng: { seed: 777 }, trainerId: trainerIdFor(777) });
+    expect(game.state).toMatchObject({ schemaVersion: 21, seed: 777, rng: { seed: 777 }, trainerId: trainerIdFor(777) });
     expect(game.state.party[0]!.pid).toBe(setupPidIvs(777, 0).pid);
   });
 
@@ -133,7 +133,7 @@ describe('save migration', () => {
     Object.assign(v3.state, { schemaVersion: 3, party: [], items: {}, pokedex: { obtained: false, national: false } });
     for (const k of ['cyclingGear', 'weather', 'specialLocation', 'trainerId', 'boxes', 'currentBox', 'bag', 'previousZone', 'platformLift', 'startDate', 'playTime', 'coins', 'registeredItem', 'wallpapersUnlocked', 'repel', 'records', 'signature', 'options', 'gameTime', 'daycare']) delete v3.state[k];
     game.load(v3);
-    expect(game.state).toMatchObject({ schemaVersion: 20, cyclingGear: 0, weather: 'fixture:OVERWORLD_WEATHER_CLEAR', specialLocation: null });
+    expect(game.state).toMatchObject({ schemaVersion: 21, cyclingGear: 0, weather: 'fixture:OVERWORLD_WEATHER_CLEAR', specialLocation: null });
     // A v3 save with v4 fields is not a v3 save.
     expect(() => game.load({ ...v3, state: { ...v3.state, cyclingGear: 0 } })).toThrow(/invalid save/);
   });
@@ -165,7 +165,7 @@ describe('save migration', () => {
     v5.state.schemaVersion = 5;
     for (const k of ['previousZone', 'platformLift', 'startDate', 'playTime', 'coins', 'registeredItem', 'wallpapersUnlocked', 'repel', 'records', 'signature', 'options', 'gameTime', 'daycare']) delete v5.state[k];
     game.load(v5);
-    expect(game.state).toMatchObject({ schemaVersion: 20, previousZone: null, platformLift: null });
+    expect(game.state).toMatchObject({ schemaVersion: 21, previousZone: null, platformLift: null });
     expect(() => game.load({ ...v5, state: { ...v5.state, previousZone: null } })).toThrow(/invalid save/);
   });
 
@@ -176,7 +176,7 @@ describe('save migration', () => {
     for (const k of ['startDate', 'playTime', 'coins', 'registeredItem', 'wallpapersUnlocked', 'repel', 'records', 'signature', 'options', 'gameTime', 'daycare']) delete v6.state[k];
     game.load(v6);
     expect(game.state).toMatchObject({
-      schemaVersion: 20,
+      schemaVersion: 21,
       startDate: null,
       playTime: { hours: 2, minutes: 1, seconds: 1 },
       coins: 0,
@@ -197,7 +197,7 @@ describe('save migration', () => {
     v8.state.schemaVersion = 8;
     delete v8.state.daycare;
     game.load(v8);
-    expect(game.state).toMatchObject({ schemaVersion: 20, daycare: { mons: [null, null], offspring: 0, stepCounter: 0 } });
+    expect(game.state).toMatchObject({ schemaVersion: 21, daycare: { mons: [null, null], offspring: 0, stepCounter: 0 } });
     expect(() => game.load({ ...v8, state: { ...v8.state, daycare: game.state.daycare } })).toThrow(/invalid save/);
     const bad = JSON.parse(JSON.stringify(game.save())) as { state: { daycare: { mons: unknown[] } } };
     bad.state.daycare.mons = [null];
@@ -254,7 +254,7 @@ describe('save migration', () => {
     v10.state.schemaVersion = 10;
     game.load(v10);
     const mon = game.state.party[0]!;
-    expect(game.state.schemaVersion).toBe(20);
+    expect(game.state.schemaVersion).toBe(21);
     expect(mon).toMatchObject({ markings: 0, ribbons: [] });
     expect(game.state.pokedex.forms).toEqual({ 'fixture:SPECIES_EMBERKIT': [{ form: 0, gender: monGender(new Dex(game.registries), mon) }] });
     // A v10 save with a v11 field is not a v10 save; v11 ribbons are ascending ids.
@@ -272,7 +272,7 @@ describe('save migration', () => {
     delete v11.state.roamers;
     delete v11.state.hallOfFame;
     game.load(v11);
-    expect(game.state).toMatchObject({ schemaVersion: 20, poketch: { ...newPoketchState(), enabled, apps, current } });
+    expect(game.state).toMatchObject({ schemaVersion: 21, poketch: { ...newPoketchState(), enabled, apps, current } });
     expect(game.state.pokedex.forms['fixture:SPECIES_EMBERKIT' as Id]).toHaveLength(1);
   });
 
@@ -287,7 +287,7 @@ describe('save migration', () => {
     delete v12.state.roamers;
     delete v12.state.hallOfFame;
     game.load(v12);
-    expect(game.state.schemaVersion).toBe(20);
+    expect(game.state.schemaVersion).toBe(21);
     expect(game.state.records.counts).toEqual({});
     expect(() => game.load({ ...v12, state: { ...v12.state, records: { ...v12.state.records, counts: {} } } })).toThrow(/invalid save/);
     const save = (counts: Record<string, number>) => {
@@ -312,7 +312,7 @@ describe('save migration', () => {
     delete v13.state.roamers;
     delete v13.state.hallOfFame;
     game.load(v13);
-    expect(game.state.schemaVersion).toBe(20);
+    expect(game.state.schemaVersion).toBe(21);
     expect(game.state.mapFeatures).toBeNull();
     expect(() => game.load({ ...v13, state: { ...v13.state, mapFeatures: null } })).toThrow(/invalid save/);
     const save = (mapFeatures: unknown) => {
@@ -337,7 +337,7 @@ describe('save migration', () => {
     delete v14.state.roamers;
     delete v14.state.hallOfFame;
     game.load(v14);
-    expect(game.state.schemaVersion).toBe(20);
+    expect(game.state.schemaVersion).toBe(21);
     expect(game.state.roamers).toEqual(newRoamerState());
     expect(() => game.load({ ...v14, state: { ...v14.state, roamers: newRoamerState() } })).toThrow(/invalid save/);
     const save = (roamers: unknown) => {
@@ -365,7 +365,7 @@ describe('the Hall of Fame (v16)', () => {
     v15.state.schemaVersion = 15;
     delete v15.state.hallOfFame;
     game.load(v15);
-    expect(game.state.schemaVersion).toBe(20);
+    expect(game.state.schemaVersion).toBe(21);
     expect(game.state.hallOfFame).toEqual({ total: 0, entries: [] });
     expect(() => game.load({ ...v15, state: { ...v15.state, hallOfFame: { total: 0, entries: [] } } })).toThrow(/invalid save/);
     const mon = { species: 'fixture:SPECIES_EMBERKIT', form: 0, level: 50, pid: 1, otId: 2, nickname: null, otName: 'Ari', moves: ['fixture:MOVE_BOP'] };
@@ -391,7 +391,7 @@ describe('the fateful-encounter bit and the tablet name (v17)', () => {
     delete v16.state.berryPatches;
     v16.state.schemaVersion = 16;
     game.load(v16);
-    expect(game.state.schemaVersion).toBe(20);
+    expect(game.state.schemaVersion).toBe(21);
     expect(game.state.party[0]!.fatefulEncounter).toBeUndefined();
     expect(game.state.tabletName).toBeUndefined();
     expect(() => game.load({ ...v16, state: { ...v16.state, tabletName: 'Ari' } })).toThrow(/invalid save/);
@@ -420,7 +420,7 @@ describe('the berry patches (v18)', () => {
     delete v17.state.berryPatches;
     v17.state.schemaVersion = 17;
     game.load(v17);
-    expect(game.state.schemaVersion).toBe(20);
+    expect(game.state.schemaVersion).toBe(21);
     expect(game.state.berryPatches).toEqual([]);
     expect(() => game.load({ ...v17, state: { ...v17.state, berryPatches: [] } })).toThrow(/invalid save/);
     const item = [...game.registries.items.keys()][0]!;
@@ -441,7 +441,7 @@ describe('the condition, the Poffin Case and the Fashion Case (v19)', () => {
     game.state.party.push(setupPokemon(game.state, game.registries, 0, 'fixture:SPECIES_EMBERKIT' as Id, 5));
     const v18 = asV18(JSON.parse(JSON.stringify(game.save())) as { state: Record<string, unknown> });
     game.load(v18);
-    expect(game.state.schemaVersion).toBe(20);
+    expect(game.state.schemaVersion).toBe(21);
     expect(game.state.party[0]!.condition).toEqual({ cool: 0, beauty: 0, cute: 0, smart: 0, tough: 0, sheen: 0 });
     expect(game.state.poffins).toEqual([]);
     expect(game.state.fashionCase).toEqual(newFashionCase());
@@ -475,7 +475,7 @@ describe('the contest photos (v20)', () => {
     delete v19.state.contestPhotos;
     v19.state.schemaVersion = 19;
     game.load(v19);
-    expect(game.state.schemaVersion).toBe(20);
+    expect(game.state.schemaVersion).toBe(21);
     expect(game.state.contestPhotos).toEqual([null, null, null, null, null]);
     expect(() => game.load({ ...v19, state: { ...v19.state, contestPhotos: [null, null, null, null, null] } })).toThrow(/invalid save/);
 
@@ -496,6 +496,42 @@ describe('the contest photos (v20)', () => {
     expect(bad((s) => s.state.contestPhotos.pop())).toThrow(/contestPhotos must have 5 slots/);
     expect(bad((s) => (s.state.contestPhotos[2]!.rank = 4))).toThrow(/invalid save/);
     expect(() => game.load({ ...saved, state: { ...saved.state, contest: {} } })).toThrow(/invalid save/);
+  });
+});
+
+describe("the Underground's traps and secret base (v21)", () => {
+  it('v20 → v21: no laid traps, no base, no traps set off or base moves; a base round-trips and is checked', () => {
+    const game = newGame();
+    const u = createUnderground(game.state, 1);
+    u.goodsPc.push(9, 12);
+    const v20 = JSON.parse(JSON.stringify(game.save())) as { state: Record<string, unknown> & { underground: Record<string, unknown> & { records: Record<string, number> } } };
+    v20.state.schemaVersion = 20;
+    delete v20.state.underground.placedTraps;
+    delete v20.state.underground.base;
+    delete v20.state.underground.records.trapsTriggered;
+    delete v20.state.underground.records.baseMoves;
+    game.load(v20);
+    expect(game.state.schemaVersion).toBe(21);
+    expect(game.state.underground).toMatchObject({ placedTraps: [], base: null, records: { trapsTriggered: 0, baseMoves: 0 } });
+    expect(() => game.load({ ...v20, state: { ...v20.state, underground: { ...v20.state.underground, base: null } } })).toThrow(/invalid save/);
+
+    const ug = game.state.underground!;
+    ug.placedTraps.push({ trap: 11, x: 100, z: 120 });
+    ug.base = { entrance: { x: 101, z: 120, dir: 'down' }, goods: Array.from({ length: 15 }, () => null), boulders: Array.from({ length: 16 }, (_, i) => (i < 2 ? { x: 10, z: 12 + i * 2 } : null)) };
+    ug.base.goods[0] = { good: 12, x: 16, z: 13, slot: 1 };
+    const saved = JSON.parse(JSON.stringify(game.save())) as { state: { underground: UndergroundState } };
+    game.load(saved);
+    expect(game.save()).toEqual(saved);
+    const bad = (edit: (s: UndergroundState) => void) => {
+      const s = JSON.parse(JSON.stringify(saved)) as typeof saved;
+      edit(s.state.underground);
+      return () => game.load(s);
+    };
+    expect(bad((s) => s.base!.goods.pop())).toThrow(/15 goods and 16 boulder slots/);
+    expect(bad((s) => (s.base!.goods[1] = { good: 9, x: 18, z: 13, slot: 1 }))).toThrow(/one PC slot twice/);
+    expect(bad((s) => (s.base!.goods[0]!.slot = 5))).toThrow(/PC slot is empty/);
+    expect(bad((s) => (s.placedTraps = Array.from({ length: 17 }, (_, i) => ({ trap: 1, x: 100 + i, z: 100 }))))).toThrow(/placedTraps is over its limit/);
+    expect(bad((s) => (s.placedTraps[0]!.trap = 33))).toThrow(/invalid save/);
   });
 });
 

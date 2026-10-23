@@ -38,6 +38,8 @@ export interface UiDeps {
   pulse(button: Button): void;
   /** A tap on the open app (InputFrame.tap). */
   tap(id: string): void;
+  /** The field's tile under a page point (the renderer's `tileAt`), or null. */
+  fieldTile?(clientX: number, clientY: number): { x: number; z: number } | null;
   /** The device's message box frame option (0–19). */
   frame(): number;
   /** The app's own settings (volume, zoom, fast-forward speed, error reports, the data actions), shown in OPTIONS. */
@@ -234,7 +236,7 @@ export function mountUi(deps: UiDeps): InGameUi {
   /** Phones (portrait, or landscape with the side controls) show a DS screen full screen. */
   const phone = () => layer.dataset.mode === 'compact' || layer.dataset.controls === 'side';
   const build = (view: AppView, dot: number, u: number, entering: boolean) => {
-    const ctx: DrawContext = { text: (s, palette = 'ink', className, k = dot) => font().label(s, palette, k, className), flow: (s, lines, palette = 'ink', k = dot) => font().flow(s, palette, k, lines), measure: (s) => font().measure(s), tap: deps.tap, art, registries: deps.game().registries, frame: deps.frame(), scale: dot, unit: u, compact: layer.dataset.mode === 'compact', options, size: roomSize(), gender: deps.game().state.gender, sound: () => ({ tick: deps.game().state.tick, cryTicks: deps.game().sound.cryTicks() }) };
+    const ctx: DrawContext = { text: (s, palette = 'ink', className, k = dot) => font().label(s, palette, k, className), flow: (s, lines, palette = 'ink', k = dot) => font().flow(s, palette, k, lines), measure: (s) => font().measure(s), tap: deps.tap, ...(deps.fieldTile ? { fieldTile: deps.fieldTile } : {}), art, registries: deps.game().registries, frame: deps.frame(), scale: dot, unit: u, compact: layer.dataset.mode === 'compact', options, size: roomSize(), gender: deps.game().state.gender, sound: () => ({ tick: deps.game().state.tick, cryTicks: deps.game().sound.cryTicks() }) };
     const { kind, root } = drawApp(ctx, view);
     // A view that patches itself in place (the Pokédex list keeps its rows and scroll position).
     if (root.isConnected) return null;
