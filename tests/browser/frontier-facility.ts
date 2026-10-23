@@ -31,7 +31,9 @@ function stageProblems(page: Page): Promise<string[]> {
     const stage = document.querySelector<HTMLElement>('.frontier-app .ds-scene-stage')!;
     const st = stage.getBoundingClientRect();
     const k = st.width / 256;
-    if (Math.abs(k * devicePixelRatio - Math.round(k * devicePixelRatio)) > 1e-6 || Math.abs(st.height - 192 * k) > 0.5) out.push(`stage ${st.width}×${st.height} is not 256×192 at whole device pixels`);
+    // Whole device pixels per DS pixel (CSS layout rounds to 1/64 px).
+    const kd = Math.round(k * devicePixelRatio);
+    if (kd < 1 || Math.abs(st.width * devicePixelRatio - 256 * kd) > 1 || Math.abs(st.height * devicePixelRatio - 192 * kd) > 1) out.push(`stage ${st.width}×${st.height} is not 256×192 at whole device pixels`);
     if (st.left < -0.5 || st.top < -0.5 || st.right > innerWidth + 0.5 || st.bottom > innerHeight + 0.5) out.push(`stage ${st.left},${st.top}–${st.right},${st.bottom} leaves the ${innerWidth}×${innerHeight} viewport`);
     for (const b of document.querySelectorAll<HTMLElement>('.controls button, .hud-button')) {
       const r = b.getBoundingClientRect();
