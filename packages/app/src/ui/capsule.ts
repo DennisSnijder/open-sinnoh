@@ -185,7 +185,7 @@ function drawEditor(s: CapsuleCanvas, d: DrawContext, v: CapsuleEditorView): voi
   const keys: unknown[] = [v.screen, v.message, v.menu, v.yesNo, d.frame, d.unit];
   if (v.screen === 'select') {
     s.background('capsule/main2');
-    s.root.dataset.backdrop = s.sheet('capsule/main2')?.atlas ?? '';
+    if (s.sheet('capsule/main2')) s.root.dataset.backdrop = 'capsule/main2';
     v.capsules.forEach((c, i) => {
       const p = capsuleGridAt(i);
       s.anim('capsule/capsules', c.sealed ? 1 : 0, p.x, p.y);
@@ -200,7 +200,7 @@ function drawEditor(s: CapsuleCanvas, d: DrawContext, v: CapsuleEditorView): voi
     }
   } else if (v.screen === 'edit') {
     s.background('capsule/sub3');
-    s.root.dataset.backdrop = s.sheet('capsule/sub3')?.atlas ?? '';
+    if (s.sheet('capsule/sub3')) s.root.dataset.backdrop = 'capsule/sub3';
     v.list.forEach((l, i) => s.cell('capsule/seals', l.cell, listSlotAt(i).x, listSlotAt(i).y));
     const pressed = (id: CapsuleEditorView['pressed']) => (v.pressed === id ? 1 : 0);
     const at0 = (id: string) => CAPSULE_BUTTONS.find((b) => b.id === id)!;
@@ -226,7 +226,7 @@ function drawEditor(s: CapsuleCanvas, d: DrawContext, v: CapsuleEditorView): voi
     }
   } else {
     s.background('capsule/main3');
-    s.root.dataset.backdrop = s.sheet('capsule/main3')?.atlas ?? '';
+    if (s.sheet('capsule/main3')) s.root.dataset.backdrop = 'capsule/main3';
     if (v.test) s.mon(d, v.test, TEST_MON.x, TEST_MON.y);
     for (const seal of v.seals) s.cell('capsule/seals', seal.cell, seal.x, seal.y);
   }

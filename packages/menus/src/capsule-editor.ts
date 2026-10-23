@@ -318,7 +318,8 @@ export function capsuleEditorScreen(ctx: MenuContext): Screen {
     if (!hand && any) {
       hand = held !== null ? { x: working[held]!.x, y: working[held]!.y } : (stops()[0] ?? null);
       if (!hand) return;
-      if (!p.includes('a') && !p.includes('b')) return;
+      // The first D-pad press only shows the hand; a button acts at once.
+      if (p.every((b) => DIRS.includes(b))) return;
     }
     if (!hand) return;
     if (held !== null) {

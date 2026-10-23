@@ -57,6 +57,14 @@ until app capsule-editor 300
 +1 release a
 +1 assert state sealCase.counts[49] 0
 +0 screenshot capsule-edit
+# Test (SELECT): the still of the first Pokémon with the capsule's seals; B goes back to editing.
++1 press select
++1 release select
++1 assert state app.screen "test"
++0 screenshot capsule-test
++1 press b
++1 release b
++1 assert state app.screen "edit"
 # CONFIRM saves the capsule front first.
 +1 tap seal:104,171
 +1 tap seal-up

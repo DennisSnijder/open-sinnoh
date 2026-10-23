@@ -13,3 +13,6 @@
 .capsule-board .capsule-holder { pointer-events: none; }
 /* The message's arrow sits in the frame's corner, so a full DS line fits on one line. */
 .capsule-board .capsule-boxes .msg-box.waiting::after { position: absolute; right: calc(var(--dot) * 8); bottom: calc(var(--dot) * 6); }
+/* The grid's touch targets show nothing of their own: the ROM cursor sprite marks the current capsule. */
+.capsule-board .capsule-cell[data-nav], .capsule-board .capsule-cell[data-nav].is-cursor, .capsule-board .capsule-cell[data-nav]:hover { background: none; box-shadow: none; }
+.capsule-board .capsule-cell[data-nav].is-cursor::before { display: none; }
