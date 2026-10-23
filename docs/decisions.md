@@ -452,6 +452,20 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   from the contest RNG's state without drawing (the DS uses MTRNG); the judging draws from the contest RNG as the DS
   does. The DS has no keys here: the PC's hand stands in for the stylus (Y jumps to the next item or the Pokémon's
   head), so replays dress up by keys. Its one screen folds the top screen's clock, theme and count into a line.
+- **The acting round** (contest/acting-rules.ts, acting.ts) keeps the decomp's own state (the turn's per-act fields
+  and their snapshots) rather than a cleaner model: the pity points compare snapshots taken at different steps, and the
+  forced next-turn places wrap in a 2-bit field, so only the same state gives the same results. Its tables (base appeal,
+  effect classes, voltage, the acting messages, the AI's 165 rules) come from the ROM's code; the effect handlers and
+  the AI's 28 conditions are code keyed by their ids.
+- **Acting round progress in the session** (`ContestSession.acting`: turn, choosing): replays wait on it with `until
+  state`, as the turns' lengths depend on the rivals' moves.
+- **Contest move animations** run on the battle animation VM in its contest mode (`AnimDeps.contest`) through
+  `AppHost.contestAnimation`, loaded with the battle engine's chunk; the contest app does not tick until it is in, so
+  a run with animations never differs from one that loaded late. A script that reaches a sprite callback whose contest
+  branch is not ported plays no animation (logged and counted).
+- **The acting screen** is the DS main screen as one canvas; the touch screen's move and judge menus are a card over
+  the stage while the player chooses (its own place under the stage on phones in portrait), and the judge buttons
+  carry the judges' voltage meters, which the card covers.
 - **Offline equivalences:** without a link, the decomp's comm syncs pass at once and `message_synchronized` is a plain
   message (ScrCmd_MessageSynchronized without CommSys); HBlank start/stop and the network icon do nothing here.
 

@@ -205,13 +205,14 @@ export async function importBattleAnims(fs: NitroFs, moveIds: Map<number, Id>, s
     return Array.from({ length: 6 }, (_, from) => Array.from({ length: 6 }, (_, to) => vec(ax, at * 36 + from * 6 + to)));
   });
   // The switched backgrounds (BattleBgSwitch_SetBg): 4bpp tiles, one palette into slot 9, a 256 or 512 px wide
-  // tilemap; one sheet per distinct member set, cell 0 as drawn for the player's side and cell 1 mirrored.
+  // tilemap; one sheet per distinct member set, cell 0 as drawn for the player's side, cell 1 mirrored and cell 2 the
+  // contest's screen (BG_NARC_MEMBER_NSCR3).
   const bgTable = await table('backgrounds');
   const bg = readNarc(fs.file(BATT_BG));
   const bgSheets = new Map<string, Id>();
   const backgrounds = Array.from({ length: 58 }, (_, i) => {
-    const [ncgr, nclr, nscr1, nscr2] = [0, 1, 2, 3].map((k) => bgTable[i * 5 + k]!);
-    const key = `${ncgr}/${nclr}/${nscr1}/${nscr2}`;
+    const [ncgr, nclr, nscr1, nscr2, nscr3] = [0, 1, 2, 3, 4].map((k) => bgTable[i * 5 + k]!);
+    const key = `${ncgr}/${nclr}/${nscr1}/${nscr2}/${nscr3}`;
     const known = bgSheets.get(key);
     if (known) return known;
     const member = (m: number) => {
@@ -221,7 +222,7 @@ export async function importBattleAnims(fs: NitroFs, moveIds: Map<number, Id>, s
     };
     const chars = readNcgr(member(ncgr!));
     const ram = new PaletteRam().load(readNclr(member(nclr!)), EFFECT_PALETTE * 32, 32);
-    const cells = [nscr1!, nscr2!].map((m) => {
+    const cells = [nscr1!, nscr2!, nscr3!].map((m) => {
       const screen = readNscr(member(m));
       return { width: screen.width, height: screen.height, rgba: renderScreen(screen, chars, ram), originX: 0, originY: 0 };
     });

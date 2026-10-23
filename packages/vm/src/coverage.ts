@@ -116,7 +116,7 @@ export const REAL_CONTESTS = [
  * entry to 'real' with its model; a test checks this list against the rounds' `placeholder` flags. The coverage
  * report counts the placeholders.
  */
-export const CONTEST_ROUNDS_STATUS: Record<'visual' | 'dance' | 'acting', 'placeholder' | 'real'> = { visual: 'real', dance: 'real', acting: 'placeholder' };
+export const CONTEST_ROUNDS_STATUS: Record<'visual' | 'dance' | 'acting', 'placeholder' | 'real'> = { visual: 'real', dance: 'real', acting: 'real' };
 
 /**
  * The ops made real over the Pokémon model (party, bag, money, Pokédex): `real: 'P'` in the export;

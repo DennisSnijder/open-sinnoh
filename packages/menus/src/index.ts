@@ -131,6 +131,8 @@ export function createRowanIntro(options: RowanIntroOptions): AppModel {
 export { INTRO_TEXT, type RowanIntroOptions } from './rowan-intro.ts';
 export { competitionRounds } from './contest/contest.ts';
 export { createContestRound, placeholderRound } from './contest/rounds.ts';
+export { actingRound } from './contest/acting.ts';
+export * as actingRules from './contest/acting-rules.ts';
 export { contestPicture } from './contest/picture.ts';
 export { MENU_TEXT, MenuText, plainPages, plainText, type MenuKey } from './strings.ts';
 export { moveCursor, REPEAT_DELAY, REPEAT_EVERY } from './stack.ts';

@@ -9,6 +9,7 @@
 import type { ContestDressUp, ContestRound, ContestRoundContext, ContestRoundKind, ContestRoundOutcome, CreateContestRound } from '@opensinnoh/contracts';
 import { conditionPoints } from '@opensinnoh/services';
 import { plainText } from '../strings.ts';
+import { actingRound } from './acting.ts';
 import { createDanceRound } from './dance.ts';
 import { visualRound } from './visual.ts';
 
@@ -26,7 +27,7 @@ export const createContestRound: CreateContestRound = (kind, ctx) => {
     case 'dance':
       return createDanceRound(ctx);
     case 'acting':
-      return placeholderRound(kind, ctx);
+      return actingRound(ctx);
   }
 };
 

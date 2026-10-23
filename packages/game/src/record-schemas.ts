@@ -967,6 +967,20 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
       themes: arr(arr(int(0, 255))),
       playerGfx: obj({ male: int(0, 0xffff), female: int(0, 0xffff) }),
       playerSprite: obj({ male: ref('sprites'), female: ref('sprites') }),
+      // 0.36.2: the acting round's tables (contracts ContestActingTables).
+      acting: opt(obj({
+        effects: arr(obj({
+          description: arr(ref('texts')),
+          appeal: int(-128, 127),
+          class: int(3, 6),
+          announce: bool,
+          messages: arr(nullable(obj({ text: ref('texts'), args: int(0, 28) }))),
+        })),
+        typeMatch: arr(arr(int(-10, 10))),
+        messages: arr(obj({ text: ref('texts'), args: int(0, 28), instant: opt(bool) })),
+        rules: arr(obj({ slot: int(1, 4), condition: int(1, 28), target: int(0, 255), judges: int(0, 3), weights: arr(int(-0x8000, 0x7fff)) })),
+        buttonPalettes: arr(arr(int(0, 0xffff))),
+      }, (v) => ((v.effects as unknown[]).length !== 24 ? 'contests.acting.effects must have the 24 effects' : (v.typeMatch as unknown[]).length !== 5 ? 'contests.acting.typeMatch must be 5 × 5' : undefined))),
       // 0.35.2: the Dance Competition's tables (contracts ContestDanceTables).
       dance: obj({
         songs: arr(obj({ sequence: ref('sequences'), bpm: int(1, 0xffff), measures: int(1, 255), moves: int(1, 8), leadIn: int(0, 255), gap: int(0, 255), windows: arr(int(0, 255)) }, (v) => ((v.windows as unknown[]).length !== 4 ? 'a dance song has 4 grading windows' : undefined))),

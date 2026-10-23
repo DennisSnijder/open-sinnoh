@@ -9,6 +9,8 @@
  */
 import type { Condition, Id, Pokemon } from '@opensinnoh/core';
 import type { AppHost, AppMessage, AppYesNo } from './apps.ts';
+import type { AudioHost } from './audio.ts';
+import type { AnimView } from './battle.ts';
 import type { Registries, StubLog } from './runtime.ts';
 import type { GameState } from './state.ts';
 import type { InputFrame } from './ui.ts';
@@ -107,6 +109,58 @@ export interface ContestTables {
   dance: ContestDanceTables;
   /** 0.35.1. Per accessory id (100), its picture (imageclip.narc member 1 + id): the visual round's hit tests. */
   accessories: ContestAccessory[];
+  /** 0.36.2. The acting round's tables. Absent (packs without them): the acting round fails loudly. */
+  acting?: ContestActingTables;
+}
+
+/**
+ * 0.36.2. The acting round's tables (docs/research/contests.md §7), read from the player's ROM:
+ * - `effects` by CONTEST_EFFECT_* (a move's `contest.effect`): arm9 Unk_020F568C (`description`, the move menu's two
+ *   lines in TEXT_BANK_CONTEST_EFFECTS; `appeal`, the base points, unk_04; `messages`, the outcome line per variant 0–4
+ *   in TEXT_BANK_CONTEST_ACTING_COMPETITION with its argument mode, null where the ROM has 0xFFFF) and overlay 17
+ *   Unk_ov17_02253AF8 (`class`: 3 scored in the act, 5 a judge effect at the turn's end, 6 the pity points;
+ *   `announce`: unk_05 = 0, its variant 4 is said before the act);
+ * - `typeMatch` Unk_ov17_022539C8: the voltage change by [contest type][move's contest type] (+10, 0, −10);
+ * - `messages` sActingCompetitionMessages: per ACTING_COMPETITION_MESSAGE_* its TEXT_BANK_CONTEST_TEXT line, argument
+ *   mode and whether it prints at once;
+ * - `rules` Unk_ov17_02253C30: the NPC AI's 165 rules;
+ * - `buttonPalettes` Unk_ov17_022534B8: the move buttons' five BGR555 palettes (16 colours each, in table order).
+ */
+export interface ContestActingTables {
+  effects: ContestEffect[];
+  typeMatch: number[][];
+  messages: ContestActingMessage[];
+  rules: ContestAiRule[];
+  buttonPalettes: number[][];
+}
+
+export interface ContestEffect {
+  description: [Id, Id];
+  appeal: number;
+  class: number;
+  announce: boolean;
+  messages: (ContestActingMessage | null)[];
+}
+
+/** A line and its argument mode (decomp ov17_0224290C: which names and numbers fill its slots). */
+export interface ContestActingMessage {
+  text: Id;
+  args: number;
+  instant?: boolean;
+}
+
+/**
+ * One NPC AI rule (decomp UnkStruct_ov17_02253C30): applies at performance `slot` (1–4) when `condition` (an index of
+ * Unk_ov17_02253BBC, 1–28) holds; `target` is a CONTEST_EFFECT_*, 240 (the move's type is the contest's) or 241
+ * (base appeal ≥ 20); `judges` the judge mode (0 clears the condition's judge marks, 2 and 3 invert them); `weights`
+ * by AI level.
+ */
+export interface ContestAiRule {
+  slot: number;
+  condition: number;
+  target: number;
+  judges: number;
+  weights: number[];
 }
 
 /**
@@ -228,6 +282,16 @@ export interface ContestSession {
   placement: number | null;
   /** The player's visual-round outfit (the photo's), once the visual round has run. */
   dressUp: ContestDressUp | null;
+  /**
+   * 0.36.2. The acting round's progress, written by that round while it runs (replays wait on it with `until state`):
+   * the turn (0–3) and whether it waits for the player's move and judge. Absent before the round.
+   */
+  acting?: ContestActingProgress;
+}
+
+export interface ContestActingProgress {
+  turn: number;
+  choosing: boolean;
 }
 
 /**
@@ -284,12 +348,93 @@ export type CreateContestRound = (kind: ContestRoundKind, ctx: ContestRoundConte
 export type ContestRoundView =
   | ContestPlaceholderRoundView
   | ContestVisualRoundView
-  | ContestDanceRoundView;
+  | ContestDanceRoundView
+  | ContestActingRoundView;
 export interface ContestPlaceholderRoundView {
   round: ContestRoundKind;
   placeholder: true;
   message: AppMessage;
 }
+
+/**
+ * 0.36.2. The acting round (decomp overlay017 ActingCompetition_*: ov17_0223B140.c and its presentation commands,
+ * ov17_02243C28.c, ov17_022413D8.c, ov17_0223F7E4.c): the stage as the DS main screen draws it, in DS px, and the
+ * touch screen's move and judge menus while the player chooses.
+ * - `fade` 0–1: the screen fade from black (the round's start and end).
+ * - `audience` 0/1: the audience's frame (0 its usual, contest_bg 2; 1 the cheering one, member 0: the applause
+ *   alternates them), `glow` 0–16: the audience palettes' blend toward 0x237E as the applause after a voltage rise
+ *   (decomp ov17_022431E8).
+ * - `judges` by seat (left to right): name, the main judge, `pips` the voltage meter's five pips (lit or not), `blink`
+ *   the frames since a full meter began to blink (null: not), `dy`/`dx` the hop or shake, `reaction` the bubble's
+ *   animation (contest_obj 12–14) or null.
+ * - `panels` in performance order (rows top to bottom): who, `hearts` the points shown (10 per heart, 6 a row, up to
+ *   four rows of colour), `gather` 0–1 the hearts flying into the panel at the turn's end, `flash` 0–10 its white blend,
+ *   `slot` the next turn's forced place (contest_obj 21–23) or null; `panelAlpha` 0–1: the panels fade out while a
+ *   Pokémon performs.
+ * - `performer`: the acting Pokémon's back picture, centred at (x, y) DS px, mirrored when `flip`; `anim` its move's
+ *   animation (the battle animation VM in contest mode), drawn as the battle scene draws one.
+ * - `stars`: what flies at DS px (`star`: from a judge to its meter, contest_obj 27–29; `pip`: a full meter's pip to
+ *   the performer's panel).
+ * - `message`: the stage's message window (the printed text so far).
+ * - `choice`: the move and judge menus (taps `move:<0-3>`, `judge:<0-2>`, `back`).
+ */
+export interface ContestActingRoundView {
+  round: 'acting';
+  placeholder: false;
+  turn: number;
+  fade: number;
+  audience: number;
+  glow: number;
+  judges: { name: string; main: boolean; pips: boolean[]; blink: number | null; dx: number; dy: number; reaction: number | null }[];
+  panels: { contestant: number; mon: string; trainer: string; player: boolean; hearts: number; gather: number; flash: number; slot: number | null }[];
+  panelAlpha: number;
+  performer: { contestant: number; species: Id; form: number; shiny: boolean; female: boolean; x: number; y: number; flip: boolean } | null;
+  anim: AnimView | null;
+  stars: { kind: 'star' | 'pip'; x: number; y: number }[];
+  message: string | null;
+  choice: ContestActingChoiceView | null;
+}
+
+/**
+ * The touch screen while the player chooses (decomp ov17_0223F7E4.c): `stage` move or judge; `cursor` the key
+ * cursor (null until a key is pressed: the DS shows it on the first key); `moves` by slot (null: no move), each with
+ * its contest type, base hearts and the effect's two lines, `disabled` when it was used last turn; the judges by
+ * seat; `back` the judge menu's EXIT line.
+ */
+export interface ContestActingChoiceView {
+  stage: 'move' | 'judge';
+  cursor: number | null;
+  moves: ({ name: string; type: number; hearts: number; description: [string, string]; disabled: boolean } | null)[];
+  judges: { name: string; main: boolean }[];
+  back: string;
+}
+
+/**
+ * 0.36.2. A move's animation as the acting round plays it (decomp ov17_022444BC: BattleAnimSystem_StartMove with the
+ * contest flag): the performer is battler 0 (its back picture at the contestant's place, 216,112), the next
+ * contestant's Pokémon the hidden battler 1 (80,42). `effectChance` is the script's effect chance (decomp unk_07: a
+ * two-turn move's second pass, a Ghost's Curse, Brick Break).
+ */
+export interface ContestMoveAnimationRequest {
+  move: Id;
+  attacker: { species: Id; form: number };
+  defender: { species: Id; form: number };
+  effectChance: number;
+  seed: number;
+}
+
+/** A running contest move animation: one `tick` per frame until `done`. */
+export interface ContestMoveAnimation {
+  tick(): void;
+  readonly done: boolean;
+  view(): AnimView;
+}
+
+/**
+ * Makes a move animation (packages/battle). Null when the move has no script or the script needs what the contest
+ * mode of the animation VM does not run (logged and counted by the factory): the act goes on without one.
+ */
+export type CreateContestMoveAnimation = (request: ContestMoveAnimationRequest, deps: { registries: Registries; log: StubLog; sound?: AudioHost }) => ContestMoveAnimation | null;
 
 /**
  * 0.35.2. The Dance Competition (decomp overlay017 ov17_0223DAD0.c; packages/menus contest/dance.ts): the stage (the

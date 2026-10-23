@@ -3,8 +3,8 @@
  * generic_emitter_callback*.c): run once as CreateEmitter makes the emitter. They place it at a battler's
  * particle position, aim its axis from attacker to defender, and set behaviour targets; the generic callback
  * (17) reads its modes from the SetExtraParams that follow the CreateEmitter in the script.
- * Battlers are ids; their types (solo in singles, slots in doubles) pick the tables' rows. Contest branches are not
- * taken.
+ * Battlers are ids; their types (solo in singles, slots in doubles) pick the tables' rows. In a contest (0.36.2) the
+ * generic callback takes the decomp's contest branches: the contest spots and axes, the contest camera angle.
  */
 import { degToIdx, s16, type Vec } from './fx.ts';
 import { PIXEL, sideOf } from './tasks.ts';
@@ -219,21 +219,24 @@ function generic(vm: AnimVm, ps: ParticleManager, e: Emitter): void {
       const side = sideOf(posMode === 12 ? vm.attacker : vm.defender);
       position = offset(vm.typePos(side === 'player' ? 0 : 1, 0));
     } else if (posMode === 31 || posMode === 30 || posMode === 32) {
-      // Bubble, Baton Pass and Dragon Breath spots by the start battler's type (generic_emitter_callback.c).
+      // Bubble, Baton Pass and Dragon Breath spots by the start battler's type (generic_emitter_callback.c); Baton
+      // Pass and Dragon Breath have a contest spot (their row 6), Bubble none.
       const spots: Record<number, Vec[]> = {
         31: [fxv(-1.4063, -1.0625), fxv(2.3164, -0.4844), fxv(-2.871, 0.8008), fxv(3.3613, -0.3574), fxv(-1.3125, -0.6855), fxv(1.7051, 0.502)],
-        30: [fxv(-2.6904, -0.8516), fxv(2.6562, 1.8691), fxv(-3.6768, -0.7715), fxv(3.662, 1.7676), fxv(-2.0078, -1.125), fxv(2.0566, 2.1719)],
-        32: [fxv(-1.125, -1.0938), fxv(1.8613, 0.5488), fxv(-2.2031, -0.7368), fxv(3.1875, 0.6875), fxv(-0.5938, -1.1719), fxv(1.5156, 0.9375)],
+        30: [fxv(-2.6904, -0.8516), fxv(2.6562, 1.8691), fxv(-3.6768, -0.7715), fxv(3.662, 1.7676), fxv(-2.0078, -1.125), fxv(2.0566, 2.1719), fxv(3.662, -0.6719)],
+        32: [fxv(-1.125, -1.0938), fxv(1.8613, 0.5488), fxv(-2.2031, -0.7368), fxv(3.1875, 0.6875), fxv(-0.5938, -1.1719), fxv(1.5156, 0.9375), fxv(1.7266, -0.8906)],
       };
-      position = spots[posMode]![vm.typeOf(start)]!;
-    } else throw new Error(`battle anim: generic emitter position mode ${posMode}`);
+      position = spots[posMode]![vm.contest && posMode !== 31 ? 6 : vm.typeOf(start)]!;
+    } else if (posMode === 28) position = fxv(2.8047, 0);
+    else if (posMode === 33) position = fxv(-1.2207, -1.4648);
+    else throw new Error(`battle anim: generic emitter position mode ${posMode}`);
     e.setPos(0, position[0]);
     e.setPos(1, position[1]);
     e.setPos(2, position[2]);
   }
 
   // Axis (GenericEmitterCallback_ApplyAxis).
-  if (axisMode !== 0) e.axis = genericAxis(vm, axisMode, start, end);
+  if (axisMode !== 0) e.axis = vm.contest ? contestAxis(vm, axisMode, targetMode, start, end) : genericAxis(vm, axisMode, start, end);
 
   // Behaviours (GenericEmitterCallback_ApplyBehavior): one SetExtraParams of 5 per flag, in bit order.
   const res = e.res;
@@ -302,8 +305,10 @@ function generic(vm: AnimVm, ps: ParticleManager, e: Emitter): void {
       angle(-degToIdx(67.502), degToIdx(45) + 1, degToIdx(22.5) + 1);
       break;
     case 4:
+      // GenericEmitterCallback_ApplyFixedAngle4: a contest has its own angle.
       cam.projection = 1;
-      angle(degToIdx(50.8) + 1, degToIdx(20.567), 0);
+      if (vm.contest) angle(degToIdx(272.817), degToIdx(32.696), degToIdx(22.5) + 1);
+      else angle(degToIdx(50.8) + 1, degToIdx(20.567), 0);
       break;
     case 5:
       cam.projection = 1;
@@ -329,6 +334,51 @@ function generic(vm: AnimVm, ps: ParticleManager, e: Emitter): void {
 }
 
 const fxv = (x: number, y: number): Vec => [Math.round(x * 4096), Math.round(y * 4096), 0];
+
+/**
+ * GenericEmitterCallback_ApplyAxis in a contest: most start-to-end axes are fixed (EMITTER_TARGET_MODE_DEFENDER, 2,
+ * picks the reverse of some), the side axes take config 1 with X turned round; the others are as in a battle.
+ */
+function contestAxis(vm: AnimVm, mode: number, targetMode: number, start: number, end: number): Vec {
+  const fixed = (x: number, y: number, z: number): Vec => [Math.round(x * 4096), Math.round(y * 4096), Math.round(z * 4096)];
+  const defender = targetMode === 2;
+  switch (mode) {
+    case 1:
+    case 2:
+      return defender ? fixed(-0.8145, 0.4492, 0.1797) : fixed(0.5703, -0.3516, 0.1797);
+    case 4:
+    case 5: {
+      const v = vm.data.axes[0]![vm.typeOf(start)]![vm.typeOf(end)]!;
+      return [s16(-v[0]!), s16(v[1]!), s16(Math.trunc(v[2]! / 2))];
+    }
+    case 6:
+    case 7: {
+      // START_TO_END_SP: the contest config for every pairing, turned round from the enemy's type.
+      const c = fixed(-0.5703, 0.3516, 0.1797);
+      return vm.typeOf(start) === 1 ? [-c[0], -c[1], -c[2]] : c;
+    }
+    case 8:
+    case 9:
+      return defender ? fixed(-0.5703, 0.3516, 0.1797) : fixed(0.5703, -0.3516, 0.1797);
+    case 12:
+    case 13:
+      return fixed(-0.7168, 0.3516, 0.1797);
+    case 10:
+    case 11:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
+    case 18:
+    case 19:
+      return fixed(-0.5703, 0.3516, 0.1797);
+    case 20:
+    case 21:
+      return fixed(-1.0586, 0.3516, 0.1797);
+    default:
+      return genericAxis(vm, mode, start, end);
+  }
+}
 
 /** GenericEmitterCallback_ApplyAxis by the start and end battlers' types. */
 function genericAxis(vm: AnimVm, mode: number, start: number, end: number): Vec {

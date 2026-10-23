@@ -1,0 +1,26 @@
+/* The acting round (ui/contest-acting.ts): the DS stage canvas, its text, and the touch screen's menu card. */
+.acting-stage .acting-canvas { inset: 0 auto auto 0; height: auto; }
+.acting-stage .acting-name { line-height: 0; white-space: nowrap; overflow: hidden; pointer-events: none; }
+.acting-stage .acting-message { line-height: 0; pointer-events: none; }
+/* The card: over the stage (landscape) or in its own place under it (phones in portrait). */
+.acting-card { position: absolute; left: 0; top: 0; width: calc(var(--k) * 256); height: calc(var(--k) * 192); display: none; }
+.acting-card.is-open { display: block; }
+.acting-card.is-under { top: calc(var(--k) * 196); }
+.acting-card > * { position: absolute; box-sizing: border-box; margin: 0; }
+.acting-card-bg { inset: 0; line-height: 0; }
+.acting-card .acting-button { position: absolute; padding: 0; border: 0; background: none; cursor: pointer; text-align: left; line-height: 0; }
+.acting-card .acting-button.is-disabled { cursor: default; }
+.acting-card .acting-button > * { position: absolute; }
+.acting-card .acting-button-art { inset: 0; }
+.acting-card .acting-move-name { left: calc(var(--k) * 11); top: calc(var(--k) * 12); }
+.acting-card .acting-move-meta { left: calc(var(--k) * 11); top: calc(var(--k) * 32); display: flex; align-items: center; gap: calc(var(--k) * 4); }
+.acting-card .acting-hearts { display: flex; gap: 0; }
+.acting-card .acting-move-lines { left: calc(var(--k) * 11); top: calc(var(--k) * 52); display: grid; gap: calc(var(--k) * 2); }
+.acting-card .acting-judge-name { left: 0; right: 0; top: calc(var(--k) * 56); display: flex; justify-content: center; }
+.acting-card .acting-judge:last-child .acting-judge-name { top: calc(var(--k) * 20); }
+.acting-card .acting-judge-pips { left: 0; right: 0; top: calc(var(--k) * 80); display: flex; justify-content: center; gap: calc(var(--k) * 1); }
+.acting-card .acting-pip { width: calc(var(--k) * 4); height: calc(var(--k) * 4); background: rgb(255 255 255 / 0.5); }
+.acting-card .acting-pip.is-lit { background: #f8d840; }
+.acting-card .acting-judge-main { left: calc(var(--k) * 32); top: calc(var(--k) * 92); }
+.acting-card .acting-button.is-cursor { outline: calc(var(--k) * 2) solid #f05030; outline-offset: calc(var(--k) * -2); }
+.acting-card .acting-button:focus-visible { outline: calc(var(--k) * 2) solid #f0b030; outline-offset: calc(var(--k) * -2); }

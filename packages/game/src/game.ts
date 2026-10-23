@@ -30,6 +30,7 @@ import {
   type BattleSetup,
   type CreateApp,
   type CreateBattle,
+  type CreateContestMoveAnimation,
   type CreatePoketch,
   type CreateScriptRunner,
   type CreateWorld,
@@ -87,6 +88,12 @@ export interface GameOptions {
   createBattle?: CreateBattle;
   /** … or loaded on the first battle (the app's lazy chunk). The game does not tick while it loads. */
   loadBattle?: () => Promise<CreateBattle>;
+  /**
+   * The contests' move animations (packages/battle `createContestMoveAnimation`), given directly (headless) or loaded
+   * with the battle engine's chunk: the contest app does not tick while it loads. Without either, acts have none.
+   */
+  createContestAnimation?: CreateContestMoveAnimation;
+  loadContestAnimation?: () => Promise<CreateContestMoveAnimation>;
   /**
    * The menu apps (packages/menus `createApp`). With it, X or Start on an idle field opens the start
    * menu and script ops open apps; without it the game has no menus and a script that opens an app throws.
@@ -183,7 +190,7 @@ export interface Game {
   wildBattles: WildBattleMode;
   /** How the replay's waits treat the evolution scene (replay `evolve …`; `reset` restores `manual`). Not game logic. */
   evolutions: EvolutionMode;
-  /** Resolves once the battle engine is loaded (starting the load if needed); replays call it up front. */
+  /** Resolves once the battle engine (and the contests' move animations) are loaded (starting the load if needed); replays call it up front. */
   loadBattleEngine(): Promise<void>;
   press(button: Button): void;
   release(button: Button): void;
@@ -362,6 +369,24 @@ export function createGame(options: GameOptions): Game {
   let textSpeed: TextSpeedOption = options.textSpeed ?? 1;
   let engine: CreateBattle | null = options.createBattle ?? null;
   let loading: Promise<void> | null = null;
+  let contestAnimation: CreateContestMoveAnimation | null = options.createContestAnimation ?? null;
+  let contestLoading: Promise<void> | null = null;
+  let contestLoadError: Error | null = null;
+  /** The contests' move animations, loaded with the battle engine's chunk when the game loads it lazily. */
+  const loadContestAnimation = (): Promise<void> => {
+    if (contestAnimation || !options.loadContestAnimation) return Promise.resolve();
+    contestLoading ??= options.loadContestAnimation().then(
+      (create) => {
+        contestAnimation = create;
+      },
+      (e: unknown) => {
+        contestLoadError = e instanceof Error ? e : new Error(String(e));
+        contestLoading = null;
+        throw contestLoadError;
+      },
+    );
+    return contestLoading;
+  };
   /** The battle started by `FieldHost.startBattle`: its setup and seed, and the engine's battle once created. */
   let battle: { setup: BattleSetup; seed: number; run: Battle | null; redHp: { flag: number; delay: number } } | null = null;
   let lastResult: BattleResult | null = null;
@@ -663,6 +688,9 @@ export function createGame(options: GameOptions): Game {
     undergroundAhead: () => world.undergroundAhead(),
     undergroundMiningRand: () => world.undergroundMiningRand(),
     spiritombVendors: () => device.options().spiritombVendors === 0,
+    get contestAnimation() {
+      return contestAnimation ?? undefined;
+    },
   };
   const openApp = (request: Parameters<CreateApp>[0], script: boolean) => {
     if (!options.createApp) throw new Error(`no menu apps in this game (createApp): cannot open ${request.app}`);
@@ -972,7 +1000,7 @@ export function createGame(options: GameOptions): Game {
       if (v !== 'manual' && v !== 'auto' && v !== 'cancel') throw new Error(`invalid evolution mode ${String(v)}`);
       evolutions = v;
     },
-    loadBattleEngine: () => loadEngine(),
+    loadBattleEngine: () => Promise.all([loadEngine(), loadContestAnimation()]).then(() => {}),
     get textSpeed() {
       return textSpeed;
     },
@@ -1043,6 +1071,12 @@ export function createGame(options: GameOptions): Game {
       }
       // An open app takes the frame; the field and the VM wait (the DS runs the app as a field task).
       if (app) {
+        // The contest app waits for the move animations' chunk (like a battle for its engine): nothing moves meanwhile.
+        if (app.name === 'contest' && !contestAnimation && options.loadContestAnimation) {
+          if (contestLoadError) throw new Error(`contest animations failed to load: ${contestLoadError.message}`);
+          loadContestAnimation().catch(() => {});
+          return;
+        }
         const result = app.model.step(frame);
         if (result) {
           const { script, evolution, underground } = app;

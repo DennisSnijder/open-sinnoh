@@ -487,7 +487,7 @@ export interface AnimBgView {
   dy: number;
   /**
    * A background switched in over the backdrop (SwitchBg): a `ui2d` sheet (cell 0 as drawn for the player's
-   * side, 1 mirrored for the enemy's), its weight 0–1 against the backdrop, its scroll and its own fade.
+   * side, 1 mirrored for the enemy's, 2 a contest's), its weight 0–1 against the backdrop, its scroll and its own fade.
    */
   effect: {
     sheet: Id;
