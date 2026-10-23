@@ -37,6 +37,8 @@ import { undergroundBaseScreen } from './ug-base.ts';
 import { undergroundPcScreen } from './ug-pc.ts';
 import { contestScreen } from './contest/contest.ts';
 import { contestPhotoScreen } from './contest/photo.ts';
+import { capsuleEditorScreen } from './capsule-editor.ts';
+import { sealMartScreen } from './seal-mart.ts';
 
 export const createApp: CreateApp = (request, deps) => {
   const ctx = menuContext(deps);
@@ -44,13 +46,13 @@ export const createApp: CreateApp = (request, deps) => {
     case 'start-menu':
       return new AppStack(startMenu(ctx), { app: 'start-menu' });
     case 'mart':
-      return new AppStack(martScreen(ctx, request), { app: 'mart' });
+      return new AppStack('seals' in request ? sealMartScreen(ctx, request) : martScreen(ctx, request), { app: 'mart' });
     case 'bag-select':
       return new AppStack(battleBagScreen(ctx, request), { app: 'bag-select', item: null, target: null });
     case 'party-select':
       return new AppStack(battlePartyScreen(ctx, request), { app: 'party-select', slot: null });
     case 'party':
-      return new AppStack(partyScreen(ctx, { kind: 'select' }), { app: 'party', slot: null });
+      return new AppStack(partyScreen(ctx, { kind: request.mode }), { app: 'party', slot: null });
     case 'party-order':
       return new AppStack(partyScreen(ctx, { kind: 'order', count: request.count }), { app: 'party-order', order: null });
     case 'storage':
@@ -107,6 +109,8 @@ export const createApp: CreateApp = (request, deps) => {
       return new AppStack(contestScreen(ctx), { app: 'contest' });
     case 'contest-photo':
       return new AppStack(contestPhotoScreen(ctx, request.slot), { app: 'contest-photo' });
+    case 'capsule-editor':
+      return new AppStack(capsuleEditorScreen(ctx), { app: 'capsule-editor' });
     case 'summary-teach':
       return new AppStack(summaryScreen(ctx, { party: () => deps.state.party, slot: request.slot, mode: { kind: 'teach', move: request.move, done: (forget) => ({ close: { app: 'summary-teach', forget } }) } }), { app: 'summary-teach', forget: null });
   }
@@ -139,6 +143,7 @@ export function createRowanIntro(options: RowanIntroOptions): AppModel {
 
 export { INTRO_TEXT, type RowanIntroOptions } from './rowan-intro.ts';
 export { competitionRounds } from './contest/contest.ts';
+export { CAPSULE_BUTTONS, listSlotAt } from './capsule-editor.ts';
 export { createContestRound, placeholderRound } from './contest/rounds.ts';
 export { actingRound } from './contest/acting.ts';
 export * as actingRules from './contest/acting-rules.ts';

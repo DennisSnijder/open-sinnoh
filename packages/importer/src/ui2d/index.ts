@@ -36,6 +36,7 @@ import { importBoxArt } from './box.ts';
 import { DANCE_PRESS_STEPS, DANCE_TIMELINE_TILES, importContestDanceArt } from './contest-dance.ts';
 import { importTownMapArt, type HiddenPatch } from './town-map.ts';
 import { importContestActingArt } from './contest-acting.ts';
+import { importSealArt } from './seals.ts';
 
 export * from './compose.ts';
 export * from './nanr.ts';
@@ -121,6 +122,7 @@ export async function importUi2d(fs: NitroFs, speciesIds: Id[], classIds: Id[], 
   importPoketchArt(fs, sheets);
   importBagArt(fs, sheets);
   importBoxArt(fs, sheets);
+  importSealArt(fs, sheets);
   importContestDanceArt(fs, sheets, await table('danceTimeline'), await table('dancePress'));
   const townMapPatches = importTownMapArt(fs, sheets);
   {

@@ -9,7 +9,7 @@
  */
 import type { Button, Id } from '@opensinnoh/core';
 import { itemCount, type BagView, type Item } from '@opensinnoh/contracts';
-import { facingSoil, FIELD_USE, fieldUseOf, isHmItem, isRegistered, itemRecord, toggleRegistered, tossItem, totalAccessories, totalBackdrops, useRepel } from '@opensinnoh/services';
+import { facingSoil, FIELD_USE, fieldUseOf, isHmItem, isRegistered, itemRecord, toggleRegistered, tossItem, totalAccessories, totalBackdrops, totalSeals, useRepel } from '@opensinnoh/services';
 import { poffinCaseScreen } from './poffin-case.ts';
 import { menuSe, type MenuContext } from './context.ts';
 import { Dialog } from './dialog.ts';
@@ -114,6 +114,9 @@ export function bagScreen(ctx: MenuContext, mode: BagMode): Screen {
       case 'fashion':
         // BagContext_FormatUsageMessage: the accessories and backdrops held.
         return say('bagFashionCase', [String(totalAccessories(ctx.state.fashionCase)), String(totalBackdrops(ctx.state.fashionCase))]);
+      case 'seals':
+        // BagContext_FormatUsageMessage (CalcTotalBallSeals): every seal owned.
+        return say('bagSealCase', [String(totalSeals(ctx.state.sealCase))]);
       case 'poffin-case':
         // UsePoffinCaseFromMenu: the Poffin Case app over the bag.
         return { push: poffinCaseScreen(ctx, () => (clampCursor(), 'pop')) };

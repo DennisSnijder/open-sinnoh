@@ -65,6 +65,7 @@ import {
   isWildKind,
   MONEY_MAX,
   newGameRecord,
+  trainerCapsule,
   type Battle,
   type BattleChoice,
   type BattleDeps,
@@ -438,7 +439,14 @@ class BattleController implements Battle {
     const party = (t: Trainer): Team => {
       const own = this.frontier?.get(t);
       if (own) return { party: own.party, sims: [], active: 0 };
-      return { party: t.party.map((m) => createTrainerPokemon(this.dex, m, this.trainerName(t), ball)), sims: [], active: 0 };
+      // Decomp trainer_data.c → Pokemon_SetBallSeal: a member with cbSeal n ≥ 1 carries trainer capsule n − 1.
+      const capsuled = (m: Trainer['party'][number], mon: Pokemon): Pokemon => {
+        if (!m.ballSeal) return mon;
+        const seals = newGameRecord(reg).seals;
+        if (!seals) throw new Error(`battle: ${t.id} has ball capsules but the packs have no NewGame.seals`);
+        return { ...mon, capsule: trainerCapsule(seals, m.ballSeal) };
+      };
+      return { party: t.party.map((m) => capsuled(m, createTrainerPokemon(this.dex, m, this.trainerName(t), ball))), sims: [], active: 0 };
     };
     const wildMon = (spec: BattleSetup['wild'][number]): Pokemon => {
       const mon = spec.roamer ? this.roamerMon(spec, ball) : createRandomPokemon(this.dex, rng, {

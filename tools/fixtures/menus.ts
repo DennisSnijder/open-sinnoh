@@ -158,6 +158,11 @@ export const menuTexts: Record<string, string> = {
   PartyMenu_Text_MonWokeUp: '{var 0}\nwoke up.',
   BoxText_EggsCantHoldItems: 'A shell carries nothing.',
   PartyMenu_Text_MailStore: 'LEAVE',
+  PartyMenu_Text_PromptCustomBall: 'Fit the shell?',
+  PartyMenu_Text_Set: 'FIT',
+  PartyMenu_Text_BallCapsuleWasSet: 'The shell is fitted.',
+  PartyMenu_Text_TwoCapsulsesCantBeSet: 'One shell per companion.',
+  PartyMenu_Text_BallCapsuleWillBeDetached: 'The shell comes off first.\nIs that fine?',
   EggHatch_Text_MonHatched: '{var 0} broke out of the shell!',
   EggHatch_Text_WantToNickname: 'Give the newly hatched\n{var 0} a name?',
   EggHatch_Text_Yes: 'Yes',
@@ -264,6 +269,7 @@ export const menuTexts: Record<string, string> = {
   Bag_Text_PoffinCountNum: '{var 0}/100',
   Bag_Text_Confirm: 'PICK',
   Bag_Text_FashionCaseMessage: 'Trinkets: {var 0}\nScenes: {var 1}',
+  Bag_Text_SealCaseMessage: 'Stickers: {var 0}',
   Bag_Text_Open: 'LOOK',
   ...Object.fromEntries(
     Object.entries({
@@ -367,6 +373,17 @@ export const menuTexts: Record<string, string> = {
   BoxText_MonWasWorried: 'It did not want to leave you.',
   BoxText_CantReleaseEgg: 'A shell cannot go free.',
   BoxText_RemoveMail: 'Take the letter off first.',
+  BoxText_DetachBallCapsule: 'Take the shell off first.',
+  // The sticker shells (the capsule editor's bank, TEXT_BANK_UNK_0008), in its message order.
+  ...Object.fromEntries(
+    ['DESIGN', 'DONE', 'FIT', 'TAKE OFF', 'SWAP', 'KEEP', 'UNDO', 'Pick a shell.', 'And this shell?', 'The shell came off.', 'Swap it with which?', 'Swapped.', 'Shell saved.', 'Checking...', 'Drop the new design?', 'The shell is full!', 'None of those left.'].map(
+      (t, i) => [`pl_msg_00000008_${pad(i)}`, t],
+    ),
+  ),
+  // The stickers' names (TEXT_BANK_BALL_SEAL_NAMES, _PLURAL) and the sticker stand's notes (TEXT_BANK_UNK_0542).
+  ...Object.fromEntries(Array.from({ length: 81 }, (_, i) => [`pl_msg_00000012_${pad(i)}`, `Sticker ${i}`])),
+  ...Object.fromEntries(Array.from({ length: 81 }, (_, i) => [`pl_msg_00000013_${pad(i)}`, `Stickers ${i}`])),
+  ...Object.fromEntries(Array.from({ length: 52 }, (_, i) => [`pl_msg_00000542_${pad(i)}`, `A plain sticker, number ${i}.`])),
   BoxText_HP: 'HP',
   BoxText_Attack: 'POWER',
   BoxText_Defense: 'GUARD',

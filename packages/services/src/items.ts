@@ -45,7 +45,7 @@ export function itemRecord(registries: Registries, id: Id): Item {
  * - `stub`: a use that is not implemented yet (logged by the caller);
  * - null: no USE entry (decomp ITEM_USE_FUNC_NONE).
  */
-export function fieldUseOf(registries: Registries, id: Id): 'party' | 'tm' | 'repel' | 'coins' | 'fashion' | 'poffin-case' | 'field' | 'stub' | null {
+export function fieldUseOf(registries: Registries, id: Id): 'party' | 'tm' | 'repel' | 'coins' | 'fashion' | 'seals' | 'poffin-case' | 'field' | 'stub' | null {
   const rec = itemRecord(registries, id);
   switch (rec.fieldUse) {
     case FIELD_USE.none:
@@ -80,6 +80,7 @@ export function fieldUseOf(registries: Registries, id: Id): 'party' | 'tm' | 're
     case FIELD_USE.bagMessage:
       if (localName(id) === 'ITEM_COIN_CASE') return 'coins';
       if (localName(id) === 'ITEM_FASHION_CASE') return 'fashion';
+      if (localName(id) === 'ITEM_SEAL_CASE') return 'seals';
       return REPELS.has(localName(id)) ? 'repel' : 'stub';
     default:
       return 'stub';

@@ -1,5 +1,5 @@
 /** Strict schemas for every registry in contracts `records.ts` (the pack boundary). */
-import { DW_PLATFORM_FLAGS, DW_PROP_KINDS, DW_PUZZLE_FLAGS, DW_SUPPORT_KINDS, GAME_RECORDS, parseTextMarkup, REGISTRIES, TRAINER_SCORE_MAX, type RegistryName } from '@opensinnoh/contracts';
+import { DW_PLATFORM_FLAGS, DW_PROP_KINDS, DW_PUZZLE_FLAGS, DW_SUPPORT_KINDS, GAME_RECORDS, parseTextMarkup, REGISTRIES, SEALS, TRAINER_SCORE_MAX, type RegistryName } from '@opensinnoh/contracts';
 import { STATS, type RegistryRecord } from '@opensinnoh/core';
 import { arr, bool, collectRefs, dict, id, int, lit, nullable, num, obj, opt, ref, str, tagged, tuple, union, validate, type RefUse, type Schema } from './schema.ts';
 
@@ -1014,6 +1014,16 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
       // 0.35.1: the accessories' pictures (sizes and masks) for the visual round.
       accessories: arr(obj({ width: lit(16, 32, 64), height: lit(16, 32, 64), mask: str() })),
     }, (v) => ((v.themes as unknown[]).length !== 12 ? 'contests.themes must have the 12 themes' : (v.accessories as unknown[]).length !== 100 ? 'contests.accessories must have the 100 accessories' : undefined))),
+    // The seal tables (contracts SealTables): a row per seal id 0–80, the seal marts, the NPC trainers' capsules, the send-out delays.
+    seals: opt(obj({
+      types: arr(obj({ sheet: int(0, 0xffff), name: int(0, 255), particle: int(0, 255), alphabet: bool, price: int(0, 0xffff), description: int(0, 255) })),
+      marts: arr(arr(int(1, SEALS.count))),
+      trainerCapsules: arr(arr(obj({ seal: int(1, SEALS.count), x: int(0, 255), y: int(0, 255) }))),
+      delays: arr(int(0, 255)),
+    }, (v) => {
+      if ((v.types as unknown[]).length !== SEALS.count + 1) return `seals.types must have ${SEALS.count + 1} rows`;
+      return (v.trainerCapsules as unknown[][]).some((c) => c.length > SEALS.perCapsule) ? `a capsule holds at most ${SEALS.perCapsule} seals` : undefined;
+    })),
     // 0.31.0: Amity Square (contracts AmitySquareTables): pools of ten accessories, the gifts' items then accessories.
     amitySquare: opt(obj({
       stepVar: ref('vars'),

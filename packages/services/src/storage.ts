@@ -59,7 +59,15 @@ export function isLastBattler(state: GameState, partySlot: number): boolean {
   return !state.party.some((m, i) => i !== partySlot && canBattle(m));
 }
 
-export type StorageRefusal = 'party-full' | 'box-full' | 'last-mon';
+/** `mail` and `capsule`: a party Pokémon holding Mail or with a Ball Capsule cannot go into a box (BoxAppMan_IsPreviewedMonHoldingMailOrHasBallCapsule). */
+export type StorageRefusal = 'party-full' | 'box-full' | 'last-mon' | 'mail' | 'capsule';
+
+const holdsMail = (registries: Registries, mon: Pokemon) => !!mon.heldItem && registries.items.get(mon.heldItem)!.pocket === 'mail';
+/** Decomp BoxAppMan_IsPreviewedMonHoldingMailOrHasBallCapsule: what keeps a party Pokémon out of the boxes. */
+function boxRefusal(registries: Registries, mon: Pokemon): 'mail' | 'capsule' | null {
+  if (holdsMail(registries, mon)) return 'mail';
+  return mon.capsule ? 'capsule' : null;
+}
 
 /** WITHDRAW: the box Pokémon joins the end of the party. */
 export function withdraw(state: GameState, box: number, slot: number): StorageRefusal | null {
@@ -71,11 +79,20 @@ export function withdraw(state: GameState, box: number, slot: number): StorageRe
   return null;
 }
 
+/** Decomp STORE_MON_CHECK_CAN_STORE_MON (before the box is chosen): the last Pokémon able to battle, then Mail, then a Ball Capsule. */
+export function depositRefusal(state: GameState, registries: Registries, partySlot: number): 'last-mon' | 'mail' | 'capsule' | null {
+  const mon = state.party[partySlot];
+  if (!mon) throw new Error(`storage: no Pokémon in party slot ${partySlot}`);
+  if (isLastBattler(state, partySlot)) return 'last-mon';
+  return boxRefusal(registries, mon);
+}
+
 /** DEPOSIT: the party Pokémon goes to the first free slot of `box` (a Sky Forme Shaymin as Land, decomp PCBoxes_TryStoreBoxMonInBox). */
 export function deposit(state: GameState, registries: Registries, partySlot: number, box: number): StorageRefusal | null {
   const mon = state.party[partySlot];
   if (!mon) throw new Error(`storage: no Pokémon in party slot ${partySlot}`);
-  if (isLastBattler(state, partySlot)) return 'last-mon';
+  const refusal = depositRefusal(state, registries, partySlot);
+  if (refusal) return refusal;
   const free = firstFreeSlot(state, box);
   if (free < 0) return 'box-full';
   storedInBox(registries, mon);
@@ -94,11 +111,18 @@ export function moveMon(state: GameState, registries: Registries, from: MonPlace
   if (!mon) throw new Error(`storage: nothing to move at ${JSON.stringify(from)}`);
   const other = to.area === 'party' && to.slot >= state.party.length ? null : monAt(state, to);
   if (from.area === 'party' && to.area === 'box') {
+    const kept = boxRefusal(registries, mon);
+    if (kept) return kept;
     // The party loses `mon` and gains `other` (if any).
     const stays = state.party.filter((m, i) => i !== from.slot);
     if (!(other && canBattle(other)) && !stays.some(canBattle)) return 'last-mon';
   }
   if (from.area === 'box' && to.area === 'party' && !other && state.party.length >= PARTY_SIZE) return 'party-full';
+  if (from.area === 'box' && to.area === 'party' && other) {
+    // The party Pokémon swapped out goes into the box.
+    const kept = boxRefusal(registries, other);
+    if (kept) return kept;
+  }
   if (from.area === 'party' && to.area === 'party') {
     const target = Math.min(to.slot, state.party.length - 1);
     const a = state.party[from.slot]!;
@@ -119,15 +143,16 @@ export function moveMon(state: GameState, registries: Registries, from: MonPlace
 /**
  * Why RELEASE is refused (decomp BoxAppMan_CheckReleaseMonValid, in its order): an Egg, a Pokémon holding
  * Mail (decomp Item_IsMail: the mail pocket's items), the party's last Pokémon able to battle
- * (BoxAppMan_OnLastAliveMon). The DS also refuses a Pokémon with a Ball Capsule; seals are not modelled.
+ * (BoxAppMan_OnLastAliveMon), and one with a Ball Capsule.
  */
-export type ReleaseRefusal = 'egg' | 'mail' | 'last-mon';
+export type ReleaseRefusal = 'egg' | 'mail' | 'capsule' | 'last-mon';
 
 export function releaseRefusal(state: GameState, registries: Registries, at: MonPlace): ReleaseRefusal | null {
   const mon = monAt(state, at);
   if (!mon) throw new Error(`storage: nothing to release at ${JSON.stringify(at)}`);
   if (mon.isEgg) return 'egg';
-  if (mon.heldItem && registries.items.get(mon.heldItem)!.pocket === 'mail') return 'mail';
+  if (holdsMail(registries, mon)) return 'mail';
+  if (mon.capsule) return 'capsule';
   if (at.area === 'party' && canBattle(mon) && isLastBattler(state, at.slot)) return 'last-mon';
   return null;
 }

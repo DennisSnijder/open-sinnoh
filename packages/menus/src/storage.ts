@@ -21,6 +21,7 @@ import {
   BOX_NAME_MAX,
   boxCount,
   deposit,
+  depositRefusal,
   giveItemTo,
   monAt,
   moveMon,
@@ -54,8 +55,8 @@ export const STORAGE_MESSAGES = Array.from({ length: 54 }, (_, i) => storageText
 const THEMES = 6;
 const WALLPAPERS_PER_THEME = 4;
 const MODE_TITLES: Record<StorageMode, MenuKey> = { deposit: 'pcDeposit', withdraw: 'pcWithdraw', move: 'pcMove', items: 'pcItems', compare: 'pcCompare' };
-const REFUSALS: Record<StorageRefusal, MenuKey> = { 'party-full': 'boxPartyFull', 'box-full': 'boxBoxFull', 'last-mon': 'boxLastMon' };
-const RELEASE_REFUSALS: Record<ReleaseRefusal, MenuKey> = { egg: 'boxCantReleaseEgg', mail: 'boxRemoveMail', 'last-mon': 'boxLastMon' };
+const REFUSALS: Record<StorageRefusal, MenuKey> = { 'party-full': 'boxPartyFull', 'box-full': 'boxBoxFull', 'last-mon': 'boxLastMon', mail: 'boxRemoveMail', capsule: 'boxDetachCapsule' };
+const RELEASE_REFUSALS: Record<ReleaseRefusal, MenuKey> = { egg: 'boxCantReleaseEgg', mail: 'boxRemoveMail', capsule: 'boxDetachCapsule', 'last-mon': 'boxLastMon' };
 /** The markings window's rows: the six marks, CONFIRM, CANCEL (decomp BOX_MENU_CIRCLE … BOX_MENU_MARK_CANCEL). */
 const MARKS = 6;
 /** Decomp enum CompareMode, in the compare button's order. */
@@ -122,6 +123,8 @@ export function storageScreen(ctx: MenuContext, mode: StorageMode): Screen {
     label: t.message(storageText(63)),
     run: () => {
       menu = null;
+      const r = depositRefusal(s, ctx.registries, place.slot);
+      if (r) return refused(r);
       depositing = place.slot;
       area = 'header';
       cursor = 0;

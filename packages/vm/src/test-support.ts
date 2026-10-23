@@ -2,7 +2,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { BUTTONS, DEFAULT_CLOCK, emptyDaycare, loadPacks, readPackFolder, type Button, type ClockTime, type Id, type Pokemon } from '@opensinnoh/core';
-import { newPoketchState, newRoamerState, REGISTRIES, setupPokemon, newFashionCase } from '@opensinnoh/contracts';
+import { newPoketchState, newRoamerState, REGISTRIES, setupPokemon, newFashionCase, newSealCase } from '@opensinnoh/contracts';
 import type { AudioHost, BattleLogEntry, BattleRequest, BattleResult, Facing, FieldHost, GameState, InputFrame, Labels, PlayerPosition, Registries, ScriptRunner, StubLog } from '@opensinnoh/contracts';
 import { createScriptRunner } from './runner.ts';
 import { TEXT_SPEED } from '@opensinnoh/text';
@@ -25,7 +25,7 @@ export function testMon(registries: Registries, species: string, level: number, 
 
 export function newState(): GameState {
   return {
-    schemaVersion: 21,
+    schemaVersion: 22,
     packs: [],
     names: { player: 'Ari', rival: 'Bo' },
     gender: 'male',
@@ -66,6 +66,7 @@ export function newState(): GameState {
     berryPatches: [],
     poffins: [],
     fashionCase: newFashionCase(),
+    sealCase: newSealCase(),
     contestPhotos: [null, null, null, null, null],
     signature: null,
     options: { sound: 0, battleScene: 0, battleStyle: 0, buttonMode: 0, frame: 0 },

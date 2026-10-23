@@ -50,3 +50,52 @@ export interface SealTables {
   trainerCapsules: BallSeal[][];
   delays: number[];
 }
+
+/** Decomp trainer_data.c → Pokemon_SetBallSeal: an NPC trainer's Pokémon with cbSeal n ≥ 1 has capsule id 1 and a copy of trainer capsule n − 1. */
+export function trainerCapsule(tables: SealTables, ballSeal: number): { id: number; seals: BallSeal[] } {
+  const seals = tables.trainerCapsules[ballSeal - 1];
+  if (!seals) throw new Error(`seals: no trainer capsule ${ballSeal}`);
+  return { id: 1, seals: seals.map((s) => ({ ...s })) };
+}
+
+/** The capsule grid's places (decomp CapsuleGraphics_GetCapsuleGridLocation): capsule i's centre on the top screen. */
+export const capsuleGridAt = (i: number): { x: number; y: number } => ({ x: 40 + 56 * (i % 4), y: 27 + 53 * Math.floor(i / 4) });
+
+/**
+ * The Ball Capsule editor (decomp applications/capsule_menu; docs/research/seals.md §5), one composed screen in DS pixels:
+ * - `select`: the capsule grid (the top screen: `capsule/main2`, the 12 capsules at `capsuleGridAt`, each holder's
+ *   party icon at (−16, +12) from it, the cursor and SHIFT's second cursor), the message window and the capsule menu.
+ * - `edit`: the touch screen (`capsule/sub3`): the seal list page (`list`, slot i at (19 + 56·(i % 2), 23 + 24·⌊i / 2⌋)),
+ *   the loose counts, the page arrows, Test, CONFIRM and CANCEL, the capsule and its seals (`seals`, centres, back to
+ *   front; `ghost` while one is held outside the circle). The top screen's seal-name line folds into `status`.
+ * - `test`: the Test's still (OpenSinnoh: the DS throws the Pokémon and plays the seals' effect): `capsule/main3`, the
+ *   Pokémon's front picture and the capsule's seals around it where the send-out effect starts them.
+ * Seals are their `capsule/seals` cell (the seal type's NCGR member − 184). Taps: `capsule:<i>` (select: the cursor to
+ * capsule i and its menu), `menu:<i>`, `next`, `yes`, `no`, `back`; in edit the stylus sends `seal:<x>,<y>` (DS px)
+ * while it is down and `seal-up` when it lifts, and the buttons are hit by their DS touch rects.
+ */
+export interface CapsuleEditorView {
+  app: 'capsule-editor';
+  screen: 'select' | 'edit' | 'test';
+  capsules: { sealed: boolean; holder: { species: import('@opensinnoh/core').Id; form: number; egg: boolean } | null }[];
+  cursor: number;
+  shift: number | null;
+  seals: { cell: number; x: number; y: number; ghost: boolean }[];
+  /** The list page's slots: the seal's cell and its loose count, right-aligned in 3 digits. */
+  list: { cell: number; count: string }[];
+  page: { index: number; count: number };
+  /** The UI sprite drawn pressed (frame 1). */
+  pressed: 'page-up' | 'page-down' | 'test' | 'confirm' | 'cancel' | null;
+  buttons: { confirm: string; cancel: string };
+  /** The keys' hand (OpenSinnoh: the DS edits by touch only), at the focused place; `grabbing` while it holds a seal. */
+  hand: { x: number; y: number; grabbing: boolean } | null;
+  /** The seal-name line: the touched seal's name, or the editor's refusal ("There's no more room!"). */
+  status: string | null;
+  message: { text: string; waiting: boolean } | null;
+  menu: { entries: { label: string }[]; cursor: number } | null;
+  yesNo: { yes: string; no: string; cursor: 0 | 1 } | null;
+  /** The Test's Pokémon (front picture, frame 0). */
+  test: { species: import('@opensinnoh/core').Id; form: number; female: boolean; shiny: boolean } | null;
+  /** The screens dim (the cancel prompt). */
+  dim: boolean;
+}

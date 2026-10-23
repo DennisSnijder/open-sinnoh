@@ -86,9 +86,9 @@ export function m3aHandlers(r: Runner): Record<string, Handler> {
         if (result.app !== 'party') throw new Error(`select_move_tutor_pokemon: got a ${result.app} result`);
         picked = result.slot;
       }),
-    // Decomp ScrCmd_OpenPartyMenuForTrade: PARTY_MENU_MODE_NPC_TRADE, which picks like SELECT_NO_PROMPT (no ball seals here).
+    // Decomp ScrCmd_OpenPartyMenuForTrade: PARTY_MENU_MODE_NPC_TRADE, which picks like SELECT_NO_PROMPT after the Ball Capsule check.
     open_party_menu_for_trade: (_t, c) =>
-      r.openApp(c, { app: 'party', mode: 'select' }, (result) => {
+      r.openApp(c, { app: 'party', mode: 'trade' }, (result) => {
         if (result.app !== 'party') throw new Error(`open_party_menu_for_trade: got a ${result.app} result`);
         picked = result.slot;
       }),

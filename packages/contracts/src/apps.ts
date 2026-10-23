@@ -117,6 +117,11 @@ export type AppRequest =
    */
   | { app: 'mart'; mart: Id; countVar: Id | null; greeting: string | null; currency?: 'bp' }
   /**
+   * Decomp ScrCmd_PokeMartSeal → Shop_Start(MART_TYPE_SEAL): the seal mart with `NewGame.seals.marts[seals]` (a
+   * MART_SEAL_ID: the Sunyshore merchant's day). BUY / CANCEL only; seals go to the Seal Case.
+   */
+  | { app: 'mart'; seals: number; greeting: string | null }
+  /**
    * 0.34.0. Decomp PARTY_MENU_MODE_BATTLE_TOWER (sub_0204A358 → sub_0206BBFC): the party picking `count` Pokémon in order
    * for the Battle Tower, then CONFIRM. Eggs and the Battle Frontier banlist (`FrontierTables.banlist`) are NOT ABLE; the
    * result is the party slots in the order picked, or null (CANCEL or B).
@@ -148,6 +153,11 @@ export type AppRequest =
    * A on a panel returns it at once (an Egg too), CANCEL or B returns null.
    */
   | { app: 'party'; mode: 'select' }
+  /**
+   * Decomp ScrCmd_OpenPartyMenuForTrade (PARTY_MENU_MODE_NPC_TRADE): picks like `select`, but a Pokémon with a Ball
+   * Capsule asks "The Ball Capsule will be detached. Will that be OK?" first (YES detaches it and picks, NO goes back).
+   */
+  | { app: 'party'; mode: 'trade' }
   /** Decomp ScrCmd_OpenPokemonStorage (enum BoxMode): the PC boxes in one mode (0.15.0; `compare` 0.20.0). */
   | { app: 'storage'; mode: StorageMode }
   /**
@@ -266,6 +276,8 @@ export type AppRequest =
   | { app: 'contest' }
   /** 0.35.1. Decomp ScrCmd_0A8 (the lobby's frames): the contest photo of type `slot` (`GameState.contestPhotos`). */
   | { app: 'contest-photo'; slot: number }
+  /** Decomp ScrCmd_OpenSealCapsuleEditor (the PC's BALL CAPSULES): the Ball Capsule editor (contracts `CapsuleEditorView`). */
+  | { app: 'capsule-editor' }
   | EvolutionRequest;
 
 /**
@@ -371,6 +383,7 @@ export type AppResult =
   | { app: 'contest' }
   /** 0.35.1. The photo viewer closed. */
   | { app: 'contest-photo' }
+  | { app: 'capsule-editor' }
   /** 0.27.30. Rowan's intro (packages/menus `createRowanIntro`): the names and gender the new game starts with. */
   | { app: 'rowan-intro'; names: { player: string; rival: string }; gender: 'male' | 'female' };
 
@@ -515,7 +528,8 @@ export type AppView =
   | import('./underground.ts').UndergroundBaseView
   | import('./underground.ts').UndergroundPcView
   | import('./contests.ts').ContestView
-  | import('./contests.ts').ContestPhotoView;
+  | import('./contests.ts').ContestPhotoView
+  | import('./seals.ts').CapsuleEditorView;
 export type AppName = AppView['app'];
 
 /**
@@ -565,7 +579,7 @@ export interface SaveView {
 export interface PartyView {
   app: 'party';
   /** 0.34.0 `order`: the Battle Tower's pick (`party-order`): `notes` say each panel's entry or BANNED, `confirm` is set. */
-  mode: 'field' | 'give' | 'use' | 'teach' | 'battle' | 'daycare' | 'select' | 'feed' | 'order' | 'contest';
+  mode: 'field' | 'give' | 'use' | 'teach' | 'battle' | 'daycare' | 'select' | 'feed' | 'order' | 'contest' | 'trade' | 'ball-seal';
   title: string;
   slots: (PartySlotView | null)[];
   prompt: string;
@@ -598,6 +612,8 @@ export interface PartySlotView {
   /** Core StatusCondition; `fainted` at 0 HP (decomp SUMMARY_CONDITION_FAINTED). */
   status: 'none' | 'sleep' | 'poison' | 'toxic' | 'burn' | 'freeze' | 'paralysis' | 'fainted';
   heldItem: Id | null;
+  /** The Ball Capsule marker (decomp PartyMenu_DrawMemberBallSeal, `party/held` cell 2 at the item marker + 8 px). */
+  capsule?: true;
 }
 
 /**
@@ -1000,6 +1016,11 @@ export interface MartView {
    * (`money.label` empty: the BP window has one line), and the panel takes the frontier palette (`shop/panel_frontier`).
    */
   currency?: 'bp';
+  /**
+   * The seal mart (MART_TYPE_SEAL): BUY / CANCEL, no item icon (the panel `shop/panel_seal`); rows and `item` name a seal
+   * as `seal:<id>`; "In Bag" counts the seals owned.
+   */
+  seals?: true;
 }
 
 /** A Pokémon in the PC (box or party column): its icon and held item. */

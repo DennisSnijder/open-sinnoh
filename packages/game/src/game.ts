@@ -18,6 +18,7 @@ import {
   markSeen,
   newGameRecord,
   newFashionCase,
+  newSealCase,
   storeInBox,
   trainerIdFor,
   type AppHost,
@@ -281,7 +282,7 @@ export function newGameState(record: NewGame, registries: Pick<Registries, 'zone
   const fieldRng = new Prng(fieldSeed(seed));
   const dailyRandom = newDailyRandom(fieldRng.next());
   return {
-    schemaVersion: 21,
+    schemaVersion: 22,
     packs: order.map((p) => ({ ...p })),
     names: { ...(options?.names ?? record.names) },
     gender: options?.gender ?? record.gender,
@@ -328,6 +329,7 @@ export function newGameState(record: NewGame, registries: Pick<Registries, 'zone
     berryPatches: record.berries ? newBerryPatches(record.berries) : [],
     poffins: [],
     fashionCase: newFashionCase(),
+    sealCase: newSealCase(),
     contestPhotos: [null, null, null, null, null],
   };
 }

@@ -46,6 +46,7 @@ import { readZoneHeaders, type ZoneHeader } from './formats/zone-headers.ts';
 import { charTable, Names, type CharmapFile, type NamesFile } from './names.ts';
 import { convertBaseCursor, readUndergroundTables } from './underground.ts';
 import { readContestTables } from './contests.ts';
+import { readSealTables, SEAL_TYPE_SIZE } from './seals.ts';
 import { ACTING_MESSAGES, AI_RULE_SIZE, AI_RULES, BUTTON_PALETTES, CONTEST_EFFECTS, EFFECT_CLASS_SIZE, EFFECT_SIZE, readActingTables } from './contest-acting.ts';
 import { DANCE_BUTTONS, DANCE_CHOICE_SIZE, DANCE_LEVELS, DANCE_POSITIONS, DANCE_SONG_SIZE, DANCE_TINTS, DANCE_VARIANT_SIZE, readContestDance } from './contest-dance.ts';
 
@@ -168,6 +169,12 @@ const TABLES = {
   martCommon: { where: 'arm9', offset: 0xebafc, count: 19, size: 4, sha1: '629e5850dc3cb17581aea879813e36eeed80c6ea' },
   /** mart_items.h PokeMartSpecialties: a pointer per MART_SPECIALTIES_ID_*. */
   martSpecialties: { where: 'arm9', offset: 0x100b1c, count: 20, size: 4, sha1: '26e5e6547df95770d129d816bae163fa3201b9f1' },
+  /** capsule_menu/main.c sealTypeValues: a row per seal id 0–80 (seals.ts). */
+  sealTypes: { where: 'arm9', offset: 0xf64d0, count: 81, size: SEAL_TYPE_SIZE, sha1: 'b722c8b73768aadb1bd5caba5a8c3477a9c43978' },
+  /** mart_items.h SunyshoreMarketDailyStocks: a pointer per MART_SEAL_ID_SUNYSHORE_* (Monday … Sunday) to a 0xFFFF-ended list. */
+  sealMarts: { where: 'arm9', offset: 0x100b00, count: 7, size: 4, sha1: '8c6bc435bd5fe5d257264b242e39f1dbeeb48252' },
+  /** ov12_02237EA0's delay table: a seal emitter's start delay in frames by distance step. */
+  sealDelays: { where: 12, offset: 0x1b420, count: 7, size: 1, sha1: 'f5af31e595e4a5912f406ed78354562d53375f26' },
   /** gTrainerAITable (overlay trainer_ai = 14): the AI flag table and bytecode, through Terminate's PopOrEnd. */
   aiScript: { where: 14, offset: 0x4c84, count: 10607, size: 4, sha1: '981183191070373d80362e94c09f8456f7f4f793' },
   /** trainer_ai.c sNoDamageCalcMoveEffects, sAltPowerMoveEffects (u16, 0xFFFF-ended) and sWeightToPower. */
@@ -1284,6 +1291,16 @@ export async function importPlatinum(
         },
       ),
       accessories: accessoryPictures(fs),
+    });
+    newGame.seals = readSealTables({
+      types: await table('sealTypes'),
+      marts: await table('sealMarts'),
+      arm9: fs.arm9(),
+      arm9Ram: fs.header.arm9RamAddress,
+      delays: await table('sealDelays'),
+      trainerCapsules: fs.file('/application/custom_ball/edit/pl_cb_data.narc'),
+      names: bankTexts[bankIndex('TEXT_BANK_BALL_SEAL_NAMES')]!.length,
+      descriptions: bankTexts[bankIndex('TEXT_BANK_UNK_0542')]!.length,
     });
     const e = SPECIAL_ENCOUNTERS;
     const ints = (b: Uint8Array, n: number, what: string) => {

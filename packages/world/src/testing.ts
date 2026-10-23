@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect } from 'vitest';
 import { DEFAULT_CLOCK, emptyDaycare, loadPacks, readPackFolder, type Button, type ClockTime, type Id } from '@opensinnoh/core';
-import { newPoketchState, newRoamerState, REGISTRIES, setupPokemon, type BattleSetup, type Facing, type GameState, type InputFrame, type MapEntry, type Registries, type ScriptRunner, type ScriptStart, type ScriptView, newFashionCase } from '@opensinnoh/contracts';
+import { newPoketchState, newRoamerState, REGISTRIES, setupPokemon, type BattleSetup, type Facing, type GameState, type InputFrame, type MapEntry, type Registries, type ScriptRunner, type ScriptStart, type ScriptView, newFashionCase, newSealCase } from '@opensinnoh/contracts';
 import type { Pokemon } from '@opensinnoh/core';
 import { createWorld, type OpenSinnohWorld, type WorldDeps } from './world.ts';
 
@@ -63,7 +63,7 @@ export class FakeRunner implements ScriptRunner {
 
 export function newState(zone = 'ROOM', x = 14, z = 16, facing: Facing = 'up'): GameState {
   return {
-    schemaVersion: 21,
+    schemaVersion: 22,
     packs: [],
     names: { player: 'Ari', rival: 'Bo' },
     gender: 'male',
@@ -104,6 +104,7 @@ export function newState(zone = 'ROOM', x = 14, z = 16, facing: Facing = 'up'): 
     berryPatches: [],
     poffins: [],
     fashionCase: newFashionCase(),
+    sealCase: newSealCase(),
     contestPhotos: [null, null, null, null, null],
     signature: null,
     options: { sound: 0, battleScene: 0, battleStyle: 0, buttonMode: 0, frame: 0 },
