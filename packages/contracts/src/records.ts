@@ -1092,6 +1092,8 @@ export interface NewGame {
   underground?: import('./underground.ts').UndergroundTables;
   /** 0.35.0. The Super Contests' tables (`ContestTables`). Absent: the contest ops fail loudly. */
   contests?: import('./contests.ts').ContestTables;
+  /** The seal tables (`SealTables`). Absent: the seal ops and the capsule editor fail loudly. */
+  seals?: import('./seals.ts').SealTables;
 }
 
 /**
