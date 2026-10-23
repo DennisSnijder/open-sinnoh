@@ -2,8 +2,9 @@
 # A constructed start in the plaza; each of the five facilities is entered from the plaza and its single-battle
 # receptionist asked. The Battle Tower is real (its own sys-tower-* replays): here its receptionist's
 # menu is left with B. The other four end on the decomp's own decline:
-# the Hall, Castle and Arcade check the party with a stub that answers "not enough" (call_battle_*_function 0), so
-# the receptionist prints the ROM's not-eligible message (message_seen_banlist_species, real); the Factory (rentals, no
+# the Hall (real) opens its party pick, left with B, which ends the challenge; the Castle and Arcade check the party
+# with a stub that answers "not enough" (call_battle_*_function 0), so the receptionist prints the ROM's not-eligible
+# message (message_seen_banlist_species, real); the Factory (rentals, no
 # party check) heals, then asks to save (the in-script save is real since F1) and B declines, which ends the challenge. No battle, no warp but the lobby doors, no hang; back out to the plaza each time.
 # Generated with a shortest-path walker (see tests/integration/m6-turnback.rom.test.ts), checked by m6-systems.
 party 0 platinum:SPECIES_GARCHOMP 60 platinum:MOVE_EARTHQUAKE platinum:MOVE_DRAGON_CLAW
@@ -65,6 +66,11 @@ until position 7 9 300
 advance text 3000
 +8 press a
 +1 release a
+advance text 3000
+until app party 600
++2 press b
++1 release b
+until app none 300
 advance text 3000
 until idle 600
 +0 assert map platinum:MAP_HEADER_BATTLE_HALL
