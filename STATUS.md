@@ -25,7 +25,8 @@ Versions: contracts 0.35.1, importer `platinum-97`, HeartGold follower add-on `h
   the Pokémon Center, the Pokétch (25 apps), Mystery Gift, the Day Care and eggs, the Hall of Fame and credits.
 - **Side and post-game systems:** berries, move tutors, the move relearner and deleter, NPC trades, honey
   trees, the Poké Radar, swarms, the Trophy Garden, Poffins and Amity Square, the Underground's mining,
-  vendors and fossil revival, legendaries, roamers and forms, the Battle Tower (singles, doubles, multi),
+  vendors and fossil revival, legendaries, roamers and forms, the Battle Tower (singles, doubles, multi), the Battle Factory and the Battle Hall
+  (singles and doubles, with Thorton and Argenta),
   the event legendaries through Mystery Gift, and the offline Super Contest circuit (reception, rivals, judging,
   results, ribbons, prizes, Master flags, the visual round's dress-up and judging, the lobby's photo frames, the Dance
   Competition and the acting round).
@@ -37,7 +38,7 @@ Versions: contracts 0.35.1, importer `platinum-97`, HeartGold follower add-on `h
 
 ## Not yet
 
-- The Battle Frontier's other facilities (Factory, Hall, Castle, Arcade).
+- The Battle Frontier's Castle and Arcade; the Frontier records app; the Factory's and Hall's particle effects.
 - The Villa, TV shows and the journal, Seals and Ball Capsules, the Underground's traps and secret bases.
 - Wireless and Wi-Fi features: they answer as "no connection".
 - Mods beyond the current pack format (no editor or mod tooling yet).

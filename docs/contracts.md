@@ -36,6 +36,12 @@ a reviewed step: bump `CONTRACTS_VERSION` and add a line below.
   replays, stepped by `date`/`time` lines. Periods are core `dayPeriod(hour)` (decomp TimeOfDayForHour).
 
 ## Changelog
+- 0.37.0 (the Battle Factory and the Battle Hall, on 0.36.2; same schema v20, optional fields): `FrontierTables.factory`
+  (`BattleFactoryTables`, `FactoryPool`, `FactoryAppArt`) and `.hall` (`BattleHallTables`, `HallAppArt`);
+  `FrontierSceneData.fgFixed?`; `FrontierView` gains `fgScroll?`, `fgBelow?`, `fgFixed?`, `fgBlend?`, `fgHidden?`,
+  `shake?`, `window?`, `pokemon?`; `FrontierBattle.facility` `factory` | `hall` and `ai?`; `FrontierState.factory?`
+  (`FactoryState`) and `.hall?` (`HallState`), `FRONTIER_CHALLENGE`; apps `factory` (`FactoryRequest`, `FactoryView`,
+  `FactoryMonView`) and `hall-board` (`HallBoardRequest`, `HallBoardView`); `party-order` request `hall?`.
 - 0.36.2 (the contests' acting round, on 0.35.2; same schema v20): `ContestTables.acting?` (`ContestActingTables`: `ContestEffect` per effect, `typeMatch`, `ContestActingMessage`s, `ContestAiRule`s, `buttonPalettes`); `ContestSession.acting?` (`ContestActingProgress`); `ContestRoundView` gains `ContestActingRoundView` (`ContestActingChoiceView`; taps `move:<n>`, `judge:<n>`, `back`); `ContestMoveAnimationRequest`, `ContestMoveAnimation`, `CreateContestMoveAnimation` and `AppHost.contestAnimation?`; `scriptUse(code, friendlyFire, contest)`; `battleAnimData.backgrounds` sheets gain cell 2 (the contest screen), `AnimBgView.effect.cell` 2 in a contest.
 - 0.35.2 (the Dance Competition; same schema; importer platinum-98): `ContestTables.dance` (`ContestDanceTables`, `ContestDanceSong`: overlay 17's songs, song per rank and type, measure variants, the AI's spread and repeat, stage places, grade spots, note rows, tints, shades by place, button rects); `ContestRoundView` gains `ContestDanceRoundView` (`ContestDancerView`; taps `step:<0–3>`, `next`).
 - 0.35.1 (the visual round; importer platinum-97): `ContestTables.accessories` (`ContestAccessory`: size and opaque mask per accessory), `PokemonFace.opaque` (front faces' opaque runs), `ContestRoundView` gains `ContestVisualRoundView` (`ContestDressView`, `ContestVisualScoringView`, `ContestPicture`), `AppRequest`/`AppResult` `contest-photo` and `ContestPhotoView` (scr_cmd_0a8). Replays: `until state` and `assert state` read the open app's view under `app…`.

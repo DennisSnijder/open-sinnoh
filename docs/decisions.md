@@ -484,8 +484,14 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   space-insensitive, once per save; the plain codes are not in the repo. Tests and replays use test-only
   codes and a dev/test flag (`grantDevEvent`) that makes the same edits.
 - **Battle Tower** runs on the frontier VM; the challenge's saved part is `GameState.frontier`. No
-  wireless: link entries answer cancel and go back to their menus. The other facilities and Brains are
-  planned.
+  wireless: link entries answer cancel and go back to their menus.
+- **Battle Factory and Battle Hall** run on the same frontier VM; each challenge is a services object the frontier
+  owns from its Init to its Free command, and their saved parts are `FrontierState.factory` and `.hall`. Their draws
+  are the game's RNG (the decomp's LCRNG_Next), not a facility LCG. Their tables (pools, ranges, BP, the Hall's 477
+  opponents and their types, ranks, milestones) are read from overlay 104 and arm9, checked against pl_btdpm,
+  pl_bsdpm and pl_btdtr. Link-only commands (the multi challenges) are left unimplemented; no single-player path
+  reaches them. The rental app and the type board are DS scenes from the ROM's art; the facilities' particle
+  effects are logged stand-ins. The Castle and the Arcade are planned.
 - **Underground (solo):** the Explorer Kit, mining from ROM tables, spheres, vendors, fossils. Seeds come
   from the clock and the trainer id, not ticks, so boards are the same whatever replays wait. No link
   play; traps and secret bases keep their state for later.
