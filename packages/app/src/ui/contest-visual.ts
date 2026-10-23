@@ -247,7 +247,8 @@ function drawVisual(s: ContestCanvas, d: DrawContext, v: ContestVisualRoundView)
     keys.push(v.intro.limit, v.intro.theme);
     windows.push(() => {
       const theme = framed(d, 'contest-theme', d.text(v.intro!.theme, 'ink'));
-      return atTiles(theme, 2, 1, 27, 2);
+      // The window (2, 1) 27 × 2 in its frame, a tile around it.
+      return atTiles(theme, 1, 0, 29, 4);
     });
   }
   if (v.message) {

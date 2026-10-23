@@ -219,7 +219,8 @@ export function visualRound(ctx: ContestRoundContext): ContestRound {
   type Phase = 'fade-bgm' | 'messages' | 'stage-in' | 'dress' | 'finishing' | 'ending' | 'stage-out' | 'judging' | 'over';
   let phase: Phase = 'fade-bgm';
   let timer = 0;
-  let fade = 16;
+  /** The intro shows the top screen's clock; the touch screen fades in from black for the dress-up. */
+  let fade = 0;
   let message: { pages: string[]; page: number; then: () => void } | null = null;
   let frames = CLOCK_FRAMES;
   let shown = 60;
@@ -248,6 +249,7 @@ export function visualRound(ctx: ContestRoundContext): ContestRound {
           se(SEQ.stageIn);
           phase = 'stage-in';
           timer = 0;
+          fade = 16;
         }),
       ),
     );

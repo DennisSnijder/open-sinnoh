@@ -86,6 +86,8 @@ until state app.round.message.waiting true 300
 until state app.round.message.waiting true 300
 +0 press a
 +1 release a
+until state app.round.scoring.curtain false 120
++20 screenshot contest-hearts
 until state app.round.message.waiting true 300
 +0 press a
 +1 release a
