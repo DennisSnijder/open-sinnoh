@@ -35,6 +35,7 @@ const tables = (accessories: ContestAccessory[], themes: number[][] = []): Conte
   playerGfx: { male: 1, female: 2 },
   playerSprite: { male: 'test:M' as Id, female: 'test:F' as Id },
   accessories,
+  dance: { songs: [], choice: [], variants: [], aiJitter: [], aiRepeat: [], stage: [], grades: [], noteRows: [], tints: [], shades: [], buttons: [] },
 });
 
 describe('the dress-up limits and the Fashion Case pages', () => {

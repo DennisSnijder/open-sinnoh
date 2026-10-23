@@ -409,7 +409,7 @@ export interface AppHost {
   /** 0.33.0. The visit's mining generator (core `miningRand`, CommSys_Seed at the arrival): every board rolls on it in turn. */
   undergroundMiningRand?(): import('@opensinnoh/core').Rand32 | null;
   /**
-   * 0.36.1. The contests' move animations (packages/battle `createContestMoveAnimation`). Absent in a game without the
+   * 0.36.2. The contests' move animations (packages/battle `createContestMoveAnimation`). Absent in a game without the
    * battle engine (menu tests); a game that loads the engine lazily holds the contest app until it is in.
    */
   contestAnimation?: import('./contests.ts').CreateContestMoveAnimation;

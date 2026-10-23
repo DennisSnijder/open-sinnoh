@@ -967,7 +967,7 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
       themes: arr(arr(int(0, 255))),
       playerGfx: obj({ male: int(0, 0xffff), female: int(0, 0xffff) }),
       playerSprite: obj({ male: ref('sprites'), female: ref('sprites') }),
-      // 0.36.1: the acting round's tables (contracts ContestActingTables).
+      // 0.36.2: the acting round's tables (contracts ContestActingTables).
       acting: opt(obj({
         effects: arr(obj({
           description: arr(ref('texts')),
@@ -981,6 +981,27 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
         rules: arr(obj({ slot: int(1, 4), condition: int(1, 28), target: int(0, 255), judges: int(0, 3), weights: arr(int(-0x8000, 0x7fff)) })),
         buttonPalettes: arr(arr(int(0, 0xffff))),
       }, (v) => ((v.effects as unknown[]).length !== 24 ? 'contests.acting.effects must have the 24 effects' : (v.typeMatch as unknown[]).length !== 5 ? 'contests.acting.typeMatch must be 5 × 5' : undefined))),
+      // 0.35.2: the Dance Competition's tables (contracts ContestDanceTables).
+      dance: obj({
+        songs: arr(obj({ sequence: ref('sequences'), bpm: int(1, 0xffff), measures: int(1, 255), moves: int(1, 8), leadIn: int(0, 255), gap: int(0, 255), windows: arr(int(0, 255)) }, (v) => ((v.windows as unknown[]).length !== 4 ? 'a dance song has 4 grading windows' : undefined))),
+        choice: arr(arr(obj({ song: int(0), variant: int(0) }))),
+        variants: arr(obj({ tilemap: int(0, 0xffff), beats: int(1, 255), tiles: int(1, 32) })),
+        aiJitter: arr(int(0, 255)),
+        aiRepeat: arr(int(0, 100)),
+        stage: arr(obj({ x: int(-0x8000, 0x7fff), y: int(-0x8000, 0x7fff), z: int(-0x8000, 0x7fff) })),
+        grades: arr(obj({ x: int(-0x8000, 0x7fff), y: int(-0x8000, 0x7fff) })),
+        noteRows: arr(int(0, 255)),
+        tints: arr(obj({ color: int(0, 0x7fff), level: int(0, 16) })),
+        shades: arr(int(0, 16)),
+        buttons: arr(obj({ x: int(0, 255), y: int(0, 255), w: int(1, 256), h: int(1, 256) })),
+      }, (v) => {
+        const d = v as { songs: unknown[]; variants: unknown[]; choice: { song: number; variant: number }[][]; aiJitter: unknown[]; aiRepeat: unknown[]; stage: unknown[]; grades: unknown[]; noteRows: unknown[]; tints: unknown[]; buttons: unknown[] };
+        if (d.choice.length !== 4 || d.choice.some((r) => r.length !== 5)) return 'contests.dance.choice is 4 ranks × 5 types';
+        if (d.choice.flat().some((c) => c.song >= d.songs.length || c.variant >= d.variants.length)) return 'contests.dance.choice names a song or variant it lacks';
+        if ([d.aiJitter, d.aiRepeat, d.stage, d.grades, d.noteRows, d.buttons].some((a) => a.length !== 4)) return 'contests.dance has 4 AI levels, ranks, stage places and buttons';
+        if (d.tints.length !== 6) return 'contests.dance.tints has 6 tints';
+        return undefined;
+      }),
       // 0.35.1: the accessories' pictures (sizes and masks) for the visual round.
       accessories: arr(obj({ width: lit(16, 32, 64), height: lit(16, 32, 64), mask: str() })),
     }, (v) => ((v.themes as unknown[]).length !== 12 ? 'contests.themes must have the 12 themes' : (v.accessories as unknown[]).length !== 100 ? 'contests.accessories must have the 100 accessories' : undefined))),

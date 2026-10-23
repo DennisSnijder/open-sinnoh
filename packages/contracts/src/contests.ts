@@ -105,14 +105,16 @@ export interface ContestTables {
   themes: number[][];
   playerGfx: { male: number; female: number };
   playerSprite: { male: Id; female: Id };
+  /** 0.35.2. The Dance Competition's tables (overlay 17). */
+  dance: ContestDanceTables;
   /** 0.35.1. Per accessory id (100), its picture (imageclip.narc member 1 + id): the visual round's hit tests. */
   accessories: ContestAccessory[];
-  /** 0.36.1. The acting round's tables. Absent (packs without them): the acting round fails loudly. */
+  /** 0.36.2. The acting round's tables. Absent (packs without them): the acting round fails loudly. */
   acting?: ContestActingTables;
 }
 
 /**
- * 0.36.1. The acting round's tables (docs/research/contests.md §7), read from the player's ROM:
+ * 0.36.2. The acting round's tables (docs/research/contests.md §7), read from the player's ROM:
  * - `effects` by CONTEST_EFFECT_* (a move's `contest.effect`): arm9 Unk_020F568C (`description`, the move menu's two
  *   lines in TEXT_BANK_CONTEST_EFFECTS; `appeal`, the base points, unk_04; `messages`, the outcome line per variant 0–4
  *   in TEXT_BANK_CONTEST_ACTING_COMPETITION with its argument mode, null where the ROM has 0xFFFF) and overlay 17
@@ -159,6 +161,49 @@ export interface ContestAiRule {
   target: number;
   judges: number;
   weights: number[];
+}
+
+/**
+ * 0.35.2. One Dance Competition song (overlay 17 Unk_ov17_02253084, 12-byte rows): the BGM it plays (`sequence`), its
+ * tempo (`bpm`), the measures of a dance round (`measures`, unk_04), the lead's steps a measure (`moves`, unk_05), the
+ * beats before the first round and between rounds (`leadIn` unk_06, `gap` unk_07) and the grading windows in frames
+ * (`windows`, unk_08: a step `d` frames off its half-beat is excellent up to [0] and [1], good up to [2] and [3]).
+ */
+export interface ContestDanceSong {
+  sequence: Id;
+  bpm: number;
+  measures: number;
+  moves: number;
+  leadIn: number;
+  gap: number;
+  windows: [number, number, number, number];
+}
+
+/**
+ * 0.35.2. The Dance Competition's tables (overlay 17; docs/research/contests.md §6):
+ * - `songs`; `choice[rank][type]`: the song and measure variant a contest dances to (Unk_ov17_0225312C);
+ * - `variants` (Unk_ov17_02252FC4): `tilemap` (the stage's contest_bg NSCR member), `beats` a measure (each split in
+ *   two half-beats) and `tiles`, the timeline's width in 8-px tiles;
+ * - the NPC dancers' AI (ov17_0224E930.c): `aiJitter` per AI level (Unk_ov17_02254A80, the timing spread), `aiRepeat`
+ *   per rank (Unk_ov17_02254A84, % that a lead repeats its last direction);
+ * - `stage` per stage position (0 the lead): x, y and depth (Unk_ov17_022546F4); `grades`: where a dancer's grade pops
+ *   up (Unk_ov17_022546CC); `noteRows`: its notes' row on the timeline (Unk_ov17_022549BC);
+ * - `tints`: the stage's blend after a lead step (Unk_ov17_022546DC: RGB555 colour and level /16; 0 none, 1–4 by step
+ *   code, 5 a miss); `shades`: the dancers' grey by place at the end (Unk_ov17_022549C0);
+ * - `buttons`: the touch screen's step buttons (Unk_ov17_02254564: up, down, left, right; DS px).
+ */
+export interface ContestDanceTables {
+  songs: ContestDanceSong[];
+  choice: { song: number; variant: number }[][];
+  variants: { tilemap: number; beats: number; tiles: number }[];
+  aiJitter: number[];
+  aiRepeat: number[];
+  stage: { x: number; y: number; z: number }[];
+  grades: { x: number; y: number }[];
+  noteRows: number[];
+  tints: { color: number; level: number }[];
+  shades: number[];
+  buttons: { x: number; y: number; w: number; h: number }[];
 }
 
 /**
@@ -238,7 +283,7 @@ export interface ContestSession {
   /** The player's visual-round outfit (the photo's), once the visual round has run. */
   dressUp: ContestDressUp | null;
   /**
-   * 0.36.1. The acting round's progress, written by that round while it runs (replays wait on it with `until state`):
+   * 0.36.2. The acting round's progress, written by that round while it runs (replays wait on it with `until state`):
    * the turn (0–3) and whether it waits for the player's move and judge. Absent before the round.
    */
   acting?: ContestActingProgress;
@@ -303,6 +348,7 @@ export type CreateContestRound = (kind: ContestRoundKind, ctx: ContestRoundConte
 export type ContestRoundView =
   | ContestPlaceholderRoundView
   | ContestVisualRoundView
+  | ContestDanceRoundView
   | ContestActingRoundView;
 export interface ContestPlaceholderRoundView {
   round: ContestRoundKind;
@@ -311,7 +357,7 @@ export interface ContestPlaceholderRoundView {
 }
 
 /**
- * 0.36.1. The acting round (decomp overlay017 ActingCompetition_*: ov17_0223B140.c and its presentation commands,
+ * 0.36.2. The acting round (decomp overlay017 ActingCompetition_*: ov17_0223B140.c and its presentation commands,
  * ov17_02243C28.c, ov17_022413D8.c, ov17_0223F7E4.c): the stage as the DS main screen draws it, in DS px, and the
  * touch screen's move and judge menus while the player chooses.
  * - `fade` 0–1: the screen fade from black (the round's start and end).
@@ -364,7 +410,7 @@ export interface ContestActingChoiceView {
 }
 
 /**
- * 0.36.1. A move's animation as the acting round plays it (decomp ov17_022444BC: BattleAnimSystem_StartMove with the
+ * 0.36.2. A move's animation as the acting round plays it (decomp ov17_022444BC: BattleAnimSystem_StartMove with the
  * contest flag): the performer is battler 0 (its back picture at the contestant's place, 216,112), the next
  * contestant's Pokémon the hidden battler 1 (80,42). `effectChance` is the script's effect chance (decomp unk_07: a
  * two-turn move's second pass, a Ghost's Curse, Brick Break).
@@ -389,6 +435,60 @@ export interface ContestMoveAnimation {
  * mode of the animation VM does not run (logged and counted by the factory): the act goes on without one.
  */
 export type CreateContestMoveAnimation = (request: ContestMoveAnimationRequest, deps: { registries: Registries; log: StubLog; sound?: AudioHost }) => ContestMoveAnimation | null;
+
+/**
+ * 0.35.2. The Dance Competition (decomp overlay017 ov17_0223DAD0.c; packages/menus contest/dance.ts): the stage (the
+ * top screen) and the step buttons (the touch screen's content), in DS px.
+ * - `variant`: the stage and timeline (`ContestDanceTables.variants`); `dancers` in draw order (the back row first),
+ *   each at its centre with its scale (256 = 1), turn (degrees) and `shade` (its colour toward the DS's grey 0x254a,
+ *   0–16: 16 while another dances, by place at the end);
+ * - `timeline`: `fill` px of the beat bar filled, `flash` (the half that lights up, 0–10), the step notes (`code` 1–4,
+ *   `anim` 0 the player's, 1 a rival's, 2 the step the player must copy; `frame` ticks since it appeared), the beat
+ *   ball and the progress cursor;
+ * - `grades`: EXCELLENT/GOOD/MISS over a dancer (`frame` ticks in); `hearts` flying from a dancer; `tint`: the stage's
+ *   blend toward a step's colour (RGB555, 0–16); `flash`/`fade`: white/black over the stage, 0–16;
+ * - `buttons` while the touch screen shows them: `dim` while they take no step, the pressed one (`step` 0/1 of the
+ *   press animation, null at rest; `label` px the label is pushed down), the labels (UP/JUMP, FRONT, LEFT, RIGHT);
+ * - `arrow`: over the player's dancer; `banner`: the round's instruction; `message`: the MC.
+ * Taps: `step:<0–3>` (up, down, left, right), `next`.
+ */
+export interface ContestDanceRoundView {
+  round: 'dance';
+  placeholder: false;
+  variant: number;
+  dancers: ContestDancerView[];
+  timeline: {
+    fill: number;
+    flash: { half: 0 | 1; level: number } | null;
+    notes: { x: number; y: number; code: number; anim: 0 | 1 | 2; frame: number }[];
+    ball: { x: number; y: number; frame: number } | null;
+    cursor: number | null;
+  };
+  grades: { x: number; y: number; grade: 0 | 1 | 2; text: string; frame: number }[];
+  hearts: { x: number; y: number; anim: 0 | 1 }[];
+  tint: { color: number; level: number } | null;
+  flash: number;
+  fade: number;
+  buttons: { dim: boolean; press: { dir: number; step: 0 | 1 | null; label: number } | null; labels: string[] } | null;
+  arrow: { x: number; y: number } | null;
+  banner: string | null;
+  message: AppMessage | null;
+}
+export interface ContestDancerView {
+  id: number;
+  species: Id;
+  form: number;
+  shiny: boolean;
+  female: boolean;
+  x: number;
+  y: number;
+  scale: number;
+  angle: number;
+  /** Its shadow's y (the stage floor under it, ov17_0224ABFC). */
+  ground: number;
+  shade: number;
+  player: boolean;
+}
 
 /**
  * 0.35.1. A contest photo as drawn (decomp ov22_0225AF8C): the Pokémon's front sprite (first frame) centred at

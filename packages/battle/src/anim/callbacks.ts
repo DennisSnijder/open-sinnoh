@@ -3,7 +3,7 @@
  * generic_emitter_callback*.c): run once as CreateEmitter makes the emitter. They place it at a battler's
  * particle position, aim its axis from attacker to defender, and set behaviour targets; the generic callback
  * (17) reads its modes from the SetExtraParams that follow the CreateEmitter in the script.
- * Battlers are ids; their types (solo in singles, slots in doubles) pick the tables' rows. In a contest (0.36.1) the
+ * Battlers are ids; their types (solo in singles, slots in doubles) pick the tables' rows. In a contest (0.36.2) the
  * generic callback takes the decomp's contest branches: the contest spots and axes, the contest camera angle.
  */
 import { degToIdx, s16, type Vec } from './fx.ts';

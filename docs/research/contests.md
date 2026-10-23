@@ -25,14 +25,14 @@ practice receptionist did the same without the prize.
 | Script ops | vm `contest-ops.ts` (`REAL_CONTESTS` in coverage.ts) | every op the Hall's scripts use offline (scrcmd_contests.c, the contest party menu, `message_synchronized`, the attire spin, the camera flashes, `contest_photo_has_data`) |
 | Session | `GameState.contest` (contracts `ContestSession`) | from `new_contest` to `end_contest`; never in a save (saves happen between scripts) |
 | App | menus `contest/contest.ts`, app `ui/contest.ts` | the rounds in order through the seam, then the final scoring and the results (ROM frames, font, `TEXT_BANK_CONTEST_RESULTS`, `SEQ_CON_TEST`, `SEQ_CO_KEKKA`, `SEQ_CO_FANFA`) |
-| Rounds | menus `contest/rounds.ts` | the seam's registry: the visual round (`contest/visual.ts`, §5.8), the acting round (`contest/acting.ts`, §7.8), the dance placeholder |
+| Rounds | menus `contest/rounds.ts` | the seam's registry: the visual round (`contest/visual.ts`, §5.8), the dance (`contest/dance.ts`, §6.8), the acting round (`contest/acting.ts`, §7.8) |
 | Party | menus `party.ts` mode `contest` (app `contest-select`) | ELIGIBLE/INELIGIBLE notes, ENTER/SUMMARY/CANCEL |
 | Saves | schema v20 `contestPhotos` | the winner photo per type, with the visual round's outfit |
 | Photo frames | menus `contest/photo.ts`, vm `scr_cmd_0a8` | the lobby's frames show a type's winner photo (§5.8) |
 
 Still stubs: the TV segment (`tv:contest-hall`), link ops.
 
-**Placeholder rounds.** Each logs `contest:placeholder:<round>` once ("contest round visual: placeholder …"), counted
+**Placeholder rounds** (none in use now). Each logs `contest:placeholder:<round>` once ("contest round visual: placeholder …"), counted
 in the stub log, and `CONTEST_ROUNDS_STATUS` (vm coverage.ts) puts them in the coverage report
 (`contestRoundsPlaceholder`); a ROM test checks the status against the registry. A placeholder shows the round's name
 and "Placeholder: scored by condition." and ends on A. Its outcome: visual dress-up points 0 (so the visual value is the
@@ -62,8 +62,7 @@ backdrop names are text banks 386–388; theme names TEXT_BANK_UNK_0385 messages
 TEXT_BANK_CONTEST_{TEXT, VISUAL_COMPETITION, DANCE_COMPETITION, ACTING_COMPETITION, EFFECTS, RESULTS} — all imported
 with every bank. Sequences by SDAT index: SEQ_CON_TEST 1135 (CONTEST_DRESSING_ROOM), SEQ_CO_DRESS 1169, SEQ_CO_KAWAI
 1176, KASHI 1177, UTSUK 1178, TAKUMA 1179, KAKKO 1180, KEKKA 1181, FANFA 1182, SEQ_SE_DP_KATI 1527 (shutter),
-SEQ_SE_DP_CON_* 1759–1787. The visual (§5.8) and acting (§7.8) rounds' tables and art are imported. Not imported yet: the
-dance song table and the dance round's contest_bg/contest_obj art.
+SEQ_SE_DP_CON_* 1759–1787. The three rounds' tables and art are imported (§5.8, §6.8, §7.8).
 
 ## 4. The round seam (contracts `contests.ts`)
 
@@ -300,12 +299,12 @@ Link play with `unk_15B > 0` forces song 1 with variant 0.
 
 Measure variants (`Unk_ov17_02252FC4`):
 
-| variant | beats per measure | half-beats per measure | timeline width | `unk_00` |
+| variant | `unk_02` beats per measure | half-beats (`ov17_0223F0BC` case 4) | `unk_03` timeline tiles (case 2; ×8 px case 3) | `unk_00` |
 |---|---|---|---|---|
-| v0 | 16 | 32 | 32 × 8 = 256 px | 14 |
-| v1 | 12 | 24 | 30 × 8 = 240 px | 15 |
+| v0 | 16 | 32 | 32 (256 px) | 14 |
+| v1 | 12 | 24 | 30 (240 px) | 15 |
 
-The meaning of `unk_00` is not clear.
+`unk_00` (case 0) is the stage's tilemap: `ov17_0223E67C` loads contest_bg member 14 or 15 with it.
 
 Derived values, stored ×10000 (`ov17_0223E9A4`):
 
@@ -408,7 +407,9 @@ The AI uses a per-NPC ARNG seed, reset every round, and level `L = unk_FC` (0..3
      (odd) slot is rejected half the time.
 2. **Add jitter** to each step's time: `rand % (2+J) - (1 + J/2)` frames.
    - `J = {1,2,3,4}[L]`, doubled for Normal, unchanged for Great, halved for Ultra, a third for Master.
-   - The result is clamped to ≥ 0 and to less than a quarter beat (variant 0) or a sixth of a beat (variant 1).
+   - A negative time becomes 0; then `t − planned >= limit` (a quarter beat for variant 0, a sixth for variant 1,
+     rounded) sets `t = planned + limit − 1`. The compare is unsigned (`s32 − u32`), so every early jitter lands on
+     the latest time the limit allows: the result is always in `[planned, planned + limit − 1]`.
 3. **Choose directions.** The first is random (0..3). Each later one repeats the previous direction with probability
    {90, 40, 0, 0}% by rank. The last move is always random.
 
@@ -445,6 +446,43 @@ The AI uses a per-NPC ARNG seed, reset every round, and level `L = unk_FC` (0..3
 - Acting order. The dance app normalizes the visual round and the dance round with `ov17_02251930` (§8), sums
   the two, and bubble-sorts the contestants descending. Ties keep the lower contestant id first. The result goes to
   `Contest->unk_156`, which becomes the first acting turn's order. Practice modes set `unk_156` to 3, 2, 1, 0 instead.
+
+### 6.8 What is built
+
+| Layer | Where | What |
+|---|---|---|
+| Tables | importer `contest-dance.ts` → `ContestTables.dance` (contracts `ContestDanceTables`) | overlay 17 by offset and SHA-1: songs (`Unk_ov17_02253084`), song per rank × type (`Unk_ov17_0225312C`), variants (`Unk_ov17_02252FC4`), AI spread and repeat (`Unk_ov17_02254A80`, `A84`), stage places (`Unk_ov17_022546F4`), grade spots (`546CC`), note rows (`549BC`), stage tints (`546DC`), shades by place (`549C0`), button rects (`Unk_ov17_02254564`) |
+| Art | importer `ui2d/contest-dance.ts` | the stage per variant (contest_bg 13, 14/15, 32, 36), the timeline strips (row 19, variant 1's tiles `Unk_ov17_02254898`), the touch screen's buttons and their press steps (18, 17, 28, 33, 16; `Unk_ov17_02254630`), the OBJ sets (notes, grades, arrow, shadow, hearts, cursor, ball on contest_obj 6) |
+| Rules | menus `contest/dance-rules.ts` | timing, round starts, the beat clock, snap/classify/grade, points, the lead log, the AI (ARNG per NPC) |
+| Round | menus `contest/dance.ts` | the app's states and commands in DS frame order, the step gate, the points task, the presentation (dancers' steps, idle sway and bob, rotation, hearts, notes, grades, tints, flashes, shades by place), the sounds |
+| View | app `ui/contest-dance.ts` | the stage on a canvas, the buttons as a card beside or under it (pointer down sends `step:<dir>`) |
+
+Found while building it:
+- **Frame order** (main.c): the app's Main runs first (it draws one contest LCRNG value every frame, so the stream
+  depends on how long the intro's pages stay up), then the tasks by priority (the per-measure task 30000, the step
+  points 30100, the dancers 39010, the hearts 40000), then the VBlank handler moves the clock. A task added from a
+  task of lower or equal priority number runs from the next frame (sys_task_manager.c).
+- **The button press animation** (`ov17_02249DA0`) copies its three steps on frames 1, 4 and 7 and ends on frame 10;
+  the gate takes no step until it ends, and not before the cooldown `beat − 2` has run out (it counts only inside the
+  window). The first frame of a window only opens the gate.
+- **Hearts** (`ov17_0224AD70`) draw two contest LCRNG values each, up to `points / 2` (16) per scoring step, as long as
+  the dancer has a free heart (each lives 11 frames).
+- `ov17_0224B0E8` places the copy note on the row of `unk_05[playerContestantID]`, an index by contestant id into a
+  table by position; offline the player is contestant 0, so it is the row of the round's lead, which is the player's.
+- The intro (`CompetitionIsReady`) and the closing (`AnnounceLeadingMon`, official only, var 0 = the leader's trainer)
+  take the message table's mode (`Unk_ov17_0225470C.unk_02`), not its index.
+- The dancers carry no accessories here (the visual round's outfits are the visual lane's).
+
+**Timing decision.** On the DS the counter `unk_107C` runs once a frame (one VBlank callback per main loop, 30 Hz) and
+is re-set from the BGM sequencer whenever it differs. Our sequencer runs in the AudioWorklet, which only plays: the
+game cannot read it. So the round runs the sequencer's tick count as a function of the game tick: after `n` ticks of
+1/30 s the song has had `floor(n · 33513982 / (30 · 2728 · 64))` sound frames, each adding the BPM to a counter that
+ticks at 240 (starting full) — exactly what the worklet plays at the app's 30 Hz, and a ROM test checks it against the
+sound engine for all seven songs. That count feeds the VBlank handler's resync unchanged (`DanceClock`). Steps are
+graded on the tick their input arrives; nothing depends on the render rate, and a replay is the same every run. Our
+game tick is 30.00 Hz, not the DS's 29.91 Hz, so on our clock the counter runs a little ahead of the sequencer and the
+resync now and then repeats a frame instead of skipping one. The song's end comes from its measured length on the same
+time base.
 
 ---
 
@@ -698,7 +736,6 @@ Camera-flash timings for the field scene (`src/contest.c:127`) depend on rank.
 - `competitionType` 0 and 1 (2-round contests weighted 60/40 and 70/30) look unused. Solo modes take the first 4
   opponent matches, not random ones.
 - `unk_15B` is link-only (it adds a 120-frame wait and forces song 1); what it means is not clear.
-- `Unk_ov17_02252FC4.unk_00` (14 / 15) is not explained.
 - In the dance backup AI, the spacing terms of `ov17_0224EC24` are dead code. The link-forced Cute/Smart multipliers
   read `unk_1B26`, the link-forced-song flag, which looks odd.
 - PITY_POINTS compares snapshots taken at different moments (ported as the DS keeps them, §7.8).
@@ -723,8 +760,6 @@ and keep the draws on `ctx.rng` in the decomp's order.
   backdrop), the dress-up points from `ContestTables.themes`, the scoring presentation (§5), the NPC outfits from
   `dressUps`, the outfit into `outcome.outfit` (the winner photo), and the lobby's photo viewer (`scr_cmd_0a8`) and the
   Jubilife TV gallery if wanted. Import imageclip.narc and contest_bg/obj art.
-- **Dance:** the song table and variants (overlay 17 data), the sequencer-driven clock (§6.2: our AudioHost must expose
-  the sequence position deterministically or the round must keep its own tick clock from the BPM — a decision for the
-  lane), the four rounds of lead/backup, the grading windows, the NPC AI with its own ARNG per NPC, `points` = unk_04.
-- **Acting:** done (§7.8). Replays: `sys-contest-normal-cool` (by touch), `sys-contest-practice-acting` (keys and
+- **Dance:** built (§6.8).
+- **Acting:** built (§7.8). Replays: `sys-contest-normal-cool` (by touch), `sys-contest-practice-acting` (keys and
   touch, with the move menu's EXIT).

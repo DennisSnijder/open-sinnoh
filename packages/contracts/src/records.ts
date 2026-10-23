@@ -1578,7 +1578,7 @@ export interface BattleAnimData {
   positions: [number, number, number][][][];
   /** EmitterAxisConfigs1–8: [config][from battler type][to battler type] → [x, y, z]. */
   axes: [number, number, number][][][];
-  /** The switched backgrounds (SwitchBg's 0–57): `ui2d` sheets, cell 0 as drawn for the player's side, cell 1 mirrored, cell 2 (0.36.1) a contest's screen. */
+  /** The switched backgrounds (SwitchBg's 0–57): `ui2d` sheets, cell 0 as drawn for the player's side, cell 1 mirrored, cell 2 (0.36.2) a contest's screen. */
   backgrounds: Id[];
   /** The stat change patterns (StatChangeUp, Down, Heal, Metal: sStatChangeNarcMemberTable): `ui2d` sheets. */
   statChange: Id[];

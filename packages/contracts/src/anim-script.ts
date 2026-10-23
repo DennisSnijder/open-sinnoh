@@ -257,7 +257,7 @@ export interface ScriptUse {
  * Walks every instruction reachable from word 0 (both arms of each branch, except the arm of JumpIfContest, which a
  * battle never takes, and of JumpIfFriendlyFire only the one `friendlyFire` picks: the jump for a move at the user's
  * side, else on), decoding as it goes. JumpIfEqual and JumpIfUnk_01 hold absolute pointers in the decomp (never valid
- * in a file): their targets are not walked. 0.36.1: `contest` walks a contest's run instead: JumpIfContest's jump, and
+ * in a file): their targets are not walked. 0.36.2: `contest` walks a contest's run instead: JumpIfContest's jump, and
  * of JumpIfBattlerSide only the arm of the performer (the player's side) and its target (the enemy's).
  */
 export function scriptUse(code: readonly number[], friendlyFire = false, contest = false): ScriptUse {
