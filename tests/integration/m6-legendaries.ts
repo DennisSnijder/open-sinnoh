@@ -13,9 +13,6 @@ const ALL = [1, 2, 3];
 /** The stand-ins each replay meets, by the seeds that meet them (none listed: none met). */
 const STUBS: Record<string, Record<string, readonly number[]>> = {
   'sys-heatran-lost.replay': { 'anim:cry-mod:9': ALL },
-  'sys-hof-respawn.replay': { 'stub:create_journal_event': ALL },
-  'm6-turnback-giratina-caught.replay': { 'stub:create_journal_event': ALL },
-  'm6-cresselia.replay': { 'stub:create_journal_event': ALL },
   'm6-event-gracidea.replay': { 'clock:timed-events': ALL },
 };
 

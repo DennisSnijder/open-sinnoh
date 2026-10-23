@@ -12,7 +12,7 @@
  *   side buttons; the keys move a board cursor (an addition), A strikes there, L, R or SELECT switch the tool.
  */
 import { isMiningFossil, isMiningSphere, MINING, MiningBoard, setPlateMined, tryAddMinedSphere, tryAddTreasure, underground, UNDERGROUND_LIMITS } from '@opensinnoh/core';
-import { newGameRecord, type InputFrame, type MiningView, type UndergroundTables } from '@opensinnoh/contracts';
+import { newGameRecord, type InputFrame, type MiningView, type UndergroundTables, JOURNAL_EVENT, journalEvent } from '@opensinnoh/contracts';
 import { incrementTrainerScore } from '@opensinnoh/services';
 import { menuSe, type MenuContext } from './context.ts';
 import { plainText } from './strings.ts';
@@ -273,7 +273,8 @@ export function miningScreen(ctx: MenuContext, spot: number): Screen {
     // Mining_ProcessConfirmStartMiningResult: the spot is gone; Mining_StartGameTask: FLAG_DIGGING_FOR_FOSSILS.
     u.spots.splice(spot, 1);
     ctx.state.flags[tables.flags.digging] = true;
-    ctx.log.stub('journal:dug-underground', 'the journal entry for digging in the Underground is not recorded yet');
+    // Mining_StartGameTask: the journal's "dug underground" entry.
+    journalEvent(ctx.registries, ctx.state, JOURNAL_EVENT.dugUnderground);
     const rand = ctx.host.undergroundMiningRand?.();
     if (!rand) throw new Error('mining: no mining generator (the board opens in the Underground only)');
     board = new MiningBoard(tables.miningObjects, u, (ctx.state.trainerId & 1) === 1, ctx.state.pokedex.national, rand);

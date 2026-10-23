@@ -11,11 +11,9 @@ import { createApp } from '@opensinnoh/menus';
 import { romSlice } from '../rom.ts';
 import { readReplay, resolveReplay } from '../rom-replays/sys-replays.ts';
 
-const DUG = ['journal:dug-underground'];
-const DAY = ['clock:daily-events', 'clock:timed-events', ...DUG];
-/** The stand-ins each replay meets (on every seed): the journal, the clock's other daily events, TV. */
+const DAY = ['clock:daily-events', 'clock:timed-events'];
+/** The stand-ins each replay meets (on every seed): the clock's other daily events, TV. */
 const STUBS: Record<string, string[]> = {
-  'sys-underground-dig': DUG,
   'sys-sphere-growth': DAY,
   'sys-underground-vendor': DAY,
   'sys-underground-treasure': [...DAY, 'tv:underground-treasures'],

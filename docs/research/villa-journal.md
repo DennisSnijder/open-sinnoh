@@ -459,3 +459,30 @@ Area, 602 Villa, 603 furniture names, 608 times of day, 618 NPC trainer names.
 - The Villa onTransition sets the counterpart gfx var every visit; OpenSinnoh's `VAR_OBJ_GFX_ID_*` handling should
   already cover it (check once in the ROM test).
 - `check_ab_press` reads held keys; the VM's input model must expose held A/B (it exposes presses today (inferred)).
+
+## 7. What is built (lane: Villa, journal, diplomas)
+
+- **Importer:** `TABLES` `villaFurnitures`, `villaFurnitureModels`, `villaFurnitureScripts`, `villaVisitorCounts`,
+  `villaVisitorChances`, `journalGyms`, `journalBuildings`, `journalPageTurn` (town-extras.ts) into `NewGame.villa` and
+  `NewGame.journal`; the furniture models 559–578 are converted in a slice import too. Art: `ui2d/journal/page-male|female`
+  (ten cells, the paper on palettes 0–9) and `ui2d/diploma/sinnoh|national` (the document's top 256×192 over the blank),
+  `NewGame.diploma`. `journalWindows` is not read (the window positions are constants in menus and app).
+- **Villa:** `MapFeatures` `{ kind: 'villa' }`; world `villa.ts` builds the props from the flags on each map load, blocks the
+  player in the boxes and adds `MapFeature.interact` (the last A check; the TV facing north only). VM: the Villa ops and
+  `show_list_menu_set_width` (a list at a set width, anchors ignored); `check_ab_press` reads `Runner.input.held`. The
+  daily visitor is core `updateVillaVisitor` in `dailyEvents` (the field stream). The TV segments stay counted stubs.
+- **Journal:** contracts `journal.ts` (types and rules), `GameState.journal` (schema v21); hooks in world mapchange (warps,
+  zone connections), game (battle end with the fifth-win rule, Fly, Dig, Teleport, Sweet Scent, the load's page roll and
+  auto-open), VM (the mart's exit counts from the mart app's result, PC box sessions, the Safari's end, `give_journal`,
+  `create_journal_event`), menus mining (dug underground). Screen: menus `journal.ts`, app `ui/journal.ts`. The Bag and Y
+  use of the Journal (and of the Town Map, view only) open the apps on the field.
+- **Diplomas:** `show_diploma_*` open the `diploma` app (fade, 60-frame hold, 48 frames for the slide, A, B or a touch).
+- **NPC ops:** `open_region_map` (the Town Map, view only), `survive_poison`, `check_is_department_store_regular`,
+  `get_party_mon_contest_stat`, `check_party_combee_gender_count`, `change_deoxys_form`, the News Press deadline ops (and
+  its daily countdown), `get_random_seen_species`, the Spiritomb counter ops.
+- **Decided (inferred):** a Pokémon Center (imported as `other`) never makes a building entry (none is in `sMapsInfo`); an
+  arrival is a zone whose first-arrival flag is still clear; the Pokémon line's time of day is the clock's period at the
+  battle's end; "used a PC box" is a session that changed the boxes or the party; the diploma document stays put on the one
+  screen. Not done: `start_vs_seeker` (the item use runs without the script), `turn_on_pokedex_form_detection` (needs a
+  Pokédex flag), `get_party_mon_footprint_type` (needs the footprint tables), RECORD_STEPS and RECORD_EGGS_HATCHED counting
+  (the Chandelier and Masterpiece gates read them), the secret-base journal entry, the online events.
