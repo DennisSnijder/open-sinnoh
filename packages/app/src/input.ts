@@ -129,6 +129,8 @@ export class InputState {
     else if (id.startsWith('pen:') && last?.startsWith('pen:')) this.taps[this.taps.length - 1] = `${last};${id.slice(4)}`;
     // The Poffin pot's stylus: only the latest point of a tick counts (the DS reads the touch once a frame).
     else if (id.startsWith('spoon:') && last?.startsWith('spoon:')) this.taps[this.taps.length - 1] = id;
+    // The dress-up's stylus likewise (contest-visual.ts).
+    else if (id.startsWith('dress:') && last?.startsWith('dress:')) this.taps[this.taps.length - 1] = id;
     else this.taps.push(id);
   }
 

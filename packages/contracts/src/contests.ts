@@ -103,6 +103,20 @@ export interface ContestTables {
   themes: number[][];
   playerGfx: { male: number; female: number };
   playerSprite: { male: Id; female: Id };
+  /** 0.35.1. Per accessory id (100), its picture (imageclip.narc member 1 + id): the visual round's hit tests. */
+  accessories: ContestAccessory[];
+}
+
+/**
+ * 0.35.1. An accessory's picture (a software sprite's 4bpp bitmap, imageclip.narc member 1 + id): `width` × `height`
+ * px (16, 32 or 64 each) and `mask`, its opaque pixels as base64 of a bitmap (row-major, `width` bits a row, the
+ * lowest bit first). The decomp's touch picks an accessory by its pixels (ov22_02254E54); the overlap tests use
+ * its rectangle.
+ */
+export interface ContestAccessory {
+  width: number;
+  height: number;
+  mask: string;
 }
 
 /** One contestant of the running contest (decomp Contest unk_00: contestMons, trainerNames, trainerGenders, unk_FC, monContestFame, contestantObjEventGFX). */
@@ -222,11 +236,96 @@ export type CreateContestRound = (kind: ContestRoundKind, ctx: ContestRoundConte
  * A round's view (inside `ContestView`). The placeholder: the round's name and its message box. The round lanes add
  * their own members to this union. Taps: `next`.
  */
-export type ContestRoundView = ContestPlaceholderRoundView;
+export type ContestRoundView =
+  | ContestPlaceholderRoundView
+  | ContestVisualRoundView;
 export interface ContestPlaceholderRoundView {
   round: ContestRoundKind;
   placeholder: true;
   message: AppMessage;
+}
+
+/**
+ * 0.35.1. A contest photo as drawn (decomp ov22_0225AF8C): the Pokémon's front sprite (first frame) centred at
+ * (`mon.x`, `mon.y`) and the accessories at their pictures' top-left, all in DS px of the screen that shows it,
+ * back to front with the Pokémon drawn after the first `monAt`; the backdrop (null: none drawn) is the 112 × 128
+ * picture at (`backdropX`, `backdropY`).
+ */
+export interface ContestPicture {
+  mon: { species: Id; form: number; female: boolean; shiny: boolean; x: number; y: number };
+  accessories: { accessory: number; x: number; y: number }[];
+  monAt: number;
+  backdrop: number | null;
+  backdropX: number;
+  backdropY: number;
+}
+
+/**
+ * 0.35.1. The visual round (decomp overlay022 VisualCompetition_*, the dress-up; overlay017 VisualCompetitionScoring_*,
+ * the judging): `phase` `intro` (the top screen's clock with the host's messages), `dress` (the touch screen's
+ * Fashion Case and stage), `scoring` (each entrant's photo and hearts). `fade` darkens the screen (0 clear … 16
+ * black). Taps: `next` (the message box); in `dress` the stylus `dress:<x>,<y>` while it is down and `dress-up`, and
+ * the buttons `case-next`, `case-prev`, `tab-accessories`, `tab-backdrops`, `done`.
+ */
+export interface ContestVisualRoundView {
+  round: 'visual';
+  placeholder: false;
+  phase: 'intro' | 'dress' | 'scoring';
+  fade: number;
+  message: AppMessage | null;
+  /** The intro's top screen: the clock's seconds, the rank's limit of accessories (its dots) and the theme window's line. */
+  intro: { seconds: number; limit: number; theme: string } | null;
+  dress: ContestDressView | null;
+  scoring: ContestVisualScoringView | null;
+}
+
+/**
+ * 0.35.1. The dress-up screen (overlay022): the top screen folded into a line (`theme`, `status`: the held accessory's
+ * name or "There is no more space.", the clock and the accessories placed of the limit); the Fashion Case's page
+ * (`tab`, `page`, `pageBg` 0/1: the page's paper) with its `items` and the stage (`backdrop`, the Pokémon, `stage` items)
+ * back to front, the item in hand last; the buttons (`pressed`: the one held down); the keyboard's hand (`cursor`).
+ */
+export interface ContestDressView {
+  theme: string;
+  status: string | null;
+  seconds: number;
+  /** The last ten seconds: the digits' alternate palette, and `pulse` (1 → 2.5 → 1 over 16 frames after a change). */
+  hurry: boolean;
+  pulse: number;
+  placed: number;
+  limit: number;
+  tab: 'accessories' | 'backdrops';
+  page: number;
+  pageBg: 0 | 1;
+  pressed: 'case-next' | 'case-prev' | 'done' | null;
+  backdrop: number;
+  mon: ContestPicture['mon'];
+  items: { kind: 'accessory' | 'backdrop'; id: number; x: number; y: number; held: boolean }[];
+  /** The Pokémon draws after the first `monAt` items. */
+  monAt: number;
+  cursor: { x: number; y: number; grabbing: boolean } | null;
+}
+
+/**
+ * 0.35.1. The judging (ov17_0223CB1C): the stage, the curtain while no photo is up, the entrant's `picture`, and the
+ * hearts rising (`kind` condition or dress-up; centre in DS px).
+ */
+export interface ContestVisualScoringView {
+  curtain: boolean;
+  picture: ContestPicture | null;
+  hearts: { x: number; y: number; kind: 'condition' | 'dressUp' }[];
+}
+
+/**
+ * 0.35.1. The lobby's photo frames (scr_cmd_0a8; decomp ov22_0225B660): the winner photo of contest type `type` in
+ * its frame with its backdrop, and the banner's two lines (the contest and rank; the trainer and Pokémon). A or B
+ * (or `back`, `next`) closes it.
+ */
+export interface ContestPhotoView {
+  app: 'contest-photo';
+  type: number;
+  picture: ContestPicture;
+  lines: [string, string];
 }
 
 /**

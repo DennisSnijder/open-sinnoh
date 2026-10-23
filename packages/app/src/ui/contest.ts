@@ -4,16 +4,19 @@
  * placeholder rounds: a message box; the round lanes add theirs here), the results table (each entry's trainer and
  * Pokémon, the points of each announced round, the total and the place) and the message box. Taps: `next`.
  */
-import type { ContestRoundView, ContestView } from '@opensinnoh/contracts';
+import type { ContestPlaceholderRoundView, ContestView } from '@opensinnoh/contracts';
 import { framed, messageBox, type DrawContext } from './apps.ts';
 import { atTiles, board, boardContext } from './board.ts';
 import { el } from './core.ts';
+import { contestVisual } from './contest-visual.ts';
 import './contest.css';
 
 /** The message box's tiles, as the field's (decomp 2, 19, 27 × 4 in its frame). */
 const MESSAGE_TILES = [1, 18, 30, 6] as const;
 
 export function contest(wide: DrawContext, v: ContestView): HTMLElement {
+  // The visual round draws its own screens (contest-visual.ts).
+  if (v.round && !v.round.placeholder && v.round.round === 'visual') return contestVisual(wide, v.round);
   const d = boardContext(wide);
   const root = board('mart mart-board contest-board');
   root.append(atTiles(framed(d, 'contest-heading', el('div', 'contest-rank', d.text(v.heading.rank)), el('div', 'contest-type', d.text(v.heading.type))), 1, 1, 30, 4));
@@ -31,15 +34,15 @@ export function contest(wide: DrawContext, v: ContestView): HTMLElement {
     });
     root.append(atTiles(framed(d, 'contest-results', head, ...rows), 1, 5, 30, 13));
   }
-  if (v.round) root.append(round(d, v.round));
+  if (v.round?.placeholder) root.append(round(d, v.round));
   if (v.message) root.append(atTiles(messageBox(d, v.message.text, v.message.waiting), ...MESSAGE_TILES));
   return root;
 }
 
 /** A round's view. The placeholder rounds are a message box only. */
-function round(d: DrawContext, r: ContestRoundView): HTMLElement {
+function round(d: DrawContext, r: ContestPlaceholderRoundView): HTMLElement {
   const box = atTiles(messageBox(d, r.message.text, r.message.waiting), ...MESSAGE_TILES);
   box.dataset.round = r.round;
-  if (r.placeholder) box.dataset.placeholder = '';
+  box.dataset.placeholder = '';
   return box;
 }
