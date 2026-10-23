@@ -4,7 +4,7 @@
  * placeholder rounds: a message box; the round lanes add theirs here), the results table (each entry's trainer and
  * Pokémon, the points of each announced round, the total and the place) and the message box. Taps: `next`.
  */
-import type { ContestRoundView, ContestView } from '@opensinnoh/contracts';
+import type { ContestPlaceholderRoundView, ContestView } from '@opensinnoh/contracts';
 import { framed, messageBox, type DrawContext } from './apps.ts';
 import { atTiles, board, boardContext } from './board.ts';
 import { el } from './core.ts';
@@ -31,13 +31,13 @@ export function contest(wide: DrawContext, v: ContestView): HTMLElement {
     });
     root.append(atTiles(framed(d, 'contest-results', head, ...rows), 1, 5, 30, 13));
   }
-  if (v.round) root.append(round(d, v.round));
+  if (v.round?.placeholder) root.append(round(d, v.round));
   if (v.message) root.append(atTiles(messageBox(d, v.message.text, v.message.waiting), ...MESSAGE_TILES));
   return root;
 }
 
-/** A round's view. The placeholder rounds are a message box only. */
-function round(d: DrawContext, r: ContestRoundView): HTMLElement {
+/** A placeholder round's view: a message box only (the rounds with their own screens draw them: contest-dance.ts). */
+function round(d: DrawContext, r: ContestPlaceholderRoundView): HTMLElement {
   const box = atTiles(messageBox(d, r.message.text, r.message.waiting), ...MESSAGE_TILES);
   box.dataset.round = r.round;
   if (r.placeholder) box.dataset.placeholder = '';

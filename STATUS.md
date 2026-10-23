@@ -27,7 +27,8 @@ Versions: contracts 0.35.0, importer `platinum-96`, HeartGold follower add-on `h
   trees, the Poké Radar, swarms, the Trophy Garden, Poffins and Amity Square, the Underground's mining,
   vendors and fossil revival, legendaries, roamers and forms, the Battle Tower (singles, doubles, multi),
   the event legendaries through Mystery Gift, and the offline Super Contest circuit (reception, rivals, judging,
-  results, ribbons, prizes, Master flags; its three rounds are placeholders scored from condition).
+  results, ribbons, prizes, Master flags; the Dance Competition is danced, the visual and acting rounds are
+  placeholders scored from condition).
 - **Audio:** the ROM's sound archive on a DS sequencer and synth in an AudioWorklet: zone music by day and
   night, sound effects, fanfares and cries.
 - **App:** the ROM import in the browser, saves with file export and import, the setup, Options, following
@@ -37,7 +38,7 @@ Versions: contracts 0.35.0, importer `platinum-96`, HeartGold follower add-on `h
 ## Not yet
 
 - The Battle Frontier's other facilities (Factory, Hall, Castle, Arcade).
-- The contest rounds themselves (visual dress-up, dance, acting; placeholders today), the Villa, TV shows and the journal, Seals and Ball Capsules, the Underground's traps
+- The visual (dress-up) and acting contest rounds (placeholders today), the Villa, TV shows and the journal, Seals and Ball Capsules, the Underground's traps
   and secret bases.
 - Wireless and Wi-Fi features: they answer as "no connection".
 - Mods beyond the current pack format (no editor or mod tooling yet).

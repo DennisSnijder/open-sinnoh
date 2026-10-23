@@ -46,6 +46,7 @@ import { readZoneHeaders, type ZoneHeader } from './formats/zone-headers.ts';
 import { charTable, Names, type CharmapFile, type NamesFile } from './names.ts';
 import { readUndergroundTables } from './underground.ts';
 import { readContestTables } from './contests.ts';
+import { DANCE_BUTTONS, DANCE_CHOICE_SIZE, DANCE_LEVELS, DANCE_POSITIONS, DANCE_SONG_SIZE, DANCE_TINTS, DANCE_VARIANT_SIZE, readContestDance } from './contest-dance.ts';
 
 /**
  * The base pack: data records (this file), script IR and movements (vm `decodeScripts`, entry n of file
@@ -197,6 +198,21 @@ const TABLES = {
   berryInit: { where: 57, offset: 0x220, count: 118, size: 4, sha1: '99139a26758e52f5414f930388a0d760d273e0e7' },
   /** sBerryAndAccessoryManOptions (scrcmd_amity_square.c): Amity Square's man's 16 gifts (9 items, then accessories). */
   amityGifts: { where: 'arm9', offset: 0xebf64, count: 16, size: 2, sha1: '198589fce01ac265466f80edd8391740b2b51481' },
+  /** Dance Competition (overlay 17, contest-dance.ts): Unk_ov17_02253084 songs, Unk_ov17_0225312C the song per rank × type, Unk_ov17_02252FC4 measure variants. */
+  danceSongs: { where: 17, offset: 0x17f44, count: 7, size: DANCE_SONG_SIZE, sha1: '31a5ba84fe355b133f42ba4b5369c2227ddd5d6c' },
+  danceChoice: { where: 17, offset: 0x17fec, count: 4 * 5, size: DANCE_CHOICE_SIZE, sha1: '24939bb9f28f8a3ddc1da7d36a70113ab9e60b4d' },
+  danceVariants: { where: 17, offset: 0x17e84, count: 2, size: DANCE_VARIANT_SIZE, sha1: 'bcce75a6e79a849f4f8309cb0ccba8563638e1ec' },
+  /** ov17_0224E930.c Unk_ov17_02254A80 (the AI's timing spread per level) and Unk_ov17_02254A84 (% a lead repeats its direction, per rank). */
+  danceAiJitter: { where: 17, offset: 0x19940, count: DANCE_LEVELS, size: 1, sha1: '12dada1fff4d4787ade3333147202c3b443e376f' },
+  danceAiRepeat: { where: 17, offset: 0x19944, count: DANCE_LEVELS, size: 1, sha1: 'dffc313d2c6a66b55d629ed905b1d07b59e7e1c1' },
+  /** ov17_0224A0FC.c Unk_ov17_022546F4: the dancers' stage positions; ov17_022492DC.c Unk_ov17_02254564: the step buttons' touch rects and terminator. */
+  danceStage: { where: 17, offset: 0x195b4, count: DANCE_POSITIONS, size: 6, sha1: 'cd7b971cfd7bc08f7652830e01db24bc596550c2' },
+  danceButtons: { where: 17, offset: 0x19424, count: DANCE_BUTTONS + 1, size: 4, sha1: 'ca58258fcbba629f043c7fed6cd249a34929cad5' },
+  /** ov17_0224A0FC.c Unk_ov17_022546CC (grade pop-ups), Unk_ov17_022549BC (note rows), Unk_ov17_022546DC (stage tints), Unk_ov17_022549C0 (shades by place). */
+  danceGrades: { where: 17, offset: 0x1958c, count: DANCE_POSITIONS, size: 4, sha1: 'f3bc8e4853d83f91a35424cb32fe6222740655cc' },
+  danceNoteRows: { where: 17, offset: 0x1987c, count: DANCE_POSITIONS, size: 1, sha1: '32217dbbd17725103461f1d227c683ba9f731709' },
+  danceTints: { where: 17, offset: 0x1959c, count: DANCE_TINTS, size: 4, sha1: '42a74eb957bd05544df1707a1ce02807dab6cbbb' },
+  danceShades: { where: 17, offset: 0x19880, count: DANCE_POSITIONS, size: 1, sha1: 'e103557ffbeb74541a66d7815fcf0bb85ebbe780' },
   /** sMonFindableAccessories: the 6 pools of 10 accessories a walking Pokémon finds. */
   amityFinds: { where: 'arm9', offset: 0xebf84, count: 60, size: 2, sha1: '496aec185ca0a68b2a9477ffc26efa183a81953f' },
   /** end_credits/strings.c sEndCreditStringProps (the end_credits overlay): {u16 message, u16 y, u16 centred} per staff row. */
@@ -1231,6 +1247,14 @@ export async function importPlatinum(
       judgeNames: bankTexts[judgeBank]!.length,
       playerGfx: { male: gfxNumber('OBJ_EVENT_GFX_PLAYER_M_CONTEST'), female: gfxNumber('OBJ_EVENT_GFX_PLAYER_F_CONTEST') },
       playerSprite: { male: playerGfx('OBJ_EVENT_GFX_PLAYER_M_CONTEST'), female: playerGfx('OBJ_EVENT_GFX_PLAYER_F_CONTEST') },
+      dance: readContestDance(
+        { songs: await table('danceSongs'), choice: await table('danceChoice'), variants: await table('danceVariants'), aiJitter: await table('danceAiJitter'), aiRepeat: await table('danceAiRepeat'), stage: await table('danceStage'), grades: await table('danceGrades'), noteRows: await table('danceNoteRows'), tints: await table('danceTints'), shades: await table('danceShades'), buttons: await table('danceButtons') },
+        (n) => {
+          const q = sound.sequences.find((s) => s.sourceIndex === n);
+          if (!q) throw new ImportError(`dance songs: no sequence ${n}`);
+          return q.id;
+        },
+      ),
     });
     const e = SPECIAL_ENCOUNTERS;
     const ints = (b: Uint8Array, n: number, what: string) => {

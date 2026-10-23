@@ -1,0 +1,66 @@
+# A practice Dance Competition (decomp scripts_contest_hall_lobby.s, FieldTask_RunPracticeCompetition, overlay017
+# DanceCompetition_*; docs/research/contests.md §6): the practice receptionist, PRACTICE, DANCE (no contest type to
+# pick), Staravia; the MC's practice lines, the song, three rounds of rivals leading and Staravia leading the last; no
+# word on the leader after a practice. Staravia copies no one and dances its three steps a measure on the beats, so its
+# points are the lead's 2 × 3 × 2 on every seed; the verdict follows, and NO to another try.
+party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK platinum:MOVE_QUICK_ATTACK
+set flag platinum:FLAG_CONTEST_HALL_VISITED true
+set var platinum:VAR_CONTEST_HALL_LOBBY_STATE 1
+warp platinum:MAP_HEADER_CONTEST_HALL_LOBBY 27 6 up
+until idle
++0 press a
++1 release a
+advance text
+until menu
++2 press a
++1 release a
++8 release a
+until menu
++2 press down
++1 release down
++2 press a
++1 release a
+advance text
+until app party 600
++2 tap slot:0
++2 tap menu:0
+until app none 600
+advance text 6000
+until app contest 6000
++0 assert state contest.mode "practice"
++0 assert state contest.competition 5
++12 screenshot dance-intro
+# The MC's five pages, then the song (120 BPM: a beat is 15 ticks, a measure 240)
++10 press a
++1 release a
++4 press a
++1 release a
++4 press a
++1 release a
++4 press a
++1 release a
++4 press a
++1 release a
++400 screenshot dance-backup
++1564 press down
++1 release down
++29 press left
++1 release left
++29 press right
++1 release right
++60 screenshot dance-lead
++119 press down
++1 release down
++29 press left
++1 release left
++29 press right
++1 release right
+until app none 2000
++0 assert state contest.scores.dance[0] 12
+advance text 6000
+until yesno 6000
++2 press b
++1 release b
+advance text 6000
+until idle 6000
++0 assert state party[0].ribbons []

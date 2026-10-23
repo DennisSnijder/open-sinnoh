@@ -106,6 +106,7 @@ const tables = (opponents: ContestOpponent[]): ContestTables => ({
   themes: [],
   playerGfx: { male: 1, female: 2 },
   playerSprite: { male: 'test:M' as Id, female: 'test:F' as Id },
+  dance: { songs: [], choice: [], variants: [], aiJitter: [], aiRepeat: [], stage: [], grades: [], noteRows: [], tints: [], shades: [], buttons: [] },
 });
 
 describe('the rivals, judges and theme (sub_02094F04, sub_020954F0, sub_02095A74)', () => {

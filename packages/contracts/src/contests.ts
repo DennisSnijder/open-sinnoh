@@ -103,6 +103,51 @@ export interface ContestTables {
   themes: number[][];
   playerGfx: { male: number; female: number };
   playerSprite: { male: Id; female: Id };
+  /** 0.35.1. The Dance Competition's tables (overlay 17). */
+  dance: ContestDanceTables;
+}
+
+/**
+ * 0.35.1. One Dance Competition song (overlay 17 Unk_ov17_02253084, 12-byte rows): the BGM it plays (`sequence`), its
+ * tempo (`bpm`), the measures of a dance round (`measures`, unk_04), the lead's steps a measure (`moves`, unk_05), the
+ * beats before the first round and between rounds (`leadIn` unk_06, `gap` unk_07) and the grading windows in frames
+ * (`windows`, unk_08: a step `d` frames off its half-beat is excellent up to [0] and [1], good up to [2] and [3]).
+ */
+export interface ContestDanceSong {
+  sequence: Id;
+  bpm: number;
+  measures: number;
+  moves: number;
+  leadIn: number;
+  gap: number;
+  windows: [number, number, number, number];
+}
+
+/**
+ * 0.35.1. The Dance Competition's tables (overlay 17; docs/research/contests.md §6):
+ * - `songs`; `choice[rank][type]`: the song and measure variant a contest dances to (Unk_ov17_0225312C);
+ * - `variants` (Unk_ov17_02252FC4): `tilemap` (the stage's contest_bg NSCR member), `beats` a measure (each split in
+ *   two half-beats) and `tiles`, the timeline's width in 8-px tiles;
+ * - the NPC dancers' AI (ov17_0224E930.c): `aiJitter` per AI level (Unk_ov17_02254A80, the timing spread), `aiRepeat`
+ *   per rank (Unk_ov17_02254A84, % that a lead repeats its last direction);
+ * - `stage` per stage position (0 the lead): x, y and depth (Unk_ov17_022546F4); `grades`: where a dancer's grade pops
+ *   up (Unk_ov17_022546CC); `noteRows`: its notes' row on the timeline (Unk_ov17_022549BC);
+ * - `tints`: the stage's blend after a lead step (Unk_ov17_022546DC: RGB555 colour and level /16; 0 none, 1–4 by step
+ *   code, 5 a miss); `shades`: the dancers' grey by place at the end (Unk_ov17_022549C0);
+ * - `buttons`: the touch screen's step buttons (Unk_ov17_02254564: up, down, left, right; DS px).
+ */
+export interface ContestDanceTables {
+  songs: ContestDanceSong[];
+  choice: { song: number; variant: number }[][];
+  variants: { tilemap: number; beats: number; tiles: number }[];
+  aiJitter: number[];
+  aiRepeat: number[];
+  stage: { x: number; y: number; z: number }[];
+  grades: { x: number; y: number }[];
+  noteRows: number[];
+  tints: { color: number; level: number }[];
+  shades: number[];
+  buttons: { x: number; y: number; w: number; h: number }[];
 }
 
 /** One contestant of the running contest (decomp Contest unk_00: contestMons, trainerNames, trainerGenders, unk_FC, monContestFame, contestantObjEventGFX). */
@@ -222,11 +267,65 @@ export type CreateContestRound = (kind: ContestRoundKind, ctx: ContestRoundConte
  * A round's view (inside `ContestView`). The placeholder: the round's name and its message box. The round lanes add
  * their own members to this union. Taps: `next`.
  */
-export type ContestRoundView = ContestPlaceholderRoundView;
+export type ContestRoundView = ContestPlaceholderRoundView | ContestDanceRoundView;
 export interface ContestPlaceholderRoundView {
   round: ContestRoundKind;
   placeholder: true;
   message: AppMessage;
+}
+
+/**
+ * 0.35.1. The Dance Competition (decomp overlay017 ov17_0223DAD0.c; packages/menus contest/dance.ts): the stage (the
+ * top screen) and the step buttons (the touch screen's content), in DS px.
+ * - `variant`: the stage and timeline (`ContestDanceTables.variants`); `dancers` in draw order (the back row first),
+ *   each at its centre with its scale (256 = 1), turn (degrees) and `shade` (its colour toward the DS's grey 0x254a,
+ *   0–16: 16 while another dances, by place at the end);
+ * - `timeline`: `fill` px of the beat bar filled, `flash` (the half that lights up, 0–10), the step notes (`code` 1–4,
+ *   `anim` 0 the player's, 1 a rival's, 2 the step the player must copy; `frame` ticks since it appeared), the beat
+ *   ball and the progress cursor;
+ * - `grades`: EXCELLENT/GOOD/MISS over a dancer (`frame` ticks in); `hearts` flying from a dancer; `tint`: the stage's
+ *   blend toward a step's colour (RGB555, 0–16); `flash`/`fade`: white/black over the stage, 0–16;
+ * - `buttons` while the touch screen shows them: `dim` while they take no step, the pressed one (`step` 0/1 of the
+ *   press animation, null at rest; `label` px the label is pushed down), the labels (UP/JUMP, FRONT, LEFT, RIGHT);
+ * - `arrow`: over the player's dancer; `banner`: the round's instruction; `message`: the MC.
+ * Taps: `step:<0–3>` (up, down, left, right), `next`.
+ */
+export interface ContestDanceRoundView {
+  round: 'dance';
+  placeholder: false;
+  variant: number;
+  dancers: ContestDancerView[];
+  timeline: {
+    fill: number;
+    flash: { half: 0 | 1; level: number } | null;
+    notes: { x: number; y: number; code: number; anim: 0 | 1 | 2; frame: number }[];
+    ball: { x: number; y: number; frame: number } | null;
+    cursor: number | null;
+  };
+  grades: { x: number; y: number; grade: 0 | 1 | 2; text: string; frame: number }[];
+  hearts: { x: number; y: number; anim: 0 | 1 }[];
+  tint: { color: number; level: number } | null;
+  flash: number;
+  fade: number;
+  buttons: { dim: boolean; press: { dir: number; step: 0 | 1 | null; label: number } | null; labels: string[] } | null;
+  arrow: { x: number; y: number } | null;
+  banner: string | null;
+  message: AppMessage | null;
+}
+export interface ContestDancerView {
+  id: number;
+  species: Id;
+  form: number;
+  shiny: boolean;
+  female: boolean;
+  x: number;
+  y: number;
+  scale: number;
+  angle: number;
+  /** Its shadow's y (the stage floor under it, ov17_0224ABFC). */
+  ground: number;
+  shade: number;
+  player: boolean;
 }
 
 /**

@@ -32,6 +32,7 @@ import { importStartMenuArt } from './start-menu.ts';
 import { importPoketchArt } from './poketch.ts';
 import { importBagArt } from './bag.ts';
 import { importBoxArt } from './box.ts';
+import { DANCE_PRESS_STEPS, DANCE_TIMELINE_TILES, importContestDanceArt } from './contest-dance.ts';
 import { importTownMapArt, type HiddenPatch } from './town-map.ts';
 
 export * from './compose.ts';
@@ -54,6 +55,9 @@ const TABLES = {
   healthboxParts: { where: HEALTHBOX_PARTS.overlay, offset: HEALTHBOX_PARTS.offset, size: HEALTHBOX_PARTS.size, sha1: '6d0c3404d49a6b4ffdaa9203eaf142abd31c9b14' },
   /** move_palettes.c: the move buttons' type palettes. */
   movePalettes: { where: MOVE_PALETTES.overlay, offset: MOVE_PALETTES.offset, size: MOVE_PALETTES.size, sha1: '48ad44a2b65ae05f6fb025cd2a9c62f2fdb3fdcb' },
+  /** ov17_0224A0FC.c Unk_ov17_02254898: the Dance Competition's variant-1 timeline tiles; ov17_022492DC.c Unk_ov17_02254630: its buttons' press steps. */
+  danceTimeline: { where: 17, offset: 0x19758, size: DANCE_TIMELINE_TILES * 2, sha1: '624dd31f936eb7f30b500241a03835bd14d4d5f2' },
+  dancePress: { where: 17, offset: 0x194f0, size: DANCE_PRESS_STEPS * 4 * 12, sha1: '160299e6981f1d57359c421a84d5668b50dccba7' },
 } as const;
 
 export interface Ui2dImport {
@@ -111,6 +115,7 @@ export async function importUi2d(fs: NitroFs, speciesIds: Id[], classIds: Id[], 
   importPoketchArt(fs, sheets);
   importBagArt(fs, sheets);
   importBoxArt(fs, sheets);
+  importContestDanceArt(fs, sheets, await table('danceTimeline'), await table('dancePress'));
   const townMapPatches = importTownMapArt(fs, sheets);
   const items = importItemIcons(fs, await table('itemArchive'));
   onProgress(4, 4);

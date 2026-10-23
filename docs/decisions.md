@@ -322,6 +322,11 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   draws `FieldView.lightning`. Other weathers are silent. The world runs it on the game tick through the game's sound
   system with its own PRNG: no game state, no game random numbers. The world does not see the renderer's particles
   drain, so a fade out's end is its ramp length (`weatherFadeTicks`), a few ticks before the drawn rain is gone.
+- **The Dance Competition's beat clock follows the music as we play it.** The DS drives the dance's frame counter from
+  the BGM sequencer; ours plays in the worklet and reports nothing back. The round computes the sequencer's ticks from
+  the game tick (the sound frames 1/30 s ticks hold, the song's tempo per frame) and runs the DS's VBlank resync on
+  that, so the beat stays on the music the player hears and replays stay exact; steps are graded on their input's tick
+  (docs/research/contests.md §6.8).
 - Volume and mute are device settings; the DS STEREO/MONO option applies. The audio context suspends with
   the page and resumes on the next gesture.
 
