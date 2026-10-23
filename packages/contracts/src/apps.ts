@@ -404,6 +404,11 @@ export interface AppHost {
   spiritombVendors?(): boolean;
   /** 0.33.0. The visit's mining generator (core `miningRand`, CommSys_Seed at the arrival): every board rolls on it in turn. */
   undergroundMiningRand?(): import('@opensinnoh/core').Rand32 | null;
+  /**
+   * 0.36.0. The contests' move animations (packages/battle `createContestMoveAnimation`). Absent in a game without the
+   * battle engine (menu tests); a game that loads the engine lazily holds the contest app until it is in.
+   */
+  contestAnimation?: import('./contests.ts').CreateContestMoveAnimation;
 }
 
 /** A running app: one `step` per 30 Hz tick while it is open; a non-null result closes it. */

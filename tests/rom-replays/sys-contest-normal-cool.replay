@@ -1,7 +1,7 @@
 # A Normal Rank Cool Contest, offline (decomp scripts_contests.s, contest.c; docs/research/contests.md): the official
 # receptionist, ENTER, NORMAL RANK, COOL CONTEST, the party in contest mode (ENTER on Staravia), the entry, the attire, the
-# stage and its introductions, the contest app (three placeholder rounds scored from condition, then the results), the
-# winner's ceremony and the prize. Staravia's condition wins every round. It comes back with the Cool Ribbon, the photo,
+# stage and its introductions, the contest app (the visual and dance placeholder rounds scored from condition, the acting
+# round played by touch, then the results), the winner's ceremony and the prize. Staravia wins. It comes back with the Cool Ribbon, the photo,
 # the Red Barrette, the records and a little friendship; the save keeps them.
 party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK platinum:MOVE_QUICK_ATTACK
 set state party[0].condition {"cool":255,"beauty":255,"cute":0,"smart":0,"tough":255,"sheen":255}
@@ -37,15 +37,27 @@ until app contest 6000
 +0 assert state contest.rank 0
 +0 assert state contest.type 0
 +2 screenshot contest-round
-# The three placeholder rounds, one A each
+# The placeholder rounds, one A each
 +2 press a
 +1 release a
 +2 press a
 +1 release a
-+2 press a
-+1 release a
+# The acting round: four turns, each a move (Wing Attack and Quick Attack in turn: last turn's move is off the menu)
+# and the main judge, by touch
+until state contest.acting {"turn":0,"choosing":true} 6000
++1 tap move:0
++8 tap judge:1
+until state contest.acting {"turn":1,"choosing":true} 9000
++1 tap move:1
++8 tap judge:1
+until state contest.acting {"turn":2,"choosing":true} 9000
++1 tap move:0
++8 tap judge:1
+until state contest.acting {"turn":3,"choosing":true} 9000
++1 tap move:1
++8 tap judge:1
 # The results (the table before the announcements), then the judging, the three rounds' columns and the winner
-until state contest.placement 0 60
+until state contest.placement 0 9000
 +2 screenshot contest-results
 +2 press a
 +1 release a

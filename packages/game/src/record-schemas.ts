@@ -967,6 +967,20 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
       themes: arr(arr(int(0, 255))),
       playerGfx: obj({ male: int(0, 0xffff), female: int(0, 0xffff) }),
       playerSprite: obj({ male: ref('sprites'), female: ref('sprites') }),
+      // 0.36.0: the acting round's tables (contracts ContestActingTables).
+      acting: opt(obj({
+        effects: arr(obj({
+          description: arr(ref('texts')),
+          appeal: int(-128, 127),
+          class: int(3, 6),
+          announce: bool,
+          messages: arr(nullable(obj({ text: ref('texts'), args: int(0, 28) }))),
+        })),
+        typeMatch: arr(arr(int(-10, 10))),
+        messages: arr(obj({ text: ref('texts'), args: int(0, 28), instant: opt(bool) })),
+        rules: arr(obj({ slot: int(1, 4), condition: int(1, 28), target: int(0, 255), judges: int(0, 3), weights: arr(int(-0x8000, 0x7fff)) })),
+        buttonPalettes: arr(arr(int(0, 0xffff))),
+      }, (v) => ((v.effects as unknown[]).length !== 24 ? 'contests.acting.effects must have the 24 effects' : (v.typeMatch as unknown[]).length !== 5 ? 'contests.acting.typeMatch must be 5 × 5' : undefined))),
     }, (v) => ((v.themes as unknown[]).length !== 12 ? 'contests.themes must have the 12 themes' : undefined))),
     // 0.31.0: Amity Square (contracts AmitySquareTables): pools of ten accessories, the gifts' items then accessories.
     amitySquare: opt(obj({

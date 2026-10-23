@@ -33,6 +33,7 @@ import { importPoketchArt } from './poketch.ts';
 import { importBagArt } from './bag.ts';
 import { importBoxArt } from './box.ts';
 import { importTownMapArt, type HiddenPatch } from './town-map.ts';
+import { importContestActingArt } from './contest-acting.ts';
 
 export * from './compose.ts';
 export * from './nanr.ts';
@@ -54,6 +55,8 @@ const TABLES = {
   healthboxParts: { where: HEALTHBOX_PARTS.overlay, offset: HEALTHBOX_PARTS.offset, size: HEALTHBOX_PARTS.size, sha1: '6d0c3404d49a6b4ffdaa9203eaf142abd31c9b14' },
   /** move_palettes.c: the move buttons' type palettes. */
   movePalettes: { where: MOVE_PALETTES.overlay, offset: MOVE_PALETTES.offset, size: MOVE_PALETTES.size, sha1: '48ad44a2b65ae05f6fb025cd2a9c62f2fdb3fdcb' },
+  /** ov17_0223F7E4.c Unk_ov17_022534B8: the acting round's move buttons, five palettes of 16 BGR555 colours. */
+  contestButtonPalettes: { where: 17, offset: 0x18378, size: 160, sha1: '88229a78266a8e8de6b1f9f93f3fdee09ac60f55' },
 } as const;
 
 export interface Ui2dImport {
@@ -112,6 +115,10 @@ export async function importUi2d(fs: NitroFs, speciesIds: Id[], classIds: Id[], 
   importBagArt(fs, sheets);
   importBoxArt(fs, sheets);
   const townMapPatches = importTownMapArt(fs, sheets);
+  {
+    const b = await table('contestButtonPalettes');
+    importContestActingArt(fs, sheets, Array.from({ length: 5 }, (_, p) => Array.from({ length: 16 }, (_, c) => b[(p * 16 + c) * 2]! | (b[(p * 16 + c) * 2 + 1]! << 8))));
+  }
   const items = importItemIcons(fs, await table('itemArchive'));
   onProgress(4, 4);
   const assets = new Map([...pokemon.assets, ...sheets.assets, ...items.assets]);

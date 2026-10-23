@@ -5,7 +5,8 @@
  * Pokémon, the points of each announced round, the total and the place) and the message box. Taps: `next`.
  */
 import type { ContestRoundView, ContestView } from '@opensinnoh/contracts';
-import { framed, messageBox, type DrawContext } from './apps.ts';
+import { framed, messageBox, type DrawContext, type Drawn } from './apps.ts';
+import { actingScene } from './contest-acting.ts';
 import { atTiles, board, boardContext } from './board.ts';
 import { el } from './core.ts';
 import './contest.css';
@@ -38,8 +39,15 @@ export function contest(wide: DrawContext, v: ContestView): HTMLElement {
 
 /** A round's view. The placeholder rounds are a message box only. */
 function round(d: DrawContext, r: ContestRoundView): HTMLElement {
+  if (!r.placeholder) throw new Error(`contest: the ${r.round} round draws its own scene`);
   const box = atTiles(messageBox(d, r.message.text, r.message.waiting), ...MESSAGE_TILES);
   box.dataset.round = r.round;
-  if (r.placeholder) box.dataset.placeholder = '';
+  box.dataset.placeholder = '';
   return box;
+}
+
+/** The contest app's layer: a round with its own screen (the acting round's stage) is a scene, the rest the board. */
+export function contestApp(d: DrawContext, v: ContestView): Drawn {
+  if (v.round && !v.round.placeholder && v.round.round === 'acting') return { kind: 'scene', root: actingScene(d, v.round) };
+  return { kind: 'mart', root: contest(d, v) };
 }

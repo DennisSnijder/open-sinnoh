@@ -58,6 +58,12 @@ export interface AnimDeps {
   seed: number;
   log: StubLog;
   sound?: AnimSound;
+  /**
+   * A contest's acting round (decomp BattleAnimSystem_SetIsContest): battler 0 is the performer at the contestant's
+   * place (216, 112), battler 1 the hidden target (80, 42); JumpIfContest jumps, world positions are the contest
+   * rows, pans and X directions turn round, switched backgrounds use their contest screen.
+   */
+  contest?: boolean;
 }
 
 /** The game's sound for the animation (decomp Sound_* calls); absent: silent, and sounds never hold the animation. */
@@ -191,6 +197,14 @@ export const BATTLER_POS: readonly { x: number; y: number }[] = [
   { x: 176, y: 42 },
 ];
 
+/** CONTESTANT_POS_PLAYER/ENEMY (BattleAnimUtil_GetBattlerTypeDefaultPos with isContest). */
+export const CONTEST_POS: readonly { x: number; y: number }[] = [
+  { x: 216, y: 112 },
+  { x: 80, y: 42 },
+];
+/** CONTESTANT_TYPE_PLAYER: the contest rows of the world position table follow the six battler types. */
+const CONTEST_TYPE = 6;
+
 /**
  * GetParticleResIdxForMove's table: the CreateEmitterForMove resource by attacker and defender type (−1: none, a
  * friendly-fire pairing, which the scripts branch away from first).
@@ -260,9 +274,10 @@ export class AnimVm {
     this.data = data[0]!;
     this.rng = new SplRandom(deps.seed >>> 0);
     if (deps.battlers.length !== (deps.doubles ? 4 : 2)) throw new Error(`battle anim: ${deps.battlers.length} battlers in a ${deps.doubles ? 'double' : 'single'} battle`);
+    if (deps.contest && (deps.doubles || deps.attacker !== 0 || deps.defender !== 1)) throw new Error('battle anim: a contest has the performer as battler 0 and its target as battler 1, singles');
     for (const b of [deps.attacker, deps.defender]) if (!deps.battlers[b]) throw new Error(`battle anim: battler ${b} is not in the battle`);
     this.sprites = deps.battlers.map((m, b) => {
-      const at = BATTLER_POS[this.typeOf(b)]!;
+      const at = (deps.contest ? CONTEST_POS : BATTLER_POS)[this.typeOf(b)]!;
       return new MonSprite(b, at.x, at.y, m?.height ?? 0, m?.visible ?? false);
     });
   }
@@ -298,6 +313,10 @@ export class AnimVm {
     return this.deps.doubles;
   }
 
+  get contest(): boolean {
+    return this.deps.contest === true;
+  }
+
   /** BattleAnimUtil_GetBattlerWorldPos_*: the table's position for the battler's type and the current camera projection. */
   worldPos(battler: number, kind = 0): [number, number, number] {
     return this.typePos(this.typeOf(battler), kind);
@@ -306,7 +325,9 @@ export class AnimVm {
   /** BattleAnimUtil_GetBattlerTypeWorldPos_*: the table's position for a battler type. */
   typePos(type: number, kind = 0): [number, number, number] {
     const proj = this.particleSystems[this.currentParticleSystem]?.camera.projection ?? 1;
-    const p = this.data.positions[type]?.[kind]?.[proj];
+    // A contest's rows follow the six battler types (CONTESTANT_TYPE_PLAYER, _ENEMY).
+    if (this.deps.contest && type > 1) throw new Error(`battle anim: battler type ${type} in a contest`);
+    const p = this.data.positions[this.deps.contest ? CONTEST_TYPE + type : type]?.[kind]?.[proj];
     if (!p) throw new Error(`battle anim: no world position ${kind} for battler type ${type}`);
     return [...p];
   }
@@ -481,7 +502,7 @@ export class AnimVm {
         next();
         return;
       case OP.SwitchBgEx:
-        this.bg.start(sideOf(this.defender) === 'player' ? a(2) : a(1), 0, false);
+        this.bg.start(this.contest ? a(3) : sideOf(this.defender) === 'player' ? a(2) : a(1), 0, false);
         next();
         return;
       case OP.SetBgSwitchVar:
@@ -534,7 +555,8 @@ export class AnimVm {
         return;
       }
       case OP.JumpIfContest:
-        next();
+        if (this.contest) jumpBy(1);
+        else next();
         return;
       case OP.JumpIfFriendlyFire:
         if (sideOf(this.attacker) === sideOf(this.defender)) jumpBy(1);
@@ -751,10 +773,13 @@ export class AnimVm {
     const p = (pan << 24) >> 24;
     const atk = sideOf(this.attacker);
     const def = sideOf(this.defender);
-    if (atk === 'player' && def === 'enemy') return p;
-    if (atk === 'enemy' && def === 'player') return -p;
-    if (atk === 'player') return p > 0 ? -p : p;
-    return p < 0 ? -p : p;
+    let out: number;
+    if (atk === 'player' && def === 'enemy') out = p;
+    else if (atk === 'enemy' && def === 'player') out = -p;
+    else if (atk === 'player') out = p > 0 ? -p : p;
+    else out = p < 0 ? -p : p;
+    // A contest's pans are turned round (the performer stands on the right).
+    return this.contest ? -out : out;
   }
 
   private soundPan(seq: number, start: number, end: number, step: number, interval: number, raw: boolean): void {

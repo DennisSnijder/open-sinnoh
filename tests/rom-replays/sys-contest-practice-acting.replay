@@ -1,0 +1,77 @@
+# A practice Acting Competition (decomp scripts_contest_hall_lobby.s, ov17_0223B140.c; docs/research/contests.md §7):
+# the practice receptionist, PRACTICE, ACTING, COOL, Staravia; four turns played by keys (the first key shows the
+# cursor, the D-pad moves it, A picks; Wing Attack and Quick Attack in turn, as last turn's move is off the menu; the
+# main judge, then a side judge, B on the judge menu once to go back to the moves), the verdict, NO to another try.
+party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK platinum:MOVE_QUICK_ATTACK
+set flag platinum:FLAG_CONTEST_HALL_VISITED true
+set var platinum:VAR_CONTEST_HALL_LOBBY_STATE 1
+warp platinum:MAP_HEADER_CONTEST_HALL_LOBBY 27 6 up
+until idle
++0 press a
++1 release a
+advance text
+until menu
++2 press a
++1 release a
++8 release a
+until menu
++2 press down
++1 release down
++2 press down
++1 release down
++2 press a
++1 release a
+advance text
+until menu
++2 press a
++1 release a
+advance text
+until app party 600
++2 tap slot:0
++2 tap menu:0
+until app none 600
+advance text 6000
+until app contest 6000
++0 assert state contest.mode "practice"
++0 assert state contest.competition 7
+# Turn 1: a key shows the cursor (on Wing Attack), A picks it; the judge menu's cursor starts on the left judge: right, A.
+until state contest.acting {"turn":0,"choosing":true} 6000
++1 press b
++1 release b
++2 press a
++1 release a
++8 press right
++1 release right
++2 press a
++1 release a
+# Turn 2: the cursor stays up after a pick by key; Quick Attack is right of Wing Attack (now off the menu). On the
+# judge menu B goes back to the moves; then Quick Attack again and the right-hand judge.
+until state contest.acting {"turn":1,"choosing":true} 9000
++1 press right
++1 release right
++2 press a
++1 release a
++8 press b
++1 release b
++8 press a
++1 release a
++8 press right
++1 release right
++2 press a
++1 release a
+# Turns 3 and 4 by touch: Wing Attack and the main judge, then Quick Attack and the main judge.
+until state contest.acting {"turn":2,"choosing":true} 9000
++1 tap move:0
++8 tap judge:1
+until state contest.acting {"turn":3,"choosing":true} 9000
++1 tap move:1
++8 tap judge:1
+until app none 9000
++0 assert state contest.acting.turn 4
+advance text 6000
+until yesno 6000
++2 press b
++1 release b
+advance text 6000
+until idle 6000
++0 assert state party[0].ribbons []

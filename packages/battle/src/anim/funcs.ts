@@ -192,7 +192,7 @@ const FUNC_IMPLS: Record<string, Func> = {
     const [frames, dx, dy, target] = vm.vars as [number, number, number, number];
     const s = battler(vm, target);
     if (!s) return;
-    const d = dirX(s.battler);
+    const d = dirX(vm, s.battler);
     const x0 = s.x;
     const y0 = s.y;
     let lerp: PosLerp | null = null;
@@ -201,7 +201,8 @@ const FUNC_IMPLS: Record<string, Func> = {
       vm,
       () => {
         if (done) return false;
-        lerp ??= new PosLerp(x0, x0 + dx * d, y0, y0 + dy * d, frames);
+        // A contest turns the Y offset round once more (BattleAnimScriptFunc_MoveBattler).
+        lerp ??= new PosLerp(x0, x0 + dx * d, y0, y0 + dy * d * (vm.contest ? -1 : 1), frames);
         if (!lerp.update()) done = true;
         s.x = lerp.x;
         s.y = lerp.y;
@@ -261,7 +262,7 @@ function moveBattlerX(vm: AnimVm, now: boolean): void {
   if (!s) return;
   const x0 = s.x;
   const y0 = s.y;
-  const off = offset * dirX(s.battler);
+  const off = offset * dirX(vm, s.battler);
   let lerp: PosLerp | null = null;
   let state = 0;
   task(
@@ -292,7 +293,7 @@ function moveEmitter(vm: AnimVm, parabolic: boolean): void {
   const skip = params! >>> 16;
   let max = params! & 0xffff;
   if (max === 0) max = 0xff;
-  const dir = dirX(vm.attacker);
+  const dir = dirX(vm, vm.attacker);
   const a = vm.worldPos(start);
   const b = vm.worldPos(end);
   const px = (v: number) => Math.trunc(v / PIXEL);
