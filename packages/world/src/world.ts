@@ -84,6 +84,8 @@ import { SPARKLE_RENDERER, UndergroundField, undergroundArrival, undergroundTabl
 const DESTROY_OBSTACLE_TICKS = 45;
 /** Decomp SystemVars_IncrementAmitySquareStepCount: the counter stops at 10000. */
 const AMITY_STEPS_MAX = 10000;
+/** Decomp SysTask_DoContestCameraFlash: BrightnessController_StartTransition over 6 frames. */
+const CAMERA_FLASH_TICKS = 6;
 /** Decomp ITEM_USE_FUNC_POKE_RADAR. */
 const FIELD_USE_POKE_RADAR = 11;
 
@@ -255,6 +257,12 @@ export class FieldWorld implements OpenSinnohWorld {
   private heightCalc = true;
   /** Drawn with the heal avatar until the next setPlayerState (setPlayerAvatar), or the Sprayduck one until endWatering. */
   private healAvatar = false;
+  /** The contest camera flash's ticks left (`cameraFlash`): presentation only, not saved. */
+  private flashTicks = 0;
+  /** The flash's brightness now: +4 of 16 at its start, fading to 0. */
+  private cameraFlashLevel(): number {
+    return (this.flashTicks / CAMERA_FLASH_TICKS) * (4 / 16);
+  }
   /** The Sprayduck task (berry-patches.ts) while it runs. */
   private watering: WateringTask | null = null;
   /** The zone's berry soil objects: local id → patch id (berry-patches.ts), per zone. */
@@ -2081,7 +2089,7 @@ export class FieldWorld implements OpenSinnohWorld {
       weather: weather.id,
       // Flash widening and the dark-map transition are not drawn yet; the radius is the weather's.
       darkness: weather.darkness ? { radius: weather.darkness.radius } : null,
-      ...(this.weatherTasks.flash() > 0 ? { lightning: this.weatherTasks.flash() } : {}),
+      ...(Math.max(this.weatherTasks.flash(), this.cameraFlashLevel()) > 0 ? { lightning: Math.max(this.weatherTasks.flash(), this.cameraFlashLevel()) } : {}),
       effects: [...this.effects.view(), ...(feature?.effects ?? []), ...soilEffects, ...this.radarEffects()],
       cameraOffset: [this.cameraOffset[0] + this.cameraShake, this.cameraOffset[1], this.cameraOffset[2]],
       clock: { seconds: secondsSinceMidnight(clock), period: dayPeriod(clock.hour) },
@@ -2288,6 +2296,7 @@ export class FieldWorld implements OpenSinnohWorld {
   }
 
   weatherTick(field: boolean): void {
+    if (this.flashTicks > 0) this.flashTicks--;
     this.weatherTasks.step(this.get('weathers', this.state.weather), this.loads, field);
   }
 
@@ -2557,16 +2566,25 @@ export class FieldWorld implements OpenSinnohWorld {
   }
 
   /** Decomp BerryPatches_EndWatering: the avatar of the player's state again. */
+  /** Decomp SysTask_DoContestCameraFlash: brightness +4 back to 0 over 6 frames (BrightnessController_StartTransition). */
+  cameraFlash(): void {
+    this.flashTicks = CAMERA_FLASH_TICKS;
+  }
+
   endWatering(): void {
     this.healAvatar = false;
     this.hero.sprite = this.playerSprite();
     this.hero.pose = null;
   }
 
-  /** The heal avatar (decomp PlayerAvatar_RequestStateHeal): the sprite with the give/receive poses. */
-  setPlayerAvatar(avatar: 'heal'): void {
-    const sprites = [...this.reg.newGame.values()][0]?.playerHealSprite;
-    if (!sprites) throw new Error(`world: setPlayerAvatar(${avatar}): newGame has no playerHealSprite`);
+  /**
+   * The heal avatar (decomp PlayerAvatar_RequestStateHeal): the sprite with the give/receive poses; the contest attire
+   * (ChangeIntoContestAttire's PlayerAvatar_Redraw with PLAYER_AVATAR_CONTEST). Both last until the next map load or state change.
+   */
+  setPlayerAvatar(avatar: 'heal' | 'contest'): void {
+    const ng = [...this.reg.newGame.values()][0];
+    const sprites = avatar === 'heal' ? ng?.playerHealSprite : ng?.contests?.playerSprite;
+    if (!sprites) throw new Error(`world: setPlayerAvatar(${avatar}): the pack has no ${avatar} sprite`);
     this.hero.sprite = sprites[this.state.gender];
     this.hero.pose = null;
     this.healAvatar = true;

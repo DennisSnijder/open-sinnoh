@@ -1090,6 +1090,8 @@ export interface NewGame {
   frontier?: FrontierTables;
   /** 0.33.0. The Underground's tables (`UndergroundTables`). Absent: no Underground (the Explorer Kit cannot be used; its ops fail loudly). */
   underground?: import('./underground.ts').UndergroundTables;
+  /** 0.35.0. The Super Contests' tables (`ContestTables`). Absent: the contest ops fail loudly. */
+  contests?: import('./contests.ts').ContestTables;
 }
 
 /**

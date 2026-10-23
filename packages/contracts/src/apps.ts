@@ -250,6 +250,14 @@ export type AppRequest =
   | { app: 'ug-menu' }
   /** 0.33.0. Vendor `vendor`'s shop (decomp UndergroundVendors_StartShopMenuTask; `UndergroundTables.vendors` index). */
   | { app: 'ug-vendor'; vendor: number }
+  /**
+   * 0.35.0. Decomp ScrCmd_OpenPartyMenuForContest (PARTY_MENU_MODE_CONTEST): each panel says whether the Pokémon may
+   * enter a `type` contest of `rank` (CheckContestEligibility: not an Egg, not fainted, at least `rank` ribbons of the
+   * type, two moves); its window is ENTER (when eligible), SUMMARY, CANCEL. ENTER returns its slot, B or CANCEL null.
+   */
+  | { app: 'contest-select'; rank: number; type: number }
+  /** 0.35.0. Decomp ScrCmd_RunContestApplication: the running contest's rounds and results (`GameState.contest`). */
+  | { app: 'contest' }
   | EvolutionRequest;
 
 /**
@@ -337,6 +345,10 @@ export type AppResult =
   /** 0.33.0. The Underground's menu closed; `goUp`: GO UP was confirmed (the return to the surface starts). */
   | { app: 'ug-menu'; goUp: boolean }
   | { app: 'ug-vendor' }
+  /** 0.35.0. The slot entered, or null. */
+  | { app: 'contest-select'; slot: number | null }
+  /** 0.35.0. The contest app ended (its scores and placements are in `GameState.contest`). */
+  | { app: 'contest' }
   /** 0.27.30. Rowan's intro (packages/menus `createRowanIntro`): the names and gender the new game starts with. */
   | { app: 'rowan-intro'; names: { player: string; rival: string }; gender: 'male' | 'female' };
 
@@ -461,7 +473,8 @@ export type AppView =
   | PoffinFeedView
   | import('./underground.ts').MiningView
   | import('./underground.ts').UndergroundMenuView
-  | import('./underground.ts').UndergroundVendorView;
+  | import('./underground.ts').UndergroundVendorView
+  | import('./contests.ts').ContestView;
 export type AppName = AppView['app'];
 
 /**
@@ -511,7 +524,7 @@ export interface SaveView {
 export interface PartyView {
   app: 'party';
   /** 0.34.0 `order`: the Battle Tower's pick (`party-order`): `notes` say each panel's entry or BANNED, `confirm` is set. */
-  mode: 'field' | 'give' | 'use' | 'teach' | 'battle' | 'daycare' | 'select' | 'feed' | 'order';
+  mode: 'field' | 'give' | 'use' | 'teach' | 'battle' | 'daycare' | 'select' | 'feed' | 'order' | 'contest';
   title: string;
   slots: (PartySlotView | null)[];
   prompt: string;

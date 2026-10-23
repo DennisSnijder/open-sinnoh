@@ -25,7 +25,7 @@ export function testMon(registries: Registries, species: string, level: number, 
 
 export function newState(): GameState {
   return {
-    schemaVersion: 19,
+    schemaVersion: 20,
     packs: [],
     names: { player: 'Ari', rival: 'Bo' },
     gender: 'male',
@@ -66,6 +66,7 @@ export function newState(): GameState {
     berryPatches: [],
     poffins: [],
     fashionCase: newFashionCase(),
+    contestPhotos: [null, null, null, null, null],
     signature: null,
     options: { sound: 0, battleScene: 0, battleStyle: 0, buttonMode: 0, frame: 0 },
     daycare: emptyDaycare(),
@@ -202,7 +203,10 @@ export class FakeField implements FieldHost {
   }
   turnPlayer = this.log('turnPlayer');
   setObjectVisible = this.log('setObjectVisible');
-  setPlayerAvatar(avatar: 'heal'): void {
+  cameraFlash(): void {
+    this.calls.push('cameraFlash');
+  }
+  setPlayerAvatar(avatar: 'heal' | 'contest'): void {
     this.calls.push(`setPlayerAvatar ${avatar}`);
   }
   setPlayerState(s: GameState['playerState']): void {

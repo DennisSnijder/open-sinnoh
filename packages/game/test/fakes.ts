@@ -80,6 +80,7 @@ export const createFakeWorld: CreateWorld = ({ registries, state, scripts }) => 
       state.playerState = s;
     },
     setPlayerAvatar() {},
+    cameraFlash() {},
     trainerApproach() {
       throw new Error('fake world: trainerApproach not implemented');
     },

@@ -45,6 +45,7 @@ import { readWeatherBgs, readWeatherTasks, readYearlyWeather, WEATHER_BG_COUNT, 
 import { readZoneHeaders, type ZoneHeader } from './formats/zone-headers.ts';
 import { charTable, Names, type CharmapFile, type NamesFile } from './names.ts';
 import { readUndergroundTables } from './underground.ts';
+import { readContestTables } from './contests.ts';
 
 /**
  * The base pack: data records (this file), script IR and movements (vm `decodeScripts`, entry n of file
@@ -273,6 +274,11 @@ const MODERN_OPTION_TEXTS = {
   Lantern_Summary_Ivs: 'IV',
   Lantern_Options_SpiritombVendors: 'SPIRITOMB',
   Lantern_Options_SpiritombVendorsDescription: 'Underground vendors you talk to\ncount as people met for Spiritomb.',
+  Lantern_Contest_Placeholder: '{var 0}\nPlaceholder: scored by condition.',
+  Lantern_Contest_Visual: 'VISUAL',
+  Lantern_Contest_Dance: 'DANCE',
+  Lantern_Contest_Acting: 'ACTING',
+  Lantern_Contest_Total: 'TOTAL',
 };
 
 /** Map header map types (decomp MAP_TYPE_*), measured on the ROM: 1 town/city, 2 outdoors, 3 cave, 4 indoors. */
@@ -1209,6 +1215,23 @@ export async function importPlatinum(
     const visited = [...names.flagNames].find(([, n]) => n === 'FLAG_CONTEST_HALL_VISITED');
     if (!visited) throw new ImportError('names: no FLAG_CONTEST_HALL_VISITED');
     newGame.contestHallFlag = names.flag(visited[0]);
+    const gfxNumber = (name: string) => {
+      const gfx = [...names.gfxNames].find(([, n]) => n === name)?.[0];
+      if (gfx === undefined) throw new ImportError(`names: no ${name}`);
+      return gfx;
+    };
+    const opponentBank = bankIndex('TEXT_BANK_CONTEST_OPPONENT_NAMES');
+    const judgeBank = bankIndex('TEXT_BANK_CONTEST_JUDGE_NAMES');
+    newGame.contests = readContestTables(fs.file('/contest/data/contest_data.narc'), {
+      species: (i) => names.species(i),
+      move: (i) => names.move(i),
+      opponentName: (n) => names.text(opponentBank, n),
+      judgeName: (n) => names.text(judgeBank, n),
+      opponentNames: bankTexts[opponentBank]!.length,
+      judgeNames: bankTexts[judgeBank]!.length,
+      playerGfx: { male: gfxNumber('OBJ_EVENT_GFX_PLAYER_M_CONTEST'), female: gfxNumber('OBJ_EVENT_GFX_PLAYER_F_CONTEST') },
+      playerSprite: { male: playerGfx('OBJ_EVENT_GFX_PLAYER_M_CONTEST'), female: playerGfx('OBJ_EVENT_GFX_PLAYER_F_CONTEST') },
+    });
     const e = SPECIAL_ENCOUNTERS;
     const ints = (b: Uint8Array, n: number, what: string) => {
       if (b.length !== n * 4) throw new ImportError(`encdata_ex ${what}: ${b.length} bytes, expected ${n} species`);

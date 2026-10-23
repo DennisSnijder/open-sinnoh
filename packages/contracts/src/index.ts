@@ -16,8 +16,9 @@ export * from './distortion.ts';
 export * from './story-scenes.ts';
 export * from './frontier.ts';
 export * from './underground.ts';
+export * from './contests.ts';
 
 export * from './anim-script.ts';
 
-export const CONTRACTS_VERSION = '0.34.5';
+export const CONTRACTS_VERSION = '0.35.0';
 

@@ -1,0 +1,252 @@
+/**
+ * 0.35.0. Super Contests, offline (decomp src/contest.c, src/scrcmd_contests.c, src/unk_02094EDC.c, overlay017 and
+ * overlay022; docs/research/contests.md): the tables read from the player's ROM, the running contest (`GameState.contest`,
+ * from `new_contest` to `end_contest`), the winner photos, and the seam the three rounds plug into. Link contests are out
+ * of scope: their receptionist answers "no connection".
+ *
+ * Ids follow the decomp: contest types CONTEST_TYPE_* (cool 0 … tough 4), ranks CONTEST_RANK_* (normal 0 … master 3),
+ * competitions CONTEST_COMPETITION_*. A contestant id is the decomp's (0 = the player); its entry number is 3 − id.
+ */
+import type { Condition, Id, Pokemon } from '@opensinnoh/core';
+import type { AppHost, AppMessage, AppYesNo } from './apps.ts';
+import type { Registries, StubLog } from './runtime.ts';
+import type { GameState } from './state.ts';
+import type { InputFrame } from './ui.ts';
+
+/** Decomp CONTEST_TYPE_* order. */
+export const CONTEST_TYPES = ['cool', 'beauty', 'cute', 'smart', 'tough'] as const;
+/** Decomp CONTEST_RANK_* order. */
+export const CONTEST_RANKS = ['normal', 'great', 'ultra', 'master'] as const;
+/** Decomp CONTEST_NUM_PARTICIPANTS, CONTEST_NUM_JUDGES, the visual themes (sub_02095A74: 12). */
+export const CONTEST_ENTRANTS = 4;
+export const CONTEST_JUDGES = 3;
+export const CONTEST_THEMES = 12;
+/** Decomp constants/contests.h CONTEST_MODE_*. */
+export const CONTEST_MODE = { official: 0, link: 1, practice: 2 } as const;
+/** Decomp constants/contests.h CONTEST_COMPETITION_* (2: the full contest; 3/5/7 practice of one round; 4/6/8 unused single rounds). */
+export const CONTEST_COMPETITION = { full: 2, practiceVisual: 3, visual: 4, practiceDance: 5, dance: 6, practiceActing: 7, acting: 8 } as const;
+
+/** The three rounds, in the order a full contest runs them. */
+export const CONTEST_ROUNDS = ['visual', 'dance', 'acting'] as const;
+export type ContestRoundKind = (typeof CONTEST_ROUNDS)[number];
+
+/**
+ * One NPC contestant (contest_data.narc member 0, 48-byte records; decomp UnkStruct_ov6_02248BE8, read by sub_02094F04 and
+ * sub_02095380):
+ * - `species`, `moves` (four), `nickname` and `trainerName` (TEXT_BANK_CONTEST_OPPONENT_NAMES text ids), `condition`;
+ * - `rank` (CONTEST_RANK_*), `types` (the contest types it enters), `practice` (bit unk_20_9: practice contests),
+ *   `single` (bit unk_20_8: the unused single-round competitions), `pool` (unk_20_10: 0 always, 1 before the post-game
+ *   only, 2 post-game only, 3 the post-game star, one of whom joins every contest then);
+ * - `gender` (unk_20_12, the trainer's), `aiLevel` (unk_20_14, 0–3: the dance and acting AI's skill and the camera
+ *   flashes' variant), `gfx` (unk_08, the overworld OBJ_EVENT_GFX_* on the stage), `trainerClass` (unk_0A, the
+ *   trainer picture in the visual round), `fame` (unk_2E, the applause), `dressUps` (unk_22–2D: a `dressUps` index per
+ *   visual theme).
+ * Fields 0x00 (u32, 0 everywhere), 0x04 (u32, 0xFFFF everywhere) and 0x2F (u8, 100 everywhere) are not read by the decomp.
+ */
+export interface ContestOpponent {
+  species: Id;
+  moves: Id[];
+  nickname: Id;
+  trainerName: Id;
+  condition: Condition;
+  rank: number;
+  types: number[];
+  practice: boolean;
+  single: boolean;
+  pool: 0 | 1 | 2 | 3;
+  gender: 'male' | 'female';
+  aiLevel: number;
+  gfx: number;
+  trainerClass: number;
+  fame: number;
+  dressUps: number[];
+}
+
+/**
+ * One judge (member 1, 8-byte records; decomp UnkStruct_020954F0, sub_020954F0): `name` (TEXT_BANK_CONTEST_JUDGE_NAMES),
+ * `rank`, `roles` per contest type (0 absent, 1 a side judge, 2 a candidate for the main judge, the middle seat).
+ * The u16 at 0x02 (decomp padding_02: 36, 62 or 35 per judge) and the top 4 bits of 0x04 (1 everywhere) are not read.
+ */
+export interface ContestJudge {
+  name: Id;
+  rank: number;
+  roles: number[];
+}
+
+/**
+ * An NPC's visual-round outfit (member 2, 84-byte records; decomp UnkStruct_020951B0, sub_020951B0): up to 20 placed
+ * accessories (accessory id, x and y on the photo, draw priority), the Pokémon's own priority and the backdrop.
+ */
+export interface ContestDressUp {
+  accessories: ContestPlacedAccessory[];
+  monPriority: number;
+  backdrop: number;
+}
+export interface ContestPlacedAccessory {
+  accessory: number;
+  x: number;
+  y: number;
+  priority: number;
+}
+
+/**
+ * 0.35.0. The contest tables (`NewGame.contests`):
+ * - `opponents`, `judges`, `dressUps`: contest_data.narc members 0–2;
+ * - `themes`: members 3–14, per visual theme (decomp unk_112) each accessory's dress-up points (ov17_02252A70);
+ * - `playerGfx`: OBJ_EVENT_GFX_PLAYER_M/F_CONTEST (the player's stage gfx, decomp Contest_Init),
+ *   `playerSprite`: their sprites (ChangeIntoContestAttire's redraw).
+ */
+export interface ContestTables {
+  opponents: ContestOpponent[];
+  judges: ContestJudge[];
+  dressUps: ContestDressUp[];
+  themes: number[][];
+  playerGfx: { male: number; female: number };
+  playerSprite: { male: Id; female: Id };
+}
+
+/** One contestant of the running contest (decomp Contest unk_00: contestMons, trainerNames, trainerGenders, unk_FC, monContestFame, contestantObjEventGFX). */
+export interface ContestEntrant {
+  /** Index into `ContestTables.opponents`; null for the player. */
+  opponent: number | null;
+  trainerName: string;
+  gender: 'male' | 'female';
+  /** A copy of the Pokémon at entry (the player's party Pokémon; an NPC's built at level 10 by sub_02095380). */
+  mon: Pokemon;
+  /** CalcMonContestFame (the player) or the record's fame: how loud the applause is (1–5+). */
+  fame: number;
+  /** The overworld gfx on the stage (VAR_OBJ_GFX_ID_n). */
+  gfx: number;
+  aiLevel: number;
+}
+
+/**
+ * The raw points of each round, per contestant id (decomp Contest unk_118[]): `condition` (unk_00, ov17_0223F374),
+ * `dressUp` (unk_02), `dance` (unk_04), `acting` (unk_06). A round not played (practice) stays null.
+ */
+export interface ContestRawScores {
+  condition: number[];
+  dressUp: number[] | null;
+  dance: number[] | null;
+  acting: number[] | null;
+}
+
+/**
+ * The final scoring (decomp ov17_02251A1C): per round (visual, dance, acting; 0 when not part of the competition) the
+ * points normalised against the round's leader (`points`) and the bar lengths in px (`bars`); the totals; the placement
+ * per contestant id (0 = first), placed by the bar total with a random tie-break.
+ */
+export interface ContestResult {
+  points: number[][];
+  bars: number[][];
+  totals: number[];
+  placements: number[];
+}
+
+/**
+ * 0.35.0. The contest running between `new_contest` and `end_contest` (`GameState.contest`; decomp Contest). Saves
+ * happen only between scripts, so a save never holds one; it is plain JSON so a mid-contest snapshot round-trips.
+ * - `mode` CONTEST_MODE (official or practice), `rank`, `type`, `competition`, `partySlot` (the entered party
+ *   Pokémon), `theme` (the visual theme, decomp unk_112), `rng` (the contest LCRNG's state, decomp Contest_SetLCRNGSeed:
+ *   seeded from one draw of the game's main stream).
+ * - `entrants` by contestant id; `judges`: indexes into `ContestTables.judges`, the main judge in the middle.
+ * - `scores` and `result` are written by the contest app (`run_contest_application`); `result` stays null in practice,
+ *   whose `placement` is the player's (decomp FieldTask_RunPracticeCompetition).
+ */
+export interface ContestSession {
+  mode: 'official' | 'practice';
+  rank: number;
+  type: number;
+  competition: number;
+  partySlot: number;
+  theme: number;
+  rng: number;
+  entrants: ContestEntrant[];
+  judges: number[];
+  scores: ContestRawScores | null;
+  result: ContestResult | null;
+  /** The player's placement (0 = first) once the app has run. */
+  placement: number | null;
+  /** The player's visual-round outfit (the photo's), once the visual round has run. */
+  dressUp: ContestDressUp | null;
+}
+
+/**
+ * 0.35.0. A contest winner photo (`GameState.contestPhotos`, one per contest type; decomp ImageClips contest photos,
+ * struct_02029C88): the winning Pokémon, its trainer, the rank and the outfit. The lobby's frames show them
+ * (scr_cmd_0a8, the visual round's lane).
+ */
+export interface ContestPhoto {
+  mon: { species: Id; form: number; pid: number; otId: number; nickname: string | null };
+  trainerName: string;
+  rank: number;
+  dressUp: ContestDressUp;
+}
+
+/**
+ * The seam the rounds plug into. A round is a headless model the contest app steps once per tick (30 Hz) with the
+ * player's input, until it returns its outcome. Its context gives it the running contest (read only), the game's
+ * records and state (the Fashion Case), the host (sound) and the contest LCRNG (`rng`: decomp Contest_GetRNGNext, a u16;
+ * every draw moves the session's `rng`, so rounds draw in a fixed order for replays).
+ */
+export interface ContestRoundContext {
+  readonly session: Readonly<ContestSession>;
+  readonly registries: Registries;
+  readonly state: Readonly<GameState>;
+  readonly host: AppHost;
+  readonly log: StubLog;
+  rng(): number;
+}
+
+/**
+ * What a round returns, per contestant id: `visual` the dress-up points (decomp unk_02; the condition points are the
+ * session's) and the player's outfit; `dance` unk_04; `acting` unk_06.
+ */
+export type ContestRoundOutcome =
+  | { kind: 'visual'; dressUp: number[]; outfit: ContestDressUp }
+  | { kind: 'dance'; points: number[] }
+  | { kind: 'acting'; points: number[] };
+
+export interface ContestRound {
+  readonly kind: ContestRoundKind;
+  /** True for the placeholder rounds (no gameplay, scored from condition): logged and counted, never silent. */
+  readonly placeholder: boolean;
+  /** One tick. Returns the outcome once the round is over (then it is not stepped again). */
+  step(input: InputFrame): ContestRoundOutcome | null;
+  view(): ContestRoundView;
+}
+
+export type CreateContestRound = (kind: ContestRoundKind, ctx: ContestRoundContext) => ContestRound;
+
+/**
+ * A round's view (inside `ContestView`). The placeholder: the round's name and its message box. The round lanes add
+ * their own members to this union. Taps: `next`.
+ */
+export type ContestRoundView = ContestPlaceholderRoundView;
+export interface ContestPlaceholderRoundView {
+  round: ContestRoundKind;
+  placeholder: true;
+  message: AppMessage;
+}
+
+/**
+ * 0.35.0. The contest app (`run_contest_application`): the rounds of the competition one after the other, then the
+ * results (official contests). `results`: the four entrants in entry order with their points per round and in total,
+ * and the placements once announced. Taps: `next` (the message box).
+ */
+export interface ContestView {
+  app: 'contest';
+  /** The heading: rank and type ("NORMAL RANK", "COOL CONTEST"). */
+  heading: { rank: string; type: string };
+  round: ContestRoundView | null;
+  results: ContestResultsView | null;
+  message: AppMessage | null;
+  yesNo: AppYesNo | null;
+}
+export interface ContestResultsView {
+  /** The round headings (VISUAL, DANCE, ACTING) and the total's. */
+  headings: string[];
+  /** Entry order (No. 1 … No. 4). */
+  /** `points` per round (normalised, decomp unk_39A), null until announced; `total` and `place` null until the winner is. */
+  rows: { entry: number; trainer: string; mon: string; points: (number | null)[]; total: number | null; place: number | null; player: boolean }[];
+}

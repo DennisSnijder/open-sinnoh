@@ -15,3 +15,4 @@ export * from './easy-chat.ts';
 export * from './poffins.ts';
 export * from './fashion.ts';
 export * from './battle-tower.ts';
+export * from './contest.ts';

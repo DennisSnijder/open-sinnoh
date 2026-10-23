@@ -212,7 +212,7 @@ export interface GameState {
   fieldRng?: PrngState;
   /** FieldOverworldState exit location (not the elevator special location). Absent until an entrance is recorded. */
   escapeLocation?: { zone: Id; x: number; z: number; facing: Facing };
-  schemaVersion: 19;
+  schemaVersion: 20;
   packs: { id: string; version: string }[];
   names: { player: string; rival: string };
   gender: 'male' | 'female';
@@ -385,6 +385,13 @@ export interface GameState {
    * spheres, mining spots, records. Absent until a system writes it (core `underground` creates it as a new game has it).
    */
   underground?: import('./underground.ts').UndergroundState;
+  /**
+   * 0.35.0. The winner photos (schema v20; decomp ImageClips contest photos), one per contest type (CONTEST_TYPE_*
+   * order): the last official win of that type, or null.
+   */
+  contestPhotos: (import('./contests.ts').ContestPhoto | null)[];
+  /** 0.35.0. The contest running between `new_contest` and `end_contest` (`ContestSession`); absent otherwise, so never in a save. */
+  contest?: import('./contests.ts').ContestSession;
 }
 
 /** Decomp MAX_POFFINS. */

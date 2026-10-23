@@ -63,7 +63,7 @@ export class FakeRunner implements ScriptRunner {
 
 export function newState(zone = 'ROOM', x = 14, z = 16, facing: Facing = 'up'): GameState {
   return {
-    schemaVersion: 19,
+    schemaVersion: 20,
     packs: [],
     names: { player: 'Ari', rival: 'Bo' },
     gender: 'male',
@@ -104,6 +104,7 @@ export function newState(zone = 'ROOM', x = 14, z = 16, facing: Facing = 'up'): 
     berryPatches: [],
     poffins: [],
     fashionCase: newFashionCase(),
+    contestPhotos: [null, null, null, null, null],
     signature: null,
     options: { sound: 0, battleScene: 0, battleStyle: 0, buttonMode: 0, frame: 0 },
     daycare: emptyDaycare(),

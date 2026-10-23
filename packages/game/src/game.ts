@@ -274,7 +274,7 @@ export function newGameState(record: NewGame, registries: Pick<Registries, 'zone
   const fieldRng = new Prng(fieldSeed(seed));
   const dailyRandom = newDailyRandom(fieldRng.next());
   return {
-    schemaVersion: 19,
+    schemaVersion: 20,
     packs: order.map((p) => ({ ...p })),
     names: { ...(options?.names ?? record.names) },
     gender: options?.gender ?? record.gender,
@@ -321,6 +321,7 @@ export function newGameState(record: NewGame, registries: Pick<Registries, 'zone
     berryPatches: record.berries ? newBerryPatches(record.berries) : [],
     poffins: [],
     fashionCase: newFashionCase(),
+    contestPhotos: [null, null, null, null, null],
   };
 }
 

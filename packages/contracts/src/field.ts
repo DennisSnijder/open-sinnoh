@@ -66,7 +66,12 @@ export interface FieldHost {
    * Redraws the player with another avatar sprite until the next setPlayerState (decomp
    * PlayerAvatar_RequestStateHeal: `NewGame.playerHealSprite`, with the give/receive poses). Not saved.
    */
-  setPlayerAvatar(avatar: 'heal'): void;
+  setPlayerAvatar(avatar: 'heal' | 'contest'): void;
+  /**
+   * 0.35.0. A camera flash on the stage (decomp SysTask_DoContestCameraFlash: BrightnessController_StartTransition 6
+   * steps from +4 to 0 on the main screen), drawn through `FieldView.lightning`. Presentation only.
+   */
+  cameraFlash(): void;
   /** Trainer sight: the trainer walks up to the player ("!" first). Poll trainerApproachDone. */
   trainerApproach(localId: number): void;
   trainerApproachDone(): boolean;

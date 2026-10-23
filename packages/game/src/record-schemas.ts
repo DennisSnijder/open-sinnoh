@@ -942,6 +942,32 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
       tram: opt(ref('props')),
     }, (v) => ((v.zones as unknown[]).length !== 6 ? 'greatMarsh.zones must have the 6 areas' : (v.daily as { regional: unknown[]; national: unknown[] }).regional.length !== 32 || (v.daily as { national: unknown[] }).national.length !== 32 ? 'greatMarsh.daily tables must have 32 species' : undefined))),
     contestHallFlag: opt(ref('flags')),
+    // 0.35.0: the Super Contests' tables (contracts ContestTables).
+    contests: opt(obj({
+      opponents: arr(obj({
+        species: ref('species'),
+        moves: arr(ref('moves')),
+        nickname: ref('texts'),
+        trainerName: ref('texts'),
+        condition: obj({ cool: int(0, 255), beauty: int(0, 255), cute: int(0, 255), smart: int(0, 255), tough: int(0, 255), sheen: int(0, 255) }),
+        rank: int(0, 3),
+        types: arr(int(0, 4)),
+        practice: bool,
+        single: bool,
+        pool: int(0, 3),
+        gender: lit('male', 'female'),
+        aiLevel: int(0, 3),
+        gfx: int(0, 0xffff),
+        trainerClass: int(0, 0xffff),
+        fame: int(0, 255),
+        dressUps: arr(int(0)),
+      })),
+      judges: arr(obj({ name: ref('texts'), rank: int(0, 3), roles: arr(int(0, 3)) })),
+      dressUps: arr(obj({ accessories: arr(obj({ accessory: int(0, 99), x: int(0, 255), y: int(0, 255), priority: int(-128, 127) })), monPriority: int(-128, 127), backdrop: int(0, 17) })),
+      themes: arr(arr(int(0, 255))),
+      playerGfx: obj({ male: int(0, 0xffff), female: int(0, 0xffff) }),
+      playerSprite: obj({ male: ref('sprites'), female: ref('sprites') }),
+    }, (v) => ((v.themes as unknown[]).length !== 12 ? 'contests.themes must have the 12 themes' : undefined))),
     // 0.31.0: Amity Square (contracts AmitySquareTables): pools of ten accessories, the gifts' items then accessories.
     amitySquare: opt(obj({
       stepVar: ref('vars'),
