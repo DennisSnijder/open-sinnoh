@@ -76,7 +76,7 @@ segment's check), the question (`TVInterview_LoadMessage`), the word, `SaveTVInt
 
 ## 3. What is built
 
-- **Contracts** `tv.ts` (0.41.0): `TvState` (`GameState.tv`, schema v23: the slot, the three saved types' four slots of
+- **Contracts** `tv.ts` (0.42.0): `TvState` (`GameState.tv`, schema v23: the slot, the three saved types' four slots of
   `TvRecord`, the pending data), `TvSegmentData` (one kind per segment), `TvTables` (`NewGame.tv`), and the recorders as
   shared state edits (`saveTvSegment`, `tvCatch`, `tvSafariCatch`, `tvRibbon`, `tvBattlePoints`, `tvDaily`, `tvTimeSlot`).
 - **Importer** `tv.ts`: tv.narc into `NewGame.tv`, checked (programmes 1–9, types 1–5, segment ids within the type's).
@@ -153,7 +153,7 @@ segment's check), the question (`TVInterview_LoadMessage`), the word, `SaveTVInt
 
 - **Model**: the case and stage are shared with the contest (packages/menus `contest/dress-up.ts`, used by
   `contest/visual.ts` unchanged in behaviour); the gallery's frame around it is `gallery.ts` (`galleryDressUpScreen`,
-  `galleryPhotoScreen`). Contracts 0.41.0: requests `gallery-dress-up` (slot, first) and `gallery-photo` (slot),
+  `galleryPhotoScreen`). Contracts 0.42.0: requests `gallery-dress-up` (slot, first) and `gallery-photo` (slot),
   results, `GalleryDressUpView`, `GalleryPhotoView`, `DressUpStageView`.
 - **VM** (`gallery-ops.ts`, `REAL_GALLERY` in coverage): `scr_cmd_0a6`, `set_dress_up_photo_title`,
   `dress_up_photo_has_data`, `show_dress_up_photo`, `buffer_custom_message_word`.

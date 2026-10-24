@@ -130,7 +130,7 @@ export interface TvPending {
 }
 
 /**
- * `GameState.tv` (0.41.0, schema v23; decomp TVBroadcast without the Wi-Fi episodes). `played`: the segments played in this
+ * `GameState.tv` (0.42.0, schema v23; decomp TVBroadcast without the Wi-Fi episodes). `played`: the segments played in this
  * time slot (slot numbers 1–4 for the saved types, segment ids for Sinnoh Now and the Variety Hour); `slotMinutes` the
  * minutes left in the 15-minute slot; `finished` the programme's farewell was shown. `interviews`, `sightings` and
  * `records` hold `TV.slots` entries each (null: free).
@@ -156,7 +156,7 @@ export const newTvState = (): TvState => ({
 });
 
 /**
- * `NewGame.tv` (0.41.0; arc/tv.narc). `schedule[slot][day]`: the programme (1–9) of each quarter hour from 5:00 (slot 0) and
+ * `NewGame.tv` (0.42.0; arc/tv.narc). `schedule[slot][day]`: the programme (1–9) of each quarter hour from 5:00 (slot 0) and
  * day (0 Monday … 6 Sunday); `programs[id − 1]`: a programme's type and its segment ids in order.
  */
 export interface TvTables {

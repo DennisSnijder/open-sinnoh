@@ -132,13 +132,13 @@ export const REAL_TOWN = [
 ];
 
 /**
- * The Jubilife TV gallery (contracts 0.41, gallery-ops.ts; docs/research/tv.md): `real: 'gallery'` in the export;
+ * The Jubilife TV gallery (contracts 0.42, gallery-ops.ts; docs/research/tv.md): `real: 'gallery'` in the export;
  * `opensinnoh coverage` fails if one is not implemented.
  */
 export const REAL_GALLERY = ['scr_cmd_0a6', 'set_dress_up_photo_title', 'dress_up_photo_has_data', 'show_dress_up_photo', 'buffer_custom_message_word'];
 
 /**
- * The TV (contracts 0.41, tv-ops.ts; docs/research/tv.md): `real: 'tv'` in the export; `opensinnoh coverage` fails if one
+ * The TV (contracts 0.42, tv-ops.ts; docs/research/tv.md): `real: 'tv'` in the export; `opensinnoh coverage` fails if one
  * is not implemented.
  */
 export const REAL_TV = [

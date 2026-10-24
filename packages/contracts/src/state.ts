@@ -410,10 +410,10 @@ export interface GameState {
    * party Pokémon's `capsule` is a copy of one of them.
    */
   sealCase: import('./seals.ts').SealCase;
-  /** 0.41.0. The TV (schema v23; decomp TVBroadcast, contracts `TvState`). */
+  /** 0.42.0. The TV (schema v23; decomp TVBroadcast, contracts `TvState`). */
   tv: import('./tv.ts').TvState;
   /**
-   * 0.41.0. The Jubilife TV gallery's photos (schema v23; decomp ImageClips savedPhotos, SAVED_PHOTOS_COUNT slots): slot 0
+   * 0.42.0. The Jubilife TV gallery's photos (schema v23; decomp ImageClips savedPhotos, SAVED_PHOTOS_COUNT slots): slot 0
    * is the player's own (the gallery's dress-up writes it); the others come only from record mixing, so stay null offline.
    */
   dressUpPhotos: (import('./contests.ts').DressUpPhoto | null)[];

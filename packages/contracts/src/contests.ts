@@ -310,7 +310,7 @@ export interface ContestPhoto {
 export const DRESS_UP_PHOTOS = { count: 11, accessories: 10 } as const;
 
 /**
- * 0.41.0. A Jubilife TV gallery photo (decomp DressUpPhoto, written by the gallery's dress-up, ov22_02256F38): the Pokémon
+ * 0.42.0. A Jubilife TV gallery photo (decomp DressUpPhoto, written by the gallery's dress-up, ov22_02256F38): the Pokémon
  * as in a contest photo plus its place on the stage (`x`, `y`) and the trainer's gender; the dress-up (at most
  * DRESS_UP_PHOTOS.accessories accessories, the backdrop, the Pokémon's priority); `title` the Easy Chat word the gallery's
  * owner asks for (ScrCmd_SetDressUpPhotoTitle), null until given.
@@ -590,11 +590,11 @@ export interface ContestPhotoView {
   lines: [string, string];
 }
 
-/** 0.41.0. The dress-up's Fashion Case and stage as both dress-ups draw them (`ContestDressView` less the contest's clock and theme). */
+/** 0.42.0. The dress-up's Fashion Case and stage as both dress-ups draw them (`ContestDressView` less the contest's clock and theme). */
 export type DressUpStageView = Omit<ContestDressView, 'theme' | 'seconds' | 'hurry' | 'pulse'>;
 
 /**
- * 0.41.0. The Jubilife TV gallery's dress-up (decomp ScrCmd_0A6 → overlay022 ov22_02255D44 / ov22_02255E50 /
+ * 0.42.0. The Jubilife TV gallery's dress-up (decomp ScrCmd_0A6 → overlay022 ov22_02255D44 / ov22_02255E50 /
  * ov22_02256098): the visual round's case and stage with ten accessories, no clock, the Pokémon movable. `phase`:
  * `intro` (the first time: bank 385 message 47 in `message`), `dress`, `finish` (the stage moving to the photo's place
  * and back), `confirm` (`question`: "Is your Pokémon all dressed up?", then "Would you like to save this design?").
@@ -622,7 +622,7 @@ export interface GalleryDressUpView {
 }
 
 /**
- * 0.41.0. The gallery's frames (decomp ScrCmd_ShowDressUpPhoto → ov22_0225B660 in its dress-up mode): the photo in the
+ * 0.42.0. The gallery's frames (decomp ScrCmd_ShowDressUpPhoto → ov22_0225B660 in its dress-up mode): the photo in the
  * gallery's frame with its backdrop, the banner, and two lines (the trainer's name; bank 385 message 45, the title
  * word). A or B (or `back`, `next`) closes it.
  */
