@@ -139,8 +139,9 @@
     <header class="nav wrap">
       <nav aria-label="Sections" class="links">
         <a href="#engine">The engine</a>
+        <a href="#features">Features</a>
         <a href="#story">The story</a>
-        <a href="#how">How it works</a>
+        <a href="#how">Get started</a>
         <a href="#faq">FAQ</a>
       </nav>
       <div class="tools">
@@ -190,34 +191,114 @@
         </div>
       </section>
 
-      <!-- The engine: what OpenSinnoh is, and what that makes possible. -->
+      <!-- The engine: a field frame drawn as layers that come apart and back together (static, apart, under reduced motion). -->
       <section id="engine" class="band" aria-labelledby="engine-title">
-        <div class="wrap">
-          <div class="head">
+        <div class="wrap engine-grid">
+          <div class="engine-copy">
             <p class="kick"><span class="cur"><!--icon:cursor--></span>The engine</p>
             <h2 id="engine-title" class="os-title d40">A new engine, not an emulator</h2>
-            <p class="lead">OpenSinnoh doesn't emulate a DS or run the game's code. It's a new engine, written for the browser, that reimplements Platinum's systems. Your ROM is read once, on your device, to import the maps, models, sprites, text and music. Then the engine plays the game itself, in 3D at your screen's resolution.</p>
+            <p class="lead">OpenSinnoh doesn't emulate a DS or run the game's code. Your ROM is taken apart once, in your browser, into open parts, and a new engine puts the game back together.</p>
+            <ul class="facts">
+              <li><!--icon:shield--><span>Your ROM stays on your device. Nothing is uploaded.</span></li>
+              <li><!--icon:screen--><span>Drawn in 3D, sharp at any screen size.</span></li>
+              <li><!--icon:disk--><span>Open formats: glTF models, PNG art, plain text and scripts.</span></li>
+              <li><!--icon:check--><span>Plays offline after the first visit.</span></li>
+            </ul>
+            <p class="tech">TypeScript, three.js and the Pokémon Showdown battle simulator.</p>
           </div>
-          <ol class="flow" aria-label="From your ROM to the game">
-            <li class="os-win"><span class="os-num">Your ROM</span><span>platinum.nds, from your cartridge</span></li>
-            <li class="arrow" aria-hidden="true"><!--icon:right--></li>
-            <li class="os-win"><span class="os-num">Import</span><span>once, in your browser</span></li>
-            <li class="arrow" aria-hidden="true"><!--icon:right--></li>
-            <li class="os-win"><span class="os-num">Engine</span><span>plays the game natively</span></li>
-          </ol>
-          <ul class="perks">
-            <li><!--icon:screen--><b>Sharp at any size</b><span>Drawn at your screen's resolution.</span></li>
-            <li><!--icon:pad--><b>Made for phones</b><span>Touch controls and layout, installable on iPhone and Android.</span></li>
-            <li><!--icon:clock--><b>Fast-forward</b><span>Up to 8×, hold or toggle.</span></li>
-            <li><!--icon:save--><b>Real saves</b><span>Export them, move devices.</span></li>
-            <li><!--icon:info--><b>Accessible</b><span>Screen readers, remapping, less flashing.</span></li>
+          <div class="explode" aria-hidden="true">
+            <div class="scene">
+              <div class="layer l-map">
+                <svg viewBox="0 0 24 24" shape-rendering="crispEdges">
+                  <rect class="grass" x="0" y="0" width="24" height="24" />
+                  <rect class="path" x="10" y="0" width="4" height="24" /><rect class="path" x="0" y="15" width="24" height="3" />
+                  <rect class="water" x="16" y="2" width="7" height="6" />
+                  <rect class="roof" x="2" y="2" width="6" height="5" /><rect class="wall" x="2" y="7" width="6" height="2" />
+                  <rect class="tree" x="3" y="19" width="3" height="3" /><rect class="tree" x="18" y="19" width="3" height="3" /><rect class="tree" x="18" y="10" width="3" height="3" />
+                  <path class="wire" d="M0 6h24M0 12h24M0 18h24M6 0v24M12 0v24M18 0v24" />
+                </svg>
+                <b class="tag">Map · glTF</b>
+              </div>
+              <div class="layer l-sprites">
+                <svg viewBox="0 0 24 24" shape-rendering="crispEdges">
+                  <rect class="fig" x="10" y="8" width="4" height="6" /><rect class="cap" x="10" y="7" width="4" height="2" /><rect class="pet" x="10.5" y="15" width="3" height="3" /><rect class="fig" x="3" y="10" width="3" height="5" /><rect class="cap2" x="3" y="9" width="3" height="1.5" />
+                </svg>
+                <b class="tag">Sprites · PNG</b>
+              </div>
+              <div class="layer l-text">
+                <svg viewBox="0 0 24 24" shape-rendering="crispEdges">
+                  <rect class="box" x="2" y="1" width="20" height="6" /><rect class="ln" x="4" y="3" width="12" height="1" /><rect class="ln" x="4" y="5" width="8" height="1" />
+                </svg>
+                <b class="tag">Text</b>
+              </div>
+              <div class="layer l-script">
+                <svg viewBox="0 0 24 24" shape-rendering="crispEdges">
+                  <rect class="code" x="10" y="11" width="9" height="1" /><rect class="code" x="12" y="13" width="10" height="1" /><rect class="code" x="12" y="15" width="7" height="1" /><rect class="code" x="12" y="17" width="9" height="1" /><rect class="code" x="10" y="19" width="5" height="1" />
+                </svg>
+                <b class="tag">Scripts</b>
+              </div>
+              <div class="layer l-music">
+                <svg viewBox="0 0 24 24" shape-rendering="crispEdges">
+                  <path class="staff" d="M2 3h20M2 5h20M2 7h20" />
+                  <rect class="note" x="4" y="4" width="2" height="2" /><rect class="note" x="9" y="2" width="2" height="2" /><rect class="note" x="14" y="5" width="2" height="2" /><rect class="note" x="19" y="3" width="2" height="2" />
+                </svg>
+                <b class="tag">Music</b>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features and what the open engine makes possible, as one bento grid of windows. -->
+      <section id="features" class="band" aria-labelledby="features-title">
+        <div class="wrap">
+          <div class="head">
+            <p class="kick"><span class="cur"><!--icon:cursor--></span>Features</p>
+            <h2 id="features-title" class="os-title d40">More than the main story</h2>
+            <p class="lead">Contests, the Battle Frontier, the Underground and the town extras are all in. If you like, the game can look better than it did on a DS.</p>
+          </div>
+          <ul class="bento">
+            <li class="b-compare">
+              <figure class="os-win">
+                <figcaption class="os-tab os-tone-world"><!--icon:screen--><span class="t">Visual style</span></figcaption>
+                <div class="pair">
+                  <div class="side">
+                    <img src="./shots/compare-ds.webp" width="960" height="540" loading="lazy" decoding="async" alt="Valley Windworks at 6 pm in the DS look: the player and a following Turtwig on the path between the windmills, seen from the DS camera." />
+                    <p class="lbl">DS</p>
+                  </div>
+                  <div class="side">
+                    <img src="./shots/compare-cinematic.webp" width="960" height="540" loading="lazy" decoding="async" alt="The same moment in the Cinematic style with the angled camera: warm evening light, long shadows, lit windows, and the edges of the frame softly out of focus." />
+                    <p class="lbl">Cinematic<span class="plus"> + angled camera</span></p>
+                  </div>
+                </div>
+                <p class="cap">The same moment twice. Cinematic adds depth of field, bloom, evening light and long shadows; the angled camera looks along the path. Both are optional, in Options › Device.</p>
+              </figure>
+            </li>
+            <li class="b-text os-win">
+              <h3 class="os-tab os-tone-items"><!--icon:clock--><span class="t">Quality of life</span></h3>
+              <p>Fast-forward up to 8×, auto-run, an item wheel, EV and IV view, a suspend point, remapping and zoom. All optional.</p>
+            </li>
+            <li class="b-text os-win">
+              <h3 class="os-tab os-tone-system"><!--icon:mods--><span class="t">Mods</span></h3>
+              <p>A mod is a small pack that patches the game's records and scripts. A demo mod comes with the game, in Options › Data. No mod editor yet.</p>
+            </li>
+            <li class="b-shot"><figure class="shot os-win"><figcaption class="os-tab os-tone-team"><span class="t">Contests</span></figcaption><img src="./shots/contest.webp" width="640" height="360" loading="lazy" decoding="async" alt="A Contest's Dance Competition: four Pokémon in their dress-up accessories on the stage." /><p>Visual, dance and acting rounds.</p></figure></li>
+            <li class="b-shot"><figure class="shot os-win"><figcaption class="os-tab os-tone-team"><span class="t"><span class="wide">Battle </span>Frontier</span></figcaption><img src="./shots/frontier.webp" width="640" height="360" loading="lazy" decoding="async" alt="The Battle Tower: the VS banner with Palmer, the Tower Tycoon, before his battle." /><p>All five facilities and their Brains.</p></figure></li>
+            <li class="b-shot"><figure class="shot os-win"><figcaption class="os-tab os-tone-world"><span class="t">Underground</span></figcaption><img src="./shots/underground.webp" width="640" height="360" loading="lazy" decoding="async" alt="The Underground: the player has stepped on a leaf trap, with leaves blowing across the tunnel." /><p>Treasure, traps and secret bases.</p></figure></li>
+            <li class="b-shot"><figure class="shot os-win"><figcaption class="os-tab os-tone-items"><span class="t">Game Corner</span></figcaption><img src="./shots/game-corner.webp" width="640" height="360" loading="lazy" decoding="async" alt="A Game Corner slot machine in a bonus round, with Clefairy under the full moon above the reels." /><p>Slots with the DS's odds.</p></figure></li>
+            <li class="b-wide os-win">
+              <h3 class="os-tab os-tone-system"><!--icon:plus--><span class="t">And also</span></h3>
+              <p class="inline">Seals and Ball Capsules · the Villa · TV broadcasts · Vs. Seeker · HM cut-ins · the shiny sparkle · following Pokémon (HeartGold's sprites as an add-on, from your own ROM) · touch controls · save import and export · screen-reader support</p>
+            </li>
+            <li class="b-text os-win">
+              <h3 class="os-tab os-tone-world"><!--icon:screen--><span class="t">Any device</span></h3>
+              <p>Desktop, tablet or phone, in portrait or landscape. Installable on iPhone and Android.</p>
+            </li>
+            <li class="b-text os-win">
+              <h3 class="os-tab os-tone-team"><!--icon:star--><span class="t">Fork it</span></h3>
+              <p>MIT-licensed. Fork it and take it somewhere new. Start with the <a href="https://github.com/DennisSnijder/open-sinnoh/blob/main/CONTRIBUTING.md" rel="noopener">contributing guide</a>.</p>
+            </li>
           </ul>
-          <div class="addon os-win">
-            <h3 class="os-tab os-tone-system"><!--icon:plus--><span class="t">Optional add-on</span></h3>
-            <img src="./shots/addon-charizard.webp" width="640" height="360" loading="lazy" decoding="async" alt="Charizard following the player in Jubilife City, drawn with HeartGold's follower sprite." />
-            <p>Have your own HeartGold or SoulSilver ROM? Add it for following Pokémon, and more content later.</p>
-          </div>
-          <p class="note"><!--icon:mods-->Next: mods and new content on the same engine. Not ready yet.</p>
         </div>
       </section>
 
@@ -241,7 +322,7 @@
       <section id="how" class="band" aria-labelledby="how-title">
         <div class="wrap">
           <div class="head">
-            <p class="kick"><span class="cur"><!--icon:cursor--></span>How it works</p>
+            <p class="kick"><span class="cur"><!--icon:cursor--></span>Get started</p>
             <h2 id="how-title" class="os-title d40">Three steps to Twinleaf Town</h2>
           </div>
           <ol class="steps">

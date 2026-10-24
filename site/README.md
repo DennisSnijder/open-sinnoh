@@ -37,11 +37,16 @@ scaled down to WebP (quality 82). "Add-on" means the HeartGold (US) follower imp
 | `montage.webm` (1.31 MB), `montage.mp4` (1.46 MB) | The hero walk montage, 14.3 s, 9 hard cuts, no audio (cuts below) | 1280 × 720, one frame per game tick, 30 fps |
 | `montage-poster.webp` | The montage's frame 12: Charizard following in Twinleaf Town | desktop, 2560 → 1280 |
 | `phone.webp` | Jubilife City on a phone, Piplup following, the touch controls | phone 390 × 844 DPR 3, → 390 wide |
-| `addon-charizard.webp` | Charizard following across a Jubilife City crossroads (add-on), the add-on card | desktop, crop 1920 × 1080, → 640 wide |
 | `spear-pillar.webp` | Spear Pillar: Giratina's shadow over Dialga and Palkia (story replay `m5-spear-pillar-barry`) | desktop, → 640 wide |
 | `distortion.webp` | Distortion World B1F | desktop, → 640 wide |
 | `battle.webp` | The battle with Giratina (replay `dw-giratina-room`) | desktop, crop 1600 × 900, → 640 wide |
 | `league.webp` | The Pokémon League's entrance | desktop, → 640 wide |
+| `compare-ds.webp` | Valley Windworks (outside, warp 241, 661, one step up) at 18:00, a level 20 Turtwig following, the DS look (captured 2026-10-24) | desktop, → 960 wide |
+| `compare-cinematic.webp` | The same moment with VISUAL STYLE Cinematic and the ANGLED CAMERA (`openSinnohEnhanced`, the cinematic preset with `camera: 'follow'`) | desktop, → 960 wide |
+| `contest.webp` | The Dance Competition, the dancers in their visual-round outfits (replay `sys-contest-normal-cool`) | desktop, crop 1280 × 720 at 0, 320, → 640 wide |
+| `frontier.webp` | Palmer's Frontier Brain cut-in at the Battle Tower (replay `sys-tower-palmer`) | desktop, crop 1792 × 1008 at 384, 216, → 640 wide |
+| `underground.webp` | A leaf trap in the Underground (replay `sys-underground-trap`) | desktop, → 640 wide |
+| `game-corner.webp` | A Game Corner slot machine in a bonus round (replay `sys-game-corner-slots`) | desktop, → 640 wide |
 
 The montage's cuts, in order (the last cuts back to the first when it loops):
 
