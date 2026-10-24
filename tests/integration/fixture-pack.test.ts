@@ -7,11 +7,11 @@ import { REGISTRIES } from '@opensinnoh/contracts';
 const root = join(import.meta.dirname, '../../packs/fixture');
 const read = (p: string) => (existsSync(join(root, p)) ? readFileSync(join(root, p), 'utf8') : undefined);
 
-/** Collects every string that looks like a fixture id or a `kind(id)` arg, to check references resolve (trainer classes, egg groups and battle effects (moves' and the AI script's) are ids without a registry). */
+/** Collects every string that looks like a fixture id or a `kind(id)` arg, to check references resolve (trainer classes, egg groups, battle effects (moves' and the AI script's) and an objective's badge are ids without a registry). */
 function refs(v: JsonValue, out: Set<string>): Set<string> {
   if (typeof v === 'string' && /^fixture:[A-Z]/.test(v)) out.add(v);
   else if (Array.isArray(v)) v.forEach((x) => refs(x, out));
-  else if (v && typeof v === 'object') Object.entries(v).forEach(([k, x]) => k !== 'id' && k !== 'class' && k !== 'eggGroups' && k !== 'effect' && k !== 'battleEffects' && refs(x, out));
+  else if (v && typeof v === 'object') Object.entries(v).forEach(([k, x]) => k !== 'id' && k !== 'class' && k !== 'eggGroups' && k !== 'effect' && k !== 'battleEffects' && k !== 'badge' && refs(x, out));
   return out;
 }
 

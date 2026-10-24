@@ -463,6 +463,8 @@ export const MENU_TEXT = {
   sumIvsView: 'Lantern_Summary_Ivs',
   optSpiritombVendors: 'Lantern_Options_SpiritombVendors',
   optSpiritombVendorsDesc: 'Lantern_Options_SpiritombVendorsDescription',
+  optObjective: 'OpenSinnoh_Options_Objective',
+  optObjectiveDesc: 'OpenSinnoh_Options_ObjectiveDescription',
   optClose: 'OptionsMenu_Text_CloseLabel',
   optCloseDesc: 'OptionsMenu_Text_CloseDescription',
 

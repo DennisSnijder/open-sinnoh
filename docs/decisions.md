@@ -440,6 +440,11 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   device has seen Rowan's intro; a suspend point when the page hides; follower talk with the HGSS add-on
   (its global interaction rules; mood is not saved); auto lowercase after the first capital on the naming
   keyboard (not Platinum's); trade evolutions without a trade (labelled, off is faithful).
+- **The objective:** the start menu shows the next story beat in a field window beside it (above it on phones), on
+  by default. It is derived, never tracked: an ordered table in the pack (`NewGame.objectives`, our words, written by
+  the importer) whose first step with no check holding is shown; each step also lists a later beat that proves it
+  (the next badge, the Champion's clear), so a skipped or reset marker never brings an old step back. With every
+  step done it says "Explore Sinnoh." The ROM test checks it at every story checkpoint's end.
 - **Off by default:** EV/IV view on the summary; RENAME on the summary; the HGSS player characters with
   the add-on; the Spiritomb substitute (Underground vendor talks count in place of link players).
 - **Game speed:** fast-forward at 2x to 8x, presentation only (the same 30 Hz ticks, more per wall

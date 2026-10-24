@@ -1119,7 +1119,24 @@ export interface NewGame {
    * Absent: the diploma ops fail loudly.
    */
   diploma?: { sinnoh: Id; national: Id; texts: { player: Id; sinnoh: Id; national: Id; credit: Id } };
+  /** 0.44.0. The start menu's objective (an OpenSinnoh addition, `ObjectiveTables`). Absent: no objective is shown. */
+  objectives?: ObjectiveTables;
 }
+
+/**
+ * 0.44.0. The objective the start menu shows (an OpenSinnoh addition, `DeviceOptions.objective`; our own words, not the
+ * ROM's). `steps` are in story order; the current objective is the first step that is not done, and a step is done
+ * when any of its `done` checks holds (a step lists the later beats that prove it too, so a skipped or reset marker
+ * never brings it back). With every step done, `explore` is shown. `title` heads the window.
+ */
+export interface ObjectiveTables {
+  title: Id;
+  explore: Id;
+  steps: { text: Id; done: ObjectiveCheck[] }[];
+}
+
+/** 0.44.0. One check of an objective step: a flag is set, a var is at least `atLeast`, a badge is held. */
+export type ObjectiveCheck = { kind: 'flag'; flag: Id } | { kind: 'var'; var: Id; atLeast: number } | { kind: 'badge'; badge: Id };
 
 /**
  * 0.31.0. Amity Square (decomp scrcmd_amity_square.c, system_vars.c): `stepVar` the step counter the field counts up

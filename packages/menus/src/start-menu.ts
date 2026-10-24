@@ -9,6 +9,7 @@ import { newGameRecord, type DeviceOptions, type OptionsView, type SaveView, typ
 import { bagScreen } from './bag.ts';
 import { trainerCardScreen } from './card-dex.ts';
 import { menuSe, playTime, type MenuContext } from './context.ts';
+import { currentObjective } from './objective.ts';
 import { partyScreen } from './party.ts';
 import { pokedexScreen } from './pokedex.ts';
 import { moveCursor, tapIndex, type Screen, type Step } from './stack.ts';
@@ -76,6 +77,8 @@ export function startMenu(ctx: MenuContext): Screen {
       cursor,
       // StartMenu_PrintBallCount: the count, 2 digits without padding.
       ...(safariGame(ctx) ? { ballStock: { label: ctx.text.t('startSafariBalls'), stock: ctx.text.t('startBallStock', String(ctx.state.safari?.balls ?? 0)) } } : {}),
+      // OpenSinnoh, not Platinum: the current objective beside the menu (option `objective`).
+      ...objective(ctx),
     }),
     input(i: Input): Step {
       if ('tap' in i) {
@@ -94,6 +97,12 @@ export function startMenu(ctx: MenuContext): Screen {
       return;
     },
   };
+}
+
+function objective(ctx: MenuContext): Pick<StartMenuView, 'objective'> {
+  if (ctx.host.options().objective !== 0) return {};
+  const o = currentObjective(ctx.state, ctx.registries);
+  return o ? { objective: { title: ctx.text.text(o.title), text: ctx.text.text(o.text) } } : {};
 }
 
 /** SAVE: the save-info window and the DS question, YES/NO, then "saved" (closes the menu on A/B). */
@@ -170,6 +179,8 @@ export function optionsScreen(ctx: Pick<MenuContext, 'registries' | 'text' | 'ho
     { key: 'character', label: 'optCharacter', desc: 'optCharacterDesc', values: () => [t('optCharacterPlatinum'), t('optCharacterHgss')] },
     // NOT DS: Underground vendors count toward Spiritomb in place of the players met over DS Wireless.
     { key: 'spiritombVendors', label: 'optSpiritombVendors', desc: 'optSpiritombVendorsDesc', values: () => [t('optOn'), t('optOff')] },
+    // OpenSinnoh, not Platinum: the start menu shows the current objective.
+    { key: 'objective', label: 'optObjective', desc: 'optObjectiveDesc', values: () => [t('optOn'), t('optOff')] },
   ];
   const step = (row: number, delta: number) => {
     const r = rows[row]!;

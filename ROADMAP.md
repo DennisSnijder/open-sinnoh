@@ -84,7 +84,8 @@ cries, battle music by encounter, the title and app music.
 - auto-run, the repeat-Repel prompt, an item wheel on a held Y;
 - the EV/IV view, RENAME in the summary, a Pokédex name search;
 - skipping the intro on a repeat play, a suspend point;
-- a trade-evolution substitute.
+- a trade-evolution substitute;
+- the current objective in the start menu.
 
 **HeartGold/SoulSilver add-on.** An optional second import adds the HGSS follower set for Platinum's following
 Pokémon, follower talk and the HGSS look.

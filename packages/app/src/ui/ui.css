@@ -121,6 +121,14 @@
 /* The Safari Game's ball window (start_menu.c StartMenu_PrintBallCount: 12×4 tiles, two 16-px lines), beside the menu. */
 .start-menu:has(> .start-balls) { position: relative; overflow: visible; }
 .start-balls { position: absolute; top: 0; right: calc(100% + var(--dot) * 8); width: calc(var(--dot) * 96); box-sizing: border-box; padding: calc(var(--dot) * 8); display: grid; grid-auto-rows: calc(var(--dot) * 16); align-items: center; }
+/* The objective (OpenSinnoh, not Platinum): a field window left of the menu, under the ball window in a Safari Game;
+   above the menu on phones. */
+/* The side windows sit outside the menu's box: the screen's corner clip would cut them off. */
+.start-menu:has(> .start-objective), .start-menu:has(> .start-balls) { position: relative; overflow: visible; clip-path: none; }
+.start-objective { position: absolute; top: 0; right: calc(100% + var(--dot) * 8); width: calc(var(--dot) * 120); box-sizing: border-box; padding: calc(var(--dot) * 6) calc(var(--dot) * 8); display: grid; }
+.start-balls ~ .start-objective { top: calc(var(--dot) * 40); }
+.start-objective-title, .start-objective-text { margin: 0; font: inherit; line-height: calc(var(--dot) * 16); }
+.ui-layer[data-mode='compact'] .start-objective { top: auto; left: 0; right: 0; bottom: calc(100% + 8px); width: auto; }
 .start-list.rom .start-entry { position: relative; display: flex; align-items: center; min-width: calc(var(--dot) * 88); height: calc(var(--dot) * 24); padding: 0 0 0 calc(var(--dot) * 28); box-sizing: border-box; }
 .start-list.rom .start-entry.is-cursor, .start-list.rom .start-entry:hover { background: none; box-shadow: none; }
 .start-list.rom .start-entry.is-cursor::before { display: none; }

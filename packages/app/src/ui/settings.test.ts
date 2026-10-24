@@ -68,14 +68,14 @@ describe('the settings registry', () => {
     for (const s of SETTINGS) expect(SECTIONS.map((x) => x.id)).toContain(s.section);
     for (const key of Object.keys(DEVICE_OPTION_COUNTS)) expect(ids).toContain(key);
     // GAME is the DS's six options in its order, then the QoL additions that change what the game offers.
-    expect(SETTINGS.filter((s) => s.section === 'game').map((s) => s.id)).toEqual(['textSpeed', 'sound', 'battleScene', 'battleStyle', 'buttonMode', 'frame', 'repelPrompt', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'spiritombVendors', 'introSkip']);
+    expect(SETTINGS.filter((s) => s.section === 'game').map((s) => s.id)).toEqual(['textSpeed', 'sound', 'battleScene', 'battleStyle', 'buttonMode', 'frame', 'repelPrompt', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'spiritombVendors', 'objective', 'introSkip']);
   });
 
   it('keeps where each setting is stored', () => {
     const storage = Object.fromEntries(SETTINGS.map((s) => [s.id, s.storage]));
     expect(storage).toEqual({
       textSpeed: 'device', sound: 'save', battleScene: 'save', battleStyle: 'save', buttonMode: 'save', frame: 'save',
-      introSkip: 'device', suspend: 'device', repelPrompt: 'device', followerTalk: 'device', statView: 'device', summaryRename: 'device', dexNameSearch: 'device', spiritombVendors: 'device', character: 'device', autoRun: 'device', itemWheel: 'device',
+      introSkip: 'device', suspend: 'device', repelPrompt: 'device', followerTalk: 'device', statView: 'device', summaryRename: 'device', dexNameSearch: 'device', spiritombVendors: 'device', objective: 'device', character: 'device', autoRun: 'device', itemWheel: 'device',
       zoom: 'device', renderScale: 'device', visualStyle: 'device', angledCamera: 'device', speed: 'device', followers: 'device', followerStyle: 'device', autoLowercase: 'device', volume: 'device', mute: 'device', tradeEvolution: 'device', theme: 'device', uiFrame: 'device', reduceFlashing: 'device',
       controlSize: 'device', controlOpacity: 'device', haptics: 'device', keepAwake: 'device',
       ...Object.fromEntries(['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'l', 'r', 'start', 'select', 'fast'].map((a) => [`bind/${a}`, 'device'])), deadZone: 'device', resetControls: 'none',
@@ -89,7 +89,7 @@ describe('the settings registry', () => {
     const p = pages(env);
     expect(p.map((x) => x.section.id)).toEqual(['game', 'device', 'controls', 'data', 'privacy']);
     expect(p.map((x) => x.settings.map((s) => s.id))).toEqual([
-      ['textSpeed', 'sound', 'battleScene', 'battleStyle', 'buttonMode', 'frame', 'repelPrompt', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'spiritombVendors', 'introSkip'],
+      ['textSpeed', 'sound', 'battleScene', 'battleStyle', 'buttonMode', 'frame', 'repelPrompt', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'spiritombVendors', 'objective', 'introSkip'],
       ['zoom', 'renderScale', 'speed', 'followers', 'followerStyle', 'character', 'autoLowercase', 'volume', 'mute', 'tradeEvolution', 'theme', 'uiFrame', 'reduceFlashing', 'visualStyle', 'angledCamera', 'controlSize', 'controlOpacity', 'haptics', 'keepAwake'],
       ['autoRun', 'itemWheel', ...['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'l', 'r', 'start', 'select', 'fast'].map((a) => `bind/${a}`), 'deadZone', 'resetControls'],
       ['exportSave', 'importSave', 'suspend', 'storage', 'reimport', 'addon', 'deleteRom', 'mod/demo'],
@@ -97,7 +97,7 @@ describe('the settings registry', () => {
     ]);
     // Without the app's hooks and the imported ROM only what does not need them is left, and the sections stay.
     expect(pages(fakeEnv({ app: false, rom: false }).env).map((x) => [x.section.id, x.settings.map((s) => s.id)])).toEqual([
-      ['game', ['textSpeed', 'sound', 'battleScene', 'battleStyle', 'buttonMode', 'frame', 'repelPrompt', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'spiritombVendors', 'introSkip']],
+      ['game', ['textSpeed', 'sound', 'battleScene', 'battleStyle', 'buttonMode', 'frame', 'repelPrompt', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'spiritombVendors', 'objective', 'introSkip']],
       ['device', ['followers', 'followerStyle', 'character', 'autoLowercase', 'tradeEvolution', 'theme', 'uiFrame', 'reduceFlashing']],
       ['controls', ['autoRun', 'itemWheel', ...['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'l', 'r', 'start', 'select', 'fast'].map((a) => `bind/${a}`), 'deadZone', 'resetControls']],
       ['data', ['exportSave', 'importSave', 'suspend', 'mod/demo']],
@@ -128,16 +128,16 @@ describe('the settings registry', () => {
 
   it('the quality-of-life rows: DS-model device rows in their sections; contract default the DS, a separate player default', () => {
     const { env } = fakeEnv();
-    const where = Object.fromEntries(['repelPrompt', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'character', 'autoRun', 'itemWheel'].map((id) => [id, [byId(id).section, byId(id).storage]]));
+    const where = Object.fromEntries(['repelPrompt', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'objective', 'character', 'autoRun', 'itemWheel'].map((id) => [id, [byId(id).section, byId(id).storage]]));
     expect(where).toEqual({
-      repelPrompt: ['game', 'device'], followerTalk: ['game', 'device'], statView: ['game', 'device'], summaryRename: ['game', 'device'], dexNameSearch: ['game', 'device'],
+      repelPrompt: ['game', 'device'], followerTalk: ['game', 'device'], statView: ['game', 'device'], summaryRename: ['game', 'device'], dexNameSearch: ['game', 'device'], objective: ['game', 'device'],
       character: ['device', 'device'], autoRun: ['controls', 'device'], itemWheel: ['controls', 'device'],
     });
     expect(byId('repelPrompt').disabled?.(env)).toBeNull();
-    // On for players: the repeat-Repel prompt, the item wheel, follower talk, the name search; auto-run on touch screens. Off: EV/IV, RENAME, the HGSS look.
+    // On for players: the repeat-Repel prompt, the item wheel, follower talk, the name search, the objective; auto-run on touch screens. Off: EV/IV, RENAME, the HGSS look.
     const on = (o: typeof DEFAULT_OPTIONS) => Object.entries(o).filter(([k, v]) => (OPENSINNOH_OPTIONS as readonly string[]).includes(k) && k !== 'character' && v === 0).map(([k]) => k);
-    expect(on(DEFAULT_OPTIONS)).toEqual(['autoLowercase', 'repelPrompt', 'itemWheel', 'followerTalk', 'dexNameSearch']);
-    expect(on(playerDefaults(true))).toEqual(['autoLowercase', 'autoRun', 'repelPrompt', 'itemWheel', 'followerTalk', 'dexNameSearch']);
+    expect(on(DEFAULT_OPTIONS)).toEqual(['autoLowercase', 'repelPrompt', 'itemWheel', 'followerTalk', 'dexNameSearch', 'objective']);
+    expect(on(playerDefaults(true))).toEqual(['autoLowercase', 'autoRun', 'repelPrompt', 'itemWheel', 'followerTalk', 'dexNameSearch', 'objective']);
     expect([DEFAULT_OPTIONS.character, DEFAULT_OPTIONS.statView, DEFAULT_OPTIONS.summaryRename]).toEqual([0, 1, 1]);
     for (const key of OPENSINNOH_OPTIONS) expect(DEFAULT_DEVICE_OPTIONS[key], key).toBe(key === 'character' ? 0 : 1);
   });

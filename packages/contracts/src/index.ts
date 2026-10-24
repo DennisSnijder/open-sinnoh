@@ -25,5 +25,5 @@ export * from './tv.ts';
 
 export * from './anim-script.ts';
 
-export const CONTRACTS_VERSION = '0.43.0';
+export const CONTRACTS_VERSION = '0.44.0';
 

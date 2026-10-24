@@ -272,7 +272,7 @@ test('unreadable stored options are reset and reported in OPTIONS', async ({ pag
   // The player's defaults: the DS's, with the OpenSinnoh additions (auto-run on touch screens only).
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('lantern-nds:options')!))).toEqual({
     textSpeed: 1, sound: 0, battleScene: 0, battleStyle: 0, buttonMode: 0, frame: 0, tradeEvolution: 0, followers: 0, followerStyle: 0, autoLowercase: 0,
-    autoRun: touch ? 0 : 1, repelPrompt: 0, itemWheel: 0, followerTalk: 0, statView: 1, summaryRename: 1, dexNameSearch: 0, character: 0, spiritombVendors: 1,
+    autoRun: touch ? 0 : 1, repelPrompt: 0, itemWheel: 0, followerTalk: 0, statView: 1, summaryRename: 1, dexNameSearch: 0, character: 0, spiritombVendors: 1, objective: 0,
   });
   expect(await page.evaluate(() => window.openSinnohApp!.game.log.counts.get('ui:options-reset'))).toBe(1);
   await key(page, 'Enter');

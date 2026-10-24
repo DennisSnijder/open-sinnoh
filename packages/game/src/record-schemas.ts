@@ -1195,6 +1195,19 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
     }, (v) => ((v.schedule as number[][]).length !== 96 || (v.schedule as number[][]).some((d) => d.length !== 7) || (v.programs as unknown[]).length !== 9 ? 'tv must have 96 × 7 slots and 9 programmes' : undefined))),
     // 0.37.0: the diplomas' documents and texts.
     diploma: opt(obj({ sinnoh: ref('ui2d'), national: ref('ui2d'), texts: obj({ player: ref('texts'), sinnoh: ref('texts'), national: ref('texts'), credit: ref('texts') }) })),
+    // 0.44.0: the start menu's objective (contracts ObjectiveTables); every step needs a check.
+    objectives: opt(obj({
+      title: ref('texts'),
+      explore: ref('texts'),
+      steps: arr(obj({
+        text: ref('texts'),
+        done: arr(tagged('kind', {
+          flag: obj({ kind: lit('flag'), flag: ref('flags') }),
+          var: obj({ kind: lit('var'), var: ref('vars'), atLeast: int(0, 0xffff) }),
+          badge: obj({ kind: lit('badge'), badge: id }),
+        })),
+      }, (v) => ((v.done as unknown[]).length === 0 ? 'an objective step needs a check' : undefined))),
+    })),
   }, (v) => {
     const pieces = v.sizeIntervals as { start: number }[] | undefined;
     return pieces && (pieces.length !== 16 || pieces[0]!.start !== 0 || pieces.some((p, i) => i > 0 && p.start <= pieces[i - 1]!.start)) ? 'sizeIntervals must have 16 increasing intervals beginning at zero' : undefined;

@@ -72,6 +72,11 @@ export interface DeviceOptions {
    * 32 players met over DS Wireless, which a solo game cannot meet. Device only.
    */
   spiritombVendors: number;
+  /**
+   * 0.44.0. An OpenSinnoh addition, not Platinum's: 0 on, 1 off. On, the start menu shows the current objective
+   * (`NewGame.objectives`). The contract default is off (the DS behaviour); the app's stored default is on. Device only.
+   */
+  objective: number;
 }
 
 /**
@@ -80,12 +85,12 @@ export interface DeviceOptions {
  */
 export const DEFAULT_DEVICE_OPTIONS: Readonly<DeviceOptions> = {
   textSpeed: 1, sound: 0, battleScene: 0, battleStyle: 0, buttonMode: 0, frame: 0, tradeEvolution: 0, followers: 0, followerStyle: 0, autoLowercase: 1,
-  autoRun: 1, repelPrompt: 1, itemWheel: 1, followerTalk: 1, statView: 1, summaryRename: 1, dexNameSearch: 1, character: 0, spiritombVendors: 1,
+  autoRun: 1, repelPrompt: 1, itemWheel: 1, followerTalk: 1, statView: 1, summaryRename: 1, dexNameSearch: 1, character: 0, spiritombVendors: 1, objective: 1,
 };
 /** Number of values per option. */
 export const DEVICE_OPTION_COUNTS: Readonly<Record<keyof DeviceOptions, number>> = {
   textSpeed: 3, sound: 2, battleScene: 2, battleStyle: 2, buttonMode: 3, frame: 20, tradeEvolution: 2, followers: 2, followerStyle: 2, autoLowercase: 2,
-  autoRun: 2, repelPrompt: 2, itemWheel: 2, followerTalk: 2, statView: 2, summaryRename: 2, dexNameSearch: 2, character: 2, spiritombVendors: 2,
+  autoRun: 2, repelPrompt: 2, itemWheel: 2, followerTalk: 2, statView: 2, summaryRename: 2, dexNameSearch: 2, character: 2, spiritombVendors: 2, objective: 2,
 };
 /** 0.32.1. The DS options kept in the save (`GameState.options`); every other option is the device's. */
 export const SAVED_OPTIONS = ['sound', 'battleScene', 'battleStyle', 'buttonMode', 'frame'] as const satisfies readonly (keyof DeviceOptions)[];
@@ -626,6 +631,8 @@ export interface StartMenuView {
    * "SAFARI BALLS" over "Stock: N".
    */
   ballStock?: { label: string; stock: string };
+  /** 0.44.0. With `DeviceOptions.objective` on and a pack with `NewGame.objectives`: the window's title and the current objective. */
+  objective?: { title: string; text: string };
 }
 
 /** Taps: `yes`, `no`, `ok` (closes after "saved" or an error). */
