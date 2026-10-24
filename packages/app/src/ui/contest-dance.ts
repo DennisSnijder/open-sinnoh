@@ -5,8 +5,9 @@
  * place is kept for the whole round, so the stage never moves when it comes and goes.
  *
  * The stage: the ROM's backdrop and timeline (`contest_dance/stage{v}`, `timeline{v}_*`), the step colour's tint, the
- * dancers' front pictures (scaled by depth, turned, greyed), their shadows, hearts, notes, the beat ball, the cursor,
- * the player's arrow, the grades with their words; the MC's message box and the instruction banner at the DS windows.
+ * dancers (their outfits' accessories and front pictures, scaled by depth, turned, greyed), their shadows, hearts, notes,
+ * the beat ball, the cursor, the player's arrow, the grades with their words; the MC's message box and the instruction
+ * banner at the DS windows.
  * A button is pressed on pointer down (the DS reads a new touch), sending `step:<dir>`.
  */
 import { newGameRecord, type ContestDanceRoundView, type Ui2dSheet } from '@opensinnoh/contracts';
@@ -37,6 +38,8 @@ const LABELS: [number, number][] = [
 const GREY = [10 / 31, 10 / 31, 9 / 31];
 const DIM = 6 / 16;
 const DIRECTIONS = ['Up', 'Front', 'Left', 'Right'];
+/** A dancer's composition canvas, its centre in the middle: room for the photo's accessories around the Pokémon. */
+const OUTFIT = 256;
 
 function animFrame(sheet: Ui2dSheet | undefined, anim: number, frame: number): number | null {
   const a = sheet?.animations?.[anim];
@@ -61,6 +64,7 @@ class DanceScene {
   private readonly pad = el('div', 'dance-pad');
   private readonly g: CanvasRenderingContext2D;
   private readonly scratch = document.createElement('canvas');
+  private readonly mask = document.createElement('canvas');
   private readonly images = new Map<string, Img | null>();
   private boxKey = '';
   private padKey = '';
@@ -73,8 +77,10 @@ class DanceScene {
     this.canvas.className = 'ds-scene-canvas';
     this.canvas.setAttribute('aria-hidden', 'true');
     this.g = this.canvas.getContext('2d')!;
-    this.scratch.width = 80;
-    this.scratch.height = 80;
+    for (const c of [this.scratch, this.mask]) {
+      c.width = OUTFIT;
+      c.height = OUTFIT;
+    }
     this.stage.append(this.canvas, this.boxes);
     this.room.append(this.stage, this.pad);
     this.root.append(this.room);
@@ -168,11 +174,13 @@ class DanceScene {
       g.fillRect(tl.flash.half * 128, TIMELINE_Y, 128, H - TIMELINE_Y);
       g.globalAlpha = 1;
     }
+    let accessories = 0;
     for (const m of v.dancers) {
       const s = m.scale / 256;
       this.cell('contest_dance/shadow', 0, m.x, m.ground, s);
-      this.dancer(d, m);
+      accessories += this.dancer(d, m);
     }
+    this.root.dataset.accessories = String(accessories);
     for (const h of v.hearts) this.anim('contest_dance/hearts', h.anim, 0, h.x, h.y);
     for (const n of tl.notes) this.anim(`contest_dance/note${n.code}`, n.anim, n.frame, n.x, n.y);
     if (tl.ball) this.anim('contest_dance/ball', 0, tl.ball.frame, tl.ball.x, tl.ball.y);
@@ -194,33 +202,58 @@ class DanceScene {
     this.drawPad(ctx, v);
   }
 
-  /** A dancer's front picture, centred, scaled, turned and greyed (ov22_0225B198's colour multiplies its palette). */
-  private dancer(d: DrawContext, m: ContestDanceRoundView['dancers'][number]): void {
+  /**
+   * A dancer: its outfit's accessories and its front picture composed about its centre (decomp ov22_0225AFD4's dress-up
+   * record), then scaled, turned and greyed as one (ov22_0225B198's colour multiplies every palette). Returns the
+   * accessories drawn (their pictures loaded).
+   */
+  private dancer(d: DrawContext, m: ContestDanceRoundView['dancers'][number]): number {
     const pics = d.registries.pokemonSprites.get(m.species);
     const form = pics?.forms[m.form] ?? pics?.forms[0];
     const img = form ? this.image(m.shiny ? form.shinyAtlas : form.atlas) : null;
-    if (!form || !img) return;
+    if (!form || !img) return 0;
     const face = (m.female && form.frontFemale) || form.front;
     const sc = this.scratch.getContext('2d')!;
     sc.globalCompositeOperation = 'source-over';
-    sc.clearRect(0, 0, 80, 80);
-    sc.drawImage(img, 0, face.y, 80, 80, 0, 0, 80, 80);
+    sc.clearRect(0, 0, OUTFIT, OUTFIT);
+    const c = OUTFIT / 2;
+    const mon = () => sc.drawImage(img, 0, face.y, 80, 80, c - 40, c - 40, 80, 80);
+    let drawn = 0;
+    m.accessories.forEach((a, i) => {
+      if (i === m.monAt) mon();
+      if (this.accessory(sc, a.accessory, c + a.x, c + a.y)) drawn++;
+    });
+    if (m.monAt >= m.accessories.length) mon();
     if (m.shade) {
+      const mask = this.mask.getContext('2d')!;
+      mask.clearRect(0, 0, OUTFIT, OUTFIT);
+      mask.drawImage(this.scratch, 0, 0);
       const k = m.shade / 16;
-      const [r, gg, b] = GREY.map((c) => Math.round(255 * (1 - k + k * c)));
+      const [r, gg, b] = GREY.map((x) => Math.round(255 * (1 - k + k * x)));
       sc.globalCompositeOperation = 'multiply';
       sc.fillStyle = `rgb(${r} ${gg} ${b})`;
-      sc.fillRect(0, 0, 80, 80);
+      sc.fillRect(0, 0, OUTFIT, OUTFIT);
       sc.globalCompositeOperation = 'destination-in';
-      sc.drawImage(img, 0, face.y, 80, 80, 0, 0, 80, 80);
+      sc.drawImage(this.mask, 0, 0);
     }
     const g = this.g;
     g.save();
     g.translate(m.x, m.y);
     if (m.angle) g.rotate((m.angle * Math.PI) / 180);
     g.scale(m.scale / 256, m.scale / 256);
-    g.drawImage(this.scratch, -40, -40);
+    g.drawImage(this.scratch, -c, -c);
     g.restore();
+    return drawn;
+  }
+
+  /** An accessory's picture (`contest/accessories` cell `id`) with its top-left at (x, y); false until it has loaded. */
+  private accessory(g: CanvasRenderingContext2D, id: number, x: number, y: number): boolean {
+    const sheet = this.art.sheet('contest/accessories');
+    const c = sheet?.cells[id];
+    const img = sheet && c ? this.image(sheet.atlas) : null;
+    if (!img || !c) return false;
+    g.drawImage(img, c.x, c.y, c.w, c.h, x - c.ox, y - c.oy, c.w, c.h);
+    return true;
   }
 
   private drawBoxes(d: DrawContext, v: ContestDanceRoundView): void {

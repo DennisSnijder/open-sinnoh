@@ -16,9 +16,10 @@
  * presentation, and the VBlank that moves the beat clock. Steps are graded on the tick their input arrives.
  */
 import { isShiny, monGender, type Id } from '@opensinnoh/core';
-import { CONTEST_COMPETITION, dexOf, type AppMessage, type ContestDanceRoundView, type ContestDanceTables, type ContestDancerView, type ContestRound, type ContestRoundContext, type InputFrame } from '@opensinnoh/contracts';
-import { contestTables, roundWeights, visualRaw } from '@opensinnoh/services';
+import { CONTEST_COMPETITION, dexOf, type AppMessage, type ContestDanceRoundView, type ContestDanceTables, type ContestDancerView, type ContestDressUp, type ContestRound, type ContestRoundContext, type InputFrame } from '@opensinnoh/contracts';
+import { contestTables, npcOutfit, roundWeights, visualRaw } from '@opensinnoh/services';
 import { plainPages, plainText } from '../strings.ts';
+import { contestPicture } from './picture.ts';
 import { backupStep, DanceClock, DanceLog, danceTiming, gradeStep, leadStep, newDanceAi, planLead, resetDanceAi, roundStart, songTicks, stepPoints, type DanceAi, type DanceStep, type DanceTiming } from './dance-rules.ts';
 
 /** TEXT_BANK_CONTEST_DANCE_COMPETITION names the round reads. */
@@ -91,6 +92,9 @@ interface Dancer {
   movePoints: number;
   /** The hearts flying from it (ov17_0224AD70, 16 at most). */
   hearts: Heart[];
+  /** Its outfit about its centre (`ContestDancerView.accessories`, `monAt`). */
+  accessories: ContestDancerView['accessories'];
+  monAt: number;
 }
 
 interface Move {
@@ -209,8 +213,10 @@ class DanceRound implements ContestRound {
     this.ns = [...ctx.registries.newGame.values()][0]!.id.split(':')[0]!;
     const missing = CONTEST_DANCE_TEXTS.filter((n) => !ctx.registries.texts.has(this.id(n)));
     if (missing.length) throw new Error(`contest dance: the pack has no text ${missing.join(', ')}`);
+    const contests = contestTables(ctx.registries);
     this.dancers = s.entrants.map((e, id) => {
       const species = ctx.registries.species.get(e.mon.species);
+      const outfit = this.outfit(contests, id);
       const pics = ctx.registries.pokemonSprites.get(e.mon.species);
       const pos = this.positions.indexOf(id);
       const yOffset = (pics?.forms[e.mon.form] ?? pics?.forms[0])?.front.yOffset ?? 0;
@@ -219,10 +225,30 @@ class DanceRound implements ContestRound {
         id, pos, x: at.x * 256, y: (at.y + yOffset) * 256, z: at.z, yOffset, turn: 0, shade: 0,
         jumps: !NO_JUMP.includes(species?.sourceIndex ?? 0),
         queue: [], move: null, movePos: 0, moveLast: false, movePoints: 0, hearts: [],
+        ...outfit,
       };
     });
     this.flow = this.run();
     this.se(SE.open);
+  }
+
+  /**
+   * Decomp ov17_0224A134: a dancer is its dress-up record drawn without the backdrop (ov22_0225AFD4), moved so the
+   * Pokémon's centre is the dancer's (ov22_0225B100) and scaled, turned and shaded about it with its accessories
+   * (ov22_0225B0EC, ov22_0225B0E4, ov22_0225B198). In a full contest the records are the visual round's outfits (the
+   * player's photo, sub_020951B0's for the NPCs); a Dance Competition alone clears them first (sub_02095338: the
+   * Pokémon only).
+   */
+  private outfit(tables: ReturnType<typeof contestTables>, id: number): Pick<Dancer, 'accessories' | 'monAt'> {
+    const s = this.ctx.session;
+    if (s.competition !== CONTEST_COMPETITION.full) return { accessories: [], monAt: 0 };
+    const e = s.entrants[id]!;
+    let dressUp: ContestDressUp;
+    if (e.opponent !== null) dressUp = npcOutfit(tables, e.opponent, s.theme);
+    else if (s.dressUp) dressUp = s.dressUp;
+    else throw new Error('contest dance: a full contest reached the dance without the player\'s outfit');
+    const p = contestPicture(this.ctx.registries, e.mon, dressUp, 0, 0, false);
+    return { accessories: p.accessories.map((a) => ({ accessory: a.accessory, x: a.x - p.mon.x, y: a.y - p.mon.y })), monAt: p.monAt };
   }
 
   private id(name: string): Id {
@@ -916,6 +942,8 @@ class DanceRound implements ContestRound {
           ground: Math.round((d.move ? d.move.y0 : d.y) / 256 + ((40 - d.yOffset) * scale) / 256),
           shade: d.shade,
           player: d.id === 0,
+          accessories: d.accessories,
+          monAt: d.monAt,
         };
       });
     const offset = (256 - t.width) / 2;

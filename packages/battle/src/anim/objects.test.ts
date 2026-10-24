@@ -110,3 +110,65 @@ describe('single-command move tasks', () => {
     }
   });
 });
+
+describe('sprite callbacks with a contest branch', () => {
+  const contestVm = (code: number[]) => new AnimVm(code, { registries: reg, attacker: 0, defender: 1, battlers: [0, 1].map((i) => ({ species: asId(`test:mon${i}`), form: 0, height: 0, visible: i === 0 })), doubles: false, effectChance: 0, weather: null, seed: 17, contest: true, log: { stub: (key: string) => { throw new Error(key); } } as never });
+  type Frame = ReturnType<AnimVm['view']>['sprites'];
+  /** Every frame's OBJ views; the run frees all its sprites. */
+  const frames = (v: AnimVm) => {
+    const seen: Frame[] = [];
+    while (!v.done) {
+      v.tick();
+      seen.push(v.view().sprites);
+    }
+    expect(v.objects.size).toBe(0);
+    return seen;
+  };
+  const script = (name: string, ...args: number[]) => [...setup, ...add(name, ...args), ...command('WaitForAnimTasks'), ...command('FreeSpriteManager', 0), ...command('End')];
+
+  it('Fissure: the crack under the defender, at (72, 32) in a contest, until its sequence ends', () => {
+    expect(frames(vm(script('Fissure'))).find((s) => s.length)![0]).toMatchObject({ x: 192, y: 32 });
+    const contest = frames(contestVm(script('Fissure'))).filter((s) => s.length);
+    expect(contest[0]![0]).toMatchObject({ x: 72, y: 32 });
+    expect(contest.length).toBeGreaterThanOrEqual(20);
+  });
+
+  it('Taunt: the hand at (128, 80) fading in and out, mirrored in a contest', () => {
+    for (const [v, scaleX] of [[vm(script('Taunt', 1)), 1], [contestVm(script('Taunt', 1)), -1]] as const) {
+      const seen = frames(v).filter((s) => s.length).map((s) => s[0]!);
+      expect(seen[0]).toMatchObject({ x: 128, y: 80, scaleX });
+      expect(Math.max(...seen.map((s) => s.alpha))).toBeCloseTo(15 / 16);
+      expect(seen.length).toBeGreaterThan(55);
+    }
+  });
+
+  it('Trick: the attacker squashes, then two cups swap places, from the contest spots in a contest', () => {
+    for (const [v, xs] of [[vm(script('Trick', 2)), [100, 180]], [contestVm(script('Trick', 2)), [160, 80]]] as const) {
+      let squashed = false;
+      const seen: Frame[] = [];
+      while (!v.done) {
+        v.tick();
+        squashed ||= v.sprite(0).scaleY < 256;
+        seen.push(v.view().sprites);
+      }
+      expect(squashed).toBe(true);
+      const shown = seen.filter((s) => s.length);
+      expect(shown[0]!.map((s) => s.x)).toEqual(xs);
+      // Five switches: an odd count leaves the cups swapped (the fixture's last frame is 2 px right).
+      expect(shown.at(-1)!.map((s) => s.x)).toEqual([xs[1] + 2, xs[0] + 2]);
+      expect(v.objects.size).toBe(0);
+    }
+  });
+
+  it('StringShot: three threads over the defender’s spot (the contestant’s in a contest), squeezed and faded', () => {
+    for (const [v, x, y] of [[vm(script('StringShot', 3)), 192, 48], [contestVm(script('StringShot', 3)), 80, 42]] as const) {
+      const seen = frames(v);
+      const all = seen.find((s) => s.length === 3)!;
+      expect(all.map((s) => [s.x, s.y])).toEqual([[x, y + 32], [x, y + 28], [x, y + 24]]);
+      // 60 % wide at the end, times the fixture's last frame's 2.
+      const last = seen.filter((s) => s.length).at(-1)!;
+      for (const s of last) expect(s.scaleX).toBeCloseTo(1.2, 1);
+      expect(last[0]!.alpha).toBeLessThan(0.1);
+    }
+  });
+});

@@ -467,8 +467,14 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   state`, as the turns' lengths depend on the rivals' moves.
 - **Contest move animations** run on the battle animation VM in its contest mode (`AnimDeps.contest`) through
   `AppHost.contestAnimation`, loaded with the battle engine's chunk; the contest app does not tick until it is in, so
-  a run with animations never differs from one that loaded late. A script that reaches a sprite callback whose contest
-  branch is not ported plays no animation (logged and counted).
+  a run with animations never differs from one that loaded late. The sprite callbacks with a contest branch
+  (StringShot, Trick, Taunt, Fissure) follow the decomp in both modes, so a contest misses only what a battle misses
+  (the nine moves battles miss too: Surf, Muddy Water, Night Shade, Transform, Role Play, and the BG-layer Pokémon of
+  Acid Armor, Sketch, Spite and Extrasensory; logged and counted).
+- **The dancers wear their outfits** (decomp ov17_0224A134: each dancer is its dress-up record, drawn without the
+  backdrop and scaled, turned and shaded about the Pokémon's centre): the visual round's outfits in a full contest, none
+  in the Dance Competition alone (sub_02095338 clears them). The acting round draws the battle back picture, as the DS
+  does, with no accessories.
 - **The acting screen** is the DS main screen as one canvas; the touch screen's move and judge menus are a card over
   the stage while the player chooses (its own place under the stage on phones in portrait), and the judge buttons
   carry the judges' voltage meters, which the card covers.

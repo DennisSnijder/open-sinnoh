@@ -14,7 +14,7 @@ import { createScriptRunner } from '@opensinnoh/vm';
 import { createBattle } from '@opensinnoh/battle';
 import { createApp, createContestRound } from '@opensinnoh/menus';
 import { NitroFs } from '@opensinnoh/nds';
-import { contestRandom, newContest } from '@opensinnoh/services';
+import { contestRandom, contestTables, newContest, npcOutfit } from '@opensinnoh/services';
 import { CONTEST_DANCE_SOUNDS, CONTEST_DANCE_TEXTS } from '../../packages/menus/src/contest/dance.ts';
 import { danceTiming, sequencerTicks, snap } from '../../packages/menus/src/contest/dance-rules.ts';
 import { romSlice } from '../rom.ts';
@@ -63,7 +63,13 @@ describe.skipIf(!ROM)('the Dance Competition (OPENSINNOH_NDS_ROM)', () => {
       g.state.party.push(setupPokemon(g.state, g.registries, 0, P('SPECIES_STARAVIA'), 20, [P('MOVE_WING_ATTACK'), P('MOVE_QUICK_ATTACK')]));
       const session = newContest(g.state, g.registries, { mode: 'official', rank, type, competition: 2, partySlot: 0, seed: 7 });
       session.scores = { condition: [10, 10, 10, 10], dressUp: [0, 0, 0, 0], dance: null, acting: null };
+      // The visual round's outfits: the player's photo (a White Fluff on the head), the NPCs' records for the theme.
+      session.dressUp = { accessories: [{ accessory: 0, x: 120, y: 90, priority: 1 }], monPriority: 0, backdrop: 4 };
       const round = createContestRound('dance', { session, registries: g.registries, state: g.state, host: {} as never, log: g.log, rng: () => contestRandom(session) });
+      const dancers = (round.view() as ContestDanceRoundView).dancers;
+      expect(dancers.find((d) => d.player)!.accessories.map((a) => a.accessory)).toEqual([0]);
+      for (const d of dancers.filter((x) => !x.player)) expect(d.accessories.length).toBe(npcOutfit(contestTables(g.registries), session.entrants[d.id]!.opponent!, session.theme).accessories.length);
+      expect(dancers.some((d) => !d.player && d.accessories.length)).toBe(true);
       const r = round as unknown as { measure: { round: number; state: number; start: number } | null; clock: { frame: number } | null; log: { entries: { k: number; code: number }[] } };
       const pick = dance().choice[rank]![type]!;
       const t = danceTiming(dance().songs[pick.song]!, dance(), pick.variant);

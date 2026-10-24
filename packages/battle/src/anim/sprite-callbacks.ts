@@ -1,8 +1,11 @@
-/** Original scene choreography over the ROM's cell animations. These are timed OAM tasks, not hits. */
+/**
+ * The sprite callbacks (BattleAnimSpriteFunc_*) over the ROM's cell animations: timed OAM tasks, not hits. Most are
+ * original choreography; StringShot, Trick, Taunt and Fissure follow the decomp, their contest branches included.
+ */
 import { SPRITE_FUNCS } from './script.ts';
 import type { ObjectSprite } from './objects.ts';
-import { dirX, task } from './tasks.ts';
-import type { AnimVm } from './vm.ts';
+import { anchoredOffset, dirX, PosLerp, Revolution, ScaleLerp, sideOf, task } from './tasks.ts';
+import { BATTLER_POS, CONTEST_POS, type AnimVm } from './vm.ts';
 
 type Context = {
   vm: AnimVm;
@@ -54,18 +57,285 @@ function attached(c: Context, role: number, update?: (s: ObjectSprite, t: number
   });
 }
 
+/** G2_ChangeBlendAlpha's sprite weight (0–16) as an OBJ alpha. */
+const blend = (eva: number) => eva / 16;
+
+/** sStringShotSpriteTimings: per thread, the frame it starts blinking and the frames between toggles. */
+const STRING_SHOT_TIMINGS = [[8, 2], [13, 1], [18, 3]] as const;
+
+/**
+ * BattleAnimSpriteFunc_StringShot (script_funcs_0.c): `vars[0]` threads stacked over the defender's side's solo spot
+ * (BattleAnimUtil_GetBattlerTypeDefaultPos; in a contest the contestant's spot), 4 px apart from 32 px below it. They
+ * blink in for 45 frames, squeeze to 60 % wide over 10, hold 45 and fade out (sprite weight 15 → 0).
+ */
+function stringShot(c: Context): void {
+  const count = c.args[0]!;
+  if (count < 1 || count > STRING_SHOT_TIMINGS.length) throw new Error(`battle OBJ StringShot: ${count} threads`);
+  const at = (c.vm.contest ? CONTEST_POS : BATTLER_POS)[c.vm.defender & 1]!;
+  const sprites = Array.from({ length: count }, (_, i) => {
+    const s = c.spawn();
+    s.x = at.x;
+    s.y = at.y + 32 - i * 4;
+    // The task draws them (SpriteSystem_DrawSprites) and hides the threads not due on its first frame.
+    s.visible = false;
+    s.alpha = blend(15);
+    return s;
+  });
+  const counters = sprites.map(() => 0);
+  let state = 0;
+  let delay = 0;
+  let alpha = 15;
+  let scale: ScaleLerp | null = null;
+  task(c.vm, () => {
+    if (sprites.some((s) => !s.active)) return false;
+    switch (state) {
+      case 0:
+        delay++;
+        for (const [i, s] of sprites.entries()) {
+          const [start, interval] = STRING_SHOT_TIMINGS[i]!;
+          if (delay < start) s.visible = false;
+          else if (++counters[i]! >= interval) {
+            counters[i] = 0;
+            s.visible = !s.visible;
+          }
+        }
+        if (delay >= 45) {
+          for (const s of sprites) s.visible = true;
+          delay = 0;
+          state++;
+        }
+        break;
+      case 1:
+        scale = new ScaleLerp(100, 60, 100, 100, 100, 10);
+        state++;
+        break;
+      case 2:
+        if (scale!.update()) {
+          for (const s of sprites) {
+            s.scaleX = scale!.x / 256;
+            s.scaleY = scale!.y / 256;
+          }
+        } else if (++delay >= 45) state++;
+        break;
+      case 3:
+        // The BG weight climbs 0 → 15 as the sprites' falls: both end together.
+        alpha--;
+        for (const s of sprites) s.alpha = blend(alpha);
+        if (alpha === 0) state++;
+        break;
+      default:
+        for (const s of sprites) c.remove(s);
+        return false;
+    }
+    return true;
+  });
+}
+
+/** sTrickCupScales: the attacker's squash and stretch before the cups, [sx, ex, sy, ey, frames] percent. */
+const TRICK_SCALES = [[100, 100, 100, 70, 8], [100, 100, 70, 120, 3], [100, 100, 120, 100, 3]] as const;
+/** cupArcDirections: the arc sides of the five cup switches. */
+const TRICK_ARCS = [[1, -1], [-1, 1], [1, -1], [1, -1], [1, -1]] as const;
+
+/** XYTransformContext_InitParabolic / UpdateParabolic: a lerp plus a half turn of `radius` px on Y; null once done. */
+function parabola(sx: number, ex: number, sy: number, ey: number, frames: number, radius: number): () => { x: number; y: number } | null {
+  const line = new PosLerp(sx, ex, sy, ey, frames);
+  const arc = new Revolution(0, 0, 0x4000, 0xc000, 0, radius * 4096, frames);
+  return () => {
+    const a = line.update();
+    const b = arc.update();
+    return a || b ? { x: line.x + arc.x, y: line.y + arc.y } : null;
+  };
+}
+
+/**
+ * BattleAnimSpriteFunc_Trick (script_funcs_0.c): the attacker squashes and stretches, two cups (`vars[0]`) slide 52 px
+ * down out of sight and appear, swap places five times on 40 px arcs and fade out. The cups start at (100, 54) and
+ * (180, 39); in a contest at (160, 54) and (80, 39) (TRICK_SPRITE_CUP_2_X − 20, CUP_1_X − 20). The decomp's draw
+ * order by the cups' place (in front of or behind the battlers) has no counterpart here.
+ */
+function trick(c: Context): void {
+  if (c.args[0] !== 2) throw new Error(`battle OBJ Trick: ${c.args[0]} cups`);
+  const vm = c.vm;
+  const cups = [c.spawn(), c.spawn()] as const;
+  const [x0, x1] = vm.contest ? [160, 80] : [100, 180];
+  cups[0].x = x0;
+  cups[0].y = 54;
+  cups[1].x = x1;
+  cups[1].y = 39;
+  const mon = vm.sprite(vm.attacker);
+  const monY = mon.y;
+  let state = 0;
+  let iteration = 0;
+  let delay = 0;
+  let cupAlpha = 0;
+  let scale: ScaleLerp | null = null;
+  let arcs: (() => { x: number; y: number } | null)[] = [];
+  // The cups draw and animate from the SET_RISE_2 state on.
+  const show = () => {
+    for (const s of cups) {
+      s.visible = state >= 4;
+      s.alpha = blend(cupAlpha);
+    }
+  };
+  show();
+  task(vm, () => {
+    if (cups.some((s) => !s.active)) return false;
+    switch (state) {
+      case 0: {
+        const [sx, ex, sy, ey, frames] = TRICK_SCALES[iteration++]!;
+        scale = new ScaleLerp(sx, ex, sy, ey, 100, frames);
+        state++;
+        break;
+      }
+      case 1:
+        if (scale!.update()) {
+          mon.scaleX = scale!.x;
+          mon.scaleY = scale!.y;
+          mon.y = monY + anchoredOffset(mon.height, scale!.cy);
+        } else state = iteration >= TRICK_SCALES.length ? 2 : 0;
+        break;
+      case 2:
+        if (++delay >= 1) {
+          delay = 0;
+          iteration = 0;
+          state++;
+        }
+        break;
+      case 3:
+        if (cups[0].y <= 54 + 50) for (const s of cups) s.y += 2;
+        else state++;
+        break;
+      case 4:
+        if (cups[0].y <= 54 + 50) for (const s of cups) s.y += 2;
+        else state++;
+        delay++;
+        cupAlpha = 16;
+        if (delay === 10) cups[0].y += 16;
+        if (delay === 12) cups[1].y += 16;
+        break;
+      case 5:
+        if (++delay < 1) break;
+        delay = 0;
+        state++;
+        break;
+      case 6: {
+        const [d0, d1] = TRICK_ARCS[iteration++]!;
+        const [a, b] = cups;
+        arcs = [parabola(a.x, b.x, a.y, b.y, 10, 40 * d0), parabola(b.x, a.x, b.y, a.y, 10, 40 * d1)];
+        state++;
+        break;
+      }
+      case 7: {
+        let done = 0;
+        for (const [i, s] of cups.entries()) {
+          const at = arcs[i]!();
+          if (!at) done++;
+          else {
+            s.x = at.x;
+            s.y = at.y;
+          }
+        }
+        if (done === cups.length) state = iteration === TRICK_ARCS.length ? 8 : 6;
+        break;
+      }
+      case 8:
+        // The BG weight climbs 0 → 16 by the same step: both end together.
+        cupAlpha = Math.max(0, cupAlpha - 2);
+        if (cupAlpha === 0) state++;
+        break;
+      default:
+        for (const s of cups) c.remove(s);
+        return false;
+    }
+    show();
+    return true;
+  });
+}
+
+/**
+ * BattleAnimSpriteFunc_Taunt (script_funcs_4.c): `vars[0]` hands, the first at (128, 80) facing the attacker's way
+ * (sequence 0 or 1 by the two sides), the others at the defender's spot (the sprite template's). They fade in over 15
+ * frames, stay to frame 45 and fade out over 15. In a contest the hands are mirrored (affine scale −1, 1).
+ */
+function taunt(c: Context): void {
+  const vm = c.vm;
+  const count = c.args[0]!;
+  if (count < 1 || count > 3) throw new Error(`battle OBJ Taunt: ${count} hands`);
+  const def = vm.sprite(vm.defender);
+  const hands = Array.from({ length: count }, () => {
+    const s = c.spawn();
+    s.x = def.baseX;
+    s.y = def.baseY;
+    return s;
+  });
+  const defender = sideOf(vm.defender);
+  const attacker = sideOf(vm.attacker);
+  hands[0]!.setAnimation(defender === 'player' ? (attacker === 'player' ? 0 : 1) : attacker === 'enemy' ? 1 : 0);
+  hands[0]!.x = 128;
+  hands[0]!.y = 80;
+  let alpha = 0;
+  let frames = 0;
+  let state = 0;
+  const show = () => {
+    for (const s of hands) {
+      s.alpha = blend(alpha);
+      if (vm.contest) s.scaleX = -1;
+    }
+  };
+  show();
+  task(vm, () => {
+    if (hands.some((s) => !s.active)) return false;
+    switch (state) {
+      case 0:
+        if (alpha < 15) alpha++;
+        if (++frames >= 45) state++;
+        break;
+      case 1:
+        // The BG weight climbs back to 15 as the sprites' falls: both end together.
+        alpha--;
+        if (alpha === 0) state++;
+        break;
+      default:
+        for (const s of hands) c.remove(s);
+        return false;
+    }
+    show();
+    return true;
+  });
+}
+
+/**
+ * BattleAnimSpriteFunc_Fissure (script_funcs_3.c): the crack under the defender (its X; Y 126 on the player's side with
+ * sequence 1, else 32 with sequence 0), in a contest at (72, 32) with sequence 0. It goes when its sequence ends.
+ */
+function fissure(c: Context): void {
+  const vm = c.vm;
+  const s = c.spawn();
+  if (vm.contest) {
+    s.x = 72;
+    s.y = 32;
+    s.setAnimation(0);
+  } else {
+    const player = sideOf(vm.defender) === 'player';
+    s.x = vm.sprite(vm.defender).baseX;
+    s.y = player ? 126 : 32;
+    s.setAnimation(player ? 1 : 0);
+  }
+  if (s.sequence.mode !== 'forward') throw new Error(`battle OBJ Fissure: a ${s.sequence.mode} sequence never ends`);
+  const frames = s.duration;
+  let t = 0;
+  task(vm, () => {
+    if (!s.active) return false;
+    if (t++ >= frames) {
+      c.remove(s);
+      return false;
+    }
+    return true;
+  });
+}
+
 const CALLBACKS: Record<string, Callback> = {
-  StringShot: (c) => {
-    const a = point(c.vm, 0), b = point(c.vm, 1);
-    animate(c, c.args[0] || 3, 48, (s, t, i) => {
-      const p = Math.min(1, t / 20);
-      s.x = mix(a.x, b.x, p);
-      s.y = mix(a.y, b.y + (i - 1) * 10, p) - ease(p) * 16;
-      s.scaleX = 0.5 + p * 0.5;
-      s.scaleY = t < 20 ? 0.5 : 0.7 + Math.sin(t / 3) * 0.15;
-      s.alpha = t > 36 ? (48 - t) / 12 : 1;
-    }, 6);
-  },
+  StringShot: stringShot,
   Kinesis: (c) => {
     const b = point(c.vm, 1);
     animate(c, 3, 96, (s, t, i) => {
@@ -74,16 +344,7 @@ const CALLBACKS: Record<string, Callback> = {
       s.rotation = Math.sin(t / 12 + i) / 12;
     });
   },
-  Trick: (c) => {
-    const a = point(c.vm, 0), b = point(c.vm, 1);
-    animate(c, c.args[0] || 2, 88, (s, t, i) => {
-      const p = Math.max(0, Math.min(1, (t - 20) / 44));
-      const q = i % 2 ? 1 - p : p;
-      s.x = mix(a.x, b.x, q);
-      s.y = mix(a.y, b.y, q) - ease(p) * 32 - 20;
-      s.rotation = Math.sin(p * tau) / 12;
-    });
-  },
+  Trick: trick,
   Metronome: (c) => attached(c, 0, (s, t) => {
     s.y -= 32;
     s.rotation = Math.sin(t / 5) / 10;
@@ -171,11 +432,7 @@ const CALLBACKS: Record<string, Callback> = {
     });
   },
   FakeOut: (c) => attached(c, 1, (s, t) => { s.scaleX = 1 + ease(t / 42) * 0.3; }),
-  Taunt: (c) => attached(c, c.args[0] ?? 1, (s, t) => {
-    s.y -= 24;
-    s.x += Math.sin(t / 5) * 8;
-    s.rotation = Math.sin(t / 5) / 16;
-  }),
+  Taunt: taunt,
   HelpingHand: (c) => {
     const a = point(c.vm, 0);
     const b = c.vm.sprite(c.vm.ally(c.vm.attacker));
@@ -211,13 +468,7 @@ const CALLBACKS: Record<string, Callback> = {
   FollowMe: (c) => attached(c, c.args[0] ?? 0, (s, t) => {
     s.x += c.args[1] ?? 0; s.y += (c.args[2] ?? 0) - 24 - Math.abs(Math.sin(t / 8)) * 12;
   }),
-  Fissure: (c) => {
-    const b = point(c.vm, 1);
-    animate(c, 1, 114, (s, t) => {
-      s.x = b.x; s.y = b.y + 32;
-      s.scaleX = 1 + ease(t / 114) * 0.25;
-    });
-  },
+  Fissure: fissure,
 };
 
 function roots(c: Context, role: number, count: number, frames: number): void {

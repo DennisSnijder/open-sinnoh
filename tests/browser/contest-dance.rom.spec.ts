@@ -5,12 +5,14 @@
  * mouse on the buttons, on the phone by touching the buttons. The replay's own check (the steps' points, the lead's
  * maximum) proves each one landed on its tick. At each screenshot line the scene is checked: one whole-pixel stage in
  * the room with the ROM's backdrop, the MC's message box, and while the round dances the card with the ROM's four
- * buttons beside or under the stage. Screenshots go to test-artifacts (ROM content, never commit).
+ * buttons beside or under the stage. Then a full contest's dance (sys-contest-normal-cool to the song): the dancers in
+ * their visual-round outfits. Screenshots go to test-artifacts (ROM content, never commit).
  */
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
-import type { AppView, ContestView, Registries } from '@opensinnoh/contracts';
-import type { Button } from '@opensinnoh/core';
+import type { AppView, ContestView, NewGame, Registries } from '@opensinnoh/contracts';
+import type { Button, Id } from '@opensinnoh/core';
 import { loadGamePacks, runReplay } from '@opensinnoh/game';
+import { accessoryOpaque } from '@opensinnoh/services';
 import { pageDriver } from '../../packages/cli/src/browser.ts';
 import { romSlice } from '../rom.ts';
 import { seedRomImport } from './seed.ts';
@@ -152,4 +154,54 @@ test('sys-contest-practice-dance in the app: the steps by keys, mouse and touch,
   expect(errors).toEqual([]);
   // The view the replay ended on is the field again.
   expect(((await page.evaluate(() => window.openSinnohGame!.snapshot().app)) as ContestView | null)?.app ?? null).not.toBe('contest');
+});
+
+/**
+ * A full contest's dance (sys-contest-normal-cool up to the end of the MC's pages, before the song's steps): the dancers
+ * wear the visual round's outfits (decomp ov17_0224A134), Staravia its White Fluff, the NPCs their records'. Each
+ * accessory is drawn (the scene counts the pictures it drew), and the White Fluff's opaque pixels over Staravia's head
+ * show on the stage canvas as near-white.
+ */
+test('sys-contest-normal-cool to the dance: the dancers wear their outfits', async () => {
+  test.setTimeout(900_000);
+  const project = test.info().project.name;
+  const base = pageDriver(page, SHOTS, `${project}-dance-outfits`);
+  const lines = readReplay('sys-contest-normal-cool.replay').split('\n');
+  const cut = lines.findIndex((l) => l.startsWith('+1964 press down'));
+  expect(cut).toBeGreaterThan(0);
+  const text = [...lines.slice(0, cut), '+2 screenshot dance-outfits'].join('\n');
+  let checked = false;
+  const driver = {
+    ...base,
+    async screenshot(name: string) {
+      // The full contest's own screenshot lines are checked by contests.rom.spec.ts.
+      if (name !== 'dance-outfits') return '';
+      await frame();
+      const v = (await dance())!;
+      expect(v.dancers, name).toHaveLength(4);
+      const player = v.dancers.find((d) => d.player)!;
+      expect(player.accessories.map((a) => a.accessory), name).toEqual([0]);
+      expect(player.shade, name).toBe(0);
+      expect(v.dancers.some((d) => !d.player && d.accessories.length), name).toBe(true);
+      const total = v.dancers.reduce((n, d) => n + d.accessories.length, 0);
+      await page.waitForFunction((n) => document.querySelector<HTMLElement>('.contest-dance-scene')?.dataset.accessories === String(n), total, { timeout: 20_000 });
+      // The White Fluff's opaque pixels where Staravia draws them (its centre, the scale; it stands still between pages).
+      const pic = (registries.newGame.get('platinum:NEW_GAME' as Id) as NewGame).contests!.accessories[0]!;
+      const a = player.accessories[0]!;
+      const points: [number, number][] = [];
+      for (let y = 0; y < pic.height; y += 2) for (let x = 0; x < pic.width; x += 2) if (accessoryOpaque(pic, x, y)) points.push([Math.round(player.x + ((a.x + x) * player.scale) / 256), Math.round(player.y + ((a.y + y) * player.scale) / 256)]);
+      expect(points.length, name).toBeGreaterThan(4);
+      const white = await page.evaluate((pts) => {
+        const g = document.querySelector<HTMLCanvasElement>('.contest-dance-scene .ds-scene-canvas')!.getContext('2d')!;
+        return pts.filter(([x, y]) => [...g.getImageData(x, y, 1, 1).data].slice(0, 3).every((c) => c > 190)).length;
+      }, points);
+      expect(white / points.length, name).toBeGreaterThan(0.5);
+      checked = true;
+      return base.screenshot!(name);
+    },
+  };
+  const result = await runReplay(driver, text, { registries, seed: 1, name: 'sys-contest-normal-cool.replay (to the dance)', resolve: resolveReplay, repeat: false });
+  expect(result.error).toBeUndefined();
+  expect(checked).toBe(true);
+  expect(errors).toEqual([]);
 });

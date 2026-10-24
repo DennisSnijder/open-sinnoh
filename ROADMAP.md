@@ -45,9 +45,9 @@ the trainer card, the Pokédex, the Town Map and Fly, all 25 Pokétch apps, opti
 - Poffins, condition, Feebas into Milotic, the Fashion Case, Amity Square.
 - Super Contests, offline: reception, practice, rivals and judges from the ROM, final scoring, results, ribbons, prizes,
   Master flags and winner photos; the visual round (dress-up, judging, the photo frames); the Dance Competition
-  (songs, lead and backup steps, grading, the NPC dancers, the stage, the music on the beat); the acting round (the
-  ROM's effect, voltage and AI tables, the judges, hearts and voltage meters, the move animations in the animation VM's
-  contest mode); all behind one seam.
+  (songs, lead and backup steps, grading, the NPC dancers in their outfits, the stage, the music on the beat); the acting
+  round (the ROM's effect, voltage and AI tables, the judges, hearts and voltage meters, the move animations in the
+  animation VM's contest mode, every script a battle plays); all behind one seam.
 - The Underground, solo: the Explorer Kit, the field and radar, mining, spheres, vendors, fossil revival; traps (laying,
   the day's hidden traps, their effects and escape games, digging them up, the touch radar); the Digger Drill and the
   secret base (entering, leaving, moving it, the goods PC, decorating, the normal flag).
@@ -88,7 +88,7 @@ Pokémon, follower talk and the HGSS look.
 
 - **Battle Frontier:** the records app; the facilities' particle effects; the Castle app's flag marks for bought
   stats and moves.
-- **Contests:** the Jubilife TV dress-up gallery; the dancers' outfits.
+- **Contests:** the Jubilife TV dress-up gallery.
 - **Underground:** the placed traps' and tools' drawn details (the slide's sprite pose, the rock's floor shadow, the
   OK emote), the transition's hole and descent animations.
 - **Town extras:** TV; the capsule editor's Test throw; the Vs. Seeker, footprints, the Unown messages and the
