@@ -51,12 +51,10 @@ const ALL = [1, 2, 3];
  */
 const STUBS: Record<string, Record<string, readonly number[]>> = {
   'cp5.replay': {
-    'render:hm-cut-in': ALL,
     'evolution:records': ALL,
     'anim:cry-mod:9': [1, 2],
   },
   'cp6.replay': {
-    'render:hm-cut-in': ALL,
     'evolution:records': ALL,
     'anim:cry-mod:9': ALL,
     'anim:platinum:MOVE_SPITE': [1, 2],
@@ -65,7 +63,6 @@ const STUBS: Record<string, Record<string, readonly number[]>> = {
   },
   'cp7.replay': {
     'stub:check_tv_interview_eligible': ALL,
-    'render:hm-cut-in': ALL,
   },
   'cp8.replay': {
   },
@@ -79,22 +76,19 @@ const STUBS: Record<string, Record<string, readonly number[]>> = {
     'stub:check_tv_interview_eligible': ALL,
   },
   'cp11.replay': {
-    'render:hm-cut-in': ALL, // Surf now uses the shared presenter; its graphic remains unrendered.
     'anim:platinum:MOVE_SURF': ALL,
     'stub:turn_on_pokedex_form_detection': ALL,
   },
   'cp12.replay': {
-    'render:hm-cut-in': ALL, // Surf on the return across Route 218.
     'anim:platinum:MOVE_SURF': ALL,
     'stub:save_tv_segment_pokemon_storage_bulletin': ALL,
   },
   'cp13.replay': {
     'anim:platinum:MOVE_SURF': ALL,
-    'render:hm-cut-in': ALL,
     'stub:save_tv_segment_pokemon_storage_bulletin': ALL,
   },
   'm5-cheryl-detach.replay': {},
-  'm5-eterna-egg-declined.replay': { 'render:hm-cut-in': ALL },
+  'm5-eterna-egg-declined.replay': {},
   'm5-tag-jubilife-lost.replay': {},
   'm5-tag-jubilife-turtwig.replay': {},
   'm5-eterna-forest-chimchar.replay': {},
@@ -112,7 +106,6 @@ const STUBS: Record<string, Record<string, readonly number[]>> = {
   'cp14.replay': {
     'anim:platinum:MOVE_NIGHT_SHADE': [2],
     'anim:platinum:MOVE_SURF': ALL,
-    'render:hm-cut-in': ALL,
   },
   'm5-galactic-hq-chimchar.replay': {},
   'm5-spear-pillar-chimchar.replay': {},
@@ -120,12 +113,10 @@ const STUBS: Record<string, Record<string, readonly number[]>> = {
     'anim:platinum:MOVE_EXTRASENSORY': ALL,
     'anim:platinum:MOVE_SURF': ALL,
     'battle:wild-flee': ALL,
-    'render:hm-cut-in': ALL,
   },
   'cp15-giratina-room.replay': { 'anim:platinum:MOVE_SURF': ALL },
   'cp15.replay': {
     'battle:wild-flee': ALL,
-    'render:hm-cut-in': ALL,
   },
   'm5-dw-cyrus-lost.replay': {},
   'm5-giratina-caught.replay': {},
@@ -138,7 +129,6 @@ const STUBS: Record<string, Record<string, readonly number[]>> = {
     'anim:cry-mod:9': [1, 2],
     'anim:platinum:MOVE_SURF': ALL,
     'battle:wild-flee': ALL,
-    'render:hm-cut-in': ALL,
   },
   'cp18.replay': {
     'anim:platinum:MOVE_SURF': ALL,
@@ -150,55 +140,44 @@ const STUBS: Record<string, Record<string, readonly number[]>> = {
   'cp20.replay': {
     'anim:platinum:MOVE_SURF': ALL,
     'battle:wild-flee': ALL,
-    'render:hm-cut-in': ALL,
   },
   'cp21a.replay': {
     'anim:platinum:MOVE_EXTRASENSORY': [2],
     'anim:platinum:MOVE_SURF': ALL,
-    'render:hm-cut-in': ALL,
   },
   'cp21b.replay': {
     'anim:platinum:MOVE_SURF': ALL,
-    'render:hm-cut-in': ALL,
     'stub:check_tv_interview_eligible': ALL,
   },
   'cp21c.replay': {
     'anim:platinum:MOVE_SURF': ALL,
-    'render:hm-cut-in': ALL,
     'stub:check_tv_interview_eligible': ALL,
   },
   'cp21d.replay': {
     'anim:platinum:MOVE_SURF': ALL,
-    'render:hm-cut-in': ALL,
   },
   'cp21e.replay': {
     'anim:platinum:MOVE_SURF': ALL,
     'clock:timed-events': ALL,
-    'render:hm-cut-in': ALL,
   },
   'cp21f.replay': {
     'anim:platinum:MOVE_SURF': ALL,
-    'render:hm-cut-in': ALL,
   },
   'cp22.replay': {
     'anim:platinum:MOVE_EXTRASENSORY': [3],
     'anim:platinum:MOVE_SURF': ALL,
     'battle:wild-flee': ALL,
-    'render:hm-cut-in': ALL,
   },
   'cp23a.replay': {
     'anim:platinum:MOVE_SURF': ALL,
-    'render:hm-cut-in': ALL,
   },
   'cp23b.replay': {
     'anim:platinum:MOVE_SURF': ALL,
     'battle:wild-flee': ALL,
-    'render:hm-cut-in': ALL,
   },
   'cp24.replay': {
     'anim:platinum:MOVE_SURF': ALL,
     'battle:wild-flee': ALL,
-    'render:hm-cut-in': ALL,
     'stub:check_tv_interview_eligible': ALL,
   },
 };

@@ -754,6 +754,15 @@ const frontierTables = obj({
   characters: dict(str(/^\d+$/), ref('ui2d')),
   objects: dict(str(/^\d+$/), ref('ui2d')),
   shadow: ref('ui2d'),
+  effects: opt(
+    obj({
+      brains: obj(Object.fromEntries(['tower', 'factory', 'castle', 'hall', 'arcade'].map((f) => [f, obj({ banner: arr(ref('ui2d')), mugshot: ref('ui2d'), name: ref('texts') })]))),
+      vs: ref('ui2d'),
+      nameColors: obj({ fg: str(/^#[0-9a-f]{6}$/), shadow: str(/^#[0-9a-f]{6}$/) }),
+      factoryDoorLights: arr(ref('ui2d')),
+      hallLights: ref('ui2d'),
+    }),
+  ),
   banlist: arr(ref('species')),
   prices: arr(obj({ item: ref('items'), bp: int(1, 0xffff) })),
   judgeMessages: arr(ref('texts')),
@@ -1243,7 +1252,7 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
   }),
   battleAnimations: obj({ id, move: opt(ref('moves')), common: opt(str(/^[a-z0-9_]+$/)), sourceIndex: int(0), code: arr(int(-0x80000000, 0x7fffffff)) }),
   particleSystems: obj(
-    { id, sourceIndex: int(0), archive: opt(lit('ball')), textures: ref('ui2d'), textureParams: arr(int(0)), emitters: arr(particleEmitter) },
+    { id, sourceIndex: int(0), archive: opt(lit('ball', 'frontier')), textures: ref('ui2d'), textureParams: arr(int(0)), emitters: arr(particleEmitter) },
     (v) => {
       const n = (v.textureParams as unknown[]).length;
       const bad = (v.emitters as { texture: number; texAnim?: { textures: number[] }; child?: { texture: number } }[]).find((e) => e.texture >= n || e.child?.texture !== undefined && e.child.texture >= n || e.texAnim?.textures.some((t) => t >= n));

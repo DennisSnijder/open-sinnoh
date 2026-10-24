@@ -5,7 +5,7 @@
  * Shop_GetItemBPPrice), and the scenes' 2D art: the rooms (frontier_bg), the 2D characters (wifi2dchar through
  * overlay 63's gfx table) and the frontier_obj sprites.
  */
-import type { BattleArcadeTables, BattleCastleTables, BattleFactoryTables, BattleHallTables, FactoryPool, FrontierSceneData, FrontierSetData, FrontierTables, FrontierTrainerData, Mart, Movement, Sequence } from '@opensinnoh/contracts';
+import type { BattleArcadeTables, BattleCastleTables, BattleFactoryTables, BattleHallTables, FactoryPool, FrontierBrainFacility, FrontierEffectsArt, FrontierSceneData, FrontierSetData, FrontierTables, FrontierTrainerData, Mart, Movement, Sequence } from '@opensinnoh/contracts';
 import { asId, type Command, type Id } from '@opensinnoh/core';
 import { readNarc, Reader, type NitroFs } from '@opensinnoh/nds';
 import { decodeFrontierScripts, FRONTIER_SCRIPT_FILES, frontierFileLabelName } from '@opensinnoh/vm';
@@ -132,6 +132,31 @@ const ARCADE_APP_SPRITES = { ncgr: 18, nanr: 19, ncer: 20, nclr: 40 } as const;
 const ARCADE_APP_BUTTON = { ncgr: 21, nanr: 22, ncer: 23, nclr: 41 } as const;
 /** Decomp FRONTIER_SCENE_CASTLE_BATTLE_ROOM and GetEmblemTiles: the emblem's 10 × 3 tiles at tile 11, 6, per round 0–6. */
 const CASTLE_BATTLE_ROOM = 12;
+/** Decomp FRONTIER_SCENE_FACTORY_BATTLE_ROOM and _HALL_BATTLE_ROOM. */
+const FACTORY_BATTLE_ROOM = 4;
+const HALL_BATTLE_ROOM = 10;
+/** Decomp BF_FUNC_UPDATE_BACKGROUND: Bg_ChangeTilemapRectPalette(BG3, 3, 10, 26, 11, step), steps 0–4. */
+const DOOR_LIGHT = { x: 3, y: 10, w: 26, h: 11, steps: 5 } as const;
+/**
+ * frontier_bg members of the Hall battle room's light animation (ov104_0223DA40): the room's map and characters (the
+ * scene's own) and the second frame's, battle_hall_battle_room_dupe over battle_hall_battle_room_2.
+ */
+const HALL_LIGHTS = { tilemap: 20, tiles: 14, dupeTilemap: 21, dupeTiles: 15 } as const;
+/**
+ * field_encounteffect.narc (res/trainers/classes/field_encounteffect.order): each Brain's mugshot (NCLR, NCGR, NCER,
+ * NANR from `mugshot`) and banner (NSCR, NCGR, NCLR from `banner`), the shared VS (frontier_vs NCGR, NCER, NANR over
+ * vs.NCLR) and enc_fade.NCLR (the name's colours); the Brains' names are their `*_dummy` trainers'.
+ */
+const ENCOUNTER_EFFECT = { path: '/graphic/field_encounteffect.narc', count: 155, fade: 11, vs: { ncgr: 144, ncer: 145, nanr: 146, nclr: 51 } } as const;
+const BRAIN_CUT_INS: Record<FrontierBrainFacility, { mugshot: number; banner: number; trainer: string }> = {
+  tower: { mugshot: 125, banner: 141, trainer: 'TRAINER_TOWER_TYCOON_PALMER_DUMMY' },
+  factory: { mugshot: 113, banner: 132, trainer: 'TRAINER_FACTORY_HEAD_THORTON_DUMMY' },
+  castle: { mugshot: 109, banner: 129, trainer: 'TRAINER_CASTLE_VALET_DARACH_DUMMY' },
+  hall: { mugshot: 121, banner: 138, trainer: 'TRAINER_HALL_MATRON_ARGENTA_DUMMY' },
+  arcade: { mugshot: 117, banner: 135, trainer: 'TRAINER_ARCADE_STAR_DAHLIA_DUMMY' },
+};
+/** UpdateBannerPalette's NUM_BANNER_PALETTES. */
+const BANNER_PALETTES = 8;
 const EMBLEM = { x: 11, y: 6, w: 10, h: 3, rounds: 7, roundTiles: 96, firstTile: 16, rowTiles: 32 } as const;
 const FIRST_PARTNER = 300;
 /** The BP after beating Palmer (decomp BattleTower_GiveBattlePointsReward: `battlePoints = 20`). */
@@ -310,6 +335,7 @@ export function importFrontier(fs: NitroFs, names: Names, rom: FrontierRomTables
   const castleRoom = sceneRows[CASTLE_BATTLE_ROOM]!;
   const castle = importCastle(rom.castle, names, objNarc, bgNarc, deps.sheets, { tiles: castleRoom.tiles, palette: castleRoom.palette });
   const arcade = importArcade(rom.arcade, names, objNarc, bgNarc, deps.sheets);
+  const effects = importEffects(fs, names, deps, bgNarc, room, sceneRows);
 
   // --- the Battle Tower ---
   const bp = [...rom.battlePoints];
@@ -336,6 +362,7 @@ export function importFrontier(fs: NitroFs, names: Names, rom: FrontierRomTables
     characters,
     objects,
     shadow,
+    effects,
     banlist: u16s(rom.banlist).map((s) => names.species(s)),
     prices: pairs(rom.prices).map(([item, price]) => ({ item: names.item(item), bp: price })),
     judgeMessages: [],
@@ -349,6 +376,65 @@ export function importFrontier(fs: NitroFs, names: Names, rom: FrontierRomTables
   const marts = [mart(rom.martRight, 'MART_FRONTIER_ID_EXCHANGE_SERVICE_CORNER_RIGHT'), mart(rom.martLeft, 'MART_FRONTIER_ID_EXCHANGE_SERVICE_CORNER_LEFT')];
   for (const m of marts) for (const { item } of m.items) if (!tables.prices.some((p) => p.item === item)) throw new Error(`${m.id}: ${item} has no BP price`);
   return { tables, labels: decoded.ir.labels, movements: decoded.movements, marts, files: decoded.files, instructions: decoded.instructions };
+}
+
+/** The Frontier Brains' cut-ins, the Factory room's door light and the Hall room's second frame (`FrontierEffectsArt`). */
+function importEffects(
+  fs: NitroFs,
+  names: Names,
+  deps: { bankIndex: (name: string) => number; sheets: Sheets },
+  bgNarc: Uint8Array[],
+  room: (tilemap: number, tiles: number, palette: number) => NonNullable<FrontierSceneData['bg']>,
+  sceneRows: { tilemap: number; tiles: number; palette: number }[],
+): FrontierEffectsArt {
+  const enc = readNarc(fs.file(ENCOUNTER_EFFECT.path));
+  if (enc.length !== ENCOUNTER_EFFECT.count) throw new Error(`${ENCOUNTER_EFFECT.path}: ${enc.length} members, expected ${ENCOUNTER_EFFECT.count}`);
+  const member = (narc: Uint8Array[], i: number, what: string) => {
+    const b = narc[i];
+    if (!b) throw new Error(`${what} has no member ${i}`);
+    return b;
+  };
+  const trainerNames = deps.bankIndex('TEXT_BANK_NPC_TRAINER_NAMES');
+  const hex = (c: number) => `#${rgb555(c).map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+  const brains = Object.fromEntries(
+    Object.entries(BRAIN_CUT_INS).map(([facility, b]) => {
+      const trainer = names.file.trainers.indexOf(b.trainer);
+      if (trainer < 0) throw new Error(`frontier cut-in: no trainer ${b.trainer}`);
+      // SetupBannerAndBannerTask: BG1's tiles on palette 12, which UpdateBannerPalette fills with each of the 8 in turn.
+      const screen = readNscr(member(enc, b.banner, 'field_encounteffect'));
+      const chars = readNcgr(member(enc, b.banner + 1, 'field_encounteffect'));
+      const ram = new PaletteRam().load(readNclr(member(enc, b.banner + 2, 'field_encounteffect')), 0, BANNER_PALETTES * 32);
+      const banner = Array.from({ length: BANNER_PALETTES }, (_, palette) =>
+        deps.sheets.image(`frontier/brain_${facility}_banner_${palette}`, textBg(screen, chars, ram, { x: 0, y: 0, w: screen.width / 8, h: screen.height / 8, palette })),
+      );
+      const mugshot = deps.sheets.obj(`frontier/brain_${facility}_mugshot`, enc, { nclr: b.mugshot, ncgr: b.mugshot + 1, ncer: b.mugshot + 2, nanr: b.mugshot + 3 });
+      return [facility, { banner, mugshot, name: names.text(trainerNames, trainer) }];
+    }),
+  ) as FrontierEffectsArt['brains'];
+  const fade = readNclr(member(enc, ENCOUNTER_EFFECT.fade, 'field_encounteffect')).colors;
+
+  // BF_FUNC_UPDATE_BACKGROUND: the door's rect of the Factory battle room's BG3 on each palette step.
+  const factory = sceneRows[FACTORY_BATTLE_ROOM]!;
+  const factoryMap = readNscr(member(bgNarc, factory.tilemap, 'frontier_bg'));
+  const factoryChars = readNcgr(member(bgNarc, factory.tiles, 'frontier_bg'));
+  const factoryColors = readNclr(member(bgNarc, factory.palette, 'frontier_bg')).colors;
+  const cols = factoryMap.width / 8;
+  const factoryDoorLights = Array.from({ length: DOOR_LIGHT.steps }, (_, step) => {
+    const entries = new Uint16Array(DOOR_LIGHT.w * DOOR_LIGHT.h);
+    for (let y = 0; y < DOOR_LIGHT.h; y++) for (let x = 0; x < DOOR_LIGHT.w; x++) entries[y * DOOR_LIGHT.w + x] = (factoryMap.entries[(DOOR_LIGHT.y + y) * cols + DOOR_LIGHT.x + x]! & 0x0fff) | (step << 12);
+    const size = { width: DOOR_LIGHT.w * 8, height: DOOR_LIGHT.h * 8 };
+    return deps.sheets.image(`frontier/factory_door_light_${step}`, { ...size, rgba: renderAffineExt({ ...size, entries }, factoryChars, factoryColors) });
+  });
+
+  const hall = sceneRows[HALL_BATTLE_ROOM]!;
+  if (hall.tilemap !== HALL_LIGHTS.tilemap || hall.tiles !== HALL_LIGHTS.tiles) throw new Error(`frontier: the Hall battle room's BG3 is ${hall.tilemap}/${hall.tiles}, not the light animation's ${HALL_LIGHTS.tilemap}/${HALL_LIGHTS.tiles}`);
+  return {
+    brains,
+    vs: deps.sheets.obj('frontier/brain_vs', enc, ENCOUNTER_EFFECT.vs),
+    nameColors: { fg: hex(fade[1]!), shadow: hex(fade[2]!) },
+    factoryDoorLights,
+    hallLights: room(HALL_LIGHTS.dupeTilemap, HALL_LIGHTS.dupeTiles, hall.palette).sheet,
+  };
 }
 
 /** The entry label of a scene's script, read from the raw scene table (the field decoder runs before `importFrontier`). */

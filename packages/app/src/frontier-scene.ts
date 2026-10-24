@@ -8,12 +8,17 @@
  * and their held-item marks (the Arcade's columns, BattleFrontier_CreateMonSprite / _CreateItemSprite), the BG2 layer
  * above them (or under BG3 in the Factory corridor, scrolled on its own where it does not follow the camera, hidden
  * while toggled off), window 0 keeping the sprites out
- * of its rect (FrontierScrCmd_4E), then the brightness fade. The message, menu and yes/no boxes are drawn over it by
- * `drawScriptOverlay` in the same frame. Sheets load on first use; until they have, their layer is not drawn.
+ * of its rect (FrontierScrCmd_4E), the particles (BG0; under the characters in the Castle battle room, with BG2), a
+ * Frontier Brain's cut-in (the room dimmed, the banner in its window, the mugshot, the name and the VS), then the
+ * brightness fade. The message, menu and yes/no boxes are drawn over it by `drawScriptOverlay` in the same frame. Sheets
+ * load on first use; until they have, their layer is not drawn.
  */
-import type { AssetRef, AssetSource, FrontierView, Registries, Ui2dSheet } from '@opensinnoh/contracts';
+import { newGameRecord, type AssetRef, type AssetSource, type FrontierView, type LoadedFont, type Registries, type Ui2dSheet } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
+import { drawText } from '@opensinnoh/text';
+import { ParticleTextures } from './battle/anim/draw.ts';
 import type { Insets } from './layout.ts';
+import { tint } from './map-popup.ts';
 import type { DsFrame } from './panel.ts';
 
 /**
@@ -67,6 +72,13 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
     if (!s) throw new Error(`frontier scene: unknown ui2d sheet ${id}`);
     return s;
   };
+  const particleTextures = new ParticleTextures((id) => {
+    const sheet = sheetOf(id);
+    const img = image(sheet.atlas);
+    return img ? { sheet, img } : null;
+  });
+  /** The Brain's name in the cut-in's colours (enc_fade's), made once per font. */
+  const tinted = new WeakMap<LoadedFont, LoadedFont>();
 
   /** Decomp ov104_02232CE0: the Pokémon's 80×80 battle front, its palette blended `darken`/16 toward black. */
   const darkened = new Map<string, HTMLCanvasElement | null>();
@@ -117,7 +129,45 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
     }
   };
 
-  return (ctx: CanvasRenderingContext2D, view: FrontierView | undefined, frame: DsFrame) => {
+  /**
+   * Decomp frontier_brain_encounter_effect.c: BG1's banner inside its window (the full width, rows y1–y2), then the
+   * sprites by priority: the mugshot (dimmed 14/16 while a silhouette), the name, the VS sprites (scaled about their origin).
+   */
+  const brainCutIn = (ctx: CanvasRenderingContext2D, cutIn: NonNullable<FrontierView['brainCutIn']>, scale: number, font: LoadedFont) => {
+    const art = newGameRecord(registries()).frontier?.effects;
+    if (!art) throw new Error('frontier scene: a Brain cut-in without FrontierTables.effects');
+    const brain = art.brains[cutIn.facility];
+    const at = (sheet: Ui2dSheet, index: number, x: number, y: number, k: number, darken = 0) => {
+      const img = darkImage(sheet.atlas, darken);
+      const c = sheet.cells[index];
+      if (!img || !c) return;
+      ctx.save();
+      ctx.translate(x * scale, y * scale);
+      ctx.scale(k, k);
+      ctx.drawImage(img, c.x, c.y, c.w, c.h, c.ox * scale, c.oy * scale, c.w * scale, c.h * scale);
+      ctx.restore();
+    };
+    if (cutIn.band && cutIn.band.y2 > cutIn.band.y1) {
+      const banner = brain.banner[cutIn.banner];
+      if (!banner) throw new Error(`frontier scene: no banner palette ${cutIn.banner}`);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, cutIn.band.y1 * scale, 256 * scale, (cutIn.band.y2 - cutIn.band.y1) * scale);
+      ctx.clip();
+      at(sheetOf(banner), 0, 0, 0, 1);
+      ctx.restore();
+    }
+    if (cutIn.mugshot) at(sheetOf(brain.mugshot), cutIn.mugshot.cell, cutIn.mugshot.x, cutIn.mugshot.y, 1, cutIn.mugshot.dark ? 14 : 0);
+    if (cutIn.name) {
+      let named = tinted.get(font);
+      if (!named) tinted.set(font, (named = tint(font, art.nameColors)));
+      drawText(ctx, named, cutIn.name.text, cutIn.name.x * scale, cutIn.name.y * scale, scale);
+    }
+    const vs = sheetOf(art.vs);
+    for (const v of cutIn.vs) at(vs, v.cell, v.x, v.y, v.scale);
+  };
+
+  return (ctx: CanvasRenderingContext2D, view: FrontierView | undefined, frame: DsFrame, font: LoadedFont) => {
     if (!view) return;
     const scale = frame.scale;
     ctx.save();
@@ -161,9 +211,17 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
       }
       ctx.globalAlpha = 1;
     };
+    /** The particles: DS screen px from the frame's corner (ParticleTextures sets its own transforms). */
+    const particles = () => {
+      if (view.particles) particleTextures.draw(ctx, view.particles, { x: frame.x, y: frame.y }, scale);
+    };
     if (view.fgBelow) fg();
     if (view.bg) cell(sheetOf(view.bg.sheet), 0, 0, 0, false, view.bgDarken ?? 0);
     if (view.bgPatch) cell(sheetOf(view.bgPatch.sheet), 0, view.bgPatch.x, view.bgPatch.y, false, view.bgDarken ?? 0);
+    if (view.spritesOnTop) {
+      if (!view.fgBelow) fg();
+      particles();
+    }
     if (view.window) {
       // Window 0: inside its rect only the BG layers show (G2_SetWnd0InsidePlane without OBJ).
       const w = view.window;
@@ -188,7 +246,14 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
     if (view.pokemon) pokemon(ctx, view.pokemon, scale);
     if (view.icons) icons(ctx, view.icons, view.shadow, scale);
     if (view.window) ctx.restore();
-    if (!view.fgBelow) fg();
+    if (!view.fgBelow && !view.spritesOnTop) fg();
+    const cutIn = view.brainCutIn;
+    if (cutIn?.roomDark) {
+      ctx.fillStyle = 'rgb(0 0 0 / 0.875)';
+      ctx.fillRect(0, 0, 256 * scale, 192 * scale);
+    }
+    if (!view.spritesOnTop) particles();
+    if (cutIn) brainCutIn(ctx, cutIn, scale, font);
     if (view.fade) {
       ctx.globalAlpha = view.fade.alpha;
       ctx.fillStyle = view.fade.color === 'black' ? '#000' : '#fff';

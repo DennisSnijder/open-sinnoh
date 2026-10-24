@@ -76,3 +76,28 @@ describe('Teleport (field_warp.c sDigTeleportStates, sFieldWarpFadeInStates)', (
     expect(task.cameraDistance()).toBe(0);
   });
 });
+
+describe('the HM cut-in (hm_cut_in.c sCutInTaskFuncs)', () => {
+  it('opens the band, slides the Pokémon through with its cry at the centre, closes the band and ends on tick 59', () => {
+    const cries: number[] = [];
+    let tick = 0;
+    const cutIn = new HmCutIn({ species: 'x:S', form: 0 } as never, { playCry: () => cries.push(tick) } as never);
+    const mon = { species: 'x:S' as never, form: 0, shiny: false, female: false };
+    const bands: string[] = [];
+    let monAtCry: number | undefined;
+    let done = false;
+    for (tick = 1; tick <= 70 && !done; tick++) {
+      done = cutIn.step();
+      const v = cutIn.view('female', mon);
+      if (cries.length === 1 && monAtCry === undefined) monAtCry = v?.mon?.x;
+      if (v?.band) bands.push(`${v.band.y1}-${v.band.y2}`);
+      if (v) expect(v.bird).toBeNull();
+    }
+    expect(tick - 1).toBe(59);
+    expect(cries).toEqual([36]);
+    expect(monAtCry).toBe(128);
+    expect(bands).toContain('56-136');
+    expect(bands.at(-1)).toBe('88-104');
+    expect(cutIn.view('female', mon)).toBeNull();
+  });
+});

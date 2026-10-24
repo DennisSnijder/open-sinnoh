@@ -1,7 +1,7 @@
 /**
  * The Battle Hall's frontier commands (decomp overlay 104 frscrcmd_battle_hall.c) and the scene effects its scripts
  * (and the Factory's) use: the stage's Pokémon (FrontierScrCmd_45/46), the shake (4C/4D), window 0 (4E/4F), the
- * particle systems (logged stand-ins) and the save that waits (73). The multi challenge's link commands are not in scope.
+ * particle systems and the save that waits (73). The multi challenge's link commands are not in scope.
  */
 import { dexOf } from '@opensinnoh/contracts';
 import { isShiny, monGender } from '@opensinnoh/core';
@@ -242,12 +242,12 @@ export function hallFrontierHandlers(): Record<string, FrontierHandler> {
       return 'continue';
     },
     fr_cmd_4f: (f, c) => f.pause(c, () => f.scene.windowDone()),
-    // Decomp FrontierScrCmd_InitParticleSystem … WaitForParticleSystemEmitters: the SPL particle effects (the Factory
-    // head's smoke, the Hall's lights) are not drawn; with no emitter running, the wait ends at once.
-    fr_init_particle_system: (f) => (f.r.log.stub('frontier:particles', 'the frontier particle effects (SPL) are not drawn'), 'continue'),
-    fr_free_particle_system: () => 'continue',
-    fr_create_particle_system_emitter: (f) => (f.r.log.stub('frontier:particles', 'the frontier particle effects (SPL) are not drawn'), 'continue'),
-    fr_wait_for_particle_system_emitters: (f, c) => f.pause(c, () => true),
+    // Decomp FrontierScrCmd_InitParticleSystem … WaitForParticleSystemEmitters (frontier_particle_system.c): the scene's
+    // SPL particle systems (the Factory head's smoke, the Hall's lights, the Castle's twinkle, the Arcade's effects).
+    fr_init_particle_system: (f, c, a) => (f.scene.particles.init(f.val(c, a[0]), f.val(c, a[1]), f.val(c, a[2])), 'continue'),
+    fr_free_particle_system: (f, c, a) => (f.scene.particles.free(f.val(c, a[0])), 'continue'),
+    fr_create_particle_system_emitter: (f, c, a) => (f.scene.particles.createEmitter(f.val(c, a[0]), f.val(c, a[1])), 'continue'),
+    fr_wait_for_particle_system_emitters: (f, c) => f.pause(c, () => f.scene.particles.idle()),
     // Decomp FrontierScrCmd_73: SaveData_SaveStateInit (a full save) and the wait for it.
     fr_cmd_73: (f) => (f.r.saves().write(), 'yield'),
   };

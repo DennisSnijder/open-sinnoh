@@ -27,6 +27,8 @@ describe.skipIf(!romPath)('battle animations (OPENSINNOH_NDS_ROM)', () => {
     const ps = [...reg.particleSystems.values()];
     expect(ps.filter((p) => !p.archive)).toHaveLength(485);
     expect(ps.filter((p) => p.archive === 'ball').map((p) => p.sourceIndex)).toEqual([...Array.from({ length: 17 }, (_, i) => i + 1), ...Array.from({ length: 81 }, (_, i) => i + 36)]);
+    // frontier_particle.narc's 7 (two unused, the Hall, the Arcade's two, the Factory, the Castle).
+    expect(ps.filter((p) => p.archive === 'frontier').map((p) => p.sourceIndex)).toEqual([0, 1, 2, 3, 4, 5, 6]);
     for (const a of anims) if (a.code.length) expect(() => scriptUse(a.code), a.id).not.toThrow();
   });
 

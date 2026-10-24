@@ -24,5 +24,5 @@ export * from './journal.ts';
 
 export * from './anim-script.ts';
 
-export const CONTRACTS_VERSION = '0.40.1';
+export const CONTRACTS_VERSION = '0.41.0';
 

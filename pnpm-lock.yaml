@@ -327,6 +327,9 @@ importers:
 
   packages/vm:
     dependencies:
+      '@opensinnoh/battle':
+        specifier: workspace:*
+        version: link:../battle
       '@opensinnoh/contracts':
         specifier: workspace:*
         version: link:../contracts

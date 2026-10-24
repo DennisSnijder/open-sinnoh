@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./formulas": "./src/formulas.ts"
+    "./formulas": "./src/formulas.ts",
+    "./particles": "./src/anim/particles.ts"
   },
   "dependencies": {
     "@opensinnoh/contracts": "workspace:*",

@@ -6,6 +6,8 @@
 import type { BattleTower } from '@opensinnoh/services';
 import { TextPrinter, toPrintOps } from '@opensinnoh/text';
 import { towerPartnerParam } from '../frontier-field-ops.ts';
+import type { Id } from '@opensinnoh/core';
+import { BRAIN_FACILITIES, BrainCutIn } from './effects.ts';
 import type { FrontierContext, FrontierHandler, FrontierRunner } from './runner.ts';
 
 /** Decomp BT_FUNC_* (constants/battle_tower_functions.h) the battle rooms call. */
@@ -28,8 +30,8 @@ const BT = {
   unk59: 59,
   checkIsNull: 100,
 } as const;
-/** Decomp frontier_brain_encounter_effect.c: the cut-in's length in frames. */
-const BRAIN_EFFECT_TICKS = 120;
+/** Decomp BATTLE_FRONTIER_BRAIN_sseq (SEQ_PL_BA_BRAIN). */
+const SEQ_PL_BA_BRAIN = 1202;
 
 export function towerFrontierHandlers(): Record<string, FrontierHandler> {
   const tower = (f: FrontierRunner): BattleTower => {
@@ -142,20 +144,30 @@ export function towerFrontierHandlers(): Record<string, FrontierHandler> {
       });
     },
     /**
-     * Decomp FrontierScrCmd_PlayFrontierBrainEncounterEffect (frontier_brain_encounter_effect.c): the brain's cut-in
-     * before the battle, about 120 frames (white flashes, the banner sliding in, the VS and the mugshot). Its timing
-     * and the flashes run; the banner and mugshot art are not drawn yet (logged).
+     * Decomp FrontierScrCmd_PlayFrontierBrainEncounterEffect (frontier_brain_encounter_effect.c): the Brain's cut-in
+     * before the battle (`BrainCutIn`) with the Frontier Brain battle music (Sound_SetSceneAndPlayBGM); the script
+     * waits for its end.
      */
-    fr_play_frontier_brain_encounter_effect: (f, c) => {
-      f.r.log.stub('frontier:brain-encounter-art', 'the Frontier Brain cut-in (banner, VS, mugshot) is not drawn yet: its timing and flashes only');
-      let t = 0;
-      f.scene.startFade(true, 4, 'white');
+    fr_play_frontier_brain_encounter_effect: (f, c, a) => {
+      const facility = BRAIN_FACILITIES[f.int(a[0])];
+      if (!facility) throw new Error(`fr_play_frontier_brain_encounter_effect: facility ${f.int(a[0])}`);
+      const effect = new BrainCutIn(facility, { fade: (out, frames) => f.scene.startFade(out, frames, 'white'), fadeDone: () => f.scene.fadeDone() });
+      const art = f.tables.effects;
+      if (!art) f.r.log.stub('frontier:brain-cut-in-art', 'the pack has no Frontier Brain cut-in art (FrontierTables.effects): its timing and flashes only');
+      const name = art ? f.r.plainText(art.brains[facility].name) : '';
+      const animations = (sheet: Id) => {
+        const s = f.r.registries.ui2d.get(sheet);
+        if (!s?.animations) throw new Error(`frontier cut-in: sheet ${sheet} has no animations`);
+        return s.animations;
+      };
+      f.scene.brainCutIn = { effect, view: () => (art ? effect.view(art, name, animations) : null) };
+      const music = f.r.source('sequences', SEQ_PL_BA_BRAIN, false);
+      if (music) f.r.audio.playBgm(music);
+      else f.r.log.stub('audio:sequence-missing', `no sequence with sourceIndex ${SEQ_PL_BA_BRAIN} in the packs: not played`);
       return f.pause(c, () => {
-        t++;
-        if (t === 4) f.scene.startFade(false, 8, 'white');
-        if (t === 12) f.scene.startFade(true, 4, 'white');
-        if (t === 16) f.scene.startFade(false, 8, 'white');
-        return t >= BRAIN_EFFECT_TICKS && f.scene.fadeDone();
+        if (!effect.finished) return false;
+        f.scene.brainCutIn = null;
+        return true;
       });
     },
     fr_free_tower_struct: (f) => {

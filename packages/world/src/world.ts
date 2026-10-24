@@ -1,5 +1,5 @@
 import { ContainmentUnits } from './containment.ts';
-import { undergroundStep, underground as undergroundState, battleTime, dailyRandomOf, daycareStep, dayPeriod, eggCycleLength, hasFieldSystems, isFeebasTile, isShiny, monGender, onMainMatrix, Prng, readSpecialEncounters, RECORD_CAUGHT_FISH, RECORD_FISH_GOT_AWAY, secondsSinceMidnight, seekerStep, SEEKER_SPIN, swarmDailyOf, swarmIndex, type ClockTime, type Id } from '@opensinnoh/core';
+import { undergroundStep, underground as undergroundState, battleTime, dailyRandomOf, daycareStep, dayPeriod, eggCycleLength, hasFieldSystems, isFeebasTile, isShiny, monGender, onMainMatrix, Prng, readSpecialEncounters, RECORD_CAUGHT_FISH, RECORD_FISH_GOT_AWAY, secondsSinceMidnight, seekerStep, SEEKER_SPIN, swarmDailyOf, swarmIndex, type ClockTime, type Id, type Pokemon } from '@opensinnoh/core';
 import {
   LOCALID_CAMERA,
   LOCALID_FOLLOWER,
@@ -281,6 +281,7 @@ export class FieldWorld implements OpenSinnohWorld {
   /** The weather's loop sound and lightning (weather-tasks.ts). */
   private readonly weatherTasks: WeatherTasks;
   private cutIn: HmCutIn | null = null;
+  private shownCutIn: HmCutIn | null = null;
   /** Fly (`fly`): the cut-in, the map change and the landing; the Pokémon that flies. */
   private flyTask: { task: FlyTask; slot: number } | null = null;
   /** Teleport (`teleport`). */
@@ -2649,11 +2650,16 @@ export class FieldWorld implements OpenSinnohWorld {
     if (this.cutIn) throw new Error('world: HM cut-in already running');
     const mon = this.state.party[slot];
     if (!mon) throw new Error(`world: no party Pokémon in slot ${slot}`);
-    this.log.stub('render:hm-cut-in', 'the HM cut-in is not drawn; its cry and timing run headless');
-    this.cutIn = new HmCutIn(mon, this.sound.audio);
+    this.cutIn = this.newCutIn(mon);
   }
 
   hmCutInDone(): boolean { return this.cutIn === null; }
+
+  /** An HM cut-in (the field move's, Teleport's or Sweet Scent's), drawn through `FieldView.fly` while it runs. */
+  private newCutIn(mon: Pokemon): HmCutIn {
+    this.shownCutIn = new HmCutIn(mon, this.sound.audio);
+    return this.shownCutIn;
+  }
 
   /**
    * Fly (decomp FieldMoves_FlyTask, FieldTask_MapChangeFly; fly.ts): the party Pokémon in `slot` flies the player to
@@ -2690,6 +2696,12 @@ export class FieldWorld implements OpenSinnohWorld {
   }
 
   flyScene(): FlySceneView | null {
+    const shown = this.shownCutIn;
+    if (shown) {
+      const view = shown.view(this.state.gender, { species: shown.mon.species, form: shown.mon.form, shiny: isShiny(shown.mon.otId, shown.mon.pid), female: monGender(dexOf(this.reg), shown.mon) === 'female' });
+      if (view) return view;
+      this.shownCutIn = null;
+    }
     if (!this.flyTask) return null;
     const mon = this.state.party[this.flyTask.slot]!;
     return this.flyTask.task.view(this.state.gender, { species: mon.species, form: mon.form, shiny: isShiny(mon.otId, mon.pid), female: monGender(dexOf(this.reg), mon) === 'female' });
@@ -2706,9 +2718,8 @@ export class FieldWorld implements OpenSinnohWorld {
     this.get('zones', dest.zone);
     this.hero.motion = null;
     this.moving = false;
-    this.log.stub('render:hm-cut-in', 'the HM cut-in is not drawn; its cry and timing run headless');
     this.teleportTask = new TeleportTask({
-      cutIn: new HmCutIn(mon, this.sound.audio),
+      cutIn: this.newCutIn(mon),
       se: (name) => this.playSeNamed(name),
       fade: (kind) => this.fade(kind, TELEPORT_FADE_TICKS, 'black'),
       fadeDone: () => this.fadeAnim === null,
@@ -2777,8 +2788,7 @@ export class FieldWorld implements OpenSinnohWorld {
     if (slot !== null) {
       const mon = this.state.party[slot];
       if (!mon) throw new Error(`world: no party Pokémon in slot ${slot}`);
-      this.log.stub('render:hm-cut-in', 'the HM cut-in is not drawn; its cry and timing run headless');
-      cutIn = new HmCutIn(mon, this.sound.audio);
+      cutIn = this.newCutIn(mon);
     }
     this.sweet = new SweetScentTask({
       cutIn,
