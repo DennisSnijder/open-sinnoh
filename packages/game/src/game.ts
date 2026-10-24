@@ -19,6 +19,8 @@ import {
   newGameRecord,
   newFashionCase,
   newSealCase,
+  newTvState,
+  DRESS_UP_PHOTOS,
   storeInBox,
   trainerIdFor,
   type AppHost,
@@ -292,7 +294,7 @@ export function newGameState(record: NewGame, registries: Pick<Registries, 'zone
   const fieldRng = new Prng(fieldSeed(seed));
   const dailyRandom = newDailyRandom(fieldRng.next());
   return {
-    schemaVersion: 22,
+    schemaVersion: 23,
     packs: order.map((p) => ({ ...p })),
     names: { ...(options?.names ?? record.names) },
     gender: options?.gender ?? record.gender,
@@ -342,6 +344,8 @@ export function newGameState(record: NewGame, registries: Pick<Registries, 'zone
     sealCase: newSealCase(),
     contestPhotos: [null, null, null, null, null],
     journal: [],
+    tv: newTvState(),
+    dressUpPhotos: Array.from({ length: DRESS_UP_PHOTOS.count }, () => null),
   };
 }
 

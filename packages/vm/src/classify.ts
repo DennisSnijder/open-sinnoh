@@ -81,7 +81,6 @@ export const TRIAGE: Record<string, Triage> = {
   stop_recording_chatot_cry: { bucket: 'party', milestone: CHATTER, note: 'Chatot cry recording' },
   store_recorded_chatot_cry: { bucket: 'party', milestone: CHATTER, note: 'Chatot cry recording' },
   scr_cmd_1b3: { bucket: 'party', milestone: 'M3 (mailbox)', note: 'opens the mailbox app' },
-  scr_cmd_0a6: { bucket: 'menus', milestone: 'later (Jubilife TV gallery)', note: 'gallery app', zero: [1] },
   scr_cmd_2b2: { bucket: 'menus', milestone: SAVE, note: 'FieldSystem_SaveObjects before a save' },
   scr_cmd_258: { bucket: 'menus', milestone: SAVE, note: 'starts the save-pose player task' },
   scr_cmd_259: { bucket: 'menus', milestone: SAVE, note: 'ends the save-pose player task' },

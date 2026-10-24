@@ -42,6 +42,7 @@ import { formHandlers } from './form-ops.ts';
 import { sideHandlers } from './side-ops.ts';
 import { poffinHandlers } from './poffin-ops.ts';
 import { contestHandlers } from './contest-ops.ts';
+import { galleryHandlers } from './gallery-ops.ts';
 import { sealHandlers } from './seal-ops.ts';
 import { gameCornerHandlers } from './game-corner-ops.ts';
 import { encounterHandlers } from './encounter-ops.ts';
@@ -1027,6 +1028,7 @@ export class Runner implements ScriptRunner {
       ...frontierFieldHandlers(this),
       ...undergroundHandlers(this),
       ...contestHandlers(this),
+      ...galleryHandlers(this),
       ...sealHandlers(this),
       ...gameCornerHandlers(this),
       ...villaHandlers(this),

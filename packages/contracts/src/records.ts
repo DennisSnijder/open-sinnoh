@@ -1100,6 +1100,8 @@ export interface NewGame {
   villa?: import('./villa.ts').VillaTables;
   /** 0.37.0. The journal (`JournalTables`). Absent: no journal (`give_journal` fails loudly, nothing is recorded). */
   journal?: import('./journal.ts').JournalTables;
+  /** 0.41.0. The TV schedule (`TvTables`). Absent: the TV ops fail loudly. */
+  tv?: import('./tv.ts').TvTables;
   /**
    * 0.37.0. The diplomas (decomp applications/diploma.c): the composed 256×192 document sheets (`ui2d`) of the Sinnoh
    * and National Pokédex diplomas and their texts (TEXT_BANK_DIPLOMA: the player line, the two bodies, the credit).

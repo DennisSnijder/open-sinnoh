@@ -1,8 +1,8 @@
 /** Save boundary: strict envelope validation, pack-set match and id resolution. */
-import { ACCESSORIES, JOURNAL_LOCATION_EVENTS, JOURNAL_PAGES, CONTEST_RANKS, CONTEST_TYPES, BERRY_STAGES, newFashionCase, newSealCase, SEALS, type SealCase, POFFIN_CASE_SIZE, POFFIN_TYPES, type FashionCase, BOX_SIZE, COINS_MAX, DW_PLATFORM_FLAGS, DW_PUZZLE_FLAGS, GAME_RECORDS, HALL_OF_FAME_ENTRIES, HALL_OF_FAME_TOTAL_MAX, DEFAULT_DEVICE_OPTIONS, ITEM_WHEEL_SIZE, DEFAULT_WALLPAPERS, DELIVERY_SLOTS, EXTRA_WALLPAPERS, TABLET_NAME_LENGTH, markSeen, MONEY_MAX, newPoketchState, newRoamerState, ROAMING_SLOTS, PLAY_HOURS_MAX, POKETCH_COLORS, POKETCH_DEFAULT_MARKERS, POKETCH_HISTORY_MAX, POKETCH_PEDOMETER_MAX, poketchAppIndex, seenFormOf, setupPidIvs, trainerIdFor, type GameState, type Labels, type MysteryGiftState, WONDER_CARD_SLOTS, type ObjectState, type PoketchState, type Registries, type SaveEnvelope } from '@opensinnoh/contracts';
+import { ACCESSORIES, DRESS_UP_PHOTOS, newTvState, TV, TV_SAVED_TYPES, tvSegmentId, type DressUpPhoto, type TvState, JOURNAL_LOCATION_EVENTS, JOURNAL_PAGES, CONTEST_RANKS, CONTEST_TYPES, BERRY_STAGES, newFashionCase, newSealCase, SEALS, type SealCase, POFFIN_CASE_SIZE, POFFIN_TYPES, type FashionCase, BOX_SIZE, COINS_MAX, DW_PLATFORM_FLAGS, DW_PUZZLE_FLAGS, GAME_RECORDS, HALL_OF_FAME_ENTRIES, HALL_OF_FAME_TOTAL_MAX, DEFAULT_DEVICE_OPTIONS, ITEM_WHEEL_SIZE, DEFAULT_WALLPAPERS, DELIVERY_SLOTS, EXTRA_WALLPAPERS, TABLET_NAME_LENGTH, markSeen, MONEY_MAX, newPoketchState, newRoamerState, ROAMING_SLOTS, PLAY_HOURS_MAX, POKETCH_COLORS, POKETCH_DEFAULT_MARKERS, POKETCH_HISTORY_MAX, POKETCH_PEDOMETER_MAX, poketchAppIndex, seenFormOf, setupPidIvs, trainerIdFor, type GameState, type Labels, type MysteryGiftState, WONDER_CARD_SLOTS, type ObjectState, type PoketchState, type Registries, type SaveEnvelope } from '@opensinnoh/contracts';
 import { addItem, CONDITIONS, createPokemon, MAX_CONDITION, zeroCondition, DAYCARE_SLOTS, DEFAULT_CLOCK, Dex, emptyBag, emptyDaycare, HONEY_SLATHER_MINUTES, HONEY_TREES, isDate, PARTY_SIZE, RADAR_BATTERY_STEPS, RADAR_CHAIN_MAX, RADAR_RECORDS, STATS, UNDERGROUND_LIMITS, type Id, type Pokemon, type UndergroundState } from '@opensinnoh/core';
 import { newBerryPatches } from '@opensinnoh/services';
-import { arr, bool, collectRefs, dict, id, int, lit, nullable, num, obj, ref, str, opt, tagged, tuple, validate, ValidationError, type Schema } from './schema.ts';
+import { arr, bool, collectRefs, dict, id, int, lit, nullable, num, obj, ref, str, opt, tagged, tuple, union, validate, ValidationError, type Schema } from './schema.ts';
 
 const facing = lit('up', 'down', 'left', 'right');
 const prng = obj({ seed: int(0, 0xffffffff) });
@@ -374,7 +374,7 @@ const stateV17Fields: Record<string, Schema> = {
 export const GAME_STATE_V17_SCHEMA: Schema = obj(stateV17Fields, stateV7Check);
 
 /** The state version this build writes (older ones are migrated on load). */
-export const SAVE_SCHEMA_VERSION = 22;
+export const SAVE_SCHEMA_VERSION = 23;
 
 /** Decomp BerryPatch (0.29.0): an empty patch has no berry, stage none and no yield. */
 const berryPatchSchema: Schema = obj(
@@ -686,9 +686,91 @@ const journalPageSchema: Schema = obj({
   trainer: nullable(obj({ trainer: ref('trainers'), zone: ref('zones') })),
 }, (v) => ((v.events as unknown[]).length > JOURNAL_LOCATION_EVENTS ? `more than ${JOURNAL_LOCATION_EVENTS} location events` : undefined));
 
+const stateV22Fields: Record<string, Schema> = { ...stateV21Fields, sealCase: sealCaseSchema, journal: arr(journalPageSchema) };
+const stateV22FullCheck = (v: Record<string, unknown>) => stateV22Check(v) ?? ((v.journal as unknown[]).length > JOURNAL_PAGES ? `more than ${JOURNAL_PAGES} journal pages` : undefined);
+/** Saves of the Seal Case and the journal (v22) before the TV. Only read to migrate. */
+export const GAME_STATE_V22_SCHEMA: Schema = obj({ ...stateV22Fields, schemaVersion: lit(22) }, stateV22FullCheck);
+
+const word = int(0, 0xffff);
+const amityFind = nullable(union(obj({ item: ref('items') }), obj({ accessory: int(0, ACCESSORIES.count - 1) })));
+const segment = (kind: string, fields: Record<string, Schema>) => obj({ kind: lit(kind), ...fields });
+/** contracts `TvSegmentData` (schema v23), by kind. */
+const tvSegmentSchema: Schema = tagged('kind', {
+  'catch-success': segment('catch-success', { species: ref('species'), ball: ref('items'), balls: int(1, 999), nickname: nullable(str()) }),
+  'catch-failure': segment('catch-failure', { balls: int(3, 999), fainted: bool }),
+  fishing: segment('fishing', { rod: ref('items'), species: nullable(ref('species')) }),
+  'hidden-item': segment('hidden-item', { item: ref('items'), location: int(0, 0xffff) }),
+  shopping: segment('shopping', { item: ref('items'), amount: int(10, 999) }),
+  egg: segment('egg', { species: ref('species'), location: int(0, 0xffff) }),
+  'name-change': segment('name-change', { species: ref('species'), nickname: str() }),
+  'ug-treasure': segment('ug-treasure', { item: int(0, 0xffff), amount: int(0, 0xffff) }),
+  safari: segment('safari', { species: ref('species'), caught: int(1, 0xff) }),
+  storage: segment('storage', { species: ref('species'), male: bool }),
+  berries: segment('berries', { berry: ref('items'), amount: int(0, 0xffff) }),
+  'no-berries': segment('no-berries', { berry: ref('items') }),
+  'seal-club': segment('seal-club', { species: ref('species'), seal: int(0, 0xff) }),
+  'villa-empty': segment('villa-empty', {}),
+  villa: segment('villa', { furniture: int(0, 0xff) }),
+  'tower-streak': segment('tower-streak', { species: ref('species'), streak: int(0, 0xffffffff), single: bool }),
+  size: segment('size', { species: ref('species'), size: int(0, 0xffffffff) }),
+  slots: segment('slots', { before: int(0, 0xffffffff), after: int(0, 0xffffffff), spent: int(0, 0xffffffff) }),
+  ribbons: segment('ribbons', { species: ref('species'), nickname: nullable(str()), ribbon: int(0, 0xff), count: int(0, 0xff) }),
+  traps: segment('traps', { trap: int(0, 0xffff), count: int(0, 999) }),
+  bp: segment('bp', { total: int(30, 9999) }),
+  'tower-corner': segment('tower-corner', { win: bool, streak: int(0, 0xffff), word }),
+  'your-pokemon': segment('your-pokemon', { species: ref('species'), nickname: nullable(str()), word }),
+  poketch: segment('poketch', { app: nullable(id), word }),
+  contest: segment('contest', { species: ref('species'), type: int(0, CONTEST_TYPES.length - 1), rank: int(0, CONTEST_RANKS.length - 1), placement: int(1, 4), word }),
+  photo: segment('photo', { species: ref('species'), word }),
+  personality: segment('personality', { type: int(1, 17) }),
+  poffin: segment('poffin', { poffin: int(0, POFFIN_TYPES - 1), word }),
+  amity: segment('amity', { species: ref('species'), nature: int(0, 24), found: amityFind, word }),
+  'frontier-single': segment('frontier-single', { species: ref('species'), nickname: nullable(str()), word }),
+  'in-your-face': segment('in-your-face', { question: lit(1, 2, 3, 4), word }),
+});
+const tvListSchema: Schema = arr(nullable(obj({ data: tvSegmentSchema, plays: int(0, TV.plays) })));
+const TV_LISTS = Object.values(TV_SAVED_TYPES);
+/** contracts `TvState` (schema v23). */
+const tvSchema: Schema = obj(
+  {
+    played: arr(int(1, 0xff)),
+    slotMinutes: int(0, TV.slotMinutes),
+    finished: bool,
+    interviews: tvListSchema,
+    sightings: tvListSchema,
+    records: tvListSchema,
+    pending: obj({
+      contest: nullable(obj({ species: ref('species'), type: int(0, CONTEST_TYPES.length - 1), rank: int(0, CONTEST_RANKS.length - 1), placement: int(1, 4) })),
+      amity: nullable(obj({ species: ref('species'), nature: int(0, 24), found: amityFind })),
+      poffin: nullable(int(0, POFFIN_TYPES - 1)),
+      tower: nullable(obj({ win: bool, streak: int(0, 0xffff) })),
+      safari: nullable(ref('species')),
+      hall: nullable(obj({ species: ref('species'), nickname: nullable(str()) })),
+      bp: int(0, 9999),
+    }),
+  },
+  (v) => {
+    const tv = v as unknown as TvState;
+    if (tv.played.length > TV.played) return `tv.played holds more than ${TV.played}`;
+    const wrong = TV_LISTS.find((k) => tv[k].length !== TV.slots || tv[k].some((r) => r && TV_SAVED_TYPES[tvSegmentId(r.data).type] !== k));
+    return wrong ? `tv.${wrong} must hold ${TV.slots} slots of its own type` : undefined;
+  },
+);
+/** contracts `DressUpPhoto` (schema v23). */
+const dressUpPhotoSchema: Schema = obj(
+  {
+    mon: obj({ species: ref('species'), form: int(0, 255), pid: int(0, 0xffffffff), otId: int(0, 0xffffffff), nickname: nullable(str()), x: int(0, 255), y: int(0, 255) }),
+    trainerName: str(),
+    trainerGender: lit('male', 'female'),
+    dressUp: dressUpSchema,
+    title: nullable(word),
+  },
+  (v) => ((v as unknown as DressUpPhoto).dressUp.accessories.length > DRESS_UP_PHOTOS.accessories ? `a gallery photo keeps at most ${DRESS_UP_PHOTOS.accessories} accessories` : undefined),
+);
+
 export const GAME_STATE_SCHEMA: Schema = obj(
-  { ...stateV21Fields, schemaVersion: lit(SAVE_SCHEMA_VERSION), sealCase: sealCaseSchema, journal: arr(journalPageSchema) },
-  (v) => stateV22Check(v) ?? ((v.journal as unknown[]).length > JOURNAL_PAGES ? `more than ${JOURNAL_PAGES} journal pages` : undefined),
+  { ...stateV22Fields, schemaVersion: lit(SAVE_SCHEMA_VERSION), tv: tvSchema, dressUpPhotos: arr(nullable(dressUpPhotoSchema)) },
+  (v) => stateV22FullCheck(v) ?? ((v.dressUpPhotos as unknown[]).length !== DRESS_UP_PHOTOS.count ? `dressUpPhotos must have ${DRESS_UP_PHOTOS.count} slots` : undefined),
 );
 
 const envelope = (state: Schema): Schema =>
@@ -721,6 +803,7 @@ const OLD_SAVE_SCHEMAS: Record<number, Schema> = {
   19: envelope(GAME_STATE_V19_SCHEMA),
   20: envelope(GAME_STATE_V20_SCHEMA),
   21: envelope(GAME_STATE_V21_SCHEMA),
+  22: envelope(GAME_STATE_V22_SCHEMA),
 };
 
 /**
@@ -750,8 +833,10 @@ type PokemonV18 = Omit<Pokemon, 'condition'>;
 /** v18 (berries, Mystery Gift): no condition, no Poffin Case, no Fashion Case. */
 /** v20 (the contest photos): the Underground without laid traps, a base or their records. */
 type UndergroundV20 = Omit<UndergroundState, 'placedTraps' | 'base' | 'records'> & { records: Omit<UndergroundState['records'], 'trapsTriggered' | 'baseMoves'> };
+/** v22 (the Seal Case, the journal): no TV, no gallery photos. */
+type StateV22 = Omit<GameState, 'schemaVersion' | 'tv' | 'dressUpPhotos'> & { schemaVersion: 22 };
 /** v21 (the Underground's traps and base): no Seal Case. */
-type StateV21 = Omit<GameState, 'schemaVersion' | 'sealCase' | 'journal'> & { schemaVersion: 21 };
+type StateV21 = Omit<StateV22, 'schemaVersion' | 'sealCase' | 'journal'> & { schemaVersion: 21 };
 type StateV20 = Omit<StateV21, 'schemaVersion' | 'underground'> & { schemaVersion: 20; underground?: UndergroundV20 };
 /** v19 (Poffins, the Fashion Case, the Underground): no contest photos. */
 type StateV19 = Omit<StateV20, 'schemaVersion' | 'contestPhotos' | 'contest'> & { schemaVersion: 19 };
@@ -1024,8 +1109,16 @@ export function migrateStateV20(v20: StateV20): StateV21 {
  * (the seal ops were logged stubs); an empty journal (`give_journal` was a logged stub). A save that owns the journal
  * (FLAG_JOURNAL_ACQUIRED) gets today's page at the load (Journal_GetSavedPage), as the DS opens one.
  */
-export function migrateStateV21(v21: StateV21): GameState {
+export function migrateStateV21(v21: StateV21): StateV22 {
   return { ...v21, schemaVersion: 22, sealCase: newSealCase(), journal: [] };
+}
+
+/**
+ * v22 → v23 (the TV, the gallery): an empty TV (no segment could be recorded before: every recorder was a logged stub) whose
+ * slot ends at the next minute, and no gallery photo (the gallery's dress-up was a logged stub).
+ */
+export function migrateStateV22(v22: StateV22): GameState {
+  return { ...v22, schemaVersion: 23, tv: newTvState(), dressUpPhotos: Array.from({ length: DRESS_UP_PHOTOS.count }, () => null) };
 }
 
 export class SaveError extends Error {}
@@ -1048,7 +1141,7 @@ export class PackMismatchError extends SaveError {
 
 /**
  * Validates an untrusted save against the loaded packs. Throws SaveError naming the field.
- * v1–v21 saves are migrated to v22 (`migrateStateV1` … `migrateStateV21`) after validation. `packs` is the current load order; a save must have been made with the same packs and versions, cosmetic packs aside.
+ * v1–v22 saves are migrated to v23 (`migrateStateV1` … `migrateStateV22`) after validation. `packs` is the current load order; a save must have been made with the same packs and versions, cosmetic packs aside.
  */
 export function validateSave(input: unknown, registries: Registries, packs: readonly { id: string; version: string; cosmetic?: true }[], labels: Labels): SaveEnvelope {
   if (typeof input !== 'object' || input === null || (input as { format?: unknown }).format !== 'lantern-nds-save') throw new NotASaveError('This file is not an OpenSinnoh save.');
@@ -1084,7 +1177,8 @@ export function validateSave(input: unknown, registries: Registries, packs: read
   const v19 = v18 ? migrateStateV18(v18) : version === 19 ? (state as StateV19) : null;
   const v20 = v19 ? migrateStateV19(v19) : version === 20 ? (state as StateV20) : null;
   const v21 = v20 ? migrateStateV20(v20) : version === 21 ? (state as StateV21) : null;
-  const env: SaveEnvelope = v21 ? { ...(input as SaveEnvelope), state: migrateStateV21(v21) } : (input as SaveEnvelope);
+  const v22 = v21 ? migrateStateV21(v21) : version === 22 ? (state as StateV22) : null;
+  const env: SaveEnvelope = v22 ? { ...(input as SaveEnvelope), state: migrateStateV22(v22) } : (input as SaveEnvelope);
   // Cosmetic packs (art only) are not part of a save's identity: one made before such a pack was added, or
   // while it was loaded, still loads. A save from before the flag may list one; it is dropped here.
   const cosmetic = new Set(packs.filter((p) => p.cosmetic).map((p) => p.id));
