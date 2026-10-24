@@ -14,12 +14,14 @@
  * - Unimplemented commands log once (`frontier:<op>`) and do nothing, as the field VM's.
  */
 import type { Arg, Command, Id } from '@opensinnoh/core';
-import type { AppRequest, AppResult, FrontierSceneData, FrontierTables, FrontierView, InputFrame, Ui2dAnimation } from '@opensinnoh/contracts';
+import { SplRandom } from '@opensinnoh/battle/particles';
+import type { AppRequest, AppResult, FrontierSceneData, FrontierTables, FrontierView, InputFrame, ParticleSystem, Ui2dAnimation } from '@opensinnoh/contracts';
 import { newGameRecord } from '@opensinnoh/contracts';
 import type { BattleArcade, BattleCastle, BattleFactory, BattleHall, BattleTower } from '@opensinnoh/services';
 import type { Runner } from '../runner.ts';
 import { FRONTIER_VARS } from './commands.ts';
 import { FrontierScene } from './scene.ts';
+import { FrontierParticles } from './effects.ts';
 import { frontierHandlers } from './ops.ts';
 import { towerFrontierHandlers } from './tower-ops.ts';
 import { factoryFrontierHandlers } from './factory-ops.ts';
@@ -57,7 +59,7 @@ const MAX_COMMANDS = 100_000;
 /** Decomp NO_NEW_ENTRY_POINT (ChangeSceneWithinScript). */
 export const NO_NEW_ENTRY_POINT = 0xffff;
 /** Decomp FRONTIER_SCENE_FACTORY_CORRIDOR, _FACTORY_BATTLE_ROOM, _HALL_BATTLE_ROOM: the scenes whose setup runs here. */
-const SCENE = { factoryCorridor: 3, factoryBattleRoom: 4, hallBattleRoom: 10, arcadeBattleRoom: 16 } as const;
+const SCENE = { factoryCorridor: 3, factoryBattleRoom: 4, hallBattleRoom: 10, castleBattleRoom: 12, arcadeCorridor: 15, arcadeBattleRoom: 16 } as const;
 
 export class FrontierRunner {
   readonly tables: FrontierTables;
@@ -81,6 +83,8 @@ export class FrontierRunner {
   arcade: BattleArcade | null = null;
   /** Decomp changeScript and the app's states 5–6: the scene to load and its entry label (null: keep the scripts). */
   private change: { scene: number; entry: Id | null; frames: number } | null = null;
+  /** The SPL random state (decomp gSPLRandomState: one stream, never seeded, so 0 at boot). */
+  private readonly splRandom = new SplRandom(0);
   /** The Battle Tower the challenge runs (decomp FieldFrontierDTO facilityData), shared with the field VM. */
   constructor(
     readonly r: Runner,
@@ -101,30 +105,52 @@ export class FrontierRunner {
   loadScene(sceneId: number, screen: { color: 'black' | 'white'; alpha: number }): void {
     const data = this.sceneData(sceneId);
     // Decomp BattleFrontier unk_24: the loaded 2D characters outlive the scene (FrontierGraphics is rebuilt).
-    this.scene = new FrontierScene(sceneId, data, this.tables, (sheet) => this.animations(sheet), screen, this.scene?.loaded);
+    const particles = new FrontierParticles(this.splRandom, (n) => this.particleSystem(n));
+    this.scene = new FrontierScene(sceneId, data, this.tables, (sheet) => this.animations(sheet), screen, particles, this.scene?.loaded);
     this.textBank = data.textBank;
     if (data.setup) this.setupScene(sceneId);
     if (data.bgm) this.r.audio.playBgm(data.bgm);
   }
 
   /**
-   * Decomp sFrontierScenes' setupFunc: the Factory corridor's BG2 under BG3 (BattleFactoryCorridorSceneSetup), the Hall
-   * battle room's BG2 off and blended 8:9 over the room (BattleHallBattleRoomSceneSetup, ov104_0223D9E4's
-   * G2_SetBlendAlpha). Their animations (the Hall lights' tilemap and palette tasks), the Factory room's message blend
-   * and the other facilities' setups are logged, not drawn.
+   * Decomp sFrontierScenes' setupFunc: the Factory corridor's BG2 under BG3 (BattleFactoryCorridorSceneSetup); the Hall
+   * battle room's BG2 off and blended 8:9 over the room (G2_SetBlendAlpha) and its light animation (ov104_0223D9E4: BG3's
+   * two frames; its palette task swaps BG palette 6, which no layer here reads: BG3 and BG2 use extended palettes); the
+   * Arcade battle room's BG2 off until an effect shows; the Castle battle room's BG2 and particles under the characters. The
+   * BG0 blends of the Factory, Castle and Arcade battle rooms (G2_SetBlendAlpha with BG0 first) are the particles' own
+   * translucency. The Arcade corridor's setup is empty; the Wi-Fi facility selector's effects are not built (no Wi-Fi).
    */
   private setupScene(sceneId: number): void {
-    if (sceneId === SCENE.factoryCorridor) {
-      this.scene.fgBelow = true;
-      return;
+    switch (sceneId) {
+      case SCENE.factoryCorridor:
+        this.scene.fgBelow = true;
+        return;
+      case SCENE.hallBattleRoom: {
+        this.scene.fgHidden = true;
+        this.scene.fgBlend = { a: 8, b: 9 };
+        const lights = this.tables.effects?.hallLights;
+        if (lights) this.scene.startHallLights(lights);
+        else this.r.log.stub('frontier:hall-lights', 'the pack has no Hall battle room light frames (FrontierTables.effects)');
+        return;
+      }
+      case SCENE.arcadeBattleRoom:
+        this.scene.fgHidden = true;
+        return;
+      case SCENE.castleBattleRoom:
+        this.scene.spritesOnTop = true;
+        return;
+      case SCENE.factoryBattleRoom:
+      case SCENE.arcadeCorridor:
+        return;
+      default:
+        this.r.log.stub(`frontier:scene-setup:${sceneId}`, `frontier scene ${sceneId}'s setup effects are not built`);
     }
-    if (sceneId === SCENE.hallBattleRoom) {
-      this.scene.fgHidden = true;
-      this.scene.fgBlend = { a: 8, b: 9 };
-    }
-    // Decomp BattleArcadeBattleRoomSceneSetup: BG2 (the effect screen) off until an effect shows.
-    if (sceneId === SCENE.arcadeBattleRoom) this.scene.fgHidden = true;
-    this.r.log.stub(`frontier:scene-setup:${sceneId}`, `frontier scene ${sceneId}'s setup effects (palette tasks, blends) are not drawn`);
+  }
+
+  /** A frontier_particle.narc particle system (decomp FrontierScrCmd_InitParticleSystem's narcIdx). */
+  private particleSystem(narcIdx: number): ParticleSystem {
+    for (const p of this.r.registries.particleSystems.values()) if (p.archive === 'frontier' && p.sourceIndex === narcIdx) return p;
+    throw new Error(`frontier: no frontier particle system ${narcIdx} in the packs`);
   }
 
   /** Decomp BattleFrontier_RunSubApp with an application (the Factory's and the Hall's apps): the script waits for it. */

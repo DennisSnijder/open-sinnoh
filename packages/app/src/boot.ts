@@ -164,7 +164,7 @@ export async function createSession(
       drawRadar(ctx, game.world.undergroundView(), font, fieldScale, game.state.tick, (x, z) => renderer.screenOf?.(x, z) ?? null);
       const view = game.scripts.view();
       const scale = frame.scale;
-      drawFrontier(ctx, view.frontier, frame);
+      drawFrontier(ctx, view.frontier, frame, font);
       // drawScriptOverlay draws in the bottom frame: moved onto `frame`.
       const bottom = bottomFrame(ctx.canvas, scale);
       ctx.save();

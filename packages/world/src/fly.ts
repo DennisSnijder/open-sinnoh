@@ -129,7 +129,10 @@ interface Bird {
   sprite: Sprite;
 }
 
-/** The cut-in of Fly (HMCutIn_StartTask with isFly, sCutInTaskFuncsFly). */
+/**
+ * The HM cut-in (HMCutIn_StartTask): Fly's (isFly, sCutInTaskFuncsFly), or with `fly` false every other field move's
+ * (sCutInTaskFuncs), which shares the first ten states and then closes the window (HMCutIn_WindowShrinkY).
+ */
 export class FlyCutIn {
   private state = 0;
   private subState = 0;
@@ -151,7 +154,10 @@ export class FlyCutIn {
   private pending: (() => void)[] = [];
   finished = false;
 
-  constructor(private readonly h: FlyHost) {}
+  constructor(
+    private readonly h: FlyHost,
+    private readonly fly = true,
+  ) {}
 
   tick(): void {
     for (const start of this.pending.splice(0)) start();
@@ -177,6 +183,7 @@ export class FlyCutIn {
   /** One call of the current state function; true to call again this tick. */
   private cutIn(): boolean {
     const w = this.window;
+    if (!this.fly && this.state >= 10) return this.closeWindow();
     switch (this.state) {
       case 0: // CutIn_Init: the window (empty), the resources transfer on the next frame
         w.on = true;
@@ -329,6 +336,37 @@ export class FlyCutIn {
 
   private birdActive = false;
 
+  /** sCutInTaskFuncs after HMCutIn_SlideMonOut. */
+  private closeWindow(): boolean {
+    const w = this.window;
+    switch (this.state) {
+      case 10: // HMCutIn_WindowShrinkY
+        w.y1 = Math.min(w.y1 + w.delta, fx(96 - 8));
+        w.y2 = Math.max(w.y2 - w.delta, fx(96 + 8));
+        w.delta = Math.min(w.delta + 0x4000, fx(32));
+        if (w.y1 === fx(88) && w.y2 === fx(104)) {
+          // CutIn_SetTaskUnk_254Done: the player sprite keeps the visibility it has.
+          this.showHide = false;
+          this.state++;
+        }
+        return false;
+      case 11: // HMCutIn_DeleteSprites
+        this.mon = null;
+        this.wind = [];
+        this.player.visible = false;
+        this.state++;
+        return false;
+      case 12: // HMCutIn_WindowTaskDone
+        w.on = false;
+        this.pattern = false;
+        this.state++;
+        return false;
+      default: // HMCutIn_Done
+        this.finished = true;
+        return false;
+    }
+  }
+
   /** Fly_PrepareBirdForDescent. */
   private prepareDescent(): void {
     const b = this.bird!;
@@ -439,7 +477,10 @@ export class FlyLanding {
   private pending: (() => void)[] = [];
   finished = false;
 
-  constructor(private readonly h: FlyHost) {}
+  constructor(
+    private readonly h: FlyHost,
+    private readonly fly = true,
+  ) {}
 
   tick(): void {
     for (const start of this.pending.splice(0)) start();

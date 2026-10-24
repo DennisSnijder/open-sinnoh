@@ -138,3 +138,53 @@ test('sys-contest-practice-acting in the app, with its screens at each screensho
   expect(seen).toEqual(['acting-move', 'acting-judge', 'acting-stage']);
   expect(errors).toEqual([]);
 });
+
+/**
+ * Taunt's contest branch (script_funcs_4.c BattleAnimSpriteFunc_Taunt): the practice acting replay to the first pick,
+ * with Staravia knowing Taunt, then frame by frame through the acts. While Staravia performs, the hand shows at (128, 80)
+ * mirrored, and the stage canvas there changes from the frame before the animation began.
+ */
+test('Taunt on the contest stage: the mirrored hand at the contest spot', async () => {
+  test.setTimeout(900_000);
+  const project = test.info().project.name;
+  const base = pageDriver(page, SHOTS, `${project}-acting-taunt`);
+  const lines = readReplay('sys-contest-practice-acting.replay').split('\n');
+  const end = lines.findIndex((l) => l.includes('screenshot acting-stage'));
+  expect(end).toBeGreaterThan(0);
+  const text = lines
+    .slice(0, end)
+    .map((l) => (l.startsWith('party 0 ') ? 'party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_TAUNT platinum:MOVE_QUICK_ATTACK' : l))
+    .join('\n');
+  const driver = { ...base, screenshot: async () => '' };
+  const result = await runReplay(driver, text, { registries, seed: 1, name: 'sys-contest-practice-acting.replay (Taunt)', resolve: resolveReplay, repeat: false });
+  expect(result.error).toBeUndefined();
+  const region = () =>
+    page.evaluate(() => {
+      const c = document.querySelector('.acting-canvas') as HTMLCanvasElement;
+      return [...c.getContext('2d')!.getImageData(112, 64, 32, 32).data];
+    });
+  let before: number[] | null = null;
+  let hand: { x: number; y: number; scaleX: number; alpha: number } | null = null;
+  for (let i = 0; i < 3000 && !hand; i++) {
+    await page.evaluate(() => window.openSinnohGame!.advance(1));
+    const v = await acting();
+    if (v.performer?.contestant !== 0) continue;
+    if (!v.anim) {
+      await frame();
+      before = await region();
+      continue;
+    }
+    const cell = v.anim.sprites.find((s) => s.kind === 'cell' && s.alpha > 0.8);
+    if (cell?.kind === 'cell') hand = cell;
+  }
+  expect(hand).not.toBeNull();
+  expect(before).not.toBeNull();
+  expect(hand).toMatchObject({ x: 128, y: 80 });
+  expect(hand!.scaleX).toBeLessThan(0);
+  await frame();
+  const after = await region();
+  const changed = after.filter((c, i) => Math.abs(c - before![i]!) > 24).length;
+  expect(changed).toBeGreaterThan(40);
+  await base.screenshot!('acting-taunt');
+  expect(errors).toEqual([]);
+});

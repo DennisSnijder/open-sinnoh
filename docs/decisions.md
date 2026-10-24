@@ -286,6 +286,9 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   full ratio.
 - **One WebGL renderer per canvas;** a disposed field frees its scene. Cinematic scene models load on
   first use, not at each mount.
+- **The generic HM cut-in is Fly's cut-in without Fly's states** (one `FlyCutIn`, `fly` false: sCutInTaskFuncs closes
+  the window after the slide), drawn through the same `FieldView.fly`; its timing (cry on tick 36, done on tick 59)
+  is the one the field moves already waited on.
 - **Cinematics draw the authored scenes** (ships, Spear Pillar, the Distortion World entry, the title)
   from their own models, cameras and animations, with no procedural stand-ins. Where a scene used both DS
   screens it is recomposed as one; sub-screen-only parts are left out.
@@ -361,6 +364,10 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   DS frame a tick. A script plays only when everything its static walk reaches is implemented; otherwise
   the battle keeps the generic hit and logs it. Choreography is an independent approximation, not a
   pixel-exact reproduction.
+- **The shiny sparkle** is common animation 11 (`shiny`) on the animation VM, played once a shiny Pokémon is in place
+  (wild after its slide-in, a send-out after the flash and any capsule seals), before the healthbox slides in. The DS
+  runs it beside the healthbox and plays a doubles pair's at once; we play them in turn. Like the DS
+  (BattleDisplay_PlayMoveAnimation), it plays with the battle scene off.
 - **Layout:** a framed window over the dimmed field on big landscape views, full screen on phones; scene
   and card composed at the largest whole-pixel scale.
 - **Items the sim lacks** are known inert (their effect acts outside the battle), not stubs.
@@ -467,8 +474,14 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   state`, as the turns' lengths depend on the rivals' moves.
 - **Contest move animations** run on the battle animation VM in its contest mode (`AnimDeps.contest`) through
   `AppHost.contestAnimation`, loaded with the battle engine's chunk; the contest app does not tick until it is in, so
-  a run with animations never differs from one that loaded late. A script that reaches a sprite callback whose contest
-  branch is not ported plays no animation (logged and counted).
+  a run with animations never differs from one that loaded late. The sprite callbacks with a contest branch
+  (StringShot, Trick, Taunt, Fissure) follow the decomp in both modes, so a contest misses only what a battle misses
+  (the nine moves battles miss too: Surf, Muddy Water, Night Shade, Transform, Role Play, and the BG-layer Pokémon of
+  Acid Armor, Sketch, Spite and Extrasensory; logged and counted).
+- **The dancers wear their outfits** (decomp ov17_0224A134: each dancer is its dress-up record, drawn without the
+  backdrop and scaled, turned and shaded about the Pokémon's centre): the visual round's outfits in a full contest, none
+  in the Dance Competition alone (sub_02095338 clears them). The acting round draws the battle back picture, as the DS
+  does, with no accessories.
 - **The acting screen** is the DS main screen as one canvas; the touch screen's move and judge menus are a card over
   the stage while the player chooses (its own place under the stage on phones in portrait), and the judge buttons
   carry the judges' voltage meters, which the card covers.
@@ -509,6 +522,14 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   A stops the board too. Its effects reach the battle as `FrontierBattle.weather` and `.sleep` (the DS's sleep turns)
   besides the parties. Frontier scripts' A/B waits show in `FrontierView.waitsForAB`, so replays' `advance text` presses
   through them, and loaded characters stay loaded across scene changes (the decomp keeps them in one table).
+- **Frontier scene effects run on the battle's SPL port** (`@opensinnoh/battle/particles`, a subpath without the battle
+  engine, so the frontier VM can wait on emitters headless): the scene owns up to 8 particle systems from
+  `frontier_particle.narc`, drawn then updated each frame, on one SPL random stream seeded 0 (the DS's global is never
+  seeded). The Brain cut-in is its own state machine in the scene (the decomp's task, banner and palette tasks), drawn
+  from field_encounteffect's art; it starts the Brain music, which the battle then keeps instead of restarting. The
+  Factory door light is a BG3 patch per palette step and the Hall lights a second BG3 frame, both imported. The Hall
+  room's palette task changes a standard BG palette no 8bpp layer reads, so it is not modelled. The Castle room's BG2,
+  particles and characters share priority 2: BG2 and the particles go under the characters there.
 - **Underground (solo):** the Explorer Kit, mining from ROM tables, spheres, vendors, fossils, traps and the
   secret base. Seeds come from the clock and the trainer id, not ticks, so boards are the same whatever
   replays wait. No link play: other players' traps, bases and flags have no stand-in.

@@ -224,6 +224,14 @@ const TEXTS: Record<string, string> = {
   DanceCompetition_Text_AnnounceLeadingMon: 'Ahead: {var 0} and {var 1}.',
 };
 
+/** Opponents 1–3 wear outfit 1, 2 or 0 for theme 0 (only their `dressUps` are read here). */
+const OPPONENTS = [0, 1, 2, 0].map((d) => ({ dressUps: [d] })) as never[];
+const DRESS_UPS = [
+  { accessories: [], monPriority: 0, backdrop: 0 },
+  { accessories: [{ accessory: 7, x: 120, y: 90, priority: 2 }, { accessory: 8, x: 110, y: 140, priority: -1 }], monPriority: 0, backdrop: 3 },
+  { accessories: [{ accessory: 9, x: 128, y: 50, priority: 0 }], monPriority: 0, backdrop: 0 },
+];
+
 describe('the round on the fixture pack', () => {
   const root = join(import.meta.dirname, '../../../../packs/fixture');
   const pack = readPackFolder((p) => (existsSync(join(root, p)) ? readFileSync(join(root, p), 'utf8') : undefined), 'packs/fixture');
@@ -231,15 +239,19 @@ describe('the round on the fixture pack', () => {
   const record = [...registries.newGame.values()][0]!;
   const reg = {
     ...registries,
-    newGame: new Map([[record.id, { ...record, contests: { opponents: [], judges: [], dressUps: [], themes: [], playerGfx: { male: 0, female: 0 }, playerSprite: { male: record.id, female: record.id }, dance: TABLES } }]]),
+    newGame: new Map([[record.id, { ...record, contests: { opponents: OPPONENTS, judges: [], dressUps: DRESS_UPS, themes: [], playerGfx: { male: 0, female: 0 }, playerSprite: { male: record.id, female: record.id }, dance: TABLES } }]]),
     texts: new Map([...registries.texts, ...CONTEST_DANCE_TEXTS.map((n) => [`fixture:${n}` as Id, { id: `fixture:${n}` as Id, text: TEXTS[n] ?? n.slice(26) }] as const)]),
     sequences: new Map([...registries.sequences, ...TABLES.songs.map((s) => [s.sequence, { id: s.sequence, data: 'fixture:x' as Id, bank: 'fixture:BANK_CHIPTUNE' as Id, volume: 100, channelPriority: 0, playerPriority: 0, player: 'fixture:PLAYER_BGM' as Id, frames: 1500 * 192 / 30 }] as const)]),
   } as unknown as Registries;
   const state = newGameState(record, registries, loaded.order, 1);
+  /** The player's photo in an official session (photo coordinates: the Pokémon's centre is (128, 141 + its offset)). */
+  const PHOTO = { accessories: [{ accessory: 5, x: 100, y: 60, priority: 1 }], monPriority: 0, backdrop: 0 };
   const species = ['fixture:SPECIES_MOSSLET', 'fixture:SPECIES_SKYLET', 'fixture:SPECIES_BURROWBIT', 'fixture:SPECIES_MOSSLET'] as Id[];
-  const session = (seed: number, mode: 'official' | 'practice' = 'official'): ContestSession => ({
-    mode, rank: 0, type: 0, competition: mode === 'official' ? 2 : 5, partySlot: 0, theme: 0, rng: seed, judges: [0, 1, 2], result: null, placement: null, dressUp: null,
-    entrants: species.map((s, i) => ({ opponent: i ? i : null, trainerName: `T${i}`, gender: 'male', mon: setupPokemon(state, registries, 0, s, 10), fame: 1, gfx: 0, aiLevel: i % 4 })),
+  /** A full contest has outfits, so its Pokémon need pictures (the fixture draws Mosslet, Dripling and Emberkit). */
+  const pictured = ['fixture:SPECIES_MOSSLET', 'fixture:SPECIES_DRIPLING', 'fixture:SPECIES_EMBERKIT', 'fixture:SPECIES_MOSSLET'] as Id[];
+  const session = (seed: number, mode: 'official' | 'practice' = 'official', kinds = mode === 'official' ? pictured : species): ContestSession => ({
+    mode, rank: 0, type: 0, competition: mode === 'official' ? 2 : 5, partySlot: 0, theme: 0, rng: seed, judges: [0, 1, 2], result: null, placement: null, dressUp: mode === 'official' ? PHOTO : null,
+    entrants: kinds.map((s, i) => ({ opponent: i ? i : null, trainerName: `T${i}`, gender: 'male', mon: setupPokemon(state, registries, 0, s, 10), fame: 1, gfx: 0, aiLevel: i % 4 })),
     scores: { condition: [10, 10, 10, 10], dressUp: [0, 0, 0, 0], dance: null, acting: null },
   });
   const idle: InputFrame = { held: [], pressed: [], touch: null };
@@ -295,6 +307,20 @@ describe('the round on the fixture pack', () => {
     expect(views.some((v) => v.grades.some((g) => g.grade === 0))).toBe(true);
     expect(views.some((v) => v.banner === 'Lead 3!')).toBe(true);
     expect(views.some((v) => v.dancers.some((d) => d.shade === 16))).toBe(true);
+  });
+
+  it('dresses the dancers in their visual-round outfits in a full contest, about their centres; a practice dance in none', () => {
+    const offset = (id: Id) => registries.pokemonSprites.get(id)!.forms[0]!.front.yOffset;
+    const official = dance(session(4), 'keys').views;
+    for (const v of [official[0]!, official.at(-1)!]) {
+      const by = new Map(v.dancers.map((d) => [d.id, d]));
+      // The player's photo; entrant 1 wears outfit 1 (back to front by priority: the −1 behind the Pokémon), 2 outfit 2, 3 none.
+      expect(by.get(0)).toMatchObject({ accessories: [{ accessory: 5, x: 100 - 128, y: 60 - 141 - offset(pictured[0]!) }], monAt: 0 });
+      expect(by.get(1)).toMatchObject({ accessories: [{ accessory: 8, x: 110 - 128, y: 140 - 141 - offset(pictured[1]!) }, { accessory: 7, x: 120 - 128, y: 90 - 141 - offset(pictured[1]!) }], monAt: 1 });
+      expect(by.get(2)!.accessories.map((a) => a.accessory)).toEqual([9]);
+      expect(by.get(3)!.accessories).toEqual([]);
+    }
+    expect(dance(session(4, 'practice'), 'keys').views.every((v) => v.dancers.every((d) => !d.accessories.length && d.monAt === 0))).toBe(true);
   });
 
   it('an official dance names the leader at the end; a practice does not', () => {

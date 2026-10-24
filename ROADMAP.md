@@ -35,7 +35,7 @@ experience, EVs and money.
 - The ROM's trainer AI bytecode, ported.
 - Bag, switching, level-up and move learning, evolution, blackout.
 - ROM battle graphics, the single-screen command card, the doubles target screen.
-- Move animations from the ROM's particle data and animation scripts (about 98% of moves).
+- Move animations from the ROM's particle data and animation scripts (about 98% of moves); the shiny sparkle.
 - Safari battles in the Great Marsh.
 
 **Menus and services.** Start menu, party, summary, bag, PC boxes, marts, the Pokémon Center, the naming keyboard,
@@ -45,14 +45,16 @@ the trainer card, the Pokédex, the Town Map and Fly, all 25 Pokétch apps, opti
 - Poffins, condition, Feebas into Milotic, the Fashion Case, Amity Square.
 - Super Contests, offline: reception, practice, rivals and judges from the ROM, final scoring, results, ribbons, prizes,
   Master flags and winner photos; the visual round (dress-up, judging, the photo frames); the Dance Competition
-  (songs, lead and backup steps, grading, the NPC dancers, the stage, the music on the beat); the acting round (the
-  ROM's effect, voltage and AI tables, the judges, hearts and voltage meters, the move animations in the animation VM's
-  contest mode); all behind one seam.
+  (songs, lead and backup steps, grading, the NPC dancers in their outfits, the stage, the music on the beat); the acting
+  round (the ROM's effect, voltage and AI tables, the judges, hearts and voltage meters, the move animations in the
+  animation VM's contest mode, every script a battle plays); all behind one seam.
 - The Underground, solo: the Explorer Kit, the field and radar, mining, spheres, vendors, fossil revival; traps (laying,
   the day's hidden traps, their effects and escape games, digging them up, the touch radar); the Digger Drill and the
   secret base (entering, leaving, moving it, the goods PC, decorating, the normal flag).
 - The Battle Tower: singles, doubles and multi, the Battle Salon partners, Palmer, BP and the exchange, on a second
-  script VM for the Battle Frontier's scenes.
+  script VM for the Battle Frontier's scenes; the Frontier Brains' cut-ins, the scenes' particle effects and room
+  lights from the ROM.
+- The generic HM cut-in (the band, the Pokémon, the player) from the ROM's art.
 - The Battle Factory (rentals and trades, Level 50 and Open Level, Thorton) and the Battle Hall (the type-rank
   board, one Pokémon, Argenta, the species records and the record keeper), singles and doubles.
 - The Battle Castle (Castle Points, healing and rentals, scouting the opponent, ranks, Darach) and the Battle Arcade
@@ -89,13 +91,12 @@ Pokémon, follower talk and the HGSS look.
 
 ## Next
 
-- **Battle Frontier:** the records app; the facilities' particle effects; the Castle app's flag marks for bought
-  stats and moves.
-- **Contests:** the dancers' outfits.
+- **Battle Frontier:** the records app; the Castle app's flag marks for bought stats and moves; the Factory, Hall,
+  Castle and Arcade pre-battle wipes (FrontierScrCmd_3F types 1–5, drawn as the Tower's).
 - **Underground:** the placed traps' and tools' drawn details (the slide's sprite pose, the rock's floor shadow, the
   OK emote), the transition's hole and descent animations.
 - **Town extras:** the TV's traps record (and its group segments, once groups exist); the capsule editor's Test throw.
-- **Polish:** the last move animations, the Frontier Brain cut-ins, the generic HM cut-in art.
+- **Polish:** the last move animations (nine, VM-wide).
 - **Modding 1.0:** script eject to TypeScript, a mod sandbox, mod docs, and Gen 4 extension points (3D model
   replacement, mod Pokétch apps, camera hooks).
 - **HeartGold/SoulSilver** as a second base pack: Johto and Kanto, the Pokégear, Apricorns, its Safari Zone and

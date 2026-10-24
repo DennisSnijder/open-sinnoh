@@ -1521,9 +1521,10 @@ export interface ParticleSystem {
   sourceIndex: number;
   /**
    * The archive when it is not `waza_particle.narc`: `ball` = `ball_particle.narc`, the battle send-out effect's
-   * default ball bursts and seals (docs/research/seals.md §6).
+   * default ball bursts and seals (docs/research/seals.md §6); 0.43.0 `frontier` = `frontier_particle.narc`, the Battle
+   * Frontier scenes' (decomp FrontierScrCmd_InitParticleSystem's narcIdx).
    */
-  archive?: 'ball';
+  archive?: 'ball' | 'frontier';
   textures: Id;
   /** Per texture: the SPL texture's repeat and flip bits (param bits 12–15) and whether colour 0 is transparent. */
   textureParams: number[];

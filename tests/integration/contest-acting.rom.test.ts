@@ -10,7 +10,7 @@ import type { Button, Id } from '@opensinnoh/core';
 import { CountingStubLog, createGame } from '@opensinnoh/game';
 import { createWorld } from '@opensinnoh/world';
 import { createScriptRunner } from '@opensinnoh/vm';
-import { contestAnimCoverage, createBattle, createContestMoveAnimation } from '@opensinnoh/battle';
+import { animSupport, contestAnimCoverage, createBattle, createContestMoveAnimation } from '@opensinnoh/battle';
 import { actingRules, createApp, createContestRound } from '@opensinnoh/menus';
 import { conditionPoints, contestRandom, newContest } from '@opensinnoh/services';
 import { romSlice } from '../rom.ts';
@@ -78,13 +78,19 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('Super Contests: the acting rou
     }
   });
 
-  it('plays move animations in contest mode: most move scripts run, the rest are counted', () => {
+  it('plays move animations in contest mode: every script a battle plays, the rest are counted', () => {
     const reg = game().registries;
     const cov = contestAnimCoverage(reg);
     expect(cov.moves).toBeGreaterThan(450);
-    // Report the coverage (the battle plays its own; the contest's differs by the contest-only sprite callbacks).
     console.log(`contest move animations: ${cov.real}/${cov.moves}; missing ${JSON.stringify([...cov.missing].sort((a, b) => b[1] - a[1]).slice(0, 12))}`);
-    expect(cov.real / cov.moves).toBeGreaterThan(0.6);
+    // No contest-only gap: a script misses in a contest only what it misses in a battle too (Surf's, Night Shade's,
+    // the BG-layer Pokémon of Acid Armor, Sketch, Spite, Extrasensory …: VM-wide work).
+    for (const a of reg.battleAnimations.values()) {
+      if (a.common !== undefined) continue;
+      const battle = new Set(animSupport(a, reg));
+      expect(animSupport(a, reg, false, true).filter((m) => !battle.has(m)), a.move).toEqual([]);
+    }
+    expect(cov.real / cov.moves).toBeGreaterThan(0.97);
     // One animation end to end: the performer moves (Tackle) and the run ends.
     const run = createContestMoveAnimation({ move: P('MOVE_TACKLE'), attacker: { species: P('SPECIES_STARAVIA'), form: 0 }, defender: { species: P('SPECIES_PIKACHU'), form: 0 }, effectChance: 0, seed: 1 }, { registries: reg, log: new CountingStubLog(() => {}) });
     expect(run).not.toBeNull();
@@ -98,6 +104,29 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('Super Contests: the acting rou
     }
     expect(ticks).toBeGreaterThan(10);
     expect(moved).toBe(true);
+  });
+
+  it('the contest branches of String Shot, Trick, Fissure and Taunt draw their OBJs at the contest spots', () => {
+    const reg = game().registries;
+    // Where the first OBJ of each move appears (script_funcs_0.c StringShot, Trick; script_funcs_3.c Fissure; script_funcs_4.c Taunt).
+    const first: Record<string, (s: { x: number; y: number; scaleX: number }) => void> = {
+      MOVE_STRING_SHOT: (s) => expect([s.x, s.y]).toEqual([80, 42 + 32]),
+      MOVE_TRICK: (s) => expect(s.x).toBe(160),
+      MOVE_FISSURE: (s) => expect(s.y).toBe(32),
+      MOVE_TAUNT: (s) => expect(s.scaleX).toBeLessThan(0),
+    };
+    for (const [move, check] of Object.entries(first)) {
+      const run = createContestMoveAnimation({ move: P(move), attacker: { species: P('SPECIES_STARAVIA'), form: 0 }, defender: { species: P('SPECIES_PIKACHU'), form: 0 }, effectChance: 0, seed: 1 }, { registries: reg, log: new CountingStubLog((key) => { throw new Error(key); }) });
+      expect(run, move).not.toBeNull();
+      let seen: { x: number; y: number; scaleX: number } | null = null;
+      while (!run!.done) {
+        run!.tick();
+        const cell = run!.view().sprites.find((s) => s.kind === 'cell');
+        if (!seen && cell?.kind === 'cell') seen = cell;
+      }
+      expect(seen, move).not.toBeNull();
+      check(seen!);
+    }
   });
 
   it('a whole practice acting round on keys: four turns, the AI, the voltage, the points; the same seed twice the same', () => {

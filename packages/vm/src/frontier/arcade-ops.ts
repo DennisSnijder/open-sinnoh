@@ -308,9 +308,14 @@ export function arcadeFrontierHandlers(): Record<string, FrontierHandler> {
         case BA.setNameOfAffectedTrainer:
           f.slots[arg1] = arcadeCategory(t.effect) === ARCADE_CATEGORY.foe ? f.r.textOf(f.tables.trainers[t.trainerAt(arg2)]!.name) : plainMarkup(f.r.state.names.player);
           break;
-        // Decomp CreateEmitter: an SPL particle emitter (not drawn).
+        // Decomp CreateEmitter on particle system 0 (resource arg1); EmitterCallback with arg2 1 mirrors it to the
+        // left: the axis's x negated, the emitter at (-1, 0, 0).
         case BA.createEmitter:
-          f.r.log.stub('frontier:particles', 'the frontier particle effects (SPL) are not drawn');
+          f.scene.particles.createEmitter(0, arg1, (e) => {
+            if (arg2 !== 1) return;
+            e.axis = [-e.axis[0], e.axis[1], e.axis[2]];
+            ([-4096, 0, 0] as const).forEach((v, i) => e.setPos(i as 0 | 1 | 2, v));
+          });
           break;
         case BA.loadTrainers:
           loaded.set(t, [t.trainerAt(0), t.trainerAt(1)]);

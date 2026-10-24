@@ -9,6 +9,7 @@
  */
 import type { FrontierActorView, FrontierObjectView, FrontierSceneData, FrontierTables, FrontierView, Movement, Ui2dAnimation } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
+import type { BrainCutIn, FrontierParticles } from './effects.ts';
 
 /** Decomp DIR_NORTH..DIR_EAST, the 2D objects' directions. */
 const DIRS = ['up', 'down', 'left', 'right'] as const;
@@ -310,6 +311,15 @@ export class FrontierScene {
   private readonly actorDarken = new Map<number, number>();
   /** The Arcade's Pokémon icons and item marks (BattleArcade_CreateMonSprites), by side and slot (`p0`, `o2`). */
   readonly icons = new Map<string, NonNullable<FrontierView['icons']>[number]>();
+  /** A Frontier Brain's cut-in while it runs (FrontierScrCmd_PlayFrontierBrainEncounterEffect), with its view. */
+  brainCutIn: { effect: BrainCutIn; view: () => NonNullable<FrontierView['brainCutIn']> | null } | null = null;
+  /** BattleCastleBattleRoomSceneSetup: BG0 (the particles) and BG2 at the sprites' priority, so under them. */
+  spritesOnTop = false;
+  /**
+   * The Hall battle room's light animation (ov104_0223DB48): BG3 swaps to the other frame's map and characters every
+   * 13 frames, starting with the room's own.
+   */
+  private hallLights: { frames: [Id, Id]; count: number; next: number; shown: Id } | null = null;
 
   constructor(
     readonly id: number,
@@ -318,6 +328,8 @@ export class FrontierScene {
     private readonly animationsOf: (sheet: Id) => readonly Ui2dAnimation[],
     /** The screen when the scene starts (the field faded out before the frontier; a sub-app returns faded out too). */
     fade: { color: 'black' | 'white'; alpha: number },
+    /** The scene's particle systems (decomp FrontierGraphics' particleSys, new with each scene). */
+    readonly particles: FrontierParticles,
     loaded: Set<number> = new Set(),
   ) {
     this.loaded = loaded;
@@ -498,8 +510,16 @@ export class FrontierScene {
     this.actorDarken.clear();
   }
 
+  /** Starts the Hall battle room's light animation over BG3's own frame and `other`. */
+  startHallLights(other: Id): void {
+    if (!this.data.bg) throw new Error('frontier: the Hall lights on a scene without BG3');
+    this.hallLights = { frames: [this.data.bg.sheet, other], count: 0, next: 0, shown: this.data.bg.sheet };
+  }
+
   /** One frame in the decomp's SysTask order (see the module comment). */
   step(): void {
+    // The Brain's cut-in (priority 1000) runs before the room's tasks.
+    this.brainCutIn?.effect.step();
     // Decomp UpdateCorridorFloorBG: BG2 one px further down a frame, back to 0 past 255.
     if (this.corridorFloor) this.fgScroll.y = this.fgScroll.y >= 255 ? 0 : this.fgScroll.y + 1;
     const shake = this.shakeTask;
@@ -523,11 +543,21 @@ export class FrontierScene {
     for (const a of this.actors) a?.updateSprite();
     const followed = this.actors[CAMERA_SLOT];
     if (followed) this.camera = { x: followed.position.x - CAMERA.x, y: followed.position.y - CAMERA.y };
+    const lights = this.hallLights;
+    if (lights) {
+      if (lights.count < 12) lights.count++;
+      else {
+        lights.count = 0;
+        lights.shown = lights.frames[lights.next]!;
+        lights.next ^= 1;
+      }
+    }
     for (const s of this.sprites) {
       if (!s?.animating) continue;
       s.anim.update(1);
       s.tick++;
     }
+    this.particles.step();
     const f = this.fade.anim;
     if (f) {
       f.elapsed++;
@@ -584,9 +614,10 @@ export class FrontierScene {
       a ? [{ localId: a.localId, sheet: a.sheet, x: a.position.x, y: a.position.y, facing: DIRS[a.dir]!, anim: a.anim.seq, frame: a.anim.frame, visible: a.visible, ...(this.actorDarken.get(a.localId) ? { darken: this.actorDarken.get(a.localId)! } : {}) }] : [],
     );
     const objects: FrontierObjectView[] = this.sprites.flatMap((s, slot) => (s ? [{ slot, sheet: s.sheet, x: s.x, y: s.y, anim: s.anim.seq, frame: s.anim.frame, visible: s.visible, ...(s.flip ? { flip: true as const } : {}) }] : []));
+    const cutIn = this.brainCutIn?.view() ?? null;
     return {
       scene: this.id,
-      bg: this.data.bg,
+      bg: this.hallLights && this.data.bg ? { ...this.data.bg, sheet: this.hallLights.shown } : this.data.bg,
       fg: this.fgOverride ?? this.data.fg,
       shadow: this.tables.shadow,
       camera: { ...this.camera },
@@ -605,6 +636,9 @@ export class FrontierScene {
       ...(this.bgPatch ? { bgPatch: { ...this.bgPatch } } : {}),
       ...(this.bgDarken ? { bgDarken: this.bgDarken } : {}),
       ...(this.icons.size ? { icons: [...this.icons.values()].map((i) => ({ ...i, item: { ...i.item } })) } : {}),
+      ...(this.particles.drawn.length ? { particles: this.particles.drawn } : {}),
+      ...(this.spritesOnTop ? { spritesOnTop: true as const } : {}),
+      ...(cutIn ? { brainCutIn: cutIn } : {}),
     };
   }
 }

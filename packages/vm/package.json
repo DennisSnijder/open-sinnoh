@@ -4,6 +4,6 @@
   "private": true,
   "type": "module",
   "exports": { ".": "./src/index.ts", "./op-classification.json": "./src/data/op-classification.json" },
-  "dependencies": { "@opensinnoh/core": "workspace:*", "@opensinnoh/contracts": "workspace:*", "@opensinnoh/services": "workspace:*", "@opensinnoh/text": "workspace:*" },
+  "dependencies": { "@opensinnoh/battle": "workspace:*", "@opensinnoh/core": "workspace:*", "@opensinnoh/contracts": "workspace:*", "@opensinnoh/services": "workspace:*", "@opensinnoh/text": "workspace:*" },
   "devDependencies": { "@opensinnoh/nds": "workspace:*" }
 }

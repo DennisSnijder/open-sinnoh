@@ -4,7 +4,8 @@
  * on Route 202 from a Piplup that knows the move. While the animation plays, its particles are drawn
  * where the decomp puts them (the defender, or the attacker for Growl): the scene with the animation's
  * particles differs from the same frame without them, most of all around that battler.
- * A Ball Capsule's seals at the player's send-out are drawn around the player's Pokémon (docs/research/seals.md §6).
+ * A Ball Capsule's seals at the player's send-out are drawn around the player's Pokémon (docs/research/seals.md §6),
+ * and so is a shiny lead's sparkle (common animation `shiny`).
  * With OPENSINNOH_ANIM_SHOTS set, frame strips of each animation go there (ROM content, never commit).
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -267,5 +268,54 @@ test("a Ball Capsule's seals play at the player's send-out, around the Pokémon"
   expect(best.changed, 'the seals are drawn').toBeGreaterThan(200);
   // Around the player's Pokémon: the effect's anchor is (64, 112) less (10, 16), the seals centred 30 px above it.
   expect(Math.hypot(best.x - 54, best.y - 66), `the seals are around the player's Pokémon (centre ${best.x.toFixed(0)}, ${best.y.toFixed(0)})`).toBeLessThan(48);
+  expect(errors).toEqual([]);
+});
+
+test("a shiny lead sparkles at the player's send-out (common animation shiny), around the Pokémon", async () => {
+  test.setTimeout(300_000);
+  let best = { changed: 0, x: 0, y: 0 };
+  let ticks = 0;
+  let done = false;
+  const driver = pageDriver(page, SHOTS ?? 'test-artifacts/battle-anim', `${test.info().project.name}-shiny`);
+  // otId 1 and PID 1: shiny (core isShiny).
+  const shinyReplay = replay('MOVE_TACKLE').replace('set var', 'set state party[0].otId 1\nset state party[0].pid 1\nset var').replace('+0 battle move 1\n+0 screenshot anim\n', '');
+  const result = await runReplay(driver, shinyReplay, {
+    registries,
+    name: 'shiny-send-out.replay',
+    seed: 1,
+    repeat: false,
+    async beforeLine() {
+      // As the capsule test: once the battle has started, step to the player's send-out, then through the sparkle.
+      if (done) return;
+      const started = await page.evaluate(() => {
+        const g = window.openSinnohGame!;
+        if (!g.battleView()) return false;
+        for (let i = 0; i < 900 && !g.battleView()?.battlers.some((b) => b.side === 'player' && b.visible); i++) g.advance(1);
+        return true;
+      });
+      if (!started) return;
+      done = true;
+      await waitForScene(page);
+      for (let i = 0; i < 300; i++) {
+        const v = await battleView();
+        if (v?.prompt) break;
+        if (v?.anim?.particles.length) {
+          ticks++;
+          if (ticks % 3 === 0) {
+            await waitForScene(page);
+            const d = await animationDiff('particles');
+            if (d.changed > best.changed) best = d;
+          }
+        }
+        await page.evaluate(() => window.openSinnohGame!.advance(1));
+      }
+    },
+  });
+  expect(result.error).toBeUndefined();
+  expect(result.ok).toBe(true);
+  expect(ticks, 'the sparkle played').toBeGreaterThan(20);
+  expect(best.changed, 'the sparkles are drawn').toBeGreaterThan(20);
+  expect(Math.hypot(best.x - AT.player.x, best.y - AT.player.y), `the sparkles are around the player's Pokémon (centre ${best.x.toFixed(0)}, ${best.y.toFixed(0)})`).toBeLessThan(56);
+  expect(await page.evaluate(() => window.openSinnohApp!.game.log.report().filter((s) => s.key === 'anim:shiny'))).toEqual([]);
   expect(errors).toEqual([]);
 });

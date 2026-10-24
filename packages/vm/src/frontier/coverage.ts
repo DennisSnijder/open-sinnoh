@@ -10,23 +10,8 @@ import { hallFrontierHandlers } from './hall-ops.ts';
 import { castleFrontierHandlers } from './castle-ops.ts';
 import { arcadeFrontierHandlers } from './arcade-ops.ts';
 
-/**
- * Frontier handlers that are logged stand-ins: battle videos (the Vs. Recorder: none is saved, saving one fails), the
- * Frontier Brain cut-in (its timing and flashes, not its art), the particle effects (not drawn; no emitter to wait for)
- * and the Hall's TV segment.
- */
-export const FRONTIER_STUBBED = [
-  'fr_cmd_70',
-  'fr_cmd_6d',
-  'fr_init_new_battle_recording',
-  'fr_free_battle_recording',
-  'fr_play_frontier_brain_encounter_effect',
-  'fr_init_particle_system',
-  'fr_free_particle_system',
-  'fr_create_particle_system_emitter',
-  'fr_wait_for_particle_system_emitters',
-  'fr_cmd_c7',
-];
+/** Frontier handlers that are logged stand-ins: battle videos (the Vs. Recorder: none is saved, saving one fails). */
+export const FRONTIER_STUBBED = ['fr_cmd_70', 'fr_cmd_6d', 'fr_init_new_battle_recording', 'fr_free_battle_recording'];
 
 export interface FrontierOpClassification {
   op: string;

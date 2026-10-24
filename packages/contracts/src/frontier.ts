@@ -11,7 +11,7 @@
  * VM between the receptionist's InitBattleTower and FreeBattleTower, as on the DS.
  */
 import type { Gender, Id, Pokemon, StatusCondition } from '@opensinnoh/core';
-import type { BattleWeather } from './battle.ts';
+import type { AnimParticle, BattleWeather } from './battle.ts';
 import type { Facing } from './records.ts';
 
 /** A frontier scene (decomp sFrontierScenes, overlay 104; FRONTIER_SCENE_*): its script, text bank, music and room. */
@@ -267,6 +267,54 @@ export interface ArcadeAppArt {
   screens: Id[];
 }
 
+/** 0.43.0. A Frontier Brain's facility (decomp FACILITY_*, sFrontierBrainsEncounterParams' rows). */
+export type FrontierBrainFacility = 'tower' | 'factory' | 'castle' | 'hall' | 'arcade';
+
+/** 0.43.0. A Frontier Brain's cut-in art (decomp sFrontierBrainsEncounterParams, field_encounteffect.narc). */
+export interface FrontierBrainCutInArt {
+  /**
+   * The banner (BG1, 256 × 256 from 0, 0): one image per palette of its NCLR, as UpdateBannerPalette loads them into
+   * BG palette 12 in turn.
+   */
+  banner: Id[];
+  /** The mugshot's OBJ sheet (animation 0). */
+  mugshot: Id;
+  /** The Brain's name (TEXT_BANK_NPC_TRAINER_NAMES, the `*_dummy` trainer's). */
+  name: Id;
+}
+
+/**
+ * 0.43.0. The frontier scenes' effect art: the Frontier Brains' cut-ins (`brains`, the shared VS sheet `vs` with
+ * animations 0 and 1, the name's text colours `nameColors`, enc_fade palette colours 1 and 2), the Factory battle
+ * room's door light (BF_FUNC_UPDATE_BACKGROUND: BG3's tiles 3, 10, 26 × 11 on palette 0–4, one patch each) and the Hall
+ * battle room's second BG3 frame (`hallLights`: battle_hall_battle_room_dupe over battle_hall_battle_room_2).
+ */
+export interface FrontierEffectsArt {
+  brains: Record<FrontierBrainFacility, FrontierBrainCutInArt>;
+  vs: Id;
+  nameColors: { fg: string; shadow: string };
+  factoryDoorLights: Id[];
+  hallLights: Id;
+}
+
+/**
+ * 0.43.0. A Frontier Brain's cut-in as it runs (decomp frontier_brain_encounter_effect.c), in screen px. `band` is the
+ * banner's window (rows y1 ≤ y < y2, the full width; BG1 shows only there), `banner` the palette it shows. The sprites,
+ * at their cells' origins: the mugshot (`dark`: its palette blended 14/16 toward black), the four VS sprites (each its
+ * cell and scale about the origin, once drawn) and the name (its text's top-left). `roomDark`: the room, BG2 and the
+ * characters dimmed 14/16 toward black (BrightnessController_SetScreenBrightness and PaletteData_BlendMulti), not the
+ * particles.
+ */
+export interface FrontierBrainCutInView {
+  facility: FrontierBrainFacility;
+  band: { y1: number; y2: number } | null;
+  banner: number;
+  mugshot: { cell: number; x: number; y: number; dark: boolean } | null;
+  vs: { cell: number; x: number; y: number; scale: number }[];
+  name: { text: string; x: number; y: number } | null;
+  roomDark: boolean;
+}
+
 /** NewGame.frontier: the Battle Frontier tables (0.34.0). */
 export interface FrontierTables {
   /** By scene id (FRONTIER_SCENE_*); null for the unused scenes 0–2 (no script or op launches them). */
@@ -295,6 +343,8 @@ export interface FrontierTables {
   objects: Record<string, Id>;
   /** The shadow under every 2D character (decomp ov63_0222B7E8: wifi2dchar cells 0). */
   shadow: Id;
+  /** 0.43.0. The scenes' effect art; absent without 2D art. */
+  effects?: FrontierEffectsArt;
   /** Decomp sBattleFrontierBanlist: species no facility accepts. */
   banlist: Id[];
   /** Decomp Shop_GetItemBPPrice (overlay 7): the exchange counters' BP prices. */
@@ -393,6 +443,15 @@ export interface FrontierView {
    * columns): the icon's centre at x, y (screen px), still on its first frame, and its held-item mark.
    */
   icons?: { species: Id; form: number; x: number; y: number; visible: boolean; item: { x: number; y: number; visible: boolean } }[];
+  /**
+   * 0.43.0. The particles drawn this frame (decomp FrontierParticleSystem_Update: the scene's SPL systems on BG0), screen
+   * quads in draw order, over BG2 and the characters. `spritesOnTop`: BG2 and then the particles under the characters
+   * (BattleCastleBattleRoomSceneSetup puts BG0 and BG2 at the sprites' priority 2).
+   */
+  particles?: AnimParticle[];
+  spritesOnTop?: true;
+  /** 0.43.0. A Frontier Brain's cut-in, over the room and under the fade. */
+  brainCutIn?: FrontierBrainCutInView;
 }
 
 /** A frontier trainer in a battle (decomp FrontierTrainer, FieldBattleDTO_InitFrontierTrainer). */

@@ -417,6 +417,8 @@ export class SoundSystem implements AudioHost {
   /** The battle scene (Sound_Impl_PlayBattleBGM): the field BGM pauses and the battle BGM plays. */
   playBattleBgm(seq: Id | null): void {
     this.scene = 'battle';
+    // The Frontier Brain cut-in started the battle's music already (Sound_SetSceneAndPlayBGM in its frontier command).
+    if (seq !== null && seq === this.current) return;
     this.pauseOrStopFieldBgm();
     if (seq) this.playBgm(seq);
   }

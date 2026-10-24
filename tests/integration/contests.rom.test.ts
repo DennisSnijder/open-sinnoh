@@ -94,6 +94,8 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('Super Contests (OPENSINNOH_NDS
     const g = game();
     g.state.party.push(setupPokemon(g.state, g.registries, 0, 'platinum:SPECIES_STARAVIA' as Id, 20, ['platinum:MOVE_WING_ATTACK' as Id, 'platinum:MOVE_QUICK_ATTACK' as Id]));
     const session = newContest(g.state, g.registries, { mode: 'official', rank: 0, type: 0, competition: 2, partySlot: 0, seed: 1 });
+    // The visual round's outfit, which the dance draws.
+    session.dressUp = { accessories: [], monPriority: 0, backdrop: 0 };
     for (const kind of ['visual', 'dance', 'acting'] as const) {
       const round = createContestRound(kind, { session, registries: g.registries, state: g.state, host: {} as never, log: g.log, rng: () => 0 });
       expect(round.placeholder, kind).toBe(CONTEST_ROUNDS_STATUS[kind] === 'placeholder');

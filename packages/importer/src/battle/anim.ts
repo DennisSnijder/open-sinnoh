@@ -6,6 +6,8 @@
  * - `wazaeffect/effectdata/waza_particle.narc`: the 485 SPA files scripts load by member number.
  * - `wazaeffect/effectdata/ball_particle.narc`: the send-out effect's SPAs (docs/research/seals.md §6.1): members
  *   1–17 and 36 the balls' default bursts, 37–116 the seals; records `archive: 'ball'`, sheets `battle/ball_particles/<n>`.
+ * - `particledata/pl_frontier/frontier_particle.narc`: the Battle Frontier scenes' SPAs (decomp frontier_particles.order:
+ *   the Hall, the Arcade's two, the Factory, the Castle); records `archive: 'frontier'`, sheets `frontier/particles/<n>`.
  * - overlay 12 rodata: BattleAnimUtil_GetBattlerTypeWorldPosInternal's position table and the generic
  *   emitter callback's EmitterAxisConfigs1–8, each checked by SHA-1.
  * Scripts stay words (records); the battle package's VM runs them. Textures become one `ui2d` sheet per
@@ -22,6 +24,7 @@ const MOVE_ANIMS = '/wazaeffect/we.arc';
 const COMMON_ANIMS = '/wazaeffect/we_sub.narc';
 const PARTICLES = '/wazaeffect/effectdata/waza_particle.narc';
 const BALL_PARTICLES = '/wazaeffect/effectdata/ball_particle.narc';
+const FRONTIER_PARTICLES = '/particledata/pl_frontier/frontier_particle.narc';
 /** The ball_particle.narc members the send-out effect loads: the default bursts (ballOpenParticles) and the seals. */
 export const SEND_OUT_PARTICLES = [...Array.from({ length: 17 }, (_, i) => i + 1), ...Array.from({ length: 81 }, (_, i) => i + 36)];
 /** we.arc members that are move scripts: `none` and moves 1–467 (decomp NUM_VALID_MOVES). */
@@ -171,11 +174,12 @@ export async function importBattleAnims(fs: NitroFs, moveIds: Map<number, Id>, s
     sheets.obj(`battle/objects/${animSpriteKey(r)}`, members, { ncgr: 0, nclr: 1, ncer: 2, nanr: 3, palette: 0 });
   }
 
-  const particleSystem = (path: string, bytes: Uint8Array, n: number, ball: boolean): ParticleSystem => {
+  const particleSystem = (path: string, bytes: Uint8Array, n: number, archive?: 'ball' | 'frontier'): ParticleSystem => {
+    const name = archive === 'ball' ? 'ball_particles' : archive === 'frontier' ? 'frontier_particles' : 'particles';
     try {
       const spa = readSpa(bytes);
       const textures = sheets.add(
-        `battle/${ball ? 'ball_particles' : 'particles'}/${n}`,
+        archive === 'frontier' ? `frontier/particles/${n}` : `battle/${name}/${n}`,
         spa.textures.map((_, t) => ({
           ...spaTexture(spa, t),
           originX: 0,
@@ -183,9 +187,9 @@ export async function importBattleAnims(fs: NitroFs, moveIds: Map<number, Id>, s
         })),
       );
       return {
-        id: asId(`platinum:${ball ? 'ball_particles' : 'particles'}/${n}`),
+        id: asId(`platinum:${name}/${n}`),
         sourceIndex: n,
-        ...(ball ? { archive: 'ball' as const } : {}),
+        ...(archive ? { archive } : {}),
         textures,
         textureParams: spa.textures.map((_, t) => spaTextureParam(spa, t)),
         emitters: spa.emitters,
@@ -196,12 +200,13 @@ export async function importBattleAnims(fs: NitroFs, moveIds: Map<number, Id>, s
   };
   const ballNarc = readNarc(fs.file(BALL_PARTICLES));
   const particleSystems = [
-    ...readNarc(fs.file(PARTICLES)).map((bytes, n) => particleSystem(PARTICLES, bytes, n, false)),
+    ...readNarc(fs.file(PARTICLES)).map((bytes, n) => particleSystem(PARTICLES, bytes, n)),
     ...SEND_OUT_PARTICLES.map((n) => {
       const bytes = ballNarc[n];
       if (!bytes) throw new Error(`${BALL_PARTICLES}: no member ${n}`);
-      return particleSystem(BALL_PARTICLES, bytes, n, true);
+      return particleSystem(BALL_PARTICLES, bytes, n, 'ball');
     }),
+    ...readNarc(fs.file(FRONTIER_PARTICLES)).map((bytes, n) => particleSystem(FRONTIER_PARTICLES, bytes, n, 'frontier')),
   ];
 
   const table = async (key: keyof typeof TABLES): Promise<Int32Array> => {

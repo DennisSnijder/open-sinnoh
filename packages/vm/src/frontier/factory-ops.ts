@@ -63,6 +63,9 @@ export function numberOf(f: FrontierRunner, registry: 'species' | 'moves' | 'typ
   return n;
 }
 
+/** Decomp BF_FUNC_UPDATE_BACKGROUND's rect on BG3 at tile 3, 10: room px. */
+const DOOR_LIGHT_AT = { x: 3 * 8, y: 10 * 8 } as const;
+
 export function factoryFrontierHandlers(): Record<string, FrontierHandler> {
   const factory = (f: FrontierRunner): BattleFactory => {
     if (!f.factory) throw new Error('the frontier runs a Battle Factory command without a challenge (InitBattleFactory)');
@@ -209,10 +212,17 @@ export function factoryFrontierHandlers(): Record<string, FrontierHandler> {
         case BF.getChallengeType:
           dest(t.challengeType);
           break;
-        // Decomp Bg_ChangeTilemapRectPalette on BG3 (3, 10, 26 × 11): the battle room's door lighting up, step 0–4.
-        case BF.updateBackground:
-          f.r.log.stub('frontier:factory-room-palette', "the Factory battle room's door light palette steps are not drawn");
+        // Decomp Bg_ChangeTilemapRectPalette on BG3 (tiles 3, 10, 26 × 11): the battle room's door lighting up, step 0–4.
+        case BF.updateBackground: {
+          const lights = f.tables.effects?.factoryDoorLights;
+          if (!lights) f.r.log.stub('frontier:factory-door-light', 'the pack has no Factory door light patches (FrontierTables.effects)');
+          else {
+            const patch = lights[arg1];
+            if (!patch) throw new Error(`BF_FUNC_UPDATE_BACKGROUND: palette step ${arg1} of ${lights.length}`);
+            f.scene.bgPatch = { sheet: patch, ...DOOR_LIGHT_AT };
+          }
           break;
+        }
         case BF.startCorridorAnimation:
           f.scene.corridorFloor = true;
           break;
