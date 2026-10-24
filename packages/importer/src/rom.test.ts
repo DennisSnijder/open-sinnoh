@@ -274,6 +274,15 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
         tv: expect.objectContaining({ programs: expect.toSatisfy((p: unknown[]) => p.length === 9) }),
         diploma: expect.objectContaining({ sinnoh: 'platinum:ui2d/diploma/sinnoh', national: 'platinum:ui2d/diploma/national' }),
         contestHallFlag: 'platinum:FLAG_CONTEST_HALL_VISITED',
+        // The start menu's objectives (objectives.ts): our texts, the first and last steps' checks.
+        objectives: expect.objectContaining({
+          title: 'platinum:OpenSinnoh_Objective_Title',
+          explore: 'platinum:OpenSinnoh_Objective_Explore',
+          steps: expect.arrayContaining([
+            { text: 'platinum:OpenSinnoh_Objective_VisitBarry', done: [{ kind: 'flag', flag: 'platinum:FLAG_RIVAL_LEFT_HOME' }, { kind: 'var', var: 'platinum:VAR_PLAYER_STARTER', atLeast: 1 }] },
+            { text: 'platinum:OpenSinnoh_Objective_StarkDepths', done: [{ kind: 'flag', flag: 'platinum:FLAG_BATTLED_STARK_MOUNTAIN_ROOM_3_HEATRAN' }, { kind: 'flag', flag: 'platinum:FLAG_CAUGHT_HEATRAN' }] },
+          ]),
+        }),
         // The contests' tables (tests/integration/contests.rom.test.ts checks them).
         contests: expect.objectContaining({ playerSprite: { male: 'platinum:OBJ_EVENT_GFX_PLAYER_M_CONTEST', female: 'platinum:OBJ_EVENT_GFX_PLAYER_F_CONTEST' } }),
         specialEncounters: expect.objectContaining({ swarms: expect.toSatisfy((z: unknown[]) => z.length === 22) }),
