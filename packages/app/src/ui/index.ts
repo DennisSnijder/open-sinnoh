@@ -259,26 +259,38 @@ export function mountUi(deps: UiDeps): InGameUi {
       // the colours of the screen's edges, no field around it.
       if (phone() && root.matches('.board, .ds-screen')) {
         scrim.classList.add('opaque');
-        const backdrop = root.dataset.backdrop;
-        // Above the art's boundary its top row's colour, below it its bottom row's. The boundary is the top of the
-        // element marked `data-backdrop-split` (the naming keys, a stacked pair's touch screen), else the screen's centre.
-        if (backdrop)
-          // `data-backdrop-bottom`: a screen whose bottom is another picture (a stacked pair's touch screen).
-          void Promise.all([art.edgeColors(backdrop), art.edgeColors(root.dataset.backdropBottom ?? backdrop)]).then(([{ top }, { bottom }]) => {
-            // Layout positions in the host (offsets ignore the entry animation's transform).
-            const y = (node: HTMLElement) => {
-              let at = 0;
-              for (let n: HTMLElement | null = node; n && n !== host; n = n.offsetParent as HTMLElement | null) at += n.offsetTop;
-              return at;
-            };
-            const mark = root.querySelector<HTMLElement>('[data-backdrop-split]');
-            const split = `${mark ? y(mark) : y(root) + root.offsetHeight / 2}px`;
-            scrim.style.background = `linear-gradient(${top} 0 ${split}, ${bottom} ${split} 100%)`;
-          });
+        paintBackdrop(scrim, root);
       }
       host.replaceChildren(scrim, frame);
     }
     return { kind, root };
+  };
+
+  /**
+   * A phone's opaque backdrop in the colours of the screen's edges: above the art's boundary its top row's colour,
+   * below it its bottom row's. The boundary is the top of the element marked `data-backdrop-split` (the naming keys,
+   * a stacked pair's touch screen), else the screen's centre. Repainted when a screen patched in place changes its
+   * picture (the Ball Capsule editor's phases).
+   */
+  const paintBackdrop = (scrim: HTMLElement, root: HTMLElement) => {
+    const backdrop = root.dataset.backdrop;
+    // `data-backdrop-bottom`: a screen whose bottom is another picture (a stacked pair's touch screen).
+    const spec = backdrop ? `${backdrop}|${root.dataset.backdropBottom ?? backdrop}` : '';
+    if (scrim.dataset.painted === spec) return;
+    scrim.dataset.painted = spec;
+    if (!backdrop) return;
+    void Promise.all([art.edgeColors(backdrop), art.edgeColors(root.dataset.backdropBottom ?? backdrop)]).then(([{ top }, { bottom }]) => {
+      if (scrim.dataset.painted !== spec) return;
+      // Layout positions in the host (offsets ignore the entry animation's transform).
+      const y = (node: HTMLElement) => {
+        let at = 0;
+        for (let n: HTMLElement | null = node; n && n !== host; n = n.offsetParent as HTMLElement | null) at += n.offsetTop;
+        return at;
+      };
+      const mark = root.querySelector<HTMLElement>('[data-backdrop-split]');
+      const split = `${mark ? y(mark) : y(root) + root.offsetHeight / 2}px`;
+      scrim.style.background = `linear-gradient(${top} 0 ${split}, ${bottom} ${split} 100%)`;
+    });
   };
 
   const draw = (view: AppView | null) => {
@@ -308,6 +320,8 @@ export function mountUi(deps: UiDeps): InGameUi {
     let built = build(view, fitted.dot, fitted.unit, entering);
     if (!built) {
       const root = host.querySelector<HTMLElement>('[data-screen]')!;
+      const scrim = host.querySelector<HTMLElement>('.ui-scrim.opaque');
+      if (scrim) paintBackdrop(scrim, root);
       if (followCursor && oldCursor !== focusKey(focusTarget(root))) restoreMenuFocus(root, oldFocus, true);
       followCursor = false;
       return;

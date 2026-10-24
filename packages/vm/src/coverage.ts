@@ -128,6 +128,8 @@ export const REAL_TOWN = [
   'set_scene_play_bgm_music_box', 'set_field_scene', 'give_journal', 'create_journal_event', 'show_diploma_sinnoh', 'show_diploma_national_dex',
   'open_region_map', 'survive_poison', 'check_is_department_store_regular', 'get_party_mon_contest_stat', 'check_party_combee_gender_count',
   'change_deoxys_form', 'get_news_press_deadline', 'set_news_press_deadline', 'get_random_seen_species', 'get_spiritomb_counter', 'clear_spiritomb_counter',
+  // town-field-ops.ts: the Vs. Seeker, Dr. Footstep, the Unown messages, the Vista Lighthouse binoculars.
+  'start_vs_seeker', 'get_party_mon_footprint_type', 'message_unown', 'use_vista_lighthouse_binoculars',
 ];
 
 /**

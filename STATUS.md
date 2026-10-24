@@ -4,7 +4,7 @@ OpenSinnoh is in beta. Pokémon Platinum (US, rev 0) plays from a new game throu
 Fame and the credits, and on into the post-game. What's next is in [ROADMAP.md](ROADMAP.md); the design
 decisions are in [docs/decisions.md](docs/decisions.md).
 
-Versions: contracts 0.40.1, importer `platinum-103`, HeartGold follower add-on `hgss-followers-4`.
+Versions: contracts 0.42.0, importer `platinum-105`, HeartGold follower add-on `hgss-followers-4`.
 
 ## Works
 
@@ -33,7 +33,9 @@ Versions: contracts 0.40.1, importer `platinum-103`, HeartGold follower add-on `
 - **Town extras:** Seals and Ball Capsules (the Seal Case, the Solaceon gifts, the Sunyshore seal shop, the PC's
   capsule editor, capsules on party Pokémon and NPC trainers, the seals' effect at a battle send-out); the Veilstone
   Game Corner (the slot machines with the DS's odds, reel control and bonus rounds, coins, the Prize Exchange); the
-  Villa (furniture, the daily visitors); the journal; the two Pokédex diplomas; and several small NPC rules.
+  Villa (furniture, the daily visitors); the journal; the two Pokédex diplomas; the Vs. Seeker (charge, the scan, the
+  rematch spin and teams); Dr. Footstep's footprint reading and ribbon; the Unown inscriptions; the Vista Lighthouse
+  binoculars; the step and egg records; and several small NPC rules.
 - **Audio:** the ROM's sound archive on a DS sequencer and synth in an AudioWorklet: zone music by day and
   night, sound effects, fanfares and cries.
 - **App:** the ROM import in the browser, saves with file export and import, the setup, Options, following

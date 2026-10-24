@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { giveItem, itemCount, newGameRecord, setupPokemon } from '@opensinnoh/contracts';
-import { dailyEvents, FIELD_VARS as V, dailyRandomOf, lotteryWinner, Prng, randomizeLottery, readSystemVar as read, rematchTrainer, seekerStep, SEEKER_USED, sizeFactor, sizeInTenths, systemFlag, writeSystemVar as write, type Id } from '@opensinnoh/core';
+import { dailyEvents, FIELD_VARS as V, dailyRandomOf, lotteryWinner, randomizeLottery, readSystemVar as read, rematchTrainer, seekerStep, SEEKER_USED, sizeFactor, sizeInTenths, systemFlag, writeSystemVar as write, type Id } from '@opensinnoh/core';
 import { fieldPack, f } from '../../../tests/fixtures/field-systems.ts';
 import { createGame } from './game.ts';
 import { fieldItemCheck, useFieldItem } from './field-items.ts';
@@ -10,39 +10,24 @@ import { updateGameTime } from './game-time.ts';
 
 function setup() {
   const notices: [Id, string[]][] = [];
+  const starts: unknown[] = [];
   const warps: unknown[][] = [];
-  const game = createGame({ packs: [fieldPack()], seed: 1, createWorld: (d) => ({ ...createFakeWorld(d), warp: (...a) => void warps.push(a), switchMovementType: (id, type) => { d.state.objects.find((o) => o.localId === id)!.movementType = type; }, view: () => ({ ...createFakeWorld(d).view(), actors: d.state.objects.map((o) => ({ localId: o.localId, visible: true })) } as never) }), createScriptRunner: (d) => ({ ...createFakeScriptRunner(d), notice: (text, slots) => void notices.push([text as Id, slots]) }), now: () => 'fixed', log: new CountingStubLog(() => {}) });
+  const game = createGame({ packs: [fieldPack()], seed: 1, createWorld: (d) => ({ ...createFakeWorld(d), warp: (...a) => void warps.push(a), switchMovementType: (id, type) => { d.state.objects.find((o) => o.localId === id)!.movementType = type; }, view: () => ({ ...createFakeWorld(d).view(), actors: d.state.objects.map((o) => ({ localId: o.localId, visible: true })) } as never) }), createScriptRunner: (d) => ({ ...createFakeScriptRunner(d), start: (x) => void starts.push(x), notice: (text, slots) => void notices.push([text as Id, slots]) }), now: () => 'fixed', log: new CountingStubLog(() => {}) });
   const d = { registries: game.registries, state: game.state, world: game.world, scripts: game.scripts, ns: 'fixture', sound: {} as never, log: game.log, openApp: () => {} };
-  return { game, d, notices, warps, reg: game.registries, s: game.state };
+  return { game, d, notices, starts: starts as { label: Id; source: string }[], warps, reg: game.registries, s: game.state };
 }
 
 describe('Vs. Seeker', () => {
-  it('refuses away from the main matrix; battery and no-trainers messages do not consume charge', () => {
-    const { d, s, reg, notices } = setup();
+  it('the item runs its script (SCRIPT_ID(VS_SEEKER, 0)) on the main matrix and is refused elsewhere', () => {
+    const { d, s, reg, starts } = setup();
     useFieldItem(d, f('SEEKER'));
-    expect(notices.at(-1)).toEqual([f('VsSeeker_Text_BatteryIsntChargedEnough'), ['100']]);
-    write(reg, s, V.battery, 100);
-    useFieldItem(d, f('SEEKER'));
-    expect(notices.at(-1)?.[0]).toBe(f('VsSeeker_Text_NoTrainersWithinRange'));
-    expect(read(reg, s, V.battery)).toBe(100);
+    expect(starts.at(-1)).toMatchObject({ label: f('VsSeeker_Use'), source: 'item' });
     reg.matrices.get(reg.zones.get(s.player.zone)!.matrix)!.sourceIndex = 9;
     expect(fieldItemCheck(d, f('SEEKER'))).toBe('generic');
   });
-  it('rolls only defeated visible trainers in the asymmetric radius; charges by steps and expires spins', () => {
-    const { d, s, reg } = setup();
-    s.player = { ...s.player, zone: f('TOWN'), x: 38, z: 14 };
-    s.objects = [{ zone: f('TOWN'), localId: 70, x: 40, z: 15, y: 0, facing: 'down', movementType: 14 }];
-    write(reg, s, V.battery, 100);
-    useFieldItem(d, f('SEEKER'));
-    expect(s.objects[0]!.movementType).toBe(14); // not defeated: only reacts, no rematch
-    s.flags[systemFlag(reg, 2060)] = true;
-    let seed = 1;
-    while (new Prng(seed).below(100) >= 50) seed++;
-    s.fieldRng = { seed };
-    write(reg, s, V.battery, 100);
-    useFieldItem(d, f('SEEKER'));
-    expect(s.objects[0]!.movementType).toBe(49);
-    expect(read(reg, s, V.battery)).toBe(0);
+  it('charges one per step while owned and expires the rematches after 100 active steps', () => {
+    const { s, reg } = setup();
+    s.flags[systemFlag(reg, SEEKER_USED)] = true;
     giveItem(s, reg, f('SEEKER'), 1);
     let clears = 0;
     for (let i = 0; i < 99; i++) seekerStep(reg, s, (i) => itemCount(s, i), () => clears++);

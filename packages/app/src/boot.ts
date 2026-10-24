@@ -88,6 +88,15 @@ function messageFontRecord(game: Game): Font {
   return record;
 }
 
+/** The Unown font of `message_unown` (`NewGame.unownFont`), or undefined for packs without one. */
+function unownFontRecord(game: Game): Font | undefined {
+  const id = [...game.registries.newGame.values()][0]!.unownFont;
+  if (!id) return undefined;
+  const record = game.registries.fonts.get(id);
+  if (!record) throw new Error(`newGame.unownFont ${id} is not a font record`);
+  return record;
+}
+
 /**
  * `newGame` picks the names and gender for the first game from the message font's characters
  * (undefined: the newGame record's defaults).
@@ -109,6 +118,8 @@ export async function createSession(
   const chosen = newGame?.(fontRecord.chars);
   if (chosen) game.reset(seed, chosen);
   const font = loadFont(fontRecord, await createImageBitmap(await assets.get(fontRecord.atlas)));
+  const unownRecord = unownFontRecord(game);
+  const unownFont = unownRecord ? loadFont(unownRecord, await createImageBitmap(await assets.get(unownRecord.atlas))) : undefined;
   const frameArt = await loadFrames(game, assets);
   /** The FRAME option (saved with the game) picks the message box frame. */
   const frames = (): OverlayFrames | undefined => (frameArt ? { message: frameArt.message[game.state.options.frame]!, window: frameArt.window } : undefined);
@@ -158,7 +169,7 @@ export async function createSession(
       const bottom = bottomFrame(ctx.canvas, scale);
       ctx.save();
       ctx.translate(frame.x - bottom.x, frame.y - bottom.y);
-      drawScriptOverlay(ctx, view, font, scale, frames());
+      drawScriptOverlay(ctx, view, font, scale, frames(), unownFont);
       ctx.restore();
       drawPreview(ctx, view.pokemonPreview, scale);
       drawLookout(ctx, game.world.lookoutView(), scale);

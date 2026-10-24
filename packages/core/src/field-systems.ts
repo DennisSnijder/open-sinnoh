@@ -21,8 +21,10 @@ const TRAINER_FLAGS = 1360;
 const REMATCH_UNLOCK_FLAGS = 2430;
 /** DAILY_FLAGS_START..END (FieldSystem_ClearDailyFlags). */
 const DAILY_FLAGS = [2720, 2911] as const;
-/** RECORD_CAUGHT_FISH and RECORD_FISH_GOT_AWAY (generated/game_records.txt). */
+/** RECORD_STEPS, RECORD_CAUGHT_FISH, RECORD_EGGS_HATCHED and RECORD_FISH_GOT_AWAY (generated/game_records.txt). */
+export const RECORD_STEPS = 0;
 export const RECORD_CAUGHT_FISH = 10;
+export const RECORD_EGGS_HATCHED = 11;
 export const RECORD_FISH_GOT_AWAY = 100;
 /** LoadFeebasLevelRange. */
 export const FEEBAS_LEVELS = { min: 10, max: 20 } as const;

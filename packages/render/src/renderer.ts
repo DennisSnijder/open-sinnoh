@@ -468,7 +468,7 @@ class Field implements FieldRenderer {
   private viewCells = new Set<number>();
   /** Drawables by actor key (`actorKeys`): local ids repeat, so they cannot key the drawables alone. */
   private readonly actors = new Map<string, ActorDraw>();
-  private readonly emotes = new Map<string, { object: THREE.Sprite; start: number }>();
+  private readonly emotes = new Map<string, { object: THREE.Sprite; start: number; double: boolean }>();
   /** Emote bubbles (`ActorView.bubble`, follower talk) by actor key, and their atlases by sprite (null while loading). */
   private readonly bubbles = new Map<string, THREE.Sprite>();
   private readonly bubbleAtlases = new Map<Id, THREE.Texture | null>();
@@ -492,6 +492,8 @@ class Field implements FieldRenderer {
   private readonly storyFlash = new FlashLimiter();
   private readonly fadeFlash = new FlashLimiter();
   private exclamation: { texture: THREE.Texture; size: number } | null = null;
+  /** The '!!' (`NewGame.doubleExclamationSprite`); null without one (the '!' is drawn instead). */
+  private doubleExclamation: { texture: THREE.Texture; size: number } | null = null;
   private exclamationPending = true;
   /**
    * Character shadow: a translucent dark ellipse on the ground under the feet, offset like the DS draws
@@ -633,17 +635,16 @@ class Field implements FieldRenderer {
   }
 
   private async loadExclamation(): Promise<void> {
-    const id = [...this.reg.newGame.values()][0]?.exclamationSprite;
-    if (!id) {
-      this.exclamation = { texture: drawnExclamation(), size: 16 };
-    } else {
+    const ng = [...this.reg.newGame.values()][0];
+    const load = async (id: Id) => {
       const record = need(this.reg.sprites, id, 'sprite');
       if (!('atlas' in record)) throw new Error(`render: exclamation sprite ${id} is not a billboard`);
-      const atlas = await this.assets.texture(record.atlas);
-      const texture = atlas.clone();
+      const texture = (await this.assets.texture(record.atlas)).clone();
       this.frameUv(texture, record, spriteFrame(record, 'stand', 'down', 0));
-      this.exclamation = { texture, size: record.frameSize };
-    }
+      return { texture, size: record.frameSize };
+    };
+    this.exclamation = ng?.exclamationSprite ? await load(ng.exclamationSprite) : { texture: drawnExclamation(), size: 16 };
+    if (ng?.doubleExclamationSprite) this.doubleExclamation = await load(ng.doubleExclamationSprite);
     this.exclamationPending = false;
   }
 
@@ -1504,25 +1505,26 @@ class Field implements FieldRenderer {
     map.offset.set(a.texture.offset.x, a.texture.offset.y + a.texture.repeat.y);
   }
 
-  /** The '!' over an actor while `emote` is set, bouncing in on its first ticks. */
+  /** The '!' (or the '!!' for `emoteDouble`) over an actor while `emote` is set, bouncing in on its first ticks. */
   private drawEmote(v: ActorView, id: string, p: THREE.Vector3): void {
     let e = this.emotes.get(id);
-    if (!v.emote || !v.visible || !this.exclamation) {
-      if (e) {
-        this.scene.remove(e.object);
-        this.emotes.delete(id);
-      }
-      return;
+    const double = !!v.emoteDouble && this.doubleExclamation !== null;
+    if (e && (!v.emote || !v.visible || e.double !== double)) {
+      this.scene.remove(e.object);
+      this.emotes.delete(id);
+      e = undefined;
     }
+    if (!v.emote || !v.visible || !this.exclamation) return;
+    const art = double ? this.doubleExclamation! : this.exclamation;
     if (!e) {
-      const object = new THREE.Sprite(fieldOutputs(new THREE.SpriteMaterial({ map: this.exclamation.texture, alphaTest: 0.5, depthTest: false }), { polygonId: 0, fog: true }));
+      const object = new THREE.Sprite(fieldOutputs(new THREE.SpriteMaterial({ map: art.texture, alphaTest: 0.5, depthTest: false }), { polygonId: 0, fog: true }));
       object.center.set(0.5, 0);
       object.renderOrder = 10;
       this.scene.add(object);
-      this.emotes.set(id, (e = { object, start: this.state.tick }));
+      this.emotes.set(id, (e = { object, start: this.state.tick, double }));
     }
     const anchor = p.clone().add(new THREE.Vector3(EMOTE_OFFSET[0], EMOTE_OFFSET[1] + emoteBounce(this.state.tick - e.start), EMOTE_OFFSET[2]));
-    this.placeBillboard(e.object, anchor, this.exclamation.size);
+    this.placeBillboard(e.object, anchor, art.size);
   }
 
   /**
@@ -1758,7 +1760,8 @@ class Field implements FieldRenderer {
       this.playerRoll = r.prev + ((((r.cur - r.prev + 540) % 360) - 180) * alpha);
       this.dwProps ??= new DistortionProps(this.scene, tables, (id) => this.animatedModel(id), (what) => this.failed(what));
     } else {
-      this.setCamera(need(this.reg.cameras, zone.camera, 'camera'));
+      // The Vista Lighthouse binoculars' own camera replaces the zone's while it is up.
+      this.setCamera(view.viewCamera?.camera ?? need(this.reg.cameras, zone.camera, 'camera'));
       this.playerRoll = 0;
     }
     this.updateClock(view);
@@ -1815,7 +1818,7 @@ class Field implements FieldRenderer {
         gl.beginQuery(this.gpuQueries.ext.TIME_ELAPSED_EXT, query);
       }
     }
-    const target = lerp3(view.camera.prev, view.camera.cur, alpha);
+    const target = view.viewCamera ? new THREE.Vector3(...view.viewCamera.target) : lerp3(view.camera.prev, view.camera.cur, alpha);
     this.updateChunks(view, target);
     this.updateFloors(dw?.floors ?? []);
     this.dwProps?.update(dw?.props ?? [], view.loads, alpha);
@@ -1835,8 +1838,8 @@ class Field implements FieldRenderer {
     }
     const aim = target.clone().add(new THREE.Vector3(...view.cameraOffset));
     this.placeCamera(aim, view.cameraDistance ?? 0);
-    // Enhanced visuals stay out of the Distortion World (its own camera and sky).
-    const enhanced = dw ? null : this.enhanced;
+    // Enhanced visuals stay out of the Distortion World (its own camera and sky) and the binoculars' view.
+    const enhanced = dw || view.viewCamera ? null : this.enhanced;
     if (enhanced) {
       const velocity = new THREE.Vector3(...view.camera.cur).sub(new THREE.Vector3(...view.camera.prev));
       const fog = !!(view.features?.fog ?? this.weather.fog());

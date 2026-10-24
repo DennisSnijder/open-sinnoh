@@ -489,7 +489,7 @@ export interface ContestDancerView {
   shade: number;
   player: boolean;
   /**
-   * 0.40.1. Its outfit (decomp ov17_0224A134: the dancer is its dress-up record, ov22_0225AFD4, without the backdrop):
+   * 0.42.0. Its outfit (decomp ov17_0224A134: the dancer is its dress-up record, ov22_0225AFD4, without the backdrop):
    * the accessories' pictures by their top-left relative to the dancer's centre at scale 1, back to front, the
    * Pokémon drawn after the first `monAt`; scaled, turned and shaded with it about its centre. Empty when the
    * competition is the dance alone (sub_02095338 clears the outfits).

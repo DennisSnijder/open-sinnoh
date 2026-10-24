@@ -137,6 +137,25 @@ describe('Battle Hall type board', () => {
     expect(press(app, 'a')).toEqual({ app: 'hall-board', cell: 0 });
   });
 
+  it('plays the DS sounds: SEQ_SE_DP_BOX03 for a refused cell, SEQ_SE_DP_DECIDE for a pick, SEQ_SE_DP_UG_020 for YES', () => {
+    const ranks = Array(18).fill(0);
+    ranks[1] = 10;
+    const s = fresh();
+    // A sound the packs have plays; one they lack is logged by its source index.
+    const played: number[] = [];
+    const log = { stub: (_: string, msg: string) => void played.push(Number(/sourceIndex (\d+)/.exec(msg)![1])) };
+    const sound = { playSe: (id: Id) => void played.push(registries.sequences.get(id)!.sourceIndex!) } as never;
+    const party = [setupPokemon(s, registries, 0, SPECIES[0]!, 50)];
+    const app = createApp({ app: 'hall-board', challengeType: 0, ranks, streak: 0, party, cursor: 1 }, { registries, state: s, log, host: { ...host(), sound } });
+    press(app, 'a');
+    expect(played).toEqual([1523]);
+    press(app, 'left', 'a');
+    wait(app, 5);
+    expect(played).toEqual([1523, 1500, 1501]);
+    press(app, 'a');
+    expect(played).toEqual([1523, 1500, 1501, 1500, 1572]);
+  });
+
   it('at the 50th battle the Matron comes after a YES: only ??? can be picked, the earlier cell is the result', () => {
     const app = open(fresh(), { streak: 50 });
     tap(app, 'cell:2');

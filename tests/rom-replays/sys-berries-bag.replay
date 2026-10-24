@@ -33,7 +33,7 @@ until idle
 +0 assert state berryPatches[27].berry "platinum:ITEM_ORAN_BERRY"
 +0 assert state berryPatches[27].stage "planted"
 +0 assert state bag.berries [{"item":"platinum:ITEM_RAZZ_BERRY","count":2}]
-+0 assert state records.counts {"4":1}
++0 assert state records.counts["4"] 1
 # Y: the Sprayduck waters it.
 +0 time 14:00
 +2 assert state berryPatches[27].moisture 70
