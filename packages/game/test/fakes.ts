@@ -183,6 +183,14 @@ export const createFakeWorld: CreateWorld = ({ registries, state, scripts }) => 
       throw new Error('fake world: no Great Marsh');
     },
     greatMarshLookoutDone: () => true,
+    vistaBinoculars() {
+      throw new Error('fake world: no Vista Lighthouse');
+    },
+    vistaBinocularsDone: () => true,
+    startVsSeeker() {
+      throw new Error('fake world: no Vs. Seeker task');
+    },
+    vsSeekerResult: () => null,
     lookoutView: () => null,
     initMapFeatures() {
       throw new Error('fake world: no map features');

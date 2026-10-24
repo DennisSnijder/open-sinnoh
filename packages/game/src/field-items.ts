@@ -5,7 +5,8 @@
  *   ItemUseCheckResult the bag (BagContext_FormatErrorMessage) or the field prints;
  * - `useFieldItem` is the use that runs on the field: the bag's useItemFromMenuFunc after
  *   FieldSystem_StartFieldMap (the bag has closed), or Y's useItemInFieldFunc. The Bicycle mounts or
- *   dismounts; Vs. Seeker scans, rods start the fishing task, and Escape Rope consumes and warps.
+ *   dismounts; the Vs. Seeker runs its script (SCRIPT_ID(VS_SEEKER, 0)), rods start the fishing task, and Escape Rope
+ *   consumes and warps.
  * - `useRegisteredItem` is Y on the idle field (decomp sub_02069238; Platinum moved it to Y from Diamond
  *   and Pearl's Select): nothing registered or a bag-message item prints its usage message
  *   (UseBagMessageItem, BagContext_FormatUsageMessage), else the check, then the use.
@@ -14,7 +15,6 @@ import { DISTRIBUTION_EVENT_MAGIC, DISTRIBUTION_EVENT_VAR, newGameRecord, takeIt
 import { onMainMatrix, type Id } from '@opensinnoh/core';
 import { facingSoil, totalAccessories, totalBackdrops } from '@opensinnoh/services';
 import type { SoundSystem } from './sound.ts';
-import { useVsSeeker } from './vs-seeker.ts';
 
 /** Decomp ITEM_USE_FUNC_* (constants/items.h) the field checks or runs. */
 const USE = { none: 0, townMap: 2, explorerKit: 3, journal: 5, bicycle: 4, berry: 8, poffinCase: 9, pokeRadar: 11, sprayduck: 12, mulch: 13, honey: 14, vsSeeker: 15, oldRod: 16, goodRod: 17, superRod: 18, bagMessage: 19, escapeRope: 21, azureFlute: 22 } as const;
@@ -24,6 +24,8 @@ const AZURE_FLUTE_ZONES = [220, 584, 585];
 const FLAG_GAME_COMPLETED = 2404;
 const DISTRIBUTION_EVENT_ARCEUS = 2;
 const AZURE_FLUTE_SCRIPT = 'CommonScript_TryUseAzureFlute';
+/** UseVsSeekerFromMenu / UseVsSeekerInField: SCRIPT_ID(VS_SEEKER, 0). */
+const VS_SEEKER_SCRIPT = 'VsSeeker_Use';
 /** Decomp SCRIPT_ID(BERRY_TREE_INTERACTIONS, 1–3): planting from the bag, the Sprayduck, mulch. */
 const BERRY_SCRIPTS = { plant: 'BerryTree_PlantBerry', sprayduck: 'BerryTree_UseSprayduck', mulch: 'BerryTree_UseMulch' } as const;
 /** Decomp SEQ_BICYCLE (the bike's BGM override, MountOrUnmountBicycle). */
@@ -132,7 +134,10 @@ export function runsOnField(d: Pick<FieldItemDeps, 'registries'>, item: Id): boo
  */
 export function useFieldItem(d: FieldItemDeps, item: Id): void {
   const use = fieldUse(d, item);
-  if (use === USE.vsSeeker) return useVsSeeker(d);
+  if (use === USE.vsSeeker) {
+    d.scripts.start({ label: `${d.ns}:${VS_SEEKER_SCRIPT}` as Id, zone: d.state.player.zone, source: 'item' });
+    return;
+  }
   // UseJournalFromMenu / UseJournalInField and UseTownMapFromMenu / UseTownMapInField: their apps over the field.
   if (use === USE.journal) return d.openApp({ app: 'journal' });
   if (use === USE.townMap) return d.openApp({ app: 'town-map' });

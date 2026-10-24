@@ -41,8 +41,8 @@ export const FRONTIER_APP_TEXTS = [
   'BattleHallScene_Text_No',
 ];
 
-/** Decomp SE_CONFIRM, SEQ_SE_DP_DECIDE, SEQ_SE_DP_BOX03 (the refusal). */
-const SE = { confirm: 1500, decide: 1501, refuse: 1525 } as const;
+/** Decomp SE_CONFIRM (SEQ_SE_DP_SELECT), SEQ_SE_DP_DECIDE, SEQ_SE_DP_BOX03 (the Hall's refusal), SEQ_SE_DP_UG_020 (the Hall's YES). */
+const SE = { confirm: 1500, decide: 1501, refuse: 1523, chosen: 1572 } as const;
 /** Decomp sInitialSelectionPokeballPositions, sExchangeSelectPokeballPositions. */
 const RENT_BALLS = [24, 64, 104, 144, 184, 224].map((x) => ({ x, y: 112 }));
 const SWAP_BALLS = [64, 120, 176].map((x) => ({ x, y: 112 }));
@@ -362,6 +362,7 @@ export function hallBoardScreen(ctx: MenuContext, request: HallBoardRequest): Sc
       page = 0;
       return;
     }
+    se(SE.chosen);
     return { close: { app: 'hall-board', cell: saved ?? cursor } };
   };
 

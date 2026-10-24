@@ -42,6 +42,8 @@ export interface ActorView {
   animTick: number;
   visible: boolean;
   emote: boolean;
+  /** 0.41.0. The emote is the '!!' (`NewGame.doubleExclamationSprite`). */
+  emoteDouble?: true;
   /** One-shot pose (sprite animation `pose-<pose>[-<facing>]`), with `animTick` counting from its start. */
   pose?: string;
   /**
@@ -121,6 +123,11 @@ export interface FieldView {
   fly?: FlySceneView;
   /** 0.29.0. Added to the camera's distance (world units) while Fly or Teleport zooms (decomp ov5_021F0EB0). */
   cameraDistance?: number;
+  /**
+   * 0.41.0. A camera that replaces the zone's and its player-following target (the Vista Lighthouse binoculars,
+   * decomp VistaLighthouseBinoculars_SetCamera): the camera record and its target in world units. Absent otherwise.
+   */
+  viewCamera?: { camera: import('./records.ts').Camera; target: Vec3 };
   zone: Id;
   matrix: Id;
   /**
@@ -482,7 +489,8 @@ export interface OverlayFrames {
   window: NineSliceArt;
 }
 
-export type DrawScriptOverlay = (ctx: CanvasRenderingContext2D, view: ScriptView, font: LoadedFont, scale: number, frames?: OverlayFrames) => void;
+/** `unown` (0.41.0): the font of a message with `font: 'unown'` (`NewGame.unownFont`). */
+export type DrawScriptOverlay = (ctx: CanvasRenderingContext2D, view: ScriptView, font: LoadedFont, scale: number, frames?: OverlayFrames, unown?: LoadedFont) => void;
 
 export interface LoadedFont {
   image: CanvasImageSource;

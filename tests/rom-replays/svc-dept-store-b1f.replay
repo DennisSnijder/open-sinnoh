@@ -111,7 +111,7 @@ advance text
 +1 release a
 until message
 +0 screenshot lava-cookie-paid
-+0 assert state records.counts {"35":200}
++0 assert state records.counts["35"] 200
 +0 assert state bag.medicine [{"item":"platinum:ITEM_LAVA_COOKIE","count":1}]
 +0 assert state money 19780
 +0 assert var platinum:VAR_DEPARTMENT_STORE_REGULAR_COUNTER 2

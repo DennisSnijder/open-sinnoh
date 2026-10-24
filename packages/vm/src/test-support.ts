@@ -157,6 +157,12 @@ export class FakeField implements FieldHost {
   greatMarshTramDone = () => true;
   greatMarshLookout = this.log('greatMarshLookout');
   greatMarshLookoutDone = () => true;
+  vistaBinoculars = this.log('vistaBinoculars');
+  vistaBinocularsDone = () => true;
+  startVsSeeker = this.log('startVsSeeker');
+  /** The Vs. Seeker's result the fake task reports (a test sets it). */
+  seekerResult: number | null = 0;
+  vsSeekerResult = () => this.seekerResult;
   honeyTreeStops = 0;
   stopHoneyTreeShaking(): void {
     this.honeyTreeStops++;

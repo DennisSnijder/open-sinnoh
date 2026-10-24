@@ -78,6 +78,8 @@ export interface Actor {
   motion: Motion | null;
   script: { steps: { op: string; count: number }[]; index: number; done: number } | null;
   emote: number;
+  /** The emote is the '!!' (MOVEMENT_ACTION_EMOTE_DOUBLE_EXCLAMATION_MARK). */
+  emoteDouble: boolean;
   /** The billboard's walk/run frame counter (DS draw updates, one per tick). */
   frames: SpriteAnim;
   /** One-shot sprite pose (ActorView.pose) and the ticks since it started; walks and turns end it. */
@@ -124,6 +126,7 @@ export function createActor(localId: number, sprite: Id | null, x: number, z: nu
     motion: null,
     script: null,
     emote: 0,
+    emoteDouble: false,
     frames: createSpriteAnim(),
     pose: null,
     poseTick: 0,
@@ -221,6 +224,7 @@ export function startAction(a: Actor, action: Action): void {
       return wait(a, action.ticks, 'script');
     case 'emote':
       a.emote = action.ticks;
+      a.emoteDouble = action.double;
       return wait(a, action.ticks, 'script');
     case 'visible':
       a.visible = action.visible;

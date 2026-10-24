@@ -1,8 +1,8 @@
 import { fixtureAudio } from '../../../tests/fixtures/audio.ts';
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_CLOCK, type Button, type Id } from '@opensinnoh/core';
+import { DEFAULT_CLOCK, eggCycleLength, RECORD_EGGS_HATCHED, RECORD_STEPS, type Button, type Id } from '@opensinnoh/core';
 import type { BillboardSprite, Prop, Registries } from '@opensinnoh/contracts';
-import { FakeRunner, f, newState, pos, registries, setup } from './testing.ts';
+import { FakeRunner, f, mon, newState, pos, registries, setup } from './testing.ts';
 import { HGSS_PLAYER_SPRITES, LOCALID_FOLLOWER, LOCALID_PLAYER } from '@opensinnoh/contracts';
 import { bgFacingMatches, createWorld, MOVEMENT_TYPE_FOLLOW_PLAYER, WARP_FADE_TICKS } from './world.ts';
 import { terrainHeight } from './terrain.ts';
@@ -49,6 +49,33 @@ describe('movement', () => {
     g.hold(['right'], 2 + 5 * 8);
     g.hold(['up'], 2 + 8 + 40);
     expect(pos(g.state)).toEqual([f('ROOM'), 18, 15, 'up']);
+  });
+
+  it('each step the player starts counts RECORD_STEPS; a bump into a wall does not (PlayerAvatar_IncrementStepsRecord)', () => {
+    const g = setup();
+    const steps = () => g.state.records.counts[RECORD_STEPS] ?? 0;
+    g.hold(['up'], 16);
+    expect(steps()).toBe(2);
+    g.tick();
+    // The table covers x 12..13, z 14..15: left from (14, 14) only bumps.
+    g.hold(['left'], 2 + 40);
+    expect(pos(g.state)).toEqual([f('ROOM'), 14, 14, 'left']);
+    expect(steps()).toBe(2);
+    g.hold(['down'], 8);
+    expect(steps()).toBe(3);
+  });
+
+  it('an egg that starts hatching counts RECORD_EGGS_HATCHED and the trainer score (Field_UpdateDaycare)', () => {
+    const g = setup();
+    const egg = { ...mon('SPECIES_MOSSLET', 1), isEgg: true, friendship: 0 };
+    g.state.party.push(egg);
+    g.state.daycare.stepCounter = eggCycleLength(g.state.gameTime.now.date, false) - 1;
+    const score = g.state.records.score;
+    g.hold(['up'], 8);
+    g.tick();
+    expect(g.scripts.starts.at(-1)?.label).toBe(f('Common_HatchEgg'));
+    expect(g.state.records.counts[RECORD_EGGS_HATCHED]).toBe(1);
+    expect(g.state.records.score).toBe(score + registries.newGame.get(f('NEW_GAME'))!.gameRecords.scoreIncrements[15]!);
   });
 
   it('runs (4 ticks per tile) with B only once the running shoes are obtained', () => {

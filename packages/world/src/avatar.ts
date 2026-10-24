@@ -129,6 +129,8 @@ export interface AvatarHost {
    * breaks: its break effect plays and the object is deleted, unsaved. Returns nothing; the slide goes on.
    */
   breakSnowball(x: number, z: number): void;
+  /** PlayerAvatar_IncrementStepsRecord: RECORD_STEPS grows by one. */
+  countStep(): void;
 }
 
 function inputDir(input: InputFrame): Facing | null {
@@ -588,10 +590,14 @@ export class Avatar {
       // MapObject_GetDeepSnowMovementAction: the underfoot snow slows the step (and stops running).
       const here = this.h.behaviour(p.x, p.z);
       const snow = here === 'SNOW_DEEPEST' ? WALK_SLOWER : here === 'SNOW_DEEPER' ? WALK_SLOW_TICKS : here === 'SNOW_DEEP' ? WALK_NORMAL_TICKS : null;
+      this.h.countStep();
       if (snow !== null) return this.started(() => this.step(dir, snow));
       return this.started(() => this.step(dir, run ? RUN_TICKS : WALK_NORMAL_TICKS, run ? 'run' : 'walk'));
     }
-    if (c === C.NONE || c === C.WATER) return this.started(() => this.step(dir, WALK_FAST));
+    if (c === C.NONE || c === C.WATER) {
+      this.h.countStep();
+      return this.started(() => this.step(dir, WALK_FAST));
+    }
     this.bump(dir);
   }
 
@@ -606,13 +612,15 @@ export class Avatar {
   private supportFloor(dir: Facing, input: InputFrame): void {
     const c = this.h.distortion()!.floorCollision(dir);
     if (!this.surfing) {
+      if (c !== C.NONE && !(c & C.JUMP_TWICE)) return this.bump(dir);
+      this.h.countStep();
       if (c & C.JUMP_TWICE) return this.distortionJump(dir);
-      if (c !== C.NONE) return this.bump(dir);
       const run = this.running(input);
       return this.started(() => this.step(dir, run ? RUN_TICKS : WALK_NORMAL_TICKS, run ? 'run' : 'walk'));
     }
-    if (c === C.NONE || c === C.WATER) return this.started(() => this.step(dir, WALK_FAST));
-    this.bump(dir);
+    if (c !== C.NONE && c !== C.WATER) return this.bump(dir);
+    this.h.countStep();
+    this.started(() => this.step(dir, WALK_FAST));
   }
 
   /**
@@ -630,6 +638,7 @@ export class Avatar {
       this.movingDir = dir;
       return;
     }
+    this.h.countStep();
     const s = uprightStep(surface, dir, !this.surfing && this.running(input));
     const move = () => walk3d(p, s.d, s.ticks, s.anim, 'input', s.face);
     // Only the surf branch starts a step (PlayerAvatar_StartStep).
@@ -676,13 +685,19 @@ export class Avatar {
     if (state === 'brake') return this.bikeBrake();
     const d = dir!;
     const c = this.collision(d);
+    // PlayerAvatar_IncrementStepsRecord: every bike step but the fourth gear's ramp.
     if (c & C.JUMP) {
       if (gear === 1) this.accelerate();
+      this.h.countStep();
       return this.started(() => this.ledge(d));
     }
-    if (c & C.JUMP_TWICE) return this.distortionJump(d);
+    if (c & C.JUMP_TWICE) {
+      this.h.countStep();
+      return this.distortionJump(d);
+    }
     if (c & C.BIKE_RAMP) {
       if (gear === 0) {
+        this.h.countStep();
         this.started(() => this.step(d, WALK_SLIGHTLY_FASTER));
         this.forced = true;
         return;
@@ -701,6 +716,7 @@ export class Avatar {
       this.speed = 0;
       return this.bump(d);
     }
+    this.h.countStep();
     if (gear === 0) {
       this.started(() => this.step(d, WALK_SLIGHTLY_FASTER));
       this.speed = 2;
