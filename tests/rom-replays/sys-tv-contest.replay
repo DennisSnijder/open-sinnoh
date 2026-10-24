@@ -1,0 +1,32 @@
+# Watching TV after a contest win (decomp scripts_contests.s Contests_LobbyOnTransition, scripts_tv_reporter_interviews.s,
+# scripts_tv_broadcast.s; scrcmd_tv_broadcast.c, ov6_022465FC.c, tv_segment.c): after the Normal Rank Cool Contest that
+# Staravia wins, the lobby shows the reporter (CheckTVInterviewEligible: the contest is pending); A on the reporter, YES,
+# the question, the answer (EVERYONE) in the Easy Chat app saves the Contest Hall segment. Then a TV in a house of
+# Canalave City at 11:30 on the Sunday, when programme 1 (the interviews) airs: the greeting, the lead-in, the Contest
+# Hall segment (the win), then the TV again: the farewell, then a commercial. The save keeps the segment and its play.
+from sys-contest-normal-cool.replay
+warp platinum:MAP_HEADER_CONTEST_HALL_LOBBY 18 14 up
+until idle
++0 assert state tv.pending.contest {"species":"platinum:SPECIES_STARAVIA","type":0,"rank":0,"placement":1}
++0 assert state objects[localId=7].x 18
++0 assert state records.score 7
+# The reporter: "May I do a quick interview?" YES
++0 press a
++1 release a
+advance text
+until yesno
++2 press a
++1 release a
+advance text 600
+until app easy-chat 600
++1 tap slot:0
++1 tap group:4
++1 tap word:6
++1 tap yes
+until app none
+advance text 600
+until idle 600
++0 assert state tv.pending.contest null
++0 assert state tv.interviews[0] {"data":{"kind":"contest","species":"platinum:SPECIES_STARAVIA","type":0,"rank":0,"placement":1,"word":1177},"plays":0}
+# TRAINER_SCORE_EVENT_TV_INTERVIEW_GIVEN
++0 assert state records.score 8
