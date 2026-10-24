@@ -26,7 +26,7 @@ import { poffinCase, poffinCooking, poffinFeed } from './poffin.ts';
 import { mining, miningPrompt, undergroundBase, undergroundMenu, undergroundPc, undergroundTrap, undergroundVendor } from './underground.ts';
 import { contestApp } from './contest.ts';
 import { contestDance } from './contest-dance.ts';
-import { contestPhoto } from './contest-visual.ts';
+import { contestPhoto, galleryDressUp, galleryPhoto } from './contest-visual.ts';
 import { capsuleEditor } from './capsule.ts';
 import { slots } from './slots.ts';
 import { arcadeApp, castleApp, factoryApp, hallBoard } from './frontier.ts';
@@ -192,6 +192,10 @@ export function drawApp(d: DrawContext, v: AppView): Drawn {
       return contestApp(d, v);
     case 'contest-photo':
       return { kind: 'mart', root: contestPhoto(d, v) };
+    case 'gallery-dress-up':
+      return { kind: 'mart', root: galleryDressUp(d, v) };
+    case 'gallery-photo':
+      return { kind: 'mart', root: galleryPhoto(d, v) };
     case 'capsule-editor':
       return { kind: 'mart', root: capsuleEditor(d, v) };
     case 'factory':

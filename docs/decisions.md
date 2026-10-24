@@ -472,6 +472,16 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
 - **The acting screen** is the DS main screen as one canvas; the touch screen's move and judge menus are a card over
   the stage while the player chooses (its own place under the stage on phones in portrait), and the judge buttons
   carry the judges' voltage meters, which the card covers.
+- **The TV** (docs/research/tv.md) is the DS's field message box, as on the DS: no TV screen app exists in Platinum.
+  Its saved block is `GameState.tv` (schema v23) without the Wi-Fi episodes; segment data is typed per segment (a
+  tagged union) instead of the DS's 40-byte unions, so saves validate it. The recorders are shared state edits in
+  contracts (like the journal's), called at the decomp's hooks in the world, VM, menus and game; the broadcast is a
+  services module the VM's `call_tv_broadcast` drives. Its MTRNG and LCRNG draws are the main stream's, in the DS's
+  order, so a watch replays exactly. The DS's quirk of excluding played segments only up to the first ineligible one
+  is kept.
+- **The TV gallery's dress-up** shares the visual round's case and stage (menus `contest/dress-up.ts`) behind a gallery
+  flag, as overlay022 does, rather than a copy; the app writes `dressUpPhotos[0]` itself at its exit as
+  `ov22_02256098` does, and the script sets the title. Offline only slot 0 is ever filled (the rest is record mixing).
 - **Offline equivalences:** without a link, the decomp's comm syncs pass at once and `message_synchronized` is a plain
   message (ScrCmd_MessageSynchronized without CommSys); HBlank start/stop and the network icon do nothing here.
 

@@ -37,6 +37,7 @@ import { undergroundBaseScreen } from './ug-base.ts';
 import { undergroundPcScreen } from './ug-pc.ts';
 import { contestScreen } from './contest/contest.ts';
 import { contestPhotoScreen } from './contest/photo.ts';
+import { galleryDressUpScreen, galleryPhotoScreen } from './gallery.ts';
 import { capsuleEditorScreen } from './capsule-editor.ts';
 import { sealMartScreen } from './seal-mart.ts';
 import { factoryScreen, hallBoardScreen } from './frontier.ts';
@@ -122,6 +123,10 @@ export const createApp: CreateApp = (request, deps) => {
       return new AppStack(contestScreen(ctx), { app: 'contest' });
     case 'contest-photo':
       return new AppStack(contestPhotoScreen(ctx, request.slot), { app: 'contest-photo' });
+    case 'gallery-dress-up':
+      return new AppStack(galleryDressUpScreen(ctx, request.slot, request.first), { app: 'gallery-dress-up', saved: false });
+    case 'gallery-photo':
+      return new AppStack(galleryPhotoScreen(ctx, request.slot), { app: 'gallery-photo' });
     case 'capsule-editor':
       return new AppStack(capsuleEditorScreen(ctx), { app: 'capsule-editor' });
     case 'factory':

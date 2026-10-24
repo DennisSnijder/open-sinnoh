@@ -32,7 +32,7 @@ function run(kind: BattleKind, outcome: BattleOutcome): string[] {
       step: () => void ticks++,
       choose: () => {},
       view: () => ({ battlers: [] }) as unknown as BattleView,
-      done: () => (ticks >= 2 ? { outcome, turns: 1, party: deps.party, money: deps.money, bag: deps.bag, caught: null, seen: [], levelled: [] } : null),
+      done: () => (ticks >= 2 ? { outcome, turns: 1, ballsThrown: 0, party: deps.party, money: deps.money, bag: deps.bag, caught: null, seen: [], levelled: [] } : null),
       app: () => null,
       appDone: () => {},
     };

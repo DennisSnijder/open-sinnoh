@@ -1,5 +1,5 @@
 import { calcStats, Prng, randomIvs, randomPid, type Id } from '@opensinnoh/core';
-import { dexOf, ROAMING_SLOTS, type BattleOutcome, type BattleResult, type GameState, type Registries, type Roamer, type WildSpec } from '@opensinnoh/contracts';
+import { dexOf, ROAMING_ROUTES, ROAMING_SLOTS, type BattleOutcome, type BattleResult, type GameState, type Registries, type Roamer, type WildSpec } from '@opensinnoh/contracts';
 
 /**
  * The roaming Pokémon (decomp src/roaming_pokemon.c, special_encounter.c, overlay006/roamer_after_battle.c and the
@@ -9,14 +9,6 @@ import { dexOf, ROAMING_SLOTS, type BattleOutcome, type BattleResult, type GameS
  * yet). CONTINUE scatters them (`roamersOnContinue`, RoamingPokemon_RandomizeAllLocations), from the title's CONTINUE
  * only (a plain load, as in replays' round trips, does not), and so do Fly and Teleport (mapchange.ts onFlyOrTeleport).
  */
-
-/** Decomp RoamingPokemonRoutes, in RoamerRouteIndex order (RI_*): the map headers a roamer can be on. */
-const ROUTES = [
-  'ROUTE_201', 'ROUTE_202', 'ROUTE_203', 'ROUTE_204_SOUTH', 'ROUTE_204_NORTH', 'ROUTE_205_SOUTH', 'ROUTE_205_NORTH', 'ROUTE_206',
-  'ROUTE_207', 'ROUTE_208', 'ROUTE_209', 'ROUTE_210_SOUTH', 'ROUTE_210_NORTH', 'ROUTE_211_WEST', 'ROUTE_211_EAST', 'ROUTE_212_NORTH',
-  'ROUTE_212_SOUTH', 'ROUTE_213', 'ROUTE_214', 'ROUTE_215', 'ROUTE_216', 'ROUTE_217', 'ROUTE_218', 'ROUTE_219', 'ROUTE_220', 'ROUTE_221',
-  'ROUTE_222', 'VALLEY_WINDWORKS_OUTSIDE', 'FUEGO_IRONWORKS_OUTSIDE',
-].map((n) => `MAP_HEADER_${n}`);
 
 /**
  * Decomp sNearbyRoutes, by route index: the routes a roamer moves to (adjacent ones and the routes of adjacent
@@ -60,7 +52,7 @@ function routeZones(reg: Registries): Id[] {
   let zones = routeCache.get(reg.zones);
   if (!zones) {
     const byName = new Map([...reg.zones.keys()].map((id) => [local(id), id]));
-    zones = ROUTES.map((name) => {
+    zones = ROAMING_ROUTES.map((name) => {
       const id = byName.get(name);
       if (!id) throw new Error(`roamers: no zone ${name} (the roaming route list)`);
       return id;

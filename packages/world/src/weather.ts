@@ -1,4 +1,4 @@
-import type { Id } from '@opensinnoh/core';
+import { yearlyDayIndex, type Id } from '@opensinnoh/core';
 import type { Registries, Weather, Zone } from '@opensinnoh/contracts';
 
 /**
@@ -17,22 +17,7 @@ export const WEATHER_DARK_FLASH = 16;
 export const FLAG_FLASH_ACTIVE = 2426;
 export const FLAG_DEFOG_ACTIVE = 2427;
 
-const DAYS_BEFORE_MONTH = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-
-const isLeap = (y: number) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
-
-/**
- * Index into a 366-entry yearly table (Jan 1 = 0, Feb 29 = 59, Dec 31 = 365): a non-leap year skips Feb 29
- * (DayNumberForDate − 1, plus one after February when the year is not a leap year).
- */
-export function yearlyDayIndex(date: string): number {
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
-  if (!m) throw new Error(`world: invalid date ${JSON.stringify(date)}`);
-  const [year, month, day] = [Number(m[1]), Number(m[2]), Number(m[3])];
-  // DayNumberForDate counts Feb 29 in a leap year; FieldSystem_GetWeather skips it in other years.
-  const before = DAYS_BEFORE_MONTH[month - 1]! + (month > 2 && isLeap(year) ? 1 : 0);
-  return before + day - 1 + (month > 2 && !isLeap(year) ? 1 : 0);
-}
+export { yearlyDayIndex } from '@opensinnoh/core';
 
 export function weatherBySource(reg: Registries, value: number): Weather {
   for (const w of reg.weathers.values()) if (w.sourceIndex === value) return w;

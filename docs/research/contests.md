@@ -30,7 +30,7 @@ practice receptionist did the same without the prize.
 | Saves | schema v20 `contestPhotos` | the winner photo per type, with the visual round's outfit |
 | Photo frames | menus `contest/photo.ts`, vm `scr_cmd_0a8` | the lobby's frames show a type's winner photo (§5.8) |
 
-Still stubs: the TV segment (`tv:contest-hall`), link ops.
+Still stubs: link ops. The Contest Hall's TV segment and its reporter are the TV's ([tv.md](tv.md)).
 
 **Placeholder rounds** (none in use now). Each logs `contest:placeholder:<round>` once ("contest round visual: placeholder …"), counted
 in the stub log, and `CONTEST_ROUNDS_STATUS` (vm coverage.ts) puts them in the coverage report
@@ -758,8 +758,8 @@ and keep the draws on `ctx.rng` in the decomp's order.
 
 - **Visual:** done (§5.8). It was: the dress-up app (overlay022: Fashion Case accessories, the rank's limit, the 1800-frame timer, the
   backdrop), the dress-up points from `ContestTables.themes`, the scoring presentation (§5), the NPC outfits from
-  `dressUps`, the outfit into `outcome.outfit` (the winner photo), and the lobby's photo viewer (`scr_cmd_0a8`) and the
-  Jubilife TV gallery if wanted. Import imageclip.narc and contest_bg/obj art.
+  `dressUps`, the outfit into `outcome.outfit` (the winner photo), and the lobby's photo viewer (`scr_cmd_0a8`); the
+  Jubilife TV gallery is built on it ([tv.md](tv.md) §5). Import imageclip.narc and contest_bg/obj art.
 - **Dance:** built (§6.8).
 - **Acting:** built (§7.8). Replays: `sys-contest-normal-cool` (by touch), `sys-contest-practice-acting` (keys and
   touch, with the move menu's EXIT).

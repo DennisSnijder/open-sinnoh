@@ -19,6 +19,11 @@ import {
   newGameRecord,
   newFashionCase,
   newSealCase,
+  newTvState,
+  tvCatch,
+  tvDaily,
+  tvTimeSlot,
+  DRESS_UP_PHOTOS,
   storeInBox,
   trainerIdFor,
   type AppHost,
@@ -292,7 +297,7 @@ export function newGameState(record: NewGame, registries: Pick<Registries, 'zone
   const fieldRng = new Prng(fieldSeed(seed));
   const dailyRandom = newDailyRandom(fieldRng.next());
   return {
-    schemaVersion: 22,
+    schemaVersion: 23,
     packs: order.map((p) => ({ ...p })),
     names: { ...(options?.names ?? record.names) },
     gender: options?.gender ?? record.gender,
@@ -342,6 +347,8 @@ export function newGameState(record: NewGame, registries: Pick<Registries, 'zone
     sealCase: newSealCase(),
     contestPhotos: [null, null, null, null, null],
     journal: [],
+    tv: newTvState(),
+    dressUpPhotos: Array.from({ length: DRESS_UP_PHOTOS.count }, () => null),
   };
 }
 
@@ -550,7 +557,7 @@ export function createGame(options: GameOptions): Game {
       if (setup.kind === 'wild' && wildBattles === 'flee') {
         log.stub('battle:wild-flee', 'replay "wild flee": the wild Pokémon is met and the player flees without a battle');
         battleLog({ kind: 'wild', trainers: [], species: setup.wild.map((w) => w.species), result: 'fled' });
-        lastResult = { outcome: 'fled', turns: 0, party: state.party, money: state.money, bag: state.bag, caught: null, seen: [], levelled: [] };
+        lastResult = { outcome: 'fled', turns: 0, ballsThrown: 0, party: state.party, money: state.money, bag: state.bag, caught: null, seen: [], levelled: [] };
         return;
       }
       // Decomp: a wild Pokémon is seen when the battle starts.
@@ -678,6 +685,7 @@ export function createGame(options: GameOptions): Game {
   const onDaily = (days: number) => {
     if (hasFieldSystems(registries)) dailyEvents(registries, state, days, villaDaily(registries, state));
     elapsePokerus(state.party, days);
+    tvDaily(state);
     // Underground_HandleDailyEvents: buried spheres grow, the seed moves on, new spots are due.
     if (state.underground) undergroundDaily(state.underground, days);
   };
@@ -939,6 +947,12 @@ export function createGame(options: GameOptions): Game {
       // Decomp encounter.c UpdateGameRecords: only after a battle the player did not lose (CheckPlayerWonEncounter).
       if (result.outcome !== 'lost' && result.outcome !== 'draw') scoreBattle(state, registries, b.setup.kind, result.outcome, result.caught?.mon.species ?? null);
       journalBattle(b.setup, result);
+      // Decomp encounter.c: after a wild, roamer or AI-partner battle (not the Safari Game's or the tutorial's), the
+      // Catch That Pokémon Show (FieldSystem_SaveTVSegment_CatchThatPokemonShow).
+      if (b.setup.kind === 'wild' || b.setup.kind === 'static' || b.setup.kind === 'legendary') {
+        const m = result.caught?.mon;
+        tvCatch(state, result.outcome, result.ballsThrown, m ? { species: m.species, ball: m.ball, nickname: m.nickname } : null);
+      }
       // The field's return (decomp encounter.c FieldTransition_StartMap → FieldMap_Init), for every field battle:
       // unless the player lost or drew (the tutorial whatever its result), the field is rebuilt, which runs the
       // zone's on-load and on-resume scripts before the battle's script goes on. Scripts rely on it with
@@ -1274,6 +1288,7 @@ export function createGame(options: GameOptions): Game {
         (days) => {
           if (hasFieldSystems(registries)) dailyEvents(registries, next, days, villaDaily(registries, next));
           if (next.underground) undergroundDaily(next.underground, days);
+          tvDaily(next);
         },
         (minutes) => timedEvents(registries, next, minutes, clock()),
       );
@@ -1325,12 +1340,13 @@ export function reloadGame(game: Game, options: GameOptions): Game {
 /**
  * Decomp sub_02055B64, the minutes that passed: the berry patches grow (BerryPatches_ElapseTime), the honey trees count
  * down (SpecialEncounter_DecrementHoneyTreeTimers), then the night turns party Sky Forme Shaymin back to Land
- * (Party_SetShayminForm). The TV slot is `updateGameTime`'s stub.
+ * (Party_SetShayminForm), with the TV's slot between (TVBroadcast_UpdateProgramTimeSlot).
  */
 function timedEvents(registries: Registries, state: GameState, minutes: number, now: ClockTime): void {
   const berries = newGameRecord(registries).berries;
   if (berries) elapseBerryMinutes(berries, state.berryPatches, minutes);
   if (state.encounters) elapseHoneyTrees(state.encounters, minutes);
+  tvTimeSlot(state, minutes, now.minute);
   shayminClockRevert(registries, state.party, minutes, now);
 }
 

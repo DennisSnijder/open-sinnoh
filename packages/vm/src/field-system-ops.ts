@@ -1,7 +1,7 @@
 /** Native command semantics: scrcmd_jubilife_lottery.c, scrcmd.c (1C1..1C5, 277..27B,
  * 2B5), overlay005/size_contest.c, overlay005/vs_seeker.c, revision 1dc13dc. */
-import { FIELD_VARS, initDailyLevel, lotteryWinner, nextFieldRandom, randomizeLottery, readSystemVar, rematchTrainer, sizeFactor, sizeInTenths, writeSystemVar, type Id } from '@opensinnoh/core';
-import { newGameRecord } from '@opensinnoh/contracts';
+import { FIELD_VARS, initDailyLevel, lotteryWinner, nextFieldRandom, randomizeLottery, readSystemVar, rematchTrainer, sizeFactor, sizeInMillimetres, sizeInTenths, writeSystemVar, type Id } from '@opensinnoh/core';
+import { newGameRecord, saveTvSegment } from '@opensinnoh/contracts';
 import type { Handler, Runner } from './runner.ts';
 
 export function fieldSystemHandlers(r: Runner): Record<string, Handler> {
@@ -45,7 +45,11 @@ export function fieldSystemHandlers(r: Runner): Record<string, Handler> {
       const record = sizeOf(mon.species, readSystemVar(r.registries, r.state, FIELD_VARS.size));
       // generated/size_contest_results.txt: SMALLER, SAME_SIZE, LARGER.
       r.setVar(t, r.ref(a[0], 'var'), value === record ? 1 : value > record ? 2 : 0);
-      if (value > record) r.log.stub('tv:size-contest', 'size record TV segment is not recorded yet');
+      // sub_0206DC6C: a new record is the TV's, in millimetres.
+      if (value > record) {
+        const height = r.registries.species.get(mon.species)!.dex!.height;
+        saveTvSegment(r.state, { kind: 'size', species: mon.species, size: sizeInMillimetres(newGameRecord(r.registries).sizeIntervals!, height, sizeFactor(mon)) });
+      }
       return 'continue';
     },
     buffer_size_contest_record: (t, _c, a) => {

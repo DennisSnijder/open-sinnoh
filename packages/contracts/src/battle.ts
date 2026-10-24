@@ -139,6 +139,8 @@ export interface BattleResult {
   outcome: BattleOutcome;
   /** Turns played (the turn counter at the end). */
   turns: number;
+  /** 0.42.0. Balls thrown at a wild Pokémon (decomp BattleSystem ballsThrown; the TV's Catch That Pokémon Show). */
+  ballsThrown: number;
   /** The party after the battle (HP, PP, status, exp, level, stats, moves, EVs, friendship), same order. */
   party: Pokemon[];
   /** The player's money after the prize or the loss penalty (decomp BtlCmd_PayPrizeMoney; 0.14.0). */

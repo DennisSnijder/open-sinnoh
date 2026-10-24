@@ -36,7 +36,7 @@ export class FishingTask {
   private ticks = 34;
   private caught = false;
   constructor(
-    private rod: 0 | 1 | 2,
+    readonly rod: 0 | 1 | 2,
     private roll: WildRoll | null,
     private next: () => number,
     private notice: (name: string) => void,

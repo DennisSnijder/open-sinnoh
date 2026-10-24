@@ -301,6 +301,14 @@ export type AppRequest =
   | { app: 'contest' }
   /** 0.35.1. Decomp ScrCmd_0A8 (the lobby's frames): the contest photo of type `slot` (`GameState.contestPhotos`). */
   | { app: 'contest-photo'; slot: number }
+  /**
+   * 0.42.0. Decomp ScrCmd_0A6 (the Jubilife TV gallery): party slot `slot`'s Pokémon in the gallery's dress-up
+   * (`GalleryDressUpView`); `first` (FLAG_ENTERED_DRESSING_ROOM was unset) shows bank 385 message 47 first. A save writes
+   * `GameState.dressUpPhotos[0]` (without a title) and the trainer score.
+   */
+  | { app: 'gallery-dress-up'; slot: number; first: boolean }
+  /** 0.42.0. Decomp ScrCmd_ShowDressUpPhoto: the gallery photo in `GameState.dressUpPhotos[slot]` (`GalleryPhotoView`). */
+  | { app: 'gallery-photo'; slot: number }
   /** Decomp ScrCmd_OpenSealCapsuleEditor (the PC's BALL CAPSULES): the Ball Capsule editor (contracts `CapsuleEditorView`). */
   | { app: 'capsule-editor' }
   /** 0.37.0. Decomp ScrCmd_267: the Game Corner's slot machine (`SlotsRequest`). */
@@ -429,6 +437,10 @@ export type AppResult =
   | { app: 'contest' }
   /** 0.35.1. The photo viewer closed. */
   | { app: 'contest-photo' }
+  /** 0.42.0. The gallery's dress-up closed; `saved`: the photo was saved (the script's var is 1). */
+  | { app: 'gallery-dress-up'; saved: boolean }
+  /** 0.42.0. The gallery's photo viewer closed. */
+  | { app: 'gallery-photo' }
   | { app: 'capsule-editor' }
   /** 0.37.0. The slot machine closed (`SlotsResult`). */
   | import('./slots.ts').SlotsResult
@@ -579,6 +591,8 @@ export type AppView =
   | import('./underground.ts').UndergroundPcView
   | import('./contests.ts').ContestView
   | import('./contests.ts').ContestPhotoView
+  | import('./contests.ts').GalleryDressUpView
+  | import('./contests.ts').GalleryPhotoView
   | import('./seals.ts').CapsuleEditorView
   | import('./frontier.ts').FactoryView
   | import('./frontier.ts').HallBoardView

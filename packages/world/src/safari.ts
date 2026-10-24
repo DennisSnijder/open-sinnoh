@@ -5,7 +5,7 @@
  * script op `start_end_safari_game`; the tables come from `NewGame.greatMarsh`.
  */
 import { marshDailyOf, type Id } from '@opensinnoh/core';
-import { firstFreeBox, newGameRecord, type BattleResult, type EncounterTable, type GameState, type GreatMarshTables, type Registries } from '@opensinnoh/contracts';
+import { tvSafariCatch, firstFreeBox, newGameRecord, type BattleResult, type EncounterTable, type GameState, type GreatMarshTables, type Registries } from '@opensinnoh/contracts';
 
 /** Decomp ScrCmd_StartEndSafariGame: the balls a game starts with. */
 export const SAFARI_BALLS = 30;
@@ -69,7 +69,10 @@ export function afterSafariBattle(reg: Registries, state: GameState, result: Bat
   if (!g || !state.safari || result.safariBalls === undefined) throw new Error('safari: a Safari battle ended outside a Safari Game');
   const s = state.safari;
   s.balls = result.safariBalls;
-  if (result.outcome === 'caught') s.caught = Math.min(0xffff, s.caught + 1);
+  if (result.outcome === 'caught') {
+    tvSafariCatch(state, result.caught!.mon.species, s.caught);
+    s.caught = Math.min(0xffff, s.caught + 1);
+  }
   if (s.balls === 0) return result.outcome === 'caught' ? { warp: false, label: g.labels.outOfBalls } : { warp: true, label: g.labels.outOfBallsBattle };
   if (firstFreeBox(state) === null && state.party.length >= 6) return { warp: false, label: g.labels.noRoom };
   return { warp: false, label: null };

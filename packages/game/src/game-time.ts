@@ -18,7 +18,7 @@ export function newGameTime(now: ClockTime): GameTime {
  * events (FieldSystem_HandleDailyEvents); a clock behind `now` moves `now` back with nothing else; whole
  * minutes forward count the penalty down (GameTime_DecrementPenalty, capped at 24 h first) and run the
  * timed events (sub_02055B64: berries, honey trees, the TV slot, Shaymin), then move `now` on.
- * The callback runs the implemented daily events; the remaining daily and timed systems stay counted stubs.
+ * The callbacks run the implemented daily and timed events; the remaining daily ones stay a counted stub.
  */
 export function updateGameTime(t: GameTime, clock: ClockTime, log: StubLog, onDaily?: (days: number) => void, onMinutes?: (minutes: number) => void): void {
   const was = clockSeconds(t.now);
@@ -32,12 +32,12 @@ export function updateGameTime(t: GameTime, clock: ClockTime, log: StubLog, onDa
   // events run once per day even when less than a minute passed.
   const newDay = clockDay(clock) > clockDay(t.now);
   if (newDay && onDaily) onDaily(clockDay(clock) - clockDay(t.now));
-  if (newDay) log.stub('clock:daily-events', 'remaining daily events (TV, the Jubilife lottery trainer sync, …) are not implemented');
+  if (newDay) log.stub('clock:daily-events', 'remaining daily events (the Jubilife lottery trainer sync, …) are not implemented');
   if (minutes > 0) {
     t.penaltyMinutes = Math.max(0, Math.min(t.penaltyMinutes, PENALTY_MINUTES) - minutes);
-    // Decomp sub_02055B64: the berry patches, the honey trees and Shaymin's Sky Forme (onMinutes) are real; the rest is not.
+    // Decomp sub_02055B64: the berry patches, the honey trees, the TV slot and Shaymin's Sky Forme (onMinutes); the
+    // Underground gift penalty is link-only.
     onMinutes?.(minutes);
-    log.stub('clock:timed-events', 'minutes passed: the TV time slot is not implemented (the Underground gift penalty is link-only)');
   }
   if (minutes > 0 || newDay) t.now = { ...clock };
 }

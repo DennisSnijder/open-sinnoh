@@ -1179,6 +1179,11 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
       art: opt(obj({ male: ref('ui2d'), female: ref('ui2d') })),
       martExcluded: obj({ label: int(0, 0xffff), zones: arr(ref('zones')) }),
     }, (v) => ((v.pageTurn as number[][]).length !== 9 || (v.pageTurn as number[][]).some((r) => r.length !== 32) ? 'journal.pageTurn must be 9 steps of 32 columns' : undefined))),
+    // 0.41.0: the TV schedule (contracts TvTables): 96 quarter hours × 7 days of programmes 1–9, the 9 programmes.
+    tv: opt(obj({
+      schedule: arr(arr(int(1, 9))),
+      programs: arr(obj({ type: int(1, 5), segments: arr(int(1, 26)) })),
+    }, (v) => ((v.schedule as number[][]).length !== 96 || (v.schedule as number[][]).some((d) => d.length !== 7) || (v.programs as unknown[]).length !== 9 ? 'tv must have 96 × 7 slots and 9 programmes' : undefined))),
     // 0.37.0: the diplomas' documents and texts.
     diploma: opt(obj({ sinnoh: ref('ui2d'), national: ref('ui2d'), texts: obj({ player: ref('texts'), sinnoh: ref('texts'), national: ref('texts'), credit: ref('texts') }) })),
   }, (v) => {

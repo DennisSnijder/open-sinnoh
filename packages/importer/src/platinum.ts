@@ -47,6 +47,7 @@ import { readZoneHeaders, type ZoneHeader } from './formats/zone-headers.ts';
 import { charTable, Names, type CharmapFile, type NamesFile } from './names.ts';
 import { convertBaseCursor, readUndergroundTables } from './underground.ts';
 import { readContestTables } from './contests.ts';
+import { readTvTables } from './tv.ts';
 import { readSealTables, SEAL_TYPE_SIZE } from './seals.ts';
 import { LIGHT_SHOW, readSlotTables, readSpriteMembers, SLOT_PRIZES } from './slots.ts';
 import { ACTING_MESSAGES, AI_RULE_SIZE, AI_RULES, BUTTON_PALETTES, CONTEST_EFFECTS, EFFECT_CLASS_SIZE, EFFECT_SIZE, readActingTables } from './contest-acting.ts';
@@ -1687,6 +1688,8 @@ export async function importPlatinum(
     const bank = (name: string) => textBanks[bankIndex(name)]!.id;
     const classIndex = names.file.trainerClasses.indexOf('TRAINER_CLASS_RIVAL');
     if (classIndex < 0) throw new ImportError('names: no TRAINER_CLASS_RIVAL');
+    // The TV schedule (tv.ts).
+    newGame.tv = readTvTables(fs.file('/arc/tv.narc'));
     newGame.journal = readJournalTables(await table('journalGyms'), await table('journalBuildings'), await table('journalPageTurn'), {
       flag: flag('FLAG_JOURNAL_ACQUIRED'),
       caveDeparted: ['LocationNames_Text_ValleyWindworks', 'LocationNames_Text_SnowpointTemple', 'LocationNames_Text_FuegoIronworks'].map(label),
