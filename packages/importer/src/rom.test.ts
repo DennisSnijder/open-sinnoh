@@ -32,7 +32,7 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
     expect(pack.manifest).toMatchObject({ id: 'platinum', version: '0.1.0', engine: '^0.1.0' });
     expect(pack.provenance).toBe('rom-derived');
     expect([...stages]).toEqual(['verify', 'text', 'sound', 'zones', 'maps', 'data', 'scripts', 'assets', '2d art']);
-    expect(report.counts).toMatchObject({ zones: 593, matrices: 292, chunks: 666, areas: 75, props: 527, cameras: 17, lights: 4, models: 1365, sprites: 464, weathers: 36, fieldEffects: 99, fonts: 1, titleScreens: 1, species: 496, trainers: 928, ui2d: 1632, pokemonSprites: 494, trainerSprites: 105, battleBackgrounds: 23, battleTerrains: 24, aiScripts: 1, battleAnimations: 518, particleSystems: 583, battleAnimData: 1 });
+    expect(report.counts).toMatchObject({ zones: 593, matrices: 292, chunks: 666, areas: 75, props: 527, cameras: 17, lights: 4, models: 1365, sprites: 464, weathers: 36, fieldEffects: 99, fonts: 1, titleScreens: 1, species: 496, trainers: 928, ui2d: 1635, pokemonSprites: 494, trainerSprites: 105, battleBackgrounds: 23, battleTerrains: 24, aiScripts: 1, battleAnimations: 518, particleSystems: 583, battleAnimData: 1 });
     expect(report.unknowns.char).toBeUndefined();
   });
 
@@ -268,6 +268,7 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
         slots: expect.objectContaining({ modes: expect.toSatisfy((m: unknown[]) => m.length === 12) }),
         villa: expect.any(Object),
         journal: expect.objectContaining({ gyms: expect.toSatisfy((g: unknown[]) => g.length === 8) }),
+        tv: expect.objectContaining({ programs: expect.toSatisfy((p: unknown[]) => p.length === 9) }),
         diploma: expect.objectContaining({ sinnoh: 'platinum:ui2d/diploma/sinnoh', national: 'platinum:ui2d/diploma/national' }),
         contestHallFlag: 'platinum:FLAG_CONTEST_HALL_VISITED',
         // The contests' tables (tests/integration/contests.rom.test.ts checks them).
