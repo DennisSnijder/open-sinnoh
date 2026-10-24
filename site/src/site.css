@@ -130,24 +130,74 @@ ol, ul { margin: 0; padding: 0; list-style: none; }
 .note { display: flex; gap: 12px; align-items: flex-start; margin-top: 32px; max-width: 72ch; font-size: 14px; line-height: 20px; color: var(--os-muted); }
 .note .os-ico { flex: none; margin-top: 2px; }
 
-/* The engine: the ROM's one trip, then what the engine makes possible. */
-.flow { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 16px; }
-.flow .os-win { display: grid; gap: 4px; padding: 12px 16px 16px; }
-.flow .os-num { color: var(--os-ink); }
-.flow .os-win span:last-child { color: var(--os-muted); }
-.flow .arrow { display: grid; place-items: center; color: var(--os-muted); }
-.perks { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px 32px; margin-top: 48px; }
+/* The engine: what the engine gives you, three by two. */
+.perks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 32px; }
 .perks li { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 4px 12px; align-items: start; align-content: start; }
 .perks .os-ico { margin-top: 4px; color: var(--os-ink); }
 .perks b { font: 500 20px/24px var(--os-font-px); }
 .perks span { grid-column: 2; font-size: 14px; line-height: 20px; color: var(--os-muted); }
-@media (max-width: 1023px) { .perks { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 719px) {
-  .flow { grid-template-columns: minmax(0, 1fr); gap: 8px; }
-  .flow .arrow { rotate: 90deg; }
-  .perks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
+@media (max-width: 719px) { .perks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 479px) { .perks { grid-template-columns: minmax(0, 1fr); } }
+
+/* Features: the visual style side by side (stacked on a phone), four scenes, then a list of the rest. */
+.compare { margin: 16px 0 0; padding: 0 8px 16px; }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.side img { width: 100%; height: auto; aspect-ratio: 16 / 9; background: var(--os-face-alt); }
+.lbl { margin-top: 8px; padding-left: 4px; font: 500 20px/24px var(--os-font-px); text-shadow: var(--os-tsd); }
+.lbl .plus { color: var(--os-muted); }
+.cap { margin-top: 12px; padding-left: 4px; max-width: 80ch; font-size: 14px; line-height: 20px; color: var(--os-muted); }
+@media (max-width: 719px) { .pair { grid-template-columns: minmax(0, 1fr); gap: 16px; } }
+
+.showcase { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin-top: 48px; }
+.showcase > li { display: grid; }
+.showcase .shot p { padding: 8px 8px 12px; font-size: 14px; line-height: 20px; color: var(--os-muted); }
+@media (max-width: 1023px) { .showcase { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 479px) { .showcase { gap: 16px; } .band .showcase .os-tab { font-size: 16px; line-height: 20px; } .showcase .wide { display: none; } }
+
+.extras { margin-top: 56px; padding: 0 16px 16px; }
+.extras ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 32px; padding: 8px 4px 0; }
+.extras li { display: grid; gap: 4px; align-content: start; }
+.extras b { font: 500 20px/24px var(--os-font-px); text-shadow: var(--os-tsd); }
+.extras li span { font-size: 14px; line-height: 20px; color: var(--os-muted); }
+@media (max-width: 899px) { .extras ul { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 479px) { .extras ul { grid-template-columns: minmax(0, 1fr); gap: 12px; } .extras { padding: 0 12px 16px; } }
+
+/* Under the hood: four stages left to right with arrows between (top to bottom below 1100 px). */
+.pipe { display: grid; grid-template-columns: minmax(0, 0.8fr) 16px minmax(0, 1.2fr) 16px minmax(0, 1.6fr) 16px minmax(0, 0.8fr); gap: 0 12px; align-items: stretch; }
+.stage { display: flex; flex-direction: column; gap: 12px; padding: 0 16px 16px; margin-top: 16px; }
+.stage .os-tab { margin-bottom: 0; }
+.stage > p { font-size: 14px; line-height: 20px; color: var(--os-muted); }
+.go { display: grid; place-items: center; padding-top: 16px; color: var(--os-muted); }
+.file { display: flex; align-items: center; gap: 8px; padding: 8px 12px; box-shadow: inset 0 0 0 2px var(--os-edge); background: var(--os-face-alt); }
+.stage > p.file { font: 12px/16px var(--os-font-mono); color: var(--os-ink); }
+.conv { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+.conv li { display: grid; padding: 4px 8px 6px; background: var(--os-face-alt); box-shadow: inset 0 0 0 2px var(--os-line); }
+.conv b { font: 500 16px/20px var(--os-font-px); }
+.conv span { font-size: 12px; line-height: 16px; color: var(--os-muted); }
+.stage > p.pack { display: flex; gap: 8px; margin-top: auto; padding-top: 12px; border-top: 2px solid var(--os-line); color: var(--os-ink); }
+.pack .os-ico { flex: none; margin-top: 2px; }
+.parts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.parts li { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px 10px; background: var(--os-face-alt); box-shadow: inset 0 0 0 2px var(--os-edge); }
+.parts b { font: 500 20px/24px var(--os-font-px); }
+.parts span { font-size: 14px; line-height: 20px; color: var(--os-muted); }
+.parts code, .note code { font: 12px/16px var(--os-font-mono); color: var(--os-ink); }
+.parts code { margin-top: auto; padding-top: 4px; color: var(--os-muted); }
+@media (max-width: 1099px) {
+  .pipe { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .go { padding: 12px 0 0; rotate: 90deg; }
+  .conv { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .parts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 719px) { .conv { grid-template-columns: repeat(2, minmax(0, 1fr)); } .parts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 479px) { .stage { padding: 0 12px 12px; } .parts { grid-template-columns: minmax(0, 1fr); } }
+
+/* Open engine: four windows, two by two. */
+.opens { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 32px; }
+.opens > li { display: flex; flex-direction: column; gap: 8px; padding: 0 20px 20px; }
+.opens p { color: var(--os-muted); }
+.opens a { color: var(--os-ink); }
+@media (max-width: 767px) { .opens { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 479px) { .opens > li { padding: 0 16px 16px; } }
 
 /* The optional HeartGold/SoulSilver add-on: one small card under the strip. */
 .addon { display: grid; grid-template-columns: 240px minmax(0, 1fr); align-items: center; gap: 8px 24px; margin-top: 48px; padding: 0 16px 16px 8px; max-width: 760px; }

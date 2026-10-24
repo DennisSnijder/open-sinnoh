@@ -139,8 +139,9 @@
     <header class="nav wrap">
       <nav aria-label="Sections" class="links">
         <a href="#engine">The engine</a>
-        <a href="#story">The story</a>
-        <a href="#how">How it works</a>
+        <a href="#features">Features</a>
+        <a href="#inside">Under the hood</a>
+        <a href="#open">Open engine</a>
         <a href="#faq">FAQ</a>
       </nav>
       <div class="tools">
@@ -198,18 +199,12 @@
             <h2 id="engine-title" class="os-title d40">A new engine, not an emulator</h2>
             <p class="lead">OpenSinnoh doesn't emulate a DS or run the game's code. It's a new engine, written for the browser, that reimplements Platinum's systems. Your ROM is read once, on your device, to import the maps, models, sprites, text and music. Then the engine plays the game itself, in 3D at your screen's resolution.</p>
           </div>
-          <ol class="flow" aria-label="From your ROM to the game">
-            <li class="os-win"><span class="os-num">Your ROM</span><span>platinum.nds, from your cartridge</span></li>
-            <li class="arrow" aria-hidden="true"><!--icon:right--></li>
-            <li class="os-win"><span class="os-num">Import</span><span>once, in your browser</span></li>
-            <li class="arrow" aria-hidden="true"><!--icon:right--></li>
-            <li class="os-win"><span class="os-num">Engine</span><span>plays the game natively</span></li>
-          </ol>
           <ul class="perks">
             <li><!--icon:screen--><b>Sharp at any size</b><span>Drawn at your screen's resolution.</span></li>
             <li><!--icon:pad--><b>Made for phones</b><span>Touch controls and layout, installable on iPhone and Android.</span></li>
             <li><!--icon:clock--><b>Fast-forward</b><span>Up to 8×, hold or toggle.</span></li>
             <li><!--icon:save--><b>Real saves</b><span>Export them, move devices.</span></li>
+            <li><!--icon:gear--><b>Quality of life</b><span>Auto-run, an item wheel, EV and IV view, a suspend point. All optional.</span></li>
             <li><!--icon:info--><b>Accessible</b><span>Screen readers, remapping, less flashing.</span></li>
           </ul>
           <div class="addon os-win">
@@ -217,7 +212,51 @@
             <img src="./shots/addon-charizard.webp" width="640" height="360" loading="lazy" decoding="async" alt="Charizard following the player in Jubilife City, drawn with HeartGold's follower sprite." />
             <p>Have your own HeartGold or SoulSilver ROM? Add it for following Pokémon, and more content later.</p>
           </div>
-          <p class="note"><!--icon:mods-->Next: mods and new content on the same engine. Not ready yet.</p>
+        </div>
+      </section>
+
+      <!-- Features: the new look side by side, then what the game holds besides the story. -->
+      <section id="features" class="band" aria-labelledby="features-title">
+        <div class="wrap">
+          <div class="head">
+            <p class="kick"><span class="cur"><!--icon:cursor--></span>Features</p>
+            <h2 id="features-title" class="os-title d40">More than the main story</h2>
+            <p class="lead">Contests, the Battle Frontier, the Underground and the town extras are all in. And if you like, the game can look better than it ever did on a DS.</p>
+          </div>
+          <figure class="compare os-win">
+            <figcaption class="os-tab os-tone-world"><!--icon:screen--><span class="t">Visual style</span></figcaption>
+            <div class="pair">
+              <div class="side">
+                <img src="./shots/compare-ds.webp" width="960" height="540" loading="lazy" decoding="async" alt="Valley Windworks at 6 pm in the DS look: the player and a following Turtwig on the path between the windmills, seen from the DS camera." />
+                <p class="lbl">DS</p>
+              </div>
+              <div class="side">
+                <img src="./shots/compare-cinematic.webp" width="960" height="540" loading="lazy" decoding="async" alt="The same moment in the Cinematic style with the angled camera: warm evening light, long shadows, lit windows, and the edges of the frame softly out of focus." />
+                <p class="lbl">Cinematic<span class="plus"> + angled camera</span></p>
+              </div>
+            </div>
+            <p class="cap">Valley Windworks at 6 pm, twice. Cinematic adds depth of field, bloom, evening light, long shadows and lit windows. The angled camera looks along the path. Both are in Options › Device; the DS look stays the default.</p>
+          </figure>
+          <ul class="showcase">
+            <li><figure class="shot os-win"><figcaption class="os-tab os-tone-team"><span class="t">Contests</span></figcaption><img src="./shots/contest.webp" width="640" height="360" loading="lazy" decoding="async" alt="A Contest's Dance Competition: four Pokémon in their dress-up accessories on the stage." /><p>The visual, dance and acting rounds, from Normal to Master rank.</p></figure></li>
+            <li><figure class="shot os-win"><figcaption class="os-tab os-tone-team"><span class="t"><span class="wide">Battle </span>Frontier</span></figcaption><img src="./shots/frontier.webp" width="640" height="360" loading="lazy" decoding="async" alt="The Battle Tower: the VS banner with Palmer, the Tower Tycoon, before his battle." /><p>All five facilities, with the Frontier Brains and their cut-ins.</p></figure></li>
+            <li><figure class="shot os-win"><figcaption class="os-tab os-tone-world"><span class="t">Underground</span></figcaption><img src="./shots/underground.webp" width="640" height="360" loading="lazy" decoding="async" alt="The Underground: the player has stepped on a leaf trap, with leaves blowing across the tunnel." /><p>Dig for treasure, set traps, drill a secret base and decorate it.</p></figure></li>
+            <li><figure class="shot os-win"><figcaption class="os-tab os-tone-items"><span class="t">Game Corner</span></figcaption><img src="./shots/game-corner.webp" width="640" height="360" loading="lazy" decoding="async" alt="A Game Corner slot machine in a bonus round, with Clefairy under the full moon above the reels." /><p>The slots with the DS's odds, bonus rounds and the prize exchange.</p></figure></li>
+          </ul>
+          <div class="extras os-win">
+            <h3 class="os-tab os-tone-system"><!--icon:plus--><span class="t">And also</span></h3>
+            <ul>
+              <li><b>Seals and Ball Capsules</b><span>Decorate your Pokémon's entrance.</span></li>
+              <li><b>The Villa</b><span>Furniture and daily visitors.</span></li>
+              <li><b>TV</b><span>The schedule, interviews and ads.</span></li>
+              <li><b>Vs. Seeker</b><span>Rematch trainers you've beaten.</span></li>
+              <li><b>HM cut-ins</b><span>As the DS shows them.</span></li>
+              <li><b>Shiny sparkle</b><span>In battle, as it should be.</span></li>
+              <li><b>Following Pokémon</b><span>Your lead walks behind you.</span></li>
+              <li><b>Touch controls</b><span>For phones and tablets.</span></li>
+              <li><b>Save files</b><span>Import and export them.</span></li>
+            </ul>
+          </div>
         </div>
       </section>
 
@@ -237,11 +276,93 @@
         </div>
       </section>
 
+      <!-- Under the hood: the ROM's one trip through the importer to the engine's packages, drawn in markup. -->
+      <section id="inside" class="band" aria-labelledby="inside-title">
+        <div class="wrap">
+          <div class="head">
+            <p class="kick"><span class="cur"><!--icon:cursor--></span>Under the hood</p>
+            <h2 id="inside-title" class="os-title d40">How the engine works</h2>
+            <p class="lead">Your ROM is converted once, in your browser, into an open format. From then on the engine reads only that.</p>
+          </div>
+          <ol class="pipe" aria-label="From your ROM to the game">
+            <li class="stage os-win">
+              <h3 class="os-tab os-tone-system"><!--icon:file--><span class="t">Your ROM</span></h3>
+              <p class="file"><span>platinum.nds</span></p>
+              <p>The file you made from your own cartridge. It stays on your device.</p>
+            </li>
+            <li class="go" aria-hidden="true"><!--icon:right--></li>
+            <li class="stage os-win">
+              <h3 class="os-tab os-tone-system"><!--icon:import--><span class="t">Importer</span></h3>
+              <p>Runs once, in your browser. It converts:</p>
+              <ul class="conv">
+                <li><b>Maps</b><span>and events</span></li>
+                <li><b>Models</b><span>to glTF</span></li>
+                <li><b>Textures</b><span>to PNG</span></li>
+                <li><b>Sprites</b><span>to sheets</span></li>
+                <li><b>Sounds</b><span>music, cries</span></li>
+                <li><b>Text</b><span>every line</span></li>
+                <li><b>Scripts</b><span>the events</span></li>
+              </ul>
+              <p class="pack"><!--icon:disk--><span>The result is an open pack, kept in your browser's storage (IndexedDB). Never uploaded.</span></p>
+            </li>
+            <li class="go" aria-hidden="true"><!--icon:right--></li>
+            <li class="stage os-win">
+              <h3 class="os-tab os-tone-system"><!--icon:gear--><span class="t">Engine</span></h3>
+              <p>Loads the pack, any mods on top, and plays the game.</p>
+              <ul class="parts">
+                <li><b>Script VM</b><span>Runs the game's own event scripts.</span><code>vm</code></li>
+                <li><b>World</b><span>Maps, movement, weather, field moves.</span><code>world</code></li>
+                <li><b>Battles</b><span>A real battle simulator, with Platinum's data.</span><code>battle</code></li>
+                <li><b>Menus</b><span>Bag, party, PC, Pokédex, marts.</span><code>menus, services</code></li>
+                <li><b>Renderer</b><span>The 3D world, drawn with three.js.</span><code>render</code></li>
+                <li><b>Audio</b><span>The music and sounds, on a DS-style synth.</span><code>audio</code></li>
+              </ul>
+            </li>
+            <li class="go" aria-hidden="true"><!--icon:right--></li>
+            <li class="stage os-win">
+              <h3 class="os-tab os-tone-world"><!--icon:pad--><span class="t">The game</span></h3>
+              <p>Pokémon Platinum in your browser, sharp at any size, on desktop, tablet or phone.</p>
+              <p>Offline after the first visit.</p>
+            </li>
+          </ol>
+          <p class="note"><!--icon:info--><span>Written in TypeScript, one package per part (the names above are the folders in <code>packages/</code>). Battles run on the open-source Pokémon Showdown simulator.</span></p>
+        </div>
+      </section>
+
+      <!-- What an open engine makes possible: only what exists; ideas for later read as possibilities. -->
+      <section id="open" class="band" aria-labelledby="open-title">
+        <div class="wrap">
+          <div class="head">
+            <p class="kick"><span class="cur"><!--icon:cursor--></span>Open engine</p>
+            <h2 id="open-title" class="os-title d40">What an open engine makes possible</h2>
+            <p class="lead">The game's data sits in open formats, and every system is code you can read and change. That opens doors the DS kept shut.</p>
+          </div>
+          <ul class="opens">
+            <li class="os-win">
+              <h3 class="os-tab os-tone-system"><!--icon:mods--><span class="t">Mods</span></h3>
+              <p>A mod is a small pack that changes the game's records and scripts: swap a starter, rewrite a line, change a route's rules. A demo mod comes with the game, under Options › Data. There's no mod editor yet.</p>
+            </li>
+            <li class="os-win">
+              <h3 class="os-tab os-tone-world"><!--icon:screen--><span class="t">Beyond the DS</span></h3>
+              <p>Models and textures are standard glTF and PNG, drawn by a modern renderer. The Cinematic style shows what that can do today. New lighting or more detailed art could follow.</p>
+            </li>
+            <li class="os-win">
+              <h3 class="os-tab os-tone-items"><!--icon:clock--><span class="t">Quality of life</span></h3>
+              <p>Fast-forward, auto-run, an item wheel, EV and IV view, a suspend point, remappable controls and zoom. Things the DS never had, all optional.</p>
+            </li>
+            <li class="os-win">
+              <h3 class="os-tab os-tone-team"><!--icon:star--><span class="t">Fork it</span></h3>
+              <p>The code is MIT-licensed. Fork it, add your own ideas, take it somewhere new. Start with the <a href="https://github.com/DennisSnijder/open-sinnoh/blob/main/CONTRIBUTING.md" rel="noopener">contributing guide</a>.</p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
       <!-- How it works: three steps and the privacy promise. -->
       <section id="how" class="band" aria-labelledby="how-title">
         <div class="wrap">
           <div class="head">
-            <p class="kick"><span class="cur"><!--icon:cursor--></span>How it works</p>
+            <p class="kick"><span class="cur"><!--icon:cursor--></span>Get started</p>
             <h2 id="how-title" class="os-title d40">Three steps to Twinleaf Town</h2>
           </div>
           <ol class="steps">
