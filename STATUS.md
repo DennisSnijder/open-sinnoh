@@ -20,7 +20,7 @@ Versions: contracts 0.40.1, importer `platinum-103`, HeartGold follower add-on `
 - **Battles:** wild, trainer, double, multi and tag battles on @pkmn/sim with the ROM's data, the ported
   trainer AI, catching, the bag, switching, move learning, evolution, prize money and the blackout; the DS
   battle scene and touch card; the ROM's move animations (all but nine moves play for real; those use a logged
-  fallback).
+  fallback) and the shiny sparkle.
 - **Menus:** the start menu, party, summary, bag, PC storage, Pokédex, trainer card, naming keyboard, marts,
   the Pokémon Center, the Pokétch (25 apps), Mystery Gift, the Day Care and eggs, the Hall of Fame and credits.
 - **Side and post-game systems:** berries, move tutors, the move relearner and deleter, NPC trades, honey

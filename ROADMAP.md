@@ -35,7 +35,7 @@ experience, EVs and money.
 - The ROM's trainer AI bytecode, ported.
 - Bag, switching, level-up and move learning, evolution, blackout.
 - ROM battle graphics, the single-screen command card, the doubles target screen.
-- Move animations from the ROM's particle data and animation scripts (about 98% of moves).
+- Move animations from the ROM's particle data and animation scripts (about 98% of moves); the shiny sparkle.
 - Safari battles in the Great Marsh.
 
 **Menus and services.** Start menu, party, summary, bag, PC boxes, marts, the Pokémon Center, the naming keyboard,

@@ -1060,6 +1060,8 @@ class BattleController implements Battle {
       this.fade = Math.max(0, 1 - t / FADE_IN);
       yield;
     }
+    // Task_SetEncounter / Task_SetGiratinaEncounter: a shiny wild Pokémon sparkles once it is in place.
+    if (!this.trainer) yield* this.shinySparkle(foes);
     if (this.twoTrainers) {
       // Decomp LoadEncounterMessage / LoadLeadMonMessage for two enemy trainers (TAG or 2vs2): "You are challenged
       // by {Tr1} and {Tr2}!", then both leads with one message.
@@ -1175,6 +1177,20 @@ class BattleController implements Battle {
       this.printStep();
       yield;
     }
+    yield* this.shinySparkle(sides);
+  }
+
+  /**
+   * The shiny sparkle (decomp Task_SetEncounter, Task_ShowEncounter, Task_ShowPokemon): once a shiny Pokémon is in
+   * place, and after its capsule's seals, common animation 11 (`shiny`: particle file 27 and SEQ_SE_DP_REAPOKE) plays
+   * on it. BattleDisplay_PlayMoveAnimation does not ask BattleSystem_AreAnimationsOn: it plays with the battle scene off.
+   * Two sparkles at once (doubles) play one after the other here, the message printing on.
+   */
+  private *shinySparkle(sides: Side[]): Tick {
+    for (const side of sides) {
+      if (!isShiny(side.mon.otId, side.mon.pid)) continue;
+      yield* this.playAnim(commonAnimation(this.deps.registries, 'shiny'), 'shiny', side, side, 0, undefined, () => this.printStep());
+    }
   }
 
   /**
@@ -1254,6 +1270,7 @@ class BattleController implements Battle {
       this.printStep();
       yield;
     }
+    yield* this.shinySparkle(sides);
     this.playerTrainer = null;
     this.partnerTrainer = null;
     for (const side of sides) this.onSwitchIn(side.id);
@@ -2551,6 +2568,11 @@ class BattleController implements Battle {
    */
   private *animate(record: BattleAnimation | null, label: string, user: Side, target: Side, effectChance = 0, power?: number): Tick {
     if (this.deps.options?.scene === false) return;
+    yield* this.playAnim(record, label, user, target, effectChance, power);
+  }
+
+  /** Runs a battle animation whatever the battle scene option (`animate` asks it); `each` runs every tick beside it. */
+  private *playAnim(record: BattleAnimation | null, label: string, user: Side, target: Side, effectChance = 0, power?: number, each?: () => void): Tick {
     if (!record) {
       this.deps.log.stub(`anim:${label}`, 'no animation script in the packs: the generic hit plays');
       return;
@@ -2587,6 +2609,7 @@ class BattleController implements Battle {
     this.anim = vm;
     while (!vm.done) {
       vm.tick();
+      each?.();
       yield;
     }
     this.anim = null;

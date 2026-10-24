@@ -361,6 +361,10 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   DS frame a tick. A script plays only when everything its static walk reaches is implemented; otherwise
   the battle keeps the generic hit and logs it. Choreography is an independent approximation, not a
   pixel-exact reproduction.
+- **The shiny sparkle** is common animation 11 (`shiny`) on the animation VM, played once a shiny Pokémon is in place
+  (wild after its slide-in, a send-out after the flash and any capsule seals), before the healthbox slides in. The DS
+  runs it beside the healthbox and plays a doubles pair's at once; we play them in turn. Like the DS
+  (BattleDisplay_PlayMoveAnimation), it plays with the battle scene off.
 - **Layout:** a framed window over the dimmed field on big landscape views, full screen on phones; scene
   and card composed at the largest whole-pixel scale.
 - **Items the sim lacks** are known inert (their effect acts outside the battle), not stubs.
