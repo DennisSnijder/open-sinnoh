@@ -338,9 +338,15 @@ until app start-menu
 until app bag
 `, { registries, repeat: false });
   expect(result.error).toBeUndefined();
+  // The warp's field scene loads first (its frames are the slowest: textures and shaders on the first draws).
+  await page.waitForFunction(() => window.openSinnohApp?.sceneLoading() === false, undefined, { timeout: 120_000 });
   for (let pocket = 0; pocket < 8; pocket++) {
     await page.evaluate(p => { window.openSinnohGame!.tap(`pocket:${p}`); window.openSinnohGame!.advance(1); }, pocket);
-    await expect(page.locator('.pocket-tab.on')).toHaveAttribute('data-tap', `pocket:${pocket}`);
+    // The tick has run; the DOM shows it on the next rendered frame, which draws the field under the bag too. Under
+    // load a frame can take seconds (software WebGL on the big viewports), past the default 5 s: allow what the
+    // replay beats allow. The tab and the highlight are drawn in one build, so once the tab shows the pocket both are
+    // placed.
+    await expect(page.locator('.pocket-tab.on')).toHaveAttribute('data-tap', `pocket:${pocket}`, { timeout: 30_000 });
     const delta = await page.evaluate(() => {
       const icon = document.querySelector('.pocket-tab.on canvas')!.getBoundingClientRect();
       const hl = document.querySelector('.pocket-highlight')!.getBoundingClientRect();

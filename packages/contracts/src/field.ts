@@ -216,6 +216,20 @@ export interface FieldHost {
   greatMarshLookout(): void;
   greatMarshLookoutDone(): boolean;
   /**
+   * 0.41.0. The Vista Lighthouse binoculars (decomp UseVistaLighthouseBinoculars, Task_UseVistaLighthouseBinoculars): a
+   * view of the Pokémon League (`FieldView.viewCamera`) until A or B, then back where the player stood; waited on with
+   * `vistaBinocularsDone`.
+   */
+  vistaBinoculars(): void;
+  vistaBinocularsDone(): boolean;
+  /**
+   * 0.41.0. The Vs. Seeker's task (decomp VsSeeker_Start, VsSeeker_ExecuteTask): the scan, the player's Vs. Seeker
+   * avatar and beep, the trainers' '!' and the rematches' '!!' and spin. `vsSeekerResult` is null while it runs, then its
+   * VS_SEEKER_USE_RESULT_* (0 OK, 1 no battery, 2 no trainers in range, 3 none picked).
+   */
+  startVsSeeker(): void;
+  vsSeekerResult(): number | null;
+  /**
    * 0.31.0. HoneyTree_StopShaking (`stop_honey_tree_shaking`, and `start_honey_tree_battle`'s HoneyTree_Unslather): the
    * current zone's honey tree stops shaking until its prop is loaded again with a Pokémon waiting.
    */
@@ -337,9 +351,10 @@ export type SignpostKind = 'map' | 'arrow' | 'landmark' | 'scrolling';
 export interface ScriptView {
   /**
    * The message box. `signpost` marks a signpost box: its kind and how far (DS px, 0–48) it is still
-   * scrolled below its resting place (it slides in and out 16 px per tick).
+   * scrolled below its resting place (it slides in and out 16 px per tick). `font: 'unown'` (0.41.0) prints it with
+   * `NewGame.unownFont`.
    */
-  message: { text: string; waitingForInput: boolean; signpost?: { kind: SignpostKind; offset: number } } | null;
+  message: { text: string; waitingForInput: boolean; signpost?: { kind: SignpostKind; offset: number }; font?: 'unown' } | null;
   yesNo: { cursor: 0 | 1 } | null;
   /** Scripted multichoice / list menu (VM-owned box over the field). */
   menu: MenuView | null;

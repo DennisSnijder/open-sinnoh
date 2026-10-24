@@ -4,6 +4,7 @@
  * folded into one composition: the board is the screen the player works on (the capsule grid, the editor, or the
  * Test's still), and a strip under it, in the art's own bottom colour, carries the message box the DS shows on the other
  * screen (the prompts, the seal name while one is held, the refusals).
+ * Like the mart's buy screen (`mart-screen`), phones show it full screen, centred, over its art's edge colours.
  * - select: `capsule/main2`, the 12 capsules (`capsule/capsules` animation 0 empty, 1 sealed) with their holders' icons,
  *   the cursor (`capsule/cursor` 0) and SHIFT's second cursor (1), the capsule menu. A tap on a capsule sends
  *   `capsule:<i>`.
@@ -61,7 +62,7 @@ class CapsuleCanvas {
   private pointer: number | null = null;
 
   constructor(private readonly art: Art) {
-    this.root = board('mart mart-board capsule-board', W, H);
+    this.root = board('mart mart-board mart-screen capsule-board', W, H);
     this.canvas.width = W;
     this.canvas.height = H;
     this.canvas.className = 'capsule-canvas';

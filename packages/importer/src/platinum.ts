@@ -100,6 +100,8 @@ const TABLES = {
   /** gHiddenItems (data/field/hidden_items.h): {u16 item, u8 quantity, u8 dowsing range 0–2, u16 pad, u16 script} per hidden item. */
   /** gVsSeekerRematchData (240 rows, six u16 tiers). */
   rematches: { where: 5, offset: 0x280c8, count: 240, size: 12, sha1: 'bf31de2274a87203cdd168d0a8588af29406a5f6' },
+  /** footprint_type.c sFootprintTypes: {u16 type, u16 hasPrint} per national dex number (0–493). */
+  footprintTypes: { where: 5, offset: 0x2ecd4, count: 494, size: 4, sha1: 'b0d175fdc5eaea9fd7811013f89abbadf1a4db56' },
   /** SizeContest sUniformToNormalIntervals: base, divisor, intervalStart, padding. */
   sizeIntervals: { where: 5, offset: 0x2e788, count: 16, size: 8, sha1: 'b87c1a51519db6c2cd7e73b51ccb7b11d4ff574b' },
   hiddenItems: { where: 'arm9', offset: 0xea378, count: 257, size: 8, sha1: 'afc122cf537e4b07fffc361ce7ae07eae08bdd53' },
@@ -534,6 +536,8 @@ const DEFAULT_NAMES = { player: 'Lucas', rival: 'Barry' };
 const SEQ_EYE_KID = 1101;
 /** pl_font.narc member of the message font (decomp FONT_MESSAGE). */
 const MESSAGE_FONT = 1;
+/** pl_font.narc member of the Unown font (decomp FONT_UNOWN, `message_unown`). */
+const UNOWN_FONT = 3;
 /** Seconds since midnight of the area light template a `Light` carries outside its schedule (title and scene models). */
 const MIDDAY = 12 * 3600;
 
@@ -1116,13 +1120,16 @@ export async function importPlatinum(
     gender: options.gender ?? 'male',
     playerSprite: { male: playerGfx('OBJ_EVENT_GFX_PLAYER_M'), female: playerGfx('OBJ_EVENT_GFX_PLAYER_F') },
     playerHealSprite: { male: playerGfx('OBJ_EVENT_GFX_PLAYER_M_POKECENTER_HEAL'), female: playerGfx('OBJ_EVENT_GFX_PLAYER_F_POKECENTER_HEAL') },
+    playerVsSeekerSprite: { male: playerGfx('OBJ_EVENT_GFX_PLAYER_M_VS_SEEKER'), female: playerGfx('OBJ_EVENT_GFX_PLAYER_F_VS_SEEKER') },
     playerCycleSprite: { male: playerGfx('OBJ_EVENT_GFX_PLAYER_M_BIKE'), female: playerGfx('OBJ_EVENT_GFX_PLAYER_F_BIKE') },
     playerSurfSprite: { male: playerGfx('OBJ_EVENT_GFX_PLAYER_M_SURF'), female: playerGfx('OBJ_EVENT_GFX_PLAYER_F_SURF') },
     messageFont: asId('platinum:FONT_MESSAGE'),
+    unownFont: asId('platinum:FONT_UNOWN'),
     trainerApproach: names.scriptLabel(SCRIPT_ID_TRAINER_APPROACH, 0)!,
     repelWoreOff: repelWoreOff(),
     hatchEgg: commonScript(SCRIPT_ID_HATCH_EGG, 'hatch egg'),
     exclamationSprite: asId('platinum:SPRITE_EXCLAMATION'),
+    doubleExclamationSprite: asId('platinum:SPRITE_DOUBLE_EXCLAMATION'),
     pockets: mon.pockets,
     boxNames: mon.boxNames,
     pokeBall: mon.pokeBall,
@@ -1226,6 +1233,9 @@ export async function importPlatinum(
   const font = importFont(readNarc(fs.file('/graphic/pl_font.narc'))[MESSAGE_FONT] as Uint8Array, chars, { id: asId('platinum:FONT_MESSAGE'), atlas: asId('platinum:fonts/message.png') });
   if (font.skipped) unknown('font', `${font.skipped} message-font glyphs have no single-character mapping (left out)`);
   assets.set('fonts/message.png', font.png);
+  const unownFont = importFont(readNarc(fs.file('/graphic/pl_font.narc'))[UNOWN_FONT] as Uint8Array, chars, { id: asId('platinum:FONT_UNOWN'), atlas: asId('platinum:fonts/unown.png'), drawnOnly: true });
+  if (unownFont.skipped) unknown('font', `${unownFont.skipped} Unown-font glyphs have no single-character mapping (left out)`);
+  assets.set('fonts/unown.png', unownFont.png);
   for (const [path, bytes] of weatherAssets) assets.set(path, bytes);
   const title = importTitle(fs);
   const creditsRide = importCreditsRide(fs, assets, await table('creditsRows'), await table('creditsTrees'));
@@ -1269,6 +1279,13 @@ export async function importPlatinum(
   for (const s of species) {
     const entry = s.sourceIndex !== undefined ? dex.entries.get(s.sourceIndex) : undefined;
     if (entry) s.dex = entry;
+  }
+  const footprints = new Reader(await table('footprintTypes'));
+  for (const s of species) {
+    if (s.sourceIndex === undefined || s.sourceIndex >= TABLES.footprintTypes.count) continue;
+    const hasPrint = footprints.u16(s.sourceIndex * 4 + 2);
+    if (hasPrint > 1) throw new ImportError(`footprint type ${s.sourceIndex}: hasPrint ${hasPrint}`);
+    s.footprintType = { type: footprints.u16(s.sourceIndex * 4), hasPrint: hasPrint === 1 };
   }
   newGame.pokedexUnknown = dex.unknown;
   const dwArt = importDistortionArt(readNarc(fs.file('/data/mmodel/fldeff.narc')), readNarc(fs.file(ARCHIVES.sky)), assets, (w) => unknown('asset', w));
@@ -1727,7 +1744,7 @@ export async function importPlatinum(
   const snowball = sprites.find((sp) => sp.sourceIndex === SNOWBALL_GFX);
   if (!snowball || !('model' in snowball) || snowball.model !== null) throw new ImportError(`object gfx 0x${SNOWBALL_GFX.toString(16)} is not an unconverted model object`);
   snowball.model = gymEffects.snowball.model;
-  sprites.push(converted.exclamation);
+  sprites.push(converted.exclamation, converted.doubleExclamation);
   // Field-effect billboards (assets/field-effects.ts) are not object gfx: they carry no sourceIndex.
   sprites.push(...converted.records.sprites.filter((s) => s.sourceIndex === undefined));
   // Party follower sets: the Pokémon gfx with a walking set (followers.ts).
@@ -1794,7 +1811,7 @@ export async function importPlatinum(
     sprites,
     followers,
     movements: decoded.movements,
-    fonts: [font.record],
+    fonts: [font.record, unownFont.record],
     texts,
     textBanks,
     flags,

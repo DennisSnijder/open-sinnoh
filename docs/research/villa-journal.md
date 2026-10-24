@@ -483,6 +483,6 @@ Area, 602 Villa, 603 furniture names, 608 times of day, 618 NPC trainer names.
 - **Decided (inferred):** a Pokémon Center (imported as `other`) never makes a building entry (none is in `sMapsInfo`); an
   arrival is a zone whose first-arrival flag is still clear; the Pokémon line's time of day is the clock's period at the
   battle's end; "used a PC box" is a session that changed the boxes or the party; the diploma document stays put on the one
-  screen. Not done: `start_vs_seeker` (the item use runs without the script), `turn_on_pokedex_form_detection` (needs a
-  Pokédex flag), `get_party_mon_footprint_type` (needs the footprint tables), RECORD_STEPS and RECORD_EGGS_HATCHED counting
-  (the Chandelier and Masterpiece gates read them), the secret-base journal entry, the online events.
+  screen. Not done: `turn_on_pokedex_form_detection` (needs a Pokédex flag), the secret-base journal entry, the online
+  events. (`start_vs_seeker`, `get_party_mon_footprint_type` and the RECORD_STEPS and RECORD_EGGS_HATCHED counts came
+  later.)

@@ -69,7 +69,8 @@ export function readNfgr(bytes: Uint8Array): NfgrFont {
 export function importFont(
   nfgrBytes: Uint8Array,
   charmap: ReadonlyMap<number, string>,
-  opts: { id?: Id; atlas?: Id } = {},
+  /** `drawnOnly`: leave out glyphs of width 0 (the Unown font draws only its letters and marks). */
+  opts: { id?: Id; atlas?: Id; drawnOnly?: boolean } = {},
 ): { record: Font; png: Uint8Array; skipped: number } {
   const f = readNfgr(nfgrBytes);
   const keep: { glyph: number; char: string }[] = [];
@@ -77,6 +78,7 @@ export function importFont(
   let skipped = 0;
   for (let g = 0; g < f.numGlyphs; g++) {
     const char = charmap.get(g + 1);
+    if (opts.drawnOnly && f.widths[g] === 0) continue;
     if (char === undefined || Array.from(char).length !== 1 || seen.has(char)) {
       skipped++;
       continue;

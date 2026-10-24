@@ -51,6 +51,7 @@ import { hofHandlers } from './hof-ops.ts';
 import { villaHandlers } from './villa-ops.ts';
 import { journalHandlers } from './journal-ops.ts';
 import { npcHandlers } from './npc-ops.ts';
+import { townFieldHandlers } from './town-field-ops.ts';
 
 /** Fixed native vars, looked up by `sourceIndex` in the vars registry. */
 export const NATIVE_VARS = { PLAYER_STARTER: 0x4030, SCRIPT_PARAMETER_0: 0x8000, LAST_TALKED: 0x800d } as const;
@@ -139,7 +140,8 @@ export class Runner implements ScriptRunner {
   /** This tick's input, for commands that read the keys directly (decomp gSystem.heldKeys: `check_ab_press`). */
   input: InputFrame = { held: [], pressed: [], touch: null };
   ui: {
-    message: { printer: TextPrinter } | null;
+    /** `font`: `message_unown`'s FONT_UNOWN. */
+    message: { printer: TextPrinter; font?: 'unown' } | null;
     buttonWait: boolean;
     yesNo: { cursor: 0 | 1 } | null;
     menu: ScriptMenu | null;
@@ -354,7 +356,7 @@ export class Runner implements ScriptRunner {
     const m = this.ui.message;
     const sp = this.ui.signpost;
     return {
-      message: m ? { text: m.printer.text(), waitingForInput: m.printer.waiting || this.ui.buttonWait, ...(sp ? { signpost: { kind: sp.kind, offset: sp.offset } } : {}) } : null,
+      message: m ? { text: m.printer.text(), waitingForInput: m.printer.waiting || this.ui.buttonWait, ...(sp ? { signpost: { kind: sp.kind, offset: sp.offset } } : {}), ...(m.font ? { font: m.font } : {}) } : null,
       yesNo: this.ui.yesNo ? { cursor: this.ui.yesNo.cursor } : null,
       menu: this.ui.menu?.shown ? this.ui.menu.view() : null,
       ...(this.ui.floorWindow ? { floorWindow: this.ui.floorWindow.view } : {}),
@@ -1032,6 +1034,7 @@ export class Runner implements ScriptRunner {
       ...villaHandlers(this),
       ...journalHandlers(this),
       ...npcHandlers(this),
+      ...townFieldHandlers(this),
     };
   }
 
