@@ -11,7 +11,7 @@ export type Action =
   | { kind: 'onspot'; dir: Facing; ticks: number }
   | { kind: 'face'; dir: Facing }
   | { kind: 'delay'; ticks: number }
-  | { kind: 'emote'; ticks: number }
+  | { kind: 'emote'; ticks: number; double: boolean }
   | { kind: 'visible'; visible: boolean }
   | { kind: 'lockDir'; locked: boolean }
   /** PAUSE_ANIMATION / RESUME_ANIMATION: the sprite's animation frame holds (MAP_OBJ_STATUS_PAUSE_ANIMATION). */
@@ -84,7 +84,7 @@ export function parseAction(op: string): Action | null {
   m = /^delay_(\d+)$/.exec(op);
   if (m && DELAYS.has(Number(m[1]))) return { kind: 'delay', ticks: Number(m[1]) };
   // 153: the exclamation emote with its third argument set (sub_020664A0(mapObj, 0, 1); DW and Eterna Forest).
-  if (op === 'emote_exclamation_mark' || op === 'emote_double_exclamation_mark' || op === '153') return { kind: 'emote', ticks: EMOTE_TICKS };
+  if (op === 'emote_exclamation_mark' || op === 'emote_double_exclamation_mark' || op === '153') return { kind: 'emote', ticks: EMOTE_TICKS, double: op === 'emote_double_exclamation_mark' };
   if (op === 'set_invisible' || op === 'set_visible') return { kind: 'visible', visible: op === 'set_visible' };
   if (op === 'lock_dir' || op === 'unlock_dir') return { kind: 'lockDir', locked: op === 'lock_dir' };
   if (op === 'pause_animation' || op === 'resume_animation') return { kind: 'animPause', paused: op === 'pause_animation' };

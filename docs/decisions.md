@@ -534,6 +534,8 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   sources are the Solaceon east-house mother and Unown boy, the Sunyshore Market merchant's stock per weekday and
   Mystery Gift, all run by the real seal ops. A party Pokémon carries a copy of its capsule (`Pokemon.capsule`), as the
   DS does; boxes and the Day-Care never hold one (the PC refuses, the Day-Care and NPC trades ask to detach).
+- **On phones the capsule editor** is a full-screen DS screen like the mart's buy list (`.mart-screen`: centred over an
+  opaque backdrop); a board patched in place repaints that backdrop when its picture changes.
 - **The capsule editor** is one board: the DS touch screen plus a 48 px strip for the message the DS shows on its other
   screen. Editing is touch-only on the DS; our keys add a hand that jumps between list seals, buttons and placed seals,
   moves a held seal pixel by pixel with acceleration, drops it with A and returns it to the case with B. Its Test shows a
@@ -558,6 +560,16 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   before FLAG_JOURNAL_ACQUIRED. The page rolls only at a load or at `give_journal`, never at midnight; the auto-open on
   a load shows the pages as saved.
 - **One schema bump for the town extras:** v22 adds the Seal Case and the journal together.
+- **The Vs. Seeker** runs as on the DS: the item starts its script, whose `start_vs_seeker` is a world task stepped one
+  native state per frame (objects pause, the scan, the raised avatar and the beep, '!' and '!!' with the spin). The rematch
+  roll stays on the field stream. The '!!' is its own fldeff texture (member 13), not the '!'.
+- **Footprints:** Dr. Footstep's types come from the ROM's `sFootprintTypes` (overlay 5), not the decomp's species data,
+  which differ for Spiritomb (the ROM gives it a print). The Pokédex footprint images were already imported.
+- **The Vista Lighthouse binoculars** reuse the Great Marsh lookout's temporary map change and circle fade. Their camera is
+  a `FieldView.viewCamera` record built from the decomp's raw values; enhanced visuals stay off while it is up.
+- **Game records:** RECORD_STEPS counts when a player step starts, at the decomp's PlayerAvatar_IncrementStepsRecord sites
+  (not forced slides, bumps, bike coasting, overworld ledge jumps or the fourth gear's ramp). RECORD_EGGS_HATCHED and
+  score event 15 count when the field step starts a hatch (Field_UpdateDaycare), before the scene.
 
 ## Mods
 
@@ -583,6 +595,8 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
 - **Replays are the main proof.** A replay runs twice from the same seed and must match, then save,
   reset, load: the loaded state must equal the save byte for byte. One runner, two drivers (headless and
   the browser bridge).
+- **Browser checks after `advance`** wait for the drawn state with the replay checks' 30 s timeout, once the field scene
+  has loaded: under load a frame (which also draws the field) can take seconds, while the tick itself is deterministic.
 - **Replays wait on the game, not recorded ticks:** `until message|yesno|menu|position|state|wild`,
   `advance text`, asserts by content. Step arguments may read state the player can see (a clue's door).
   Setup lines apply through snapshot → edit → load. A replay's grammar is the only input it has; the dev

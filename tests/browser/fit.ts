@@ -40,9 +40,15 @@ export function screenProblems(page: Page): Promise<string[]> {
     const kind = screen.parentElement!.className;
     const dx = Math.abs(r.left - room.left - (room.right - r.right));
     const dy = Math.abs(r.top - room.top - (room.bottom - r.bottom));
-    // Windows (the start menu, save) sit at the DS's right edge; the mart's DS screen is bottom-centred.
+    // Windows (the start menu, save) sit at the DS's right edge; the mart's DS screen is bottom-centred, except a
+    // screen of its own (`.mart-screen`: the buy list, the Ball Capsule editor) on phones, which shows full screen
+    // over an opaque backdrop.
+    const layerData = document.querySelector<HTMLElement>('.ui-layer')!.dataset;
+    const phone = layerData.mode === 'compact' || layerData.controls === 'side';
+    const ownScreen = phone && screen.matches('.mart-screen');
+    if (ownScreen && !document.querySelector('.ui-host .ui-scrim.opaque')) out.push(`${name}: no opaque backdrop behind the full-screen DS screen`);
     if (!kind.includes('ui-window') && dx > 2) out.push(`${name}: off centre sideways by ${f(dx / 2)} px`);
-    if (!kind.includes('ui-mart') && !kind.includes('ui-window') && dy > 2) out.push(`${name}: off centre vertically by ${f(dy / 2)} px`);
+    if ((ownScreen || !kind.includes('ui-mart')) && !kind.includes('ui-window') && dy > 2) out.push(`${name}: off centre vertically by ${f(dy / 2)} px`);
     for (const e of [screen, ...screen.querySelectorAll<HTMLElement>('*')]) {
       if ((e.offsetParent === null && e !== screen) || e.classList.contains('sr-only')) continue;
       const s = getComputedStyle(e);

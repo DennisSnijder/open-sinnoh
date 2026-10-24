@@ -1,0 +1,103 @@
+# sys-game-records. RECORD_STEPS (PlayerAvatar_IncrementStepsRecord: each step the player starts) and RECORD_EGGS_HATCHED
+# (Field_UpdateDaycare: an egg starts hatching), and the Villa gates that read them (check_met_furniture_requirements:
+# the Chandelier at 300,000 steps, the Masterpiece at 30 eggs; docs/research/villa-journal.md §1.2). A constructed start
+# in the Villa with the free Table, two steps and one hatch short of the gates, a party egg with no cycles left and the
+# egg-cycle counter two steps from the end of a cycle.
+party 0 platinum:SPECIES_GARCHOMP 60 platinum:MOVE_EARTHQUAKE
+party 1 platinum:SPECIES_PICHU 1 platinum:MOVE_THUNDER_SHOCK
+set state party[1].isEgg true
+set state party[1].friendship 0
+set flag platinum:FLAG_GAME_COMPLETED true
+set var platinum:VAR_RESORT_AREA_STATE 1
+set var platinum:VAR_VILLA_STATE 2
+set var platinum:VAR_RESORT_VILLA_VISITOR 255
+set flag platinum:FLAG_VILLA_FURNITURE_TABLE true
+set money 300000
+set state records.counts["0"] 299998
+set state records.counts["11"] 29
+set state daycare.stepCounter 253
+date 2009-03-22 12:00
+warp platinum:MAP_HEADER_VILLA 10 6 down
+until idle
+# One step down to the order form: 299,999 steps, no hatch yet.
++0 press down
+until position 10 7 300
++0 release down
+until idle
++0 assert state records.counts["0"] 299999
++0 assert state records.counts["11"] 29
++0 press right
++2 release right
+until idle
++0 press a
++1 release a
+advance text 600
+until menu 600
+# 11 entries, the Table to the PC Desk (the Table sold out; the Masterpiece and the Chandelier gated with the others;
+# game-records.rom.test.ts reads the list). B closes the form.
++8 press b
++1 release b
+advance text 600
+until idle 600
+# A step up: the 300,000th (counted as it starts); at its end the egg-cycle counter ends a cycle, so the egg starts
+# hatching (30 eggs).
++0 press up
+until state records.counts["0"] 300000 300
++0 release up
++0 assert state records.counts["11"] 29
+until state records.counts["11"] 30 300
++0 assert state records.counts["0"] 300000
++30 press a
++1 release a
+until app hatch
++520 tap no
+until app none
+advance text
+until idle
++0 assert state party[1].isEgg false
+# Back down to the order form: now 13 entries, the Masterpiece the 12th and the Chandelier the last.
++0 press down
+until position 10 7 300
++0 release down
+until idle
++0 assert state records.counts["0"] 300001
++0 press right
++2 release right
+until idle
++0 press a
++1 release a
+advance text 600
+until menu 600
++8 press down
++1 release down
++8 press down
++1 release down
++8 press down
++1 release down
++8 press down
++1 release down
++8 press down
++1 release down
++8 press down
++1 release down
++8 press down
++1 release down
++8 press down
++1 release down
++8 press down
++1 release down
++8 press down
++1 release down
++8 press down
++1 release down
++8 press down
++1 release down
++8 press a
++1 release a
+until yesno 600
++4 press a
++1 release a
+advance text 6000
+until idle 1200
++0 assert flag platinum:FLAG_VILLA_FURNITURE_CHANDELIER true
++0 assert state money 180000

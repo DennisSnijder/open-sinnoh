@@ -32,7 +32,7 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
     expect(pack.manifest).toMatchObject({ id: 'platinum', version: '0.1.0', engine: '^0.1.0' });
     expect(pack.provenance).toBe('rom-derived');
     expect([...stages]).toEqual(['verify', 'text', 'sound', 'zones', 'maps', 'data', 'scripts', 'assets', '2d art']);
-    expect(report.counts).toMatchObject({ zones: 593, matrices: 292, chunks: 666, areas: 75, props: 527, cameras: 17, lights: 4, models: 1365, sprites: 464, weathers: 36, fieldEffects: 99, fonts: 1, titleScreens: 1, species: 496, trainers: 928, ui2d: 1635, pokemonSprites: 494, trainerSprites: 105, battleBackgrounds: 23, battleTerrains: 24, aiScripts: 1, battleAnimations: 518, particleSystems: 583, battleAnimData: 1 });
+    expect(report.counts).toMatchObject({ zones: 593, matrices: 292, chunks: 666, areas: 75, props: 527, cameras: 17, lights: 4, models: 1365, sprites: 465, weathers: 36, fieldEffects: 99, fonts: 2, titleScreens: 1, species: 496, trainers: 928, ui2d: 1635, pokemonSprites: 494, trainerSprites: 105, battleBackgrounds: 23, battleTerrains: 24, aiScripts: 1, battleAnimations: 518, particleSystems: 583, battleAnimData: 1 });
     expect(report.unknowns.char).toBeUndefined();
   });
 
@@ -217,11 +217,14 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
         gender: 'female',
         playerSprite: { male: 'platinum:OBJ_EVENT_GFX_PLAYER_M', female: 'platinum:OBJ_EVENT_GFX_PLAYER_F' },
         playerHealSprite: { male: 'platinum:OBJ_EVENT_GFX_PLAYER_M_POKECENTER_HEAL', female: 'platinum:OBJ_EVENT_GFX_PLAYER_F_POKECENTER_HEAL' },
+        playerVsSeekerSprite: { male: 'platinum:OBJ_EVENT_GFX_PLAYER_M_VS_SEEKER', female: 'platinum:OBJ_EVENT_GFX_PLAYER_F_VS_SEEKER' },
         playerCycleSprite: { male: 'platinum:OBJ_EVENT_GFX_PLAYER_M_BIKE', female: 'platinum:OBJ_EVENT_GFX_PLAYER_F_BIKE' },
         playerSurfSprite: { male: 'platinum:OBJ_EVENT_GFX_PLAYER_M_SURF', female: 'platinum:OBJ_EVENT_GFX_PLAYER_F_SURF' },
         messageFont: 'platinum:FONT_MESSAGE',
+        unownFont: 'platinum:FONT_UNOWN',
         trainerApproach: 'platinum:scripts_battles/928',
         exclamationSprite: 'platinum:SPRITE_EXCLAMATION',
+        doubleExclamationSprite: 'platinum:SPRITE_DOUBLE_EXCLAMATION',
         pockets: [
           { name: 'items', size: 165, max: 999, sorted: false },
           { name: 'medicine', size: 40, max: 999, sorted: false },

@@ -1,5 +1,6 @@
-# VsSeekerSystem_PickRematchTrainers / GetRematchTrainerID: a charged scan makes a defeated trainer
-# spin; talking starts the unlocked rematch tier, then his normal post-battle movement returns.
+# VsSeekerSystem_PickRematchTrainers / GetRematchTrainerID: a charged scan (the item's script and its
+# start_vs_seeker task) makes a defeated trainer spin; talking starts the unlocked rematch tier, then his
+# normal post-battle movement returns.
 party 0 platinum:SPECIES_CHARIZARD 80 platinum:MOVE_FLAMETHROWER
 give item platinum:ITEM_VS_SEEKER 1
 set state registeredItem "platinum:ITEM_VS_SEEKER"
@@ -13,6 +14,7 @@ until idle
 +1 release y
 until state objects[localId=0].movementType 49 120
 +0 assert var platinum:VAR_VS_SEEKER_BATTERY_LEVEL 0
+until idle
 +0 reload
 until idle
 +0 press a

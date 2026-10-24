@@ -38,7 +38,7 @@ const SIGN_FRAMES: Record<SignpostKind, Frame> = {
 
 type Rect = { x: number; y: number; width: number; height: number };
 
-export const drawScriptOverlay: DrawScriptOverlay = (ctx, view, font, scale, frames) => {
+export const drawScriptOverlay: DrawScriptOverlay = (ctx, view, font, scale, frames, unown) => {
   if (!Number.isInteger(scale) || scale < 1) throw new Error(`drawScriptOverlay: scale must be a positive integer, got ${scale}`);
   const ox = Math.floor((ctx.canvas.width / scale - SCREEN.width) / 2);
   const oy = Math.floor(ctx.canvas.height / scale - SCREEN.height);
@@ -93,7 +93,10 @@ export const drawScriptOverlay: DrawScriptOverlay = (ctx, view, font, scale, fra
     ctx.clip();
     if (sign) drawSignpost(px, drawn, sign.kind, at, dy);
     else messageFrame(at);
-    view.message.text.split('\n').slice(0, 2).forEach((line, i) => text(line, at.x, at.y + i * LINE_HEIGHT));
+    // Decomp ScrCmd_MessageUnown prints with FONT_UNOWN.
+    const messageFont = view.message.font === 'unown' ? unown : font;
+    if (!messageFont) throw new Error('drawScriptOverlay: an Unown message without the Unown font');
+    view.message.text.split('\n').slice(0, 2).forEach((line, i) => drawText(ctx, messageFont, line, (ox + at.x) * scale, (oy + at.y + i * LINE_HEIGHT) * scale, scale));
     // The DS draws the "more" arrow inside the box, at its bottom-right corner, clear of the frame.
     if (view.message.waitingForInput) drawArrow(px, at.x + at.width - 8, at.y + at.height - 5, 'down');
     ctx.restore();

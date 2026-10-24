@@ -4,7 +4,8 @@
  * (a seal placed by the stylus taps and one by the keys, then, at the editor's screenshot, the keys' seal dragged to a
  * new place with the mouse on desktop and the finger on the phone), the Test's still, SET through the party. At each
  * screenshot line the screen is checked: the editor is one whole-pixel board (the DS screen and the message strip) in
- * the viewport, its canvas showing the ROM's art. Screenshots go to test-artifacts (ROM content, never commit).
+ * the viewport, passing the shared fit checks (fit.ts), on phones full screen (centred over an opaque backdrop), its canvas showing
+ * the ROM's art. Screenshots go to test-artifacts (ROM content, never commit).
  */
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import type { AppView, CapsuleEditorView, Registries } from '@opensinnoh/contracts';
@@ -13,6 +14,7 @@ import { pageDriver } from '../../packages/cli/src/browser.ts';
 import { romSlice } from '../rom.ts';
 import { seedRomImport } from './seed.ts';
 import { readReplay, resolveReplay } from '../rom-replays/sys-replays.ts';
+import { screenProblems } from './fit.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 const SHOTS = 'test-artifacts/seals';
@@ -71,6 +73,21 @@ async function board(name: string, phase: CapsuleEditorView['screen'], font = '.
   expect(s.x + s.w, name).toBeLessThanOrEqual(s.vw + 0.5);
   expect(s.y + s.h, name).toBeLessThanOrEqual(s.vh + 0.5);
   expect(await page.locator(`.capsule-board ${font} .px, .capsule-board ${font} canvas`).count(), name).toBeGreaterThan(0);
+  expect(await screenProblems(page), name).toEqual([]);
+  // Phones show the editor full screen: centred in the room over the opaque backdrop, not at the room's bottom with the
+  // field's black above it.
+  if (phone) {
+    const fit = await page.evaluate(() => {
+      const board = document.querySelector<HTMLElement>('.capsule-board')!;
+      const b = board.getBoundingClientRect();
+      const room = board.parentElement!.getBoundingClientRect();
+      const scrim = document.querySelector<HTMLElement>('.ui-host .ui-scrim.opaque');
+      return { above: b.top - room.top, below: room.bottom - b.bottom, painted: scrim?.dataset.painted, backdrop: board.dataset.backdrop };
+    });
+    expect(Math.abs(fit.above - fit.below), `${name}: ${fit.above} px above the board, ${fit.below} px below`).toBeLessThanOrEqual(2);
+    // The backdrop follows the phase's picture (the board is patched in place between phases).
+    expect(fit.painted, name).toBe(`${fit.backdrop}|${fit.backdrop}`);
+  }
 }
 
 /** The canvas pixel at DS (x, y), once the ROM art has drawn there (not the black clear). */

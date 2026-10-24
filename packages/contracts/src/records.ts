@@ -669,6 +669,11 @@ export interface Species extends SpeciesData {
   regionalDex?: number;
   /** 0.16.0: the Pokédex entry (decomp zukan_data, zukan_enc_platinum, pokefoot and the species text banks); absent = no entry. */
   dex?: SpeciesDex;
+  /**
+   * 0.41.0. Dr. Footstep's reading (decomp sFootprintTypes, overlay 5): `type` is FOOTPRINT_TYPE_* (0 none, 1 cute,
+   * 2 tough, 3 scary, 4 slow, 5 silent) and `hasPrint` whether the species leaves a print. Absent = not imported.
+   */
+  footprintType?: { type: number; hasPrint: boolean };
 }
 
 /**
@@ -997,11 +1002,17 @@ export interface NewGame {
   boat?: { ship: Id; bridges: [Id, Id]; cinematicFrames: number[]; snowpointShip?: Id; scenes?: import('./boat.ts').ShipScene[] };
   /** The player handing over or taking back Pokémon (decomp PLAYER_AVATAR_HEAL gfx; `pose-give`, `pose-receive`). */
   playerHealSprite?: { male: Id; female: Id };
+  /** 0.41.0. The player raising the Vs. Seeker (decomp PLAYER_AVATAR_VS_SEEKER gfx; `pose-vs-seeker`). */
+  playerVsSeekerSprite?: { male: Id; female: Id };
   messageFont: Id;
+  /** 0.41.0. The Unown font (decomp FONT_UNOWN) of `message_unown`'s messages (`ScriptView.message.font`). */
+  unownFont?: Id;
   /** Started when a trainer spots the player (decomp script 3928, `Battles_ApproachingTrainer`). */
   trainerApproach?: Id;
   /** Billboard drawn over an actor whose `emote` is set (frame of `stand-down`); absent = the renderer's own '!'. */
   exclamationSprite?: Id;
+  /** 0.41.0. The '!!' (MOVEMENT_ACTION_EMOTE_DOUBLE_EXCLAMATION_MARK: the Vs. Seeker's rematch), drawn for `ActorView.emoteDouble`. */
+  doubleExclamationSprite?: Id;
   /**
    * Bag pockets in bag order (decomp bag.h): `Item.pocket` names one. `size` = distinct items it holds,
    * `max` = count per item, `sorted` = kept in item order (decomp Pocket_Sort: berries, TMs/HMs); others

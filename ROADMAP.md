@@ -62,7 +62,9 @@ the trainer card, the Pokédex, the Town Map and Fly, all 25 Pokétch apps, opti
 **Town extras.** Seals and Ball Capsules with the editor and the battle send-out effect; the Game Corner's slots,
 coins and prizes; the Villa and its visitors; the journal; the diplomas; the TV (its schedule, the recorded
 segments, the interviews) and the Jubilife TV gallery; small NPC rules (Hidden Power, the News
-Press, the Spiritomb counter, Deoxys's meteorites, the department store regular, field poison).
+Press, the Spiritomb counter, Deoxys's meteorites, the department store regular, field poison); the Vs. Seeker's task and
+rematches, Dr. Footstep, the Solaceon Ruins' Unown inscriptions, the Vista Lighthouse binoculars; the step and egg
+records.
 
 **Audio.** The SDAT sequencer and DS synth in an AudioWorklet: field music by zone and time, fanfares, sound effects,
 cries, battle music by encounter, the title and app music.
@@ -92,8 +94,7 @@ Pokémon, follower talk and the HGSS look.
 - **Contests:** the dancers' outfits.
 - **Underground:** the placed traps' and tools' drawn details (the slide's sprite pose, the rock's floor shadow, the
   OK emote), the transition's hole and descent animations.
-- **Town extras:** the TV's traps record (and its group segments, once groups exist); the capsule editor's Test throw; the Vs. Seeker, footprints, the Unown messages and the
-  Vista Lighthouse binoculars; counting RECORD_STEPS and RECORD_EGGS_HATCHED (two Villa pieces wait on them).
+- **Town extras:** the TV's traps record (and its group segments, once groups exist); the capsule editor's Test throw.
 - **Polish:** the last move animations, the Frontier Brain cut-ins, the generic HM cut-in art.
 - **Modding 1.0:** script eject to TypeScript, a mod sandbox, mod docs, and Gen 4 extension points (3D model
   replacement, mod Pokétch apps, camera hooks).

@@ -65,11 +65,11 @@
 
 /* --- Mart (decomp shop_menu.c): one DS screen at the UI unit, bottom-centred over the field (as the script
    windows), windows at their DS tiles; buying or selling, on the shop panel. Phones show that screen full
-   screen, centred, over an opaque backdrop (index.ts). */
+   screen, centred, over an opaque backdrop (index.ts); so do the other `.mart-screen` boards (the Ball Capsule editor). */
 .ui-mart { inset: var(--room-top, 0px) var(--room-right, 0px) var(--room-bottom, 0px) var(--room-left, 0px); }
 .mart.ui-screen { background: none; box-shadow: none; clip-path: none; max-height: none; }
 .mart.mart-board { position: absolute; inset: auto; left: calc(50% - var(--unit) * 128); bottom: 0; display: block; pointer-events: none; }
-.ui-layer[data-mode='compact'] .mart.mart-screen, .ui-layer[data-controls='side'] .mart.mart-screen { bottom: calc(50% - var(--unit) * 96); }
+.ui-layer[data-mode='compact'] .mart.mart-screen, .ui-layer[data-controls='side'] .mart.mart-screen { bottom: calc(50% - var(--unit) * var(--board-h) / 2); }
 .mart-board > * { pointer-events: auto; }
 .mart-board .ds-picture { display: block; pointer-events: none; }
 .mart-board .board-at { min-width: 0; min-height: 0; }

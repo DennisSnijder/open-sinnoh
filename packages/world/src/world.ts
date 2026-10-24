@@ -1,5 +1,5 @@
 import { ContainmentUnits } from './containment.ts';
-import { undergroundStep, underground as undergroundState, battleTime, dailyRandomOf, daycareStep, dayPeriod, eggCycleLength, hasFieldSystems, isFeebasTile, isShiny, monGender, onMainMatrix, Prng, readSpecialEncounters, RECORD_CAUGHT_FISH, RECORD_FISH_GOT_AWAY, secondsSinceMidnight, seekerStep, SEEKER_SPIN, swarmDailyOf, swarmIndex, type ClockTime, type Id } from '@opensinnoh/core';
+import { undergroundStep, underground as undergroundState, battleTime, dailyRandomOf, daycareStep, dayPeriod, eggCycleLength, hasFieldSystems, isFeebasTile, isShiny, monGender, onMainMatrix, Prng, readSpecialEncounters, RECORD_CAUGHT_FISH, RECORD_EGGS_HATCHED, RECORD_FISH_GOT_AWAY, RECORD_STEPS, secondsSinceMidnight, seekerStep, SEEKER_SPIN, swarmDailyOf, swarmIndex, type ClockTime, type Id } from '@opensinnoh/core';
 import {
   LOCALID_CAMERA,
   LOCALID_FOLLOWER,
@@ -55,6 +55,8 @@ import { SWEET_SCENT_BLOCKED_WEATHERS, SWEET_SCENT_COLOR, SweetScentTask } from 
 import { HoneyTreeShakes, honeyTreePlacements } from './honey-trees.ts';
 import { afterSafariBattle, greatMarsh, safariActive, safariEncounterTable, safariStep } from './safari.ts';
 import { GreatMarshLookout, type LookoutView } from './great-marsh-lookout.ts';
+import { BINOCULARS_CAMERA, VistaBinoculars } from './vista-binoculars.ts';
+import { VsSeekerTask } from './vs-seeker.ts';
 import { GreatMarshTram } from './gyms/great-marsh.ts';
 import { activateRoamer, roamersAfterBattle, roamersOnContinue, roamerWildSpec, rollRoamerEncounter } from './roamers.ts';
 import { battleWeather, battleScene, partnerWildBattleSetup, VAR_PARTNER_TRAINER_ID, wildBattleSetup } from './battle-setup.ts';
@@ -86,6 +88,9 @@ const DESTROY_OBSTACLE_TICKS = 45;
 const AMITY_STEPS_MAX = 10000;
 /** Decomp SysTask_DoContestCameraFlash: BrightnessController_StartTransition over 6 frames. */
 const CAMERA_FLASH_TICKS = 6;
+/** MAP_HEADER_POKEMON_LEAGUE and MAP_HEADER_VISTA_LIGHTHOUSE (the Vista Lighthouse binoculars' map changes). */
+const MAP_HEADER_POKEMON_LEAGUE = 172;
+const MAP_HEADER_VISTA_LIGHTHOUSE = 164;
 /** Decomp ITEM_USE_FUNC_POKE_RADAR. */
 const FIELD_USE_POKE_RADAR = 11;
 
@@ -94,6 +99,8 @@ export const WARP_FADE_TICKS = 8;
 /** Decomp TRAINER_SCORE_EVENT_UNDERGROUND_ENTERED and _UNDERGROUND_100_STEPS. */
 const TRAINER_SCORE_UNDERGROUND_ENTERED = 36;
 const TRAINER_SCORE_UNDERGROUND_100_STEPS = 37;
+/** Decomp TRAINER_SCORE_EVENT_UNK_15: an egg starts hatching (Field_UpdateDaycare). */
+const SCORE_EGG_HATCHED = 15;
 /** Fly's fades to and from white (hm_cut_in.c FadeOut, FadeIn: StartScreenFade 6 steps of 1 frame). */
 const FLY_FADE_TICKS = 6;
 /** The field camera follows the target's height with a 6-frame delay (decomp field_camera.c FIELD_CAMERA_DELAY). */
@@ -242,8 +249,12 @@ export class FieldWorld implements OpenSinnohWorld {
   private healMachine: HealMachine | null = null;
   /** A boat trip under way (boat.ts), and the ship placement it moves. */
   private boat: BoatTrip | null = null;
-  /** The gate's binoculars (great-marsh-lookout.ts) while they run. */
-  private lookout: GreatMarshLookout | null = null;
+  /** The gate's binoculars (great-marsh-lookout.ts) or the Vista Lighthouse's (vista-binoculars.ts) while they run. */
+  private lookout: GreatMarshLookout | VistaBinoculars | null = null;
+  /** The Vista Lighthouse binoculars' camera while they look at the League. */
+  private viewCamera: typeof BINOCULARS_CAMERA | null = null;
+  /** The Vs. Seeker's task (vs-seeker.ts) while it runs, then its result until the script reads it. */
+  private seeker: VsSeekerTask | null = null;
   /** This tick's input (the binoculars end a view on A). */
   private lookoutInput: InputFrame | null = null;
   private boatShip: Vec3 | null = null;
@@ -345,6 +356,7 @@ export class FieldWorld implements OpenSinnohWorld {
       flagBySource: (index) => this.flag(flagId(this.reg, index)),
       breakSnowball: (x, z) => this.breakSnowball(x, z),
       distortion: () => this.distortion(),
+      countStep: () => this.addGameRecord(RECORD_STEPS),
     });
     const radar = newGameRecord(reg).specialEncounters?.pokeRadar;
     this.radar = radar ? new PokeRadar({
@@ -1101,7 +1113,7 @@ export class FieldWorld implements OpenSinnohWorld {
   private settled(): boolean {
     if (this.storyScene) return false;
     if (this.containment && !this.containment.done()) return false;
-    if (this.fishing || this.watering || this.boat || this.lookout || this.warpState || this.ugTransit || this.ug?.busy() || this.flyTask || this.teleportTask || this.fadeAnim || this.radarTask || this.sweet || !this.avatar.idle() || this.feature?.busy()) return false;
+    if (this.fishing || this.watering || this.boat || this.lookout || this.seeker?.done() === null || this.warpState || this.ugTransit || this.ug?.busy() || this.flyTask || this.teleportTask || this.fadeAnim || this.radarTask || this.sweet || !this.avatar.idle() || this.feature?.busy()) return false;
     for (const a of this.allActors()) {
       if (a.script) return false;
       if (a.motion && a.motion.source !== 'type' && !(a === this.hero && a.motion.source === 'input' && a.motion.kind !== 'walk')) return false;
@@ -1190,7 +1202,11 @@ export class FieldWorld implements OpenSinnohWorld {
       // Decomp Field_ProcessStep → Field_UpdateSafari (before the daycare): out of balls, or the 500th step.
       const safari = safariStep(this.reg, this.state);
       if (safari) return this.scripts.start({ label: safari, zone, source: 'step' });
-      if (this.daycareStep()) return this.scripts.start({ label: newGameRecord(this.reg).hatchEgg, zone, source: 'step' });
+      if (this.daycareStep()) {
+        this.addGameRecord(RECORD_EGGS_HATCHED);
+        this.addTrainerScore(SCORE_EGG_HATCHED);
+        return this.scripts.start({ label: newGameRecord(this.reg).hatchEgg, zone, source: 'step' });
+      }
       // Decomp Field_ProcessStep → Repel_UpdateSteps: the last step of a Repel starts CommonScript_RepelsEffectWoreOff.
       if (this.state.repel > 0 && --this.state.repel === 0) {
         const label = [...this.reg.newGame.values()][0]?.repelWoreOff;
@@ -1608,6 +1624,7 @@ export class FieldWorld implements OpenSinnohWorld {
       const running = task.step(input, this.scripts.running());
       // FishingTask_WaitForFish shows the bite marker; the renderer already draws actor emotes.
       this.hero.emote = task.phase === 'bite' ? 1 : 0;
+      this.hero.emoteDouble = false;
       if (!running) {
         this.fishing = null;
         this.releaseAll();
@@ -1635,6 +1652,7 @@ export class FieldWorld implements OpenSinnohWorld {
     if (touched && this.ug && !this.warpState && !this.ugTransit && !this.scripts.running()) this.ug.touched(Number(touched[1]), Number(touched[2]));
     this.lookoutInput = input;
     if (this.lookout?.step()) this.lookout = null;
+    if (this.seeker?.done() === null) this.seeker.step();
     if (this.safariScript && !this.warpState && !this.scripts.running()) {
       this.scripts.start({ label: this.safariScript, zone: this.zone.id, source: 'step' });
       this.safariScript = null;
@@ -2038,6 +2056,7 @@ export class FieldWorld implements OpenSinnohWorld {
       ...spriteAnimView(a.frames),
       visible: a.visible,
       emote: a.emote > 0,
+      ...(a.emote > 0 && a.emoteDouble ? { emoteDouble: true as const } : {}),
       ...(a.pose ? { pose: a.pose, animTick: a.poseTick } : {}),
       ...(a.sink ? { sink: a.sink } : {}),
       ...(object ? { home: a.cloneOf ?? a.zone } : {}),
@@ -2123,6 +2142,7 @@ export class FieldWorld implements OpenSinnohWorld {
     if (this.storyScene) view.storyScene = this.storyScene;
     const fly = this.flyScene();
     if (fly) view.fly = fly;
+    if (this.viewCamera) view.viewCamera = this.viewCamera;
     if (this.flyTask) view.cameraDistance = this.flyTask.task.cameraDistance();
     if (this.teleportTask) view.cameraDistance = this.teleportTask.cameraDistance();
     if (this.departed) view.departed = this.departed;
@@ -2386,7 +2406,6 @@ export class FieldWorld implements OpenSinnohWorld {
     const g = greatMarsh(this.reg);
     if (!g) throw new Error('world: the packs have no Great Marsh (NewGame.greatMarsh)');
     const marsh = this.get('matrices', this.get('zones', g.zones[0]!).matrix);
-    const ns = this.zone.id.slice(0, this.zone.id.indexOf(':'));
     const prng = () => Prng.from(this.state.rng);
     this.lookout = new GreatMarshLookout({
       reg: this.reg,
@@ -2412,12 +2431,7 @@ export class FieldWorld implements OpenSinnohWorld {
       hidePlayer: (hidden) => {
         this.hero.visible = !hidden;
       },
-      hidePoketch: (hidden) => {
-        const id = `${ns}:FLAG_POKETCH_HIDDEN` as Id;
-        if (!this.reg.flags.has(id)) throw new Error(`world: no ${id}`);
-        if (hidden === this.reg.flags.get(id)!.initial) delete this.state.flags[id];
-        else this.state.flags[id] = hidden;
-      },
+      hidePoketch: (hidden) => this.hidePoketch(hidden),
       encounters: (zone) => {
         const id = this.get('zones', zone).encounters;
         if (!id) throw new Error(`world: Great Marsh area ${zone} has no encounters`);
@@ -2433,7 +2447,97 @@ export class FieldWorld implements OpenSinnohWorld {
     return this.lookout === null;
   }
 
-  /** The binoculars' Pokémon and iris for the app's overlay, or null while they are not in use. */
+  /** FLAG_POKETCH_HIDDEN (SystemFlag_SetPoketchHidden / ClearPoketchHidden). */
+  private hidePoketch(hidden: boolean): void {
+    const ns = this.zone.id.slice(0, this.zone.id.indexOf(':'));
+    const id = `${ns}:FLAG_POKETCH_HIDDEN` as Id;
+    if (!this.reg.flags.has(id)) throw new Error(`world: no ${id}`);
+    if (hidden === this.reg.flags.get(id)!.initial) delete this.state.flags[id];
+    else this.state.flags[id] = hidden;
+  }
+
+  vistaBinoculars(): void {
+    if (this.lookout) throw new Error('world: the binoculars are already in use');
+    const zone = (index: number) => {
+      const z = [...this.reg.zones.values()].find((r) => r.sourceIndex === index);
+      if (!z) throw new Error(`world: no zone with sourceIndex ${index} (the Vista Lighthouse binoculars)`);
+      return z.id;
+    };
+    const p = this.state.player;
+    this.lookout = new VistaBinoculars({
+      fade: (kind, frames) => this.fade(kind, frames, 'black'),
+      fadeDone: () => this.fadeDone(),
+      changeMap: (target, x, z, facing) => {
+        // FieldMapChange_SetNewLocation; the temporary map change skips FieldSystem_InitFlagsWarp (onWarp).
+        this.state.previousZone = this.zone.id;
+        this.loadMap(target, x, z, 0, facing);
+      },
+      league: zone(MAP_HEADER_POKEMON_LEAGUE),
+      // Location_Set(MAP_HEADER_VISTA_LIGHTHOUSE, …, the saved x and z): the lighthouse the script runs in.
+      home: { zone: zone(MAP_HEADER_VISTA_LIGHTHOUSE), x: p.x, z: p.z },
+      hidePlayer: (hidden) => {
+        this.hero.visible = !hidden;
+      },
+      hidePoketch: (hidden) => this.hidePoketch(hidden),
+      setCamera: (camera) => {
+        this.viewCamera = camera;
+      },
+      pressedAB: () => !!this.lookoutInput?.pressed.some((b) => b === 'a' || b === 'b'),
+      playSe: (n) => this.sound.play(n),
+    });
+  }
+
+  vistaBinocularsDone(): boolean {
+    return this.lookout === null;
+  }
+
+  startVsSeeker(): void {
+    if (this.seeker?.done() === null) throw new Error('world: the Vs. Seeker is already in use');
+    const ng = newGameRecord(this.reg);
+    this.seeker = new VsSeekerTask({
+      reg: this.reg,
+      state: this.state,
+      objects: () => [...this.actors.values()].filter((a) => !this.featureActors.has(a)),
+      pause: (a, paused) => {
+        a.paused = paused;
+      },
+      animate: (a, steps) => {
+        if (a.script) throw new Error(`world: object ${a.localId} already has a movement running`);
+        a.script = { steps, index: 0, done: 0 };
+      },
+      animationDone: (a) => !a.script && a.motion?.source !== 'script',
+      switchMovementType: (a, type) => {
+        a.movementType = type;
+        this.applyMovementType(a);
+        this.syncState();
+      },
+      playerAvatar: (raised) => {
+        // ov5_021E0F54 / ov5_021E0FC0: only a walking player changes avatar.
+        if (this.state.playerState !== 'walk') return;
+        const p = this.hero;
+        if (raised) {
+          if (!ng.playerVsSeekerSprite) throw new Error('world: the Vs. Seeker without NewGame.playerVsSeekerSprite');
+          p.sprite = ng.playerVsSeekerSprite[this.state.gender];
+          p.pose = 'vs-seeker';
+          p.poseTick = 0;
+          this.healAvatar = true;
+        } else {
+          this.healAvatar = false;
+          p.sprite = this.playerSprite();
+          p.pose = null;
+        }
+      },
+      playSe: (n) => this.sound.play(n),
+      sePlaying: (n) => this.sound.playing(n),
+    });
+  }
+
+  vsSeekerResult(): number | null {
+    if (!this.seeker) throw new Error('world: the Vs. Seeker was not started');
+    return this.seeker.done();
+  }
+
+  /** The binoculars' Pokémon (the Great Marsh's) and iris for the app's overlay, or null while they are not in use. */
   lookoutView(): LookoutView | null {
     return this.lookout?.view() ?? null;
   }

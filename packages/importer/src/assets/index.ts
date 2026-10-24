@@ -72,6 +72,8 @@ export interface ImportAssetsResult {
   modelObjects: Map<number, Id>;
   /** The trainer-sight '!' (fldeff texture), a 16×16 billboard. */
   exclamation: BillboardSprite;
+  /** The Vs. Seeker's '!!' (fldeff texture), a 16×16 billboard. */
+  doubleExclamation: BillboardSprite;
   /** Pack-relative path → bytes. */
   assets: Map<string, Uint8Array>;
   /** Features seen but not converted (one line per kind, with counts). */
@@ -103,6 +105,8 @@ const PATHS = {
 
 /** fldeff member holding the trainer-sight '!' texture (decomp ov5_021F5A10.c, texture slot 1). */
 const FLDEFF_EXCLAMATION = 4;
+/** fldeff member holding the '!!' texture (decomp ov5_021F5A10.c, texture slot 11: MOVEMENT_ACTION_EMOTE_DOUBLE_EXCLAMATION_MARK). */
+const FLDEFF_DOUBLE_EXCLAMATION = 13;
 
 /** mmodel members: 0–420 BTX0 character sets; frame-sequence tables generic_walk (445) and walk_and_run (446). */
 const MMODEL = { sets: 421, genericWalk: 445, walkAndRun: 446, frameSeqs: 445 };
@@ -406,21 +410,20 @@ export function importAssets(fs: NitroFs, opts: ImportAssetsOptions = {}): Impor
   models.push(...effects.models, ...obstacles.models);
   sprites.push(...effects.sprites);
   textureAnimations.push(...effects.textureAnimations, ...obstacles.textureAnimations);
-  const exAtlas = buildSpriteAtlas(must(readTex0(must(fldeff[FLDEFF_EXCLAMATION], 'fldeff exclamation')), 'fldeff exclamation TEX0'));
-  assets.set('sprites/exclamation.png', encodePng(exAtlas.width, exAtlas.frameSize, exAtlas.rgba));
-  const exclamation: BillboardSprite = {
-    id: 'platinum:SPRITE_EXCLAMATION',
-    atlas: 'platinum:sprites/exclamation.png',
-    frameSize: exAtlas.frameSize,
-    frameCount: exAtlas.frameCount,
-    animations: staticAnimations(exAtlas.frameCount),
+  const emoteSprite = (member: number, name: string, id: Id): BillboardSprite => {
+    const atlas = buildSpriteAtlas(must(readTex0(must(fldeff[member], `fldeff ${name}`)), `fldeff ${name} TEX0`));
+    assets.set(`sprites/${name}.png`, encodePng(atlas.width, atlas.frameSize, atlas.rgba));
+    return { id, atlas: `platinum:sprites/${name}.png`, frameSize: atlas.frameSize, frameCount: atlas.frameCount, animations: staticAnimations(atlas.frameCount) };
   };
+  const exclamation = emoteSprite(FLDEFF_EXCLAMATION, 'exclamation', 'platinum:SPRITE_EXCLAMATION');
+  const doubleExclamation = emoteSprite(FLDEFF_DOUBLE_EXCLAMATION, 'double-exclamation', 'platinum:SPRITE_DOUBLE_EXCLAMATION');
 
   return {
     records: { models, sprites, textureAnimations, fieldEffects: [...effects.fieldEffects, ...obstacles.fieldEffects] },
     propAnimations,
     modelObjects,
     exclamation,
+    doubleExclamation,
     assets,
     warnings: [...warnings].map(([w, n]) => `${w} ×${n}`),
   };

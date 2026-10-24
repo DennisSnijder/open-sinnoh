@@ -3,7 +3,7 @@
  * Timings are the decomp movement actions (player_move.c, ov5_021DFB54.c) in 30 Hz ticks.
  */
 import { describe, expect, it } from 'vitest';
-import type { Button } from '@opensinnoh/core';
+import { RECORD_STEPS, type Button } from '@opensinnoh/core';
 import type { Facing, GameState } from '@opensinnoh/contracts';
 import { f, mon, newState, pos, setup, type Harness } from './testing.ts';
 import { HM_CUT_IN_TICKS } from './avatar.ts';
@@ -84,6 +84,10 @@ describe('surfing (FieldTask_StartUseSurf, PlayerAvatar_SetMovement_Normal)', ()
     const surfer = terrain(5, 9, 'up', (s) => (s.playerState = 'surf'));
     surfer.hold(['up'], 4 * 3);
     expect(pos(surfer.state)).toEqual([f('TERRAIN'), 5, 6, 'up']);
+    // PlayerAvatar_IncrementStepsRecord: walked and surfed steps count; the shore's bumps do not.
+    expect(walker.state.records.counts[RECORD_STEPS]).toBe(10);
+    expect(shore.state.records.counts[RECORD_STEPS]).toBeUndefined();
+    expect(surfer.state.records.counts[RECORD_STEPS]).toBe(3);
   });
 
   it('surfing rolls the surf table on the encounter rng', () => {

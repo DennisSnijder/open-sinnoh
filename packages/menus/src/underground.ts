@@ -22,7 +22,7 @@ const VISIBLE = 6;
 /** SE_CONFIRM, SEQ_SE_DP_WIN_OPEN, SEQ_SE_DP_SELECT78, SEQ_SE_PL_SUTYA2, SEQ_SE_DP_PIRORIRO2. */
 const SE = { confirm: 1500, open: 1533, select: 1504, bury: 1367, obtained: 1507, trapSet: 1571 };
 /** RECORD_SPHERES_BURIED (generated/game_records.txt). */
-const RECORD_SPHERES_BURIED = 46;
+const RECORD_SPHERES_BURIED = 47;
 /** MINING_TREASURE_REVIVE and _MAX_REVIVE: put into the bag's MEDICINE pocket. */
 const REVIVES = [29, 30];
 
