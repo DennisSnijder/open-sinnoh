@@ -239,6 +239,9 @@ function startMenu(d: DrawContext, v: StartMenuView): HTMLElement {
   root.setAttribute('aria-label', v.title);
   // In a Safari Game, StartMenu_PrintBallCount's window (12×4 tiles): the label over the stock.
   if (v.ballStock) root.append(framed(d, 'start-balls', el('div', '', d.text(v.ballStock.label)), el('div', '', d.text(v.ballStock.stock))));
+  // OpenSinnoh, not Platinum: the current objective in a field window beside the menu (above it on phones). The UI
+  // layer reads it out once when the menu opens (index.ts).
+  if (v.objective) root.append(framed(d, 'start-objective', el('h3', 'start-objective-title', d.text(v.objective.title)), el('p', 'start-objective-text', d.flow(v.objective.text, false))));
   return root;
 }
 

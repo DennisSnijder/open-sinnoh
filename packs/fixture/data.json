@@ -12258,6 +12258,34 @@
    "text": "Look up?"
   },
   {
+   "id": "fixture:OpenSinnoh_Options_Objective",
+   "text": "PURPOSE"
+  },
+  {
+   "id": "fixture:OpenSinnoh_Options_ObjectiveDescription",
+   "text": "Show what to do next."
+  },
+  {
+   "id": "fixture:OpenSinnoh_Objective_Title",
+   "text": "PURPOSE"
+  },
+  {
+   "id": "fixture:OpenSinnoh_Objective_Explore",
+   "text": "Wander the valley."
+  },
+  {
+   "id": "fixture:OpenSinnoh_Objective_WakeUp",
+   "text": "Wake up and look around."
+  },
+  {
+   "id": "fixture:OpenSinnoh_Objective_FindGuide",
+   "text": "Find the guide east of here."
+  },
+  {
+   "id": "fixture:OpenSinnoh_Objective_CoalToken",
+   "text": "Earn the Coal token."
+  },
+  {
    "id": "fixture:Lantern_Summary_Rename",
    "text": "RENAME"
   },
@@ -24854,6 +24882,40 @@
      {
       "particle": 36,
       "emitters": 1
+     }
+    ]
+   },
+   "objectives": {
+    "title": "fixture:OpenSinnoh_Objective_Title",
+    "explore": "fixture:OpenSinnoh_Objective_Explore",
+    "steps": [
+     {
+      "text": "fixture:OpenSinnoh_Objective_WakeUp",
+      "done": [
+       {
+        "kind": "var",
+        "var": "fixture:VAR_ROOM_INTRO",
+        "atLeast": 1
+       }
+      ]
+     },
+     {
+      "text": "fixture:OpenSinnoh_Objective_FindGuide",
+      "done": [
+       {
+        "kind": "flag",
+        "flag": "fixture:FLAG_FIRST_ARRIVAL_ETERNA_CITY"
+       }
+      ]
+     },
+     {
+      "text": "fixture:OpenSinnoh_Objective_CoalToken",
+      "done": [
+       {
+        "kind": "badge",
+        "badge": "fixture:BADGE_ID_COAL"
+       }
+      ]
      }
     ]
    }

@@ -308,6 +308,8 @@ export function mountUi(deps: UiDeps): InGameUi {
     }
     drawn = key;
     drawnApp = view?.app ?? null;
+    // The start menu's objective (drawn beside the menu, not focusable) is read out once as the menu opens.
+    if (entering && view.app === 'start-menu' && view.objective) live.say(`${view.objective.title}: ${view.objective.text}`);
     host.hidden = !view;
     if (!view) {
       host.replaceChildren();

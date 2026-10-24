@@ -10,13 +10,13 @@ export const OPTIONS_KEY = 'lantern-nds:options'; // pre-rename name, kept: play
  * The OpenSinnoh additions (not the DS's): their contract default is the DS behaviour, which replays and tests run
  * (`DEFAULT_DEVICE_OPTIONS`); players get `DEFAULT_OPTIONS` (docs/decisions.md).
  */
-export const OPENSINNOH_OPTIONS = ['autoLowercase', 'autoRun', 'repelPrompt', 'itemWheel', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'character', 'spiritombVendors'] as const satisfies readonly (keyof DeviceOptions)[];
-/** On for players: auto lowercase, the repeat-Repel prompt, the item wheel, follower talk and the Pokédex name search. Auto-run is on for touch screens only (`playerDefaults`). */
-export const DEFAULT_OPTIONS: Readonly<DeviceOptions> = { ...DEFAULT_DEVICE_OPTIONS, autoLowercase: 0, repelPrompt: 0, itemWheel: 0, followerTalk: 0, dexNameSearch: 0 };
+export const OPENSINNOH_OPTIONS = ['autoLowercase', 'autoRun', 'repelPrompt', 'itemWheel', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'character', 'spiritombVendors', 'objective'] as const satisfies readonly (keyof DeviceOptions)[];
+/** On for players: auto lowercase, the repeat-Repel prompt, the item wheel, follower talk, the Pokédex name search and the start menu's objective. Auto-run is on for touch screens only (`playerDefaults`). */
+export const DEFAULT_OPTIONS: Readonly<DeviceOptions> = { ...DEFAULT_DEVICE_OPTIONS, autoLowercase: 0, repelPrompt: 0, itemWheel: 0, followerTalk: 0, dexNameSearch: 0, objective: 0 };
 /** The player's defaults on this device: auto-run on where the screen is a touch screen (phones). */
 export const playerDefaults = (touch: boolean): DeviceOptions => ({ ...DEFAULT_OPTIONS, autoRun: touch ? 0 : 1 });
 /** Options of earlier versions start at the default when stored without them. */
-const ADDED_LATER: readonly (keyof DeviceOptions)[] = ['tradeEvolution', 'followers', 'followerStyle', 'autoLowercase', 'autoRun', 'repelPrompt', 'itemWheel', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'character', 'spiritombVendors'];
+const ADDED_LATER: readonly (keyof DeviceOptions)[] = ['tradeEvolution', 'followers', 'followerStyle', 'autoLowercase', 'autoRun', 'repelPrompt', 'itemWheel', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'character', 'spiritombVendors', 'objective'];
 
 /** Options not applied to the game yet, and why (logged when changed). */
 export const NOT_APPLIED: Readonly<Partial<Record<keyof Options, string>>> = {};
@@ -36,7 +36,7 @@ export function parseOptions(raw: string | null, touch = false): { options: Opti
   const options = { ...defaults };
   for (const key of Object.keys(DEVICE_OPTION_COUNTS) as (keyof Options)[]) {
     // Stored before the option existed (trade evolutions 0.19, followers 0.27.11, their style 0.27.21, auto lowercase
-    // 0.29.3, the quality-of-life options 0.31.0): it starts at the default, every stored setting kept.
+    // 0.29.3, the quality-of-life options 0.31.0, the objective 0.44.0): it starts at the default, every stored setting kept.
     if (ADDED_LATER.includes(key) && !(key in v)) continue;
     const x = v[key];
     if (!Number.isInteger(x) || (x as number) < 0 || (x as number) >= DEVICE_OPTION_COUNTS[key]) return { options: { ...defaults }, problem: `${key} is ${JSON.stringify(x)}` };

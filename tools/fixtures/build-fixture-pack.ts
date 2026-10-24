@@ -1315,6 +1315,18 @@ const data = {
         marts: Array.from({ length: 7 }, (_, d) => [1 + d, 8 + d, 15 + d, 22 + d]),
         trainerCapsules: [],
         delays: [0, 4, 8, 12, 12, 10, 10],
+        // The send-out bursts: particles 1–17 for the balls, 36 for the rest.
+        ballOpen: [...Array.from({ length: 17 }, (_, i) => ({ particle: i + 1, emitters: 1 })), ...Array.from({ length: 3 }, () => ({ particle: 36, emitters: 1 }))],
+      },
+      // Original objectives (contracts ObjectiveTables): after the intro, the guide (the Eterna arrival flag stands in), a badge.
+      objectives: {
+        title: id('OpenSinnoh_Objective_Title'),
+        explore: id('OpenSinnoh_Objective_Explore'),
+        steps: [
+          { text: id('OpenSinnoh_Objective_WakeUp'), done: [{ kind: 'var', var: id('VAR_ROOM_INTRO'), atLeast: 1 }] },
+          { text: id('OpenSinnoh_Objective_FindGuide'), done: [{ kind: 'flag', flag: id('FLAG_FIRST_ARRIVAL_ETERNA_CITY') }] },
+          { text: id('OpenSinnoh_Objective_CoalToken'), done: [{ kind: 'badge', badge: id('BADGE_ID_COAL') }] },
+        ],
       },
     },
   ],

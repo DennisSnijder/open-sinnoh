@@ -1,0 +1,108 @@
+/**
+ * The start menu's objective table for Platinum (contracts `ObjectiveTables`; an OpenSinnoh addition). The texts are
+ * our own words; the checks name the decomp's flags, vars and badges that mark each story beat (the story checkpoints
+ * in docs/research/story-cp5-19.md and story-cp20-24.md). A step is done when any of its checks holds: each step also
+ * lists a later beat the story cannot reach without it (the next badge, or the Champion's clear), so a marker that is
+ * skipped or reset later never brings an old step back. Only markers the story sets once and never clears are used.
+ */
+import { asId, type Id } from '@opensinnoh/core';
+import type { ObjectiveCheck, ObjectiveTables } from '@opensinnoh/contracts';
+
+type Check = `FLAG_${string}` | `VAR_${string} ${number}` | `BADGE_${string}`;
+
+/** [text id suffix, our words, checks]: in story order. */
+const STEPS: [string, string, Check[]][] = [
+  // The opening (Twinleaf, Route 201, Lake Verity, Sandgem).
+  ['VisitBarry', 'Visit Barry in the house next door.', ['FLAG_RIVAL_LEFT_HOME', 'VAR_PLAYER_STARTER 1']],
+  ['Route201', 'Catch up with Barry on Route 201.', ['VAR_PLAYER_STARTER 1']],
+  ['HomeToMom', 'Head home and tell Mom what happened.', ['VAR_PLAYER_HOUSE_STATE 4', 'FLAG_HAS_POKEDEX']],
+  ['LakeVerity', 'Go with Barry to Lake Verity.', ['VAR_VISITED_LAKE_VERITY_WITH_RIVAL 1', 'FLAG_HAS_POKEDEX']],
+  ['RowanLab', "Visit Professor Rowan's lab in Sandgem Town.", ['FLAG_HAS_POKEDEX']],
+  ['MomParcel', 'Go home to Twinleaf Town and see Mom.', ['FLAG_RECEIVED_PARCEL', 'BADGE_ID_COAL']],
+  ['Parcel', 'Deliver the Parcel to Barry in Jubilife City.', ['FLAG_TALKED_TO_TRAINERS_SCHOOL_RIVAL', 'BADGE_ID_COAL']],
+  ['Poketch', 'Get a Pokétch in Jubilife City.', ['FLAG_RECEIVED_POKETCH', 'BADGE_ID_COAL']],
+  // Coal Badge.
+  ['Oreburgh', 'Head east to Oreburgh City.', ['FLAG_FIRST_ARRIVAL_OREBURGH_CITY', 'BADGE_ID_COAL']],
+  ['RoarkMine', 'Find Roark in the Oreburgh Mine.', ['FLAG_ROARK_RETURNED_TO_OREBURGH_GYM', 'BADGE_ID_COAL']],
+  ['Roark', 'Beat Roark at the Oreburgh Gym.', ['BADGE_ID_COAL']],
+  // Forest Badge.
+  ['Floaroma', 'Find out what Team Galactic is up to in Floaroma Town.', ['FLAG_OBTAINED_FLOAROMA_MEADOW_WORKS_KEY', 'BADGE_ID_FOREST']],
+  ['Windworks', 'Free the Valley Windworks from Team Galactic.', ['VAR_VALLEY_WINDWORKS_STATE 2', 'BADGE_ID_FOREST']],
+  ['Eterna', 'Go through Eterna Forest to Eterna City.', ['FLAG_FIRST_ARRIVAL_ETERNA_CITY', 'BADGE_ID_FOREST']],
+  ['Gardenia', 'Beat Gardenia at the Eterna Gym.', ['BADGE_ID_FOREST']],
+  // Relic Badge.
+  ['EternaBuilding', 'Stop Team Galactic at their building in Eterna City.', ['FLAG_TEAM_GALACTIC_LEFT_ETERNA_BUILDING', 'BADGE_ID_RELIC']],
+  ['Bicycle', "Get a Bicycle at Eterna City's Cycle Shop.", ['FLAG_RECEIVED_BICYCLE', 'BADGE_ID_RELIC']],
+  ['Hearthome', 'Head south to Hearthome City.', ['FLAG_FIRST_ARRIVAL_HEARTHOME_CITY', 'BADGE_ID_RELIC']],
+  ['Fantina', 'Beat Fantina at the Hearthome Gym.', ['BADGE_ID_RELIC']],
+  // Cobble Badge.
+  ['Veilstone', 'Head east through Solaceon Town to Veilstone City.', ['FLAG_FIRST_ARRIVAL_VEILSTONE_CITY', 'BADGE_ID_COBBLE']],
+  ['Maylene', 'Beat Maylene at the Veilstone Gym.', ['BADGE_ID_COBBLE']],
+  // Fen Badge.
+  ['Warehouse', "Stop Team Galactic at their warehouse in Veilstone City.", ['VAR_PASTORIA_CITY_STATE 1', 'BADGE_ID_FEN']],
+  ['Pastoria', 'Head south to Pastoria City.', ['VAR_PASTORIA_CITY_STATE 2', 'BADGE_ID_FEN']],
+  ['Wake', 'Beat Crasher Wake at the Pastoria Gym.', ['BADGE_ID_FEN']],
+  // Mine Badge.
+  ['GruntChase', 'Follow the Team Galactic Grunt to Valor Lakefront.', ['VAR_PASTORIA_CITY_STATE 6', 'BADGE_ID_MINE']],
+  ['Psyduck', 'Use the SecretPotion on the Psyduck on Route 210.', ['FLAG_USED_SECRETPOTION', 'BADGE_ID_MINE']],
+  ['OldCharm', 'Take the Old Charm to Celestic Town.', ['FLAG_DELIVERED_OLD_CHARM', 'BADGE_ID_MINE']],
+  ['Celestic', 'Stop Team Galactic in Celestic Town.', ['VAR_CELESTIC_TOWN_STATE 1', 'BADGE_ID_MINE']],
+  ['Canalave', 'Surf west from Jubilife City to Canalave City.', ['FLAG_FIRST_ARRIVAL_CANALAVE_CITY', 'BADGE_ID_MINE']],
+  ['Byron', 'Beat Byron at the Canalave Gym.', ['BADGE_ID_MINE']],
+  // Icicle Badge.
+  ['Library', 'Meet Professor Rowan at the Canalave Library.', ['VAR_CANALAVE_LIBRARY_STATE 2', 'BADGE_ID_ICICLE']],
+  ['LakeValor', 'Stop Team Galactic at Lake Valor.', ['FLAG_DEFEATED_COMMANDER_SATURN_VALOR_CAVERN', 'BADGE_ID_ICICLE']],
+  ['VerityRescue', 'Hurry to Lake Verity.', ['FLAG_TEAM_GALACTIC_LEFT_LAKE_VERITY', 'BADGE_ID_ICICLE']],
+  ['Snowpoint', 'Head through Mt. Coronet to Snowpoint City.', ['FLAG_FIRST_ARRIVAL_SNOWPOINT_CITY', 'BADGE_ID_ICICLE']],
+  ['Candice', 'Beat Candice at the Snowpoint Gym.', ['BADGE_ID_ICICLE']],
+  // Beacon Badge.
+  ['LakeAcuity', 'Go to Lake Acuity.', ['VAR_LAKE_ACUITY_STATE 2', 'BADGE_ID_BEACON']],
+  ['GalacticHq', "Break into Team Galactic's HQ in Veilstone City.", ['FLAG_FREED_GALACTIC_HQ_POKEMON', 'BADGE_ID_BEACON']],
+  ['SpearPillar', 'Climb Mt. Coronet to Spear Pillar and stop Cyrus.', ['VAR_SPEAR_PILLAR_STATE 3', 'BADGE_ID_BEACON']],
+  ['DistortionWorld', 'Stop Cyrus in the Distortion World.', ['VAR_EXITED_DISTORTION_WORLD_STATE 1', 'BADGE_ID_BEACON']],
+  ['RowanReturn', "Visit Professor Rowan's lab in Sandgem Town.", ['VAR_SANDGEM_TOWN_LAB_STATE 3', 'BADGE_ID_BEACON']],
+  ['Sunyshore', 'Head east to Sunyshore City.', ['FLAG_FIRST_ARRIVAL_SUNYSHORE_CITY', 'BADGE_ID_BEACON']],
+  ['Lighthouse', 'Find Volkner at the Vista Lighthouse.', ['FLAG_VOLKNER_RETURNED_TO_GYM', 'BADGE_ID_BEACON']],
+  ['Volkner', 'Beat Volkner at the Sunyshore Gym.', ['BADGE_ID_BEACON']],
+  // The Pokémon League.
+  ['VictoryRoad', 'Head north from Sunyshore City to Victory Road.', ['FLAG_FIRST_ARRIVAL_VICTORY_ROAD', 'FLAG_GAME_COMPLETED']],
+  ['League', 'Make it through Victory Road to the Pokémon League.', ['FLAG_FIRST_ARRIVAL_POKEMON_LEAGUE', 'FLAG_GAME_COMPLETED']],
+  ['Aaron', 'Take on the Elite Four, starting with Aaron.', ['FLAG_DEFEATED_AARON', 'FLAG_GAME_COMPLETED']],
+  ['Bertha', 'Beat Bertha of the Elite Four.', ['FLAG_DEFEATED_BERTHA', 'FLAG_GAME_COMPLETED']],
+  ['Flint', 'Beat Flint of the Elite Four.', ['FLAG_DEFEATED_FLINT', 'FLAG_GAME_COMPLETED']],
+  ['Lucian', 'Beat Lucian of the Elite Four.', ['FLAG_DEFEATED_LUCIAN', 'FLAG_GAME_COMPLETED']],
+  ['Cynthia', 'Beat Cynthia, the Champion.', ['FLAG_GAME_COMPLETED']],
+  // The post-game: the Battle Zone, the National Pokédex (Route 225's blockade goes once both are done), Stark Mountain.
+  ['BattleZone', 'Take the ship from Snowpoint City to the Battle Zone.', ['FLAG_SAILED_TO_BATTLE_ZONE']],
+  ['FightArea', 'Meet Barry in the Fight Area.', ['VAR_FIGHT_AREA_STATE 2']],
+  ['NationalDex', 'See every Pokémon in the Sinnoh Pokédex, then visit Professor Rowan.', ['FLAG_HIDE_FIGHT_AREA_BLOCKADE']],
+  ['StarkMountain', 'Head north from the Fight Area to Stark Mountain.', ['FLAG_ARRESTED_CHARON_STARK_MOUNTAIN']],
+  ['Buck', 'Find Buck at the Battleground in the Survival Area.', ['FLAG_TALKED_TO_BATTLEGROUND_BUCK']],
+  ['StarkDepths', 'Return to the depths of Stark Mountain.', ['FLAG_BATTLED_STARK_MOUNTAIN_ROOM_3_HEATRAN', 'FLAG_CAUGHT_HEATRAN']],
+];
+
+const textId = (name: string) => `OpenSinnoh_Objective_${name}`;
+
+/** Our texts for the table and its option (text id → words), added to the pack's texts. */
+export const OBJECTIVE_TEXTS: Record<string, string> = {
+  OpenSinnoh_Options_Objective: 'OBJECTIVE',
+  OpenSinnoh_Options_ObjectiveDescription: 'The START menu shows what to\ndo next in the story.',
+  [textId('Title')]: 'OBJECTIVE',
+  [textId('Explore')]: 'Explore Sinnoh.',
+  ...Object.fromEntries(STEPS.map(([name, words]) => [textId(name), words])),
+};
+
+/** The table, with every flag and var resolved through the names (an unknown name fails the import). */
+export function objectiveTables(names: { flag(name: string): Id; var(name: string): Id }): ObjectiveTables {
+  const check = (c: Check): ObjectiveCheck => {
+    if (c.startsWith('BADGE_')) return { kind: 'badge', badge: asId(`platinum:${c}`) };
+    if (c.startsWith('FLAG_')) return { kind: 'flag', flag: names.flag(c) };
+    const [name, atLeast] = c.split(' ') as [string, string];
+    return { kind: 'var', var: names.var(name), atLeast: Number(atLeast) };
+  };
+  return {
+    title: asId(`platinum:${textId('Title')}`),
+    explore: asId(`platinum:${textId('Explore')}`),
+    steps: STEPS.map(([name, , checks]) => ({ text: asId(`platinum:${textId(name)}`), done: checks.map(check) })),
+  };
+}

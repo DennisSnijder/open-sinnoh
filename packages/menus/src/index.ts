@@ -189,3 +189,4 @@ export { createPoketch } from './poketch/system.ts';
 export { calcDigit, calcEval, calcText, calcZero, type CalcValue } from './poketch/tools.ts';
 export { cellPosition, cellZone, flyLocationAt, foundHidden, locationCell, namedCell, startCell, townMapScreen, unlockedLocations } from './town-map.ts';
 export { printJournalPage } from './journal.ts';
+export { currentObjective } from './objective.ts';

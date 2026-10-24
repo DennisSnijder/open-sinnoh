@@ -250,6 +250,7 @@ export const SETTINGS: readonly Setting[] = [
   dsOption('summaryRename', 'game', 'choice'),
   dsOption('dexNameSearch', 'game', 'choice'),
   dsOption('spiritombVendors', 'game', 'choice'),
+  dsOption('objective', 'game', 'choice'),
   // Repeat play: NEW GAME offers to skip Rowan's intro once this device has finished it (OpenSinnoh, title/intro-skip.ts).
   {
     id: 'introSkip',

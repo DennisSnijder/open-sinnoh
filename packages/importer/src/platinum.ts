@@ -1,4 +1,5 @@
 import { doorSounds } from './assets/door-sounds.ts';
+import { OBJECTIVE_TEXTS, objectiveTables } from './objectives.ts';
 import { importSpearPillar } from './spear-pillar.ts';
 import { animationFrames } from './gyms/index.ts';
 import { readSunyshoreTables, SUNYSHORE_REGION } from './gyms/sunyshore.ts';
@@ -634,6 +635,8 @@ export async function importPlatinum(
   for (const [c, n] of textStats.unknownChars) unknown('char', `0x${c.toString(16)} ×${n}`);
   // Our own labels for the modern options (not in the ROM; docs/decisions.md: trade-only evolutions in single player).
   for (const [name, text] of Object.entries(MODERN_OPTION_TEXTS)) texts.push({ id: asId(`platinum:${name}`), text });
+  // The start menu's objectives and their option (our words; objectives.ts).
+  for (const [name, text] of Object.entries(OBJECTIVE_TEXTS)) texts.push({ id: asId(`platinum:${name}`), text });
   const bankText = (bank: number, msg: number) => {
     const t = bankTexts[bank]?.[msg];
     if (t === undefined) throw new ImportError(`text bank ${bank} has no message ${msg}`);
@@ -1417,6 +1420,12 @@ export async function importPlatinum(
     const visited = [...names.flagNames].find(([, n]) => n === 'FLAG_CONTEST_HALL_VISITED');
     if (!visited) throw new ImportError('names: no FLAG_CONTEST_HALL_VISITED');
     newGame.contestHallFlag = names.flag(visited[0]);
+    const flagByName = (name: string) => {
+      const e = [...names.flagNames].find(([, n]) => n === name);
+      if (!e) throw new ImportError(`names: no ${name}`);
+      return names.flag(e[0]);
+    };
+    newGame.objectives = objectiveTables({ flag: flagByName, var: varByName });
     const gfxNumber = (name: string) => {
       const gfx = [...names.gfxNames].find(([, n]) => n === name)?.[0];
       if (gfx === undefined) throw new ImportError(`names: no ${name}`);
