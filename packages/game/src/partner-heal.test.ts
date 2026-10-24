@@ -29,7 +29,7 @@ function run(outcome: 'won' | 'fled' | 'draw', hasPartner: boolean) {
       step: () => void ticks++,
       choose: () => {},
       view: () => ({ battlers: [] }) as unknown as BattleView,
-      done: () => (ticks >= 2 ? { outcome, turns: 1, party, money: deps.money, bag: deps.bag, caught: null, seen: [], levelled: [] } : null),
+      done: () => (ticks >= 2 ? { outcome, turns: 1, ballsThrown: 0, party, money: deps.money, bag: deps.bag, caught: null, seen: [], levelled: [] } : null),
       app: () => null,
       appDone: () => {},
     };

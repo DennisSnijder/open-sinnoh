@@ -4,7 +4,7 @@
  * streak check (ScrCmd_CheckBonusRoundStreak), the prizes (scrcmd_game_corner_prize.c) and the guitarist's Hidden Power
  * type (ov5_021F6454.c ScrCmd_CalcHiddenPowerType).
  */
-import { COINS_MAX, newGameRecord, SLOT, type SlotTables } from '@opensinnoh/contracts';
+import { COINS_MAX, newGameRecord, saveTvSegment, SLOT, type SlotTables } from '@opensinnoh/contracts';
 import { dailyRandomOf, STATS, type Arg, type Id } from '@opensinnoh/core';
 import { addToGameRecord, incrementTrainerScore, slotMode } from '@opensinnoh/services';
 import { formatNumber, PADDING_SPACES } from './m1b-ops.ts';
@@ -75,17 +75,19 @@ export function gameCornerHandlers(r: Runner): Record<string, Handler> {
     /**
      * Decomp ScrCmd_267 → sub_0203E414: the machine's mode for the day (sub_0203E484 over the daily random), the trainer
      * score, then the slot app; on its return (sub_0203E35C, ov101_021D0F3C): the coins, the bonus rounds played into
-     * RECORD_UNK_014, the streak var raised to the session's best. The Records-program TV segment is not kept yet.
+     * RECORD_UNK_014, the streak var raised to the session's best; 1000 coins or more won are a TV record (sub_0206DD38,
+     * with the minutes played: here the ticks the app ran).
      */
     scr_cmd_267: (t, c, a) => {
       const machine = val(t, a[0]);
       if (machine >= SLOT.machines) throw new Error(`scr_cmd_267: no slot machine ${machine}`);
       const mode = slotMode(tables('scr_cmd_267'), dailyRandomOf(r.state), machine);
       const before = r.state.coins;
+      const start = r.state.tick;
       incrementTrainerScore(r.state, r.registries, SCORE_SLOTS);
       return r.openApp(c, { app: 'slots', machine, mode, seed: r.rngSource().next() }, (result) => {
         if (result.app !== 'slots') throw new Error(`scr_cmd_267: got a ${result.app} result`);
-        if (result.coins >= before + TV_COINS) r.log.stub('tv:game-corner', 'the Records program TV segment (1000 coins or more won) is not recorded yet');
+        if (result.coins >= before + TV_COINS) saveTvSegment(r.state, { kind: 'slots', before, after: result.coins, spent: Math.floor((r.state.tick - start) / (30 * 60)) });
         r.state.coins = result.coins;
         addToGameRecord(r.state, r.registries, RECORD_BONUS_ROUNDS, result.rounds);
         const streakVar = tables('scr_cmd_267').streakVar;

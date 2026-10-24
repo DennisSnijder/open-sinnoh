@@ -65,17 +65,12 @@ interface Triage {
   note: string;
   zero?: number[];
 }
-const TV = 'later (TV)';
 const TOWER = 'later (Battle Tower)';
 const CHATTER = 'later (recording a Chatot cry needs the microphone)';
 const SAVE = 'M3 (save)';
 const comm = (note: string, zero?: number[]): Triage => ({ bucket: 'communication', note, ...(zero ? { zero } : {}) });
 
 export const TRIAGE: Record<string, Triage> = {
-  call_tv_broadcast: { bucket: 'other', milestone: TV, note: 'TV broadcast screen' },
-  call_tv_interview: { bucket: 'other', milestone: TV, note: 'TV interview segment' },
-  scr_cmd_27c: { bucket: 'other', milestone: TV, note: 'saves a TV segment (party mon, item, …)' },
-  scr_cmd_2b8: { bucket: 'other', milestone: TV, note: 'saves the Rate That Name Change TV segment' },
   check_recorded_chatot_cry_is_playable: { bucket: 'party', milestone: CHATTER, note: 'Chatot cry recording' },
   try_record_chatot_cry: { bucket: 'party', milestone: CHATTER, note: 'Chatot cry recording' },
   stop_recording_chatot_cry: { bucket: 'party', milestone: CHATTER, note: 'Chatot cry recording' },

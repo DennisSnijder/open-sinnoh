@@ -280,7 +280,7 @@ export class FakeField implements FieldHost {
   startBattle = (setup: BattleRequest) => {
     this.calls.push(`battle ${setup.kind}`);
     this.battles.push(setup);
-    this.result = { outcome: this.nextOutcome, turns: 1, party: [], money: 0, bag: {}, caught: null, seen: [], levelled: [] };
+    this.result = { outcome: this.nextOutcome, turns: 1, ballsThrown: 0, party: [], money: 0, bag: {}, caught: null, seen: [], levelled: [] };
   };
   battleDone = () => this.result;
   blackOut = () => void this.calls.push('blackOut');

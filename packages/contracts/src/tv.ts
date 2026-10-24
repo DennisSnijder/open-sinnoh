@@ -197,6 +197,18 @@ export function tvSafariCatch(state: GameState, species: Id, caughtBefore: numbe
   if (caughtBefore === 0) state.tv.pending.safari = species;
 }
 
+/** sub_0206DE4C's ribbons (decomp Unk_020EFDDC as enum Ribbon ids): the Effort Ribbon and the Sinnoh ribbons 32–69. */
+const COUNTED_RIBBONS = new Set([24, ...Array.from({ length: 38 }, (_, i) => 32 + i)]);
+
+/**
+ * Decomp sub_0206DDB8 (a ribbon given: a contest win, a script's ribbon, a Battle Tower streak): with 15, 20, 25, 30, 35
+ * or 40 of the counted ribbons, the record names the Pokémon and the ribbon (its id is its TEXT_BANK_RIBBON_NAMES entry).
+ */
+export function tvRibbon(state: GameState, mon: { species: Id; nickname: string | null; ribbons: number[] }, ribbon: number): void {
+  const count = mon.ribbons.filter((r) => COUNTED_RIBBONS.has(r)).length;
+  if ([15, 20, 25, 30, 35, 40].includes(count)) saveTvSegment(state, { kind: 'ribbons', species: mon.species, nickname: mon.nickname, ribbon, count });
+}
+
 /** Decomp sub_0206D0C8: Battle Points won, summed for the day (at most 9999). */
 export function tvBattlePoints(state: GameState, bp: number): void {
   state.tv.pending.bp = Math.min(9999, state.tv.pending.bp + bp);

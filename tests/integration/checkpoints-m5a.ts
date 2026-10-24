@@ -173,7 +173,6 @@ const STUBS: Record<string, Record<string, readonly number[]>> = {
   },
   'cp21e.replay': {
     'anim:platinum:MOVE_SURF': ALL,
-    'clock:timed-events': ALL,
     'render:hm-cut-in': ALL,
   },
   'cp21f.replay': {

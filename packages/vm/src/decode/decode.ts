@@ -145,8 +145,10 @@ function decodeAt(bytes: Uint8Array, offset: number): Raw {
               : first === 5 || first === 6
                 ? 2
                 : 0;
-    // Mystery Gift's extras are destination vars too (decomp MysteryGiftGive destVar1ID, destVar2ID).
-    for (let i = 0; i < extra; i++) read('u16', spec.variable === 'field_move' || spec.variable === 'mystery_gift' ? 'var' : undefined);
+    // Mystery Gift's extras are destination vars too (decomp MysteryGiftGive destVar1ID, destVar2ID); the TV's per call
+    // (ScrCmd_CallTVBroadcast: a framing type, then the bank and message vars; a segment id var-or-value; …).
+    const tvKinds: (CommandSpec['operands'][number]['kind'])[] = spec.variable === 'tv_broadcast' ? ([['var'], [undefined, 'var', 'var'], [], ['vov', 'var', 'var'], ['var', 'var'], ['vov', 'vov', 'var'], ['var']] as const)[first]?.slice() ?? [] : [];
+    for (let i = 0; i < extra; i++) read('u16', spec.variable === 'tv_broadcast' ? tvKinds[i] : spec.variable === 'field_move' || spec.variable === 'mystery_gift' ? 'var' : undefined);
   }
   return { spec, offset, next: o, values };
 }

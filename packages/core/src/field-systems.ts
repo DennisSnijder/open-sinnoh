@@ -314,12 +314,17 @@ export function sizeFactor(m: Pokemon): number {
 /** A height in tenths of an inch (SizeContest). The native interval search skips the penultimate interval;
  * the boundary quirk at the upper tail is preserved. `height` is the species' Pokédex height (decimetres). */
 export function sizeInTenths(intervals: readonly { base: number; divisor: number; start: number }[], height: number, factor: number): number {
+  const mm = sizeInMillimetres(intervals, height, factor);
+  return Math.floor((Math.floor((mm * 1000) / 254) + 5) / 10);
+}
+
+/** CalcMillimeterSize: the size in millimetres the inches come from (the TV's size record keeps it). */
+export function sizeInMillimetres(intervals: readonly { base: number; divisor: number; start: number }[], height: number, factor: number): number {
   let i = 1;
   while (i < intervals.length - 1 && factor >= intervals[i]!.start) i++;
   const piece = intervals[i < intervals.length - 1 ? i - 1 : i]!;
   const multiplier = piece.base + Math.floor((factor - piece.start) / piece.divisor);
-  const mm = Math.floor((height * multiplier) / 10);
-  return Math.floor((Math.floor((mm * 1000) / 254) + 5) / 10);
+  return Math.floor((height * multiplier) / 10);
 }
 
 /**

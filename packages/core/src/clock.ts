@@ -110,3 +110,21 @@ export function formatClock(c: ClockTime): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${c.date} ${pad(c.hour)}:${pad(c.minute)}:${pad(c.second)}`;
 }
+
+const DAYS_BEFORE_MONTH = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+
+const isLeapYear = (y: number) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+
+/**
+ * Index into a 366-entry yearly table (Jan 1 = 0, Feb 29 = 59, Dec 31 = 365): a non-leap year skips Feb 29
+ * (DayNumberForDate − 1, plus one after February when the year is not a leap year).
+ */
+export function yearlyDayIndex(date: string): number {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+  if (!m) throw new Error(`clock: invalid date ${JSON.stringify(date)}`);
+  const [year, month, day] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  // DayNumberForDate counts Feb 29 in a leap year; FieldSystem_GetWeather skips it in other years.
+  const before = DAYS_BEFORE_MONTH[month - 1]! + (month > 2 && isLeapYear(year) ? 1 : 0);
+  return before + day - 1 + (month > 2 && !isLeapYear(year) ? 1 : 0);
+}
+

@@ -51,6 +51,7 @@ import { mysteryGiftHandlers } from './mystery-gift-ops.ts';
 import { hofHandlers } from './hof-ops.ts';
 import { villaHandlers } from './villa-ops.ts';
 import { journalHandlers } from './journal-ops.ts';
+import { tvHandlers } from './tv-ops.ts';
 import { npcHandlers } from './npc-ops.ts';
 
 /** Fixed native vars, looked up by `sourceIndex` in the vars registry. */
@@ -1033,6 +1034,7 @@ export class Runner implements ScriptRunner {
       ...gameCornerHandlers(this),
       ...villaHandlers(this),
       ...journalHandlers(this),
+      ...tvHandlers(this),
       ...npcHandlers(this),
     };
   }

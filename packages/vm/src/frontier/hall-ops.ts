@@ -109,9 +109,14 @@ export function hallFrontierHandlers(): Record<string, FrontierHandler> {
       f.set(c, a[0], updated ? 1 : 0);
       return 'yield';
     },
-    // Decomp FrontierScrCmd_C7: the Hall's singles Pokémon for a TV segment (sub_0206D048). No TV yet.
+    // Decomp FrontierScrCmd_C7: the Hall's singles Pokémon for the Battle Hall reporter (sub_0206D048).
     fr_cmd_c7: (f) => {
-      if (hall(f).challengeType === 0) f.r.log.stub('tv:battle-hall', 'the Battle Hall TV segment is not recorded (no TV yet)');
+      const h = hall(f);
+      if (h.challengeType === 0) {
+        const mon = f.r.state.party[h.slots[0]!];
+        if (!mon) throw new Error(`fr_cmd_c7: no party Pokémon in slot ${h.slots[0]}`);
+        f.r.state.tv.pending.hall = { species: mon.species, nickname: mon.nickname };
+      }
       return 'continue';
     },
 

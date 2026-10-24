@@ -82,10 +82,9 @@ export function contestHandlers(r: Runner): Record<string, Handler> {
       r.state.contest = newContest(r.state, r.registries, { mode, rank, type, competition, partySlot: val(t, a[3]), seed: r.rngSource().next() });
       return 'continue';
     },
-    /** ScrCmd_EndContest: the rewards (services `endContest`), then the contest is gone. The TV segment is not kept. */
+    /** ScrCmd_EndContest: the rewards and the TV's data (services `endContest`), then the contest is gone. */
     end_contest: () => {
       const s = session('end_contest');
-      if (s.mode === 'official') r.log.stub('tv:contest-hall', 'the Contest Hall TV segment is not recorded yet');
       endContest(r.state, r.registries, s);
       delete r.state.contest;
       return 'continue';

@@ -8,7 +8,7 @@
  */
 import { JOURNAL_EVENT, journalEvent, journalMart } from '@opensinnoh/contracts';
 import { monGender, type Id, type Pokemon } from '@opensinnoh/core';
-import { dexOf, newGameRecord, STORAGE_MODES } from '@opensinnoh/contracts';
+import { dexOf, newGameRecord, STORAGE_MODES, tvRibbon } from '@opensinnoh/contracts';
 import { addToGameRecord, cardStars, incrementTrainerScore, localDexCompleted, nationalDexCompleted } from '@opensinnoh/services';
 import { toPrintOps } from '@opensinnoh/text';
 import { formatNumber, PADDING_SPACES } from './m1b-ops.ts';
@@ -114,11 +114,12 @@ export function m3aHandlers(r: Runner): Record<string, Handler> {
       r.setVar(t, r.ref(a[0], 'var'), has ? 1 : 0);
       return 'continue';
     },
-    // Decomp ScrCmd_SetPartyMonRibbon (its TV segment, sub_0206DDB8, comes with TV).
+    // Decomp ScrCmd_SetPartyMonRibbon, then its TV record (sub_0206DDB8).
     set_party_mon_ribbon: (t, _c, a) => {
       const m = partyMon('set_party_mon_ribbon', r.val(t, a[0]));
       const id = ribbonId('set_party_mon_ribbon', r.val(t, a[1]));
       if (!m.ribbons.includes(id)) m.ribbons = [...m.ribbons, id].sort((x, y) => x - y);
+      tvRibbon(r.state, m, id);
       return 'continue';
     },
     buffer_ribbon_name: (t, _c, a) => {

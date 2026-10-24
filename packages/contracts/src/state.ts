@@ -157,6 +157,14 @@ export interface PoketchState {
 
 /** Decomp ROAMING_SLOT_MAX: Mesprit, Cresselia, Darkrai, Moltres, Zapdos, Articuno. */
 export const ROAMING_SLOTS = 6;
+/** Decomp RoamingPokemonRoutes, in RoamerRouteIndex order (RI_*): the map headers a roamer can be on. */
+export const ROAMING_ROUTES = [
+  'ROUTE_201', 'ROUTE_202', 'ROUTE_203', 'ROUTE_204_SOUTH', 'ROUTE_204_NORTH', 'ROUTE_205_SOUTH', 'ROUTE_205_NORTH', 'ROUTE_206',
+  'ROUTE_207', 'ROUTE_208', 'ROUTE_209', 'ROUTE_210_SOUTH', 'ROUTE_210_NORTH', 'ROUTE_211_WEST', 'ROUTE_211_EAST', 'ROUTE_212_NORTH',
+  'ROUTE_212_SOUTH', 'ROUTE_213', 'ROUTE_214', 'ROUTE_215', 'ROUTE_216', 'ROUTE_217', 'ROUTE_218', 'ROUTE_219', 'ROUTE_220', 'ROUTE_221',
+  'ROUTE_222', 'VALLEY_WINDWORKS_OUTSIDE', 'FUEGO_IRONWORKS_OUTSIDE',
+].map((n) => `MAP_HEADER_${n}`);
+
 
 /** An active roamer (decomp Roamer): what its battles start from and leave behind. */
 export interface Roamer {

@@ -448,7 +448,7 @@ test:Sign::
 });
 
 describe('stubs with a return value', () => {
-  it('TV is a stub, a journal event without an owned journal does nothing; the game records are real (pack limits: even ids high)', () => {
+  it('an interview with room is eligible, a journal event without an owned journal does nothing; the game records are real (pack limits: even ids high)', () => {
     const d = drive(`
 test:Stubs::
   create_journal_event 0, 0, 0, 0, 0
@@ -463,9 +463,10 @@ test:Stubs::
     d.state.vars['fixture:VAR_SCENE' as Id] = 5;
     d.vm.start({ label: 'test:Stubs', zone: 'fixture:TOWN', source: 'test' });
     d.until(() => !d.vm.running());
-    expect(vars(d)['fixture:VAR_SCENE' as Id]).toBeUndefined();
+    // TVInterview_IsEligible: an empty interviews list has room, and the unused interview 1 has no check of its own.
+    expect(vars(d)['fixture:VAR_SCENE' as Id]).toBe(1);
     expect(d.state.records.counts).toEqual({ 3: 2, 34: 150005, 81: 9999 });
-    expect(d.log.keys.get('stub:check_tv_interview_eligible')).toBe(1);
+    expect(d.log.keys.get('stub:check_tv_interview_eligible')).toBeUndefined();
     expect(d.log.keys.get('stub:create_journal_event')).toBeUndefined();
     expect(d.state.journal).toEqual([]);
     expect(d.log.keys.get('stub:increment_game_record')).toBeUndefined();

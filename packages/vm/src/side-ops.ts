@@ -4,7 +4,7 @@
  * the move deleter (scrcmd_party_mon_moves.c, scrcmd_party.c), and the in-game trades (scrcmd.c ScrCmd_*NPCTrade).
  * The rules are services' (berries.ts, tutors.ts, trades.ts); 'yield' where the decomp handler returns TRUE.
  */
-import { addPoketchHistory, dexOf, giveItem, markCaught, newGameRecord, type BerryTables } from '@opensinnoh/contracts';
+import { addPoketchHistory, dexOf, giveItem, markCaught, newGameRecord, saveTvSegment, type BerryTables } from '@opensinnoh/contracts';
 import { dayPeriod, setMoveSlot, type Arg, type Id, type Pokemon } from '@opensinnoh/core';
 import {
   addToGameRecord, berryPatch, berryStageIndex, canAffordTutorMove, createTradeMon, harvestBerryPatch, incrementTrainerScore, mulchBerryPatch, npcTrade, patchMoisture,
@@ -110,10 +110,15 @@ export function sideHandlers(r: Runner): Record<string, Handler> {
     },
     /**
      * ScrCmd_HarvestBerry (BerryPatches_HarvestBerry): the patch is cleared and its berries go in the bag (the script
-     * checked the room); TRAINER_SCORE_EVENT_BERRY_HARVESTED. The planting-and-watering TV segment waits for TV.
+     * checked the room); TRAINER_SCORE_EVENT_BERRY_HARVESTED. First the Planting and Watering Show
+     * (FieldSystem_SaveTVSegment_PlantingAndWateringShow): a yield rated 4 or 0 (none) is recorded, 5 is not.
      */
     harvest_berry: (t) => {
-      const { berry, count } = harvestBerryPatch(patchOf(t, 'harvest_berry'));
+      const patch = patchOf(t, 'harvest_berry');
+      const rating = patch.yieldRating;
+      const { berry, count } = harvestBerryPatch(patch);
+      if (rating === 4) saveTvSegment(r.state, { kind: 'berries', berry, amount: count });
+      else if (rating === 0) saveTvSegment(r.state, { kind: 'no-berries', berry });
       if (!giveItem(r.state, r.registries, berry, count)) throw new Error(`harvest_berry: ${count} ${berry} do not fit the bag (the script checks first)`);
       incrementTrainerScore(r.state, r.registries, 'BERRY_HARVESTED');
       return 'continue';

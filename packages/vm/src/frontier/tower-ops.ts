@@ -3,6 +3,7 @@
  * `fr_call_battle_tower_function`, the opponent's intro, the battle and its result. The challenge is the field VM's
  * (`Runner.tower`, the decomp's fieldData->facilityData).
  */
+import { tvBattlePoints } from '@opensinnoh/contracts';
 import type { BattleTower } from '@opensinnoh/services';
 import { TextPrinter, toPrintOps } from '@opensinnoh/text';
 import { towerPartnerParam } from '../frontier-field-ops.ts';
@@ -54,8 +55,12 @@ export function towerFrontierHandlers(): Record<string, FrontierHandler> {
       const t = tower(f);
       switch (fn) {
         case BT.unk46:
-          f.r.log.stub('tv:frontier-bp', 'the Battle Points TV segment is not recorded (no TV yet)');
-          dest(t.giveReward());
+          {
+            // FrontierScrCmd_CallBattleTowerFunction: the BP, then the day's BP for the TV (sub_0206D0C8).
+            const bp = t.giveReward();
+            tvBattlePoints(f.r.state, bp);
+            dest(bp);
+          }
           break;
         case BT.partnerParam:
           dest(towerPartnerParam(f.r, t, arg));
@@ -86,11 +91,9 @@ export function towerFrontierHandlers(): Record<string, FrontierHandler> {
           break;
         case BT.updateGameRecords:
           t.updateRecords();
-          f.r.log.stub('tv:battle-tower', 'the Battle Tower TV segments are not recorded (no TV yet)');
           break;
         case BT.updateGameRecordsAndJournal:
           t.updateRecordsAndJournal();
-          f.r.log.stub('tv:battle-tower', 'the Battle Tower TV segments are not recorded (no TV yet)');
           break;
         case BT.unk39:
           t.saveChallenge();

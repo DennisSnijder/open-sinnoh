@@ -8,7 +8,7 @@
  * tower RNG at the challenge's start, so a streak's trainers and teams never take a draw from the game's streams.
  */
 import { createPokemon, dailyRandomOf, goodsPcHasRoom, readUnderground, isShiny, natureIndex, recalc, STATS, type Dex, type Id, type Pokemon, type Stats } from '@opensinnoh/core';
-import { canGiveItem, dexOf, giveItem, newGameRecord, type FrontierBattle, type FrontierBattleTrainer, type FrontierSetData, type FrontierState, type FrontierTables, type GameState, type Registries } from '@opensinnoh/contracts';
+import { canGiveItem, dexOf, giveItem, newGameRecord, saveTvSegment, tvRibbon, type FrontierBattle, type FrontierBattleTrainer, type FrontierSetData, type FrontierState, type FrontierTables, type GameState, type Registries } from '@opensinnoh/contracts';
 import { addToGameRecord, incrementTrainerScore } from './score.ts';
 import { MAX_TRANSACTION } from './mart.ts';
 
@@ -571,12 +571,15 @@ export class BattleTower {
     const total = this.carried + this.wins;
     s.record = setIfBetter(s.record, total);
     const newRecord = s.record > 1 && (before < s.record || (before === s.record && s.record % 7 === 0));
+    // sub_0204A5A0: a singles or doubles record names the first Pokémon chosen (TV).
+    if (newRecord && this.mode <= TOWER_MODE.double) saveTvSegment(this.state, { kind: 'tower-streak', species: this.selectedParty()[0]!.species, streak: s.record, single: this.mode === TOWER_MODE.single });
     s.latest = Math.min(STREAK_MAX, total);
     setFlagBit(f, TOWER_FLAGS.active + this.mode, false);
     addToGameRecord(this.state, this.registries, TOWER_RECORDS.victories, this.wins);
     f.towerRooms[roomIndex(this.mode)] = 0;
     addToGameRecord(this.state, this.registries, TOWER_RECORDS.challenges, 1);
     this.ribbonCheck();
+    this.tvInterview(false, Math.min(STREAK_MAX, s.latest + 1));
     return { newRecord };
   }
 
@@ -598,6 +601,12 @@ export class BattleTower {
     addToGameRecord(this.state, this.registries, TOWER_RECORDS.challenges, 1);
     incrementTrainerScore(this.state, this.registries, SCORE_SEVEN_WINS);
     this.ribbonCheck();
+    this.tvInterview(true, s.latest);
+  }
+
+  /** sub_0204A5EC: a singles or doubles challenge of seven or more battles is the Battle Tower reporter's (sub_0206CFE4). */
+  private tvInterview(win: boolean, streak: number): void {
+    if (this.mode <= TOWER_MODE.double && streak >= 7) this.state.tv.pending.tower = { win, streak };
   }
 
   /** Decomp sub_0204ACC8: doubles and multi earn a ribbon at a 50 streak. */
@@ -645,6 +654,7 @@ export class BattleTower {
     for (const mon of this.selectedParty()) {
       if (mon.ribbons.includes(ribbon)) continue;
       mon.ribbons = [...mon.ribbons, ribbon].sort((a, b) => a - b);
+      tvRibbon(this.state, mon, ribbon);
       given++;
     }
     return given > 0;

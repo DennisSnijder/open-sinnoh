@@ -5,7 +5,7 @@
  */
 import type { Arg, Id } from '@opensinnoh/core';
 import { heal } from '@opensinnoh/core';
-import { dexOf, type InputFrame } from '@opensinnoh/contracts';
+import { dexOf, tvBattlePoints, type InputFrame } from '@opensinnoh/contracts';
 import { addToGameRecord, giveBattlePoints, incrementTrainerScore, removeBattlePoints, battlePoints } from '@opensinnoh/services';
 import { plainMarkup, TEXT_SPEED, TextPrinter, toPrintOps } from '@opensinnoh/text';
 import { CONDITIONS } from '../commands.ts';
@@ -380,9 +380,10 @@ export function frontierHandlers(): Record<string, FrontierHandler> {
     fr_increment_trainer_score: (f, _c, a) => (incrementTrainerScore(f.r.state, f.r.registries, int(f, a[0])), 'continue'),
     fr_get_num_battle_points: (f, c, a) => (f.set(c, a[0], battlePoints(f.r.state)), 'continue'),
     fr_give_battle_points: (f, c, a) => {
-      // Decomp FrontierScrCmd_GiveBattlePoints: sub_0206D0C8 records a TV segment first.
-      f.r.log.stub('tv:frontier-bp', 'the Battle Points TV segment is not recorded (no TV yet)');
-      giveBattlePoints(f.r.state, f.r.registries, val(f, c, a[0]));
+      // Decomp FrontierScrCmd_GiveBattlePoints: the day's BP for the TV first (sub_0206D0C8).
+      const bp = val(f, c, a[0]);
+      tvBattlePoints(f.r.state, bp);
+      giveBattlePoints(f.r.state, f.r.registries, bp);
       return 'continue';
     },
     fr_remote_battle_points: (f, c, a) => (removeBattlePoints(f.r.state, f.r.registries, val(f, c, a[0])), 'continue'),

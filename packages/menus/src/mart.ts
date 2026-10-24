@@ -7,7 +7,7 @@
  * prices, the total and the purse in BP (Shop_GetItemBPPrice) and its own messages.
  */
 import type { Button, Id } from '@opensinnoh/core';
-import { canGiveItem, itemCount, type Item, type Mart, type MartView } from '@opensinnoh/contracts';
+import { canGiveItem, itemCount, saveTvSegment, type Item, type Mart, type MartView } from '@opensinnoh/contracts';
 import { battlePoints, bpPrice, buy, buyWithBp, canSell, martStock, maxBuy, maxBuyBp, maxSell, sell, sellPrice } from '@opensinnoh/services';
 import { menuSe, type MenuContext } from './context.ts';
 import { moveCursor, stepCount, tapIndex, type Screen, type Step } from './stack.ts';
@@ -85,6 +85,8 @@ export function martScreen(ctx: MenuContext, request: { mart: Id; countVar: Id |
     const r = buy(ctx.state, ctx.registries, id, count, request.countVar);
     if (!r.ok) return message([t.t(r.reason === 'money' ? 'martNoMoney' : 'martNoRoom')], toList);
     bought = tally(bought, count);
+    // Shop_ConfirmItemPurchase: ten or more at once are the Sinnoh Shopping Champ Corner's (FieldSystem_SaveTVSegment_SinnohShoppingChampCorner).
+    if (count >= 10) saveTvSegment(ctx.state, { kind: 'shopping', item: id, amount: count });
     const thanks = t.pages('martThanks', itemName(id, count), t.pocket(item(id).pocket));
     menuSe(ctx, 1604);
     return message(thanks, () => (r.premierBall ? message([t.t('martPremier')], toList) : toList()));
