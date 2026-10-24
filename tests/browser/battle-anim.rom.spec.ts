@@ -138,10 +138,14 @@ async function saveStrip(name: string): Promise<void> {
   writeFileSync(join(SHOTS!, `${test.info().project.name}-${name}.png`), Buffer.from(url.slice(url.indexOf(',') + 1), 'base64'));
 }
 
-/** DS px centres of the battlers' sprites (scene.ts POS, decomp battle_display.c) and how near the particles must be. */
-const AT = { player: { x: 64, y: 112 }, enemy: { x: 192, y: 48 } };
+/**
+ * DS px centres of the battlers' sprites (scene.ts POS, decomp battle_display.c) and how near the particles must be;
+ * `centre` is a fixed screen spot (BattleAnimSpriteFunc_Taunt puts its hand at TAUNT_SPRITE_HAND_0_POS_X/Y, 128, 80,
+ * whichever side the defender is on).
+ */
+const AT = { player: { x: 64, y: 112 }, enemy: { x: 192, y: 48 }, centre: { x: 128, y: 80 } };
 
-const PROOF: { move: string; near: 'player' | 'enemy'; min: number; kind?: 'sprites' | 'battlers' }[] = [
+const PROOF: { move: string; near: 'player' | 'enemy' | 'centre'; min: number; kind?: 'sprites' | 'battlers' }[] = [
   { move: 'MOVE_TACKLE', near: 'enemy', min: 40 },
   { move: 'MOVE_EMBER', near: 'enemy', min: 60 },
   { move: 'MOVE_WATER_GUN', near: 'enemy', min: 60 },
@@ -149,14 +153,14 @@ const PROOF: { move: string; near: 'player' | 'enemy'; min: number; kind?: 'spri
   { move: 'MOVE_GROWL', near: 'player', min: 40 },
   { move: 'MOVE_STRING_SHOT', near: 'enemy', min: 40, kind: 'sprites' },
   { move: 'MOVE_METAL_CLAW', near: 'enemy', min: 40, kind: 'sprites' },
-  { move: 'MOVE_TAUNT', near: 'enemy', min: 40, kind: 'sprites' },
+  { move: 'MOVE_TAUNT', near: 'centre', min: 40, kind: 'sprites' },
   { move: 'MOVE_FAKE_OUT', near: 'enemy', min: 40, kind: 'sprites' },
   { move: 'MOVE_DIG', near: 'player', min: 40, kind: 'battlers' },
   { move: 'MOVE_CAMOUFLAGE', near: 'player', min: 40, kind: 'battlers' },
 ];
 
 for (const proof of PROOF) {
-  test(`${proof.move}: the ROM animation plays, its ${proof.kind ?? 'particles'} drawn at the ${proof.near === 'enemy' ? 'defender' : 'attacker'}`, async () => {
+  test(`${proof.move}: the ROM animation plays, its ${proof.kind ?? 'particles'} drawn at the ${proof.near === 'enemy' ? 'defender' : proof.near === 'player' ? 'attacker' : 'screen centre'}`, async () => {
     test.setTimeout(300_000);
     const project = test.info().project.name;
     let best = { changed: 0, x: 0, y: 0 };
