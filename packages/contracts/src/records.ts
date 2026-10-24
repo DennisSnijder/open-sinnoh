@@ -1111,6 +1111,8 @@ export interface NewGame {
   villa?: import('./villa.ts').VillaTables;
   /** 0.37.0. The journal (`JournalTables`). Absent: no journal (`give_journal` fails loudly, nothing is recorded). */
   journal?: import('./journal.ts').JournalTables;
+  /** 0.42.0. The TV schedule (`TvTables`). Absent: the TV ops fail loudly. */
+  tv?: import('./tv.ts').TvTables;
   /**
    * 0.37.0. The diplomas (decomp applications/diploma.c): the composed 256×192 document sheets (`ui2d`) of the Sinnoh
    * and National Pokédex diplomas and their texts (TEXT_BANK_DIPLOMA: the player line, the two bodies, the credit).
@@ -1519,7 +1521,7 @@ export interface ParticleSystem {
   sourceIndex: number;
   /**
    * The archive when it is not `waza_particle.narc`: `ball` = `ball_particle.narc`, the battle send-out effect's
-   * default ball bursts and seals (docs/research/seals.md §6); 0.42.0 `frontier` = `frontier_particle.narc`, the Battle
+   * default ball bursts and seals (docs/research/seals.md §6); 0.43.0 `frontier` = `frontier_particle.narc`, the Battle
    * Frontier scenes' (decomp FrontierScrCmd_InitParticleSystem's narcIdx).
    */
   archive?: 'ball' | 'frontier';

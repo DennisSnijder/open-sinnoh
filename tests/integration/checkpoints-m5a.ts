@@ -62,18 +62,14 @@ const STUBS: Record<string, Record<string, readonly number[]>> = {
     'battle:protocol:-formechange|P|Cherrim-Sunshine|[msg]|[from] ability: Flower Gift': [1, 2],
   },
   'cp7.replay': {
-    'stub:check_tv_interview_eligible': ALL,
   },
   'cp8.replay': {
   },
   // M5b (docs/research/story-cp5-19.md §"Stub allowlist (M5b)").
   'cp9.replay': {
-    'stub:check_tv_interview_eligible': ALL,
-    'stub:save_tv_segment_pokemon_storage_bulletin': ALL,
   },
   'cp10.replay': {
     'anim:platinum:MOVE_NIGHT_SHADE': [1, 3],
-    'stub:check_tv_interview_eligible': ALL,
   },
   'cp11.replay': {
     'anim:platinum:MOVE_SURF': ALL,
@@ -81,11 +77,9 @@ const STUBS: Record<string, Record<string, readonly number[]>> = {
   },
   'cp12.replay': {
     'anim:platinum:MOVE_SURF': ALL,
-    'stub:save_tv_segment_pokemon_storage_bulletin': ALL,
   },
   'cp13.replay': {
     'anim:platinum:MOVE_SURF': ALL,
-    'stub:save_tv_segment_pokemon_storage_bulletin': ALL,
   },
   'm5-cheryl-detach.replay': {},
   'm5-eterna-egg-declined.replay': {},
@@ -147,18 +141,15 @@ const STUBS: Record<string, Record<string, readonly number[]>> = {
   },
   'cp21b.replay': {
     'anim:platinum:MOVE_SURF': ALL,
-    'stub:check_tv_interview_eligible': ALL,
   },
   'cp21c.replay': {
     'anim:platinum:MOVE_SURF': ALL,
-    'stub:check_tv_interview_eligible': ALL,
   },
   'cp21d.replay': {
     'anim:platinum:MOVE_SURF': ALL,
   },
   'cp21e.replay': {
     'anim:platinum:MOVE_SURF': ALL,
-    'clock:timed-events': ALL,
   },
   'cp21f.replay': {
     'anim:platinum:MOVE_SURF': ALL,
@@ -178,7 +169,6 @@ const STUBS: Record<string, Record<string, readonly number[]>> = {
   'cp24.replay': {
     'anim:platinum:MOVE_SURF': ALL,
     'battle:wild-flee': ALL,
-    'stub:check_tv_interview_eligible': ALL,
   },
 };
 

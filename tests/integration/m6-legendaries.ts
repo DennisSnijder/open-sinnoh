@@ -13,7 +13,7 @@ const ALL = [1, 2, 3];
 /** The stand-ins each replay meets, by the seeds that meet them (none listed: none met). */
 const STUBS: Record<string, Record<string, readonly number[]>> = {
   'sys-heatran-lost.replay': { 'anim:cry-mod:9': ALL },
-  'm6-event-gracidea.replay': { 'clock:timed-events': ALL },
+  'm6-event-gracidea.replay': {},
 };
 
 /** Each replay twice on seeds 1–3 (a branch from its parent's anchor), its save round-tripped, its stand-ins its allowlist's. */

@@ -101,7 +101,7 @@ export interface EffectView {
 }
 
 /**
- * 0.29.0. Fly's cut-in and landing (decomp overlay006/hm_cut_in.c), and since 0.42.0 every other field move's HM cut-in
+ * 0.29.0. Fly's cut-in and landing (decomp overlay006/hm_cut_in.c), and since 0.43.0 every other field move's HM cut-in
  * (sCutInTaskFuncs: no bird), 2D over the field in a 256×192 DS frame centred on
  * the view (the player at its centre), positions in DS px (sprite centres). `band` is the cut-in's window
  * (G2_SetWnd0Position: x1 ≤ x < x2, y1 ≤ y < y2; a band reaching x 0 and 255 spans the view): inside it the field is
@@ -120,7 +120,7 @@ export interface FlySceneView {
 }
 
 export interface FieldView {
-  /** 0.29.0. Fly's cut-in or landing while it runs (`World.fly`); 0.42.0 an HM cut-in too. */
+  /** 0.29.0. Fly's cut-in or landing while it runs (`World.fly`); 0.43.0 an HM cut-in too. */
   fly?: FlySceneView;
   /** 0.29.0. Added to the camera's distance (world units) while Fly or Teleport zooms (decomp ov5_021F0EB0). */
   cameraDistance?: number;

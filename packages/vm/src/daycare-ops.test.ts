@@ -8,6 +8,9 @@ const fixture = loadFixture();
 const registries = (() => {
   const out = Object.fromEntries(Object.entries(fixture.registries).map(([k, m]) => [k, new Map(m as Map<Id, unknown>)])) as Record<string, Map<Id, unknown>>;
   for (const [name, n] of [['A', 0x4100], ['B', 0x4101], ['C', 0x4102]] as const) out.vars!.set(`test:VAR_${name}` as Id, { id: `test:VAR_${name}`, sourceIndex: n, initial: 0, scope: 'saved' });
+  // The town's map label (the fixture's zones have none): the TV's egg segment names it.
+  const town = out.zones!.get('fixture:TOWN' as Id) as Record<string, unknown>;
+  out.zones!.set('fixture:TOWN' as Id, { ...town, mapPopup: { label: 7, window: 'fixture:ui2d/none', onWarp: false } });
   return out as unknown as Registries;
 })();
 const v = (name: string) => `var(test:VAR_${name})`;
@@ -75,6 +78,8 @@ test:Hatch::
     expect(d.vm.view().app).toEqual({ app: 'hatch', slot: 1 });
     expect(egg).toMatchObject({ isEgg: false, friendship: 120, nickname: null, met: { zone: 'fixture:TOWN', level: 0 } });
     expect(d.state.pokedex.caught).toContain('fixture:SPECIES_MOSSLET');
+    // FieldSystem_HatchEgg: the Happy Happy Egg Club's segment, before the hatch.
+    expect(d.state.tv.sightings[0]).toEqual({ data: { kind: 'egg', species: 'fixture:SPECIES_MOSSLET', location: 7 }, plays: 0 });
     d.vm.appDone({ app: 'hatch', nickname: 'Sprout' });
     d.until(() => !d.vm.running());
     expect(egg.nickname).toBe('Sprout');

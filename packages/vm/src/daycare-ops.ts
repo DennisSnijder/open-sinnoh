@@ -4,8 +4,8 @@
  * rules (`egg.ts`). The daycare's party menu and the hatch scene are menu apps the script waits on.
  */
 import { compatibilityLevel, createEgg, daycareFee, daycareLevel, daycareLevelsGained, daycareState, depositMon, eggFromDaycare, firstHatchingEgg, hatchEgg, monGender, PARTY_SIZE, withdrawMon, type Arg, type Id, type Pokemon } from '@opensinnoh/core';
-import { addPoketchHistory, dexOf, giveItem, markCaught, newGameRecord } from '@opensinnoh/contracts';
-import { revertForm, scoreCatch, shayminToLand } from '@opensinnoh/services';
+import { addPoketchHistory, dexOf, giveItem, markCaught, newGameRecord, saveTvSegment } from '@opensinnoh/contracts';
+import { revertForm, scoreCatch, shayminToLand, zoneLabel } from '@opensinnoh/services';
 import { plainMarkup } from '@opensinnoh/text';
 import type { Handler, Runner, Thread } from './runner.ts';
 
@@ -169,6 +169,9 @@ export function daycareHandlers(r: Runner): Record<string, Handler> {
     hatch_egg: (_t, c) => {
       const slot = firstHatchingEgg(state().party);
       if (slot < 0) throw new Error('hatch_egg: no party egg is ready to hatch');
+      // FieldSystem_HatchEgg: the Happy Happy Egg Club's segment (the party's first Egg, here).
+      const egg = state().party.find((p) => p.isEgg)!;
+      saveTvSegment(state(), { kind: 'egg', species: egg.species, location: zoneLabel(r.registries, state().player.zone) });
       const m = state().party[slot]!;
       hatchEgg(dex(), m, { ball: ball(), zone: state().player.zone, date: r.clock().date });
       // Decomp egg_hatch.c → SaveData_UpdateCatchRecords: a first catch of the species scores (CAUGHT_SPECIES), the Pokédex, the Pokétch history.

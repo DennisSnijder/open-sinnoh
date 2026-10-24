@@ -312,7 +312,6 @@ export function m1aHandlers(r: Runner): Record<string, Handler> {
 
 
     // ---------------------------------------------------------------- stubs with a return value
-    check_tv_interview_eligible: (t, _c, a) => (stub('check_tv_interview_eligible', 'TV not implemented: never eligible'), dest(t, a[1], 0), 'continue'),
   };
 }
 

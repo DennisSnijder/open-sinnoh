@@ -19,7 +19,7 @@
  * The battle's party (`party-select`) and the battle bag's target are battle.ts.
  */
 import { evolutionTarget, maxPp, monGender, movesAtLevel, setMoveSlot, type Button, type Id, type Pokemon, type Stats } from '@opensinnoh/core';
-import { dexOf, itemCount, levelEvolutionTrigger, markCaught, takeItem as takeBagItem, type AppMenu, type AppResult, type PartyView } from '@opensinnoh/contracts';
+import { dexOf, itemCount, levelEvolutionTrigger, markCaught, newGameRecord, saveTvSegment, takeItem as takeBagItem, type AppMenu, type AppResult, type PartyView } from '@opensinnoh/contracts';
 import { bySource, canShayminSky, contestEligible, detachCapsule, setCapsule, frontierBanned, HALL, canUseItemOn, giveHeldItem, ITEM_GRACIDEA, itemPicksMove, itemRecord, setShayminForm, SHAYMIN_SKY, takeHeldItem, teachTm, tmCompatibility, useItemOnMon, type ItemUsedMessage } from '@opensinnoh/services';
 import { menuSe, type MenuContext } from './context.ts';
 import { Dialog } from './dialog.ts';
@@ -246,7 +246,14 @@ export function partyScreen(ctx: MenuContext, mode: PartyMode, done: () => Step 
         label: t.t('partySet'),
         run: () => {
           menu = null;
-          return say(setCapsule(ctx.state, slot, index) === 'set' ? 'partyCapsuleSet' : 'partyTwoCapsules', [], done);
+          const set = setCapsule(ctx.state, slot, index) === 'set';
+          // The capsule menu's attach (FieldSystem_SaveTVSegment_SealClubShow): the Pokémon and its capsule's first seal's
+          // name (sealTypeValues nameIndex; an empty capsule names seal 0). Its unused MTRNG draw is not made here.
+          if (set) {
+            const tables = newGameRecord(ctx.registries).seals!;
+            saveTvSegment(ctx.state, { kind: 'seal-club', species: party()[slot]!.species, seal: tables.types[ctx.state.sealCase.capsules[index]![0]?.seal ?? 0]!.name });
+          }
+          return say(set ? 'partyCapsuleSet' : 'partyTwoCapsules', [], done);
         },
       },
     ]);

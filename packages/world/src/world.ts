@@ -118,7 +118,7 @@ const PREVIEW_RANGE = 32;
 
 export type { Vec3, ActorView, FieldView } from '@opensinnoh/contracts';
 import type { Vec3, ActorView, DwObject, EffectView, FeatureModelView, FieldView, FlySceneView, MapEntry, UndergroundDecorationView } from '@opensinnoh/contracts';
-import { countPoketchStep } from '@opensinnoh/contracts';
+import { countPoketchStep, saveTvSegment } from '@opensinnoh/contracts';
 
 /** Kept as an alias: World now includes view(). */
 export type OpenSinnohWorld = World;
@@ -1632,7 +1632,8 @@ export class FieldWorld implements OpenSinnohWorld {
         const roll = task.result();
         if (roll) {
           this.addGameRecord(RECORD_CAUGHT_FISH);
-          this.log.stub('tv:fishing', 'the successful fishing TV segment is not recorded yet');
+          // FieldSystem_SaveTVSegment_WhatsFishing: the rod and the hooked Pokémon.
+          saveTvSegment(this.state, { kind: 'fishing', rod: this.rodItem(task.rod), species: roll.species });
           this.startWild(wildBattleSetup(this.zone, 'WATER_RIVER', this.state.playerState === 'surf', roll, battleTime(dayPeriod(this.state.gameTime.now.hour))));
         }
       }
@@ -2260,12 +2261,19 @@ export class FieldWorld implements OpenSinnohWorld {
     };
     const gotAway = () => {
       this.addGameRecord(RECORD_FISH_GOT_AWAY);
-      this.log.stub('tv:fishing-got-away', 'the fishing TV segment for a fish that got away is not recorded yet');
+      saveTvSegment(this.state, { kind: 'fishing', rod: this.rodItem(rod), species: null });
     };
     this.fishing = new FishingTask(rod, encounter?.roll ?? null, next, (name) => {
       const ns = this.zone.id.split(':')[0];
       this.scripts.notice(`${ns}:${name}` as Id, []);
     }, gotAway);
+  }
+
+  /** ConvertRodTypeToRodItem. */
+  private rodItem(rod: 0 | 1 | 2): Id {
+    const id = `${this.zone.id.split(':')[0]}:${['ITEM_OLD_ROD', 'ITEM_GOOD_ROD', 'ITEM_SUPER_ROD'][rod]}` as Id;
+    if (!this.reg.items.has(id)) throw new Error(`world: the pack has no ${id}`);
+    return id;
   }
 
   /** GameRecords_IncrementRecordValue (services `addToGameRecord`, which the world does not depend on). */

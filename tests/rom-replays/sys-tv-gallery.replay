@@ -1,0 +1,162 @@
+# The Jubilife TV gallery (decomp scripts_jubilife_tv_2f_gallery.s; docs/research/tv.md): the Hiker's dress-up the
+# first time (ScrCmd_0A6: YES, no explanation, the help's pages), by keys and touch: Y to the Fashion Case's first
+# White Fluff, A, Y to Staravia's head, A; Staravia moved by the stylus with its fluff; X for DONE, NO (B) to "all
+# dressed up?" and back, DONE again, YES, YES to "save this design?". The photo in slot 0 (Staravia and its fluff where
+# they stood, moved by (-64, +40)); the title (ChooseCustomMessageWord: EVERYONE), SetDressUpPhotoTitle and the record;
+# Frame0 shows the photo in the viewer (ScrCmd_ShowDressUpPhoto), an empty frame is only a frame, and the photo
+# survives a reload.
+party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK platinum:MOVE_QUICK_ATTACK
+set state fashionCase.accessories[0] 2
+set state fashionCase.accessories[30] 1
+set state fashionCase.backdrops [4]
+warp platinum:MAP_HEADER_JUBILIFE_TV_2F_GALLERY 3 6 up
+until idle
++0 press a
++1 release a
+advance text
+until yesno
++0 press a
++1 release a
+advance text
+until yesno
+# No explanation
++0 press down
++1 release down
++1 press a
++1 release a
+until message
++0 assert text platinum:JubilifeTV2FGallery_Text_DressItUpAdorably 0
++0 press a
++1 release a
+until app gallery-dress-up 600
+until state app.phase "intro" 60
++2 screenshot tv-gallery-help
+# The help's seven pages
++0 press a
++1 release a
++2 press a
++1 release a
++2 press a
++1 release a
++2 press a
++1 release a
++2 press a
++1 release a
++2 press a
++1 release a
++0 assert state app.phase "intro"
++2 press a
++1 release a
++0 assert state app.phase "dress"
++0 assert state app.message null
+# A White Fluff onto Staravia's head by keys
++1 press y
++1 release y
++1 press a
++1 release a
++1 press y
++1 release y
++1 press a
++1 release a
++1 assert state app.stage.placed 1
++1 assert state app.stage.monAt 1
+# Staravia moved by the stylus: the fluff on it moves along
++1 tap dress:192,72
++1 tap dress:186,76
++1 tap dress:180,80
++1 tap dress-up
++1 assert state app.stage.mon {"species":"platinum:SPECIES_STARAVIA","form":0,"female":true,"shiny":false,"x":180,"y":64}
++1 screenshot tv-gallery-dress
+# DONE: the stage slides to the photo's place; YES, YES
++1 press x
++1 release x
+until state app.phase "confirm" 120
++0 assert state app.shift {"x":-64,"y":40}
++0 assert state app.photoBg true
++0 assert state app.question.cursor "yes"
++2 screenshot tv-gallery-confirm
+# NO (B) first: back to the dress-up, then DONE again
++0 press b
++1 release b
+until state app.phase "dress" 120
++0 assert state app.shift {"x":0,"y":0}
++0 assert state app.caseShown true
++1 press x
++1 release x
+until state app.phase "confirm" 120
++0 press a
++1 release a
+until state app.question.pressed null 30
++0 press a
++1 release a
+until app none 60
++0 assert state dressUpPhotos[0].mon.species "platinum:SPECIES_STARAVIA"
++0 assert state dressUpPhotos[0].mon.x 116
++0 assert state dressUpPhotos[0].mon.y 104
++0 assert state dressUpPhotos[0].dressUp.accessories.length 1
++0 assert state dressUpPhotos[0].title null
++0 assert state dressUpPhotos[0].trainerName "Lucas"
+# The title: EVERYONE
+until message 600
++0 press a
++1 release a
+until message 300
++0 press a
++1 release a
+until app easy-chat 120
++1 tap slot:0
++1 tap group:4
++1 tap word:6
++1 tap yes
+until app none
+until message 300
++0 assert text platinum:JubilifeTV2FGallery_Text_IGetItNow 0 0=EVERYONE
++0 assert state dressUpPhotos[0].title 1177
+advance text
+until idle
++0 assert state records.counts["54"] 1
+# Frame0: the photo in the viewer
++0 press right
+until position 5 6 120
++0 release right
+until idle
++0 press up
+until position 5 5 60
++0 release up
+until idle
++0 press a
++1 release a
+until app gallery-photo 120
++0 assert state app.lines[0] "Lucas"
++0 assert state app.lines[1] "EVERYONE"
++0 assert state app.picture.mon.x 116
++0 assert state app.picture.mon.y 64
++0 assert state app.picture.accessories.length 1
++0 assert state app.picture.backdrop 0
++2 screenshot tv-gallery-photo
++2 press a
++1 release a
+until app none 120
+until idle 120
+# Frame1 holds nothing offline (only record mixing fills slots 1–10): a frame for a portrait
++0 press right
+until position 9 5 240
++0 release right
+until idle
++0 press up
+until position 9 3 120
++0 release up
+until idle
++0 press a
++1 release a
+until message 120
++0 assert text platinum:JubilifeTV2FGallery_Text_FrameForHoldingPortrait 0
++0 assert app none
+advance text
+until idle
+# The photo survives a save and load, and Frame0 still shows it
++0 reload
++0 assert state dressUpPhotos[0].title 1177
++0 assert state dressUpPhotos[0].mon.x 116
++0 assert state dressUpPhotos[1] null
+until idle

@@ -19,7 +19,7 @@ const EVENTS = [
 ];
 
 /** A trainer score event: its decomp name without `TRAINER_SCORE_EVENT_`, or its number (script operands). */
-export type ScoreEvent = 'BERRY_HARVESTED' | 'SIGNED_TRAINER_CARD' | 'WON_WILD_BATTLE' | 'CAPTURED_REGIONAL_MON' | 'CAPTURED_NATIONAL_MON' | 'WON_TRAINER_BATTLE' | 'CAUGHT_SPECIES' | 'BADGE_EARNED' | number;
+export type ScoreEvent = 'BERRY_HARVESTED' | 'TV_INTERVIEW_GIVEN' | 'SIGNED_TRAINER_CARD' | 'WON_WILD_BATTLE' | 'CAPTURED_REGIONAL_MON' | 'CAPTURED_NATIONAL_MON' | 'WON_TRAINER_BATTLE' | 'CAUGHT_SPECIES' | 'BADGE_EARNED' | number;
 
 /** Decomp GameRecords_IncrementTrainerScore: adds the event's increment, capped at TRAINER_SCORE_LIMIT. */
 export function incrementTrainerScore(state: GameState, registries: Registries, event: ScoreEvent): void {

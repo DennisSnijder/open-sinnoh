@@ -4,7 +4,7 @@
  * the theme, judges and rivals, the condition score, the final scoring and placement, and the rewards. Pure rules over
  * `GameState` and `ContestTables`; the VM and the contest app call them. Independent implementation.
  */
-import { CONTEST_COMPETITION, CONTEST_ENTRANTS, CONTEST_TYPES, dexOf, markSeen, newGameRecord, seenFormOf, type ContestEntrant, type ContestOpponent, type ContestRawScores, type ContestResult, type ContestSession, type ContestTables, type FashionCase, type GameState, type Registries } from '@opensinnoh/contracts';
+import { CONTEST_COMPETITION, CONTEST_ENTRANTS, CONTEST_TYPES, dexOf, markSeen, newGameRecord, seenFormOf, tvRibbon, type ContestEntrant, type ContestOpponent, type ContestRawScores, type ContestResult, type ContestSession, type ContestTables, type FashionCase, type GameState, type Registries } from '@opensinnoh/contracts';
 import { createPokemon, MAX_FRIENDSHIP, type ConditionName, type Id, type Pokemon } from '@opensinnoh/core';
 import { canFitAccessory } from './fashion.ts';
 import { bySource } from './forms.ts';
@@ -356,7 +356,7 @@ function contestWinFriendship(registries: Registries, mon: Pokemon): void {
 /**
  * Decomp Contest_EndContest for an official contest (practice ends with nothing): the Master flag on a first Master win,
  * the ribbon (RECORD_RIBBONS_WON when new), the participation and win records and the trainer score, the rivals seen in
- * the Pokédex, the winner photo and the friendship of a win. The TV segment is not kept (logged by the caller).
+ * the Pokédex, the winner photo and the friendship of a win, the ribbons record and the Contest Hall reporter's data (TV).
  */
 export function endContest(state: GameState, registries: Registries, session: ContestSession): void {
   if (session.mode !== 'official') return;
@@ -372,7 +372,10 @@ export function endContest(state: GameState, registries: Registries, session: Co
       ribbonWon = true;
       mon.ribbons = [...mon.ribbons, ribbon].sort((a, b) => a - b);
     }
+    tvRibbon(state, mon, ribbon);
   }
+  // TVBroadcast_SetContestHallShowInfo: the entrant and its placement for the Contest Hall reporter.
+  state.tv.pending.contest = { species: mon.species, type: session.type, rank: session.rank, placement: session.placement + 1 };
   addToGameRecord(state, registries, RECORD.participations, 1);
   if (won) {
     addToGameRecord(state, registries, RECORD.wins, 1);

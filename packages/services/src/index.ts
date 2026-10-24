@@ -23,3 +23,4 @@ export * from './contest.ts';
 export * from './contest-visual.ts';
 export * from './seals.ts';
 export * from './slots.ts';
+export * from './tv.ts';

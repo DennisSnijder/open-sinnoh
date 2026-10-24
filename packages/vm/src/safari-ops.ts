@@ -4,7 +4,7 @@
  * ScrCmd_StartGreatMarshLookout; scrcmd_tv_broadcast.c ScrCmd_GetCurrentSafariGameCaughtNum). Names and behaviour only.
  */
 import { JOURNAL_EVENT, journalEvent } from '@opensinnoh/contracts';
-import { newGameRecord } from '@opensinnoh/contracts';
+import { newGameRecord, saveTvSegment } from '@opensinnoh/contracts';
 import type { Handler, Runner } from './runner.ts';
 
 /** Decomp SAFARI_GAME_ACTIVE / SAFARI_GAME_INACTIVE. */
@@ -38,10 +38,14 @@ export function safariHandlers(r: Runner): Record<string, Handler> {
       if (mode === SAFARI_GAME_ACTIVE) {
         r.setFlag(g.flag, true);
         r.state.safari = { balls: SAFARI_BALLS, steps: 0, caught: 0 };
+        // TVBroadcast_ResetSafariGameData.
+        r.state.tv.pending.safari = null;
       } else if (mode === SAFARI_GAME_INACTIVE) {
         r.setFlag(g.flag, false);
         r.state.safari = { balls: 0, steps: 0, caught: r.state.safari?.caught ?? 0 };
-        r.log.stub('safari:tv', 'the Safari Game TV bulletin is not recorded (TV)');
+        // FieldSystem_SaveTVSegment_SafariGameSpecialNewsBulletin: the first catch and the count, if any.
+        const first = r.state.tv.pending.safari;
+        if (r.state.safari.caught > 0 && first) saveTvSegment(r.state, { kind: 'safari', species: first, caught: Math.min(0xff, r.state.safari.caught) });
         journalEvent(r.registries, r.state, JOURNAL_EVENT.safari);
       } else throw new Error(`start_end_safari_game: mode ${mode}`);
       return 'continue';

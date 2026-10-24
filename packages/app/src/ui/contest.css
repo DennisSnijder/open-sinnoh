@@ -20,3 +20,5 @@
 .contest-board .contest-theme { display: flex; align-items: center; }
 /* The message's arrow sits in the frame's corner, so a full DS line (27 tiles) fits on one line. */
 .contest-board .contest-canvas-boxes .msg-box.waiting::after { position: absolute; right: calc(var(--dot) * 8); bottom: calc(var(--dot) * 6); }
+/* The TV gallery's touch YES/NO (ui/contest-visual.ts): the art is on the canvas, the buttons only take the touch. */
+.contest-board .contest-canvas-boxes .gallery-yes-no { pointer-events: auto; background: none; border: 0; padding: 0; cursor: pointer; }

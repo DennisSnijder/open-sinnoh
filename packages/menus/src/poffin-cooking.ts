@@ -442,6 +442,8 @@ export function cookingScreen(ctx: MenuContext, berry: Id, done: (again: boolean
           frame = 0;
           // Case 5 (ov83_0223C8B0): the Poffin goes in the case.
           if (!addPoffin(ctx.state, made!)) throw new Error('poffin cooking: the case filled up while cooking');
+          // Cooking alone, the Poffin's type for the Poffin House reporter (sub_0206CFCC).
+          ctx.state.tv.pending.poffin = made!.type;
           message = t.message(making(20), ctx.state.names.player, '', '', poffinName(made!.type));
         }
         return;

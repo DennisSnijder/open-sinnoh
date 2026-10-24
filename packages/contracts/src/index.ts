@@ -21,8 +21,9 @@ export * from './seals.ts';
 export * from './slots.ts';
 export * from './villa.ts';
 export * from './journal.ts';
+export * from './tv.ts';
 
 export * from './anim-script.ts';
 
-export const CONTRACTS_VERSION = '0.42.0';
+export const CONTRACTS_VERSION = '0.43.0';
 

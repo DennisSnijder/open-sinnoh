@@ -386,6 +386,8 @@ class BattleController implements Battle {
   private cancelled = false;
   private readonly bag: Bag;
   private caught: BattleResult['caught'] = null;
+  /** Decomp BattleSystem ballsThrown (the TV's Catch That Pokémon Show). */
+  private ballsThrown = 0;
   /** The victory music has started (decomp expJinglePlayed). */
   private victoryPlayed = false;
   /** The trainer's Pokémon sent out so far (BattleResult.seen). */
@@ -1528,6 +1530,7 @@ class BattleController implements Battle {
     s.balls--;
     this.catchSide = this.enemy;
     yield* this.say(this.text.get('PlayerUsedOneItem', [this.deps.player.name, rec.name]));
+    this.ballsThrown++;
     const shakes = yield* this.ballThrow(rec, () => this.catchShakes(rec));
     if (shakes === CAUGHT) {
       yield* this.caughtMon(rec);
@@ -2984,7 +2987,7 @@ class BattleController implements Battle {
     const levelled = this.setup.kind === 'tutorial' ? [] : [...this.levelled].sort((a, b) => a - b);
     // A roamer's HP and status go back to the field (decomp RoamerAfterBattle_UpdateRoamers reads the enemy party).
     const roamer = this.battleType === BATTLE_TYPE_ROAMER ? this.roamerAfter() : {};
-    this.result = { outcome: this.outcome!, turns: this.turns, party, money: this.money, bag: this.bag, caught: this.caught, seen: this.seen, levelled, ...roamer, ...(this.safari ? { safariBalls: this.safari.balls } : {}), ...(this.frontier ? { enemyParty: this.foe.party } : {}) };
+    this.result = { outcome: this.outcome!, turns: this.turns, ballsThrown: this.ballsThrown, party, money: this.money, bag: this.bag, caught: this.caught, seen: this.seen, levelled, ...roamer, ...(this.safari ? { safariBalls: this.safari.balls } : {}), ...(this.frontier ? { enemyParty: this.foe.party } : {}) };
     for (;;) yield;
   }
 

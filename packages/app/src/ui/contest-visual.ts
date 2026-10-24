@@ -11,7 +11,7 @@
  * - the lobby's photo: its frame and backdrop, the photo, the type's banner and its two lines.
  * Accessories draw only inside the frames' window (ov22_02255390: (10, 18) to (246, 143)).
  */
-import type { ContestPhotoView, ContestPicture, ContestVisualRoundView, Ui2dSheet } from '@opensinnoh/contracts';
+import type { ContestPhotoView, ContestPicture, ContestVisualRoundView, DressUpStageView, GalleryDressUpView, GalleryPhotoView, Ui2dSheet } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
 import { framed, messageBox, type DrawContext } from './apps.ts';
 import type { Art } from './art.ts';
@@ -64,7 +64,7 @@ class ContestCanvas {
       return `dress:${Math.floor(((e.clientX - r.left) / r.width) * W)},${Math.floor(((e.clientY - r.top) / r.height) * H)}`;
     };
     this.root.addEventListener('pointerdown', (e) => {
-      if (!this.last || (e.target as HTMLElement).closest('.msg-box')) return;
+      if (!this.last || (e.target as HTMLElement).closest('.msg-box, .gallery-yes-no')) return;
       e.preventDefault();
       this.root.setPointerCapture(e.pointerId);
       this.pointer = e.pointerId;
@@ -150,7 +150,7 @@ class ContestCanvas {
   }
 
   /** The dress-up's case and stage items back to front with the Pokémon after the first `monAt`, clipped to `clip`. */
-  items(d: DrawContext, v: NonNullable<ContestVisualRoundView['dress']>, clip: { x: number; y: number; w: number; h: number }): void {
+  items(d: DrawContext, v: DressUpStageView, clip: { x: number; y: number; w: number; h: number }): void {
     const g = this.g;
     g.save();
     g.beginPath();
@@ -161,6 +161,16 @@ class ContestCanvas {
       this.cell(i.kind === 'accessory' ? 'contest/accessories' : 'contest/backdrop_icons', i.id, i.x, i.y);
     });
     if (v.monAt >= v.items.length) this.mon(d, v.mon);
+    g.restore();
+  }
+
+  /** Darkens what is drawn so far (a brightness change, 0 … 16). */
+  darken(level: number): void {
+    const g = this.g;
+    g.save();
+    g.globalAlpha = Math.max(0, Math.min(16, level)) / 16;
+    g.fillStyle = '#000';
+    g.fillRect(0, 0, W, H);
     g.restore();
   }
 
@@ -209,21 +219,7 @@ function drawVisual(s: ContestCanvas, d: DrawContext, v: ContestVisualRoundView)
   }
   const dv = v.dress;
   if (dv) {
-    s.cell('contest/dress_bg', 0, 0, 0);
-    s.cell('contest/case_bg', dv.pageBg, 8, 16);
-    s.cell('contest/backdrops', dv.backdrop, 136, 16);
-    s.items(d, dv, CLIP);
-    const [nx, ny, nc] = BUTTON_AT.next;
-    s.cell('contest/buttons', nc + (dv.pressed === 'case-next' ? 1 : 0), nx, ny);
-    const [px, py, pc] = BUTTON_AT.prev;
-    s.cell('contest/buttons', pc + (dv.pressed === 'case-prev' ? 1 : 0), px, py);
-    const [ax, ay, ac] = BUTTON_AT.accessories;
-    s.cell('contest/buttons', ac + (dv.tab === 'accessories' ? 2 : 0), ax, ay);
-    const [bx, by, bc] = BUTTON_AT.backdrops;
-    s.cell('contest/buttons', bc + (dv.tab === 'backdrops' ? 2 : 0), bx, by);
-    const [dx, dy, dc] = BUTTON_AT.done;
-    s.cell('contest/buttons', dc + (dv.pressed === 'done' ? 1 : 0), dx, dy);
-    if (dv.cursor) s.anim('box/cursor', dv.cursor.grabbing ? 2 : 0, dv.cursor.x, dv.cursor.y);
+    drawStage(s, d, dv, STILL);
     keys.push(dv.theme, dv.status, dv.seconds, dv.hurry, dv.pulse, dv.placed, dv.limit, dv.pressed === 'done');
     windows.push(() => {
       const line = el('div', 'contest-dress-line', d.text(dv.status ?? dv.theme, 'light'));
@@ -259,6 +255,47 @@ function drawVisual(s: ContestCanvas, d: DrawContext, v: ContestVisualRoundView)
   s.fade(v.fade);
 }
 
+/** The finish's look (the gallery's stage moving to the photo's place); the contest's stage stays still. */
+interface StageLook {
+  bg: 'contest/dress_bg' | 'contest/dress_photo_bg';
+  shade: number;
+  caseShown: boolean;
+  shift: { x: number; y: number };
+  buttonsDrop: number;
+}
+/** The stage's slide in x (−8 a frame for 8 frames), which the photo's background keeps. */
+const PHOTO_BG_X = -64;
+const STILL: StageLook ={ bg: 'contest/dress_bg', shade: 0, caseShown: true, shift: { x: 0, y: 0 }, buttonsDrop: 0 };
+
+/** The dress-up's background, the case's page, the stage (backdrop, Pokémon, accessories), the buttons and the keys' hand. */
+function drawStage(s: ContestCanvas, d: DrawContext, dv: DressUpStageView, o: StageLook): void {
+  // BG1 slid with the stage (ov22_02257098) and keeps its x scroll when the photo's background replaces it
+  // (ov22_02256C70 state 6 resets only y): that map shows 64 px to the left, wrapping.
+  if (o.bg === 'contest/dress_photo_bg') {
+    s.cell(o.bg, 0, PHOTO_BG_X, 0);
+    s.cell(o.bg, 0, PHOTO_BG_X + 256, 0);
+  } else s.cell(o.bg, 0, 0, 0);
+  // The brightness change covers the background (BG1) only.
+  if (o.shade) s.darken(o.shade);
+  if (o.caseShown) s.cell('contest/case_bg', dv.pageBg, 8, 16);
+  const { x: sx, y: sy } = o.shift;
+  s.cell('contest/backdrops', dv.backdrop, 136 + sx, 16 + sy);
+  const moved = sx || sy ? { ...dv, mon: { ...dv.mon, x: dv.mon.x + sx, y: dv.mon.y + sy }, items: dv.items.map((i) => ({ ...i, x: i.x + sx, y: i.y + sy })) } : dv;
+  s.items(d, moved, sx || sy ? { x: 138 + sx, y: 18 + sy, w: 108, h: 125 } : CLIP);
+  const by = o.buttonsDrop;
+  const [nx, ny, nc] = BUTTON_AT.next;
+  s.cell('contest/buttons', nc + (dv.pressed === 'case-next' ? 1 : 0), nx, ny + by);
+  const [px, py, pc] = BUTTON_AT.prev;
+  s.cell('contest/buttons', pc + (dv.pressed === 'case-prev' ? 1 : 0), px, py + by);
+  const [ax, ay, ac] = BUTTON_AT.accessories;
+  s.cell('contest/buttons', ac + (dv.tab === 'accessories' ? 2 : 0), ax, ay + by);
+  const [bx, bby, bc] = BUTTON_AT.backdrops;
+  s.cell('contest/buttons', bc + (dv.tab === 'backdrops' ? 2 : 0), bx, bby + by);
+  const [dx, dy, dc] = BUTTON_AT.done;
+  s.cell('contest/buttons', dc + (dv.pressed === 'done' ? 1 : 0), dx, dy + by);
+  if (dv.cursor) s.anim('box/cursor', dv.cursor.grabbing ? 2 : 0, dv.cursor.x, dv.cursor.y);
+}
+
 /** "DONE!" (bank 385 message 0) for the button. */
 function doneLabel(d: DrawContext): string {
   return d.registries.texts.get(textId(d, 'pl_msg_00000385_00000'))?.text ?? '';
@@ -276,6 +313,90 @@ export function contestPhoto(wide: DrawContext, v: ContestPhotoView): HTMLElemen
     scene.cell('contest/photo_bg', 0, 0, 0);
     scene.picture(d, v.picture, { x: v.picture.backdropX, y: v.picture.backdropY, w: 112, h: 129 });
     scene.anim('contest/photo_banner', v.type, 0, 144);
+    scene.windows(JSON.stringify([v.lines, d.unit]), () => [
+      at(el('div', 'contest-photo-line', d.text(v.lines[0], 'ink')), 0, 151, 256, 16),
+      at(el('div', 'contest-photo-line', d.text(v.lines[1], 'ink')), 0, 171, 256, 16),
+    ]);
+    scene.fade(0);
+  };
+  draw();
+  scene.root.dataset.tap = 'next';
+  scene.root.onclick = () => d.tap('next');
+  return scene.root;
+}
+
+const galleryScenes = new WeakMap<Art, ContestCanvas>();
+const galleryPhotoScenes = new WeakMap<Art, ContestCanvas>();
+/** The touch YES and NO buttons' places (YesNoTouchMenu at tiles (25, 4), 6 × 4 tiles, a tile apart). */
+const YES_NO_AT = { yes: [200, 32], no: [200, 72] } as const;
+
+/**
+ * The Jubilife TV gallery's dress-up (contracts `GalleryDressUpView`; packages/menus gallery.ts): the visual round's
+ * screen without the clock, the top screen's window folded into the line (the held accessory's name, the accessories
+ * placed of ten), the first time's help in the message box; after DONE the stage slides to the photo's place, the
+ * question in the window at the top and the touch YES/NO on the right.
+ */
+export function galleryDressUp(wide: DrawContext, v: GalleryDressUpView): HTMLElement {
+  const d = boardContext(wide);
+  let s = galleryScenes.get(d.art);
+  if (!s || !s.root.isConnected) galleryScenes.set(d.art, (s = new ContestCanvas(d.art, 'contest-visual gallery-dress-up', true)));
+  const scene = s;
+  const draw = () => drawGallery(scene, d, v);
+  draw();
+  return scene.root;
+}
+
+function drawGallery(s: ContestCanvas, d: DrawContext, v: GalleryDressUpView): void {
+  s.begin(d, () => drawGallery(s, d, v));
+  s.root.dataset.phase = v.phase;
+  const dv = v.stage;
+  drawStage(s, d, dv, { bg: v.photoBg ? 'contest/dress_photo_bg' : 'contest/dress_bg', shade: v.shade, caseShown: v.caseShown, shift: v.shift, buttonsDrop: v.buttonsDrop });
+  const q = v.question;
+  if (q) {
+    s.cell('gallery/yes_no', q.pressed === 'yes' ? q.frame : 0, ...YES_NO_AT.yes);
+    s.cell('gallery/yes_no', 4 + (q.pressed === 'no' ? q.frame : 0), ...YES_NO_AT.no);
+    if (!q.pressed) s.anim('box/cursor', 0, YES_NO_AT[q.cursor][0] + 4, YES_NO_AT[q.cursor][1] + 12);
+  }
+  const windows: (() => HTMLElement)[] = [];
+  const keys: unknown[] = [v.phase, v.message, q?.text, q?.yes, dv.status, dv.placed, dv.pressed === 'done', v.buttonsDrop, d.frame, d.unit];
+  if (v.phase === 'dress' || v.phase === 'intro') {
+    windows.push(() => at(el('div', 'contest-dress-line', d.text(dv.status ?? '', 'light')), 4, 1, 152, 14));
+    windows.push(() => at(el('div', 'contest-dress-clock', d.text(`${dv.placed}/${dv.limit}`, 'light')), 196, 1, 56, 14));
+  }
+  windows.push(() => at(el('div', `contest-done-label${dv.pressed === 'done' ? ' is-pressed' : ''}`, d.text(doneLabel(d), 'ink')), 184, (dv.pressed === 'done' ? 159 : 163) + v.buttonsDrop, 72, 16));
+  if (q) {
+    // The question's window (ov22_022574CC: (2, 1) 27 × 2, a tile around it) and the buttons' touch areas.
+    windows.push(() => atTiles(messageBox(d, q.text, false), 1, 0, 29, 4));
+    for (const which of ['yes', 'no'] as const) {
+      windows.push(() => {
+        const b = el('button', 'gallery-yes-no');
+        b.type = 'button';
+        b.dataset.tap = which;
+        b.setAttribute('aria-label', q[which]);
+        b.addEventListener('click', () => d.tap(which));
+        return at(b, YES_NO_AT[which][0], YES_NO_AT[which][1], 48, 32);
+      });
+    }
+  }
+  if (v.message) {
+    const m = v.message;
+    windows.push(() => atTiles(messageBox(d, m.text, m.waiting), ...MESSAGE_TILES));
+  }
+  s.windows(JSON.stringify(keys), () => windows.map((w) => w()));
+  s.fade(v.fade);
+}
+
+/** The gallery's frames (the photo viewer's dress-up mode, ov22_0225BB00): the frame, the photo, the banner (anim 5 at (48, 144)), the trainer and the title. */
+export function galleryPhoto(wide: DrawContext, v: GalleryPhotoView): HTMLElement {
+  const d = boardContext(wide);
+  let s = galleryPhotoScenes.get(d.art);
+  if (!s || !s.root.isConnected) galleryPhotoScenes.set(d.art, (s = new ContestCanvas(d.art, 'contest-photo gallery-photo', false)));
+  const scene = s;
+  const draw = () => {
+    scene.begin(d, draw);
+    scene.cell('contest/gallery_photo_bg', 0, 0, 0);
+    scene.picture(d, v.picture, { x: v.picture.backdropX, y: v.picture.backdropY, w: 112, h: 129 });
+    scene.anim('contest/photo_banner', 5, 48, 144);
     scene.windows(JSON.stringify([v.lines, d.unit]), () => [
       at(el('div', 'contest-photo-line', d.text(v.lines[0], 'ink')), 0, 151, 256, 16),
       at(el('div', 'contest-photo-line', d.text(v.lines[1], 'ink')), 0, 171, 256, 16),

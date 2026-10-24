@@ -12,7 +12,7 @@
  *   side buttons; the keys move a board cursor (an addition), A strikes there, L, R or SELECT switch the tool.
  */
 import { isMiningFossil, isMiningSphere, MINING, MiningBoard, setPlateMined, tryAddMinedSphere, tryAddTreasure, underground, UNDERGROUND_LIMITS } from '@opensinnoh/core';
-import { newGameRecord, type InputFrame, type MiningView, type UndergroundTables, JOURNAL_EVENT, journalEvent } from '@opensinnoh/contracts';
+import { newGameRecord, saveTvSegment, type InputFrame, type MiningView, type UndergroundTables, JOURNAL_EVENT, journalEvent } from '@opensinnoh/contracts';
 import { incrementTrainerScore } from '@opensinnoh/services';
 import { menuSe, type MenuContext } from './context.ts';
 import { plainText } from './strings.ts';
@@ -210,7 +210,7 @@ export function miningScreen(ctx: MenuContext, spot: number): Screen {
       // Mining_ProcessNextDugUpItem: the records first, then the bag (or "Your Bag is full!").
       if (isMiningSphere(id)) u.records.spheresDug++;
       else {
-        ctx.log.stub('tv:underground-treasures', 'the Underground treasures TV segment is not recorded yet');
+        saveTvSegment(ctx.state, { kind: 'ug-treasure', item: id, amount: 1 });
         if (isMiningFossil(id)) {
           u.records.fossilsDug++;
           const v = tables.vars.fossilsUnearthed;

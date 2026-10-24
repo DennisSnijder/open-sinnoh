@@ -187,6 +187,8 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('the Villa and journal replays'
         expect(result).toMatchObject({ ok: true, determinism: 'identical', roundTrip: 'identical' });
         const stubs = [...log.counts.keys()];
         for (const op of ['init_persisted_map_features_for_villa', 'check_met_furniture_requirements', 'show_list_menu_set_width', 'give_journal', 'create_journal_event']) expect(stubs.some((k) => k.includes(op)), op).toBe(false);
-        if (file.startsWith('sys-villa')) expect(stubs.filter((k) => k.startsWith('stub:save_tv_segment_home_and_manor')).length).toBeGreaterThan(0);
+        // The Villa's TV segments are recorded (FieldSystem_SaveTVSegment_HomeAndManor*), no longer stubs.
+        expect(stubs.some((k) => k.startsWith('stub:save_tv_segment'))).toBe(false);
+        if (file.startsWith('sys-villa')) expect(game.state.tv.sightings.some((r) => r?.data.kind.startsWith('villa'))).toBe(true);
       }, 300_000);
 });

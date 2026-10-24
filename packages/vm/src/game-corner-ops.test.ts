@@ -113,8 +113,8 @@ describe('the Game Corner and the Prize Exchange', () => {
     expect(d.state.coins).toBe(1450);
     expect(d.state.vars[STREAK]).toBe(3);
     expect(d.state.records.counts[14]).toBe(4);
-    // Winning 1000 coins or more would make a Records-program TV segment: logged as a stub.
-    expect(d.log.keys.has('tv:game-corner')).toBe(true);
+    // Winning 1000 coins or more makes a Records-program TV segment (sub_0206DD38).
+    expect(d.state.tv.records[0]).toEqual({ data: { kind: 'slots', before: 300, after: 1450, spent: 0 }, plays: 0 });
     const lower = driver('test:Run::\n  scr_cmd_267 0\n  end\n');
     lower.state.vars[STREAK] = 9;
     lower.vm.start({ label: 'test:Run' as Id, zone: 'fixture:TOWN', source: 'test' });
@@ -122,7 +122,7 @@ describe('the Game Corner and the Prize Exchange', () => {
     lower.vm.appDone({ app: 'slots', coins: 0, streak: 3, rounds: 3 });
     lower.until(() => !lower.vm.running());
     expect(lower.state.vars[STREAK]).toBe(9);
-    expect(lower.log.keys.has('tv:game-corner')).toBe(false);
+    expect(lower.state.tv.records[0]).toBeNull();
   });
 
   it('calc_hidden_power_type: the IVs\' low bits pick the type (skipping ???); some species never learn it', () => {

@@ -267,10 +267,10 @@ export interface ArcadeAppArt {
   screens: Id[];
 }
 
-/** 0.42.0. A Frontier Brain's facility (decomp FACILITY_*, sFrontierBrainsEncounterParams' rows). */
+/** 0.43.0. A Frontier Brain's facility (decomp FACILITY_*, sFrontierBrainsEncounterParams' rows). */
 export type FrontierBrainFacility = 'tower' | 'factory' | 'castle' | 'hall' | 'arcade';
 
-/** 0.42.0. A Frontier Brain's cut-in art (decomp sFrontierBrainsEncounterParams, field_encounteffect.narc). */
+/** 0.43.0. A Frontier Brain's cut-in art (decomp sFrontierBrainsEncounterParams, field_encounteffect.narc). */
 export interface FrontierBrainCutInArt {
   /**
    * The banner (BG1, 256 × 256 from 0, 0): one image per palette of its NCLR, as UpdateBannerPalette loads them into
@@ -284,7 +284,7 @@ export interface FrontierBrainCutInArt {
 }
 
 /**
- * 0.42.0. The frontier scenes' effect art: the Frontier Brains' cut-ins (`brains`, the shared VS sheet `vs` with
+ * 0.43.0. The frontier scenes' effect art: the Frontier Brains' cut-ins (`brains`, the shared VS sheet `vs` with
  * animations 0 and 1, the name's text colours `nameColors`, enc_fade palette colours 1 and 2), the Factory battle
  * room's door light (BF_FUNC_UPDATE_BACKGROUND: BG3's tiles 3, 10, 26 × 11 on palette 0–4, one patch each) and the Hall
  * battle room's second BG3 frame (`hallLights`: battle_hall_battle_room_dupe over battle_hall_battle_room_2).
@@ -298,7 +298,7 @@ export interface FrontierEffectsArt {
 }
 
 /**
- * 0.42.0. A Frontier Brain's cut-in as it runs (decomp frontier_brain_encounter_effect.c), in screen px. `band` is the
+ * 0.43.0. A Frontier Brain's cut-in as it runs (decomp frontier_brain_encounter_effect.c), in screen px. `band` is the
  * banner's window (rows y1 ≤ y < y2, the full width; BG1 shows only there), `banner` the palette it shows. The sprites,
  * at their cells' origins: the mugshot (`dark`: its palette blended 14/16 toward black), the four VS sprites (each its
  * cell and scale about the origin, once drawn) and the name (its text's top-left). `roomDark`: the room, BG2 and the
@@ -343,7 +343,7 @@ export interface FrontierTables {
   objects: Record<string, Id>;
   /** The shadow under every 2D character (decomp ov63_0222B7E8: wifi2dchar cells 0). */
   shadow: Id;
-  /** 0.42.0. The scenes' effect art; absent without 2D art. */
+  /** 0.43.0. The scenes' effect art; absent without 2D art. */
   effects?: FrontierEffectsArt;
   /** Decomp sBattleFrontierBanlist: species no facility accepts. */
   banlist: Id[];
@@ -444,13 +444,13 @@ export interface FrontierView {
    */
   icons?: { species: Id; form: number; x: number; y: number; visible: boolean; item: { x: number; y: number; visible: boolean } }[];
   /**
-   * 0.42.0. The particles drawn this frame (decomp FrontierParticleSystem_Update: the scene's SPL systems on BG0), screen
+   * 0.43.0. The particles drawn this frame (decomp FrontierParticleSystem_Update: the scene's SPL systems on BG0), screen
    * quads in draw order, over BG2 and the characters. `spritesOnTop`: BG2 and then the particles under the characters
    * (BattleCastleBattleRoomSceneSetup puts BG0 and BG2 at the sprites' priority 2).
    */
   particles?: AnimParticle[];
   spritesOnTop?: true;
-  /** 0.42.0. A Frontier Brain's cut-in, over the room and under the fade. */
+  /** 0.43.0. A Frontier Brain's cut-in, over the room and under the fade. */
   brainCutIn?: FrontierBrainCutInView;
 }
 

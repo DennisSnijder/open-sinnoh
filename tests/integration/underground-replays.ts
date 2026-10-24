@@ -11,12 +11,12 @@ import { createApp } from '@opensinnoh/menus';
 import { romSlice } from '../rom.ts';
 import { readReplay, resolveReplay } from '../rom-replays/sys-replays.ts';
 
-const DAY = ['clock:daily-events', 'clock:timed-events'];
-/** The stand-ins each replay meets (on every seed): the clock's other daily events, TV. */
+const DAY = ['clock:daily-events'];
+/** The stand-ins each replay meets (on every seed): the clock's other daily events. */
 const STUBS: Record<string, string[]> = {
   'sys-sphere-growth': DAY,
   'sys-underground-vendor': DAY,
-  'sys-underground-treasure': [...DAY, 'tv:underground-treasures'],
+  'sys-underground-treasure': DAY,
   'sys-underground-base': [...DAY, 'journal:secret-base'],
 };
 

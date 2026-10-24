@@ -1,0 +1,50 @@
+# Watching the Contest Hall segment (decomp scripts_tv_broadcast.s TVBroadcast_Interact; ov6_022465FC.c, tv_segment.c
+# TVSegment_LoadMessage_ContestHall): after sys-tv-contest's interview, a house TV in Canalave City at 14:20 on the
+# Sunday, when programme 1 (Battling Trainers, the interviews) airs. The first watch: the greeting, the lead-in and the
+# Contest Hall segment of Staravia's win with the answer EVERYONE. The second: nothing else to show, the early
+# farewell, the programme ends. The third: a commercial. The segment's play and the slot are saved.
+from sys-tv-contest.replay
+warp platinum:MAP_HEADER_CANALAVE_CITY_EAST_HOUSE 6 4 up
+time 14:20
+until idle
++0 press a
++1 release a
+until message 300
++0 assert text platinum:TVBroadcast_Text_BattlingTrainers_GoodDay 0
++0 press a
++1 release a
+until message 300
++0 assert text platinum:TVBroadcast_Text_BattlingTrainers_GoodDay 1
++0 press a
++1 release a
+until message 300
++0 assert text platinum:TVBroadcast_Text_BattlingTrainers_LeadSegment 0
++0 press a
++1 release a
+until message 300
++0 assert text platinum:TVProgramInterviews_Text_ContestHall_Win 0 0=STARAVIA
++0 assert state tv.played [1]
++0 assert state tv.interviews[0].plays 1
+advance text 3000
+until idle 600
++0 assert state records.counts["48"] 1
+# The second watch: the early farewell (no segment left), and the programme is over
++0 press a
++1 release a
+until message 300
++0 assert text platinum:TVBroadcast_Text_BattlingTrainers_FarewellExtended 0
++0 assert state tv.finished false
+advance text 3000
+until idle 600
++0 assert state tv.finished true
+# The third: a commercial
++0 press a
++1 release a
+until message 300
+advance text 3000
+until idle 600
++0 reload
+until idle
++0 assert state tv.interviews[0].plays 1
++0 assert state tv.played [1]
++0 assert state tv.finished true

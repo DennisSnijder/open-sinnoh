@@ -306,6 +306,23 @@ export interface ContestPhoto {
   dressUp: ContestDressUp;
 }
 
+/** Decomp SAVED_PHOTOS_COUNT and PHOTO_ACCESSORY_COUNT: the gallery's photos and the accessories one keeps. */
+export const DRESS_UP_PHOTOS = { count: 11, accessories: 10 } as const;
+
+/**
+ * 0.42.0. A Jubilife TV gallery photo (decomp DressUpPhoto, written by the gallery's dress-up, ov22_02256F38): the Pokémon
+ * as in a contest photo plus its place on the stage (`x`, `y`) and the trainer's gender; the dress-up (at most
+ * DRESS_UP_PHOTOS.accessories accessories, the backdrop, the Pokémon's priority); `title` the Easy Chat word the gallery's
+ * owner asks for (ScrCmd_SetDressUpPhotoTitle), null until given.
+ */
+export interface DressUpPhoto {
+  mon: { species: Id; form: number; pid: number; otId: number; nickname: string | null; x: number; y: number };
+  trainerName: string;
+  trainerGender: 'male' | 'female';
+  dressUp: ContestDressUp;
+  title: number | null;
+}
+
 /**
  * The seam the rounds plug into. A round is a headless model the contest app steps once per tick (30 Hz) with the
  * player's input, until it returns its outcome. Its context gives it the running contest (read only), the game's
@@ -489,7 +506,7 @@ export interface ContestDancerView {
   shade: number;
   player: boolean;
   /**
-   * 0.42.0. Its outfit (decomp ov17_0224A134: the dancer is its dress-up record, ov22_0225AFD4, without the backdrop):
+   * 0.43.0. Its outfit (decomp ov17_0224A134: the dancer is its dress-up record, ov22_0225AFD4, without the backdrop):
    * the accessories' pictures by their top-left relative to the dancer's centre at scale 1, back to front, the
    * Pokémon drawn after the first `monAt`; scaled, turned and shaded with it about its centre. Empty when the
    * competition is the dance alone (sub_02095338 clears the outfits).
@@ -577,6 +594,48 @@ export interface ContestVisualScoringView {
 export interface ContestPhotoView {
   app: 'contest-photo';
   type: number;
+  picture: ContestPicture;
+  lines: [string, string];
+}
+
+/** 0.42.0. The dress-up's Fashion Case and stage as both dress-ups draw them (`ContestDressView` less the contest's clock and theme). */
+export type DressUpStageView = Omit<ContestDressView, 'theme' | 'seconds' | 'hurry' | 'pulse'>;
+
+/**
+ * 0.42.0. The Jubilife TV gallery's dress-up (decomp ScrCmd_0A6 → overlay022 ov22_02255D44 / ov22_02255E50 /
+ * ov22_02256098): the visual round's case and stage with ten accessories, no clock, the Pokémon movable. `phase`:
+ * `intro` (the first time: bank 385 message 47 in `message`), `dress`, `finish` (the stage moving to the photo's place
+ * and back), `confirm` (`question`: "Is your Pokémon all dressed up?", then "Would you like to save this design?").
+ * `fade` darkens the screen and `shade` the frame's background (0 clear … 16 black); `shift` is the stage's move toward
+ * the photo's place, `buttonsDrop` the buttons' slide down (px), `caseShown` whether the case's page shows, `photoBg`
+ * the photo's background in place of the dress-up's. Taps: `next` (the message), the stylus `dress:<x>,<y>` while down
+ * and `dress-up`, the buttons as the visual round's, `yes` and `no` (the question's touch buttons).
+ */
+export interface GalleryDressUpView {
+  app: 'gallery-dress-up';
+  phase: 'intro' | 'dress' | 'finish' | 'confirm';
+  fade: number;
+  shade: number;
+  message: AppMessage | null;
+  stage: DressUpStageView;
+  shift: { x: number; y: number };
+  buttonsDrop: number;
+  caseShown: boolean;
+  photoBg: boolean;
+  /**
+   * The question and its touch buttons (`yes`, `no`: their labels for screen readers; the art carries the words): `pressed`
+   * the one pressed (its animation `frame` 0–3), `cursor` the keys' choice.
+   */
+  question: { text: string; yes: string; no: string; cursor: 'yes' | 'no'; pressed: 'yes' | 'no' | null; frame: number } | null;
+}
+
+/**
+ * 0.42.0. The gallery's frames (decomp ScrCmd_ShowDressUpPhoto → ov22_0225B660 in its dress-up mode): the photo in the
+ * gallery's frame with its backdrop, the banner, and two lines (the trainer's name; bank 385 message 45, the title
+ * word). A or B (or `back`, `next`) closes it.
+ */
+export interface GalleryPhotoView {
+  app: 'gallery-photo';
   picture: ContestPicture;
   lines: [string, string];
 }

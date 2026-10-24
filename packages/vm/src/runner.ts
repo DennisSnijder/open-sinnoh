@@ -42,6 +42,7 @@ import { formHandlers } from './form-ops.ts';
 import { sideHandlers } from './side-ops.ts';
 import { poffinHandlers } from './poffin-ops.ts';
 import { contestHandlers } from './contest-ops.ts';
+import { galleryHandlers } from './gallery-ops.ts';
 import { sealHandlers } from './seal-ops.ts';
 import { gameCornerHandlers } from './game-corner-ops.ts';
 import { encounterHandlers } from './encounter-ops.ts';
@@ -50,6 +51,7 @@ import { mysteryGiftHandlers } from './mystery-gift-ops.ts';
 import { hofHandlers } from './hof-ops.ts';
 import { villaHandlers } from './villa-ops.ts';
 import { journalHandlers } from './journal-ops.ts';
+import { tvHandlers } from './tv-ops.ts';
 import { npcHandlers } from './npc-ops.ts';
 import { townFieldHandlers } from './town-field-ops.ts';
 
@@ -1029,10 +1031,12 @@ export class Runner implements ScriptRunner {
       ...frontierFieldHandlers(this),
       ...undergroundHandlers(this),
       ...contestHandlers(this),
+      ...galleryHandlers(this),
       ...sealHandlers(this),
       ...gameCornerHandlers(this),
       ...villaHandlers(this),
       ...journalHandlers(this),
+      ...tvHandlers(this),
       ...npcHandlers(this),
       ...townFieldHandlers(this),
     };
