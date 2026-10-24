@@ -10,8 +10,8 @@ import { hallFrontierHandlers } from './hall-ops.ts';
 import { castleFrontierHandlers } from './castle-ops.ts';
 import { arcadeFrontierHandlers } from './arcade-ops.ts';
 
-/** Frontier handlers that are logged stand-ins: battle videos (the Vs. Recorder: none is saved, saving one fails) and the Hall's TV segment. */
-export const FRONTIER_STUBBED = ['fr_cmd_70', 'fr_cmd_6d', 'fr_init_new_battle_recording', 'fr_free_battle_recording', 'fr_cmd_c7'];
+/** Frontier handlers that are logged stand-ins: battle videos (the Vs. Recorder: none is saved, saving one fails). */
+export const FRONTIER_STUBBED = ['fr_cmd_70', 'fr_cmd_6d', 'fr_init_new_battle_recording', 'fr_free_battle_recording'];
 
 export interface FrontierOpClassification {
   op: string;
