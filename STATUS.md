@@ -12,7 +12,7 @@ Versions: contracts 0.42.0, importer `platinum-105`, HeartGold follower add-on `
   replays and pass headless (seeds 1–3, with a save round trip and late starts) and in the browser on desktop
   and phone. Every battle on the path is a real battle.
 - **World:** DS movement, collision, terrain, warps, doors, stairs, ledges, NPC movement and trainer sight;
-  HM moves and the terrain they open; every weather, fog, darkness and Flash; day and night on a real clock;
+  HM moves, their cut-in and the terrain they open; every weather, fog, darkness and Flash; day and night on a real clock;
   gym puzzles; the Distortion World; Fly and Teleport; the Great Marsh and the Safari Game; ships and other
   cut-scenes. All 567 playable zones load; the browser sweep renders all but a few unused maps.
 - **Script engine:** decodes every script; the story path's commands are implemented. Commands not yet
@@ -27,7 +27,7 @@ Versions: contracts 0.42.0, importer `platinum-105`, HeartGold follower add-on `
   trees, the Poké Radar, swarms, the Trophy Garden, Poffins and Amity Square, the Underground played solo
   (mining, spheres, vendors, fossil revival, traps and their escape games, the secret base and its decoration),
   legendaries, roamers and forms, the Battle Tower (singles, doubles, multi), the Battle Factory, the Battle Hall,
-  the Battle Castle and the Battle Arcade (singles and doubles, with Thorton, Argenta, Darach and Dahlia), the event legendaries through Mystery Gift, and the offline Super Contest circuit (reception, rivals, judging,
+  the Battle Castle and the Battle Arcade (singles and doubles, with Thorton, Argenta, Darach and Dahlia; the Brains' cut-ins, the scenes' particles and lights), the event legendaries through Mystery Gift, and the offline Super Contest circuit (reception, rivals, judging,
   results, ribbons, prizes, Master flags, the visual round's dress-up and judging, the lobby's photo frames, the Dance
   Competition with the dancers in their outfits, and the acting round with the move animations).
 - **Town extras:** Seals and Ball Capsules (the Seal Case, the Solaceon gifts, the Sunyshore seal shop, the PC's
@@ -44,7 +44,8 @@ Versions: contracts 0.42.0, importer `platinum-105`, HeartGold follower add-on `
 
 ## Not yet
 
-- The Frontier records app; the facilities' particle effects; the Castle's bought-info flag marks.
+- The Frontier records app; the Castle's bought-info flag marks; the other facilities' pre-battle wipes (drawn as the
+  Tower's).
 - TV shows. The capsule editor's Test shows a still image, not the throw.
 - Wireless and Wi-Fi features: they answer as "no connection".
 - Mods beyond the current pack format (no editor or mod tooling yet).

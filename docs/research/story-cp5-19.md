@@ -524,7 +524,7 @@ it is met, why it stays.
 
 - `stub:create_journal_event` (cp5–8, `m5-eterna-egg-declined`): the Journal is not kept yet; the event changes nothing else.
 - `stub:check_tv_interview_eligible` (cp7): the TV system comes later; the op answers "not eligible", so no interviewer scene.
-- `render:hm-cut-in` (cp5–7, `m5-eterna-egg-declined`): the HM cut-in graphic is not drawn; the script waits its decomp length (a known follow-up).
+- `render:hm-cut-in` (cp5–7, `m5-eterna-egg-declined`): the HM cut-in graphic was not drawn; it is now (no longer a stub).
 - `evolution:records` (cp5, cp6): the game records an evolution adds (RECORD_POKEMON_EVOLVED, trainer score) are not kept.
 - `anim:cry-mod:9` (cp5 seeds 1–2, cp6): a cry modulation without a CryMod plays as a normal cry.
 - `anim:platinum:MOVE_SPITE` (cp6 seeds 1–2): the animation still needs battler-to-BG support. Faint Attack, Foresight, String Shot, Mean Look and Metronome now animate and are no longer allowlisted.

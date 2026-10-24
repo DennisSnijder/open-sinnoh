@@ -1,8 +1,8 @@
 # Palmer at his first appearance: a constructed save (the frontier state set below, not played) holds a singles
 # challenge interrupted by REST with 20 wins (two sevens carried, opponent 7 of room 2 next, the saved draw's seventh
 # trainer FRONTIER_TRAINER_TOWER_TYCOON_PALMER_SILVER, 305). The lobby resumes it (OnFrame_ResumeChallenge), the
-# battle room announces the Tower Tycoon (streak 20), Palmer's intro and the Frontier Brain cut-in (its timing; the
-# art is logged), then RUN forfeits. The streak ends at 20, so Teala's bronze trophy is due: it goes to the
+# battle room announces the Tower Tycoon (streak 20), Palmer's intro and the Frontier Brain cut-in (the ROM's
+# banner, VS and mugshot), then RUN forfeits. The streak ends at 20, so Teala's bronze trophy is due: it goes to the
 # Underground's goods PC, and she says goodbye.
 party 0 platinum:SPECIES_GARCHOMP 60 platinum:MOVE_EARTHQUAKE platinum:MOVE_DRAGON_CLAW
 party 1 platinum:SPECIES_LUCARIO 55 platinum:MOVE_AURA_SPHERE

@@ -286,6 +286,9 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   full ratio.
 - **One WebGL renderer per canvas;** a disposed field frees its scene. Cinematic scene models load on
   first use, not at each mount.
+- **The generic HM cut-in is Fly's cut-in without Fly's states** (one `FlyCutIn`, `fly` false: sCutInTaskFuncs closes
+  the window after the slide), drawn through the same `FieldView.fly`; its timing (cry on tick 36, done on tick 59)
+  is the one the field moves already waited on.
 - **Cinematics draw the authored scenes** (ships, Spear Pillar, the Distortion World entry, the title)
   from their own models, cameras and animations, with no procedural stand-ins. Where a scene used both DS
   screens it is recomposed as one; sub-screen-only parts are left out.
@@ -509,6 +512,14 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   A stops the board too. Its effects reach the battle as `FrontierBattle.weather` and `.sleep` (the DS's sleep turns)
   besides the parties. Frontier scripts' A/B waits show in `FrontierView.waitsForAB`, so replays' `advance text` presses
   through them, and loaded characters stay loaded across scene changes (the decomp keeps them in one table).
+- **Frontier scene effects run on the battle's SPL port** (`@opensinnoh/battle/particles`, a subpath without the battle
+  engine, so the frontier VM can wait on emitters headless): the scene owns up to 8 particle systems from
+  `frontier_particle.narc`, drawn then updated each frame, on one SPL random stream seeded 0 (the DS's global is never
+  seeded). The Brain cut-in is its own state machine in the scene (the decomp's task, banner and palette tasks), drawn
+  from field_encounteffect's art; it starts the Brain music, which the battle then keeps instead of restarting. The
+  Factory door light is a BG3 patch per palette step and the Hall lights a second BG3 frame, both imported. The Hall
+  room's palette task changes a standard BG palette no 8bpp layer reads, so it is not modelled. The Castle room's BG2,
+  particles and characters share priority 2: BG2 and the particles go under the characters there.
 - **Underground (solo):** the Explorer Kit, mining from ROM tables, spheres, vendors, fossils, traps and the
   secret base. Seeds come from the clock and the trainer id, not ticks, so boards are the same whatever
   replays wait. No link play: other players' traps, bases and flags have no stand-in.

@@ -144,7 +144,7 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
       ctx.save();
       ctx.translate(x * scale, y * scale);
       ctx.scale(k, k);
-      ctx.drawImage(img, c.x, c.y, c.w, c.h, c.ox * scale, c.oy * scale, c.w * scale, c.h * scale);
+      ctx.drawImage(img, c.x, c.y, c.w, c.h, -c.ox * scale, -c.oy * scale, c.w * scale, c.h * scale);
       ctx.restore();
     };
     if (cutIn.band && cutIn.band.y2 > cutIn.band.y1) {
