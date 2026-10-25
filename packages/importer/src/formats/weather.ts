@@ -1,7 +1,7 @@
-import type { AssetRef, Weather, WeatherFade, WeatherParticles } from '@opensinnoh/contracts';
+import type { AssetRef, Weather, WeatherFade, WeatherParticles, WeatherSpawner, WeatherSprites } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
 import { Reader } from '@opensinnoh/nds';
-import { encodeImage, PaletteRam, readNclr, readNcgr, readNscr, renderScreen } from '../ui2d/index.ts';
+import { encodeImage, pack, PaletteRam, readNanr, readNcer, readNclr, readNcgr, readNcgrData, readNscr, renderCell, renderScreen } from '../ui2d/index.ts';
 
 /**
  * The overworld weather task table (decomp ov5_021D5EB8.c `Unk_ov5_02201D78`, 31 entries of 28 bytes,
@@ -47,7 +47,7 @@ interface TaskParams {
    * blend set: opaque). `layer: 'pending'` = the task has a BG we do not import yet; `layer: 'drawn'` =
    * its BG is drawn by another part (DARK_FLASH's darkness, task 17's lightning flash).
    */
-  layer?: { scroll: [number, number]; eva: number } | 'pending' | 'drawn';
+  layer?: { scroll: [number, number]; eva: number; under?: true } | 'pending' | 'drawn';
   count?: number;
   darkness?: number;
   densityTable?: true;
@@ -60,6 +60,8 @@ interface TaskParams {
    * `steady` (BG2 on once faded in, off when the fade out starts).
    */
   spawn?: { in: [number, number, number, number, number, number, number]; out: [number, number, number, number] };
+  /** The map load's spawner (count, interval; the task's state 2 ov5_021D7210) and its ov5_021D7568 prewarm (n, period, step). */
+  load?: { spawner: [number, number]; prewarm: [number, number, number] };
   fogFade?: [number, number];
   layerFade?: [number, number] | 'steady';
 }
@@ -78,18 +80,18 @@ const SAND_SPAWN: TaskParams['spawn'] = { in: [1, 15, 8, 1, -2, 4, 2], out: [0, 
 export const WEATHER_TASKS: Record<number, TaskParams> = {
   0x021d7604: {}, // CLEAR
   0x021dac68: { layer: { scroll: [0, 0], eva: 4 }, layerFade: [8, 8] }, // CLOUDY: a still dark BG at 4/16
-  0x021d7658: { fog: [3, 0x6f6f + 0x300, GREY26], count: 16, spawn: { in: [1, 8, 4, 0, -1, 1, 1], out: [0, 8, 1, -1] }, fogFade: [1, 1] }, // RAINING: 4 drops per tick, 1–2 tick streaks, 30% splash 4 ticks
-  0x021d9ff8: { fog: [3, 0x6f6f, GREY26], count: 36, spawn: HEAVY_RAIN_SPAWN, fogFade: [1, 1] }, // HEAVY_RAIN: 10 drops per tick
-  0x021d9f0c: { fog: [3, 0x6f6f, GREY26], count: 36, lightning: true, spawn: HEAVY_RAIN_SPAWN, fogFade: [1, 1] }, // THUNDERSTORM: heavy rain + task 17
-  0x021d79f0: { fog: [3, 0x6f6f + 0x300, GREY26], count: 16, spawn: { in: [1, 24, 1, 14, -5, 1, 0], out: [0, 24, 5, -1] }, fogFade: [1, 2] }, // SNOWING: 1 flake per 14 ticks, slow fall
-  0x021d7e54: { fog: [3, 0x6f6f - 0x200, GREY24], count: 48, spawn: HEAVY_SNOW_SPAWN, fogFade: [2, 1] }, // HEAVY_SNOW: 6 per 3 ticks
-  0x021d8ff8: { fog: [3, 0x6f6f - 0x400, GREY24], count: 48, layer: { scroll: [24, -12], eva: 16 }, spawn: { in: [1, 30, 10, 1, -4, 2, 3], out: [0, 12, 4, -4] }, fogFade: [1, 1], layerFade: 'steady' }, // BLIZZARD: 10 per tick; BG offset (2b, −b), b += 12
-  0x021d879c: { fog: [5, 0x6f6f + 0xaa0, WHITE], layer: 'pending', fogFade: [2, 1] }, // CLEAR_8: thin white fog + BG behind the 3D (priority 3)
-  0x021da244: { fog: [3, 0x6f6f - 0x40, [20, 20, 14]], count: 24, layer: 'pending', spawn: { in: [1, 12, 1, 6, -1, 4, 0], out: [0, 12, 1, -1] }, fogFade: [1, 1] }, // SLOW_ASHFALL: 1 per 6 ticks, slow; BG jumps 32 px every 30 ticks
-  0x021d8d08: { fog: [3, 28399, SAND], count: 48, layer: { scroll: [12, -6], eva: 16 }, spawn: SAND_SPAWN, fogFade: [1, 1], layerFade: 'steady' }, // SANDSTORM: 8 per tick; BG offset (2b, −b), b += 6
-  0x021d9464: { fog: [3, 0x6f6f + 0x200, GREY26], count: 48, spawn: { in: [2, 16, 20, 2, -2, 4, 2], out: [0, 16, 6, -10] }, fogFade: [1, 1] }, // HAILING: 20 per 2 ticks
-  0x021da8a0: { count: 16, spawn: { in: [1, 35, 4, 15, -2, 5, 1], out: [0, 35, 2, -3] } }, // SPIRITS: 15 per 4 ticks, no fog
-  0x021dab78: { layer: 'pending' }, // CLEAR_13: BG only, behind the 3D (priority 3)
+  0x021d7658: { fog: [3, 0x6f6f + 0x300, GREY26], count: 16, spawn: { in: [1, 8, 4, 0, -1, 1, 1], out: [0, 8, 1, -1] }, fogFade: [1, 1], load: { spawner: [4, 0], prewarm: [20, 10, 1] } }, // RAINING: 4 drops per tick, 1–2 tick streaks, 30% splash 4 ticks
+  0x021d9ff8: { fog: [3, 0x6f6f, GREY26], count: 36, spawn: HEAVY_RAIN_SPAWN, fogFade: [1, 1], load: { spawner: [10, 0], prewarm: [20, 5, 1] } }, // HEAVY_RAIN: 10 drops per tick
+  0x021d9f0c: { fog: [3, 0x6f6f, GREY26], count: 36, lightning: true, spawn: HEAVY_RAIN_SPAWN, fogFade: [1, 1], load: { spawner: [10, 0], prewarm: [20, 5, 1] } }, // THUNDERSTORM: heavy rain + task 17
+  0x021d79f0: { fog: [3, 0x6f6f + 0x300, GREY26], count: 16, spawn: { in: [1, 24, 1, 14, -5, 1, 0], out: [0, 24, 5, -1] }, fogFade: [1, 2], load: { spawner: [1, 14], prewarm: [20, 2, 24] } }, // SNOWING: 1 flake per 14 ticks, slow fall
+  0x021d7e54: { fog: [3, 0x6f6f - 0x200, GREY24], count: 48, spawn: HEAVY_SNOW_SPAWN, fogFade: [2, 1], load: { spawner: [6, 3], prewarm: [20, 2, 3] } }, // HEAVY_SNOW: 6 per 3 ticks
+  0x021d8ff8: { fog: [3, 0x6f6f - 0x400, GREY24], count: 48, layer: { scroll: [24, -12], eva: 16 }, spawn: { in: [1, 30, 10, 1, -4, 2, 3], out: [0, 12, 4, -4] }, fogFade: [1, 1], layerFade: 'steady', load: { spawner: [10, 1], prewarm: [20, 2, 2] } }, // BLIZZARD: 10 per tick; BG offset (2b, −b), b += 12
+  0x021d879c: { fog: [5, 0x6f6f + 0xaa0, WHITE], layer: { scroll: [0, 0], eva: 16, under: true }, fogFade: [2, 1], layerFade: [30, 30] }, // CLEAR_8: thin white fog + the fog BG behind the 3D (priority 3)
+  0x021da244: { fog: [3, 0x6f6f - 0x40, [20, 20, 14]], count: 24, layer: 'pending', spawn: { in: [1, 12, 1, 6, -1, 4, 0], out: [0, 12, 1, -1] }, fogFade: [1, 1], load: { spawner: [1, 6], prewarm: [20, 2, 16] } }, // SLOW_ASHFALL: 1 per 6 ticks, slow; BG jumps 32 px every 30 ticks
+  0x021d8d08: { fog: [3, 28399, SAND], count: 48, layer: { scroll: [12, -6], eva: 16 }, spawn: SAND_SPAWN, fogFade: [1, 1], layerFade: 'steady', load: { spawner: [8, 1], prewarm: [24, 2, 2] } }, // SANDSTORM: 8 per tick; BG offset (2b, −b), b += 6
+  0x021d9464: { fog: [3, 0x6f6f + 0x200, GREY26], count: 48, spawn: { in: [2, 16, 20, 2, -2, 4, 2], out: [0, 16, 6, -10] }, fogFade: [1, 1], load: { spawner: [20, 2], prewarm: [20, 10, 1] } }, // HAILING: 20 per 2 ticks
+  0x021da8a0: { count: 16, spawn: { in: [1, 35, 4, 15, -2, 5, 1], out: [0, 35, 2, -3] }, load: { spawner: [1, 4], prewarm: [16, 2, 1] } }, // SPIRITS: 15 per 4 ticks, no fog
+  0x021dab78: { layer: { scroll: [0, 0], eva: 16, under: true }, layerFade: [8, 8] }, // CLEAR_13: BG only, behind the 3D (priority 3)
   0x021daec0: { fog: [6, 30037, WHITE], layer: { scroll: [0, 0], eva: 9 }, fogFade: [1, 1], layerFade: [30, 30] }, // FOG: a still white BG at 9/16
   0x021dad38: { fog: [7, 30287, BLACK], layer: { scroll: [0, 0], eva: 9 }, fogFade: [1, 1], layerFade: [30, 30] }, // DEEP_FOG: the same white BG at 9/16
   0x021db04c: { darkness: 32, layer: 'drawn' }, // DARK_FLASH
@@ -97,8 +99,8 @@ export const WEATHER_TASKS: Record<number, TaskParams> = {
   0x021d84d4: { fog: [3, 0x6f6f + 0x200, GREY26], fogFade: [2, 2] }, // 18
   0x021d8638: { fog: [3, 0x6f6f - 0x9e0, GREY26], fogFade: [2, 2] }, // 19
   0x021d97e8: { layer: 'pending' }, // 20: pulsing BG layer only
-  0x021d823c: { fog: [3, 0x6f6f, GREY24], count: 48, layer: { scroll: [6, -6], eva: 16 }, spawn: HEAVY_SNOW_SPAWN, fogFade: [2, 1], layerFade: 'steady' }, // 21: heavy snow + blizzard BG; offset (b, −b), b += 6
-  0x021d8948: { fog: [3, 28399, SAND], count: 48, spawn: SAND_SPAWN, fogFade: [1, 1] }, // 22: sand without BG
+  0x021d823c: { fog: [3, 0x6f6f, GREY24], count: 48, layer: { scroll: [6, -6], eva: 16 }, spawn: HEAVY_SNOW_SPAWN, fogFade: [2, 1], layerFade: 'steady', load: { spawner: [6, 3], prewarm: [20, 2, 3] } }, // 21: heavy snow + blizzard BG; offset (b, −b), b += 6
+  0x021d8948: { fog: [3, 28399, SAND], count: 48, spawn: SAND_SPAWN, fogFade: [1, 1], load: { spawner: [8, 1], prewarm: [24, 2, 2] } }, // 22: sand without BG
   0x021db144: { fog: [3, 0x6f6f - 1600, WHITE], layer: 'pending', fogFade: [1, 1] }, // 23 (Eterna Forest): BG at 7/16 that follows the camera
   0x021db3a8: { fog: [5, 28591, BLACK], densityTable: true, layer: 'pending' }, // 24: BG alpha pulses with the fog
   0x021db3c4: { fog: [5, 28591, BLACK], densityTable: true, layer: 'pending' }, // 25
@@ -122,18 +124,19 @@ export const DEFAULT_FOG_DENSITIES = Array.from({ length: 32 }, (_, i) => i * 4)
  * The decoded parts of weather `value` (0–30): particles, fog, darkness and the BG layer (`layerImage`
  * names the asset of a BG resource). Weathers change no light.
  */
-export function weatherParts(value: number, task: RawWeatherTask, densityTable: number[], layerImage: (bg: number) => AssetRef, weatherId: (value: number) => Id): Pick<Weather, 'particles' | 'fog' | 'darkness' | 'layer' | 'fade' | 'pending'> {
+export function weatherParts(value: number, task: RawWeatherTask, densityTable: number[], layerImage: (bg: number) => AssetRef, weatherId: (value: number) => Id, sprites: (set: number) => WeatherSprites): Pick<Weather, 'particles' | 'fog' | 'darkness' | 'layer' | 'fade' | 'pending'> {
   const p = WEATHER_TASKS[task.task];
   if (!p) throw new Error(`weather ${value}: task function 0x${task.task.toString(16)} is not a known weather task`);
   const out: Pick<Weather, 'particles' | 'fog' | 'darkness' | 'layer' | 'fade' | 'pending'> = {};
   if ((task.bg === null) !== (p.layer === undefined)) throw new Error(`weather ${value}: BG resource ${task.bg} but task layer ${JSON.stringify(p.layer)}`);
-  if (task.bg !== null && typeof p.layer === 'object') out.layer = { image: layerImage(task.bg), scroll: p.layer.scroll, alpha: p.layer.eva / 16 };
+  if (task.bg !== null && typeof p.layer === 'object') out.layer = { image: layerImage(task.bg), scroll: p.layer.scroll, alpha: p.layer.eva / 16, ...(p.layer.under ? { under: true as const } : {}) };
   if (p.layer === 'pending') out.pending = ['layer'];
   if (task.particles !== null) {
     const kind = PARTICLE_SETS[task.particles];
     if (!kind) throw new Error(`weather ${value}: particle set ${task.particles} unknown`);
-    if (p.count === undefined) throw new Error(`weather ${value}: particle set without a count`);
-    out.particles = { kind: p.lightning ? 'thunder' : kind, count: p.count };
+    if (p.count === undefined || !p.spawn || !p.load) throw new Error(`weather ${value}: particle set without a count, spawner or map-load spawner`);
+    const spawner: WeatherSpawner = { load: p.load.spawner, steady: [p.spawn.in[2], p.spawn.in[3]], prewarm: p.load.prewarm };
+    out.particles = { kind: p.lightning ? 'thunder' : kind, count: p.count, sprites: sprites(task.particles), spawner };
   }
   if (p.fog) {
     const [slope, offset, rgb] = p.fog;
@@ -239,4 +242,48 @@ export function weatherBgPng(narc: Uint8Array[], [nclr, ncgr, nscr]: [number, nu
   if (screen.width !== 256 || screen.height !== 256) throw new Error(`weather BG NSCR ${nscr}: ${screen.width}×${screen.height}, expected 256×256`);
   const rgba = renderScreen({ ...screen, entries: screen.entries.map((e) => (e & 0xfff) | (6 << 12)) }, chars, ram);
   return encodeImage({ width: 256, height: 256, rgba });
+}
+
+/** weather_sys.narc's sprite resource tables (ov5_021D61D0): member and resource type, per kind. */
+const SPRITE_TABLES = { chars: [63, 0], palettes: [64, 1], cells: [61, 2], anims: [62, 3] } as const;
+/** NARC_INDEX_NONE (sprite_resource.c): the end of a resource table. */
+const TABLE_END = 0xfffffffe;
+
+/** A SpriteResourceTableBinary: u32 type, then {narc, member, compressed, id, vram, palette} entries up to TABLE_END. */
+function spriteTable(narc: Uint8Array[], [member, type]: readonly [number, number]): number[] {
+  const bytes = narc[member];
+  if (!bytes) throw new Error(`weather_sys.narc has no member ${member}`);
+  const r = new Reader(bytes);
+  if (r.u32(0) !== type) throw new Error(`weather sprite table ${member}: type ${r.u32(0)}, expected ${type}`);
+  const members: number[] = [];
+  for (let o = 4; r.u32(o) !== TABLE_END; o += 24) {
+    if (o + 24 > bytes.length) throw new Error(`weather sprite table ${member}: no end`);
+    if (r.u32(o + 8) !== 0) throw new Error(`weather sprite table ${member}: a compressed entry`);
+    members.push(r.u32(o + 4));
+  }
+  return members;
+}
+
+/**
+ * OAM set `set` (the weather task table's particle resource) as a packed PNG of its cells, and per animation frame the
+ * cell it shows (the set's one NANR sequence).
+ */
+export function weatherSpriteSet(narc: Uint8Array[], set: number): { png: Uint8Array; cells: WeatherSprites['cells']; frames: number[] } {
+  const member = (kind: keyof typeof SPRITE_TABLES) => {
+    const i = spriteTable(narc, SPRITE_TABLES[kind])[set];
+    const bytes = i === undefined ? undefined : narc[i];
+    if (!bytes) throw new Error(`weather sprite set ${set}: no ${kind} member`);
+    return bytes;
+  };
+  const bank = readNcer(member('cells'));
+  const chars = readNcgrData(member('chars'));
+  const palette = readNclr(member('palettes'));
+  const sequences = readNanr(member('anims'));
+  if (sequences.length !== 1) throw new Error(`weather sprite set ${set}: ${sequences.length} animation sequences, expected 1`);
+  const packed = pack(bank.cells.map((c) => renderCell(c, chars.data, palette.colors, { mapping: bank.mapping })));
+  const frames = sequences[0]!.frames.map((f) => {
+    if (f.cell >= bank.cells.length) throw new Error(`weather sprite set ${set}: a frame shows cell ${f.cell} of ${bank.cells.length}`);
+    return f.cell;
+  });
+  return { png: encodeImage(packed.image), cells: packed.cells, frames };
 }

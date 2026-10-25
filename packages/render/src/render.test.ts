@@ -336,20 +336,54 @@ it('plays field-effect animations once (holding the last frame) or looping; fade
   expect([0, 12, 24].map(surfBob)).toEqual([0, 3, 0]);
 });
 
-it('keeps the weather particle count alive', async () => {
-  const { ParticleField } = await import('./weather.ts');
-  const field = new ParticleField('rain', 16);
-  for (let t = 0; t < 100; t++) field.step(256, 192);
-  expect(field.particles).toHaveLength(16);
-  expect(field.particles.every((p) => p.y > -40 && p.y < 240)).toBe(true);
-  // A zoom changes the count with the view: new ones anywhere in it, extra ones dropped.
-  field.count = 64;
-  field.step(512, 384);
-  expect(field.particles).toHaveLength(64);
-  expect(field.particles.slice(16).some((p) => p.y > 192)).toBe(true);
-  field.count = 8;
-  field.step(256, 192);
-  expect(field.particles).toHaveLength(8);
+it('steps the weather tasks particles as the DS does: spawn, fall, the pool and the camera shift', async () => {
+  const { WeatherSim, WEATHER_POOL } = await import('./weather-particles.ts');
+  // Heavy snow (ov5_021D8098/ov5_021D81BC): flakes enter at y −8 and drift down-left, slowing; a map load prewarms 20.
+  const snow = new WeatherSim('heavy-snow', 1);
+  snow.prewarm(20, 2, 3);
+  expect(snow.particles.length).toBeGreaterThan(10);
+  expect(Math.max(...snow.particles.map((p) => p.y))).toBeGreaterThan(40);
+  expect(snow.particles.every((p) => p.frame >= 0 && p.frame <= 2)).toBe(true);
+  for (let t = 0; t < 300; t++) {
+    if (t % 4 === 0) snow.spawn(6);
+    snow.update();
+    expect(snow.particles.length).toBeLessThanOrEqual(WEATHER_POOL);
+  }
+  expect(snow.particles.length).toBeGreaterThan(20);
+  // The camera moving right by 10 px moves every flake 10 px left (wrapped into −64..319).
+  const before = snow.particles.map((p) => p.x);
+  snow.shift(10, 0);
+  snow.particles.forEach((p, i) => expect(p.x === before[i]! - 10 || p.x > before[i]!).toBe(true));
+  // Rain (ov5_021D78A4/ov5_021D7960): drops placed 96 px above the screen (wrapped by ov5_021D630C to 160) live one or
+  // two ticks, then some splash.
+  const rain = new WeatherSim('rain', 7);
+  rain.spawn(4);
+  expect(rain.particles.map((p) => p.y)).toEqual([160, 160, 160, 160]);
+  let splashed = false;
+  for (let t = 0; t < 60; t++) {
+    rain.spawn(4);
+    rain.update();
+    splashed ||= rain.particles.some((p) => p.frame === 3);
+  }
+  expect(splashed).toBe(true);
+  expect(rain.particles.length).toBeLessThan(WEATHER_POOL);
+  // The blizzard (ov5_021D92C4) does not move with the camera.
+  const blizzard = new WeatherSim('blizzard', 3);
+  blizzard.spawn(1);
+  const x = blizzard.particles.map((p) => p.x);
+  blizzard.shift(10, 10);
+  expect(blizzard.particles.map((p) => p.x)).toEqual(x);
+});
+
+it('covers a wide view with DS screens, the DS screen in the middle, and scales the camera shift as ov5_021D7028', async () => {
+  const { weatherTiles, weatherCameraScale } = await import('./weather.ts');
+  expect(weatherTiles(256, 192)).toEqual([{ key: '0,0', x: 0, y: 0 }]);
+  const wide = weatherTiles(341, 192);
+  expect(wide.map((t) => t.x)).toEqual([-213, 43, 299]);
+  // The field camera (FOV 8.09°, distance 666.9): about 1 DS px per unit.
+  const s = weatherCameraScale(16.18, 666.92);
+  expect(s.perX).toBeCloseTo(1.01, 2);
+  expect(s.perZ[0]).toBeCloseTo(1.0, 1);
 });
 
 it('scrolls a weather BG layer per tick, wrapping at 256 (G2_SetBG2Offset)', async () => {

@@ -3,7 +3,7 @@ import { OBJECTIVE_TEXTS, objectiveTables } from './objectives.ts';
 import { importSpearPillar } from './spear-pillar.ts';
 import { animationFrames } from './gyms/index.ts';
 import { readSunyshoreTables, SUNYSHORE_REGION } from './gyms/sunyshore.ts';
-import type { Area, BgEvent, Model, Light, LightTemplate, Camera, MapPopup, Chunk, CoordEvent, EncounterSlot, EncounterTable, Facing, Flag, Item, Matrix, NewGame, ObjectEvent, Prop, Sprite, Text, TextBank, TileBehavior, Var, WarpEvent, Weather, Zone } from '@opensinnoh/contracts';
+import type { Area, BgEvent, Model, Light, LightTemplate, Camera, MapPopup, Chunk, CoordEvent, EncounterSlot, EncounterTable, Facing, Flag, Item, Matrix, NewGame, ObjectEvent, Prop, Sprite, Text, TextBank, TileBehavior, Var, WarpEvent, Weather, WeatherSprites, Zone } from '@opensinnoh/contracts';
 import { GAME_RECORDS } from '@opensinnoh/contracts';
 import { asId, type Id, type PackData, type RegistryRecord } from '@opensinnoh/core';
 import { importFont } from '@opensinnoh/text';
@@ -43,7 +43,7 @@ import { readInitScripts } from './formats/init-scripts.ts';
 import { readAreaLight, templateAt, type RawLightTemplate } from './formats/area-light.ts';
 import { readAreaData, readLandData, readMapMatrix } from './formats/map.ts';
 import { decodeText } from './formats/text.ts';
-import { readWeatherBgs, readWeatherTasks, readYearlyWeather, WEATHER_BG_COUNT, weatherBgPng, weatherParts, WEATHER_TASK_COUNT, WEATHER_TASK_SIZE } from './formats/weather.ts';
+import { readWeatherBgs, readWeatherTasks, readYearlyWeather, WEATHER_BG_COUNT, weatherBgPng, weatherParts, weatherSpriteSet, WEATHER_TASK_COUNT, WEATHER_TASK_SIZE } from './formats/weather.ts';
 import { readZoneHeaders, type ZoneHeader } from './formats/zone-headers.ts';
 import { charTable, Names, type CharmapFile, type NamesFile } from './names.ts';
 import { convertBaseCursor, readUndergroundTables } from './underground.ts';
@@ -1053,11 +1053,24 @@ export async function importPlatinum(
     if (!weatherAssets.has(path)) weatherAssets.set(path, weatherBgPng(weatherSys, entry));
     return asId(`platinum:${path}`);
   };
+  /** Weather OAM sets by set index, packed once per set a weather uses. */
+  const spriteSets = new Map<number, WeatherSprites>();
+  const weatherSprites = (set: number): WeatherSprites => {
+    let sprites = spriteSets.get(set);
+    if (!sprites) {
+      const { png, cells, frames } = weatherSpriteSet(weatherSys, set);
+      const path = `weather/sprites${set}.png`;
+      weatherAssets.set(path, png);
+      sprites = { image: asId(`platinum:${path}`), cells, frames };
+      spriteSets.set(set, sprites);
+    }
+    return sprites;
+  };
   const weatherValues = new Set([...Array.from({ length: WEATHER_TASK_COUNT }, (_, v) => v), ...names.weatherNames.keys(), ...headers.map((h) => h.weather), ...yearly.flat()]);
   const weathers: Weather[] = [...weatherValues].sort((a, b) => a - b).map((v) => {
     const name = names.weatherNames.get(v)?.replace(/^OVERWORLD_WEATHER_/, '') ?? String(v);
     const base = { id: names.weather(v), sourceIndex: v, name };
-    if (v < WEATHER_TASK_COUNT) return { ...base, ...weatherParts(v, weatherTasks[v]!, fogDensities, layerImage, (w) => names.weather(w)) };
+    if (v < WEATHER_TASK_COUNT) return { ...base, ...weatherParts(v, weatherTasks[v]!, fogDensities, layerImage, (w) => names.weather(w), weatherSprites) };
     const days = yearly[v - YEARLY_WEATHER_START];
     if (!days) throw new ImportError(`weather ${v}: neither a weather task nor a yearly weather`);
     return { ...base, yearly: days.map((d) => names.weather(d)) };

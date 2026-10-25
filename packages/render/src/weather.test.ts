@@ -4,11 +4,12 @@ import { WEATHER_LOAD_TICKS } from '@opensinnoh/contracts';
 import { WeatherFades, fogFadeDensities } from './weather.ts';
 
 const densities = Array.from({ length: 32 }, (_, i) => i * 4);
+const drawn = { sprites: { image: 'test:weather/sprites.png' as Id, cells: [], frames: [] }, spawner: { load: [4, 0] as [number, number], steady: [4, 0] as [number, number], prewarm: [20, 10, 1] as [number, number, number] } };
 
 it('fades weather across a zone connection as the DS does, and shows it at full on a map load', () => {
   const fog = { slope: 3, offset: 0x6f6f + 0x300, color: [26 / 31, 26 / 31, 26 / 31] as [number, number, number], alpha: 31, densities };
   const clear = { id: 'test:clear' as Id, name: 'CLEAR' };
-  const rain = { id: 'test:rain' as Id, name: 'RAINING', particles: { kind: 'rain' as const, count: 16 }, fog, fade: { particles: { in: [0.25, 0.5, 1], out: [0.5, 0] }, fog: { in: 1, out: 1 } } };
+  const rain = { id: 'test:rain' as Id, name: 'RAINING', particles: { kind: 'rain' as const, count: 16, ...drawn }, fog, fade: { particles: { in: [0.25, 0.5, 1], out: [0.5, 0] }, fog: { in: 1, out: 1 } } };
   const f = new WeatherFades();
   const ticks = (n: number) => {
     for (let i = 0; i < n; i++) f.step(() => true);
@@ -59,8 +60,8 @@ it('steps the fog density table as ov5_021D7534 does', () => {
 
 it('fades overlapping weathers into each other (the snows), the fog parameters moving between them', () => {
   const fogOf = (offset: number) => ({ slope: 3, offset, color: [24 / 31, 24 / 31, 24 / 31] as [number, number, number], alpha: 31, densities });
-  const snow = { id: 'test:snow' as Id, name: 'SNOWING', particles: { kind: 'snow' as const, count: 16 }, fog: fogOf(0x6f6f + 0x300), fade: { particles: { in: [0.5, 1], out: [0.5, 0] }, fog: { in: 1, out: 2 }, overlaps: ['test:heavy' as Id] } };
-  const heavy = { id: 'test:heavy' as Id, name: 'HEAVY_SNOW', particles: { kind: 'heavy-snow' as const, count: 48 }, fog: fogOf(0x6f6f - 0x200), fade: { particles: { in: [0.5, 1], out: [0.5, 0] }, fog: { in: 2, out: 1 }, overlaps: ['test:snow' as Id] } };
+  const snow = { id: 'test:snow' as Id, name: 'SNOWING', particles: { kind: 'snow' as const, count: 16, ...drawn }, fog: fogOf(0x6f6f + 0x300), fade: { particles: { in: [0.5, 1], out: [0.5, 0] }, fog: { in: 1, out: 2 }, overlaps: ['test:heavy' as Id] } };
+  const heavy = { id: 'test:heavy' as Id, name: 'HEAVY_SNOW', particles: { kind: 'heavy-snow' as const, count: 48, ...drawn }, fog: fogOf(0x6f6f - 0x200), fade: { particles: { in: [0.5, 1], out: [0.5, 0] }, fog: { in: 2, out: 1 }, overlaps: ['test:snow' as Id] } };
   const f = new WeatherFades();
   f.set(snow, true);
   f.set(heavy, false);

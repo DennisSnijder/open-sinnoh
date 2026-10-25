@@ -435,8 +435,11 @@ export interface Weather {
   sourceIndex?: number;
   /** Decomp name without the prefix (`CLEAR`, `FOG`, `DARK_FLASH`, `ROUTE_212_SOUTH`). */
   name: string;
-  /** Screen particles (decomp weather OAM tasks): kind, and how many are alive at once. */
-  particles?: { kind: WeatherParticles; count: number };
+  /**
+   * Screen particles (decomp weather OAM tasks): kind (which task's spawn and update the renderer runs), and how many
+   * are alive at once. 0.45.0: `sprites` (the task's weather_sys OAM set) and `spawner` (its steady spawner).
+   */
+  particles?: { kind: WeatherParticles; count: number; sprites: WeatherSprites; spawner: WeatherSpawner };
   /**
    * DS fog (GBATEK "DS 3D Fog"): `slope` = the GX_FOGSLOPE shift (0–10), `offset` = the depth (0..0x7fff)
    * where fog starts, `color` 0..1, `alpha` 0..31, `densities` = the 32-entry density table (0..127).
@@ -456,8 +459,10 @@ export interface Weather {
    * (y + scroll[1]·t) mod 256) (the task's per-tick `G2_SetBG2Offset` step, in DS px). `alpha` is the
    * task's steady `G2_SetBlendAlpha` EVA / 16 (BG2 over the 3D and backdrop, EVB = 16 − EVA); 1 when
    * the task sets no blend (opaque pixels). The fades in and out are not modelled.
+   * 0.45.0 `under`: BG2 at priority 3, behind the 3D field (CLEAR_8, CLEAR_13): it shows where the field's rear plane
+   * is clear, blended over the black backdrop.
    */
-  layer?: { image: AssetRef; scroll: [number, number]; alpha: number };
+  layer?: { image: AssetRef; scroll: [number, number]; alpha: number; under?: true };
   /**
    * 0.34.1. How the weather fades in and out when it changes without a map load (decomp ov5_021D5F7C: a zone
    * connection, or a script's weather update); a map load shows it at full at once (ov5_021D5F24). Absent = no fade.
@@ -505,6 +510,28 @@ export function weatherFadeTicks(w: Weather, phase: 'in' | 'out', keepsFog = fal
   if (!f) return 0;
   const layer = f.layer && f.layer !== 'steady' ? f.layer[phase] : 0;
   return Math.max(f.particles?.[phase].length ?? 0, f.fog && !keepsFog ? f.fog[phase] * WEATHER_FOG_STEPS : 0, layer);
+}
+
+/**
+ * 0.45.0. A weather task's OAM set (weather_sys.narc, the resource tables in members 61–64): its cells packed in a PNG
+ * (colour 0 transparent) and, per animation frame (Sprite_SetAnimFrame; the sprites never animate), the cell drawn.
+ * A cell's `ox`, `oy` is the sprite position inside its rect.
+ */
+export interface WeatherSprites {
+  image: AssetRef;
+  cells: { x: number; y: number; w: number; h: number; ox: number; oy: number }[];
+  frames: number[];
+}
+
+/**
+ * 0.45.0. A weather task's spawner once it runs at full (decomp ov5_021D5EB8.c, the task's state 3): `count` particles
+ * every `interval` + 1 ticks. `load` is the one a map load starts with (state 2); `steady` the one its fade in ends on;
+ * `prewarm` the map load's ov5_021D7568 arguments (spawn n, then advance the k-th particle by `step` per `period`).
+ */
+export interface WeatherSpawner {
+  load: [count: number, interval: number];
+  steady: [count: number, interval: number];
+  prewarm: [n: number, period: number, step: number];
 }
 
 export type WeatherParticles = 'rain' | 'heavy-rain' | 'thunder' | 'snow' | 'heavy-snow' | 'blizzard' | 'ash' | 'sand' | 'hail' | 'spirits' | 'diamond-dust';

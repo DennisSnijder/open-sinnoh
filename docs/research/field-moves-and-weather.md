@@ -68,8 +68,20 @@ How weather works on the DS:
   density is in DS depth units (slope and offset), mapped through the DS projection.
 - Weather draws no simulation random numbers.
 
-The DS draws weather particles with SPL. The engine draws its own particles from the decoded task parameters, so the
-`weathers` registry carries particles, fog, light and the darkness radius. The dark-Flash circle is screen-space on
+The DS draws weather particles as OAM sprites (not SPL): each task has an OAM set in `weather_sys.narc`, listed by the
+sprite resource tables in members 61–64 (characters, palettes, cells, animations; set index = the task table's particle
+resource). The sprites never animate: a spawn picks a frame (`Sprite_SetAnimFrame`), and the task's own update moves
+it once a tick in a 48-sprite pool. Positions wrap into x −64..319, y −64..256 (ov5_021D630C), so rain placed 96 px
+above the screen starts at y 160. Every task but the blizzard's moves its sprites against the camera target's motion
+(ov5_021D7028: 256 px across the view's width at the target, 190.55 px down its height), so the snow stays with the
+field when the player walks. A map load starts the task at full and prewarms it (ov5_021D7568). The hail task works
+out a move but never applies it: its sparkles stay where they appear. The `weathers` registry carries the OAM set, the
+spawners, fog, light and the darkness radius; the renderer ports each task's spawn and update
+(`packages/render/src/weather-particles.ts`) and runs one per DS screen of a wider view, clipped to it.
+
+CLEAR_8 (the Pokémon League) and CLEAR_13 put their BG (CLEAR_8: the fog BG) at priority 3, behind the 3D layer, at
+EVA 16 over the backdrop: it shows where the field's rear plane is clear, as the sky behind the League in the Vista
+Lighthouse binoculars. The dark-Flash circle is screen-space on
 the DS; the engine pins it to the player at DS scale and darkens the extra width of wide screens.
 
 Edge marking is on for field maps: `area_data.c` sets the indoor and outdoor edge tables.

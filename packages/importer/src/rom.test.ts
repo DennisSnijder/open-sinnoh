@@ -454,13 +454,20 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
   });
 
   it('decodes the weather task table: fog, particles, darkness and yearly weathers', () => {
-    const weathers = reg<{ name: string; particles?: { kind: string; count: number }; fog?: { slope: number; offset: number; densities: number[] }; darkness?: { radius: number }; yearly?: string[]; pending?: unknown }>('weathers');
+    const weathers = reg<{ name: string; particles?: { kind: string; count: number; sprites: { image: string; cells: { w: number; h: number }[]; frames: number[] }; spawner: unknown }; fog?: { slope: number; offset: number; densities: number[] }; darkness?: { radius: number }; yearly?: string[]; pending?: unknown }>('weathers');
     const w = (n: string) => weathers.get(`platinum:${n}`)!;
-    // Weather BG layers we do not import yet: CLEAR_8, SLOW_ASHFALL, CLEAR_13, 20, 23–25.
-    expect([...weathers.values()].filter((x) => x.pending).map((x) => [x.name, x.pending])).toEqual(['CLEAR_8', 'SLOW_ASHFALL', 'CLEAR_13', '20', '23', '24', '25'].map((n) => [n, ['layer']]));
+    // Weather BG layers we do not import yet: SLOW_ASHFALL, 20, 23–25.
+    expect([...weathers.values()].filter((x) => x.pending).map((x) => [x.name, x.pending])).toEqual(['SLOW_ASHFALL', '20', '23', '24', '25'].map((n) => [n, ['layer']]));
     expect(w('OVERWORLD_WEATHER_FOG').fog).toMatchObject({ slope: 6, offset: 30037 });
     expect(w('OVERWORLD_WEATHER_FOG').fog!.densities.slice(0, 3)).toEqual([0, 4, 8]);
-    expect(w('OVERWORLD_WEATHER_BLIZZARD').particles).toEqual({ kind: 'blizzard', count: 48 });
+    expect(w('OVERWORLD_WEATHER_BLIZZARD').particles).toMatchObject({ kind: 'blizzard', count: 48, spawner: { load: [10, 1], steady: [10, 1], prewarm: [20, 2, 2] } });
+    // The OAM sets (weather_sys members 61–64): heavy snow's four 8×8 flakes; rain's three streaks (32, 48 and 64 rows)
+    // and its splash, all ending 64 rows under the sprite; the snowing set shows its flakes in reverse frame order.
+    const heavy = w('OVERWORLD_WEATHER_HEAVY_SNOW').particles!.sprites;
+    expect(heavy.image).toBe('platinum:weather/sprites1.png');
+    expect(heavy.cells.map((c) => [c.w, c.h])).toEqual([[8, 8], [8, 8], [8, 8], [8, 8]]);
+    expect(w('OVERWORLD_WEATHER_RAINING').particles!.sprites.cells.map((c) => c.h)).toEqual([32, 48, 64, 8]);
+    expect(w('OVERWORLD_WEATHER_SNOWING').particles!.sprites.frames).toEqual([3, 2, 1, 0]);
     expect(w('OVERWORLD_WEATHER_DARK_FLASH').darkness).toEqual({ radius: 32 });
     expect(w('weather/24').fog!.densities.slice(0, 4)).toEqual([0x38, 0x30, 0x28, 0x20]);
     expect(w('OVERWORLD_WEATHER_ROUTE_216').yearly).toHaveLength(366);
@@ -468,7 +475,7 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
   });
 
   it('imports the weather BG layers: cloud shade, fog veil, sand and snow (Unk_ov5_021F8D90)', () => {
-    const weathers = reg<{ name: string; layer?: { image: string; scroll: [number, number]; alpha: number } }>('weathers');
+    const weathers = reg<{ name: string; layer?: { image: string; scroll: [number, number]; alpha: number; under?: true } }>('weathers');
     const layers = Object.fromEntries([...weathers.values()].filter((x) => x.layer).map((x) => [x.name, x.layer]));
     expect(layers).toEqual({
       CLOUDY: { image: 'platinum:weather/bg5.png', scroll: [0, 0], alpha: 4 / 16 },
@@ -477,8 +484,11 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
       FOG: { image: 'platinum:weather/bg6.png', scroll: [0, 0], alpha: 9 / 16 },
       DEEP_FOG: { image: 'platinum:weather/bg6.png', scroll: [0, 0], alpha: 9 / 16 },
       '21': { image: 'platinum:weather/bg0.png', scroll: [6, -6], alpha: 1 },
+      // Behind the 3D field (BG2 priority 3): the League's white sky, and CLEAR_13's BG.
+      CLEAR_8: { image: 'platinum:weather/bg6.png', scroll: [0, 0], alpha: 1, under: true },
+      CLEAR_13: { image: 'platinum:weather/bg8.png', scroll: [0, 0], alpha: 1, under: true },
     });
-    expect([...assets.keys()].filter((k) => k.startsWith('weather/')).sort()).toEqual(['weather/bg0.png', 'weather/bg1.png', 'weather/bg5.png', 'weather/bg6.png']);
+    expect([...assets.keys()].filter((k) => k.startsWith('weather/bg')).sort()).toEqual(['weather/bg0.png', 'weather/bg1.png', 'weather/bg5.png', 'weather/bg6.png', 'weather/bg8.png']);
     // The cloud and fog BGs are one flat colour: dark slate (7, 7, 8) and white.
     const pixel = (path: string) => [...decodeImage(assets.get(path)!).rgba.subarray(0, 4)];
     expect(pixel('weather/bg5.png')).toEqual([58, 58, 66, 255]);

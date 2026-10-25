@@ -18,7 +18,7 @@ import type { EnhancedPipeline } from './enhanced/pipeline.ts';
 import { FieldEffects } from './effects.ts';
 import { FeatureModels } from './gyms/index.ts';
 import { DISTORTION_FOG, DistortionProps, DistortionSky, distortionCamera } from './distortion/index.ts';
-import { WeatherOverlay } from './weather.ts';
+import { WeatherOverlay, weatherCameraScale } from './weather.ts';
 import { capFlash, FlashLimiter } from './flash.ts';
 import { billboardLight, dsVertexLight, lightAt, SHADOW_ALPHA_STEP, SHADOW_BY_PERIOD, SHADOW_SCALE_STEP, type LightTemplate } from './lighting.ts';
 import { Materials, patternAt, withTranslucentParts } from './materials.ts';
@@ -409,6 +409,8 @@ export interface RenderDebug {
   edges: boolean;
   /** Draws the field's polygon ID buffer (red = ID / 63) instead of the picture. */
   polygonIds: boolean;
+  /** The weather's 2D layers over the field (default); off lets a test find the particle pixels. */
+  weather: boolean;
   /**
    * Perf runs: each frame waits for the GPU (a one-pixel read) before `RenderStats.renderMs` times it, and the field's
    * GPU time is measured with a timer query where the browser has one (`RenderStats.gpuMs`).
@@ -574,7 +576,7 @@ class Field implements FieldRenderer {
   /** A chunk build that threw: `loading()` rethrows it, so a broken scene fails instead of loading forever. */
   private failure: Error | null = null;
   private disposed = false;
-  readonly debug: RenderDebug = { spritesOnly: false, heldTextureAnimations: [], edges: true, polygonIds: false, syncTiming: false };
+  readonly debug: RenderDebug = { spritesOnly: false, heldTextureAnimations: [], edges: true, polygonIds: false, weather: true, syncTiming: false };
   readonly stats: RenderStats = { frames: 0, renderMs: [], gpuMs: [], enhanced: null, chunks: 0, chunkBuilds: 0, doors: 0, doorsPosed: 0, geometries: 0, textures: 0, cachedModels: 0, actors: [], weather: [] };
 
   constructor(
@@ -1861,10 +1863,13 @@ class Field implements FieldRenderer {
     if (weather.pending?.length) this.reportOnce(`weather:${weather.id}`, 'render:weather', `${weather.id}: ${weather.pending.join(', ')} not decoded`);
     // A map feature's fog (Hearthome Gym's FogManager) replaces the weather's.
     // The Distortion World's fog (InitFog) fades the far field into its sky; its edges are dark gray (InitEdgeColors).
-    this.weather.update(weather, view.darkness, view.lightning ?? 0, this.state.tick, view.loads);
+    // The weather tasks move their particles with the camera target (ov5_021D7028).
+    const rec = this.cameraRecord!;
+    this.weather.update(weather, view.darkness, view.lightning ?? 0, this.state.tick, view.loads, { x: aim.x, z: aim.z, ...weatherCameraScale(rec.fovY, rec.distance + (view.cameraDistance ?? 0)) });
     this.stats.weather = this.weather.stats();
     if (dw) this.composite.configure(DISTORTION_FOG, false, { edges: this.debug.edges, ids: this.debug.polygonIds }, true);
-    else this.composite.configure(view.features?.fog ?? this.weather.fog(), zone.mapType !== 'outdoors' && zone.mapType !== 'town', { edges: this.debug.edges, ids: this.debug.polygonIds });
+    // A weather BG behind the field (CLEAR_8, CLEAR_13) shows through its clear rear plane.
+    else this.composite.configure(view.features?.fog ?? this.weather.fog(), zone.mapType !== 'outdoors' && zone.mapType !== 'town', { edges: this.debug.edges, ids: this.debug.polygonIds }, this.weather.under());
 
     // The 3D field into colour + polygon ID/fog flag + depth, then edge marking and fog to the screen,
     // then the 2D layers (weather, darkness) and the fade.
@@ -1874,11 +1879,10 @@ class Field implements FieldRenderer {
     // Enhanced post: the composite goes to the pipeline's buffer, which draws it to the screen with its effects.
     const post = enhanced && needsPost(this.enhancedConfig!) ? enhanced : null;
     if (post) post.begin();
-    else {
-      this.renderer.setRenderTarget(null);
-      this.renderer.clear();
-    }
+    else this.renderer.setRenderTarget(null);
+    this.renderer.clear();
     if (dw) this.dwSky!.draw(this.renderer, dw.sky, this.viewHeight * this.aspect, this.viewHeight);
+    else if (this.weather.under()) this.weather.drawUnder(this.renderer);
     this.composite.draw(this.renderer);
     if (view.storyScene?.kind === 'spear-field') {
       const pass = this.stories.pose(view.storyScene, this.aspect, this.lightTemplate);
@@ -1897,7 +1901,7 @@ class Field implements FieldRenderer {
         lamps: this.enhancedConfig!.lamps ? this.lampList() : [],
       });
     }
-    if (this.weather.active()) this.weather.draw(this.renderer);
+    if (this.weather.active() && this.debug.weather) this.weather.draw(this.renderer);
     if (view.storyScene?.kind === 'spear-field' && view.storyScene.brightness !== 0) {
       const white = view.storyScene.brightness > 0;
       this.fadeMaterial.color.set(white ? 0xffffff : 0x000000);

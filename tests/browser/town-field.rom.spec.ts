@@ -63,7 +63,10 @@ const press = async (button: 'a' | 'b') => {
   await page.evaluate((b) => window.openSinnohGame!.release(b), button);
   await advance(1);
 };
-/** Distinct colours and lit share of the field canvas, read in the frame it is drawn (its buffer is not preserved). */
+/**
+ * Distinct colours and lit share of the field canvas, and the black share of its top quarter (the sky), read in the
+ * frame it is drawn (its buffer is not preserved).
+ */
 const fieldStats = () => page.evaluate(async () => {
   await new Promise(requestAnimationFrame);
   await new Promise(requestAnimationFrame);
@@ -76,11 +79,14 @@ const fieldStats = () => page.evaluate(async () => {
   const px = g.getImageData(0, 0, c.width, c.height).data;
   const colours = new Set<number>();
   let lit = 0;
+  let skyDark = 0;
+  const top = c.width * Math.floor(c.height / 4);
   for (let i = 0; i < px.length; i += 4) {
     colours.add((px[i]! << 16) | (px[i + 1]! << 8) | px[i + 2]!);
     if (px[i]! + px[i + 1]! + px[i + 2]! > 60) lit++;
+    else if (i / 4 < top) skyDark++;
   }
-  return { colours: colours.size, lit: lit / (px.length / 4) };
+  return { colours: colours.size, lit: lit / (px.length / 4), skyDark: skyDark / top };
 });
 /** The field scene has loaded its map (the canvas shows it). */
 const loaded = () => expect.poll(() => page.evaluate(() => window.openSinnohApp!.sceneLoading()), { timeout: 30_000 }).toBe(false);
@@ -113,6 +119,8 @@ test('the Vista Lighthouse binoculars show the League, then the lighthouse again
   const field = await fieldStats();
   expect(field.colours).toBeGreaterThan(200);
   expect(field.lit).toBeGreaterThan(0.3);
+  // Behind the League is CLEAR_8's BG (BG2 behind the 3D, ov5_021D879C), not the black clear colour.
+  expect(field.skyDark).toBeLessThan(0.02);
   await press('a');
   await until((s) => !s.scriptRunning && s.state.player.zone === 'platinum:MAP_HEADER_VISTA_LIGHTHOUSE' && s.fade === null, 'back in the lighthouse');
   expect((await snapshot()).state.player).toMatchObject({ x: 6, z: 4, facing: 'up' });

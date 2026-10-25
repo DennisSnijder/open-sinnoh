@@ -203,7 +203,9 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   points, camera rows and the boulder puzzle follow the overlay's state machines. Room records are
   imported, not an asset. No party follower there.
 - **Weather** comes from the ROM's task table; changes without a map load fade as ov5_021D5F7C does.
-  Yearly weathers read the saved game time.
+  Yearly weathers read the saved game time. Particles are the tasks' own OAM sprites and spawn and update functions,
+  ported per kind; a view wider or taller than the DS screen runs one task per DS screen, each clipped to its screen, so
+  the density is the DS's everywhere. Fades spawn at the ramp's rate (not the DS's whole spawns per interval).
 - **Clock:** the game reads time only through `GameOptions.clock`. The app passes the device's local time;
   headless runs freeze it (2009-03-22 12:00). Two readings as on the DS: the saved `gameTime` (field time
   of day, yearly weather) and the clock itself (encounters, lights, day of week). A clock moved backwards
@@ -297,7 +299,8 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   lazy chunk, and replays and tests keep the DS look. Lighting stays the DS's: the angled camera keeps the DS view
   space for the area light. The angled camera only replaces the DS camera outdoors (towns, cities, routes) without fog:
   caves show the void past their rooms, and the fog table is indexed by the DS projection's depth. Phones draw the
-  bloom at a quarter of the pixels; lamp glows take only street lamp and window materials.
+  bloom at a quarter of the pixels; lamp glows take only street lamp and window materials. The 2D layers (weather, darkness, tints, fades) draw
+  on the screen over the post chain's output, never into its buffers.
 - **Reduce flashing** caps white overlays at 25 % and eases them; black fades are untouched. It follows
   `prefers-reduced-motion` until chosen.
 

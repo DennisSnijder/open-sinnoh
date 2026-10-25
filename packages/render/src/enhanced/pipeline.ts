@@ -261,6 +261,9 @@ export class EnhancedPipeline {
     (u.uSunset!.value as THREE.Vector3).set(...g.sunset);
     u.uSunsetAmt!.value = g.sunsetAmount;
     this.composer.render(0);
+    // EffectComposer restores the target it started on (`begin`'s buffer): the 2D layers after this (weather, darkness,
+    // tints, fades) go to the screen.
+    this.renderer.setRenderTarget(null);
   }
 
   dispose(): void {

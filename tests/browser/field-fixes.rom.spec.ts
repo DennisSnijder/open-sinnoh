@@ -1,7 +1,8 @@
 /**
  * Field fixes in the browser (OPENSINNOH_NDS_ROM; skipped without it; desktop): the Galactic HQ doors are drawn (their
  * own slab model, galactic_hq_door), Route 214's Spring Path is closed before it is found, and walking from Route 210
- * South onto rainy Route 215 fades the rain and its fog in rather than switching them on. Screenshots go to
+ * South onto rainy Route 215 fades the rain and its fog in rather than switching them on, and the rain's drops and the
+ * snow routes' flakes are drawn (the weather tasks' sprites, in the DS look and CINEMATIC). Screenshots go to
  * test-artifacts/field-fixes (gitignored: ROM content, never commit).
  */
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
@@ -25,6 +26,47 @@ interface Stats {
   weather: { id: string; phase: string; particles: number; fog: number | null }[];
 }
 const stats = () => page.evaluate(() => (globalThis as unknown as { openSinnohRenderStats: Stats }).openSinnohRenderStats);
+/**
+ * The pixels the weather's 2D layers change: the field canvas drawn with them and, with no tick between, without them
+ * (`openSinnohRenderDebug.weather`), read in the frame each is drawn (the buffer is not preserved). `bright` counts the
+ * changed pixels that are lighter than the field under them (drops and flakes, not a tint).
+ */
+const weatherPixels = () =>
+  page.evaluate(async () => {
+    const debug = (globalThis as unknown as { openSinnohRenderDebug: { weather: boolean } }).openSinnohRenderDebug;
+    const grab = async () => {
+      await new Promise(requestAnimationFrame);
+      const src = document.getElementById('main-canvas') as HTMLCanvasElement;
+      const c = document.createElement('canvas');
+      c.width = src.width;
+      c.height = src.height;
+      const g = c.getContext('2d')!;
+      g.drawImage(src, 0, 0);
+      return g.getImageData(0, 0, c.width, c.height).data;
+    };
+    const game = window.openSinnohGame!;
+    const tick = game.snapshot().tick;
+    // Two frames without the layers first: what changes between them on its own (`noise`) is not the layers'.
+    debug.weather = false;
+    const still = await grab();
+    const off = await grab();
+    debug.weather = true;
+    const on = await grab();
+    if (game.snapshot().tick !== tick) throw new Error('weatherPixels: the game ticked between the frames');
+    const diff = (a: Uint8ClampedArray, b: Uint8ClampedArray) => {
+      let changed = 0;
+      let bright = 0;
+      for (let i = 0; i < a.length; i += 4) {
+        const d = a[i]! + a[i + 1]! + a[i + 2]! - (b[i]! + b[i + 1]! + b[i + 2]!);
+        if (d !== 0) changed++;
+        if (d > 60) bright++;
+      }
+      return { changed: changed / (a.length / 4), bright: bright / (a.length / 4) };
+    };
+    return { ...diff(on, off), noise: diff(off, still).bright };
+  });
+const enhanced = (config: string | null) => page.evaluate((c) => (window as unknown as { openSinnohEnhanced: (c: string | null) => void }).openSinnohEnhanced(c), config);
+
 /** Two frames, so the renderer has drawn the current state. */
 const frames = () => page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
 
@@ -104,5 +146,37 @@ test('walking onto Route 215 fades the rain and its fog in', async () => {
   expect(particles[1]!, 'drops start few').toBeLessThan(particles.at(-1)! / 2);
   expect(rain.at(-1)!.phase).toBe('steady');
   await page.screenshot({ path: `${SHOTS}/route-215-rain.png` });
+  // The drops are drawn: light streaks over the field, not a tint over all of it.
+  const drops = await weatherPixels();
+  expect(drops.bright, 'drop pixels').toBeGreaterThan(0.0005 + 3 * drops.noise);
+  expect(drops.changed, 'only the drops change').toBeLessThan(0.05);
+  // CINEMATIC draws the field through its post chain; the weather still goes over it, to the screen.
+  await enhanced('cinematic');
+  await expect.poll(async () => ((p) => p.bright - 3 * p.noise)(await weatherPixels()), { timeout: 20_000 }).toBeGreaterThan(0.0005);
+  await page.screenshot({ path: `${SHOTS}/route-215-rain-cinematic.png` });
+  await enhanced(null);
+  expect(errors).toEqual([]);
+});
+
+test('the snow routes draw the weather tasks flakes, in the DS look and CINEMATIC', async () => {
+  test.setTimeout(120_000);
+  for (const [zone, x, z, weather] of [
+    ['ROUTE_216', 298, 402, 'platinum:OVERWORLD_WEATHER_HEAVY_SNOW'],
+    ['ROUTE_217', 299, 308, 'platinum:OVERWORLD_WEATHER_BLIZZARD'],
+  ] as const) {
+    await arrive(zone, x, z, 'down');
+    await frames();
+    const shown = (await stats()).weather;
+    expect(shown).toMatchObject([{ id: weather, phase: 'steady' }]);
+    // A map load starts the task at full (ov5_021D7568's prewarm): flakes are spread over the screen at once.
+    expect(shown[0]!.particles).toBeGreaterThan(20);
+    const flakes = await weatherPixels();
+    expect(flakes.bright, `${zone} flake pixels`).toBeGreaterThan(0.002 + 3 * flakes.noise);
+    await page.screenshot({ path: `${SHOTS}/${zone.toLowerCase()}-snow.png` });
+    await enhanced('cinematic');
+    await expect.poll(async () => ((p) => p.bright - 3 * p.noise)(await weatherPixels()), { timeout: 20_000 }).toBeGreaterThan(0.002);
+    await page.screenshot({ path: `${SHOTS}/${zone.toLowerCase()}-snow-cinematic.png` });
+    await enhanced(null);
+  }
   expect(errors).toEqual([]);
 });
