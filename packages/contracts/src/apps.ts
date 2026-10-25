@@ -510,6 +510,11 @@ export interface AppHost {
    */
   undergroundDecoration?(view: import('./underground.ts').UndergroundDecorationView | null): void;
   /**
+   * 0.45.0. The rock trap's shadow under the player (Traps_ProcessBoulder's ov5_DrawGrowingFloorTexture: the black
+   * circle at the size given, growing while the boulder falls), or null when it is gone.
+   */
+  undergroundTrapShadow?(size: number | null): void;
+  /**
    * 0.37.0. Where the player is in the Underground (UndergroundMan_AreCoordinatesInSecretBase): in their base with the
    * entrance `open` or `closed` (CommServerClient_IsInClosedSecretBase), in the corridors (`corridor`), or null off it.
    */

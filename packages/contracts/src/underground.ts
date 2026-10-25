@@ -63,12 +63,16 @@ export interface UndergroundGood {
  * tiles: the character number in bits 0–9 is the smoke's thickness 0–5, bits 10–11 its flips); the floor marks of the
  * player's own laid traps by trap id (ov5_DrawFloorTexture: fldeff 26 + trap − 1) and the hole's black circle (fldeff 25)
  * as field effects; VAR_UNDERGROUND_TRAPS_SET.
+ * 0.45.0: `emotes`, the marks over a trapped player as field effects (UndergroundPlayer_HandleEmoteDisplay): the '!'
+ * (EMOTE_EXCLAMATION, ov5_021F52E4: fldeff 23) and the OK of an escape (EMOTE_OK, ov5_021F5488: fldeff 24). The rock
+ * trap's growing shadow is `hole` too (ov5_DrawGrowingFloorTexture).
  */
 export interface UndergroundTrapTables {
   smoke: number[][];
   bigSmoke: number[];
   marks: Id[];
   hole: Id;
+  emotes: { exclamation: Id; ok: Id };
   vars: { trapsSet: Id };
 }
 
@@ -121,6 +125,21 @@ export interface UndergroundFieldView {
 
 /** Decomp MARKER_ANIM_* (top_screen.c's sprites). */
 export const UNDERGROUND_MARKER = { player: 1, base: 3, sphere: 9, trap: 11, spot: 12 } as const;
+
+/**
+ * 0.45.0. The way down and up (decomp underground_map_transition.c, `World.undergroundTransition`): 2D sprites over the
+ * field in a 256×192 DS frame centred on the view (the player at its centre), positions in DS px (the sprite's
+ * position; its cells carry their own offsets), while the player's map object is hidden. `player`: the jumping, falling
+ * or rising player (`ui2d/underground/transition_<gender>`, animation `anim` (0 the fall, 1 the spin), `frame` frames
+ * into it: Sprite_UpdateAnim's sum, fractional at the spin's speeds); `hole`: the hole opening or closing
+ * (`ui2d/underground/transition_hole`, animation `anim` 0 open, 1 close, `frame` frames in). The world's fade covers
+ * them too.
+ */
+export interface UndergroundTransitionView {
+  gender: 'male' | 'female';
+  player: { anim: number; frame: number; x: number; y: number } | null;
+  hole: { anim: number; frame: number; x: number; y: number } | null;
+}
 
 /**
  * 0.33.0. What the Underground asks the game to open (World `undergroundRequest`), after an A press or X on its field:

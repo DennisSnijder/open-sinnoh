@@ -28,7 +28,15 @@ const OFFSETS: [RegExp, Vec3][] = [
   [/^RADAR_GRASS_/, [0, 0, 1]],
   // ov5_021F4E08.c: the Underground's floor marks at (x·16 + 9, z·16) less (0.5, 1, −5): 0.5 east, 3 north of the centre.
   [/^UG_FLOOR_/, [0.5, 0, -3]],
+  // ov5_021F5284.c / ov5_021F5428.c: the '!' and OK over an Underground player at its position, z −10, then up 25 and z −5.
+  [/^UG_EMOTE_/, [0, 25, -15]],
 ];
+/**
+ * Squares turned to face the camera, as the DS draws them (the Underground's '!' and OK: rotated 90° about X, then by
+ * the inverse camera matrix).
+ */
+const FACING_CAMERA = /^UG_EMOTE_/;
+const STAND_UP = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
 /**
  * Flat models drawn at their own height over the anchor (the object position), as the DS draws them: the berry soil
  * (berry_patch_effects.c, 2 units up) lies over the plot the map draws 0.5 units over the ground, and at the lift of
@@ -111,14 +119,17 @@ export class FieldEffects {
     for (const m of i.materials) m.dispose();
   }
 
-  /** `light`: the colour of a billboard under the area light (lighting.ts billboardLight); model effects are lit as meshes. */
-  update(effects: readonly EffectView[], alpha: number, light: THREE.Color): void {
+  /**
+   * `light`: the colour of a billboard under the area light (lighting.ts billboardLight); model effects are lit as meshes.
+   * `camera`: the placed camera, which the camera-facing models turn to.
+   */
+  update(effects: readonly EffectView[], alpha: number, light: THREE.Color, camera: THREE.Camera): void {
     const seen = new Set<number>();
     for (const e of effects) {
       seen.add(e.key);
       if (!this.live.has(e.key)) this.create(e);
       const inst = this.live.get(e.key);
-      if (inst) this.place(inst, e, alpha);
+      if (inst) this.place(inst, e, alpha, camera);
       if (inst?.sprite) (inst.object as THREE.Sprite).material.color.copy(light);
     }
     for (const [key, inst] of this.live) {
@@ -222,7 +233,7 @@ export class FieldEffects {
     return { frames, total: frames.reduce((n, f) => n + f.ticks, 0) };
   }
 
-  private place(inst: Instance, e: EffectView, alpha: number): void {
+  private place(inst: Instance, e: EffectView, alpha: number, camera: THREE.Camera): void {
     const name = inst.effect.name;
     const p = lerp(e.prev, e.cur, alpha);
     const offset = OFFSETS.find(([re]) => re.test(name))?.[1];
@@ -241,9 +252,11 @@ export class FieldEffects {
       return;
     }
     if (name === 'SURF_BLOB' && !e.rotation) p.y += surfBob(e.tick);
-    inst.object.position.set(p.x, p.y + (e.rotation ? 0 : inst.lift), p.z);
+    const facingCamera = FACING_CAMERA.test(name);
+    inst.object.position.set(p.x, p.y + (e.rotation || facingCamera ? 0 : inst.lift), p.z);
     inst.object.scale.setScalar(e.scale ?? 1);
-    if (e.rotation) inst.object.rotation.set(...e.rotation.map(v => v * Math.PI / 180) as [number, number, number], 'ZYX');
+    if (facingCamera) inst.object.quaternion.copy(camera.quaternion).multiply(STAND_UP);
+    else if (e.rotation) inst.object.rotation.set(...e.rotation.map(v => v * Math.PI / 180) as [number, number, number], 'ZYX');
     else if (ROTATED.test(name) && e.facing) inst.object.rotation.set(0, (YAW[e.facing] * Math.PI) / 180, 0);
     if (FADES.test(name)) for (const m of inst.materials) m.opacity = fadeAlpha(e.tick);
     if (inst.joint) {
