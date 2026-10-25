@@ -463,7 +463,7 @@ export function castleScreen(ctx: MenuContext, request: CastleRequest): Screen {
       panel: panelOf(),
       playerName: player,
       cp: t.message(`${SELF}CastlePoints`, String(cp()).padStart(4, ' ')),
-      mons: mons.map((m, i) => ({ species: m.species, form: m.form, gender: monGender(dex, m), shiny: isShiny(m.otId, m.pid), level: m.level, hp: m.hp, maxHp: m.stats.hp, item: m.heldItem !== null, hidden: !self && !unlocked.identity[i] })),
+      mons: mons.map((m, i) => ({ species: m.species, form: m.form, gender: monGender(dex, m), shiny: isShiny(m.otId, m.pid), level: m.level, hp: m.hp, maxHp: m.stats.hp, item: m.heldItem !== null, hidden: !self && !unlocked.identity[i], ...(self ? {} : { flags: { stats: unlocked.stats[i] === true, moves: unlocked.moves[i] === true } }) })),
       cursor,
       exit: msg('Exit'),
       menu: mode.k === 'menu' ? { window: mode.menu.window, entries: mode.menu.entries.map((e) => ({ label: e.label, enabled: e.enabled })), cursor: mode.menu.cursor } : null,

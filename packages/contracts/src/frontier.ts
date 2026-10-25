@@ -345,6 +345,11 @@ export interface FrontierTables {
   shadow: Id;
   /** 0.43.0. The scenes' effect art; absent without 2D art. */
   effects?: FrontierEffectsArt;
+  /**
+   * 0.45.0. The records app's BG2 (decomp frontier/records/main.c LoadMainBackground: battle_frontier_records_app over
+   * frontier_records_app's two palettes); absent without 2D art.
+   */
+  recordsArt?: Id;
   /** Decomp sBattleFrontierBanlist: species no facility accepts. */
   banlist: Id[];
   /** Decomp Shop_GetItemBPPrice (overlay 7): the exchange counters' BP prices. */
@@ -452,6 +457,49 @@ export interface FrontierView {
   spritesOnTop?: true;
   /** 0.43.0. A Frontier Brain's cut-in, over the room and under the fade. */
   brainCutIn?: FrontierBrainCutInView;
+  /** 0.45.0. A facility's pre-battle wipe while it runs (decomp FrontierScrCmd_3F types 1–4), under the fade. */
+  wipe?: FrontierWipeView;
+}
+
+/**
+ * 0.45.0. The pre-battle wipes (decomp Unk_ov104_0223F65C):
+ * - `blocks` (the Hall's ov104_022311BC, the Arcade's ov104_022312D8): black rects (screen px) filled on BG1 over the
+ *   whole room, growing in 32 × 16 (Hall) or 16 × 32 (Arcade) steps.
+ * - `lines` (the Factory's ov104_02231720, the Castle's ov104_02231864): BG2 and BG3 drawn line by line from an H-blank
+ *   table of affine reference points (one per pair of lines, 96): line pair i shows the layer's row `rows[i].y` from
+ *   column `rows[i].x` (BG px, either may be off the layer: transparent there), for BG2 (`fg`) and BG3 (`bg`) apart;
+ *   the characters stay where they are; `bgHidden` once BG3 is switched off at the end.
+ */
+export type FrontierWipeView =
+  | { kind: 'blocks'; rects: { x: number; y: number; w: number; h: number }[] }
+  | { kind: 'lines'; bg: { x: number; y: number }[]; fg: { x: number; y: number }[]; bgHidden: boolean };
+
+/** 0.45.0. Decomp FACILITY_TOWER … FACILITY_ARCADE (constants/battle_frontier.h). */
+export const FRONTIER_FACILITY = { tower: 1, factory: 2, factoryOpen: 3, castle: 4, hall: 5, arcade: 6 } as const;
+
+/**
+ * 0.45.0. Opens the Frontier's record viewer (decomp FieldSystem_OpenBattleFrontierRecord, FrontierRecordsAppArgs):
+ * `facility` a `FRONTIER_FACILITY`, `challengeType` a `FRONTIER_CHALLENGE`, `species` the Hall record's Pokémon (the
+ * Hall only).
+ */
+export interface FrontierRecordsRequest {
+  app: 'frontier-records';
+  facility: number;
+  challengeType: number;
+  species: Id | null;
+}
+
+/**
+ * 0.45.0. The record viewer (decomp frontier/records/main.c, windows.c), one DS frame per tick: BG2 the facility's
+ * records art (`FrontierTables.recordsArt`) and the lines in the system font (colours 1/2) at screen px, `align`ed on x
+ * as PrintMessage does (`centre`: x − (width + 1) / 2; `right`: x − width); `black` the brightness fade (0 shown … 16
+ * black). A or B (or a tap, `back`) leaves.
+ */
+export interface FrontierRecordsView {
+  app: 'frontier-records';
+  bg: Id | null;
+  lines: { text: string; x: number; y: number; align: 'left' | 'centre' | 'right' }[];
+  black: number;
 }
 
 /** A frontier trainer in a battle (decomp FrontierTrainer, FieldBattleDTO_InitFrontierTrainer). */
@@ -750,6 +798,11 @@ export interface CastleMonView {
   maxHp: number;
   item: boolean;
   hidden: boolean;
+  /**
+   * 0.45.0. The opponent app's flags (decomp UpdateFlagSprites, ANIM_ID_FLAG): the stats (`stats`) and moves (`moves`)
+   * bought for this slot; absent on the player's app.
+   */
+  flags?: { stats: boolean; moves: boolean };
 }
 
 /**

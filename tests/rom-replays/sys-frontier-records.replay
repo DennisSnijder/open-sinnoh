@@ -1,0 +1,66 @@
+from sys-hall-single.replay
+# sys-frontier-records (scripts_battle_frontier_records.s, frontier/records/main.c): after the Hall singles challenge
+# (Garchomp's record 1), the Hall's record machine: "Which record?", SINGLE, no streak on, so "Which Pokémon's
+# record?", the letter groups (GHI), the record list (ShowBattleHallRecordMonSelectionMenu: the species with a singles
+# record, then EXIT), Garchomp: the records app (FACILITY_HALL) with its record, B back to the list, which keeps its
+# place; EXIT, the letters' EXIT, CANCEL.
+warp platinum:MAP_HEADER_BATTLE_HALL 7 9 up
+until idle
++0 press a
++1 release a
+until menu 600
+# SINGLE
++5 press a
++1 release a
+advance text 600
+until menu 600
+# GHI (the third letter group)
++5 press down
++1 release down
++2 press down
++1 release down
++2 press a
++1 release a
+until menu 600
++5 screenshot records-list
+# Garchomp (the list's first)
++2 press a
++1 release a
+until app frontier-records 600
++30 screenshot records-hall
++0 press b
++1 release b
+until app none 300
+advance text 600
+until menu 600
+# EXIT (the list's second)
++5 press down
++1 release down
++2 press a
++1 release a
+until menu 600
+# The letters' EXIT (the tenth; the list kept GHI)
++5 press down
++1 release down
++2 press down
++1 release down
++2 press down
++1 release down
++2 press down
++1 release down
++2 press down
++1 release down
++2 press down
++1 release down
++2 press down
++1 release down
++2 press a
++1 release a
+until menu 600
+# CANCEL (the challenge types' fourth)
++5 press up
++1 release up
++2 press a
++1 release a
+until idle 600
++0 assert map platinum:MAP_HEADER_BATTLE_HALL

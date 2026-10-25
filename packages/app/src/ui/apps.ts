@@ -29,7 +29,7 @@ import { contestDance } from './contest-dance.ts';
 import { contestPhoto, galleryDressUp, galleryPhoto } from './contest-visual.ts';
 import { capsuleEditor } from './capsule.ts';
 import { slots } from './slots.ts';
-import { arcadeApp, castleApp, factoryApp, hallBoard } from './frontier.ts';
+import { arcadeApp, frontierRecords, castleApp, factoryApp, hallBoard } from './frontier.ts';
 import { credits, hallOfFame } from './hall-of-fame.ts';
 import { icon, type IconName } from './icons.ts';
 import { party } from './party.ts';
@@ -208,6 +208,8 @@ export function drawApp(d: DrawContext, v: AppView): Drawn {
       return { kind: 'scene', root: castleApp(d, v) };
     case 'arcade':
       return { kind: 'scene', root: arcadeApp(d, v) };
+    case 'frontier-records':
+      return { kind: 'scene', root: frontierRecords(d, v) };
   }
 }
 

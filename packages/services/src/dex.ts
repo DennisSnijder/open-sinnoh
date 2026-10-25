@@ -80,3 +80,18 @@ export function cardStars(state: GameState, registries: Registries): number {
   if (FLAG_CONTEST_MASTERS.some((f) => systemFlag(state, registries, f))) stars++;
   return stars;
 }
+
+/** The nine name groups of the A–Z lists (decomp zukan_data members 18–26: ABC … YZ). */
+export const NAME_GROUP_LETTERS = ['ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQR', 'STU', 'VWX', 'YZ'] as const;
+
+/**
+ * A name group's species, A–Z (decomp zukan_data members 18–26, which the Battle Hall's record list reads): the
+ * national list whose names start with the group's letters, the names compared by code unit, ties by number.
+ */
+export function nameGroupSpecies(registries: Registries, group: number): Species[] {
+  const letters = NAME_GROUP_LETTERS[group];
+  if (!letters) throw new Error(`dex: name group ${group}`);
+  return dexList(registries, true)
+    .filter((s) => letters.includes(s.name.charAt(0).toUpperCase()))
+    .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : a.sourceIndex! - b.sourceIndex!));
+}

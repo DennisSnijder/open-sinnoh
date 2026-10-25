@@ -148,6 +148,8 @@ export type AppRequest =
   | import('./frontier.ts').CastleRequest
   /** 0.39.0. The Battle Arcade's game board (decomp battle_arcade/main.c). Result `arcade`. */
   | import('./frontier.ts').ArcadeRequest
+  /** 0.45.0. The Frontier's record viewer (decomp ScrCmd_OpenFrontierRecordsApp → frontier/records/main.c). Result `frontier-records`. */
+  | import('./frontier.ts').FrontierRecordsRequest
   /**
    * 0.12.0. The battle bag (decomp battle_bag.c, BattleBag_Init): the bag's items grouped by their
    * `battlePocket` bits into HP/PP, status, Poké Balls and battle items. A medicine asks for a party
@@ -387,6 +389,8 @@ export type AppResult =
   | { app: 'castle'; party: Pokemon[]; opponents: Pokemon[]; unlocked: import('./frontier.ts').CastleUnlocks; slot: number }
   /** 0.39.0. The board's effect (ARCADE_EFFECT_*), its cursor and the random number the app drew (decomp randomIndex). */
   | { app: 'arcade'; effect: number; cursor: number; random: number }
+  /** 0.45.0. */
+  | { app: 'frontier-records' }
   | { app: 'storage' }
   | { app: 'pokedex-entry' }
   | { app: 'naming'; name: string | null }
@@ -603,7 +607,8 @@ export type AppView =
   | import('./frontier.ts').HallBoardView
   | import('./slots.ts').SlotsView
   | import('./frontier.ts').CastleView
-  | import('./frontier.ts').ArcadeView;
+  | import('./frontier.ts').ArcadeView
+  | import('./frontier.ts').FrontierRecordsView;
 export type AppName = AppView['app'];
 
 /**

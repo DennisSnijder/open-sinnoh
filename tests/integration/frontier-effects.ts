@@ -39,3 +39,14 @@ export async function sampleFrontier(file: string): Promise<Sampled> {
   expect(result.ok).toBe(true);
   return { game, log, views, bgm };
 }
+
+/** Runs of consecutive views with a pre-battle wipe (FrontierScrCmd_3F): one per battle. */
+export function wipeRuns(views: FrontierView[]): FrontierView[][] {
+  const runs: FrontierView[][] = [];
+  views.forEach((v, i) => {
+    if (!v.wipe) return;
+    if (!views[i - 1]?.wipe) runs.push([]);
+    runs.at(-1)!.push(v);
+  });
+  return runs;
+}
