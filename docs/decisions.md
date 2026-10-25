@@ -364,6 +364,13 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   DS frame a tick. A script plays only when everything its static walk reaches is implemented; otherwise
   the battle keeps the generic hit and logs it. Choreography is an independent approximation, not a
   pixel-exact reproduction.
+- **The last nine move animations** follow the decomp's functions: BG2 holding a battler's picture
+  (LoadPokemonSpriteIntoBg) is a view of its own (`AnimView.bgMon`: the picture, the layer's offsets, its HBlank lines,
+  blend, priority and window 0), Surf's and Muddy Water's waves are a background in BG2 (`AnimBgView.custom`), and
+  StartBattlerSlideIn mode 0 is the decomp's picture swap (`picture` on battlers and copies), not a slide. Blends draw
+  as BG2's or the OBJ's EVA alone, as the other translucent effects do. Spite's darkening of BG2's palette is not done:
+  the script loads the picture's palette over it. Substitute's doll (mode 2) is not in the packs; it keeps its slide.
+  Transform's swapped picture lasts to the animation's end only: the battle view does not keep it.
 - **The shiny sparkle** is common animation 11 (`shiny`) on the animation VM, played once a shiny Pokémon is in place
   (wild after its slide-in, a send-out after the flash and any capsule seals), before the healthbox slides in. The DS
   runs it beside the healthbox and plays a doubles pair's at once; we play them in turn. Like the DS
@@ -480,9 +487,9 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
 - **Contest move animations** run on the battle animation VM in its contest mode (`AnimDeps.contest`) through
   `AppHost.contestAnimation`, loaded with the battle engine's chunk; the contest app does not tick until it is in, so
   a run with animations never differs from one that loaded late. The sprite callbacks with a contest branch
-  (StringShot, Trick, Taunt, Fissure) follow the decomp in both modes, so a contest misses only what a battle misses
-  (the nine moves battles miss too: Surf, Muddy Water, Night Shade, Transform, Role Play, and the BG-layer Pokémon of
-  Acid Armor, Sketch, Spite and Extrasensory; logged and counted).
+  (StringShot, Trick, Taunt, Fissure) follow the decomp in both modes, and every move script plays in a contest. The
+  acting screen draws the performer's sprite copies and BG2 too; a picture of the hidden target (BG2 in Sketch, Spite
+  and Extrasensory, Role Play's copy) shows that Pokémon as the DS loads it.
 - **The dancers wear their outfits** (decomp ov17_0224A134: each dancer is its dress-up record, drawn without the
   backdrop and scaled, turned and shaded about the Pokémon's centre): the visual round's outfits in a full contest, none
   in the Dance Competition alone (sub_02095338 clears them). The acting round draws the battle back picture, as the DS
@@ -543,6 +550,12 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   slide, the hole and the altered steps are the field's. The microphone traps take held A or a held touch as
   a fixed blow. The escape games' rolls (bubbles, leaves, the smoke's pattern) take the visit's mining
   generator, as the DS's CommSys_Seed does; the smoke's pattern is LCRNG on the DS.
+- **Underground drawn details:** the '!' and OK over the player are the Underground's own fldeff models (23, 24),
+  turned to the camera, not the field's emote; the rock trap's shadow is the floor circle the trap screen grows through
+  `AppHost.undergroundTrapShadow`, since the screen is an app over a field that does not step. The slide needs nothing
+  drawn of its own: the held frame (LOCK_DIR, PAUSE_ANIMATION) is the DS's pose. The way down and up are 2D sprites in
+  a DS frame centred on the view, as Fly's cut-in; the fall and the rise keep the time they spend on the DS's other
+  screen without drawing it.
 - **Secret base:** Platinum has one base layout (every base chunk is the same room). Solo, the base is drawn
   in chunk (0, 0) with the entrance closed and (1, 0) with it open, as the DS's alone mode does; a loaded
   save in a base knows which by the chunk. Flags come only from other players' bases, so the solo base keeps

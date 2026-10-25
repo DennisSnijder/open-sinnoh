@@ -4,7 +4,7 @@ OpenSinnoh is in beta. Pokémon Platinum (US, rev 0) plays from a new game throu
 Fame and the credits, and on into the post-game. What's next is in [ROADMAP.md](ROADMAP.md); the design
 decisions are in [docs/decisions.md](docs/decisions.md).
 
-Versions: contracts 0.44.0, importer `platinum-107`, HeartGold follower add-on `hgss-followers-4`.
+Versions: contracts 0.45.0, importer `platinum-108`, HeartGold follower add-on `hgss-followers-4`.
 
 ## Works
 
@@ -19,8 +19,8 @@ Versions: contracts 0.44.0, importer `platinum-107`, HeartGold follower add-on `
   implemented are logged once and counted by `pnpm opensinnoh coverage`.
 - **Battles:** wild, trainer, double, multi and tag battles on @pkmn/sim with the ROM's data, the ported
   trainer AI, catching, the bag, switching, move learning, evolution, prize money and the blackout; the DS
-  battle scene and touch card; the ROM's move animations (all but nine moves play for real; those use a logged
-  fallback) and the shiny sparkle.
+  battle scene and touch card; the ROM's move animations (every move, in battles and in the contests' acting round) and
+  the shiny sparkle.
 - **Menus:** the start menu, party, summary, bag, PC storage, Pokédex, trainer card, naming keyboard, marts,
   the Pokémon Center, the Pokétch (25 apps), Mystery Gift, the Day Care and eggs, the Hall of Fame and credits.
 - **Side and post-game systems:** berries, move tutors, the move relearner and deleter, NPC trades, honey

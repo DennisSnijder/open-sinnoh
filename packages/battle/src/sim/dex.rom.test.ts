@@ -82,10 +82,10 @@ describe.skipIf(!ROM)('ROM battle data in the sim (OPENSINNOH_NDS_ROM)', () => {
     expect(data.item(P('ITEM_EVERSTONE'))).toBe('');
   });
 
-  it('reports how each move animates: the 468 entries less MOVE_NONE, at least 90 % of them real', () => {
+  it('reports how each move animates: the 468 entries less MOVE_NONE, every one real', () => {
     const anims = moveAnimations(reg);
     expect(anims.size).toBe(467);
     const real = [...anims.values()].filter((a) => a === 'real').length;
-    expect(real / anims.size).toBeGreaterThanOrEqual(0.9);
+    expect(real).toBe(anims.size);
   });
 });

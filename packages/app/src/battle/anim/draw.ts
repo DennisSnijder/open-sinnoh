@@ -7,7 +7,7 @@
  * - battler changes (offset, scale, rotation, hiding, palette fade, translucency) through `battlerTransform`;
  * - the backdrop's fade and scroll through `bgEffect`.
  */
-import type { AnimBattlerView, AnimParticle, AnimView, Ui2dSheet } from '@opensinnoh/contracts';
+import type { AnimBattlerView, AnimBgMonView, AnimParticle, AnimView, Ui2dSheet } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
 
 type Img = CanvasImageSource & { width: number; height: number };
@@ -134,4 +134,53 @@ export function fadeImage(g: CanvasRenderingContext2D, w: number, h: number, fad
   g.fillRect(0, 0, w, h);
   g.globalAlpha = 1;
   g.globalCompositeOperation = 'source-over';
+}
+
+/**
+ * The OBJ mosaic on an image drawn at (0, 0) of `g` (G2_SetOBJMosaicSize): every `size`×`size` block takes the colour
+ * of its top-left pixel.
+ */
+export function mosaicImage(g: CanvasRenderingContext2D, w: number, h: number, size: number): void {
+  if (size <= 1) return;
+  const img = g.getImageData(0, 0, w, h);
+  const d = img.data;
+  for (let y = 0; y < h; y++)
+    for (let x = 0; x < w; x++) {
+      const from = ((y - (y % size)) * w + (x - (x % size))) * 4;
+      const to = (y * w + x) * 4;
+      for (let c = 0; c < 4; c++) d[to + c] = d[from + c]!;
+    }
+  g.putImageData(img, 0, 0);
+}
+
+const mod = (v: number, m: number) => ((v % m) + m) % m;
+
+/**
+ * BG2 holding a battler's picture (`AnimBgMonView`): `pic` is the 80×80 picture (faded as the view says), drawn on the
+ * 512×512 wrapping layer at its offsets, line by line where an HBlank scroll moves it, at its weight and inside its
+ * window. DS px → canvas by `k` from `origin`; only the DS screen's 192 lines are drawn.
+ */
+export function drawBgMon(ctx: CanvasRenderingContext2D, pic: CanvasImageSource, m: AnimBgMonView, origin: { x: number; y: number }, k: number): void {
+  if (m.alpha <= 0) return;
+  ctx.save();
+  ctx.globalAlpha *= m.alpha;
+  if (m.window) {
+    ctx.beginPath();
+    ctx.rect(origin.x + m.window.x0 * k, origin.y + m.window.y0 * k, Math.max(0, m.window.x1 - m.window.x0) * k, Math.max(0, m.window.y1 - m.window.y0) * k);
+    ctx.clip();
+  }
+  const row = (sy: number, ox: number, oy: number, rows: number) => {
+    const ly = mod(sy + oy, 512);
+    if (ly >= 80) return;
+    const n = Math.min(rows, 80 - ly);
+    const left = mod(-ox, 512);
+    for (const x of [left, left - 512]) ctx.drawImage(pic, 0, ly, 80, n, origin.x + x * k, origin.y + sy * k, 80 * k, n * k);
+  };
+  if (m.lines) m.lines.forEach(([ox, oy], sy) => row(sy, ox, oy, 1));
+  else {
+    // One offset for every line: the picture's top row on the screen (or above it, cut by the screen's top).
+    const top = mod(-m.y, 512);
+    for (const t of [top, top - 512]) if (t > -80 && t < 192) row(Math.max(0, t), m.x, m.y, 80 - Math.max(0, -t));
+  }
+  ctx.restore();
 }

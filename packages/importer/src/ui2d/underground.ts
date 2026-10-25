@@ -19,6 +19,11 @@
  *   cells and animations: SpriteTransfer_ReplaceCharData), the smoke's BG characters with their palette
  *   `underground/trap_smoke` (cells named by character number) and the smoke patterns (NSCR 11–14 and the big one, 8),
  *   returned as data: the first 32×24 entries (Graphics_LoadTilemapToBgLayer's 32 × 24 × 2 bytes).
+ * - The way down and up (/data/ugeffect_obj_graphic.narc, res/graphics/underground_map_transition; the templates in
+ *   /data/ugroundeffect.narc): the player by gender `underground/transition_male` (lucas NCGR 0, NCLR 1) and
+ *   `underground/transition_female` (dawn NCGR 2, NCLR 3), with the player cells (NCER 5) and animations (NANR 4); the
+ *   hole `underground/transition_hole` (NCGR 8, NCER 7, NANR 6) in the player's shared palette, Lucas's here (the hole's
+ *   colours are the same in Dawn's).
  */
 import type { MiningObject } from '@opensinnoh/contracts';
 import { readNarc, type NitroFs } from '@opensinnoh/nds';
@@ -49,6 +54,8 @@ const TRAP = {
   smokeTiles: { ncgr: 9, nclr: 10, count: 9 },
   smoke: [11, 12, 13, 14],
 };
+/** res/graphics/underground_map_transition/underground_map_transition.order: the members by name. */
+const TRANSITION = { path: '/data/ugeffect_obj_graphic.narc', count: 9, male: { ncgr: 0, nclr: 1 }, female: { ncgr: 2, nclr: 3 }, player: { nanr: 4, ncer: 5 }, hole: { nanr: 6, ncer: 7, ncgr: 8 } };
 /** BG_LAYER_MAIN_2's 32 × 24 tiles. */
 const SMOKE_TILES = 32 * 24;
 /** CRACK_START_TILEMAP_INDEX_ROW_1..4 (column 25 of rows 0–3) and MINING_BASE_TILE_CRACK_ROW_1..4. */
@@ -153,6 +160,10 @@ export function importUndergroundArt(fs: NitroFs, sheets: Sheets, miningObjects:
     sheets.image('underground/radar_map', crop({ width: s.width, height: s.height, rgba: renderScreen(s, readNcgr(radar[1]!), ramRadar) }, 0, 0, 256, 192));
   }
   sheets.obj('underground/radar_markers', radar, { ncgr: 4, ncer: 5, nanr: 6, nclr: 3 });
+
+  const transition = narcOf(fs, TRANSITION.path, TRANSITION.count);
+  for (const gender of ['male', 'female'] as const) sheets.obj(`underground/transition_${gender}`, transition, { ...TRANSITION[gender], ...TRANSITION.player });
+  sheets.obj('underground/transition_hole', transition, { ...TRANSITION.hole, nclr: TRANSITION.male.nclr });
 }
 
 /** The objects sheet's cell for a table entry and shine step. */

@@ -1,9 +1,10 @@
 /**
- * Move animations in the app on the real ROM (OPENSINNOH_NDS_ROM; skipped without it): the five proof
- * moves (Tackle, Ember, Water Gun, Thunder Shock, Growl), each in a wild battle
- * on Route 202 from a Piplup that knows the move. While the animation plays, its particles are drawn
- * where the decomp puts them (the defender, or the attacker for Growl): the scene with the animation's
- * particles differs from the same frame without them, most of all around that battler.
+ * Move animations in the app on the real ROM (OPENSINNOH_NDS_ROM; skipped without it): proof moves, each in a wild
+ * battle on Route 202 from a Piplup that knows the move. While the animation plays, its particles (or cells, sprite
+ * copies, battler changes, BG2) are drawn where the decomp puts them (the defender, the attacker, a fixed spot): the
+ * scene with them differs from the same frame without them, most of all around that place. The last nine moves are
+ * among them: Surf's wave, Muddy Water's wave layer, Night Shade's shadow, Transform's mosaic, Role Play's copy beside
+ * the attacker, and the BG2 pictures of Acid Armor (the attacker), Sketch, Spite and Extrasensory (the defender).
  * A Ball Capsule's seals at the player's send-out are drawn around the player's Pokémon (docs/research/seals.md §6),
  * and so is a shiny lead's sparkle (common animation `shiny`).
  * With OPENSINNOH_ANIM_SHOTS set, frame strips of each animation go there (ROM content, never commit).
@@ -50,17 +51,24 @@ test.afterAll(async () => {
   await page?.close();
 });
 
-/** A wild battle on Route 202 (as m2-switch) with Piplup L10 knowing `move` in slot 1; the animation is captured at `screenshot anim`. */
-const replay = (move: string) => `party 0 platinum:SPECIES_PIPLUP 10
+/**
+ * A wild battle on Route 202 (as m2-switch) with Piplup L10 knowing `move` in slot 1; the animation is captured at
+ * `screenshot anim`. `opts.wild`: walk until that species appears (a move a Bidoof is immune to); `opts.late`: Growl
+ * first, the move on the second turn (a move that fails before the foe has moved); `opts.auto`: the slot the rest of
+ * the battle fights with (Transform leaves the foe's moves).
+ */
+const replay = (move: string, opts: { wild?: string; late?: boolean; auto?: number } = {}) => `party 0 platinum:SPECIES_PIPLUP 10
 set state party[0].moves[0] "platinum:${move}"
 set state party[0].pp[0] 10
+set state party[0].moves[1] "platinum:MOVE_GROWL"
+set state party[0].pp[1] 10
 set var platinum:VAR_ROUTE_202_STATE 1
 warp platinum:MAP_HEADER_ROUTE_202 178 827 up
 until idle
-${'+0 press up\n+30 release up\n+0 press down\n+30 release down\n'.repeat(8)}until battle 900
-+0 battle move 1
+${opts.wild ? `until wild platinum:${opts.wild} up down 30000\n` : '+0 press up\n+30 release up\n+0 press down\n+30 release down\n'.repeat(8)}until battle 900
+${opts.late ? '+0 battle move 2\nuntil battle 3000\n' : ''}+0 battle move 1
 +0 screenshot anim
-battle auto 9000
+battle auto ${opts.auto ? `move ${opts.auto} ` : ''}9000
 `;
 
 const battleView = () => page.evaluate(() => window.openSinnohGame!.battleView()) as Promise<BattleView | null>;
@@ -69,7 +77,7 @@ const battleView = () => page.evaluate(() => window.openSinnohGame!.battleView()
  * The scene pixels (device px of the scene's rect) and the same frame drawn without the animation's
  * effect layer: the count of changed pixels and their centre in DS px.
  */
-async function animationDiff(kind: 'particles' | 'sprites' | 'battlers' | 'send-out'): Promise<{ changed: number; x: number; y: number }> {
+async function animationDiff(kind: Kind | 'send-out'): Promise<{ changed: number; x: number; y: number }> {
   return page.evaluate(async (kind) => {
     const app = window.openSinnohApp!;
     const grab = () => {
@@ -92,7 +100,17 @@ async function animationDiff(kind: 'particles' | 'sprites' | 'battlers' | 'send-
     battle.view = () => {
       const v = view();
       if (kind === 'send-out') return { ...v, sendOut: [] };
-      return { ...v, anim: v.anim && { ...v.anim, ...(kind === 'particles' ? { particles: [] } : kind === 'sprites' ? { sprites: v.anim.sprites.filter((s) => s.kind !== 'cell') } : { battlers: [] }) } };
+      if (!v.anim) return v;
+      if (kind === 'bg') {
+        const anim = { ...v.anim, bg: { ...v.anim.bg } };
+        delete anim.bgMon;
+        delete anim.bg.custom;
+        return { ...v, anim };
+      }
+      if (kind === 'particles') return { ...v, anim: { ...v.anim, particles: [] } };
+      if (kind === 'sprites') return { ...v, anim: { ...v.anim, sprites: v.anim.sprites.filter((s) => s.kind !== 'cell') } };
+      if (kind === 'copies') return { ...v, anim: { ...v.anim, sprites: v.anim.sprites.filter((s) => s.kind !== 'pokemon') } };
+      return { ...v, anim: { ...v.anim, battlers: [] } };
     };
     await frame();
     const b = grab();
@@ -139,13 +157,29 @@ async function saveStrip(name: string): Promise<void> {
 }
 
 /**
- * DS px centres of the battlers' sprites (scene.ts POS, decomp battle_display.c) and how near the particles must be;
- * `centre` is a fixed screen spot (BattleAnimSpriteFunc_Taunt puts its hand at TAUNT_SPRITE_HAND_0_POS_X/Y, 128, 80,
- * whichever side the defender is on).
+ * What a proof compares: the frame against the same frame without the animation's particles, its OAM cells (`sprites`),
+ * its copies of the battlers' sprites (`copies`), its changes to the battlers (`battlers`) or BG2 (`bg`: a battler's
+ * picture loaded into it, or a wave).
  */
-const AT = { player: { x: 64, y: 112 }, enemy: { x: 192, y: 48 }, centre: { x: 128, y: 80 } };
+type Kind = 'particles' | 'sprites' | 'copies' | 'battlers' | 'bg';
 
-const PROOF: { move: string; near: 'player' | 'enemy' | 'centre'; min: number; kind?: 'sprites' | 'battlers' }[] = [
+/**
+ * DS px centres of the battlers' sprites (scene.ts POS, decomp battle_display.c) and how near the effect must be;
+ * `centre` is a fixed screen spot (BattleAnimSpriteFunc_Taunt puts its hand at TAUNT_SPRITE_HAND_0_POS_X/Y, 128, 80,
+ * whichever side the defender is on), `screen` the screen's middle (a wave over the whole layer), `wave` Surf's wave
+ * sprite (SURF_PLAYER_SIDE_X/Y, 76, 120, before its ground anchoring lifts it) and `beside` Role Play's copy
+ * (ROLE_PLAY_ATTACKER_X_OFFSET: 32 px toward the attacker's side of the player's Pokémon).
+ */
+const AT = {
+  player: { x: 64, y: 112 },
+  enemy: { x: 192, y: 48 },
+  centre: { x: 128, y: 80 },
+  screen: { x: 128, y: 96 },
+  wave: { x: 76, y: 104 },
+  beside: { x: 32, y: 112 },
+};
+
+const PROOF: { move: string; near: keyof typeof AT; min: number; kind?: Exclude<Kind, 'particles'>; opts?: Parameters<typeof replay>[1] }[] = [
   { move: 'MOVE_TACKLE', near: 'enemy', min: 40 },
   { move: 'MOVE_EMBER', near: 'enemy', min: 60 },
   { move: 'MOVE_WATER_GUN', near: 'enemy', min: 60 },
@@ -157,17 +191,28 @@ const PROOF: { move: string; near: 'player' | 'enemy' | 'centre'; min: number; k
   { move: 'MOVE_FAKE_OUT', near: 'enemy', min: 40, kind: 'sprites' },
   { move: 'MOVE_DIG', near: 'player', min: 40, kind: 'battlers' },
   { move: 'MOVE_CAMOUFLAGE', near: 'player', min: 40, kind: 'battlers' },
+  { move: 'MOVE_SURF', near: 'wave', min: 40, kind: 'sprites' },
+  { move: 'MOVE_MUDDY_WATER', near: 'screen', min: 400, kind: 'bg' },
+  { move: 'MOVE_NIGHT_SHADE', near: 'player', min: 40, kind: 'copies', opts: { wild: 'SPECIES_SHINX' } },
+  { move: 'MOVE_TRANSFORM', near: 'player', min: 40, kind: 'copies', opts: { auto: 1 } },
+  { move: 'MOVE_ROLE_PLAY', near: 'beside', min: 40, kind: 'copies' },
+  { move: 'MOVE_ACID_ARMOR', near: 'player', min: 40, kind: 'bg' },
+  { move: 'MOVE_SKETCH', near: 'enemy', min: 40, kind: 'bg', opts: { late: true } },
+  { move: 'MOVE_SPITE', near: 'enemy', min: 40, kind: 'bg', opts: { late: true } },
+  { move: 'MOVE_EXTRASENSORY', near: 'enemy', min: 40, kind: 'bg' },
 ];
 
+const NEAR = { player: 'attacker', enemy: 'defender', centre: 'screen centre', screen: 'whole screen', wave: "attacker's wave", beside: "attacker's side" } as const;
+
 for (const proof of PROOF) {
-  test(`${proof.move}: the ROM animation plays, its ${proof.kind ?? 'particles'} drawn at the ${proof.near === 'enemy' ? 'defender' : proof.near === 'player' ? 'attacker' : 'screen centre'}`, async () => {
+  test(`${proof.move}: the ROM animation plays, its ${proof.kind ?? 'particles'} drawn at the ${NEAR[proof.near]}`, async () => {
     test.setTimeout(300_000);
     const project = test.info().project.name;
     let best = { changed: 0, x: 0, y: 0 };
     let ticks = 0;
     const strip = { frames: 0 };
     const driver = pageDriver(page, SHOTS ?? 'test-artifacts/battle-anim', `${project}-${proof.move}`);
-    const result = await runReplay(driver, replay(proof.move), {
+    const result = await runReplay(driver, replay(proof.move, proof.opts), {
       registries,
       name: `${proof.move}.replay`,
       seed: 1,
@@ -189,7 +234,14 @@ for (const proof of PROOF) {
             await stripFrame(strip);
           }
           // Every third frame with visible effects is enough to find the busiest one.
-          const visible = proof.kind === 'sprites' ? v.anim.sprites.some((s) => s.kind === 'cell') : proof.kind === 'battlers' || v.anim.particles.length > 0;
+          const visible =
+            proof.kind === 'sprites'
+              ? v.anim.sprites.some((s) => s.kind === 'cell')
+              : proof.kind === 'copies'
+                ? v.anim.sprites.some((s) => s.kind === 'pokemon')
+                : proof.kind === 'bg'
+                  ? !!(v.anim.bgMon || v.anim.bg.custom)
+                  : proof.kind === 'battlers' || v.anim.particles.length > 0;
           if (visible && ticks % (proof.kind ? 8 : 3) === 0) {
             // The effect's atlas loads when first drawn: wait for it, or a slow load leaves every sample bare.
             await waitForScene(page);

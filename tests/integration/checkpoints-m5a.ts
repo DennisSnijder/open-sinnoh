@@ -57,7 +57,6 @@ const STUBS: Record<string, Record<string, readonly number[]>> = {
   'cp6.replay': {
     'evolution:records': ALL,
     'anim:cry-mod:9': ALL,
-    'anim:platinum:MOVE_SPITE': [1, 2],
     'battle:protocol:-curestatus|P|psn|[msg]': [1],
     'battle:protocol:-formechange|P|Cherrim-Sunshine|[msg]|[from] ability: Flower Gift': [1, 2],
   },
@@ -69,17 +68,13 @@ const STUBS: Record<string, Record<string, readonly number[]>> = {
   'cp9.replay': {
   },
   'cp10.replay': {
-    'anim:platinum:MOVE_NIGHT_SHADE': [1, 3],
   },
   'cp11.replay': {
-    'anim:platinum:MOVE_SURF': ALL,
     'stub:turn_on_pokedex_form_detection': ALL,
   },
   'cp12.replay': {
-    'anim:platinum:MOVE_SURF': ALL,
   },
   'cp13.replay': {
-    'anim:platinum:MOVE_SURF': ALL,
   },
   'm5-cheryl-detach.replay': {},
   'm5-eterna-egg-declined.replay': {},
@@ -91,24 +86,20 @@ const STUBS: Record<string, Record<string, readonly number[]>> = {
   // M5b branches.
   'm5-rival-pastoria-turtwig.replay': {},
   'm5-valor-lakefront-chimchar.replay': {},
-  'm5-canalave-chimchar.replay': { 'anim:platinum:MOVE_SURF': ALL, 'stub:turn_on_pokedex_form_detection': ALL },
+  'm5-canalave-chimchar.replay': { 'stub:turn_on_pokedex_form_detection': ALL },
   'm5-library-lucas.replay': {},
-  'm5-lake-verity-lucas.replay': { 'anim:cry-mod:9': ALL, 'anim:platinum:MOVE_SURF': ALL },
+  'm5-lake-verity-lucas.replay': { 'anim:cry-mod:9': ALL },
   'm5-lake-acuity-turtwig.replay': {},
-  'm5-tag-riley.replay': { 'anim:platinum:MOVE_SURF': ALL },
+  'm5-tag-riley.replay': {},
   // M5c (docs/research/story-cp5-19.md §"Stub allowlist (M5c)").
   'cp14.replay': {
-    'anim:platinum:MOVE_NIGHT_SHADE': [2],
-    'anim:platinum:MOVE_SURF': ALL,
   },
   'm5-galactic-hq-chimchar.replay': {},
   'm5-spear-pillar-chimchar.replay': {},
   'cp15-dw-cyrus.replay': {
-    'anim:platinum:MOVE_EXTRASENSORY': ALL,
-    'anim:platinum:MOVE_SURF': ALL,
     'battle:wild-flee': ALL,
   },
-  'cp15-giratina-room.replay': { 'anim:platinum:MOVE_SURF': ALL },
+  'cp15-giratina-room.replay': {},
   'cp15.replay': {
     'battle:wild-flee': ALL,
   },
@@ -116,58 +107,41 @@ const STUBS: Record<string, Record<string, readonly number[]>> = {
   'm5-giratina-caught.replay': {},
   'm5-giratina-fled.replay': {},
   'cp16.replay': {
-    'anim:platinum:MOVE_SURF': ALL,
     'battle:wild-flee': ALL,
   },
   'cp17.replay': {
     'anim:cry-mod:9': [1, 2],
-    'anim:platinum:MOVE_SURF': ALL,
     'battle:wild-flee': ALL,
   },
   'cp18.replay': {
-    'anim:platinum:MOVE_SURF': ALL,
   },
   'cp19.replay': {
-    'anim:platinum:MOVE_SURF': [1, 3],
   },
   // M6 (docs/research/story-cp20-24.md §"Stub allowlist").
   'cp20.replay': {
-    'anim:platinum:MOVE_SURF': ALL,
     'battle:wild-flee': ALL,
   },
   'cp21a.replay': {
-    'anim:platinum:MOVE_EXTRASENSORY': [2],
-    'anim:platinum:MOVE_SURF': ALL,
   },
   'cp21b.replay': {
-    'anim:platinum:MOVE_SURF': ALL,
   },
   'cp21c.replay': {
-    'anim:platinum:MOVE_SURF': ALL,
   },
   'cp21d.replay': {
-    'anim:platinum:MOVE_SURF': ALL,
   },
   'cp21e.replay': {
-    'anim:platinum:MOVE_SURF': ALL,
   },
   'cp21f.replay': {
-    'anim:platinum:MOVE_SURF': ALL,
   },
   'cp22.replay': {
-    'anim:platinum:MOVE_EXTRASENSORY': [3],
-    'anim:platinum:MOVE_SURF': ALL,
     'battle:wild-flee': ALL,
   },
   'cp23a.replay': {
-    'anim:platinum:MOVE_SURF': ALL,
   },
   'cp23b.replay': {
-    'anim:platinum:MOVE_SURF': ALL,
     'battle:wild-flee': ALL,
   },
   'cp24.replay': {
-    'anim:platinum:MOVE_SURF': ALL,
     'battle:wild-flee': ALL,
   },
 };

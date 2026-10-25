@@ -7,6 +7,7 @@
  * - the alerts: 30 ticks, then the player is free (escaped);
  * - the escape games (core `SmokeGame`, `BubbleGame`, `BoulderGame`, `LeafGame`, `FlameGame`), after 30 ticks and their
  *   tutorial ("Remove the Trap by touch!" / "Blow the Trap away!", erased 60 ticks later), the field dimmed (−4).
+ * The rock trap's shadow grows on the field under the player until the boulder lands (`AppHost.undergroundTrapShadow`).
  * The microphone is held A or a held touch here (`blow:on`/`blow:off`): a sample of 100 (the DS's signed 8-bit).
  * Rolls (the bubbles, the leaves, the smoke's pattern) take the visit's generator (`AppHost.undergroundMiningRand`:
  * CommSys_Seed's; the smoke's pattern is LCRNG_Next's on the DS).
@@ -52,11 +53,13 @@ const DEBRIS = [
   [120, -11, 2, 0],
 ] as const;
 const DEBRIS_BY_STAGE = [1, 3, 6, 10, 14];
+/** ov5_DrawGrowingFloorTexture(…, 5, …) and ov5_021F4F8C: the shadow's float grows by 0.2 a frame while under 5. */
+const SHADOW = { size: 5, growth: 0.2 };
 
 type Game =
   | { kind: 'smoke'; game: SmokeGame; hiss: number }
   | { kind: 'bubble'; game: BubbleGame; pops: Map<number, number> }
-  | { kind: 'rock'; game: BoulderGame; debris: { x: number; y: number; dx: number; dy: number }[] }
+  | { kind: 'rock'; game: BoulderGame; debris: { x: number; y: number; dx: number; dy: number }[]; shadow: number | null }
   | { kind: 'leaf'; game: LeafGame }
   | { kind: 'fire'; game: FlameGame };
 
@@ -99,7 +102,8 @@ export function undergroundTrapScreen(ctx: MenuContext, trap: number): Screen {
         return { kind: 'bubble', game: new BubbleGame(effect.foam, rand()), pops: new Map() };
       case 'rock':
         se(SE.shadow);
-        return { kind: 'rock', game: new BoulderGame(effect.fall), debris: [] };
+        ctx.host.undergroundTrapShadow?.(0);
+        return { kind: 'rock', game: new BoulderGame(effect.fall), debris: [], shadow: 0 };
       case 'leaf':
         return { kind: 'leaf', game: new LeafGame(effect.flower, rand()) };
       case 'fire':
@@ -134,6 +138,11 @@ export function undergroundTrapScreen(ctx: MenuContext, trap: number): Screen {
         return false;
       case 'rock': {
         const event = g.game.step();
+        if (g.shadow !== null) {
+          // Traps_ProcessBoulder: the shadow goes as the boulder lands.
+          g.shadow = event === 'landed' ? null : g.shadow < SHADOW.size ? Math.fround(g.shadow + SHADOW.growth) : g.shadow;
+          ctx.host.undergroundTrapShadow?.(g.shadow);
+        }
         if (event === 'landed') se(SE.land);
         if (event === 'collapsed') se(SE.collapse);
         if (g.game.phase === 'debris') {
