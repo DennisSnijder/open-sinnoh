@@ -388,12 +388,25 @@ const weather = obj(
     id,
     sourceIndex,
     name: str(/^[A-Za-z0-9_]+$/),
-    particles: opt(obj({ kind: lit('rain', 'heavy-rain', 'thunder', 'snow', 'heavy-snow', 'blizzard', 'ash', 'sand', 'hail', 'spirits', 'diamond-dust'), count: int(1) })),
+    particles: opt(
+      obj({
+        kind: lit('rain', 'heavy-rain', 'thunder', 'snow', 'heavy-snow', 'blizzard', 'ash', 'sand', 'hail', 'spirits', 'diamond-dust'),
+        count: int(1),
+        sprites: obj(
+          { image: ref('assets'), cells: arr(obj({ x: int(0), y: int(0), w: int(1), h: int(1), ox: int(), oy: int() })), frames: arr(int(0)) },
+          (v) => {
+            const bad = (v.frames as number[]).find((f) => f >= (v.cells as unknown[]).length);
+            return bad === undefined ? undefined : `sprites.frames names cell ${bad} of ${(v.cells as unknown[]).length}`;
+          },
+        ),
+        spawner: obj({ load: tuple(int(1), int(0)), steady: tuple(int(1), int(0)), prewarm: tuple(int(1), int(1), int(0)) }),
+      }),
+    ),
     fog: opt(obj({ slope: int(0, 10), offset: int(0, 0x7fff), color: rgb, alpha: int(0, 31), densities: arr(int(0, 127)) }, (v) => ((v.densities as unknown[]).length === 32 ? undefined : `fog.densities has ${(v.densities as unknown[]).length} entries, expected 32`))),
     light: opt(ref('lights')),
     darkness: opt(obj({ radius: num })),
     yearly: opt(arr(ref('weathers'))),
-    layer: opt(obj({ image: ref('assets'), scroll: tuple(int(), int()), alpha: num }, (v) => ((v.alpha as number) > 0 && (v.alpha as number) <= 1 ? undefined : `layer.alpha ${String(v.alpha)} is not in (0, 1]`))),
+    layer: opt(obj({ image: ref('assets'), scroll: tuple(int(), int()), alpha: num, under: opt(bool) }, (v) => ((v.alpha as number) > 0 && (v.alpha as number) <= 1 ? undefined : `layer.alpha ${String(v.alpha)} is not in (0, 1]`))),
     fade: opt(
       obj({
         particles: opt(obj({ in: arr(num), out: arr(num) })),

@@ -336,6 +336,20 @@ mkdirSync(join(OUT, 'ui2d/evolution'), { recursive: true });
   writeFileSync(join(OUT, 'ui2d/evolution/particles.png'), encodePng(8, 8, rgba));
 }
 
+// ---------- weather sprites (original): a 1×16 drop, a 4×2 splash and a 3×3 flake ----------
+mkdirSync(join(OUT, 'weather'), { recursive: true });
+{
+  const rgba = new Uint8Array(16 * 16 * 4);
+  for (let y = 0; y < 16; y++) rgba.set([160, 190, 230, 255], (y * 16) * 4);
+  for (let x = 2; x < 6; x++) for (let y = 0; y < 2; y++) rgba.set([200, 220, 240, 255], (y * 16 + x) * 4);
+  for (let x = 8; x < 11; x++) for (let y = 0; y < 3; y++) rgba.set([255, 255, 255, 255], (y * 16 + x) * 4);
+  writeFileSync(join(OUT, 'weather/sprites.png'), encodePng(16, 16, rgba));
+}
+const weatherSprites = (cells: { x: number; y: number; w: number; h: number; ox: number; oy: number }[], frames: number[]) => ({ image: id('weather/sprites.png'), cells, frames });
+const DROP = { x: 0, y: 0, w: 1, h: 16, ox: 0, oy: -48 };
+const SPLASH = { x: 2, y: 0, w: 4, h: 2, ox: 2, oy: -62 };
+const FLAKE = { x: 8, y: 0, w: 3, h: 3, ox: 1, oy: 1 };
+
 // ---------- sprites: 16 frames of 32×32; per direction [stand, step-left, stand, step-right] ----------
 const DIRS = ['down', 'up', 'left', 'right'] as const;
 function spriteAtlas(name: string, body: [number, number, number], head: [number, number, number]) {
@@ -834,8 +848,8 @@ const data = {
       fog: { slope: 5, offset: 0x7c00, color: [0.8, 0.8, 0.85], alpha: 31, densities: Array.from({ length: 32 }, (_, i) => Math.min(127, i * 4)) },
     },
     { id: id('OVERWORLD_WEATHER_DARK_FLASH'), sourceIndex: 16, name: 'DARK_FLASH', darkness: { radius: 32 } },
-    { id: id('OVERWORLD_WEATHER_RAINING'), sourceIndex: 2, name: 'RAINING', particles: { kind: 'rain', count: 16 } },
-    { id: id('OVERWORLD_WEATHER_SNOWING'), sourceIndex: 5, name: 'SNOWING', particles: { kind: 'snow', count: 16 } },
+    { id: id('OVERWORLD_WEATHER_RAINING'), sourceIndex: 2, name: 'RAINING', particles: { kind: 'rain', count: 16, sprites: weatherSprites([DROP, SPLASH], [0, 0, 0, 1]), spawner: { load: [4, 0], steady: [4, 0], prewarm: [20, 10, 1] } } },
+    { id: id('OVERWORLD_WEATHER_SNOWING'), sourceIndex: 5, name: 'SNOWING', particles: { kind: 'snow', count: 16, sprites: weatherSprites([FLAKE], [0, 0, 0, 0]), spawner: { load: [1, 14], steady: [1, 14], prewarm: [20, 2, 24] } } },
     // A yearly weather (366 days from Jan 1, Feb 29 = day 59): snow until Feb 28, rain on Feb 29, then clear.
     {
       id: id('OVERWORLD_WEATHER_SNOWPOINT_CITY'),

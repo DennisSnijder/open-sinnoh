@@ -898,7 +898,49 @@
    "name": "RAINING",
    "particles": {
     "kind": "rain",
-    "count": 16
+    "count": 16,
+    "sprites": {
+     "image": "fixture:weather/sprites.png",
+     "cells": [
+      {
+       "x": 0,
+       "y": 0,
+       "w": 1,
+       "h": 16,
+       "ox": 0,
+       "oy": -48
+      },
+      {
+       "x": 2,
+       "y": 0,
+       "w": 4,
+       "h": 2,
+       "ox": 2,
+       "oy": -62
+      }
+     ],
+     "frames": [
+      0,
+      0,
+      0,
+      1
+     ]
+    },
+    "spawner": {
+     "load": [
+      4,
+      0
+     ],
+     "steady": [
+      4,
+      0
+     ],
+     "prewarm": [
+      20,
+      10,
+      1
+     ]
+    }
    }
   },
   {
@@ -907,7 +949,41 @@
    "name": "SNOWING",
    "particles": {
     "kind": "snow",
-    "count": 16
+    "count": 16,
+    "sprites": {
+     "image": "fixture:weather/sprites.png",
+     "cells": [
+      {
+       "x": 8,
+       "y": 0,
+       "w": 3,
+       "h": 3,
+       "ox": 1,
+       "oy": 1
+      }
+     ],
+     "frames": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "spawner": {
+     "load": [
+      1,
+      14
+     ],
+     "steady": [
+      1,
+      14
+     ],
+     "prewarm": [
+      20,
+      2,
+      24
+     ]
+    }
    }
   },
   {
