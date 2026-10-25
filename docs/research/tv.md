@@ -100,9 +100,13 @@ segment's check), the question (`TVInterview_LoadMessage`), the word, `SaveTVInt
 - One stream: the DS's MTRNG and LCRNG draws are both the game's main stream, in the DS's order. The Seal Club's unused
   MTRNG draw is not made (the capsule editor has no stream).
 - The slots' record counts the minutes the slot app ran (the DS: real seconds / 60).
+- The traps record (TrapsEnv_Free → sub_0206DEEC: ten or more traps dug up in one visit, the first's kind) counts the
+  traps whose setter is not the player (Traps_ProcessDisengagedTrap). Alone, the day's hidden traps live in the buried
+  trap slots past the players' (Traps_SpawnRandomTrap: `(MAX_CONNECTED_PLAYERS + index / MAX_PLACED_TRAPS) *
+  MAX_PLACED_TRAPS`), so Traps_GetBuriedTrapSetterNetID gives them a setter of 8 or more, never the player's net id 0:
+  each one dug up counts, the player's own laid traps do not. That is what OpenSinnoh records, on the way up.
 - Not recorded: Love That Group Corner (groups are not built), Capture the Flag Digest and the GTS count (link-only),
-  the traps record (the DS counts traps others set; the solo Underground's spawned traps have no setter), the Battle
-  Frontier multi partner interview (a link partner's name; never eligible offline). Discovering Groups (Sinnoh Now)
+  the Battle Frontier multi partner interview (a link partner's name; never eligible offline). Discovering Groups (Sinnoh Now)
   needs a group, so it never airs.
 - The Variety Hour's random move can be the DS's move −1 (a draw of 0); the first move name bank entry stands in.
 

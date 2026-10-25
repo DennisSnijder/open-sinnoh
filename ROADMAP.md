@@ -59,11 +59,13 @@ the trainer card, the Pokédex, the Town Map and Fly, all 25 Pokétch apps, opti
   board, one Pokémon, Argenta, the species records and the record keeper), singles and doubles.
 - The Battle Castle (Castle Points, healing and rentals, scouting the opponent, ranks, Darach) and the Battle Arcade
   (the game board and its effects, Dahlia), singles and doubles.
+- The Frontier's record viewer (every facility, the Hall's record list by species), the Castle's flags for bought
+  stats and moves, and each facility's own pre-battle wipe.
 - Mystery Gift with gift codes.
 
-**Town extras.** Seals and Ball Capsules with the editor and the battle send-out effect; the Game Corner's slots,
-coins and prizes; the Villa and its visitors; the journal; the diplomas; the TV (its schedule, the recorded
-segments, the interviews) and the Jubilife TV gallery; small NPC rules (Hidden Power, the News
+**Town extras.** Seals and Ball Capsules with the editor, its Test throw and the battle send-out effect; the Game
+Corner's slots, coins and prizes; the Villa and its visitors; the journal; the diplomas; the TV (its schedule, the
+recorded segments, the traps record, the interviews) and the Jubilife TV gallery; small NPC rules (Hidden Power, the News
 Press, the Spiritomb counter, Deoxys's meteorites, the department store regular, field poison); the Vs. Seeker's task and
 rematches, Dr. Footstep, the Solaceon Ruins' Unown inscriptions, the Vista Lighthouse binoculars; the step and egg
 records.
@@ -92,11 +94,9 @@ Pokémon, follower talk and the HGSS look.
 
 ## Next
 
-- **Battle Frontier:** the records app; the Castle app's flag marks for bought stats and moves; the Factory, Hall,
-  Castle and Arcade pre-battle wipes (FrontierScrCmd_3F types 1–5, drawn as the Tower's).
 - **Underground:** the placed traps' and tools' drawn details (the slide's sprite pose, the rock's floor shadow, the
   OK emote), the transition's hole and descent animations.
-- **Town extras:** the TV's traps record (and its group segments, once groups exist); the capsule editor's Test throw.
+- **Town extras:** the TV's group segments, once groups exist.
 - **Polish:** the last move animations (nine, VM-wide).
 - **Modding 1.0:** script eject to TypeScript, a mod sandbox, mod docs, and Gen 4 extension points (3D model
   replacement, mod Pokétch apps, camera hooks).
