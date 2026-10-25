@@ -2,8 +2,9 @@
  * The Underground in the app on the real ROM (OPENSINNOH_NDS_ROM; desktop and phone): down into the Underground with the Explorer
  * Kit, its menu, mining a wall and a trap vendor's shop, through `window.openSinnohGame` (tests/rom-replays
  * sys-underground-enter, sys-underground-dig, sys-underground-vendor). At each screenshot line
- * the screen is checked: the field is lit with the radar card; the menu, the prompt and the shop are ROM-framed windows
- * on the board; the mining game is one whole-pixel DS stage in the viewport with ROM art on its canvas.
+ * the screen is checked: the way down draws its ROM sprites down the middle of the view (the hole and the jumping player
+ * on the surface, the falling player below); the field is lit with the radar card; the menu, the prompt and the shop are
+ * ROM-framed windows on the board; the mining game is one whole-pixel DS stage in the viewport with ROM art on its canvas.
  * Screenshots go to test-artifacts (ROM content, never commit).
  */
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
@@ -74,6 +75,35 @@ async function field(name: string) {
   expect(await page.evaluate(() => window.openSinnohApp!.game.world.undergroundView() !== null), name).toBe(true);
 }
 
+/**
+ * The overlay canvas's middle column (the transition's sprites stand on it; the radar card stays in the left half):
+ * its opaque pixels and colours.
+ */
+function overlayMiddle() {
+  return page.evaluate(() => {
+    const src = document.getElementById('overlay-canvas') as HTMLCanvasElement;
+    const px = src.getContext('2d')!.getImageData(Math.round(src.width / 2) - 2, 0, 4, src.height).data;
+    const colours = new Set<number>();
+    let opaque = 0;
+    for (let i = 0; i < px.length; i += 4) {
+      if (px[i + 3] === 0) continue;
+      opaque++;
+      colours.add((px[i]! << 16) | (px[i + 1]! << 8) | px[i + 2]!);
+    }
+    return { opaque, colours: colours.size };
+  });
+}
+
+/** The way down: the transition's sprites (`World.undergroundTransition`) drawn over the field. */
+async function transition(name: string, parts: ('player' | 'hole')[]) {
+  const view = await page.evaluate(() => window.openSinnohApp!.game.world.undergroundTransition());
+  expect(view, name).not.toBeNull();
+  for (const part of ['player', 'hole'] as const) expect(view![part] !== null, `${name}: ${part}`).toBe(parts.includes(part));
+  // The sheets load on their first draw.
+  await expect.poll(async () => (await overlayMiddle()).colours, { message: `${name}: sprite colours`, timeout: 20_000 }).toBeGreaterThan(4);
+  expect((await overlayMiddle()).opaque, `${name}: sprites drawn`).toBeGreaterThan(parts.includes('hole') ? 100 : 20);
+}
+
 /** A board of ROM-framed windows (the Underground's frame) over the field. */
 async function windows(root: string, name: string) {
   await page.waitForSelector(`${root} .window.rom-frame`, { timeout: 20_000 });
@@ -81,6 +111,8 @@ async function windows(root: string, name: string) {
 }
 
 const CHECKS: Record<string, (name: string) => Promise<void>> = {
+  'ug-hole': (name) => transition(name, ['player', 'hole']),
+  'ug-fall': (name) => transition(name, ['player']),
   'ug-field': field,
   async 'ug-menu'(name) {
     expect((await app())?.app, name).toBe('ug-menu');
@@ -108,7 +140,7 @@ const KIND: Record<string, string> = { 'mining-board': 'mining', 'mining-dig': '
 
 /** Each replay's own screenshot lines (a `from` parent runs without its screenshots). */
 const FILES: Record<string, string[]> = {
-  'sys-underground-enter': ['ug-field', 'ug-menu'],
+  'sys-underground-enter': ['ug-hole', 'ug-fall', 'ug-field', 'ug-menu'],
   'sys-underground-dig': ['mining-prompt', 'mining-board', 'mining-dig', 'mining-items'],
   'sys-underground-vendor': ['ug-vendor', 'ug-vendor-buy'],
 };

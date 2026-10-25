@@ -15,7 +15,10 @@ until state player.zone "platinum:MAP_HEADER_ETERNA_CITY"
 until idle
 +0 press y
 +1 release y
+# The jump into the opening hole (underground_map_transition.c), then the fall onto the Underground's field.
++10 screenshot ug-hole
 until state player.zone "platinum:MAP_HEADER_UNDERGROUND"
++32 screenshot ug-fall
 until message
 # Roark's intro: ten pages that wait, the last one then WaitABPress (no replay wait: A once it has printed).
 until message

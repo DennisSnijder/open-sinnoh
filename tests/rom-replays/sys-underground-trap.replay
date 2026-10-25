@@ -29,6 +29,8 @@ until state app.game "leaf"
 +0 press a
 until app none
 +0 release a
+# Free: the OK over the player for 60 ticks.
++2 screenshot trap-ok
 until idle
 # The Move Up Trap, laid south and stepped on: the slide north ends against the wall (z 261).
 +0 press x

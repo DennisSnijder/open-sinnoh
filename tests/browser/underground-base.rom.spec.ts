@@ -3,7 +3,8 @@
  * `window.openSinnohGame` (tests/rom-replays sys-underground-base, sys-underground-trap). At each screenshot line the
  * screen is checked: the drill's prompt and the PC are ROM-framed windows on the board over the lit field; the
  * decoration shows the base's goods as props from the room's centre; while a good is placed the floor takes touches
- * (a touch on the room's middle picks a room tile); a trap's screen is one DS canvas with ROM art over the field.
+ * (a touch on the room's middle picks a room tile); a trap's screen is one DS canvas with ROM art over the field, the '!'
+ * over the player under it, and the OK over the player once free.
  * Screenshots go to test-artifacts (ROM content, never commit).
  */
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
@@ -67,6 +68,9 @@ async function windows(root: string, name: string) {
 /** The props the world draws in the base (FieldView.props): the PC, the boulders and the goods out. */
 const baseProps = () => page.evaluate(() => (window.openSinnohApp!.game.world.view().props ?? []).filter((p) => p.key.startsWith('ug-good-')).length);
 
+/** The marks over the player (FieldView.effects: the '!' or OK). */
+const emotes = () => page.evaluate(() => window.openSinnohApp!.game.world.view().effects.filter((e) => e.effect.includes('UG_EMOTE')).map((e) => e.effect));
+
 const CHECKS: Record<string, (name: string) => Promise<void>> = {
   async drill(name) {
     expect((await app())?.app, name).toBe('ug-base');
@@ -112,13 +116,19 @@ const CHECKS: Record<string, (name: string) => Promise<void>> = {
     await lit(name);
     await expect.poll(async () => (await canvasStats(page, '.ug-trap .ug-trap-canvas')).colours, { timeout: 20_000 }).toBeGreaterThan(3);
     expect(await page.locator('.ug-trap.is-dim').count(), `${name}: dimmed`).toBe(1);
+    expect(await emotes(), `${name}: the '!'`).toEqual(['platinum:FIELD_EFFECT_UG_EMOTE_EXCLAMATION']);
+  },
+  async 'trap-ok'(name) {
+    expect(await app(), name).toBeNull();
+    await lit(name);
+    expect(await emotes(), `${name}: the OK`).toEqual(['platinum:FIELD_EFFECT_UG_EMOTE_OK']);
   },
 };
 
 /** Each replay's own screenshot lines (a `from` parent runs without its screenshots). */
 const FILES: Record<string, string[]> = {
   'sys-underground-base': ['drill', 'pc', 'decoration', 'placing'],
-  'sys-underground-trap': ['leaf-trap'],
+  'sys-underground-trap': ['leaf-trap', 'trap-ok'],
 };
 
 for (const [file, shots] of Object.entries(FILES)) {
