@@ -10,6 +10,7 @@
 import type { FrontierActorView, FrontierObjectView, FrontierSceneData, FrontierTables, FrontierView, Movement, Ui2dAnimation } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
 import type { BrainCutIn, FrontierParticles } from './effects.ts';
+import type { BlockWipe, LineLayer, LineWipe } from './wipes.ts';
 
 /** Decomp DIR_NORTH..DIR_EAST, the 2D objects' directions. */
 const DIRS = ['up', 'down', 'left', 'right'] as const;
@@ -313,6 +314,8 @@ export class FrontierScene {
   readonly icons = new Map<string, NonNullable<FrontierView['icons']>[number]>();
   /** A Frontier Brain's cut-in while it runs (FrontierScrCmd_PlayFrontierBrainEncounterEffect), with its view. */
   brainCutIn: { effect: BrainCutIn; view: () => NonNullable<FrontierView['brainCutIn']> | null } | null = null;
+  /** A facility's pre-battle wipe while FrontierScrCmd_3F runs it. */
+  wipe: BlockWipe | LineWipe | null = null;
   /** BattleCastleBattleRoomSceneSetup: BG0 (the particles) and BG2 at the sprites' priority, so under them. */
   spritesOnTop = false;
   /**
@@ -461,6 +464,21 @@ export class FrontierScene {
 
   fadeDone(): boolean {
     return this.fade.anim === null;
+  }
+
+  /** Decomp SetScreenColorBrightness(…, COLOR_BLACK): the screen black at once. */
+  blackOut(): void {
+    this.fade = { color: 'black', alpha: 1, anim: null };
+  }
+
+  /**
+   * BG3's and BG2's places for the line wipes: a layer that follows the camera has its tilemap moved by whole tiles and
+   * its X offset the rest (ov63_0222D378); BG2 on its own scroll (`fgFixed`) keeps its map and has that scroll's X.
+   */
+  lineLayers(): { bg: LineLayer; fg: LineLayer } {
+    const fine = (n: number) => n % 8;
+    const bg: LineLayer = { origin: { x: this.camera.x - fine(this.camera.x), y: this.camera.y - fine(this.camera.y) }, offset: fine(this.camera.x) };
+    return { bg, fg: this.data.fgFixed ? { origin: { x: 0, y: 0 }, offset: this.fgScroll.x } : bg };
   }
 
   /** The screen's fade now (a new scene starts from it). */
@@ -639,6 +657,7 @@ export class FrontierScene {
       ...(this.particles.drawn.length ? { particles: this.particles.drawn } : {}),
       ...(this.spritesOnTop ? { spritesOnTop: true as const } : {}),
       ...(cutIn ? { brainCutIn: cutIn } : {}),
+      ...(this.wipe ? { wipe: this.wipe.view() } : {}),
     };
   }
 }

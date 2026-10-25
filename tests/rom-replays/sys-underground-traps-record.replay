@@ -1,0 +1,137 @@
+from sys-underground-hole.replay
+# sys-underground-traps-record (traps.c Traps_ProcessDisengagedTrap, TrapsEnv_Free; tv_segment.c sub_0206DEEC): ten of
+# the day's hidden traps dug up with A in one visit (their slots lie past the players', so the solo game counts them as
+# someone else's); going up makes the TV's traps record: the first trap's kind and the count.
+# Setup: ten hidden traps beside the row the player came along (a Bubble Trap first, then Move Up Traps): each stop
+# east digs north and south.
+set state underground.spawnedTraps[0] {"trap":23,"x":314,"z":340}
+set state underground.spawnedTraps[1] {"trap":1,"x":314,"z":342}
+set state underground.spawnedTraps[2] {"trap":1,"x":315,"z":340}
+set state underground.spawnedTraps[3] {"trap":1,"x":315,"z":342}
+set state underground.spawnedTraps[4] {"trap":1,"x":316,"z":340}
+set state underground.spawnedTraps[5] {"trap":1,"x":316,"z":342}
+set state underground.spawnedTraps[6] {"trap":1,"x":317,"z":340}
+set state underground.spawnedTraps[7] {"trap":1,"x":317,"z":342}
+set state underground.spawnedTraps[8] {"trap":1,"x":318,"z":340}
+set state underground.spawnedTraps[9] {"trap":1,"x":318,"z":342}
+until idle
++0 assert state tv.records [null,null,null,null]
++0 press right
+until position 314 341 120
++0 release right
+until idle
++2 press up
++1 release up
+until idle
++0 assert facing player up
++2 press a
++1 release a
+advance text 300
+until idle 300
++0 assert state underground.spawnedTraps[0] null
++2 press down
++1 release down
+until idle
++0 assert facing player down
++2 press a
++1 release a
+advance text 300
+until idle 300
++0 assert state underground.spawnedTraps[1] null
++0 press right
+until position 315 341 120
++0 release right
+until idle
++2 press up
++1 release up
+until idle
++0 assert facing player up
++2 press a
++1 release a
+advance text 300
+until idle 300
++0 assert state underground.spawnedTraps[2] null
++2 press down
++1 release down
+until idle
++0 assert facing player down
++2 press a
++1 release a
+advance text 300
+until idle 300
++0 assert state underground.spawnedTraps[3] null
++0 press right
+until position 316 341 120
++0 release right
+until idle
++2 press up
++1 release up
+until idle
++0 assert facing player up
++2 press a
++1 release a
+advance text 300
+until idle 300
++0 assert state underground.spawnedTraps[4] null
++2 press down
++1 release down
+until idle
++0 assert facing player down
++2 press a
++1 release a
+advance text 300
+until idle 300
++0 assert state underground.spawnedTraps[5] null
++0 press right
+until position 317 341 120
++0 release right
+until idle
++2 press up
++1 release up
+until idle
++0 assert facing player up
++2 press a
++1 release a
+advance text 300
+until idle 300
++0 assert state underground.spawnedTraps[6] null
++2 press down
++1 release down
+until idle
++0 assert facing player down
++2 press a
++1 release a
+advance text 300
+until idle 300
++0 assert state underground.spawnedTraps[7] null
++0 press right
+until position 318 341 120
++0 release right
+until idle
++2 press up
++1 release up
+until idle
++0 assert facing player up
++2 press a
++1 release a
+advance text 300
+until idle 300
++0 assert state underground.spawnedTraps[8] null
++2 press down
++1 release down
+until idle
++0 assert facing player down
++2 press a
++1 release a
+advance text 300
+until idle 300
++0 assert state underground.spawnedTraps[9] null
+# GO UP: the record is made as the player leaves.
++0 press x
++1 release x
+until app ug-menu
++1 tap entry:5
++1 tap yes
+until state player.zone "platinum:MAP_HEADER_ETERNA_CITY"
+until idle
++0 assert state tv.records[0].data {"kind":"traps","trap":23,"count":10}

@@ -47,6 +47,7 @@ import { diplomaScreen } from './diploma.ts';
 import { townMapScreen } from './town-map.ts';
 import { castleScreen } from './frontier-castle.ts';
 import { arcadeScreen } from './frontier-arcade.ts';
+import { frontierRecordsScreen } from './frontier-records.ts';
 
 export const createApp: CreateApp = (request, deps) => {
   const ctx = menuContext(deps);
@@ -139,6 +140,8 @@ export const createApp: CreateApp = (request, deps) => {
       return new AppStack(castleScreen(ctx, request), { app: 'castle', party: request.party, opponents: request.opponents, unlocked: request.unlocked, slot: 0 });
     case 'arcade':
       return new AppStack(arcadeScreen(ctx, request), { app: 'arcade', effect: 30, cursor: 0, random: 0 });
+    case 'frontier-records':
+      return new AppStack(frontierRecordsScreen(ctx, request), { app: 'frontier-records' });
     case 'summary-teach':
       return new AppStack(summaryScreen(ctx, { party: () => deps.state.party, slot: request.slot, mode: { kind: 'teach', move: request.move, done: (forget) => ({ close: { app: 'summary-teach', forget } }) } }), { app: 'summary-teach', forget: null });
   }

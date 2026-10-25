@@ -44,7 +44,7 @@ const MILESTONE_RULES: [RegExp, string][] = [
 const RULES: [Bucket, RegExp][] = [
   ['text', /^buffer_|^capitalize_/],
   ['underground', /underground|give_trap|give_sphere|good|treasure|turnback/],
-  ['communication', /union_room|wi_fi|wi_f_|(^|_)comm(_|$)|communication|link_|_link|gts|mystery_gift|battle_client|battle_server|net_id|network|signature|group_connection|distribution|plaza|save_type|is_misc_save|gba_cartridge|teala|frontier_scene|frontier_records/],
+  ['communication', /union_room|wi_fi|wi_f_|(^|_)comm(_|$)|communication|link_|_link|gts|mystery_gift|battle_client|battle_server|net_id|network|signature|group_connection|distribution|plaza|save_type|is_misc_save|gba_cartridge|teala|frontier_scene/],
   ['contest', /contest|accessor|backdrop|ribbon|dress_up|poffin|seal|judge|fashion/],
   ['battle', /battle|trainer|encounter|catching_tutorial|black_out|vs_seeker|legendary|giratina|fateful|roaming|swarm|safari|colosseum|did_not_capture|_won_|_lost_|bp_display/],
   ['objects', /object|player|movement|follower|partner|move_code|position|face_|lock_|release_|shake|flicker|_dir$|bg_event|warp_event/],

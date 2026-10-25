@@ -41,6 +41,7 @@ describe.skipIf(!romPath)('Route 205 north / Eterna City border (OPENSINNOH_NDS_
       step: () => {},
       view: () => ({ message: null, yesNo: null, menu: null, panel: { kind: 'idle', title: '' }, app: null }),
       takeStartMenuRequest: () => false,
+      fieldReturn: () => {},
       appDone: () => {},
       ask: () => {
         throw new Error('no field questions');

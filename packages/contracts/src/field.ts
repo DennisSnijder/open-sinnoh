@@ -50,6 +50,12 @@ export interface PlayerPosition {
 /** World services used by script commands. All calls are synchronous; waits are polled per tick. */
 export interface FieldHost {
   player(): PlayerPosition;
+  /**
+   * The field's return after a battle or an app, between its on-load and on-resume scripts (0.27.29; on FieldHost
+   * since 0.45.0; decomp FieldMap_Init's DynamicMapFeatures_Init): the map's dynamic features are built again from the
+   * saved slot (the Distortion World's objects from the story state the battle's scripts left).
+   */
+  fieldReturned(): void;
   /** Starts a movement script on an object; throws if the object is not present. */
   applyMovement(target: number, movement: Id): void;
   /** True when no script movement is running on `target` (or on any object for 'all'). */
@@ -432,6 +438,12 @@ export interface ScriptRunner {
    * `show_start_menu`, or X in a button wait) has ended; the app opens its start menu. A new script clears it.
    */
   takeStartMenuRequest(): boolean;
+  /**
+   * 0.45.0. The field map starts again (decomp FieldMap_Init, after a battle, `return_to_field` or an app the start menu
+   * opened): the zone's on-load script, its dynamic features (`FieldHost.fieldReturned`), then its on-resume script,
+   * each run to completion now.
+   */
+  fieldReturn(): void;
   /** The app of `ScriptView.app` closed with this result; the waiting op resumes on the next tick. */
   appDone(result: AppResult): void;
   /**

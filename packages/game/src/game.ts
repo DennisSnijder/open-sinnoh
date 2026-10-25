@@ -742,6 +742,7 @@ export function createGame(options: GameOptions): Game {
     useFieldMove(slot, move, location) {
       pendingFieldMove = { slot, move, ...(location !== undefined ? { location } : {}) };
     },
+    fieldReturn: () => scripts.fieldReturn(),
     fieldItemCheck: (item) => fieldItemCheck(fieldItems(), item),
     useFieldItem(item) {
       pendingFieldItem = item;
@@ -834,13 +835,7 @@ export function createGame(options: GameOptions): Game {
   };
 
   /** Decomp FieldMap_Init on the field's return after a battle: the zone's on-load, then its on-resume script. */
-  const fieldReturn = () => {
-    const zone = registries.zones.get(state.player.zone);
-    if (!zone) throw new Error(`field return: unknown zone ${state.player.zone}`);
-    if (zone.mapScripts.onLoad) scripts.runImmediate({ label: zone.mapScripts.onLoad, zone: zone.id, source: 'load' });
-    world.fieldReturned();
-    if (zone.mapScripts.onResume) scripts.runImmediate({ label: zone.mapScripts.onResume, zone: zone.id, source: 'resume' });
-  };
+  const fieldReturn = () => scripts.fieldReturn();
 
   /** Battle mode: one tick of the battle; its result goes into the state and the log. */
   /**
@@ -1170,12 +1165,16 @@ export function createGame(options: GameOptions): Game {
             scripts.start({ label: retire, zone: state.player.zone, source: 'field-move' });
           }
           if (evolution && !nextEvolution()) sound.playEffectiveForZone(state.player.zone);
+          // A field move or item from the start menu's party or bag: the field map starts again first (decomp the field
+          // move tasks and useItemFromMenuFunc after FieldSystem_StartFieldMap).
           if (pendingFieldMove) {
             const { slot, move, location } = pendingFieldMove;
             pendingFieldMove = null;
+            fieldReturn();
             runFieldMove(slot, move, location);
           }
           if (pendingFieldItem) {
+            fieldReturn();
             useFieldItem(fieldItems(), pendingFieldItem);
             pendingFieldItem = null;
           }

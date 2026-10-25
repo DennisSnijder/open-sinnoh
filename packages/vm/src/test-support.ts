@@ -82,6 +82,9 @@ export function newState(): GameState {
 /** Fake world: movements take `movementTicks` field steps; fades and warps finish after `fadeTicks`. */
 export class FakeField implements FieldHost {
   calls: string[] = [];
+  fieldReturned(): void {
+    this.calls.push('fieldReturned');
+  }
   movementTicks = 3;
   fadeTicks = 4;
   /** Ticks a trainer approach / obstacle animation takes. */

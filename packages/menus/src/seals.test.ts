@@ -6,7 +6,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_CLOCK, readPackFolder, type Button, type Id } from '@opensinnoh/core';
-import { DEFAULT_DEVICE_OPTIONS, setupPokemon, type AppHost, type AppModel, type AppRequest, type CapsuleEditorView, type GameState, type MartView, type PartyView, type StorageView } from '@opensinnoh/contracts';
+import { DEFAULT_DEVICE_OPTIONS, setupPokemon, type AppHost, type AppModel, type AppRequest, type BattleAnimData, type CapsuleEditorView, type GameState, type MartView, type ParticleEmitter, type ParticleSystem, type Registries, type StorageView, type PartyView } from '@opensinnoh/contracts';
 import { loadGamePacks, newGameState } from '@opensinnoh/game';
 import { capsuleHolder, sealsOwned } from '@opensinnoh/services';
 import { createApp } from './index.ts';
@@ -22,9 +22,9 @@ function fresh(): GameState {
   s.party.push(setupPokemon(s, registries, 0, id('SPECIES_MOSSLET'), 12), setupPokemon(s, registries, 1, id('SPECIES_DRIPLING'), 9));
   return s;
 }
-function open(s: GameState, request: AppRequest): AppModel {
+function open(s: GameState, request: AppRequest, reg: Registries = registries, stub: (key: string, message: string) => void = () => {}): AppModel {
   const host: AppHost = { options: () => ({ ...DEFAULT_DEVICE_OPTIONS }), setOption: () => {}, save: () => {}, fieldMoveCheck: () => 'location', useFieldMove: () => {}, fieldItemCheck: () => null, useFieldItem: () => {}, clock: () => DEFAULT_CLOCK };
-  return createApp(request, { registries, state: s, log: { stub: () => {} }, host });
+  return createApp(request, { registries: reg, state: s, log: { stub }, host });
 }
 const idle = { held: [] as Button[], pressed: [] as Button[], touch: null };
 function press(app: AppModel, ...buttons: Button[]) {
@@ -159,7 +159,7 @@ describe('the Ball Capsule editor', () => {
     stroke(app, [190, 70], [10, 150]);
     expect(s.sealCase.counts[0]).toBe(3);
     stroke(app, [192, 171]);
-    expect(editor(app)).toMatchObject({ dim: true, message: { text: 'Drop the new design?' }, yesNo: { cursor: 0 } });
+    expect(editor(app)).toMatchObject({ dim: 10 / 16, message: { text: 'Drop the new design?' }, yesNo: { cursor: 0 } });
     tap(app, 'no');
     expect(editor(app).screen).toBe('edit');
     stroke(app, [192, 171]);
@@ -186,6 +186,60 @@ describe('the Ball Capsule editor', () => {
     expect(editor(app).hand!.grabbing).toBe(false);
     press(app, 'start');
     expect(s.sealCase.capsules[0]).toEqual([{ seal: 1, x: 193, y: 54 }]);
+  });
+
+  it('Test: the ball opens, the seals play and the Pokémon comes out; held 30 frames, taken back; the capsule on screen, nothing saved', () => {
+    // The fixture has no particle data: one small `ball_particle.narc` system per seal and the recall's (member 36), and
+    // the battler type positions, all at the origin.
+    const emitter: ParticleEmitter = { flags: 1 << 14, basePos: [0, 0, 0], count: 4096, radius: 0, length: 0, axis: [0, 4096, 0], color: 0x7fff, velPos: 0, velAxis: 0, scale: 4096, aspect: 4096, startDelay: 0, minRotation: 0, maxRotation: 0, initAngle: 0, emitterLife: 4, particleLife: 6, attenuation: [0, 0, 0], interval: 1, alpha: 31, air: 255, texture: 0, loopFrames: 0, dbbScale: 0, tileS: 0, tileT: 0, scaleDir: 0, faceEmitter: false, flipS: false, flipT: false, polygonX: 0, polygonY: 0 };
+    const system = (n: number): ParticleSystem => ({ id: id(`ball_particles/${n}`), sourceIndex: n, archive: 'ball', textures: id('ui2d/p'), textureParams: [0], emitters: [emitter, emitter] });
+    const data: BattleAnimData = { id: id('battle_anim'), positions: Array.from({ length: 8 }, () => [[[0, 0, 0], [0, 0, 0]]]), axes: [], backgrounds: [], statChange: [] };
+    const reg: Registries = { ...registries, particleSystems: new Map([36, 37, 38].map((n) => [id(`ball_particles/${n}`), system(n)])), battleAnimData: new Map([[data.id, data]]) };
+    const s = fresh();
+    s.sealCase.counts[0] = 1;
+    s.sealCase.counts[1] = 1;
+    const sounds: string[] = [];
+    const app = open(s, { app: 'capsule-editor' }, reg, (key, message) => key === 'audio:sequence-missing' && sounds.push(message));
+    press(app, 'a', 'a');
+    stroke(app, [16, 24], [190, 70]);
+    stroke(app, [72, 24], [240, 70]);
+    const counts = [...s.sealCase.counts];
+    const run = () => {
+      sounds.length = 0;
+      stroke(app, [32, 171]);
+      const frames: CapsuleEditorView[] = [editor(app)];
+      while (frames.length < 1000 && (editor(app).screen !== 'edit' || editor(app).message)) {
+        app.step(idle);
+        frames.push(editor(app));
+      }
+      return frames;
+    };
+    const frames = run();
+    expect(frames[0]).toMatchObject({ screen: 'edit', message: { text: expect.any(String) }, test: null });
+    // The editor dims first (10/16, two steps a frame), then the top screen shows the throw.
+    const top = frames.filter((f) => f.screen === 'test');
+    expect(frames.slice(0, 6).map((f) => f.dim * 16)).toEqual([0, 2, 4, 6, 8, 10]);
+    expect(top[0]).toMatchObject({ dim: 0, seals: [], test: { species: id('SPECIES_MOSSLET'), sprite: null, ball: { x: 192, y: 86, anim: 0 } } });
+    // The ball opens: the Pokémon at scale 0 and SEQ_SE_DP_CUSTOM05, then 0x20 a frame up to full size.
+    const out = top.findIndex((f) => f.test!.sprite);
+    expect(top.slice(out, out + 9).map((f) => f.test!.sprite!.scale * 8)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(top[out]!.test!.ball).toMatchObject({ anim: 1 });
+    expect(sounds.filter((m) => m.includes('1734'))).toHaveLength(1);
+    // The seals' particles (the centre seal's at once, the outer one's after the fixture's delay for its distance).
+    expect(top.some((f) => f.test!.particles.length > 0)).toBe(true);
+    // Then the ball takes it back: the opening frames held, the sprite shrinking, and the editor undims.
+    const back = top.findIndex((f, i) => i > out && f.test!.ball !== null && f.test!.ball.frame !== null);
+    expect(back).toBeGreaterThan(out + 30);
+    expect(top[top.length - 1]!.test!.sprite).toMatchObject({ scale: 0 });
+    expect(frames.slice(-7, -1).map((f) => f.dim * 16)).toEqual([10, 8, 6, 4, 2, 0]);
+    expect(frames).toHaveLength(125);
+    // Nothing saved: the capsule, the counts and the party as they were; the editor goes on with the seals on screen.
+    expect(s.sealCase.capsules[0]).toEqual([]);
+    expect(s.sealCase.counts).toEqual(counts);
+    expect(s.party[0]!.capsule).toBeUndefined();
+    expect(editor(app)).toMatchObject({ screen: 'edit', dim: 0, seals: [{ x: 190, y: 70 }, { x: 240, y: 70 }] });
+    // THROW_WAIT_AFTER_ANIMS_END's counter is never reset while the app runs: a second Test does not hold.
+    expect(run()).toHaveLength(125 - 29);
   });
 
   it('SET puts the capsule on a party Pokémon (one each), REMOVE takes it off, SHIFT swaps and the holder follows', () => {

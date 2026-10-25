@@ -1,7 +1,7 @@
 # The PC's BALL CAPSULES (decomp scripts_common.s CommonScript_PlayersPC, applications/capsule_menu; docs/research/seals.md
 # §5): the editor opens from <player>'s PC, a Heart Seal A and an A Seal are placed on capsule 1 by the stylus and the keys,
-# CONFIRM saves it, SET puts it on Staravia through the party's BALL_SEAL mode (the party shows the capsule's marker).
-# The save keeps the case and the capsule.
+# Test throws Staravia out with them, CONFIRM saves it, SET puts it on Staravia through the party's BALL_SEAL mode (the
+# party shows the capsule's marker). The save keeps the case and the capsule.
 party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK
 party 1 platinum:SPECIES_PIPLUP 15 platinum:MOVE_POUND
 give item platinum:ITEM_SEAL_CASE 1
@@ -57,14 +57,18 @@ until app capsule-editor 300
 +1 release a
 +1 assert state sealCase.counts[49] 0
 +0 screenshot capsule-edit
-# Test (SELECT): the still of the first Pokémon with the capsule's seals; B goes back to editing.
+# Test (SELECT): the editor dims, then a copy of Staravia comes out of its ball on the top screen with the capsule's
+# seals (the battle's send-out effect), is held, goes back in, and the editor undims. Nothing is saved.
 +1 press select
 +1 release select
-+1 assert state app.screen "test"
-+0 screenshot capsule-test
-+1 press b
-+1 release b
-+1 assert state app.screen "edit"
++0 assert state app.screen "edit"
+until state app.screen "test" 30
+until state app.test.sprite.scale 1 60
++4 screenshot capsule-test
+until state app.message null 400
++0 assert state app.screen "edit"
++0 assert state app.dim 0
++0 assert state sealCase.capsules[0].length 0
 # CONFIRM saves the capsule front first.
 +1 tap seal:104,171
 +1 tap seal-up

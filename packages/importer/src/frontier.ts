@@ -115,6 +115,8 @@ const HALL_SUMMARY_CELL = 0xfe;
  */
 const FACTORY_APP = { ncgr: 4, selection: 5, noScreens: 7, conveyor: 8, wheel: 9, summary: 10, nclr: 130, palettes: 11 } as const;
 const HALL_APP = { ncgr: 23, nscr: 24, nclr: 134, palettes: 6 } as const;
+/** The records app's BG2 (battle_frontier_records_app NSCR, frontier_records_app NCGR, NCLR: LoadMainBackgroundPalette's two palettes). */
+const RECORDS_APP = { nscr: 123, ncgr: 124, nclr: 170, palettes: 2 } as const;
 /** frontier_obj members (narc_frontier_obj.h): BATTLE_FACTORY_APP_SPRITES, BATTLE_HALL_APP_CURSOR_BOX. */
 const FACTORY_APP_SPRITES = { ncgr: 0, nanr: 1, ncer: 2, nclr: 36 } as const;
 const HALL_APP_CURSOR = { ncgr: 12, nanr: 13, ncer: 14, nclr: 38 } as const;
@@ -336,6 +338,15 @@ export function importFrontier(fs: NitroFs, names: Names, rom: FrontierRomTables
   const castle = importCastle(rom.castle, names, objNarc, bgNarc, deps.sheets, { tiles: castleRoom.tiles, palette: castleRoom.palette });
   const arcade = importArcade(rom.arcade, names, objNarc, bgNarc, deps.sheets);
   const effects = importEffects(fs, names, deps, bgNarc, room, sceneRows);
+  const recordsMember = (i: number) => {
+    const b = bgNarc[i];
+    if (!b) throw new Error(`frontier_bg has no member ${i}`);
+    return b;
+  };
+  const recordsArt = deps.sheets.image(
+    'frontier/records_app',
+    textBg(readNscr(recordsMember(RECORDS_APP.nscr)), readNcgr(recordsMember(RECORDS_APP.ncgr)), new PaletteRam().load(readNclr(recordsMember(RECORDS_APP.nclr)), 0, RECORDS_APP.palettes * 32)),
+  );
 
   // --- the Battle Tower ---
   const bp = [...rom.battlePoints];
@@ -363,6 +374,7 @@ export function importFrontier(fs: NitroFs, names: Names, rom: FrontierRomTables
     objects,
     shadow,
     effects,
+    recordsArt,
     banlist: u16s(rom.banlist).map((s) => names.species(s)),
     prices: pairs(rom.prices).map(([item, price]) => ({ item: names.item(item), bp: price })),
     judgeMessages: [],

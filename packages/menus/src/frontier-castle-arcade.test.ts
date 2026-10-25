@@ -119,6 +119,8 @@ describe('Battle Castle apps', () => {
     press(app, 'a', 'down', 'a', 'a', 'a');
     expect((app.view() as CastleView).panel).toBe('summary');
     expect((app.view() as CastleView).lines?.length).toBeGreaterThan(10);
+    // The bought stats raise the slot's first flag (decomp UpdateFlagSprites), not its moves flag or another slot's.
+    expect((app.view() as CastleView).mons.map((m) => m.flags)).toEqual([{ stats: true, moves: false }, { stats: false, moves: false }, { stats: false, moves: false }]);
     const done = press(app, 'b', 'b', 'down', 'a') as { unlocked: { identity: boolean[]; stats: boolean[]; level: string[] } } | null;
     expect(done?.unlocked.identity[0]).toBe(true);
     expect(done?.unlocked.stats[0]).toBe(true);

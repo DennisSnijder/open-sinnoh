@@ -764,6 +764,7 @@ const frontierTables = obj({
       hallLights: ref('ui2d'),
     }),
   ),
+  recordsArt: opt(ref('ui2d')),
   banlist: arr(ref('species')),
   prices: arr(obj({ item: ref('items'), bp: int(1, 0xffff) })),
   judgeMessages: arr(ref('texts')),

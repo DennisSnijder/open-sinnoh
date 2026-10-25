@@ -19,13 +19,14 @@
  * The sprites animate on the canvas between views. Packs without the art (the fixture) get flat colours in the same
  * places.
  */
-import { newGameRecord, type ArcadeView, type CastleMonView, type CastleView, type FactoryView, type HallBoardView, type Ui2dSheet } from '@opensinnoh/contracts';
+import { newGameRecord, type ArcadeView, type CastleMonView, type CastleView, type FactoryView, type FrontierRecordsView, type HallBoardView, type Ui2dSheet } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
 import { framed, messageBox, stop, type DrawContext } from './apps.ts';
 import type { Art } from './art.ts';
 import { hpColor, ICON_ANIM } from './art.ts';
 import { el } from './core.ts';
 import { layoutScene, place, sceneContext } from './evolution.ts';
+import { DsScene } from './journal.ts';
 import type { Palette } from './pixel-font.ts';
 import './frontier.css';
 
@@ -398,7 +399,7 @@ const CASTLE_MENUS: Record<CastleView['mode'], Partial<Record<NonNullable<Castle
   opponent: { options: framedRect(23, 15, 8, 8), summary: framedRect(22, 9, 9, 8), level: framedRect(24, 11, 7, 6) },
 };
 /** Decomp sprites.h ANIM_ID_*. */
-const CASTLE_ANIM = { exitCursor: 0, monCursor: 1, listCursor: 3, upArrow: 4, downArrow: 5, shakingBall: 7, red: 13, yellow: 14, green: 15 };
+const CASTLE_ANIM = { exitCursor: 0, monCursor: 1, listCursor: 3, upArrow: 4, downArrow: 5, shakingBall: 7, flag: 12, red: 13, yellow: 14, green: 15 };
 /**
  * Decomp self_app.c / opponent_app.c, solo: slot i is 64 px right of slot 0 — its icon at (64, 58) (the selected one 3 px
  * up on the icon's first frame, 1 down on its second: BattleCastle_UpdateMonSpritePosition), the HP bar at (64, 78),
@@ -419,6 +420,8 @@ const CASTLE_AT = {
   upArrow: { x: 160, y: 10 },
   downArrow: { x: 160, y: 124 },
   bigItem: { x: 24, y: 162 },
+  /** Decomp GetFlagSpritesOffsets (solo): the stats flag at (96, 60) and the moves flag 12 px under it. */
+  flag: { x: 96, y: 60, dy: 12 },
 };
 /**
  * Decomp windows.c and the Print* functions (window interiors in DS px): the header (2, 1) with the name at 28 and the
@@ -525,6 +528,14 @@ class CastleScene extends FrontierScene<CastleView> {
     } else {
       v.mons.forEach((m, i) => {
         const dx = SLOT * i;
+        // Decomp UpdateFlagSprites: a flag for the bought stats, one for the moves (drawn whatever the slot shows).
+        (['stats', 'moves'] as const).forEach((k, j) => {
+          if (!m.flags?.[k]) return;
+          this.sprite(sheet, CASTLE_ANIM.flag, t, CASTLE_AT.flag.x + dx, CASTLE_AT.flag.y + CASTLE_AT.flag.dy * j, () => {
+            g.fillStyle = '#e83830';
+            g.fillRect(CASTLE_AT.flag.x + dx - 4, CASTLE_AT.flag.y + CASTLE_AT.flag.dy * j - 4, 8, 6);
+          });
+        });
         if (m.hidden) {
           this.sprite(sheet, CASTLE_ANIM.shakingBall, t, CASTLE_AT.ball.x + dx, CASTLE_AT.ball.y, () => {
             g.fillStyle = '#e83830';
@@ -788,5 +799,46 @@ export function hallBoard(d: DrawContext, v: HallBoardView): HTMLElement {
   let s = hallScenes.get(d.art);
   if (!s || !s.root.isConnected) hallScenes.set(d.art, (s = new HallBoardScene(d.art)));
   s.draw(d, v);
+  return s.root;
+}
+
+const recordsScenes = new WeakMap<Art, DsScene>();
+
+/**
+ * The record viewer (contracts `FrontierRecordsView`; decomp frontier/records/main.c): BG2 the records art, the lines in
+ * the system font aligned as PrintMessage does, the brightness fade; a tap anywhere is A.
+ */
+export function frontierRecords(d: DrawContext, v: FrontierRecordsView): HTMLElement {
+  let scene = recordsScenes.get(d.art);
+  if (!scene || !scene.root.isConnected) recordsScenes.set(d.art, (scene = new DsScene(d.art, 'frontier-records', 'Battle Frontier records')));
+  const s = scene;
+  s.redraw = () => frontierRecords(d, v);
+  layoutScene(d, s.root, s.stage);
+  const g = s.g;
+  g.imageSmoothingEnabled = false;
+  const bg = v.bg ? s.image(v.bg) : null;
+  const cell = bg?.cells[0];
+  if (bg && cell) g.drawImage(bg.img, cell.x, cell.y, W, H, 0, 0, W, H);
+  else {
+    g.fillStyle = '#88b8e8';
+    g.fillRect(0, 0, W, H);
+  }
+  const x = (l: FrontierRecordsView['lines'][number]) => (l.align === 'centre' ? l.x - Math.floor((d.measure(l.text) + 1) / 2) : l.align === 'right' ? l.x - d.measure(l.text) : l.x);
+  if (d.paint) for (const l of v.lines) d.paint(g, l.text, 'ink', x(l), l.y);
+  s.fade(v.black);
+  const key = JSON.stringify(v.lines);
+  if (key !== s.boxesKey) {
+    s.boxesKey = key;
+    const text = el('div', 'sr-only');
+    text.textContent = v.lines.map((l) => l.text.trim()).join('. ');
+    const back = el('button', 'diploma-next');
+    back.type = 'button';
+    back.tabIndex = -1;
+    back.dataset.tap = 'back';
+    back.setAttribute('aria-label', 'Close');
+    back.addEventListener('click', () => d.tap('back'));
+    place(back, { x: 0, y: 0, w: W, h: H });
+    s.boxes.replaceChildren(text, back);
+  }
   return s.root;
 }
