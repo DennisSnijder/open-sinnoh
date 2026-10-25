@@ -71,8 +71,9 @@ export const capsuleGridAt = (i: number): { x: number; y: number } => ({ x: 40 +
  * - `edit`: the touch screen (`capsule/sub3`): the seal list page (`list`, slot i at (19 + 56·(i % 2), 23 + 24·⌊i / 2⌋)),
  *   the loose counts, the page arrows, Test, CONFIRM and CANCEL, the capsule and its seals (`seals`, centres, back to
  *   front; `ghost` while one is held outside the circle). The top screen's seal-name line folds into `status`.
- * - `test`: the Test's still (OpenSinnoh: the DS throws the Pokémon and plays the seals' effect): `capsule/main3`, the
- *   Pokémon's front picture and the capsule's seals around it where the send-out effect starts them.
+ * - `test`: the Test's throw on the top screen (`capsule/main3`): a copy of the Pokémon comes out of its ball with the
+ *   capsule as it is on screen, the seals' send-out effect plays, and the ball takes it back (`test`). The editor's
+ *   screen dims (`dim`) before the throw and undims after it.
  * Seals are their `capsule/seals` cell (the seal type's NCGR member − 184). Taps: `capsule:<i>` (select: the cursor to
  * capsule i and its menu), `menu:<i>`, `next`, `yes`, `no`, `back`; in edit the stylus sends `seal:<x>,<y>` (DS px)
  * while it is down and `seal-up` when it lifts, and the buttons are hit by their DS touch rects.
@@ -97,8 +98,21 @@ export interface CapsuleEditorView {
   message: { text: string; waiting: boolean } | null;
   menu: { entries: { label: string }[]; cursor: number } | null;
   yesNo: { yes: string; no: string; cursor: 0 | 1 } | null;
-  /** The Test's Pokémon (front picture, frame 0). */
-  test: { species: import('@opensinnoh/core').Id; form: number; female: boolean; shiny: boolean } | null;
-  /** The screens dim (the cancel prompt). */
-  dim: boolean;
+  /**
+   * The Test's Pokémon. `sprite`: its front picture while out of the ball, scaled (0–1) about its feet at (192, 88),
+   * on its front animation's `frame` moved by (`dx`, `dy`). `ball`: the `battle/ball_throws/<ball>` sprite centred at
+   * (x, y), animation `anim` `tick` frames in (or held on `frame` when set), its palette blended `white` (0–1) toward
+   * white. `particles`: the seals' send-out effect and the recall's burst, in DS px (drawn like the battle's).
+   */
+  test: {
+    species: import('@opensinnoh/core').Id;
+    form: number;
+    female: boolean;
+    shiny: boolean;
+    sprite: { scale: number; frame: number; dx: number; dy: number } | null;
+    ball: { item: import('@opensinnoh/core').Id; x: number; y: number; anim: 0 | 1; tick: number; frame: number | null; white: number } | null;
+    particles: import('./battle.ts').AnimParticle[];
+  } | null;
+  /** The editor's screen blended toward black, 0–1 (the cancel prompt, and the Test before and after its throw). */
+  dim: number;
 }

@@ -5,6 +5,7 @@
   "type": "module",
   "exports": { ".": "./src/index.ts" },
   "dependencies": {
+    "@opensinnoh/battle": "workspace:*",
     "@opensinnoh/core": "workspace:*",
     "@opensinnoh/contracts": "workspace:*",
     "@opensinnoh/services": "workspace:*",

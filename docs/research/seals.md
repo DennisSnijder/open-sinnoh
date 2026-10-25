@@ -333,7 +333,16 @@ Draw order: the last touched seal is in front (priority 0, the others pushed bac
   Pokémon's ball): when the ball opens, `SEQ_SE_DP_CUSTOM05` (1734), the seal effect (§6) with battler type 1 (the
   foe's spot), the front sprite at (192, 48 + y offset) grows by 0x20/256 a frame (8 frames); its cry animation plays;
   after the effect and the animation end, 30 frames, the ball takes it back (mode 5) while it shrinks; the screens
-  undim. The test uses the capsule as it is on screen, on a copy of the Pokémon (nothing is saved).
+  undim. The test uses the capsule as it is on screen, on a copy of the Pokémon (nothing is saved). Frame by frame
+  (`manager.c` THROW_* states, `ov12_02236F24`, `ov12_02237474`): the bottom screen dims to 10/16 two steps a frame
+  (only the bottom screen: buffers SUB_BG palettes 0x80B and SUB_OBJ); the ball (type 1) sits still at (192, 86) for
+  its 12-frame parabola, then plays animation 1 and opens on its 6th frame, its palette whitening 0 → 14 by 2 a frame,
+  and ends 16 frames into the opening; the sprite grows 0x20 a frame from that frame; the ball's OBJ goes once it ends
+  and the sprite is full size, then the front animation plays. The recall: the opening held on frames 0, 2 (2 frames
+  each), the burst `ball_particle.narc` 36 (both emitters, `Unk_ov12_0223AE10` row 0xFF + 20) at (x − 190 + 61,
+  70 − y + 30) · 172 from the ball, then frames 2, 1, 0 (6 frames each), until the burst ends; the sprite shrinks 0x20
+  a frame. The 30-frame counter (`frameCounter`) is never reset while the app runs, so only the first Test after the
+  app starts (and after SET, which restarts it) holds.
 
 ### 5.4 Coordinates
 
@@ -530,9 +539,9 @@ formula, the capsule menu layouts, the Test sprite position (192, 48), the 30-fr
 - The contest visual round's capsule anchor (§6.4) is inferred from the code path; the stage might put the photo
   somewhere the battler-type-0 anchor does not fit. OpenSinnoh's visual round has no ball pop-in yet.
 - The editor's keyboard scheme (§5.6) is ours to design; the DS has none.
-- Sharing the SPL: the battle's `ParticleManager` lives in `packages/battle`; the editor's test is a menus screen.
-  Either export the SPL from a shared package or keep the test in the battle package's reach; the simple
-  `menus/particles.ts` does not model everything the seal SPAs may use (behaviours, texture animation).
+- Sharing the SPL (built): the menus reach the battle's SPL and `SendOutEffect` through `@opensinnoh/battle/particles`
+  (as the Frontier scenes do); the editor's Test steps them headless in the menu model (`menus/capsule-test.ts`) and the
+  app draws the particles with the battle's `ParticleTextures`.
 - Frontier: (inferred) the player's capsules show there; not checked in the frontier code.
 
 ## 11. What is built
@@ -559,7 +568,9 @@ formula, the capsule menu layouts, the Test sprite position (192, 48), the 30-fr
   (the D-pad jumps to the nearest in that direction); A presses (a list seal comes out at the capsule's centre); a held
   seal moves 1 px a tick (2 after 8, 4 after 24); A drops, B puts it back; otherwise B is CANCEL, L/R the pages,
   START CONFIRM, SELECT Test.
-- **Not built.** The Test plays no throw or particles: it shows a still of the Pokémon with the seals at the send-out
-  effect's offsets (the battle lane's effect can replace it). The selection screen does not preview the current
-  capsule's design (the DS's bottom screen). No TV Seal Club segment (TV is a stub). Mystery Gift has no seal gift hook.
-  Link trade and GTS capsule clearing are out of scope.
+- **Test** (menus `capsule-test.ts`): the editor dims, the board shows the top screen: the ball (`battle/ball_throws`)
+  opens at (192, 86), the copy grows out at (192, 48) with SE 1734 and the battle's `SendOutEffect` (battler type 1, on
+  its own SPL stream), its front animation, the 30-frame hold (first Test only, as the DS), the recall with burst 36,
+  then the editor undims. Its length comes from the simulation; input waits.
+- **Not built.** The selection screen does not preview the current capsule's design (the DS's bottom screen). No TV Seal
+  Club segment (TV is a stub). Mystery Gift has no seal gift hook. Link trade and GTS capsule clearing are out of scope.

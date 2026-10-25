@@ -250,6 +250,9 @@ importers:
 
   packages/menus:
     dependencies:
+      '@opensinnoh/battle':
+        specifier: workspace:*
+        version: link:../battle
       '@opensinnoh/contracts':
         specifier: workspace:*
         version: link:../contracts
