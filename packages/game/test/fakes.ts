@@ -319,6 +319,10 @@ export const createFakeWorld: CreateWorld = ({ registries, state, scripts }) => 
     undergroundDecoration: () => {
       throw new Error('fake world: no Underground');
     },
+    undergroundTrapShadow: () => {
+      throw new Error('fake world: no Underground');
+    },
+    undergroundTransition: () => null,
     undergroundPlace: () => null,
     undergroundView: () => null,
     talkToFollower: () => null,

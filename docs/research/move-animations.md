@@ -1,5 +1,7 @@
 # Platinum move animation requirements and VM coverage
 
+Implementation update (2026-10-25): the last nine moves (Surf, Muddy Water, Night Shade, Transform, Role Play, Acid Armor, Sketch, Spite, Extrasensory) and slot 0 now play: AddSprite, StartBattlerSlideOut, LoadPokemonSpriteIntoBg, RemovePokemonSpriteFromBg, StartBattlerSlideIn mode 0 as the picture swap it is, and their eleven native functions follow the decomp. **468/468** move scripts play, in battles, at an ally and in contests.
+
 Implementation update (2026-10-16): generic sprite resources, all 25 callbacks in the 29-move batch, and the seven single-command wins now run on the VM. Actual-move fallbacks are **9/467** (previously 45); **458/467** play. The tables below retain the original audit baseline. Sprite choreography/native timing remain approximate; ROM execution and browser pixel tests cover the implementation. Remaining moves: Surf, Night Shade, Transform, Acid Armor, Sketch, Spite, Role Play, Extrasensory and Muddy Water.
 
 Audited 2026-10-16 against OpenSinnoh `60b31aba587c6d3092390606a3d9b78ffbf581e4`.

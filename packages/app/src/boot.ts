@@ -20,6 +20,7 @@ import { createFrontierDrawer } from './frontier-scene.ts';
 import { bottomFrame, type DsFrame } from './panel.ts';
 import { createLookoutDrawer, createPreviewDrawer } from './pokemon-preview.ts';
 import { createFlyDrawer } from './fly-scene.ts';
+import { createUndergroundTransitionDrawer } from './underground-transition.ts';
 import { createScriptRunner } from '@opensinnoh/vm';
 import { createWorld } from '@opensinnoh/world';
 
@@ -127,6 +128,7 @@ export async function createSession(
   const drawFrontier = createFrontierDrawer(assets, () => game.registries);
   const drawLookout = createLookoutDrawer(assets, () => game.registries);
   const drawFly = createFlyDrawer(assets, () => game.registries);
+  const drawUgTransition = createUndergroundTransitionDrawer(assets, () => game.registries);
   const drawRadar = createRadarDrawer(assets, () => game.registries);
   const mount = () => mountFieldRenderer(canvas, { world: game.world, registries: game.registries, state: game.state, assets, log: game.log });
   let renderer = await mount();
@@ -161,6 +163,7 @@ export async function createSession(
     drawOverlay(ctx, frame, fieldScale) {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       drawFly(ctx, game.world.flyScene(), game.world.fadeState(), fieldScale);
+      drawUgTransition(ctx, game.world.undergroundTransition(), game.world.fadeState(), fieldScale);
       drawRadar(ctx, game.world.undergroundView(), font, fieldScale, game.state.tick, (x, z) => renderer.screenOf?.(x, z) ?? null);
       const view = game.scripts.view();
       const scale = frame.scale;

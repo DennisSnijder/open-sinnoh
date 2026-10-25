@@ -814,6 +814,8 @@ const undergroundTables = obj({
     bigSmoke: arr(int(0, 0xffff)),
     marks: arr(ref('fieldEffects')),
     hole: ref('fieldEffects'),
+    // 0.45.0: the '!' and OK over a trapped player.
+    emotes: obj({ exclamation: ref('fieldEffects'), ok: ref('fieldEffects') }),
     vars: obj({ trapsSet: ref('vars') }),
   }, (v) => ([...(v.smoke as unknown[][]), v.bigSmoke as unknown[]].some((p) => p.length !== 32 * 24) ? 'a smoke pattern must have 32 × 24 tiles' : (v.marks as unknown[]).length !== 32 ? 'traps.marks must have the 32 trap ids' : undefined)),
   base: obj({ cursor: nullable(ref('models')), flags: obj({ created: ref('flags'), decorated: ref('flags') }) }),

@@ -78,19 +78,23 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('Super Contests: the acting rou
     }
   });
 
-  it('plays move animations in contest mode: every script a battle plays, the rest are counted', () => {
+  it('plays move animations in contest mode: every move script', () => {
     const reg = game().registries;
     const cov = contestAnimCoverage(reg);
-    expect(cov.moves).toBeGreaterThan(450);
-    console.log(`contest move animations: ${cov.real}/${cov.moves}; missing ${JSON.stringify([...cov.missing].sort((a, b) => b[1] - a[1]).slice(0, 12))}`);
-    // No contest-only gap: a script misses in a contest only what it misses in a battle too (Surf's, Night Shade's,
-    // the BG-layer Pokémon of Acid Armor, Sketch, Spite, Extrasensory …: VM-wide work).
-    for (const a of reg.battleAnimations.values()) {
-      if (a.common !== undefined) continue;
-      const battle = new Set(animSupport(a, reg));
-      expect(animSupport(a, reg, false, true).filter((m) => !battle.has(m)), a.move).toEqual([]);
+    expect([cov.real, cov.moves, cov.missing.size]).toEqual([468, 468, 0]);
+    for (const a of reg.battleAnimations.values()) if (a.common === undefined) expect(animSupport(a, reg, false, true), a.move).toEqual([]);
+    // The last nine run to their end in a contest, nothing stubbed: the BG2 pictures, the picture swap, the waves.
+    for (const move of ['MOVE_SURF', 'MOVE_MUDDY_WATER', 'MOVE_NIGHT_SHADE', 'MOVE_TRANSFORM', 'MOVE_ROLE_PLAY', 'MOVE_ACID_ARMOR', 'MOVE_SKETCH', 'MOVE_SPITE', 'MOVE_EXTRASENSORY']) {
+      const run = createContestMoveAnimation({ move: P(move), attacker: { species: P('SPECIES_STARAVIA'), form: 0 }, defender: { species: P('SPECIES_PIKACHU'), form: 0 }, effectChance: 0, seed: 1 }, { registries: reg, log: new CountingStubLog((key) => { throw new Error(key); }) });
+      expect(run, move).not.toBeNull();
+      let ticks = 0;
+      while (!run!.done) {
+        run!.tick();
+        run!.view();
+        ticks++;
+      }
+      expect(ticks, move).toBeGreaterThan(20);
     }
-    expect(cov.real / cov.moves).toBeGreaterThan(0.97);
     // One animation end to end: the performer moves (Tackle) and the run ends.
     const run = createContestMoveAnimation({ move: P('MOVE_TACKLE'), attacker: { species: P('SPECIES_STARAVIA'), form: 0 }, defender: { species: P('SPECIES_PIKACHU'), form: 0 }, effectChance: 0, seed: 1 }, { registries: reg, log: new CountingStubLog(() => {}) });
     expect(run).not.toBeNull();

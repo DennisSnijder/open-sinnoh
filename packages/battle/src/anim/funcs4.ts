@@ -116,10 +116,19 @@ export const SPRITE_COMPANION_FUNCS: Record<string, Func> = {
   },
 };
 
-/** The operand is a BATTLE_ANIM_* target mask, not a battler role. */
-export function startBattlerSlideIn(vm: AnimVm, targets: number): void {
-  const s = battler(vm, targets);
-  if (!s) return;
+/**
+ * StartBattlerSlideIn (decomp BattleAnimScriptCmd_StartBattlerSlideIn, ov12_022380BC): mode 0 pushes the attacker's
+ * picture and shows the defender's in its place, in the face the attacker's side shows (the front on the enemy's
+ * side): Transform, Role Play. Mode 2 makes the attacker the substitute doll (ov12_02238390), which the packs do not
+ * have: the attacker slides in from its side instead.
+ */
+export function startBattlerSlideIn(vm: AnimVm, mode: number): void {
+  if (mode === 0) {
+    vm.sprite(vm.attacker).picture = { battler: vm.defender, back: (vm.attacker & 1) === 0 };
+    return;
+  }
+  if (mode !== 2) throw new Error(`battle anim: StartBattlerSlideIn mode ${mode}`);
+  const s = vm.sprite(vm.attacker);
   const x = s.baseX, y = s.baseY;
   const start = x - dirX(vm, s.battler) * 96;
   s.hide = false;

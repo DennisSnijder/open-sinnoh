@@ -43,6 +43,10 @@ const MODEL_EFFECTS: { name: string; renderer: number; member: number; pattern?:
   // FLOOR_TEXTURE_TRAP_*), and the hole's black circle (25).
   ...Array.from({ length: 32 }, (_, i) => ({ name: `UG_FLOOR_TRAP_${i + 1}`, renderer: 0x03, member: 26 + i })),
   { name: 'UG_FLOOR_BLACK_CIRCLE', renderer: 0x03, member: 25 },
+  // ov5_021F5284.c (renderer 6) and ov5_021F5428.c (renderer 7): the '!' over a trapped player in the Underground (23) and
+  // the OK of an escape (24), squares turned to face the camera.
+  { name: 'UG_EMOTE_EXCLAMATION', renderer: 0x06, member: 23 },
+  { name: 'UG_EMOTE_OK', renderer: 0x07, member: 24 },
 ];
 
 /**

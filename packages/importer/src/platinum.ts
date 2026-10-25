@@ -1587,6 +1587,7 @@ export async function importPlatinum(
           ...trapArt,
           marks: Array.from({ length: 32 }, (_, i) => fieldEffect(`UG_FLOOR_TRAP_${i + 1}`)),
           hole: fieldEffect('UG_FLOOR_BLACK_CIRCLE'),
+          emotes: { exclamation: fieldEffect('UG_EMOTE_EXCLAMATION'), ok: fieldEffect('UG_EMOTE_OK') },
           vars: { trapsSet: varId('VAR_UNDERGROUND_TRAPS_SET') },
         },
         base: { cursor: cursor?.id ?? null, flags: { created: flag('FLAG_CREATED_SECRET_BASE'), decorated: flag('FLAG_DECORATED_SECRET_BASE') } },

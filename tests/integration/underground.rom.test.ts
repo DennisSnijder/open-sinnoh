@@ -1,6 +1,6 @@
 /**
  * The Underground on the ROM: its tables and art are imported and checked against the
- * decomp; getting the Explorer Kit, going down and reviving a fossil replay here, mining and spheres in
+ * decomp (the drawn details tick by tick in underground-drawn.rom.test.ts); getting the Explorer Kit, going down and reviving a fossil replay here, mining and spheres in
  * underground-mining.rom.test.ts.
  */
 import { describe, expect, it } from 'vitest';
@@ -54,11 +54,24 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('the Underground (OPENSINNOH_ND
     }
     expect(u.traps.marks[10]).toBe('platinum:FIELD_EFFECT_UG_FLOOR_TRAP_11');
     expect(u.traps.hole).toBe('platinum:FIELD_EFFECT_UG_FLOOR_BLACK_CIRCLE');
+    // UndergroundPlayer_HandleEmoteDisplay: the '!' (fldeff 23) and the OK (fldeff 24).
+    expect(u.traps.emotes).toEqual({ exclamation: 'platinum:FIELD_EFFECT_UG_EMOTE_EXCLAMATION', ok: 'platinum:FIELD_EFFECT_UG_EMOTE_OK' });
     expect(u.traps.vars.trapsSet).toBe('platinum:VAR_UNDERGROUND_TRAPS_SET');
     expect(u.base.flags).toEqual({ created: 'platinum:FLAG_CREATED_SECRET_BASE', decorated: 'platinum:FLAG_DECORATED_SECRET_BASE' });
     for (const sheet of ['trap_petal', 'trap_bubble', 'trap_smoke', 'trap_radar', 'trap_fire', 'trap_ember', 'trap_leaf', 'trap_boulder', 'trap_boulder_6'])
       expect(ui2d.get(`platinum:ui2d/underground/${sheet}` as Id), sheet).toBeDefined();
     expect(ui2d.get('platinum:ui2d/underground/trap_bubble' as Id)!.animations).toHaveLength(6);
+    // underground_map_transition.c: the player by gender (12 cells of 32×32; the fall, the spin), the hole (four circles
+    // and an empty cell; opening in 7 frames, closing in 8, played forward).
+    for (const gender of ['male', 'female']) {
+      const player = ui2d.get(`platinum:ui2d/underground/transition_${gender}` as Id)!;
+      expect(player.cells, gender).toHaveLength(12);
+      expect(player.cells[0]).toMatchObject({ w: 32, h: 32, ox: 0, oy: 0 });
+      expect(player.animations!.map((a) => a.frames.map((f) => f.cell))).toEqual([[0, 6, 7, 6, 7, 0], [0, 3, 1, 2], [1]]);
+    }
+    const hole = ui2d.get('platinum:ui2d/underground/transition_hole' as Id)!;
+    expect(hole.cells.slice(0, 4).every((c) => c.w === 64 && c.ox === 16 && c.oy === 32)).toBe(true);
+    expect(hole.animations!.map((a) => [a.mode, a.frames.reduce((n, f) => n + f.ticks, 0)])).toEqual([['forward', 7], ['forward', 8]]);
   });
 
   undergroundReplay('sys-underground-kit');

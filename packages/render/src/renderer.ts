@@ -1857,7 +1857,7 @@ class Field implements FieldRenderer {
     }
     this.drawActors(view, alpha);
     if (enhanced) enhanced.stretchShadows([...this.actors.values()].flatMap((a) => (a.kind === 'billboard' ? [a.shadow] : [])), view.clock.seconds, zone);
-    this.effects.update(view.effects, alpha, this.billboardColor);
+    this.effects.update(view.effects, alpha, this.billboardColor, this.camera);
     this.materials.animate(this.state.tick, this.debug.heldTextureAnimations, this.posedAnimations(view.features?.propPoses));
     const weather = need(this.reg.weathers, view.weather, 'weather');
     if (weather.pending?.length) this.reportOnce(`weather:${weather.id}`, 'render:weather', `${weather.id}: ${weather.pending.join(', ')} not decoded`);
