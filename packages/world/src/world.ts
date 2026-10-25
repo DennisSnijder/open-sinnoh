@@ -3349,6 +3349,8 @@ export class FieldWorld implements OpenSinnohWorld {
       return;
     }
     const zone = this.get('zones', t.zone);
+    // FieldTask_MapChangeFromUnderground: the Underground's traps go (TrapsEnv_Free).
+    if (!t.down) this.ug?.leave();
     onWarp(this.reg, this.state, this.zone, zone);
     this.state.previousZone = this.zone.id;
     this.loadMap(t.zone, t.x, t.z, 0, 'down');

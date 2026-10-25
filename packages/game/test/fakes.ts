@@ -508,6 +508,12 @@ export const createFakeScriptRunner: CreateScriptRunner = ({ registries, labels,
     },
     view: () => view,
     takeStartMenuRequest: () => false,
+    fieldReturn() {
+      const zone = registries.zones.get(state.player.zone)!;
+      if (zone.mapScripts.onLoad) runner.runImmediate({ label: zone.mapScripts.onLoad, zone: zone.id, source: 'load' });
+      field().fieldReturned();
+      if (zone.mapScripts.onResume) runner.runImmediate({ label: zone.mapScripts.onResume, zone: zone.id, source: 'resume' });
+    },
     appDone: () => {},
     notice: () => {
       throw new Error('fake vm: no field messages');

@@ -53,6 +53,7 @@ export class FakeRunner implements ScriptRunner {
     return false;
   }
   appDone(): void {}
+  fieldReturn(): void {}
   notice(): void {
     throw new Error('fake runner: no field messages');
   }

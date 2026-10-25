@@ -98,6 +98,7 @@ describe('createGame', () => {
       step: (f: InputFrame) => order.push(`vm ${f.pressed.join()}`),
       view: () => view,
       takeStartMenuRequest: () => false,
+      fieldReturn: () => {},
       appDone: () => {},
       notice: () => {},
       ask: () => {},

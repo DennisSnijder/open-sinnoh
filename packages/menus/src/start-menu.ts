@@ -44,12 +44,15 @@ export function startMenu(ctx: MenuContext): Screen {
     return ENTRIES.filter((e) => (e.id !== 'pokedex' || ctx.state.pokedex.obtained) && (e.id !== 'pokemon' || ctx.state.party.length > 0) && (e.id !== 'retire' || safari) && (e.id !== 'save' || !safari));
   };
   let cursor = Math.max(0, entries().findIndex((e) => e.id === ctx.memory.startEntry));
+  /** The entry whose screen is open over the menu. */
+  let open: string | null = null;
   const select = (i: number): Step => {
     const entry = entries()[i];
     if (!entry) return;
     menuSe(ctx, 1500);
     cursor = i;
     ctx.memory.startEntry = entry.id;
+    open = entry.id;
     switch (entry.id) {
       case 'retire':
         return { close: { app: 'start-menu', retire: true } };
@@ -96,8 +99,20 @@ export function startMenu(ctx: MenuContext): Screen {
       else if (b === 'b' || b === 'x' || b === 'start') { menuSe(ctx, 1500); return CLOSE; }
       return;
     },
+    /**
+     * Back from an entry's screen. The Pokédex, party, bag, trainer card and options replaced the field map on the DS,
+     * so it starts again (StartMenu_Exit* → FieldSystem_StartFieldMap); SAVE runs over the field.
+     */
+    resume(): Step {
+      if (open !== null && FIELD_MAP_APPS.has(open)) ctx.host.fieldReturn?.();
+      open = null;
+      return undefined;
+    },
   };
 }
+
+/** The start menu's entries whose screen is a DS child process (FieldSystem_StartChildProcess). */
+const FIELD_MAP_APPS = new Set(['pokedex', 'pokemon', 'bag', 'trainer', 'options']);
 
 function objective(ctx: MenuContext): Pick<StartMenuView, 'objective'> {
   if (ctx.host.options().objective !== 0) return {};

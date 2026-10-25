@@ -257,6 +257,15 @@ export class Runner implements ScriptRunner {
     });
   }
 
+  /** Decomp FieldMap_Init: the zone's on-load script, the field's dynamic features, then its on-resume script. */
+  fieldReturn(): void {
+    const zone = this.registries.zones.get(this.state.player.zone);
+    if (!zone) throw new Error(`field return: unknown zone ${this.state.player.zone}`);
+    if (zone.mapScripts.onLoad) this.runImmediate({ label: zone.mapScripts.onLoad, zone: zone.id, source: 'load' });
+    this.field.fieldReturned();
+    if (zone.mapScripts.onResume) this.runImmediate({ label: zone.mapScripts.onResume, zone: zone.id, source: 'resume' });
+  }
+
   runImmediate(start: ScriptStart): void {
     const t = this.newThread(start, true);
     const idle: InputFrame = { held: [], pressed: [], touch: null };
@@ -987,7 +996,8 @@ export class Runner implements ScriptRunner {
         return 'continue';
       },
       get_player_starter_species: (t, _c, a) => (setDest(t, a[0], this.getVar(t, this.source('vars', NATIVE_VARS.PLAYER_STARTER)!)), 'continue'),
-      return_to_field: () => 'yield',
+      // Decomp ScrCmd_ReturnToField → FieldTransition_StartMap: the field map starts again after the script's app.
+      return_to_field: () => (this.fieldReturn(), 'yield'),
 
       // player and system
       get_player_gender: (t, _c, a) => (setDest(t, a[0], this.state.gender === 'male' ? 0 : 1), 'continue'),

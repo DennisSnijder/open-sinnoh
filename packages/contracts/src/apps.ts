@@ -496,6 +496,12 @@ export interface AppHost {
   /** The game clock (0.17.0; replaces the unused `date()`). */
   clock(): ClockTime;
   /**
+   * 0.45.0. The start menu's Pokédex, party, bag, trainer card or options closed back to it: on the DS that app replaced
+   * the field map, which starts again (StartMenu_Exit* → FieldSystem_StartFieldMap → FieldMap_Init: the zone's on-load
+   * and on-resume scripts). Absent in hosts without a field (menu tests).
+   */
+  fieldReturn?(): void;
+  /**
    * 0.33.0. The tile in front of the player in the Underground (decomp CommPlayer_GetX/ZInFrontOfPlayer) and what is
    * there for a burial (Spheres_TryBurySphere): `secretBase` (outside the main area), `object` (CommPlayer_
    * CheckNPCCollision), `wall` (TerrainCollisionManager_CheckCollision). Null off the Underground.

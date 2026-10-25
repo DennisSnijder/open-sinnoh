@@ -114,6 +114,7 @@ const KIND: Record<string, keyof typeof CHECKS> = {
   'condition-feed': 'condition',
   'poffin-feed': 'feed',
   'condition-change': 'condition',
+  'poffin-reporter': 'field',
   'amity-follower': 'field',
   'amity-find': 'field',
 };
