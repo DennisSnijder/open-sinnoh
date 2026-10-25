@@ -509,7 +509,7 @@ until idle
 until position 3 3 6000
 +0 release left
 +0 press down
-until position 3 58 6000
+until position 3 58 12000
 +0 release down
 +0 press right
 until position 4 58 6000
