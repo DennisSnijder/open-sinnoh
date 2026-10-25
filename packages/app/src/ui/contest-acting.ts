@@ -13,10 +13,10 @@
  * the flying stars and pips, the reaction bubble, BG1 the message window. Positions are the decomp's (see each draw).
  * Packs without the art (the fixture) get flat shapes in their place.
  */
-import type { AssetRef, ContestActingChoiceView, ContestActingRoundView, Ui2dSheet } from '@opensinnoh/contracts';
+import type { AnimBattlerView, AnimPicture, AssetRef, ContestActingChoiceView, ContestActingRoundView, Ui2dSheet } from '@opensinnoh/contracts';
 import { capFlash } from '@opensinnoh/render/flash';
 import { panelScale } from '../battle/scene.ts';
-import { applyBattlerTransform, battlerTransform, css555, fadeImage, ParticleTextures } from '../battle/anim/draw.ts';
+import { applyBattlerTransform, battlerTransform, css555, drawBgMon, fadeImage, mosaicImage, ParticleTextures } from '../battle/anim/draw.ts';
 import { stop, type DrawContext } from './apps.ts';
 import type { Art } from './art.ts';
 import { el } from './core.ts';
@@ -232,10 +232,32 @@ class ActingScene {
       }
       if (p.slot !== null) this.cell('contest/acting/order', p.slot, 64, 42 + 48 * row, a);
     });
+    // A move animation's BG2: a wave (Surf, Muddy Water) or a battler's picture, under the performer unless raised.
+    const custom = v.anim?.bg.custom;
+    if (custom) {
+      const s = this.sheet(custom.sheet.slice(custom.sheet.indexOf(':ui2d/') + 6));
+      const c = s?.sheet.cells[custom.cell];
+      if (s && c && custom.alpha > 0) {
+        const mod = (x: number, m: number) => ((x % m) + m) % m;
+        g.globalAlpha = custom.alpha;
+        for (const y of [mod(-custom.dy, 512), mod(-custom.dy, 512) - 512])
+          for (const x of [mod(-custom.dx, 512), mod(-custom.dx, 512) - 512]) g.drawImage(s.img, c.x, c.y, c.w, c.h, x, y, c.w, c.h);
+        g.globalAlpha = 1;
+      }
+    }
+    const bgMon = v.anim?.bgMon;
+    if (bgMon && !bgMon.front) this.drawBgMon(d, v, bgMon);
     // The performer: the back picture at (x, y + its height), mirrored; the move animation's transform on battler 0.
     if (v.performer) this.drawPerformer(d, v);
+    if (bgMon?.front) this.drawBgMon(d, v, bgMon);
     if (v.anim) {
       for (const s of v.anim.sprites) {
+        // Copies of the performer's sprite (a hidden target's are never drawn), at its place.
+        if (s.kind === 'pokemon' && s.battler === 0 && v.performer) {
+          const t: AnimBattlerView = { battler: 0, dx: s.x, dy: s.y, scaleX: s.scaleX, scaleY: s.scaleY, rotation: s.rotation, pivotX: 0, pivotY: 0, hidden: false, fade: s.fade, alpha: s.alpha };
+          this.drawMon(d, v, s.picture ?? null, t, s.mosaic ?? 0);
+          continue;
+        }
         if (s.kind !== 'cell' || !s.sheet) continue;
         const sh = this.sheet(s.sheet.slice(s.sheet.indexOf(':ui2d/') + 6));
         const c = sh?.sheet.cells[s.cell!];
@@ -269,43 +291,73 @@ class ActingScene {
   }
 
   private drawPerformer(d: DrawContext, v: ContestActingRoundView): void {
-    const p = v.performer!;
-    const sprites = d.registries.pokemonSprites.get(p.species);
-    const form = sprites?.forms[p.form] ?? sprites?.forms[0];
-    const face = form && ((p.female && form.backFemale) || form.back);
-    const img = form ? this.image(p.shiny ? form.shinyAtlas : form.atlas) : null;
     const t = battlerTransform(v.anim, 0);
-    const cx = p.x + (t?.dx ?? 0);
-    const cy = p.y + (face?.yOffset ?? 0) + (t?.dy ?? 0);
-    const g = this.g;
-    g.save();
-    if (!applyBattlerTransform(g, t, { x: cx, y: cy, k: 1 })) {
-      g.restore();
-      return;
-    }
-    if (!face || !img) {
-      g.fillStyle = '#4060c0';
-      g.beginPath();
-      g.arc(cx, cy + 12, 24, 0, Math.PI * 2);
-      g.fill();
-      g.restore();
-      return;
-    }
+    this.drawMon(d, v, t?.picture ?? null, t, 0);
+  }
+
+  /**
+   * The 80×80 picture a contest animation shows: the performer's own back picture (mirrored as the DS flips symmetrical
+   * forms) or another (`picture` of the hidden target: plain colours), drawn into the scratch canvas; null while it loads.
+   */
+  private monPicture(d: DrawContext, v: ContestActingRoundView, picture: AnimPicture | null, fade: { color: number; amount: number } | null, mosaic: number): { canvas: HTMLCanvasElement; yOffset: number } | null {
+    const p = v.performer;
+    const own = !picture || (picture.battler === 0 && p !== null);
+    const species = picture?.species ?? p?.species;
+    if (!species) return null;
+    const sprites = d.registries.pokemonSprites.get(species);
+    const form = sprites?.forms[picture?.form ?? p?.form ?? 0] ?? sprites?.forms[0];
+    const back = picture ? picture.back : true;
+    const female = own && p?.female === true;
+    const face = form && ((female && (back ? form.backFemale : form.frontFemale)) || (back ? form.back : form.front));
+    const img = form ? this.image(own && p?.shiny ? form.shinyAtlas : form.atlas) : null;
+    if (!face || !img) return null;
     const c = this.scratch;
     c.width = 80;
     c.height = 80;
     const s = c.getContext('2d')!;
     s.clearRect(0, 0, 80, 80);
     s.save();
-    if (p.flip) {
+    if (own && p?.flip) {
       s.translate(80, 0);
       s.scale(-1, 1);
     }
     s.drawImage(img, 0, face.y, 80, 80, 0, 0, 80, 80);
     s.restore();
-    if (t?.fade) fadeImage(s, 80, 80, t.fade);
-    g.drawImage(c, Math.round(cx - 40), Math.round(cy - 40));
+    fadeImage(s, 80, 80, fade);
+    mosaicImage(s, 80, 80, mosaic);
+    return { canvas: c, yOffset: face.yOffset };
+  }
+
+  /** A picture at the performer's place, at its own height, with an animation's transform, partial draw and OBJ mosaic. */
+  private drawMon(d: DrawContext, v: ContestActingRoundView, picture: AnimPicture | null, t: AnimBattlerView | null, mosaic: number): void {
+    const p = v.performer!;
+    const pic = this.monPicture(d, v, picture, t?.fade ?? null, mosaic);
+    const cx = p.x + (t?.dx ?? 0);
+    const cy = p.y + (pic?.yOffset ?? 0) + (t?.dy ?? 0);
+    const g = this.g;
+    g.save();
+    if (!applyBattlerTransform(g, t, { x: cx, y: cy, k: 1 })) {
+      g.restore();
+      return;
+    }
+    if (t?.partial) {
+      g.beginPath();
+      g.rect(Math.round(cx - 40) + t.partial.x, Math.round(cy - 40) + t.partial.y, t.partial.w, t.partial.h);
+      g.clip();
+    }
+    if (!pic) {
+      g.fillStyle = '#4060c0';
+      g.beginPath();
+      g.arc(cx, cy + 12, 24, 0, Math.PI * 2);
+      g.fill();
+    } else g.drawImage(pic.canvas, Math.round(cx - 40), Math.round(cy - 40));
     g.restore();
+  }
+
+  /** BG2 holding a battler's picture: the performer's (mirrored like it) or the hidden target's. */
+  private drawBgMon(d: DrawContext, v: ContestActingRoundView, m: NonNullable<NonNullable<ContestActingRoundView['anim']>['bgMon']>): void {
+    const pic = this.monPicture(d, v, m.picture, m.fade, 0);
+    if (pic) drawBgMon(this.g, pic.canvas, m, { x: 0, y: 0 }, 1);
   }
 
   /** The panels' names (ov17_02242FE8: nickname at 1, 12 + 48·row; trainer at 1, 28 + 48·row) and the message. */

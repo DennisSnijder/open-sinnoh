@@ -6,7 +6,10 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { animSpriteSheetId, type BattleAnimation, type Registries } from '@opensinnoh/contracts';
 import { loadPacks, type Id } from '@opensinnoh/core';
 import { romSlice } from '../../../../tests/rom.ts';
-import { ANIM_FUNCS, ANIM_OPCODES, animCoverage, animSupport, AnimVm, scriptUse } from './index.ts';
+import { animCoverage, animSupport, AnimVm, contestAnimCoverage, scriptUse } from './index.ts';
+import { LAST_FUNCS } from './funcs5.ts';
+
+const LAST = new Set(Object.keys(LAST_FUNCS));
 
 const romPath = process.env.OPENSINNOH_NDS_ROM;
 
@@ -32,22 +35,13 @@ describe.skipIf(!romPath)('battle animations (OPENSINNOH_NDS_ROM)', () => {
     for (const a of anims) if (a.code.length) expect(() => scriptUse(a.code), a.id).not.toThrow();
   });
 
-  it('reduces actual-move fallbacks from 45 to 9, unlocking exactly the requested 36', () => {
-    const addedOps = new Set(['InitSpriteManager', 'LoadCharResObj', 'LoadPlttRes', 'LoadCellResObj', 'LoadAnimResObj', 'AddSpriteWithFunc', 'StartBattlerSlideIn']);
-    const addedFuncs = new Set(['Swagger', 'FakeOut', 'FakeOutCurtain', 'BattlerPartialDraw', 'Camouflage', 'FaintAttack', 'Memento', 'Mimic', 'Snatch']);
-    const moves = anims.filter((a) => a.common === undefined && a.sourceIndex !== 0);
-    const before = moves.filter((a) => {
-      const u = scriptUse(a.code);
-      return [...u.opcodes].some((o) => !ANIM_OPCODES.has(o) || addedOps.has(o)) || [...u.funcs].some((f) => !ANIM_FUNCS.has(f) || addedFuncs.has(f)) || u.spriteFuncs.size;
-    });
-    const after = moves.filter((a) => animSupport(a, reg).length);
-    expect(moves).toHaveLength(467);
-    expect(before).toHaveLength(45);
-    expect(after.map((a) => a.sourceIndex)).toEqual([57, 101, 144, 151, 166, 180, 272, 326, 330]);
-    const unlocked = before.filter((a) => !after.includes(a));
-    expect(unlocked.map((a) => a.sourceIndex)).toEqual([81, 90, 91, 102, 118, 132, 134, 137, 155, 164, 184, 185, 193, 199, 207, 212, 226, 232, 252, 259, 262, 265, 266, 269, 270, 271, 274, 275, 288, 289, 293, 306, 333, 337, 338, 415]);
-    for (const a of unlocked) {
+  it('plays every move script, slot 0 included, in battles, at an ally and in contests', () => {
+    const moves = anims.filter((a) => a.common === undefined);
+    expect(moves).toHaveLength(468);
+    for (const a of moves) {
+      expect(animSupport(a, reg), a.id).toEqual([]);
       expect(animSupport(a, reg, true), a.id).toEqual([]);
+      expect(animSupport(a, reg, false, true), a.id).toEqual([]);
       for (const r of scriptUse(a.code).spriteResources.values()) {
         const sheet = reg.ui2d.get(animSpriteSheetId(r))!;
         expect(sheet.cells.length, a.id).toBeGreaterThan(0);
@@ -55,12 +49,17 @@ describe.skipIf(!romPath)('battle animations (OPENSINNOH_NDS_ROM)', () => {
         expect(animSupport(a, { ...reg, ui2d: new Map() }), a.id).toContain(`sprite/${sheet.id}`);
       }
     }
-  });
-
-  it('plays 458 actual moves plus the supported common animations', () => {
     const cov = animCoverage(reg);
-    expect(cov.moves).toBe(468);
-    expect(cov.real).toBe(458);
+    expect([cov.moves, cov.real, cov.missing.size]).toEqual([468, 468, 0]);
+    const contest = contestAnimCoverage(reg as Registries);
+    expect([contest.moves, contest.real, contest.missing.size]).toEqual([468, 468, 0]);
+    // The last nine and slot 0 need the commands and functions the VM gained last.
+    const lastOps = ['AddSprite', 'StartBattlerSlideOut', 'LoadPokemonSpriteIntoBg', 'RemovePokemonSpriteFromBg'];
+    const last = moves.filter((a) => {
+      const u = scriptUse(a.code, false, true);
+      return [...u.opcodes].some((o) => lastOps.includes(o)) || [...u.funcs].some((f) => LAST.has(f));
+    });
+    expect(last.map((a) => a.sourceIndex)).toEqual([0, 57, 101, 144, 151, 166, 180, 272, 326, 330]);
   });
 
   it('runs every supported script to its end from either side', () => {

@@ -426,6 +426,40 @@ export interface AnimView {
    * 0.27.6: `mask` is the battler id (was its side).
    */
   overlay: { sheet: Id; dx: number; dy: number; alpha: number; mask: number } | null;
+  /** 0.45.0. A battler's picture copied into BG2 (LoadPokemonSpriteIntoBg), or absent. */
+  bgMon?: AnimBgMonView;
+}
+
+/**
+ * 0.45.0. A battler's picture (decomp PokemonSpriteTemplate): whose it is and which face. `battler` finds the
+ * battler's `BattlerView` (gender, shininess) where there is one; `species` and `form` name the picture.
+ */
+export interface AnimPicture {
+  battler: number;
+  species: Id;
+  form: number;
+  /** The back picture (else the front). */
+  back: boolean;
+}
+
+/**
+ * 0.45.0. BG2 holding a battler's picture (decomp LoadPokemonSpriteIntoBg): a 512×512 layer, wrapping, with the 80×80
+ * picture at its top-left and nothing else. Screen pixel (sx, sy) shows layer pixel ((sx + x) mod 512, (sy + y) mod 512);
+ * `lines` (HBlank scrolls) gives each screen line 0–191 its own (x, y) instead.
+ */
+export interface AnimBgMonView {
+  picture: AnimPicture;
+  x: number;
+  y: number;
+  lines: [number, number][] | null;
+  /** Its blend weight, 0–1 (1 opaque). */
+  alpha: number;
+  /** Its palette blend toward `color` (BGR555), `amount` 0–16. */
+  fade: { color: number; amount: number } | null;
+  /** Drawn over the battlers (its priority above the 3D layer's); otherwise between the backdrop and the battlers. */
+  front: boolean;
+  /** Window 0 (screen px, x1 and y1 exclusive): the layer shows only inside it; absent, everywhere. */
+  window?: { x0: number; y0: number; x1: number; y1: number };
 }
 
 /** One battler's sprite as the animation has it (decomp PokemonSprite attributes). */
@@ -450,6 +484,10 @@ export interface AnimBattlerView {
   fade: { color: number; amount: number } | null;
   /** Translucency, 0–1 (1 = opaque). */
   alpha: number;
+  /** 0.45.0. Another picture in the battler's place (decomp StartBattlerSlideIn: Transform, Role Play), at that picture's own height. */
+  picture?: AnimPicture;
+  /** 0.45.0. Only this rectangle of the 80×80 frame is drawn (PokemonSprite_SetPartialDraw: Sketch). */
+  partial?: { x: number; y: number; w: number; h: number };
 }
 
 /**
@@ -486,6 +524,10 @@ export interface AnimSpriteView {
   rotation: number;
   alpha: number;
   fade: { color: number; amount: number } | null;
+  /** 0.45.0. `pokemon`: the picture the copy shows when it is not its battler's own (copied after a StartBattlerSlideIn). */
+  picture?: AnimPicture;
+  /** 0.45.0. OBJ mosaic (G2_SetOBJMosaicSize): blocks of this many px, sampled at their top-left; absent or 1, none. */
+  mosaic?: number;
 }
 
 /** The animation's background effects (decomp BG2/BG3 of the battle screen). */
@@ -511,6 +553,12 @@ export interface AnimBgView {
   } | null;
   /** The backdrop's colours turned to greys (SetBgGrayscale). */
   grayscale: boolean;
+  /**
+   * 0.45.0. A background loaded into BG2 (ScrollCustomBg, MuddyWater: Surf's and Muddy Water's waves): the sheet's cell
+   * (as `effect`'s) at the top-left of a 512×512 wrapping layer, nothing below it, scrolled by `dx`/`dy`, at weight
+   * `alpha` 0–1 over the backdrop and under the battlers.
+   */
+  custom?: { sheet: Id; cell: number; alpha: number; dx: number; dy: number };
 }
 
 export interface Battle {

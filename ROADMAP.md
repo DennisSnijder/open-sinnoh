@@ -35,7 +35,8 @@ experience, EVs and money.
 - The ROM's trainer AI bytecode, ported.
 - Bag, switching, level-up and move learning, evolution, blackout.
 - ROM battle graphics, the single-screen command card, the doubles target screen.
-- Move animations from the ROM's particle data and animation scripts (about 98% of moves); the shiny sparkle.
+- Move animations from the ROM's particle data and animation scripts (every move, in battles and contests); the shiny
+  sparkle.
 - Safari battles in the Great Marsh.
 
 **Menus and services.** Start menu, party, summary, bag, PC boxes, marts, the Pokémon Center, the naming keyboard,
@@ -96,7 +97,8 @@ Pokémon, follower talk and the HGSS look.
 - **Battle Frontier:** the records app; the Castle app's flag marks for bought stats and moves; the Factory, Hall,
   Castle and Arcade pre-battle wipes (FrontierScrCmd_3F types 1–5, drawn as the Tower's).
 - **Town extras:** the TV's traps record (and its group segments, once groups exist); the capsule editor's Test throw.
-- **Polish:** the last move animations (nine, VM-wide).
+- **Polish:** Transform's look kept after the move (the battle view goes back to the user's own picture when the
+  animation ends).
 - **Modding 1.0:** script eject to TypeScript, a mod sandbox, mod docs, and Gen 4 extension points (3D model
   replacement, mod Pokétch apps, camera hooks).
 - **HeartGold/SoulSilver** as a second base pack: Johto and Kanto, the Pokégear, Apricorns, its Safari Zone and

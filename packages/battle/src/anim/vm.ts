@@ -14,7 +14,7 @@
  * ENEMY_SIDE_SLOT_1, PLAYER_SIDE_SLOT_2, ENEMY_SIDE_SLOT_2), which picks its place, world positions and particle
  * resources.
  */
-import type { AnimBattlerView, AnimParticle, AnimSpriteView, AnimView, BattleAnimData, CryMod, ParticleSystem, Registries, StubLog } from '@opensinnoh/contracts';
+import type { AnimBattlerView, AnimParticle, AnimPicture, AnimSpriteView, AnimView, BattleAnimData, CryMod, ParticleSystem, Registries, StubLog } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
 import { BattleBg } from './bg.ts';
 import { ParticleCamera } from './camera.ts';
@@ -22,6 +22,7 @@ import { createEmitterCallback } from './callbacks.ts';
 import { callFunc } from './funcs.ts';
 import { ObjectSprites } from './objects.ts';
 import { startBattlerSlideIn } from './funcs4.ts';
+import { Bg2State, BgMon } from './bg-mon.ts';
 import { instructionLength, OP, OPCODES } from './script.ts';
 import { ParticleManager, SplRandom, type Emitter } from './spl.ts';
 import { sideOf } from './tasks.ts';
@@ -96,6 +97,13 @@ export class MonSprite {
   /** The blend last applied (PokemonSpriteManager's palette), 0–16. */
   fadeAmount = 0;
   fadeColor = 0;
+  /**
+   * Another battler's picture in its place (StartBattlerSlideIn: PokemonSprite_Push and a new template), whose
+   * face, until StartBattlerSlideOut pops it; null: its own.
+   */
+  picture: { battler: number; back: boolean } | null = null;
+  /** PokemonSprite_SetPartialDraw: only this rectangle of the 80×80 frame is drawn; null: all of it. */
+  partial: { x: number; y: number; w: number; h: number } | null = null;
 
   constructor(
     readonly battler: number,
@@ -158,11 +166,15 @@ export class PokeCopy {
   /** Its palette loaded darkened (PaletteData_LoadBufferFromFileStartWithTint), and faded: 0–16 toward `fadeColor`. */
   fade = 0;
   fadeColor = 0;
+  /** ManagedSprite_SetMosaicFlag: drawn through the OBJ mosaic (`AnimVm.objMosaic`). */
+  mosaic = false;
 
   constructor(
     readonly battler: number,
     public x: number,
     public y: number,
+    /** The battler's picture when it was copied (its swapped one, after a StartBattlerSlideIn); null: its own. */
+    readonly picture: { battler: number; back: boolean } | null = null,
   ) {}
 }
 
@@ -185,6 +197,7 @@ export const ANIM_OPCODES = new Set([
   'SwitchBg', 'RestoreBg', 'SwitchBgEx', 'SetBgSwitchVar', 'WaitForPartialBgSwitch', 'WaitForBgSwitch',
   'InitSpriteManager', 'LoadCharResObj', 'LoadPlttRes', 'LoadCellResObj', 'LoadAnimResObj', 'AddSpriteWithFunc', 'StartBattlerSlideIn',
   'FreeSpriteManager', 'SetPokemonSpriteVisible', 'StartPokemonSpriteDrawTask', 'StopPokemonSpriteDrawTask',
+  'AddSprite', 'StartBattlerSlideOut', 'LoadPokemonSpriteIntoBg', 'RemovePokemonSpriteFromBg',
 ]);
 
 /** Decomp default sprite centres by battler type (BATTLER_POS_SOLO_*, BATTLER_POS_*_SLOT_*). */
@@ -262,6 +275,11 @@ export class AnimVm {
   readonly pokemonSprites: (PokeCopy | null)[] = new Array(5).fill(null);
   /** G2_SetBlendAlpha for translucent OBJs (EVA, EVB; 0–16). */
   objBlend = { a: 8, b: 8 };
+  /** G2_SetOBJMosaicSize (one size for both axes): blocks of objMosaic + 1 px. */
+  objMosaic = 0;
+  /** BG2 holding a battler's picture (LoadPokemonSpriteIntoBg), or null. */
+  bgMon: BgMon | null = null;
+  readonly bg2 = new Bg2State();
   /** The stat change pattern over a battler's silhouette (BattleAnimTask_StatChange). */
   overlay: { sheet: Id; dx: number; dy: number; alpha: number; mask: number } | null = null;
 
@@ -350,6 +368,7 @@ export class AnimVm {
       }
     }
     this.objects.tick();
+    this.bgMon?.track();
     this.bg.scroll();
     for (const s of this.sprites) s.stepFade();
     this.drawn = [];
@@ -631,7 +650,7 @@ export class AnimVm {
       case OP.AddPokemonSprite: {
         const b = this.roleBattler(a(1));
         const m = this.sprites[b]!;
-        const copy = new PokeCopy(b, m.x, m.y);
+        const copy = new PokeCopy(b, m.x, m.y, m.picture);
         copy.visible = !m.hide;
         this.pokemonSprites[a(3)] = copy;
         next();
@@ -680,6 +699,23 @@ export class AnimVm {
         return;
       case OP.StartBattlerSlideIn:
         startBattlerSlideIn(this, a(1));
+        next();
+        return;
+      case OP.StartBattlerSlideOut:
+        // ov12_022382BC: PokemonSprite_Pop on the attacker (every participant mode targets it).
+        this.sprite(this.attacker).picture = null;
+        next();
+        return;
+      case OP.AddSprite:
+        this.objects.addPlain(a(1), a(2), { chars: a(3), palette: a(4), cells: a(5), animation: a(6) }, this.sprite(this.defender));
+        next();
+        return;
+      case OP.LoadPokemonSpriteIntoBg:
+        this.bgMon = new BgMon(this, this.roleBattler(a(1)), a(2) === 1);
+        next();
+        return;
+      case OP.RemovePokemonSpriteFromBg:
+        this.bgMon = null;
         next();
         return;
       case OP.RemovePokemonSprite:
@@ -834,6 +870,14 @@ export class AnimVm {
 
   // ---------- the view ----------
 
+  /** A battler's picture for the view: its own (face by its side; a contest's performer shows its back) or the one it holds. */
+  picture(battler: number, swapped: { battler: number; back: boolean } | null): AnimPicture {
+    const b = swapped?.battler ?? battler;
+    const mon = this.deps.battlers[b];
+    if (!mon) throw new Error(`battle anim: no battler ${b} for a picture`);
+    return { battler: b, species: mon.species, form: mon.form, back: swapped ? swapped.back : sideOf(battler) === 'player' };
+  }
+
   view(): AnimView {
     const battlers: AnimBattlerView[] = this.sprites.filter((s) => this.deps.battlers[s.battler]).map((s) => {
       return {
@@ -849,6 +893,8 @@ export class AnimVm {
         pivotY: s.pivotY,
         fade: s.fadeAmount ? { color: s.fadeColor, amount: s.fadeAmount } : null,
         alpha: s.alpha / 31,
+        ...(s.picture ? { picture: this.picture(s.battler, s.picture) } : {}),
+        ...(s.partial ? { partial: { ...s.partial } } : {}),
       };
     });
     return {
@@ -868,12 +914,15 @@ export class AnimVm {
             rotation: (c.rotation & 0xffff) / 0x10000,
             alpha: c.xlu ? Math.min(16, this.objBlend.a) / 16 : 1,
             fade: c.fade ? { color: c.fadeColor, amount: c.fade } : null,
+            ...(c.picture ? { picture: this.picture(c.battler, c.picture) } : {}),
+            ...(c.mosaic && this.objMosaic ? { mosaic: this.objMosaic + 1 } : {}),
           },
         ];
       })],
       ...(this.curtain ? { curtain: { ...this.curtain } } : {}),
       overlay: this.overlay && { ...this.overlay },
       bg: this.bg.view(this.data.backgrounds),
+      ...(this.bgMon ? { bgMon: this.bgMon.view() } : {}),
     };
   }
 }

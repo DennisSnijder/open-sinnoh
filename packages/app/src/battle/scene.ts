@@ -16,12 +16,12 @@
  * as the DS loads during the encounter flash), and until it is in the scene stays black.
  */
 import type { Id } from '@opensinnoh/core';
-import type { AnimBattlerView, AnimSpriteView, AssetRef, AssetSource, BattlerView, BattleView, LoadedFont, Registries, Ui2dSheet } from '@opensinnoh/contracts';
+import type { AnimBattlerView, AnimBgMonView, AnimPicture, AnimSpriteView, AssetRef, AssetSource, BattlerView, BattleView, LoadedFont, PokemonFace, PokemonSpriteForm, Registries, Ui2dSheet } from '@opensinnoh/contracts';
 import { barColor, gaugeCells } from '@opensinnoh/battle/formulas';
 import { drawText } from '@opensinnoh/text';
 import { plainText } from '@opensinnoh/menus';
 import { capFlash, reduceFlashing } from '@opensinnoh/render/flash';
-import { applyBattlerTransform, battlerTransform, css555, fadeImage, ParticleTextures } from './anim/draw.ts';
+import { applyBattlerTransform, battlerTransform, css555, drawBgMon, fadeImage, mosaicImage, ParticleTextures } from './anim/draw.ts';
 
 export const SCENE = { width: 256, height: 192 } as const;
 
@@ -147,6 +147,10 @@ export class BattleScene {
   healthboxes: { battler: number; x: number; y: number; width: number; height: number; hpDisplay: 'bar' | 'numbers' | 'both' }[] = [];
   /** Move animations' particle textures, tinted and tiled as drawn. */
   private readonly particles = new ParticleTextures((id) => this.sheet(id));
+  /** The battlers of the view being drawn (a swapped picture takes its gender and shininess from its battler). */
+  private battlers: BattlerView[] = [];
+  /** A second scratch canvas: BG2's picture. */
+  private readonly bgMonCanvas = document.createElement('canvas');
 
   constructor(
     readonly canvas: HTMLCanvasElement,
@@ -326,8 +330,11 @@ export class BattleScene {
       ctx.rect(this.origin.x, this.origin.y, SCENE.width * this.scale, SCENE.height * this.scale);
       ctx.clip();
     }
+    this.battlers = view.battlers;
     this.drawBackdrop(view);
     this.drawPlatforms(view);
+    // BG2's picture under the 3D layer (its priority equal: the 3D layer wins), over the backdrop.
+    if (view.anim?.bgMon && !view.anim.bgMon.front) this.drawBgMon(view.anim.bgMon);
     // Trainers: a lone one at its side's solo spot; two enemy trainers and every trainer of a 2vs2 at their battlers'
     // spots (decomp BattleDisplay_InitTaskSetTrainerEncounter), the back slot drawn first.
     const spots = trainerSpots(view.topology);
@@ -337,6 +344,7 @@ export class BattleScene {
     if (view.trainer) this.drawTrainer(view.trainer, spots.player);
     if (view.partnerTrainer) this.drawTrainer(view.partnerTrainer, spots.partner);
     for (const b of drawOrder('player', view.battlers)) this.drawBattler(b, battlerTransform(view.anim, b.battler));
+    if (view.anim?.bgMon?.front) this.drawBgMon(view.anim.bgMon);
     // The send-out effect's particles (a capsule's seals or the ball's burst), like an animation's.
     // Kept to the scene: seals at the capsule's rim reach past its bottom edge, where the phone layout has no frame.
     if (view.sendOut) {
@@ -452,6 +460,58 @@ export class BattleScene {
     // A move animation's flash of the backdrop toward a bright colour is capped by Reduce flashing.
     if (bgFx?.fade) this.layer('source-over', css555(bgFx.fade.color), isBright555(bgFx.fade.color) ? capFlash(bgFx.fade.amount / 16) : bgFx.fade.amount / 16);
     if (bgFx?.effect) this.drawSwitchedBg(bgFx.effect);
+    if (bgFx?.custom) this.drawCustomBg(bgFx.custom);
+  }
+
+  /** A background loaded into BG2 (Surf's and Muddy Water's waves): the cell at the 512×512 layer's top-left, wrapping, at its weight. */
+  private drawCustomBg(c: NonNullable<NonNullable<BattleView['anim']>['bg']['custom']>): void {
+    const s = this.sheet(c.sheet);
+    const cell = s?.sheet.cells[c.cell];
+    if (!s || !cell || c.alpha <= 0) return;
+    const { ctx, canvas } = this;
+    const k = this.scale;
+    const mod = (v: number, m: number) => ((v % m) + m) % m;
+    ctx.save();
+    ctx.globalAlpha = c.alpha;
+    ctx.beginPath();
+    ctx.rect(0, this.origin.y, canvas.width, SCENE.height * k);
+    ctx.clip();
+    const top = mod(-c.dy, 512);
+    const left = mod(-c.dx, 512);
+    for (const y of [top, top - 512])
+      for (let x = left - Math.ceil((left + this.origin.x / k) / 512) * 512; this.origin.x + x * k < canvas.width; x += 512)
+        ctx.drawImage(s.img, cell.x, cell.y, cell.w, cell.h, this.origin.x + x * k, this.origin.y + y * k, cell.w * k, cell.h * k);
+    ctx.restore();
+  }
+
+  /** BG2 holding a battler's picture (LoadPokemonSpriteIntoBg). */
+  private drawBgMon(m: AnimBgMonView): void {
+    const look = this.look(m.picture);
+    if (!look) return;
+    const c = this.bgMonCanvas;
+    c.width = 80;
+    c.height = 80;
+    const g = c.getContext('2d')!;
+    g.imageSmoothingEnabled = false;
+    g.drawImage(look.img, 0, look.face.y, 80, 80, 0, 0, 80, 80);
+    fadeImage(g, 80, 80, m.fade);
+    drawBgMon(this.ctx, c, m, this.origin, this.scale);
+  }
+
+  /** A battler's picture: its form, face and atlas (the battler's gender and shininess when it is on the field). */
+  private picture(p: AnimPicture): { form: PokemonSpriteForm | undefined; face: PokemonFace | undefined; img: Img | null } {
+    const b = this.battlers.find((v) => v.battler === p.battler);
+    const sprites = this.deps.registries().pokemonSprites.get(p.species);
+    const form = sprites?.forms[p.form] ?? sprites?.forms[0];
+    const name = p.back ? 'back' : 'front';
+    const face = (b?.gender === 'female' && form?.[`${name}Female`]) || form?.[name];
+    const img = form ? this.image(b?.shiny ? form.shinyAtlas : form.atlas) : null;
+    return { form, face: face || undefined, img };
+  }
+
+  private look(p: AnimPicture): { img: Img; face: PokemonFace } | null {
+    const { face, img } = this.picture(p);
+    return img && face ? { img, face } : null;
   }
 
   /** The stat change pattern seen through a battler's silhouette (decomp: BG2 inside the OBJ window of its sprite copy). */
@@ -695,11 +755,10 @@ export class BattleScene {
     if (!b.visible) return;
     const t: AnimBattlerView | null = copy ? { battler: b.battler, dx: copy.x, dy: copy.y, scaleX: copy.scaleX, scaleY: copy.scaleY, rotation: copy.rotation, pivotX: 0, pivotY: 0, hidden: false, fade: copy.fade, alpha: copy.alpha } : anim;
     const pos = this.place(b);
-    const sprites = this.deps.registries().pokemonSprites.get(b.species);
-    const form = sprites?.forms[b.form] ?? sprites?.forms[0];
-    const faceName = b.side === 'enemy' ? 'front' : 'back';
-    const face = (b.gender === 'female' && form?.[`${faceName}Female`]) || form?.[faceName];
-    const img = form ? this.image(b.shiny ? form.shinyAtlas : form.atlas) : null;
+    // Another battler's picture in its place (Transform, Role Play), at that picture's height.
+    const picture = (copy ? copy.picture : anim?.picture) ?? { battler: b.battler, species: b.species, form: b.form, back: b.side !== 'enemy' };
+    const { form, face, img } = this.picture(picture);
+    const mosaic = copy?.mosaic ?? 0;
     const k = this.scale;
     const cx = pos.x + b.dx + (t?.dx ?? 0);
     const top = pos.y + (face?.yOffset ?? 0) - 40 + (t?.dy ?? 0);
@@ -712,6 +771,11 @@ export class BattleScene {
     if (t?.cropBottom) {
       ctx.beginPath();
       ctx.rect(this.origin.x + (cx - 40) * k, this.origin.y + top * k, 80 * k, (80 - t.cropBottom) * k);
+      ctx.clip();
+    }
+    if (t?.partial) {
+      ctx.beginPath();
+      ctx.rect(this.origin.x + (cx - 40 + t.partial.x) * k, this.origin.y + (top + t.partial.y) * k, t.partial.w * k, t.partial.h * k);
       ctx.clip();
     }
     // Fainting: the sprite sinks behind its own baseline (an animation's scaled sprite is not clipped).
@@ -731,7 +795,7 @@ export class BattleScene {
       const s = b.scale;
       const x = cx - 40 * s;
       const y = top + 80 - 80 * s + b.dy;
-      if (b.flash || t?.fade || b.introShade !== undefined) {
+      if (b.flash || t?.fade || b.introShade !== undefined || mosaic > 1) {
         const c = this.scratch;
         c.width = 80;
         c.height = 80;
@@ -743,7 +807,8 @@ export class BattleScene {
           g.fillStyle = '#fff';
           g.fillRect(0, 0, 80, 80);
           g.globalCompositeOperation = 'source-over';
-        } else fadeImage(g, 80, 80, b.introShade !== undefined ? { color: 0, amount: b.introShade * 16 } : t!.fade);
+        } else fadeImage(g, 80, 80, b.introShade !== undefined ? { color: 0, amount: b.introShade * 16 } : (t?.fade ?? null));
+        mosaicImage(g, 80, 80, mosaic);
         // Reduce flashing: the white flash is laid over the Pokémon at a capped alpha instead of replacing it.
         const alpha = ctx.globalAlpha;
         if (b.flash && reduceFlashing()) {
