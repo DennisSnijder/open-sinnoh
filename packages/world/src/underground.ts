@@ -95,8 +95,8 @@ const TURN_TICKS = 4;
 /** UndergroundMan_CheckForTouchInput's cooldown and TouchRadar_DrawEffects' ring (scale 0–20). */
 const TOUCH_COOLDOWN = 30;
 const TOUCH_RING = 20;
-/** The '!' over the trapped player (UndergroundPlayer_AddExclamationEmote): shown while the trap's screen runs. */
-const EMOTE_TICKS = 40;
+/** The OK over a player who escaped (ov5_021F5488's 60-frame life). */
+const OK_TICKS = 60;
 /** The step back off a tool (Traps_StepBackFromTool: one tile, the client's 8-tick wait). */
 const STEP_BACK_TICKS = 8;
 /** DEFAULT_GOOD_POSITION … UndergroundPC_MoveCamera: the decoration looks at (15, 17) of the base. */
@@ -187,6 +187,13 @@ export class UndergroundField {
    * the player); the player's own laid traps do not.
    */
   private retrieved = { count: 0, trap: 0 };
+  /**
+   * The mark over the player (CommPlayerManager emote): the '!' from a trap going off until the player is free, then the
+   * OK for its 60 ticks (UndergroundPlayer_AddExclamationEmote, _AddOKEmote, _RemoveEmote).
+   */
+  private emote: { kind: 'exclamation' } | { kind: 'ok'; ticks: number } | null = null;
+  /** The rock trap's shadow size (AppHost.undergroundTrapShadow), null when none. */
+  trapShadow: number | null = null;
 
   constructor(private readonly h: UndergroundHost) {}
 
@@ -448,7 +455,7 @@ export class UndergroundField {
   private trigger(trap: number, tool: Running['tool'], own: boolean): void {
     const u = underground(this.h.state);
     this.h.playSe('SEQ_SE_DP_UG_007');
-    this.h.hero().emote = EMOTE_TICKS;
+    this.emote = { kind: 'exclamation' };
     u.records.trapsTriggered = Math.min(999999, u.records.trapsTriggered + 1);
     const name = this.h.state.names.player;
     const effect = trapEffect(trap);
@@ -495,10 +502,11 @@ export class UndergroundField {
     throw new Error(`underground: trap ${run.trap}'s screen ended unescaped`);
   }
 
-  /** Traps_EscapeTrapServer → Traps_ProcessEscapedTrap: the player is free; a tool's victim steps back off it. */
+  /** Traps_EscapeTrapServer → Traps_ProcessEscapedTrap: the player is free (the OK over them); a tool's victim steps back off it. */
   private escape(): void {
     const run = this.running!;
     this.endRunning();
+    this.emote = { kind: 'ok', ticks: OK_TICKS };
     if (run.effect.kind !== 'alert') this.ticker('UndergroundCommon_Text_PlayerEscapedFromTrap', [this.h.state.names.player]);
     if (!run.tool) return;
     // Traps_StepBackFromTool: back one tile from the tool, facing away from it.
@@ -516,7 +524,7 @@ export class UndergroundField {
     p.dirLocked = false;
     p.animPaused = false;
     p.lift = 0;
-    p.emote = 0;
+    this.emote = null;
     this.running = null;
   }
 
@@ -732,6 +740,7 @@ export class UndergroundField {
     }
     if (!this.h.scripts.running() && !this.request) this.stepRunning(input);
     if (this.touchCooldown > 0) this.touchCooldown--;
+    if (this.emote?.kind === 'ok' && --this.emote.ticks <= 0) this.emote = null;
     if (this.touch && ++this.touch.tick > TOUCH_RING) this.touch = null;
     // Mining_SendNormalRadarResults: still for 20 ticks, then a blip a tick for eight ticks.
     if (this.h.moving()) this.still = 0;
@@ -814,7 +823,11 @@ export class UndergroundField {
     return out;
   }
 
-  /** The floor marks of the player's laid traps (Traps_DrawPlacedTrap) and the hole under a trapped player. */
+  /**
+   * The floor marks of the player's laid traps (Traps_DrawPlacedTrap), the hole under a trapped player, the rock trap's
+   * shadow (ov5_DrawGrowingFloorTexture) and the '!' or OK over the player (anchored on the player; the renderer adds
+   * the DS offsets and turns them to the camera).
+   */
   effects(): EffectView[] {
     const out: EffectView[] = [];
     const t = this.h.tables.traps;
@@ -829,6 +842,16 @@ export class UndergroundField {
       const cur = ugTile(p.x, p.z);
       cur[1] = this.h.groundY(p.x, p.z);
       out.push({ key: 0x75470100, effect: t.hole, cur, prev: cur, tick: 0, scale: run.depth });
+    }
+    const p = this.h.hero();
+    if (this.trapShadow !== null) {
+      const cur = ugTile(p.x, p.z);
+      cur[1] = this.h.groundY(p.x, p.z);
+      out.push({ key: 0x75470101, effect: t.hole, cur, prev: cur, tick: 0, scale: this.trapShadow });
+    }
+    if (this.emote) {
+      const effect = this.emote.kind === 'ok' ? t.emotes.ok : t.emotes.exclamation;
+      out.push({ key: this.emote.kind === 'ok' ? 0x75470201 : 0x75470200, effect, cur: [...p.cur], prev: [...p.prev], tick: this.emote.kind === 'ok' ? OK_TICKS - this.emote.ticks : 0 });
     }
     return out;
   }

@@ -330,10 +330,13 @@ export interface World extends FieldHost {
    * 0.33.0. Into the Underground (decomp FieldTask_MapChangeToUnderground, MapChangeUndergroundContext_New): the
    * surface tile is kept as the special location, the BGM fades, the map changes to the Underground tile under the
    * player's chunk, facing down. Blocks input and saving until it is done. No DS Wireless prompt or forced save (no
-   * wireless here; docs/decisions.md).
+   * wireless here; docs/decisions.md). 0.45.0: with the jump into the hole and the fall (`undergroundTransition`).
    */
   enterUnderground(): void;
-  /** 0.33.0. Back up (decomp FieldTask_MapChangeFromUnderground): to the special location, facing down. */
+  /**
+   * 0.33.0. Back up (decomp FieldTask_MapChangeFromUnderground): to the special location, facing down. 0.45.0: with the
+   * rise and the jump out of the hole (`undergroundTransition`).
+   */
   exitUnderground(): void;
   /**
    * 0.33.0. What the Underground's field asks the game to open, taken once (an A press at a mining spot or a vendor,
@@ -349,6 +352,10 @@ export interface World extends FieldHost {
   undergroundMiningRand(): import('@opensinnoh/core').Rand32 | null;
   /** 0.37.0. The decoration's field view (`AppHost.undergroundDecoration`); null ends it. */
   undergroundDecoration(view: import('./underground.ts').UndergroundDecorationView | null): void;
+  /** 0.45.0. The rock trap's shadow (`AppHost.undergroundTrapShadow`); null ends it. */
+  undergroundTrapShadow(size: number | null): void;
+  /** 0.45.0. The way down or up while it is drawn (`UndergroundTransitionView`); null otherwise. */
+  undergroundTransition(): import('./underground.ts').UndergroundTransitionView | null;
   /** 0.37.0. Where the player is in the Underground (`AppHost.undergroundPlace`). */
   undergroundPlace(): 'corridor' | 'open' | 'closed' | null;
   /**

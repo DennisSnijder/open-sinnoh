@@ -81,6 +81,7 @@ import { PartyFollower } from './party-follower.ts';
 import { EternaGym, PastoriaGym, SunyshoreGym, createMapFeature, initMapFeatures, type FeatureHost, type MapFeature } from './gyms/index.ts';
 import { DistortionWorld } from './distortion/feature.ts';
 import { SPARKLE_RENDERER, UndergroundField, undergroundArrival, undergroundTables } from './underground.ts';
+import { UgTransition, type UgTransitionPart } from './underground-transition.ts';
 
 /** The destroy-obstacle effect's animations are 45 frames (graphic/hiden_effect, ov6_02248050). */
 const DESTROY_OBSTACLE_TICKS = 45;
@@ -99,6 +100,8 @@ export const WARP_FADE_TICKS = 8;
 /** Decomp TRAINER_SCORE_EVENT_UNDERGROUND_ENTERED and _UNDERGROUND_100_STEPS. */
 const TRAINER_SCORE_UNDERGROUND_ENTERED = 36;
 const TRAINER_SCORE_UNDERGROUND_100_STEPS = 37;
+/** BrightnessController_StartTransition(30, …): the Underground's top screen fading in after the way down, out before the way up. */
+const UG_TOP_SCREEN_FADE = 30;
 /** Decomp TRAINER_SCORE_EVENT_UNK_15: an egg starts hatching (Field_UpdateDaycare). */
 const SCORE_EGG_HATCHED = 15;
 /** Fly's fades to and from white (hm_cut_in.c FadeOut, FadeIn: StartScreenFade 6 steps of 1 frame). */
@@ -315,7 +318,13 @@ export class FieldWorld implements OpenSinnohWorld {
   /** The Underground kept across a move to or from the secret base (a map load within the visit). */
   private ugKeep: UndergroundField | null = null;
   /** The map change into or out of the Underground (`enterUnderground`, `exitUnderground`) while it runs. */
-  private ugTransit: { phase: 'out' | 'in'; zone: Id; x: number; z: number; down: boolean; base?: { facing: Facing; then: () => void } } | null = null;
+  /**
+   * A map change to or from the Underground (field_map_change.c's tasks) or a move to or from the secret base. The
+   * Underground's: `top` (the top screen's 30-frame fade before going up), `start` (the BGM fades, the jump or the
+   * rise: `anim`), `load` (the map change once the BGM is quiet), `arrive` (the fall or the jump out), `settle` (the top
+   * screen's 30-frame fade after going down: `wait`). The base's: `out` and `in`, the fades around the move.
+   */
+  private ugTransit: { phase: 'out' | 'in' | 'top' | 'start' | 'load' | 'arrive' | 'settle'; zone: Id; x: number; z: number; down: boolean; base?: { facing: Facing; then: () => void }; anim?: UgTransition; wait?: number } | null = null;
 
   constructor(
     private readonly reg: Registries,
@@ -3318,46 +3327,109 @@ export class FieldWorld implements OpenSinnohWorld {
   }
 
   /**
-   * FieldTask_MapChangeToUnderground / _FromUnderground, without the DS Wireless prompt and its save: the BGM fades
-   * (Sound_FadeOutBGM 30 frames) and the screen with it, the map changes (facing down), the screen fades back in.
-   * The hole's jump and the descent animations (underground_map_transition.c) are not drawn yet.
+   * FieldTask_MapChangeToUnderground / _FromUnderground, without the DS Wireless prompt and its save. Going down: the BGM
+   * fades (Sound_FadeOutBGM 30 frames) while the player jumps into the hole and the screen fades, the map changes (facing
+   * down) once the BGM is quiet, the player falls in, then the top screen's 30-frame fade in. Going up: the top screen's
+   * fade out, then the BGM fades while the player rises and the screen fades to white, the map changes, the player jumps
+   * out of the hole (underground_map_transition.c). The secret base's move fades out and in only.
    */
   private startUgTransit(zone: Id, x: number, z: number, down: boolean, base?: { facing: Facing; then: () => void }): void {
     if (this.warpState || this.ugTransit) throw new Error('world: a map change is already under way');
     this.get('zones', zone);
     this.hero.motion = null;
     this.moving = false;
-    // The secret base's move keeps the BGM (SecretBases_MoveToFromSecretBaseTask fades the screens only).
-    if (!base) this.sound.audio.fadeOutBgm(0, 15);
-    this.ugTransit = { phase: 'out', zone, x, z, down, ...(base ? { base } : {}) };
-    this.fade('out', WARP_FADE_TICKS, 'black');
+    if (base) {
+      // SecretBases_MoveToFromSecretBaseTask keeps the BGM and fades the screens only.
+      this.ugTransit = { phase: 'out', zone, x, z, down, base };
+      this.fade('out', WARP_FADE_TICKS, 'black');
+      return;
+    }
+    if (!down) {
+      // FieldTask_MapChangeFromUnderground: the top screen ends and fades out first (BrightnessController 30 frames).
+      this.ugTransit = { phase: 'top', zone, x, z, down, wait: UG_TOP_SCREEN_FADE };
+      return;
+    }
+    this.sound.audio.fadeOutBgm(0, 15);
+    this.ugTransit = { phase: 'start', zone, x, z, down, anim: this.ugAnim('enter-start') };
+  }
+
+  private ugAnim(part: UgTransitionPart): UgTransition {
+    return new UgTransition(part, this.state.gender, {
+      fade: (kind, frames, color) => this.fade(kind, frames, color),
+      fadeDone: () => this.fadeAnim === null,
+      playSe: (name) => this.sound.playNamed(name),
+      heroVisible: (visible) => void (this.hero.visible = visible),
+    });
   }
 
   private stepUgTransit(): void {
     const t = this.ugTransit!;
-    if (this.fadeAnim || this.sound.audio.fadeActive()) return;
-    if (t.phase === 'in') {
-      this.ugTransit = null;
-      t.base?.then();
-      return;
-    }
     if (t.base) {
+      if (this.fadeAnim) return;
+      if (t.phase === 'in') {
+        this.ugTransit = null;
+        t.base.then();
+        return;
+      }
       this.ugKeep = this.ug;
       this.loadMap(t.zone, t.x, t.z, 0, t.base.facing);
       t.phase = 'in';
       this.fade('in', WARP_FADE_TICKS, 'black');
       return;
     }
-    const zone = this.get('zones', t.zone);
-    // FieldTask_MapChangeFromUnderground: the Underground's traps go (TrapsEnv_Free).
-    if (!t.down) this.ug?.leave();
-    onWarp(this.reg, this.state, this.zone, zone);
-    this.state.previousZone = this.zone.id;
-    this.loadMap(t.zone, t.x, t.z, 0, 'down');
-    // CommManUnderground_EnterUnderground: TRAINER_SCORE_EVENT_UNDERGROUND_ENTERED.
-    if (t.down) this.addTrainerScore(TRAINER_SCORE_UNDERGROUND_ENTERED);
-    t.phase = 'in';
-    this.fade('in', WARP_FADE_TICKS, 'black');
+    switch (t.phase) {
+      case 'top':
+        if (--t.wait! > 0) return;
+        this.sound.audio.fadeOutBgm(0, 15);
+        t.phase = 'start';
+        t.anim = this.ugAnim('exit-start');
+        return;
+      case 'start':
+        t.anim!.step();
+        if (t.anim!.done) t.phase = 'load';
+        return;
+      case 'load': {
+        if (this.sound.audio.fadeActive()) return;
+        const zone = this.get('zones', t.zone);
+        // FieldTask_MapChangeFromUnderground: the Underground's traps go (TrapsEnv_Free).
+        if (!t.down) this.ug?.leave();
+        onWarp(this.reg, this.state, this.zone, zone);
+        this.state.previousZone = this.zone.id;
+        this.loadMap(t.zone, t.x, t.z, 0, 'down');
+        // CommManUnderground_EnterUnderground: TRAINER_SCORE_EVENT_UNDERGROUND_ENTERED.
+        if (t.down) this.addTrainerScore(TRAINER_SCORE_UNDERGROUND_ENTERED);
+        t.phase = 'arrive';
+        t.anim = this.ugAnim(t.down ? 'enter-arrive' : 'exit-arrive');
+        t.anim.step();
+        return;
+      }
+      case 'arrive':
+        t.anim!.step();
+        if (!t.anim!.done) return;
+        if (!t.down) {
+          this.ugTransit = null;
+          return;
+        }
+        // FieldTask_MapChangeToUnderground's last state: the top screen's fade in (BrightnessController 30 frames).
+        t.phase = 'settle';
+        t.wait = UG_TOP_SCREEN_FADE;
+        return;
+      case 'settle':
+        if (--t.wait! <= 0) this.ugTransit = null;
+        return;
+      default:
+        throw new Error(`world: the Underground's map change has no phase ${t.phase}`);
+    }
+  }
+
+  /** The way down or up while it draws (`World.undergroundTransition`). */
+  undergroundTransition() {
+    return this.ugTransit?.anim?.view() ?? null;
+  }
+
+  undergroundTrapShadow(size: number | null): void {
+    if (!this.ug) throw new Error('world: the rock trap\'s shadow outside the Underground');
+    this.ug.trapShadow = size;
   }
 
   undergroundRequest() {
@@ -3390,6 +3462,8 @@ export class FieldWorld implements OpenSinnohWorld {
   }
 
   undergroundView() {
+    // FieldTask_MapChangeFromUnderground ends the top screen as the way up starts.
+    if (this.ugTransit && !this.ugTransit.down && !this.ugTransit.base) return null;
     return this.ug?.view() ?? null;
   }
 

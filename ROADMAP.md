@@ -35,7 +35,8 @@ experience, EVs and money.
 - The ROM's trainer AI bytecode, ported.
 - Bag, switching, level-up and move learning, evolution, blackout.
 - ROM battle graphics, the single-screen command card, the doubles target screen.
-- Move animations from the ROM's particle data and animation scripts (about 98% of moves); the shiny sparkle.
+- Move animations from the ROM's particle data and animation scripts (every move, in battles and contests); the shiny
+  sparkle.
 - Safari battles in the Great Marsh.
 
 **Menus and services.** Start menu, party, summary, bag, PC boxes, marts, the Pokémon Center, the naming keyboard,
@@ -49,8 +50,9 @@ the trainer card, the Pokédex, the Town Map and Fly, all 25 Pokétch apps, opti
   round (the ROM's effect, voltage and AI tables, the judges, hearts and voltage meters, the move animations in the
   animation VM's contest mode, every script a battle plays); all behind one seam.
 - The Underground, solo: the Explorer Kit, the field and radar, mining, spheres, vendors, fossil revival; traps (laying,
-  the day's hidden traps, their effects and escape games, digging them up, the touch radar); the Digger Drill and the
-  secret base (entering, leaving, moving it, the goods PC, decorating, the normal flag).
+  the day's hidden traps, their effects and escape games, digging them up, the touch radar, the '!' and OK over the
+  player, the rock trap's shadow); the Digger Drill and the secret base (entering, leaving, moving it, the goods PC,
+  decorating, the normal flag); the way down and up (the hole, the jump, the fall and the rise) from the ROM's sprites.
 - The Battle Tower: singles, doubles and multi, the Battle Salon partners, Palmer, BP and the exchange, on a second
   script VM for the Battle Frontier's scenes; the Frontier Brains' cut-ins, the scenes' particle effects and room
   lights from the ROM.
@@ -94,10 +96,9 @@ Pokémon, follower talk and the HGSS look.
 
 ## Next
 
-- **Underground:** the placed traps' and tools' drawn details (the slide's sprite pose, the rock's floor shadow, the
-  OK emote), the transition's hole and descent animations.
 - **Town extras:** the TV's group segments, once groups exist.
-- **Polish:** the last move animations (nine, VM-wide).
+- **Polish:** Transform's look kept after the move (the battle view goes back to the user's own picture when the
+  animation ends).
 - **Modding 1.0:** script eject to TypeScript, a mod sandbox, mod docs, and Gen 4 extension points (3D model
   replacement, mod Pokétch apps, camera hooks).
 - **HeartGold/SoulSilver** as a second base pack: Johto and Kanto, the Pokégear, Apricorns, its Safari Zone and

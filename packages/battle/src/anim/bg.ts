@@ -91,6 +91,11 @@ export class BattleBg {
   /** ScrollSwitchedBg's sine scroll (ScreenScrollManager_ScrollX): its position, and whether it runs. */
   private sine: { pos: number } | null = null;
   grayscale = false;
+  /**
+   * A switched background loaded into BG2 (ScrollCustomBg, MuddyWater): its id, the screen (0 the player's, 1 the
+   * enemy's, 2 a contest's), the layer's offsets and its blend weight (EVA, 0–16); null: none (or the layer off).
+   */
+  custom: { bg: number; cell: number; x: number; y: number; alpha: number } | null = null;
 
   constructor(private readonly vm: AnimVm) {}
 
@@ -306,6 +311,13 @@ export class BattleBg {
           ? { sheet, cell: this.vm.contest ? 2 : e.reversed ? 1 : 0, alpha: this.effectAlpha, dx: this.offset.x + (this.move?.x ?? 0), dy: this.offset.y + (this.move?.y ?? 0), fade: eff.amount ? { ...eff } : null, rows }
           : null,
       grayscale: this.grayscale,
+      ...(this.custom ? { custom: this.customView(sheets, this.custom) } : {}),
     };
+  }
+
+  private customView(sheets: Id[], c: NonNullable<BattleBg['custom']>): NonNullable<AnimBgView['custom']> {
+    const sheet = sheets[c.bg];
+    if (!sheet) throw new Error(`battle anim: no switched background ${c.bg} in the packs`);
+    return { sheet, cell: c.cell, alpha: Math.min(16, c.alpha) / 16, dx: c.x, dy: c.y };
   }
 }

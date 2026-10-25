@@ -13,6 +13,7 @@ import { anchoredOffset, BACKGROUND, BATTLER_SPRITES, battler, battlerSprites, d
 import { MORE_FUNCS } from './funcs2.ts';
 import { SPRITE_FUNCS } from './funcs3.ts';
 import { SPRITE_COMPANION_FUNCS } from './funcs4.ts';
+import { LAST_FUNCS } from './funcs5.ts';
 
 const FUNC_IMPLS: Record<string, Func> = {
   Nop: () => {},
@@ -343,7 +344,7 @@ function emitterActive(e: Emitter): boolean {
 }
 
 /** The functions the VM runs, by name; `FUNCS` names the others (unimplemented). */
-Object.assign(FUNC_IMPLS, MORE_FUNCS, SPRITE_FUNCS, SPRITE_COMPANION_FUNCS);
+Object.assign(FUNC_IMPLS, MORE_FUNCS, SPRITE_FUNCS, SPRITE_COMPANION_FUNCS, LAST_FUNCS);
 
 export const ANIM_FUNCS = new Set(Object.keys(FUNC_IMPLS));
 

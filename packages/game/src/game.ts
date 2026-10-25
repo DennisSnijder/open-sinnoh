@@ -751,6 +751,7 @@ export function createGame(options: GameOptions): Game {
     undergroundAhead: () => world.undergroundAhead(),
     undergroundMiningRand: () => world.undergroundMiningRand(),
     undergroundDecoration: (view) => world.undergroundDecoration(view),
+    undergroundTrapShadow: (size) => world.undergroundTrapShadow(size),
     undergroundPlace: () => world.undergroundPlace(),
     spiritombVendors: () => device.options().spiritombVendors === 0,
     get contestAnimation() {

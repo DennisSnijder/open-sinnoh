@@ -67,6 +67,7 @@ interface Manager {
 
 export class ObjectSprites {
   private readonly managers = new Map<number, Manager>();
+  private readonly byId = new Map<number, { sprite: ObjectSprite; manager: Manager }>();
   constructor(private readonly vm: AnimVm) {}
   init(id: number, max: number): void {
     if (this.managers.has(id)) throw new Error(`battle OBJ: manager ${id} already exists`);
@@ -93,6 +94,35 @@ export class ObjectSprites {
     };
     startSpriteCallback(this.vm, callback, args, spawn, (s) => { s.active = false; m.sprites.delete(s); });
   }
+  /** AddSprite: a sprite without a callback at a battler's place, kept by `spriteId` for the native functions (BattleAnimSystem_GetSprite). */
+  addPlain(id: number, spriteId: number, resource: AnimSpriteResource, at: { x: number; y: number }): void {
+    const m = this.manager(id);
+    for (const [kind, member] of [['chars', resource.chars], ['palettes', resource.palette], ['cells', resource.cells], ['animations', resource.animation]] as const)
+      if (!m[kind].has(member)) throw new Error(`battle OBJ: ${kind} ${member} was not loaded into manager ${id}`);
+    const sheet = this.vm.deps.registries.ui2d?.get(animSpriteSheetId(resource));
+    if (!sheet) throw new Error(`battle OBJ: missing sheet ${animSpriteSheetId(resource)}`);
+    if (this.byId.has(spriteId)) throw new Error(`battle OBJ: sprite ${spriteId} added twice`);
+    if (m.sprites.size >= m.max) throw new Error(`battle OBJ: manager ${id} exceeded ${m.max} sprites`);
+    const s = new ObjectSprite(sheet);
+    s.x = at.x;
+    s.y = at.y;
+    m.sprites.add(s);
+    this.byId.set(spriteId, { sprite: s, manager: m });
+  }
+  /** BattleAnimSystem_GetSprite: an AddSprite sprite by its id. */
+  get(spriteId: number): ObjectSprite {
+    const e = this.byId.get(spriteId);
+    if (!e || !e.sprite.active) throw new Error(`battle OBJ: no sprite ${spriteId}`);
+    return e.sprite;
+  }
+  /** Sprite_DeleteAndFreeResources on an AddSprite sprite. */
+  remove(spriteId: number): void {
+    const e = this.byId.get(spriteId);
+    if (!e) return;
+    e.sprite.active = false;
+    e.manager.sprites.delete(e.sprite);
+    this.byId.delete(spriteId);
+  }
   free(id: number): void {
     // Tasks can outlive a manager in scripts without a WaitForAnimTasks. Clearing the live set prevents
     // their remaining updates from drawing and releasing twice is harmless for those owned sprites.
@@ -102,11 +132,15 @@ export class ObjectSprites {
     for (const s of m.sprites) s.active = false;
     m.sprites.clear();
     this.managers.delete(id);
+    for (const [k, e] of this.byId) if (e.manager === m) this.byId.delete(k);
   }
   tick(): void { for (const m of this.managers.values()) for (const s of m.sprites) if (s.visible) s.tick(); }
   view(): AnimSpriteView[] {
     return [...this.managers.values()].flatMap((m) => [...m.sprites].filter((s) => s.visible).map((s) => s.view()));
   }
   get size(): number { return [...this.managers.values()].reduce((n, m) => n + m.sprites.size, 0); }
-  clear(): void { this.managers.clear(); }
+  clear(): void {
+    this.managers.clear();
+    this.byId.clear();
+  }
 }
