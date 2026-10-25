@@ -543,6 +543,12 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   slide, the hole and the altered steps are the field's. The microphone traps take held A or a held touch as
   a fixed blow. The escape games' rolls (bubbles, leaves, the smoke's pattern) take the visit's mining
   generator, as the DS's CommSys_Seed does; the smoke's pattern is LCRNG on the DS.
+- **Underground drawn details:** the '!' and OK over the player are the Underground's own fldeff models (23, 24),
+  turned to the camera, not the field's emote; the rock trap's shadow is the floor circle the trap screen grows through
+  `AppHost.undergroundTrapShadow`, since the screen is an app over a field that does not step. The slide needs nothing
+  drawn of its own: the held frame (LOCK_DIR, PAUSE_ANIMATION) is the DS's pose. The way down and up are 2D sprites in
+  a DS frame centred on the view, as Fly's cut-in; the fall and the rise keep the time they spend on the DS's other
+  screen without drawing it.
 - **Secret base:** Platinum has one base layout (every base chunk is the same room). Solo, the base is drawn
   in chunk (0, 0) with the entrance closed and (1, 0) with it open, as the DS's alone mode does; a loaded
   save in a base knows which by the chunk. Flags come only from other players' bases, so the solo base keeps

@@ -49,8 +49,9 @@ the trainer card, the Pokédex, the Town Map and Fly, all 25 Pokétch apps, opti
   round (the ROM's effect, voltage and AI tables, the judges, hearts and voltage meters, the move animations in the
   animation VM's contest mode, every script a battle plays); all behind one seam.
 - The Underground, solo: the Explorer Kit, the field and radar, mining, spheres, vendors, fossil revival; traps (laying,
-  the day's hidden traps, their effects and escape games, digging them up, the touch radar); the Digger Drill and the
-  secret base (entering, leaving, moving it, the goods PC, decorating, the normal flag).
+  the day's hidden traps, their effects and escape games, digging them up, the touch radar, the '!' and OK over the
+  player, the rock trap's shadow); the Digger Drill and the secret base (entering, leaving, moving it, the goods PC,
+  decorating, the normal flag); the way down and up (the hole, the jump, the fall and the rise) from the ROM's sprites.
 - The Battle Tower: singles, doubles and multi, the Battle Salon partners, Palmer, BP and the exchange, on a second
   script VM for the Battle Frontier's scenes; the Frontier Brains' cut-ins, the scenes' particle effects and room
   lights from the ROM.
@@ -94,8 +95,6 @@ Pokémon, follower talk and the HGSS look.
 
 - **Battle Frontier:** the records app; the Castle app's flag marks for bought stats and moves; the Factory, Hall,
   Castle and Arcade pre-battle wipes (FrontierScrCmd_3F types 1–5, drawn as the Tower's).
-- **Underground:** the placed traps' and tools' drawn details (the slide's sprite pose, the rock's floor shadow, the
-  OK emote), the transition's hole and descent animations.
 - **Town extras:** the TV's traps record (and its group segments, once groups exist); the capsule editor's Test throw.
 - **Polish:** the last move animations (nine, VM-wide).
 - **Modding 1.0:** script eject to TypeScript, a mod sandbox, mod docs, and Gen 4 extension points (3D model
