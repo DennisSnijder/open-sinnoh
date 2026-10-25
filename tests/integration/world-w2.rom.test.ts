@@ -41,6 +41,7 @@ describe.skipIf(!romPath)('World W2 on Platinum data (OPENSINNOH_NDS_ROM)', () =
       step: () => {},
       view: () => ({ message: null, yesNo: null, menu: null, panel: { kind: 'idle', title: '' }, app: null }),
       takeStartMenuRequest: () => false,
+      fieldReturn: () => {},
       appDone: () => {},
       ask: () => {
         throw new Error('no field questions');

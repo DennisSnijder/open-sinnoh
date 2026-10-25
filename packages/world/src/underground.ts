@@ -54,6 +54,7 @@ import {
 } from '@opensinnoh/core';
 import {
   newGameRecord,
+  saveTvSegment,
   UNDERGROUND_MARKER,
   type AppResult,
   type EffectView,
@@ -148,6 +149,12 @@ type Running = { trap: number; effect: TrapEffect; tool: { dir: Facing; x: numbe
   | { phase: 'step-back'; ticks: number }
 );
 
+/** USHRT_MAX: retrievedTrapCount stops there. */
+const RETRIEVED_MAX = 0xffff;
+/** TrapsEnv_Free: the traps dug up in one visit that make the record. */
+const TV_TRAPS_RECORD = 10;
+/** sub_0206DEEC: the count it keeps. */
+const TV_TRAPS_MAX = 999;
 const ugTile = (x: number, z: number) => [tileCentre(x), 0, tileCentre(z)] as [number, number, number];
 
 export class UndergroundField {
@@ -175,6 +182,12 @@ export class UndergroundField {
   decoration: UndergroundDecorationView | null = null;
   private moving = false;
   /**
+   * TrapsEnv retrievedTrapCount and retrievedTrapID: the traps someone else set that the player dug up this visit, and
+   * the first's kind. Alone, the day's hidden traps count (their slots lie past the players', so their setter is never
+   * the player); the player's own laid traps do not.
+   */
+  private retrieved = { count: 0, trap: 0 };
+  /**
    * The mark over the player (CommPlayerManager emote): the '!' from a trap going off until the player is free, then the
    * OK for its 60 ticks (UndergroundPlayer_AddExclamationEmote, _AddOKEmote, _RemoveEmote).
    */
@@ -183,6 +196,11 @@ export class UndergroundField {
   trapShadow: number | null = null;
 
   constructor(private readonly h: UndergroundHost) {}
+
+  /** TrapsEnv_Free as the player leaves the Underground: ten or more traps dug up make the TV's traps record (sub_0206DEEC). */
+  leave(): void {
+    if (this.retrieved.count >= TV_TRAPS_RECORD) saveTvSegment(this.h.state, { kind: 'traps', trap: this.retrieved.trap, count: Math.min(this.retrieved.count, TV_TRAPS_MAX) });
+  }
 
   private get ns(): string {
     return this.h.tables.zone.slice(0, this.h.tables.zone.indexOf(':'));
@@ -351,6 +369,10 @@ export class UndergroundField {
     if (result === 'full') {
       this.say('UndergroundCommon_Text_NoRoomForTrap');
       return true;
+    }
+    if (hit.source === 'spawned') {
+      if (this.retrieved.count === 0) this.retrieved.trap = hit.trap;
+      if (this.retrieved.count !== RETRIEVED_MAX) this.retrieved.count++;
     }
     this.h.playSe('SEQ_SE_DP_PIRORIRO2');
     const name = this.h.state.names.player;

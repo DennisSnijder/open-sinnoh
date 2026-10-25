@@ -28,6 +28,7 @@ import {
   hallStreakIs50,
   hallStreakSpecies,
   hallTotalSinglesRecord,
+  nameGroupSpecies,
   judgeStats,
   removeBattlePoints,
   towerQuitWithoutSaving,
@@ -38,6 +39,8 @@ import {
 } from '@opensinnoh/services';
 import { formatNumber, PADDING_SPACES } from './m1b-ops.ts';
 import { FrontierRunner } from './frontier/runner.ts';
+import { MENU_RESULT, ScriptMenu } from './menu.ts';
+import { showScriptMenu } from './ops.ts';
 import type { Handler, Runner, Thread } from './runner.ts';
 
 /** Decomp BT_FUNC_* (constants/battle_tower_functions.h). */
@@ -95,6 +98,11 @@ const BH_LOBBY = { checkPartyEligible: 0, checkStreakActive: 1, currentStreakSpe
 const CA_LOBBY = { checkPartyEligible: 0, checkStreakActive: 1, deleteActiveStreak: 3, selectPokemon: 4 } as const;
 /** Decomp PARTY_SLOT_NONE: no Pokémon picked. */
 const PARTY_SLOT_NONE = 0xff;
+/**
+ * Decomp ScrCmd_ShowBattleHallRecordMonSelectionMenu: the list window at tiles (20, 1), 11 tiles wide, the EXIT entry
+ * MenuEntries_Text_ListMenu_Exit (TEXT_BANK_MENU_ENTRIES 361, message 12).
+ */
+const HALL_RECORD_LIST = { x: 20, y: 1, width: 11, exitBank: 361, exit: 12 } as const;
 /** Decomp MART_FRONTIER_ID_* (generated/mart_frontier_id.txt). */
 const FRONTIER_MARTS = ['platinum:MART_FRONTIER_ID_EXCHANGE_SERVICE_CORNER_RIGHT', 'platinum:MART_FRONTIER_ID_EXCHANGE_SERVICE_CORNER_LEFT'] as Id[];
 
@@ -374,6 +382,40 @@ export function frontierFieldHandlers(r: Runner): Record<string, Handler> {
       return 'continue';
     },
     delete_active_battle_hall_streak: (t, _c, a) => (deleteHallStreak(r.state, val(t, a[0])), 'continue'),
+    /**
+     * Decomp ScrCmd_ShowBattleHallRecordMonSelectionMenu: the letter group's species (A–Z, zukan_data) with a record in
+     * the challenge type, then EXIT; the list opens at the remembered offset and row and writes them back as it moves.
+     * The result is the species' number, or MENU_CANCEL for EXIT and B.
+     */
+    show_battle_hall_record_mon_selection_menu: (t, c, a) => {
+      const type = val(t, a[0]);
+      const records = r.state.frontier?.hall?.records[type] ?? {};
+      const m = new ScriptMenu({ x: HALL_RECORD_LIST.x, y: HALL_RECORD_LIST.y }, 0, true, HALL_RECORD_LIST.exitBank);
+      for (const s of nameGroupSpecies(r.registries, val(t, a[1]))) if (records[s.id]) m.add({ text: s.name, index: s.sourceIndex! });
+      m.add({ text: r.plainSlots(r.textOf(r.bankText(HALL_RECORD_LIST.exitBank, HALL_RECORD_LIST.exit)), []), index: MENU_RESULT.cancel });
+      const offsetVar = r.ref(a[3], 'var');
+      const rowVar = r.ref(a[4], 'var');
+      m.remember(r.getVar(t, offsetVar), r.getVar(t, rowVar));
+      t.menuVar = r.ref(a[2], 'var');
+      r.setVar(t, t.menuVar, MENU_RESULT.pending);
+      r.ui.menu = m;
+      return showScriptMenu(r, t, c, m, 'list', undefined, () => {
+        const p = m.listPosition();
+        r.setVar(t, offsetVar, p.offset);
+        r.setVar(t, rowVar, p.row);
+      }, HALL_RECORD_LIST.width);
+    },
+    /**
+     * Decomp ScrCmd_OpenFrontierRecordsApp → FieldSystem_OpenBattleFrontierRecord: the record viewer for the challenge
+     * type, the facility (FACILITY_*) and the Hall's species (a number; 0 elsewhere).
+     */
+    open_frontier_records_app: (t, c, a) => {
+      const [challengeType, facility, species] = [val(t, a[0]), val(t, a[1]), val(t, a[2])];
+      const id = species ? r.source('species', species)! : null;
+      return r.openApp(c, { app: 'frontier-records', challengeType, facility, species: id }, (result) => {
+        if (result.app !== 'frontier-records') throw new Error(`open_frontier_records_app: got a ${result.app} result`);
+      });
+    },
 
     call_battle_castle_lobby_function: castleLobby('call_battle_castle_lobby_function', (type) => r.state.frontier?.castle?.active[type] === true, (type) => deleteCastleStreak(r.state, type)),
     get_battle_castle_selected_slots: selectedSlots,

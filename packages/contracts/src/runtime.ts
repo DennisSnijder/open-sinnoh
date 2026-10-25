@@ -244,12 +244,6 @@ export interface World extends FieldHost {
   /** Tick step 4. */
   step(input: InputFrame): void;
   /**
-   * The field's return after a battle, between its on-load and on-resume scripts (0.27.29; decomp FieldMap_Init's
-   * DynamicMapFeatures_Init): the map's dynamic features are built again from the saved slot (the Distortion World's
-   * objects from the story state the battle's scripts left).
-   */
-  fieldReturned(): void;
-  /**
    * 0.34.4. One game tick of the weather tasks' sound and lightning (decomp ov5_021D5EB8.c), on every tick the game counts:
    * `field` is false while a battle or a menu app replaces the field map (FieldMap_Exit stops the weather's loop; the
    * field's return starts its weather at full). Sound only: it changes no game state.

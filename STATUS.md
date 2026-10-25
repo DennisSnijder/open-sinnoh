@@ -4,7 +4,7 @@ OpenSinnoh is in beta. Pokémon Platinum (US, rev 0) plays from a new game throu
 Fame and the credits, and on into the post-game. What's next is in [ROADMAP.md](ROADMAP.md); the design
 decisions are in [docs/decisions.md](docs/decisions.md).
 
-Versions: contracts 0.46.0, importer `platinum-109`, HeartGold follower add-on `hgss-followers-4`.
+Versions: contracts 0.47.0, importer `platinum-110`, HeartGold follower add-on `hgss-followers-4`.
 
 ## Works
 
@@ -27,7 +27,7 @@ Versions: contracts 0.46.0, importer `platinum-109`, HeartGold follower add-on `
   trees, the Poké Radar, swarms, the Trophy Garden, Poffins and Amity Square, the Underground played solo
   (mining, spheres, vendors, fossil revival, traps and their escape games, the secret base and its decoration),
   legendaries, roamers and forms, the Battle Tower (singles, doubles, multi), the Battle Factory, the Battle Hall,
-  the Battle Castle and the Battle Arcade (singles and doubles, with Thorton, Argenta, Darach and Dahlia; the Brains' cut-ins, the scenes' particles and lights), the event legendaries through Mystery Gift, and the offline Super Contest circuit (reception, rivals, judging,
+  the Battle Castle and the Battle Arcade (singles and doubles, with Thorton, Argenta, Darach and Dahlia; the Brains' cut-ins, the scenes' particles and lights, each facility's pre-battle wipe; the record viewer), the event legendaries through Mystery Gift, and the offline Super Contest circuit (reception, rivals, judging,
   results, ribbons, prizes, Master flags, the visual round's dress-up and judging, the lobby's photo frames, the Dance
   Competition with the dancers in their outfits, and the acting round with the move animations).
 - **Town extras:** Seals and Ball Capsules (the Seal Case, the Solaceon gifts, the Sunyshore seal shop, the PC's
@@ -45,9 +45,7 @@ Versions: contracts 0.46.0, importer `platinum-109`, HeartGold follower add-on `
 
 ## Not yet
 
-- The Frontier records app; the Castle's bought-info flag marks; the other facilities' pre-battle wipes (drawn as the
-  Tower's).
-- The TV's group, link and traps segments. The capsule editor's Test shows a still image, not the throw.
+- The TV's group and link segments.
 - Wireless and Wi-Fi features: they answer as "no connection".
 - Mods beyond the current pack format (no editor or mod tooling yet).
 - HeartGold and SoulSilver as games (only the follower sprites are imported from HeartGold).

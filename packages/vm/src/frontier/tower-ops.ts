@@ -9,6 +9,7 @@ import { TextPrinter, toPrintOps } from '@opensinnoh/text';
 import { towerPartnerParam } from '../frontier-field-ops.ts';
 import type { Id } from '@opensinnoh/core';
 import { BRAIN_FACILITIES, BrainCutIn } from './effects.ts';
+import { BlockWipe, LineWipe } from './wipes.ts';
 import type { FrontierContext, FrontierHandler, FrontierRunner } from './runner.ts';
 
 /** Decomp BT_FUNC_* (constants/battle_tower_functions.h) the battle rooms call. */
@@ -118,32 +119,68 @@ export function towerFrontierHandlers(): Record<string, FrontierHandler> {
       return introMessage(f, c, o.trainer * 3);
     },
     /**
-     * Decomp FrontierScrCmd_3F → Unk_ov104_0223F65C[type] (ov104_02231148 for the tower, type 0): the battle music, two
-     * white flashes of the main screen (ov104_0223E894: 0 → 16 → 0 brightness, 3 frames each way), then the screen
-     * fades to black over 12 frames (FADE_TYPE_UNK_32's pattern drawn as a plain fade). The other facilities' wipes
-     * (types 1–5) are not built yet: logged, the same flashes and fade.
+     * Decomp FrontierScrCmd_3F → Unk_ov104_0223F65C[type]: the pre-battle wipe (the battle's music starts with the battle).
+     * Types 0–4 first flash the main screen white twice (ov104_0223E894: 0 → 16 → 0 brightness, 3 frames each way), then:
+     * 0 the Tower (ov104_02231148) fades to black over 12 frames (FADE_TYPE_UNK_32's pattern drawn as a plain fade);
+     * 1 the Hall and 2 the Arcade fill BG1 black block by block (`BlockWipe`), then the screen is black; 3 the Factory and
+     * 4 the Castle run the line wipe (`LineWipe`) while BG1–3 and the sprites darken over 40 frames, then BG3 goes off.
+     * Type 5 (ov104_022319CC, a wave on BG3 that never ends) is in no script: a mod's call is loud.
      */
     fr_cmd_3f: (f, c, a) => {
       const type = f.val(c, a[0]);
-      if (type !== 0) f.r.log.stub(`frontier:encounter-effect-${type}`, `frontier encounter effect ${type} (another facility's wipe) is drawn as the tower's`);
-      const steps: [boolean, number, 'white' | 'black'][] = [
-        [true, 3, 'white'],
-        [false, 3, 'white'],
-        [true, 3, 'white'],
-        [false, 3, 'white'],
-        [true, 12, 'black'],
+      if (type > 4) throw new Error(`FrontierScrCmd_3F: wipe ${type} (the endless BG3 wave, used by no script) is not built`);
+      const flashes: [boolean, number][] = [
+        [true, 3],
+        [false, 3],
+        [true, 3],
+        [false, 3],
       ];
       let i = 0;
-      const next = () => {
-        const [out, ticks, color] = steps[i++]!;
-        f.scene.startFade(out, ticks, color);
+      const flash = () => {
+        const [out, ticks] = flashes[i++]!;
+        f.scene.startFade(out, ticks, 'white');
       };
-      next();
+      flash();
+      let state: 'flash' | 'wipe' | 'end' = 'flash';
       return f.pause(c, () => {
-        if (!f.scene.fadeDone()) return false;
-        if (i === steps.length) return true;
-        next();
-        return false;
+        const scene = f.scene;
+        if (state === 'flash') {
+          if (!scene.fadeDone()) return false;
+          if (i < flashes.length) {
+            flash();
+            return false;
+          }
+          state = 'wipe';
+          if (type === 0) scene.startFade(true, 12, 'black');
+          else if (type === 1 || type === 2) {
+            scene.wipe = new BlockWipe(type === 1 ? 'rows' : 'columns');
+            return false;
+          } else {
+            scene.wipe = new LineWipe(type === 3 ? 1 : 2, scene.lineLayers());
+            scene.startFade(true, 40, 'black');
+          }
+        }
+        const wipe = scene.wipe;
+        if (state === 'wipe') {
+          if (type === 0) return scene.fadeDone();
+          if (wipe instanceof BlockWipe) {
+            // The step after the last block ends it (the default case of ov104_022311BC / 022312D8).
+            if (wipe.step()) state = 'end';
+            return false;
+          }
+          if (wipe instanceof LineWipe) {
+            wipe.step();
+            if (!scene.fadeDone()) return false;
+            wipe.bgHidden = true;
+            state = 'end';
+            return false;
+          }
+          throw new Error('FrontierScrCmd_3F: the wipe is gone');
+        }
+        // ov104_02231AA8: both screens black, the wipe's window and task freed.
+        scene.blackOut();
+        scene.wipe = null;
+        return true;
       });
     },
     /**

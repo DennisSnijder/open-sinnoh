@@ -169,6 +169,11 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   When needed they will be generator-based labels stepped by the VM.
 - **The frontier VM runs inside the field VM,** as the DS's frontier app runs over the waiting field
   script. It shares the field's message box and menus; its battles run on copies (nothing written back).
+- **The field map starts again after an app** as FieldMap_Init does on the DS: the zone's on-load script, its dynamic
+  features, then its on-resume script, run to completion. It happens at `return_to_field` (ScrCmd_ReturnToField: every
+  script that opens an app), when the start menu's Pokédex, party, bag, trainer card or options close back to it
+  (StartMenu_Exit* → FieldSystem_StartFieldMap; SAVE runs over the field), before a field move or item those started,
+  and after a battle. The field itself stays up; only the scripts and the dynamic features run again.
 - **Choices where the decomp is undefined** throw rather than guess (for example AI commands that never
   advance, an unknown operand).
 
@@ -545,6 +550,16 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   Factory door light is a BG3 patch per palette step and the Hall lights a second BG3 frame, both imported. The Hall
   room's palette task changes a standard BG palette no 8bpp layer reads, so it is not modelled. The Castle room's BG2,
   particles and characters share priority 2: BG2 and the particles go under the characters there.
+- **The facilities' pre-battle wipes** (FrontierScrCmd_3F) are stepped headless in the frontier VM and drawn from the
+  view: the Hall's and the Arcade's as the black rects their block steppers fill on BG1, the Factory's and the Castle's
+  as one affine reference point per line pair for BG2 and BG3. A reference point written in H-blank is that line's
+  origin on the hardware, so each pair shows the layer's row at the point's y (the decomp reads BG2's and BG3's X offset
+  for both axes, kept). The brightness ramps are drawn as the scene's fade. Type 5 (an endless BG3 wave) is in no
+  script and throws.
+- **The record viewer** reads the saved Frontier state as the DS's app reads its save (the Hall's latest streak only for
+  the species that set it; always PREV there). Its text comes from the ROM's records bank by name, so packs without it
+  (the fixture) have no record viewer. The Hall's record list is a scripted list menu built from the A–Z name groups
+  the Pokédex sorts by (zukan_data's lists, which the ROM test compares).
 - **Underground (solo):** the Explorer Kit, mining from ROM tables, spheres, vendors, fossils, traps and the
   secret base. Seeds come from the clock and the trainer id, not ticks, so boards are the same whatever
   replays wait. No link play: other players' traps, bases and flags have no stand-in.
@@ -552,7 +567,8 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   link's), as do the day's hidden ones; A digs either up. Each trap's screen is an app over the field; the
   slide, the hole and the altered steps are the field's. The microphone traps take held A or a held touch as
   a fixed blow. The escape games' rolls (bubbles, leaves, the smoke's pattern) take the visit's mining
-  generator, as the DS's CommSys_Seed does; the smoke's pattern is LCRNG on the DS.
+  generator, as the DS's CommSys_Seed does; the smoke's pattern is LCRNG on the DS. The TV's traps record counts the
+  day's hidden traps dug up in a visit: their slots give them a setter that is never the player (docs/research/tv.md).
 - **Underground drawn details:** the '!' and OK over the player are the Underground's own fldeff models (23, 24),
   turned to the camera, not the field's emote; the rock trap's shadow is the floor circle the trap screen grows through
   `AppHost.undergroundTrapShadow`, since the screen is an app over a field that does not step. The slide needs nothing
@@ -580,8 +596,10 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   opaque backdrop); a board patched in place repaints that backdrop when its picture changes.
 - **The capsule editor** is one board: the DS touch screen plus a 48 px strip for the message the DS shows on its other
   screen. Editing is touch-only on the DS; our keys add a hand that jumps between list seals, buttons and placed seals,
-  moves a held seal pixel by pixel with acceleration, drops it with A and returns it to the case with B. Its Test shows a
-  still image of the capsule around the Pokémon; the send-out effect lives in the battle package.
+  moves a held seal pixel by pixel with acceleration, drops it with A and returns it to the case with B. Its Test plays
+  the battle's send-out effect on a copy of the Pokémon, stepped headless in the menu model through
+  `@opensinnoh/battle/particles` (its own SPL stream), with the decomp's ball, timing and sounds. Its length comes from
+  that simulation, and the single board shows the top screen only while the throw plays.
 - **The seals' send-out effect** runs in the battle on the battle's SPL, one system per seal, from the frame the ball
   opens, with the ROM's delays by distance. Only a capsule holds the send-out until its seals end; the default ball burst
   plays without holding, so battles without capsules keep their tick counts. Ball-particle SPAs share `particleSystems`

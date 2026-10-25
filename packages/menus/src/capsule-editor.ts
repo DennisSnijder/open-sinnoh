@@ -15,8 +15,8 @@
  *   trainer score event 6; CANCEL leaves at once when nothing changed, else asks "Quit without changing the capsule
  *   design?": YES puts the capsule and every loose count back as they were at EDIT and leaves as CONFIRM does, NO
  *   goes on editing.
- * - Test: OpenSinnoh shows a still (the Pokémon and the seals where the send-out effect starts them) for TEST_TICKS or
- *   until A or B; the DS throws the Pokémon and plays the seals' particles (the battle's send-out effect).
+ * - Test (capsule-test.ts): a copy of the first non-Egg party Pokémon (the holder, when the capsule has one) comes out
+ *   of its ball with the capsule as it is on screen and the battle's send-out effect; input waits until it is over.
  * - Keys (OpenSinnoh: the DS edits by touch only): a hand moves between the list's seals, the page arrows, the buttons
  *   and the placed seals (the D-pad jumps to the nearest in that direction); A presses there (a list seal comes out at
  *   the capsule's centre); while a seal is held the D-pad moves it 1 px a tick (2 after 8 ticks, 4 after 24), A drops
@@ -27,14 +27,16 @@
 import { isShiny, monGender, type BallSeal, type Button, type Pokemon } from '@opensinnoh/core';
 import { dexOf, SEALS, type CapsuleEditorView, type InputFrame } from '@opensinnoh/contracts';
 import { capsuleHolder, giveOrTakeSeal, incrementTrainerScore, onCapsule, removeCapsule, returnSeal, saveCapsule, sealList, sealTables, shiftCapsules } from '@opensinnoh/services';
+import { SplRandom } from '@opensinnoh/battle/particles';
+import { CapsuleTest } from './capsule-test.ts';
 import { menuSe, type MenuContext } from './context.ts';
 import { partyScreen } from './party.ts';
 import { sealNameText } from './seal-mart.ts';
 import { moveCursor, tapIndex, type Screen, type Step } from './stack.ts';
 import type { MenuKey } from './strings.ts';
 
-/** SDAT sequences (§8): SE_CONFIRM, SEQ_SE_DP_DECIDE, _CUSTOM02, _PIRORIRO, _CUSTOM06, _BOX02, _BOX01, _CUSTOM05. */
-const SE = { confirm: 1500, decide: 1501, page: 1733, done: 1506, refuse: 1522, pick: 1515, drop: 1514, test: 1734 } as const;
+/** SDAT sequences (§8): SE_CONFIRM, SEQ_SE_DP_DECIDE, _CUSTOM02, _PIRORIRO, _CUSTOM06, _BOX02, _BOX01. */
+const SE = { confirm: 1500, decide: 1501, page: 1733, done: 1506, refuse: 1522, pick: 1515, drop: 1514 } as const;
 /** Decomp TRAINER_SCORE_EVENT_UNK_06: every CONFIRM. */
 const SCORE_EVENT = 6;
 /** The cell bank of the seals in `capsule/seals` starts at cb_data member 184. */
@@ -60,8 +62,6 @@ const SEAL_TOUCH = 10;
 const inRect = (r: Rect, x: number, y: number) => x >= r.left && x < r.right && y >= r.top && y < r.bottom;
 /** The pressed button's frame shows this long. */
 const PRESS_TICKS = 4;
-/** OpenSinnoh's Test still. */
-export const TEST_TICKS = 60;
 /** CONFIRM's "Finished editing the capsule." while the editor slides away (the exit fade, 16 frames, and the slide, 4). */
 const FINISH_TICKS = 20;
 /** The keys' seal speed: 1 px a tick, 2 after 8 ticks held, 4 after 24. */
@@ -72,10 +72,8 @@ const SPEED = [
 ];
 /** The capsule's centre, where a seal taken with the keys comes out. */
 const CENTRE = { x: 190, y: 70 };
-/** The Test still: the Pokémon's place (CAPSULE_MON_SPRITE_X/Y_BASE) and the seals around a point 30 px above it (§6.3). */
-const TEST_AT = { x: 192, y: 48 };
-/** Where the Test still draws a seal stored at (x, y): the send-out effect's offset (x − 190, y − 70) from 30 px above the Pokémon. */
-const testSealAt = (s: { x: number; y: number }) => ({ x: TEST_AT.x + s.x - CENTRE.x, y: TEST_AT.y - 30 + s.y - CENTRE.y });
+/** The cancel prompt's dim: PaletteData_StartFade to 10/16 toward black. */
+const ASK_DIM = 10 / 16;
 
 type Phase =
   | { kind: 'select' }
@@ -84,7 +82,7 @@ type Phase =
   | { kind: 'message'; text: string; then: () => Step }
   | { kind: 'edit' }
   | { kind: 'ask'; yes: boolean }
-  | { kind: 'test'; ticks: number; mon: Pokemon }
+  | { kind: 'test'; run: CapsuleTest }
   | { kind: 'finish'; ticks: number };
 
 export function capsuleEditorScreen(ctx: MenuContext): Screen {
@@ -100,6 +98,9 @@ export function capsuleEditorScreen(ctx: MenuContext): Screen {
   let message: string | null = t.t('capsuleChoose');
   /** The tick's input was taken by `tick` (the editor and the Test read the frame themselves). */
   let consumed = false;
+  /** The Test's particles' own random stream (never the game's), and its hold counter (the DS never resets it while the app runs). */
+  const testRng = new SplRandom(0);
+  const testHeld = { frames: 0 };
 
   // --- the editor's state ---
   /** The capsule being edited, back to front (the last is drawn in front). */
@@ -152,6 +153,8 @@ export function capsuleEditorScreen(ctx: MenuContext): Screen {
   };
   const set = (): Step => {
     toSelect();
+    // The DS leaves the app for the party menu and starts it again.
+    testHeld.frames = 0;
     return { push: partyScreen(ctx, { kind: 'ball-seal', index: cursor }) };
   };
   const startShift = (): Step => {
@@ -219,8 +222,9 @@ export function capsuleEditorScreen(ctx: MenuContext): Screen {
         const holder = capsuleHolder(ctx.state.party, cursor);
         const mon = holder >= 0 ? ctx.state.party[holder]! : ctx.state.party.find((m) => !m.isEgg);
         if (!mon) throw new Error('capsule editor: no Pokémon to test with');
-        se(SE.test);
-        phase = { kind: 'test', ticks: TEST_TICKS, mon };
+        // THROW_SET_CAPSULE: a copy holding the capsule as it is on screen (SealPlacement_GetCapsuleSeals, front first).
+        const copy: Pokemon = { ...mon, capsule: { id: cursor + 1, seals: [...working].reverse().map((s) => ({ ...s })) } };
+        phase = { kind: 'test', run: new CapsuleTest({ registries: ctx.registries, tables, rng: testRng, se, held: testHeld }, copy) };
         message = t.t('capsuleConfirming');
         return;
       }
@@ -382,7 +386,8 @@ export function capsuleEditorScreen(ctx: MenuContext): Screen {
       }
       if (p.kind === 'test') {
         consumed = true;
-        if (--p.ticks <= 0 || f.pressed.includes('a') || f.pressed.includes('b') || f.tap === 'next' || f.tap === 'back') {
+        p.run.tick();
+        if (p.run.done) {
           phase = { kind: 'edit' };
           message = null;
           stylus = null;
@@ -487,10 +492,11 @@ export function capsuleEditorScreen(ctx: MenuContext): Screen {
     view(): CapsuleEditorView {
       const p = phase;
       const editing = p.kind === 'edit' || p.kind === 'ask' || p.kind === 'test';
-      const screen = p.kind === 'test' ? 'test' : editing ? 'edit' : 'select';
-      const shown = editing ? working : [...sealCase().capsules[cursor]!].reverse();
+      const testing = p.kind === 'test' && p.run.onTop ? p.run : null;
+      const screen = testing ? 'test' : editing ? 'edit' : 'select';
+      const shown = testing ? [] : editing ? working : [...sealCase().capsules[cursor]!].reverse();
       const ghostAt = held !== null && editing ? held : -1;
-      const testMon = p.kind === 'test' ? p.mon : null;
+      const testMon = testing?.mon;
       return {
         app: 'capsule-editor',
         screen,
@@ -501,7 +507,7 @@ export function capsuleEditorScreen(ctx: MenuContext): Screen {
         }),
         cursor,
         shift: p.kind === 'shift' ? p.other : null,
-        seals: shown.map((s, k) => ({ cell: cellOf(s.seal), ...(testMon ? testSealAt(s) : { x: s.x, y: s.y }), ghost: k === ghostAt && !onCapsule(s.x, s.y) })),
+        seals: shown.map((s, k) => ({ cell: cellOf(s.seal), x: s.x, y: s.y, ghost: k === ghostAt && !onCapsule(s.x, s.y) })),
         list: editing ? pageIds.map((id) => ({ cell: cellOf(id), count: String(sealCase().counts[id - 1]).padStart(3, ' ') })) : [],
         page: { index: page, count: pages },
         pressed: pressed?.id ?? null,
@@ -511,10 +517,8 @@ export function capsuleEditorScreen(ctx: MenuContext): Screen {
         message: p.kind === 'message' ? { text: p.text, waiting: true } : p.kind === 'ask' ? { text: t.t('capsuleQuitAsk'), waiting: false } : message ? { text: message, waiting: false } : null,
         menu: p.kind === 'menu' ? { entries: p.entries.map((e) => ({ label: t.t(e.key) })), cursor: p.cursor } : null,
         yesNo: p.kind === 'ask' ? { yes: t.t('yes'), no: t.t('no'), cursor: p.yes ? 0 : 1 } : null,
-        test: testMon
-          ? { species: testMon.species, form: testMon.form, female: monGender(dexOf(ctx.registries), testMon) === 'female', shiny: isShiny(testMon.otId, testMon.pid) }
-          : null,
-        dim: p.kind === 'ask',
+        test: testing && testMon ? testing.view({ species: testMon.species, form: testMon.form, female: monGender(dexOf(ctx.registries), testMon) === 'female', shiny: isShiny(testMon.otId, testMon.pid) }) : null,
+        dim: p.kind === 'ask' ? ASK_DIM : p.kind === 'test' && !testing ? p.run.dim : 0,
       };
     },
   };

@@ -1,7 +1,7 @@
 /**
  * Seals and Ball Capsules on the ROM (docs/research/seals.md): the imported seal tables against the decomp's
- * (mart_items.h, the send-out delays), the editor placing a seal on the ROM's art and texts, an NPC trainer's capsule
- * in battle, and the seal replays.
+ * (mart_items.h, the send-out delays), the editor placing a seal on the ROM's art and texts and its Test playing the
+ * seal's particles, an NPC trainer's capsule in battle, and the seal replays.
  */
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_CLOCK, type Id, type Pokemon } from '@opensinnoh/core';
@@ -81,6 +81,22 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('Seals (OPENSINNOH_NDS_ROM)', (
     expect(v().status).toBe('A Seal');
     tap('seal:200,60');
     tap('seal-up');
+    // Test: Piplup comes out of its ball with the A Seal's `ball_particle.narc` system (the battle's send-out effect) and
+    // goes back in; the editor goes on with nothing saved.
+    tap('seal:32,171');
+    tap('seal-up');
+    const frames: CapsuleEditorView[] = [];
+    while (frames.length < 1000 && (v().screen !== 'edit' || v().message)) {
+      app.step(idle);
+      frames.push(v());
+    }
+    const sheets = new Set(frames.flatMap((f) => f.test?.particles.map((q) => q.textures) ?? []));
+    expect(sheets).toContain(`platinum:ui2d/battle/ball_particles/${tables().types[50]!.particle}`);
+    expect(frames.some((f) => f.test?.sprite?.scale === 1)).toBe(true);
+    expect(frames.length).toBeGreaterThan(100);
+    expect(frames.length).toBeLessThan(400);
+    expect(s.sealCase.capsules[0]).toEqual([]);
+    expect(v()).toMatchObject({ screen: 'edit', seals: [{ x: 200, y: 60 }] });
     tap('seal:104,171');
     tap('seal-up');
     expect(s.sealCase.capsules[0]).toEqual([{ seal: 50, x: 200, y: 60 }]);

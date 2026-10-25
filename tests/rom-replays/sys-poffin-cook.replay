@@ -2,7 +2,8 @@
 # by the tables, COOK ALONE, the bag's berries (CONFIRM), the berry drops in and the cooking runs with Right held (the
 # keys' stand-in for the stylus, stirring clockwise round the pot); RESULTS, the Poffin put away, "keep cooking?" NO.
 # The Poffin's flavours follow the stirring (each seed rolls its own directions); its smoothness is the berry's less 1
-# (a Cheri Berry's 25). The Poffin House reporter's data is the Poffin's type. The save keeps the Poffin.
+# (a Cheri Berry's 25). The Poffin House reporter's data is the Poffin's type, and the reporter stands in the house as soon as the cooking
+# ends. The save keeps the Poffin.
 party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK
 give item platinum:ITEM_POFFIN_CASE 1
 give item platinum:ITEM_CHERI_BERRY 2
@@ -39,24 +40,12 @@ advance text
 until idle
 +0 assert state poffins[0].smoothness 24
 +0 assert state tv.pending.poffin 27
-# Out and back in: the house's resume script shows the TV reporter (the Poffin is pending, PoffinHouse_OnResume), so the
+# Back on the field (ReturnToField: FieldMap_Init runs the house's resume script), the TV reporter is there at once:
+# the Poffin is pending (PoffinHouse_OnResume clears FLAG_HIDE_POFFIN_HOUSE_REPORTER and adds LOCALID_REPORTER). The
 # reload keeps the state.
-+0 press down
-until position 5 12 120
-+0 release down
-until idle
-+0 press right
-until position 8 12 240
-+0 release right
-until idle
-+0 press down
-until state player.zone "platinum:MAP_HEADER_HEARTHOME_CITY" 300
-+0 release down
-until idle 300
-+0 press up
-until state player.zone "platinum:MAP_HEADER_POFFIN_HOUSE" 300
-+0 release up
-until idle 300
++0 assert flag platinum:FLAG_HIDE_POFFIN_HOUSE_REPORTER false
++0 assert state objects[localId=4].zone "platinum:MAP_HEADER_POFFIN_HOUSE"
++30 screenshot poffin-reporter
 +0 reload
 until idle
 +0 assert state poffins[0].smoothness 24

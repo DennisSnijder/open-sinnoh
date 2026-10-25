@@ -2,7 +2,8 @@
  * The Ball Capsule editor in the app on the real ROM (OPENSINNOH_NDS_ROM; desktop and phone), through
  * `window.openSinnohGame` (tests/rom-replays sys-seals-capsule): the PC's BALL CAPSULES, the capsule grid, the editor
  * (a seal placed by the stylus taps and one by the keys, then, at the editor's screenshot, the keys' seal dragged to a
- * new place with the mouse on desktop and the finger on the phone), the Test's still, SET through the party. At each
+ * new place with the mouse on desktop and the finger on the phone), the Test (Staravia out of its ball with the seals'
+ * particles), SET through the party. At each
  * screenshot line the screen is checked: the editor is one whole-pixel board (the DS screen and the message strip) in
  * the viewport, passing the shared fit checks (fit.ts), on phones full screen (centred over an opaque backdrop), its canvas showing
  * the ROM's art. Screenshots go to test-artifacts (ROM content, never commit).
@@ -160,6 +161,9 @@ const CHECKS: Record<string, (name: string) => Promise<void>> = {
     const v = await editor();
     expect(v?.screen, name).toBe('test');
     expect(v?.test?.species, name).toBe('platinum:SPECIES_STARAVIA');
+    // Out of the ball at full size, the seals' particles playing round it.
+    expect(v?.test?.sprite?.scale, name).toBe(1);
+    expect(v?.test?.particles.length, name).toBeGreaterThan(0);
     await board(name, 'test');
     expect((await canvasPixel(4, 100)).slice(0, 3).some((c) => c > 100), name).toBe(true);
   },

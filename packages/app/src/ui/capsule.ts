@@ -11,9 +11,11 @@
  * - edit: `capsule/sub3` with the list's seals and loose counts, the page arrows, Test, CONFIRM and CANCEL (their
  *   pressed frame), the corner arrows round the capsule, the placed seals (translucent while held off the circle) and the
  *   keys' hand (`box/cursor`). The stylus is the pointer: `seal:<x>,<y>` while it is down, `seal-up` when it lifts.
- * - test: `capsule/main3`, the Pokémon's front picture and the seals around it.
+ * - test: `capsule/main3`, the Pokémon's front picture (scaled about its feet, its animation frame), the send-out
+ *   effect's particles (drawn as the battle draws them) and the ball (`battle/ball_throws/<ball>`) over them.
  */
 import type { CapsuleEditorView, Ui2dSheet } from '@opensinnoh/contracts';
+import { ParticleTextures } from '../battle/anim/draw.ts';
 import { capsuleGridAt } from '@opensinnoh/contracts';
 import { CAPSULE_BUTTONS, listSlotAt } from '@opensinnoh/menus';
 import type { Id } from '@opensinnoh/core';
@@ -46,8 +48,9 @@ const ARROWS = [
 ] as const;
 /** The holder's icon: (−16, +12) from its capsule. */
 const HOLDER = { x: -16, y: 12 };
-/** The Test's Pokémon (CAPSULE_MON_SPRITE_X / _Y_BASE). */
+/** The Test's Pokémon (CAPSULE_MON_SPRITE_X / _Y_BASE); it scales about its feet, 40 px under that (PokemonSprite_CalcScaledYOffset). */
 const TEST_MON = { x: 192, y: 48 };
+const MON_FEET = TEST_MON.y + 40;
 
 type Img = HTMLImageElement;
 
@@ -60,6 +63,9 @@ class CapsuleCanvas {
   private boxesKey = '';
   private last: { d: DrawContext; redraw: () => void; editing: boolean } | null = null;
   private pointer: number | null = null;
+  private particles: ParticleTextures | null = null;
+  /** The ball's cell, blended on a copy. */
+  private readonly scratch = document.createElement('canvas');
 
   constructor(private readonly art: Art) {
     this.root = board('mart mart-board mart-screen capsule-board', W, H);
@@ -150,13 +156,68 @@ class CapsuleCanvas {
     if (f) this.cell(path, f.cell, x, y);
   }
 
-  /** A Pokémon's front picture (frame 0) centred at (x, y + its offset). */
-  mon(d: DrawContext, m: NonNullable<CapsuleEditorView['test']>, x: number, y: number): void {
+  /** The Test's Pokémon: its front picture on its animation frame, centred at the sprite place plus its offset, scaled about its feet. */
+  mon(d: DrawContext, m: NonNullable<CapsuleEditorView['test']>): void {
+    const sprite = m.sprite;
     const f = d.registries.pokemonSprites.get(m.species)?.forms[m.form] ?? d.registries.pokemonSprites.get(m.species)?.forms[0];
-    if (!f) return;
+    if (!sprite || !f || sprite.scale <= 0) return;
     const face = (m.female && f.frontFemale) || f.front;
     const img = this.image(m.shiny ? f.shinyAtlas : f.atlas);
-    if (img) this.g.drawImage(img, 0, face.y, 80, 80, x - 40, y - 40 + face.yOffset, 80, 80);
+    if (!img) return;
+    const g = this.g;
+    g.save();
+    g.translate(TEST_MON.x + sprite.dx, MON_FEET + sprite.dy);
+    g.scale(sprite.scale, sprite.scale);
+    g.drawImage(img, sprite.frame * 80, face.y, 80, 80, -40, TEST_MON.y - 40 + face.yOffset - MON_FEET, 80, 80);
+    g.restore();
+  }
+
+  /** The send-out effect's particles (DS px). */
+  drawParticles(d: DrawContext, particles: NonNullable<CapsuleEditorView['test']>['particles']): void {
+    this.particles ??= new ParticleTextures((id) => {
+      const sheet = d.registries.ui2d.get(id);
+      if (!sheet) throw new Error(`capsule editor: unknown particle sheet ${id}`);
+      const img = this.image(sheet.atlas);
+      return img ? { sheet, img } : null;
+    });
+    this.particles.draw(this.g, particles, { x: 0, y: 0 }, 1);
+  }
+
+  /** The thrown ball: its animation's frame (at `tick`, or held on `frame`), blended toward white. */
+  ball(b: NonNullable<NonNullable<CapsuleEditorView['test']>['ball']>): void {
+    const sheet = this.art.sheet(`battle/ball_throws/${b.item.slice(b.item.indexOf(':') + 1).replace(/^ITEM_/, '').toLowerCase()}`);
+    const anim = sheet?.animations?.[b.anim];
+    if (!sheet || !anim) return;
+    let frame = anim.frames[Math.min(b.frame ?? 0, anim.frames.length - 1)]!;
+    if (b.frame === null) {
+      // The frame at `tick` (looping animations wrap; forward ones hold the last frame).
+      const total = anim.frames.reduce((n, f) => n + f.ticks, 0);
+      let left = anim.mode === 'loop' ? b.tick % total : b.tick;
+      frame = anim.frames[anim.frames.length - 1]!;
+      for (const f of anim.frames) {
+        if (left < f.ticks) {
+          frame = f;
+          break;
+        }
+        left -= f.ticks;
+      }
+    }
+    const c = sheet.cells[frame.cell];
+    const img = this.image(sheet.atlas);
+    if (!c || !img) return;
+    const s = this.scratch;
+    s.width = c.w;
+    s.height = c.h;
+    const g = s.getContext('2d')!;
+    g.drawImage(img, c.x, c.y, c.w, c.h, 0, 0, c.w, c.h);
+    if (b.white > 0) {
+      // The DS blends the ball's palette toward white.
+      g.globalCompositeOperation = 'source-atop';
+      g.globalAlpha = b.white;
+      g.fillStyle = '#fff';
+      g.fillRect(0, 0, c.w, c.h);
+    }
+    this.g.drawImage(s, b.x - c.ox, b.y - c.oy);
   }
 
   /** Replaces the overlay's windows when their content changed. */
@@ -228,11 +289,15 @@ function drawEditor(s: CapsuleCanvas, d: DrawContext, v: CapsuleEditorView): voi
   } else {
     s.background('capsule/main3');
     if (s.sheet('capsule/main3')) s.root.dataset.backdrop = 'capsule/main3';
-    if (v.test) s.mon(d, v.test, TEST_MON.x, TEST_MON.y);
-    for (const seal of v.seals) s.cell('capsule/seals', seal.cell, seal.x, seal.y);
+    if (v.test) {
+      // The Pokémon and the particles are 3D (BG0), the ball an OBJ in front of them.
+      s.mon(d, v.test);
+      s.drawParticles(d, v.test.particles);
+      if (v.test.ball) s.ball(v.test.ball);
+    }
   }
-  if (v.dim) {
-    g.fillStyle = 'rgb(0 0 0 / 0.45)';
+  if (v.dim > 0) {
+    g.fillStyle = `rgb(0 0 0 / ${v.dim})`;
     g.fillRect(0, 0, W, DS_HEIGHT);
   }
   const line = v.message ?? (v.status ? { text: v.status, waiting: false } : null);

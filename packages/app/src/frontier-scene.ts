@@ -9,8 +9,9 @@
  * above them (or under BG3 in the Factory corridor, scrolled on its own where it does not follow the camera, hidden
  * while toggled off), window 0 keeping the sprites out
  * of its rect (FrontierScrCmd_4E), the particles (BG0; under the characters in the Castle battle room, with BG2), a
- * Frontier Brain's cut-in (the room dimmed, the banner in its window, the mugshot, the name and the VS), then the
- * brightness fade. The message, menu and yes/no boxes are drawn over it by `drawScriptOverlay` in the same frame. Sheets
+ * Frontier Brain's cut-in (the room dimmed, the banner in its window, the mugshot, the name and the VS), a facility's
+ * pre-battle wipe (the Hall's and the Arcade's black blocks on BG1; the Factory's and the Castle's line wipe, which draws
+ * BG2 and BG3 one line pair at a time from the wipe's reference points), then the brightness fade. The message, menu and yes/no boxes are drawn over it by `drawScriptOverlay` in the same frame. Sheets
  * load on first use; until they have, their layer is not drawn.
  */
 import { newGameRecord, type AssetRef, type AssetSource, type FrontierView, type LoadedFont, type Registries, type Ui2dSheet } from '@opensinnoh/contracts';
@@ -196,6 +197,25 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
       ctx.drawImage(img, c.x, c.y, c.w, c.h, c.ox * scale, (y - cam.y + c.oy) * scale, c.w * scale, c.h * scale);
       ctx.restore();
     };
+    const lines = view.wipe?.kind === 'lines' ? view.wipe : null;
+    /**
+     * A room layer under the line wipe: each pair of lines shows the layer's row at its reference point, from its x on
+     * (room px; off the layer is transparent).
+     */
+    const layerLines = (sheet: Ui2dSheet, points: { x: number; y: number }[], darken = 0) => {
+      const img = darkImage(sheet.atlas, darken);
+      const c = sheet.cells[0];
+      if (!img || !c) return;
+      points.forEach((room, i) => {
+        // Room px to the cell's px (its origin offset).
+        const p = { x: room.x - c.ox, y: room.y - c.oy };
+        if (p.y < 0 || p.y >= c.h) return;
+        const x0 = Math.max(0, p.x);
+        const x1 = Math.min(c.w, p.x + 256);
+        if (x1 <= x0) return;
+        ctx.drawImage(img, c.x + x0, c.y + p.y, x1 - x0, 1, (x0 - p.x) * scale, 2 * i * scale, (x1 - x0) * scale, 2 * scale);
+      });
+    };
     /** The cell an animation shows at its frame. */
     const animCell = (sheet: Ui2dSheet, anim: number, frame: number): number => sheet.animations?.[anim]?.frames[frame]?.cell ?? 0;
     /** BG2: at the camera, or (decomp FR_SCENE_FLAG_2 0) at its own scroll, wrapping down its height. */
@@ -204,7 +224,8 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
       const s = sheetOf(view.fg.sheet);
       // The blend's weights as one alpha (BG2's `a`/16 over what is below; the DS also scales below by `b`/16).
       if (view.fgBlend) ctx.globalAlpha = view.fgBlend.a / 16;
-      if (!view.fgFixed) cell(s, 0, 0, 0);
+      if (lines) layerLines(s, lines.fg);
+      else if (!view.fgFixed) cell(s, 0, 0, 0);
       else {
         const scroll = view.fgScroll ?? { x: 0, y: 0 };
         for (const dy of [0, view.fg.height]) cell(s, 0, cam.x - scroll.x, cam.y - scroll.y + dy);
@@ -216,8 +237,10 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
       if (view.particles) particleTextures.draw(ctx, view.particles, { x: frame.x, y: frame.y }, scale);
     };
     if (view.fgBelow) fg();
-    if (view.bg) cell(sheetOf(view.bg.sheet), 0, 0, 0, false, view.bgDarken ?? 0);
-    if (view.bgPatch) cell(sheetOf(view.bgPatch.sheet), 0, view.bgPatch.x, view.bgPatch.y, false, view.bgDarken ?? 0);
+    if (lines) {
+      if (view.bg && !lines.bgHidden) layerLines(sheetOf(view.bg.sheet), lines.bg, view.bgDarken ?? 0);
+    } else if (view.bg) cell(sheetOf(view.bg.sheet), 0, 0, 0, false, view.bgDarken ?? 0);
+    if (view.bgPatch && !lines) cell(sheetOf(view.bgPatch.sheet), 0, view.bgPatch.x, view.bgPatch.y, false, view.bgDarken ?? 0);
     if (view.spritesOnTop) {
       if (!view.fgBelow) fg();
       particles();
@@ -254,6 +277,10 @@ export function createFrontierDrawer(assets: AssetSource, registries: () => Regi
     }
     if (!view.spritesOnTop) particles();
     if (cutIn) brainCutIn(ctx, cutIn, scale, font);
+    if (view.wipe?.kind === 'blocks') {
+      ctx.fillStyle = '#000';
+      for (const r of view.wipe.rects) ctx.fillRect(r.x * scale, r.y * scale, r.w * scale, r.h * scale);
+    }
     if (view.fade) {
       ctx.globalAlpha = view.fade.alpha;
       ctx.fillStyle = view.fade.color === 'black' ? '#000' : '#fff';

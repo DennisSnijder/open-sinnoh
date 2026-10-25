@@ -33,7 +33,7 @@ const ZONES = [
 
 const sheetPath = (id: Id) => id.slice(id.indexOf(':') + 'ui2d/'.length + 1);
 
-class DsScene {
+export class DsScene {
   readonly root: HTMLElement;
   readonly stage = el('div', 'ds-scene-stage');
   readonly canvas = document.createElement('canvas');
