@@ -121,19 +121,15 @@ test('walking onto Route 215 fades the rain and its fog in', async () => {
   await arrive('ROUTE_210_SOUTH', 573, 597, 'right');
   await frames();
   expect((await stats()).weather).toEqual([{ id: 'platinum:OVERWORLD_WEATHER_CLEAR', phase: 'steady', particles: 0, fog: null }]);
-  // The walk to the zone edge (the renderer steps the weather through every tick since its last frame).
-  expect(
-    await page.evaluate(() => {
-      const g = window.openSinnohGame!;
-      g.press('right');
-      let n = 0;
-      for (; n < 200 && g.snapshot().state.player.zone !== 'platinum:MAP_HEADER_ROUTE_215'; n++) g.advance(1);
-      g.release('right');
-      return n;
-    }),
-    'reaches Route 215',
-  ).toBeLessThan(200);
-  await frames();
+  // Each tick of the walk is drawn, as in play: the renderer steps the ticks it missed with the weather it sees now,
+  // so a frame first drawn after the zone change would count the new weather's load gap as already gone.
+  await page.evaluate(() => window.openSinnohGame!.press('right'));
+  for (let n = 0; (await page.evaluate(() => window.openSinnohGame!.snapshot().state.player.zone)) !== 'platinum:MAP_HEADER_ROUTE_215'; n++) {
+    expect(n, 'reaches Route 215').toBeLessThan(200);
+    await page.evaluate(() => window.openSinnohGame!.advance(1));
+    await frames();
+  }
+  await page.evaluate(() => window.openSinnohGame!.release('right'));
   // The old weather goes, the rain loads, then fades in over its spawner ramp and 127 fog steps: every tick of the
   // start is drawn, then every eighth, 200 ticks in all.
   const seen: Stats['weather'][] = [];
