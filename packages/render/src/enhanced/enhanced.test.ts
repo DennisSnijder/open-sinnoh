@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import * as THREE from 'three';
 import type { Zone } from '@opensinnoh/contracts';
 import { cameraAllowed, ENHANCED_PRESETS, enhancedVisuals, parseEnhanced, setEnhancedVisuals, visualStyleConfig } from './config.ts';
-import { lampPoints } from './lamp-points.ts';
+import { glowKind } from './light-sources.ts';
 import { goldenAt, gradeAt, nightAt, sunDirection } from './time.ts';
 
 describe('enhanced visuals config', () => {
@@ -15,6 +14,8 @@ describe('enhanced visuals config', () => {
   it('parses presets and switches, and rejects unknown ones', () => {
     expect(parseEnhanced('cinematic')).toEqual(ENHANCED_PRESETS.cinematic);
     expect(parseEnhanced('follow,dof')).toMatchObject({ camera: 'follow', dof: true, bloom: false });
+    expect(parseEnhanced('cinematic,follow')).toEqual({ ...ENHANCED_PRESETS.cinematic, camera: 'follow' });
+    expect(parseEnhanced('follow,subtle')).toEqual({ ...ENHANCED_PRESETS.subtle, camera: 'follow' });
     expect(() => parseEnhanced('dof,lensdirt')).toThrow(/lensdirt/);
   });
 
@@ -36,13 +37,12 @@ describe('the Options visual style', () => {
     expect(visualStyleConfig('cinematic', false, false)).toMatchObject({ camera: 'off', dof: true, sun: true });
   });
 
-  it('keeps the DS camera in caves, buildings and fog', () => {
+  it('keeps the DS camera in caves and buildings', () => {
     const zone = (mapType: Zone['mapType']) => ({ mapType }) as Zone;
-    expect(cameraAllowed(zone('route'), false)).toBe(true);
-    expect(cameraAllowed(zone('town'), false)).toBe(true);
-    expect(cameraAllowed(zone('route'), true)).toBe(false);
-    expect(cameraAllowed(zone('cave'), false)).toBe(false);
-    expect(cameraAllowed(zone('indoors'), false)).toBe(false);
+    expect(cameraAllowed(zone('route'))).toBe(true);
+    expect(cameraAllowed(zone('town'))).toBe(true);
+    expect(cameraAllowed(zone('cave'))).toBe(false);
+    expect(cameraAllowed(zone('indoors'))).toBe(false);
   });
 });
 
@@ -69,19 +69,10 @@ describe('enhanced visuals by the hour', () => {
   });
 });
 
-describe('lamp points', () => {
-  it('clusters a lamp material per 16 units, at its top', () => {
-    const quad = (x: number, z: number) => [x, 0, z, x + 2, 0, z, x, 20, z];
-    const geometry = new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute([...quad(2, 2), ...quad(50, 2)], 3));
-    const points = lampPoints('c1_lamp01_lm1', geometry);
-    expect(points.map((p) => [p.kind, p.at.x, p.at.y])).toEqual([
-      ['lamp', 3, 18],
-      ['lamp', 51, 18],
-    ]);
-    expect(lampPoints('h_mado', geometry)[0]!.kind).toBe('window');
-    expect(lampPoints('c1_b01_1', geometry)).toEqual([]);
-    // Other "light" materials are not lamps: a PC, the Pokémon Center floor, the caves' fittings.
-    for (const name of ['light', 'light_a', 'dun_light_lm1', 'bf_light_lm5', 'window01_mat']) expect(lampPoints(name, geometry)).toEqual([]);
-    expect(lampPoints('c5_light_lm1', geometry)[0]!.kind).toBe('lamp');
+describe('light sources', () => {
+  it('finds lamps, signs and windows by their material names', () => {
+    for (const name of ['light', 'light_a', 'light2', 'Light', 'c1_lamp01_lm1', 'lamp03', 'c2_light_a_lm4', 'bf_light_lm5']) expect(glowKind(name), name).toBe('lamp');
+    for (const name of ['h_mado', 'h_mado_lm5', 'gingamado', 'window01_mat', 'c4_mado']) expect(glowKind(name), name).toBe('window');
+    for (const name of ['c1_b01_1', 'pc_door', 'pc_1', 'h_kage_lm3', 'tshadow_lm5', 'allpeak_lm34']) expect(glowKind(name), name).toBeNull();
   });
 });

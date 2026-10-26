@@ -8,7 +8,7 @@ import { IndexedDbSaveStore, PackMismatchError, saveFromJson, TEXT_FRAME_DELAY, 
 import { checkNewGame, readNewGame, storeNewGame } from './new-game.ts';
 import { createSession, warmBattleEngine, type Session } from './boot.ts';
 import { parseEnhanced, setEnhancedVisuals, visualStyleConfig, type EnhancedConfig } from '@opensinnoh/render';
-import { readVisuals, storeVisuals, type Visuals } from './visuals.ts';
+import { readVisuals, storeVisuals, VISUAL_STYLES, visualStyleChosen, type Visuals } from './visuals.ts';
 import { createBridge, type AppBridge } from './bridge.ts';
 import type { ReplayRecorder } from './recorder.ts';
 import { attachGamepadEvents, attachKeyboard, controls, FAST_FORWARD_TOGGLE, gamepadFastForward, InputState, pollGamepads } from './input.ts';
@@ -191,9 +191,15 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   // The visual style and angled camera (visuals.ts; the renderer's enhanced visuals): the player's choice, applied
   // live; replays keep the DS look whatever is stored. Dev and test builds also get a hook to set a config directly.
   let visuals: Visuals = readVisuals();
-  const applyVisuals = () => setEnhancedVisuals(opts.replay ? null : visualStyleConfig(visuals.style, visuals.angledCamera, matchMedia('(pointer: coarse)').matches));
+  const lowPower = () => matchMedia('(pointer: coarse)').matches;
+  const applyVisuals = () => setEnhancedVisuals(opts.replay ? null : visualStyleConfig(visuals.style, visuals.angledCamera, lowPower()));
   applyVisuals();
-  if (import.meta.env.DEV) (window as { openSinnohEnhanced?: (c: string | EnhancedConfig | null) => void }).openSinnohEnhanced = (c) => setEnhancedVisuals(typeof c === 'string' ? parseEnhanced(c) : c);
+  // A preset or switch list takes this device's power, as the Options' style does.
+  if (import.meta.env.DEV)
+    (window as { openSinnohEnhanced?: (c: string | EnhancedConfig | null) => void }).openSinnohEnhanced = (c) => {
+      const config = typeof c === 'string' ? parseEnhanced(c) : c;
+      setEnhancedVisuals(config && typeof c === 'string' ? { ...config, lowPower: lowPower() } : config);
+    };
   if (import.meta.env.DEV && new URLSearchParams(location.search).get('debug') === '1') {
     const { mountDebugPanel } = await import('./debug/panel.ts');
     mountDebugPanel(() => session, () => input.clear('keyboard'));
@@ -910,6 +916,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     if (!answered.includes('reports') && !reportsAnswered()) questions.push('reports');
     if (opts.imported && !opts.imported.addon && !answered.includes('addon')) questions.push('addon');
     if (!answered.includes('textSpeed')) questions.push('textSpeed');
+    if (!answered.includes('visualStyle') && !visualStyleChosen()) questions.push('visualStyle');
     const stored = (q: SetupQuestion) => {
       const err = storeAnswered(q);
       if (err) session.game.log.stub('ui:setup-storage', `the setup's answers are kept for this visit only: ${err}`);
@@ -925,6 +932,11 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
         } else if (q === 'textSpeed') {
           device.setOption('textSpeed', choice);
           session.game.textSpeed = choice as TextSpeedOption;
+        } else if (q === 'visualStyle') {
+          visuals = { ...visuals, style: VISUAL_STYLES[choice]! };
+          const err = storeVisuals(visuals);
+          if (err) session.game.log.stub('ui:visuals-storage', `the visual style is kept for this visit only: ${err}`);
+          applyVisuals();
         }
         stored(q);
       },

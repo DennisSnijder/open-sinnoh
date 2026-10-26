@@ -1,6 +1,7 @@
 /**
  * The first-run setup on the ROM page: while the Platinum ROM imports, a short wizard asks the
- * questions a new player answers once (the optional HeartGold/SoulSilver add-on, error reports, text speed). It is a
+ * questions a new player answers once (the optional HeartGold/SoulSilver add-on, error reports, text speed, the visual
+ * style). It is a
  * list of steps, so a later question is one more entry in `STEPS`. Each answer is stored at once where the title's
  * setup (title/setup.ts) keeps it, so a question answered here is never asked there, and one left open (the player
  * pressed Start playing first) is asked there.
@@ -12,6 +13,7 @@ import { readReports, reportsAnswered } from './telemetry/settings.ts';
 import { setReportsEnabled } from './telemetry/index.ts';
 import { ASK, readAnswered, storeAnswered, type SetupQuestion } from './title/setup-questions.ts';
 import { OPTIONS_KEY, parseOptions, storeOption } from './ui/options-store.ts';
+import { readVisuals, storeVisuals, VISUAL_STYLES, visualStyleChosen } from './visuals.ts';
 
 export interface FirstRunDeps {
   /** The add-on's file was picked: import it (now, or once the base import is done). */
@@ -78,6 +80,18 @@ const STEPS: readonly Step[] = [
       const err = storeOption('textSpeed', i);
       if (err) console.warn(`the text speed is kept for this visit only: ${err}`);
       stored('textSpeed');
+      return true;
+    },
+  },
+  {
+    id: 'visualStyle',
+    ask: () => !visualStyleChosen(),
+    // DS until chosen.
+    cursor: () => VISUAL_STYLES.indexOf(readVisuals().style),
+    answer(i) {
+      const err = storeVisuals({ ...readVisuals(), style: VISUAL_STYLES[i]! });
+      if (err) console.warn(`the visual style is kept for this visit only: ${err}`);
+      stored('visualStyle');
       return true;
     },
   },

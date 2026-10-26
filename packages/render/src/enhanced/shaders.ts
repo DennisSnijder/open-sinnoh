@@ -25,7 +25,7 @@ const depthUniforms = () => ({ tDepth: { value: null as THREE.Texture | null }, 
 /**
  * Ambient occlusion by unsharp-masking the depth (Luft et al. 2006): a pixel whose neighbours lie on average nearer
  * the camera is in a crease (a wall's foot, under eaves, between props) and darkens. Pairs of opposite taps cancel
- * on a flat slope, so open ground stays clear. 8 pairs within ~12 world units.
+ * on a flat slope, so open ground stays clear. 8 pairs within ~12 world units; 4 with `LOW` (phones).
  */
 export const AO_SHADER = {
   name: 'EnhancedAO',
@@ -43,24 +43,29 @@ void main() {
   if (texture2D(tDepth, vUv).r >= 1.0) { gl_FragColor = c; return; }
   float z = linearDepth(vUv);
   float r = clamp(12.0 * uProjScale / (uPersp ? z : 1.0), 2.0, 48.0);
+#ifdef LOW
+  const int PAIRS = 4;
+#else
+  const int PAIRS = 8;
+#endif
   float occ = 0.0;
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < PAIRS; i++) {
     float a = float(i) * 2.39996;
-    float s = sqrt((float(i) + 0.5) / 8.0);
+    float s = sqrt((float(i) + 0.5) / float(PAIRS));
     vec2 o = vec2(cos(a), sin(a)) * r * s * uTexel;
     float za = linearDepth(vUv + o);
     float zb = linearDepth(vUv - o);
     float dz = z - 0.5 * (za + zb);
     occ += clamp(dz / 6.0, 0.0, 1.0) * (1.0 - smoothstep(6.0, 16.0, abs(z - min(za, zb))));
   }
-  gl_FragColor = vec4(c.rgb * (1.0 - uStrength * occ / 8.0), c.a);
+  gl_FragColor = vec4(c.rgb * (1.0 - uStrength * occ / float(PAIRS)), c.a);
 }`,
 };
 
 /**
  * Golden-hour light: shafts from the sun's side (a radial scatter of the frame's bright pixels toward the sun, the
  * GPU Gems 3 volumetric light scattering), a glare on that side and lens flare ghosts along the axis through the
- * frame's middle. The sun is kept at the frame's edge (pipeline.ts).
+ * frame's middle. The sun is kept at the frame's edge (pipeline.ts). `LOW` (phones) takes half the steps.
  */
 export const SUN_SHADER = {
   name: 'EnhancedSun',
@@ -77,19 +82,30 @@ uniform float uFlare;
 varying vec2 vUv;
 void main() {
   vec4 base = texture2D(tDiffuse, vUv);
-  vec2 delta = (vUv - uSun) * (0.6 / 24.0);
+#ifdef LOW
+  const int STEPS = 12;
+  const float DECAY = 0.85;
+#else
+  const int STEPS = 24;
+  const float DECAY = 0.92;
+#endif
+  vec2 delta = (vUv - uSun) * (0.6 / float(STEPS));
   vec2 uv = vUv;
   float decay = 1.0;
   vec3 acc = vec3(0.0);
-  for (int i = 0; i < 24; i++) {
+  for (int i = 0; i < STEPS; i++) {
     uv -= delta;
     vec2 cuv = clamp(uv, 0.001, 0.999);
     vec3 s = texture2D(tDiffuse, cuv).rgb;
     float l = max(dot(s, vec3(0.299, 0.587, 0.114)) - 0.68, 0.0);
     acc += s * l * decay;
-    decay *= 0.92;
+    decay *= DECAY;
   }
   vec3 rays = acc * uIntensity * uColor * 0.5;
+#ifdef LOW
+  // The shorter decay sums to 5.8 against 10.2: the same strength.
+  rays *= 1.76;
+#endif
   float dist = length((vUv - uSun) * vec2(uAspect, 1.0));
   vec3 glare = uColor * uIntensity * 0.28 * exp(-dist * 1.8);
   vec2 axis = vec2(0.5) - uSun;
@@ -108,15 +124,16 @@ void main() {
  * Tilt-shift depth of field, one direction per pass (two passes: horizontal, vertical). The circle of confusion is
  * the larger of the screen distance from the focus band (the player's row) and the depth distance from the player,
  * so the far top and near bottom of the frame blur like a photographed miniature. 13 taps, weighted against
- * pulling sharp pixels into blurred ones.
+ * pulling sharp pixels into blurred ones. `LOW` (phones) is one pass instead: 8 taps on a disc.
  */
 export const DOF_SHADER = {
   name: 'EnhancedDof',
-  uniforms: { tDiffuse: { value: null }, ...depthUniforms(), uDir: { value: new THREE.Vector2() }, uFocusY: { value: 0.5 }, uFocusZ: { value: 500 }, uBand: { value: 0.12 }, uMaxR: { value: 6 } },
+  uniforms: { tDiffuse: { value: null }, ...depthUniforms(), uDir: { value: new THREE.Vector2() }, uTexel: { value: new THREE.Vector2() }, uFocusY: { value: 0.5 }, uFocusZ: { value: 500 }, uBand: { value: 0.12 }, uMaxR: { value: 6 } },
   vertexShader: VERTEX,
   fragmentShader: /* glsl */ `
 uniform sampler2D tDiffuse;
 uniform vec2 uDir;
+uniform vec2 uTexel;
 uniform float uFocusY;
 uniform float uFocusZ;
 uniform float uBand;
@@ -133,6 +150,16 @@ void main() {
   float c = coc(vUv);
   vec4 base = texture2D(tDiffuse, vUv);
   if (c < 0.02) { gl_FragColor = base; return; }
+#ifdef LOW
+  vec3 sum = base.rgb;
+  for (int i = 0; i < 8; i++) {
+    float a = float(i) * 2.39996;
+    vec2 o = vec2(cos(a), sin(a)) * sqrt((float(i) + 0.5) / 8.0) * c * uMaxR * 0.7;
+    sum += texture2D(tDiffuse, vUv + o * uTexel).rgb;
+  }
+  gl_FragColor = vec4(sum / 9.0, base.a);
+  return;
+#endif
   vec3 acc = vec3(0.0);
   float wsum = 0.0;
   for (int i = -6; i <= 6; i++) {

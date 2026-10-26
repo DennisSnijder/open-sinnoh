@@ -111,7 +111,7 @@ for (const v of VIEWPORTS) {
     const wizard = page.locator('#wizard');
     await expect(wizard).toBeVisible();
     await expect(wizard.locator('.fr-choices')).toHaveAttribute('data-question', 'addon');
-    await expect(wizard).toContainText('Question 1 of 3');
+    await expect(wizard).toContainText('Question 1 of 4');
     await expect(wizard).toContainText('later in Options');
     await expect(start(page)).toHaveAttribute('aria-disabled', 'true');
     await expect(page.locator('#start-why')).toHaveText('Your game is still importing.');
@@ -124,7 +124,7 @@ for (const v of VIEWPORTS) {
     await page.locator('#addon-input').setInputFiles(fakeRom('heartgold.nds'));
     await expect(wizard.locator('.fr-choices')).toHaveAttribute('data-question', 'reports');
     await expect(page.locator('#addon-stage')).toContainText('Waiting for Pokémon Platinum');
-    await expect(wizard).toContainText('Question 2 of 3');
+    await expect(wizard).toContainText('Question 2 of 4');
     // Step 2: error reports, with the analytics line; the keyboard is on the answers.
     await expect(wizard).toContainText('without cookies');
     await expect(wizard.locator('.os-choice').first()).toBeFocused();
@@ -140,7 +140,17 @@ for (const v of VIEWPORTS) {
     await expect(wizard.locator('.os-choice.is-cursor')).toContainText('Mid');
     await wizard.locator('.os-choice', { hasText: 'Fast' }).click();
     expect(await page.evaluate(() => (JSON.parse(localStorage.getItem('lantern-nds:options')!) as { textSpeed: number }).textSpeed)).toBe(2);
-    expect(await page.evaluate(() => localStorage.getItem('lantern-nds:setup'))).toBe('["reports","addon","textSpeed"]');
+    // Step 4: the visual style, optional, on DS until chosen; each answer says what it adds.
+    await expect(wizard.locator('.fr-choices')).toHaveAttribute('data-question', 'visualStyle');
+    await expect(wizard).toContainText('Question 4 of 4');
+    // The keyboard starts on DS (the mouse may rest on another answer, which then shows the cursor).
+    await expect(wizard.locator('.os-choice').first()).toBeFocused();
+    expect(await wizard.locator('.os-choice .cl').allInnerTexts()).toEqual(['DS', 'Subtle', 'Cinematic']);
+    await settle(page);
+    await page.screenshot({ path: `${SHOTS}/${v.name}-setup-visual-style.png` });
+    await wizard.locator('.os-choice', { hasText: 'Subtle' }).click();
+    expect(await page.evaluate(() => localStorage.getItem('lantern-nds:visual-style'))).toBe('subtle');
+    expect(await page.evaluate(() => localStorage.getItem('lantern-nds:setup'))).toBe('["reports","addon","textSpeed","visualStyle"]');
     // All answered before the import is done: the progress, and Start playing still held.
     await expect(wizard).toContainText('All set');
     await expect(start(page)).toHaveAttribute('aria-disabled', 'true');
@@ -192,6 +202,7 @@ test('the import finishes first: the setup goes on and Start playing is there; a
   await page.locator('#wizard .os-choice', { hasText: 'Skip' }).click();
   await page.locator('#wizard .os-choice', { hasText: 'Allow' }).first().click();
   await page.locator('#wizard .os-choice', { hasText: 'Slow' }).click();
+  await page.locator('#wizard .os-choice', { hasText: 'The original look' }).click();
   await expect(page.locator('#wizard')).toContainText('All set');
   await expect(start(page)).toBeFocused();
   expect(await page.evaluate(() => localStorage.getItem('lantern-nds:error-reports'))).toBe('true');

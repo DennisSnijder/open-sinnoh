@@ -304,12 +304,22 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   from their own models, cameras and animations, with no procedural stand-ins. Where a scene used both DS
   screens it is recomposed as one; sub-screen-only parts are left out.
 - **Enhanced visuals are opt-in** (`packages/render/src/enhanced/`): Options › VISUAL STYLE (DS, SUBTLE, CINEMATIC) and
-  ANGLED CAMERA, device settings off by default. The DS look pays nothing (one null check per frame); the effects are a
+  ANGLED CAMERA, device settings off by default; the setup asks the style once (DS first and default) and skips the
+  question once a style is stored. The DS look pays nothing (one null check per frame); the effects are a
   lazy chunk, and replays and tests keep the DS look. Lighting stays the DS's: the angled camera keeps the DS view
-  space for the area light. The angled camera only replaces the DS camera outdoors (towns, cities, routes) without fog:
-  caves show the void past their rooms, and the fog table is indexed by the DS projection's depth. Phones draw the
-  bloom at a quarter of the pixels; lamp glows take only street lamp and window materials. The 2D layers (weather, darkness, tints, fades) draw
-  on the screen over the post chain's output, never into its buffers.
+  space for the area light. The angled camera only replaces the DS camera outdoors (towns, cities, routes); caves show
+  the void past their rooms. Under it the fog reads linear view depth, shifted so the camera target sits at the DS
+  camera's distance, and maps it back through the DS camera's planes to the density table; the rear plane takes the
+  fog colour. Fog turns the sun off and lifts the bloom threshold over the fog's pale colour.
+- **Night glows come from the map's own light sources:** materials the models name as lights (`light`, `lamp`,
+  `_light`, `_lamp`) or windows (`mado`, `window`) are drawn again, additively, with only their bright texels, so a
+  glow has its texture's shape and colour (red beacons stay red and blink with their animation) and the bloom spreads
+  it. No hand-placed points. Lamps the map draws as plain land texture (Jubilife's plaza) have no glow.
+- **Phones take a cheaper post chain** (`lowPower`, a coarse pointer): the bloom at a quarter of the pixels, half the
+  AO and sun samples, and depth of field as one 8-tap disc pass instead of two 13-tap passes. A fixed tier, not an
+  auto-scale: the same device draws the same frame.
+- The 2D layers (weather, darkness, tints, fades) draw on the screen over the post chain's output, never into its
+  buffers.
 - **Reduce flashing** caps white overlays at 25 % and eases them; black fades are untouched. It follows
   `prefers-reduced-motion` until chosen.
 
