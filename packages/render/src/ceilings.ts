@@ -31,30 +31,41 @@ export class Ceilings {
 
   constructor(group: THREE.Group) {
     group.updateWorldMatrix(true, true);
-    const vertices = new Map<string, Surface[]>();
-    const key = (v: THREE.Vector3) => `${v.x},${v.y},${v.z}`;
+    // Faces sharing a vertex (the same x, y and z) are neighbours.
+    const vertices = new Map<number, Map<number, Map<number, Surface[]>>>();
+    const sharing = (v: THREE.Vector3): Surface[] => {
+      let ys = vertices.get(v.x);
+      if (!ys) vertices.set(v.x, (ys = new Map()));
+      let zs = ys.get(v.y);
+      if (!zs) ys.set(v.y, (zs = new Map()));
+      let list = zs.get(v.z);
+      if (!list) zs.set(v.z, (list = []));
+      return list;
+    };
     const lows = new Set<number>();
     // The chunk's merged static meshes are direct children; animated props have their own groups.
     for (const object of group.children) {
       if (!(object as THREE.Mesh).isMesh) continue;
       const geometry = (object as THREE.Mesh).geometry as THREE.BufferGeometry;
       const positions = geometry.getAttribute('position');
-      const count = geometry.index?.count ?? positions.count;
+      const index = geometry.index;
+      const count = index?.count ?? positions.count;
+      const vertex = (n: number) => new THREE.Vector3().fromBufferAttribute(positions, index ? index.getX(n) : n).applyMatrix4(object.matrixWorld);
       for (let i = 0; i < count; i += 3) {
-        const vertex = (n: number) => new THREE.Vector3().fromBufferAttribute(positions, geometry.index?.getX(n) ?? n).applyMatrix4(object.matrixWorld);
         const a = vertex(i), b = vertex(i + 1), c = vertex(i + 2);
-        const normal = b.clone().sub(a).cross(c.clone().sub(a)).normalize();
-        // Include roof pitches up to 60 degrees; vertical walls cannot be ceilings.
-        const overhead = Math.abs(normal.y) >= 0.5;
+        // The face normal's y ((b - a) × (c - a), normalized as Vector3 does): include roof pitches up to 60 degrees;
+        // vertical walls cannot be ceilings.
+        const ux = b.x - a.x, uy = b.y - a.y, uz = b.z - a.z;
+        const vx = c.x - a.x, vy = c.y - a.y, vz = c.z - a.z;
+        const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+        const overhead = Math.abs(ny * (1 / (Math.sqrt(nx * nx + ny * ny + nz * nz) || 1))) >= 0.5;
         const denominator = (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z);
         const surface: Surface = { a, b, c, denominator, low: Math.min(a.y, b.y, c.y), neighbours: [] };
         lows.add(surface.low);
         for (const v of [a, b, c]) {
-          const vertexKey = key(v);
-          const adjacent = vertices.get(vertexKey) ?? [];
+          const adjacent = sharing(v);
           for (const other of adjacent) { other.neighbours.push(surface); surface.neighbours.push(other); }
           adjacent.push(surface);
-          vertices.set(vertexKey, adjacent);
         }
         if (!overhead) continue; // Side faces extend the bounds, but cannot be ceilings themselves.
         for (let z = Math.floor(Math.min(a.z, b.z, c.z) / CELL); z <= Math.floor(Math.max(a.z, b.z, c.z) / CELL); z++) {
