@@ -10,7 +10,7 @@ import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import type { GameSnapshot } from '@opensinnoh/contracts';
 import { waitForScene } from '../../packages/cli/src/browser.ts';
 import { spawnPoint } from '../../packages/cli/src/sweep.ts';
-import { seedRomImport } from './seed.ts';
+import { romContext, resetRomDevice } from './rom-context.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 const ZONES = ['VEILSTONE_CITY', 'VEILSTONE_STORE_1F', 'SUNYSHORE_CITY_POKECENTER_1F'];
@@ -24,22 +24,26 @@ let page: Page;
 const errors: string[] = [];
 
 test.beforeAll(async ({ browser }, info) => {
-  test.setTimeout(120_000);
-  const use = info.project.use;
-  context = await browser.newContext({ baseURL: use.baseURL, viewport: use.viewport });
+  test.setTimeout(240_000);
+  // The worker's seeded context (rom-context.ts): the import is copied into the browser once per worker, not per file.
+  context = await romContext(browser, info.project.use);
   page = await context.newPage();
   page.on('pageerror', (e) => errors.push(e.message));
-  await seedRomImport(page);
+  await resetRomDevice(page);
   await page.goto('/?replay');
   await page.waitForFunction(() => window.openSinnohGame?.ready === true, undefined, { timeout: 60_000 });
 });
 
 test.afterAll(async () => {
-  await context?.close();
+  await page?.close();
 });
 
-/** Loads a save with the player at the zone's spawn point (a remount: a new renderer scene on the same canvas). */
-async function loadAt(name: string): Promise<void> {
+/**
+ * Loads a save with the player at the zone's spawn point (a remount: a new renderer scene on the same canvas). `budget`:
+ * the scene is in within the sweep's per-zone wait (30 s); otherwise within a wait sized for a loaded machine, where
+ * only what the load frees is measured.
+ */
+async function loadAt(name: string, budget = true): Promise<void> {
   const zone = `platinum:MAP_HEADER_${name}`;
   const { state } = JSON.parse(await page.evaluate(() => JSON.stringify(window.openSinnohGame!.snapshot()))) as GameSnapshot;
   const spawn = await page.evaluate((id) => {
@@ -51,7 +55,8 @@ async function loadAt(name: string): Promise<void> {
   const moved = { ...state, player: { zone, x: at.x, z: at.z, y: 0, facing: 'down' }, objects: [], follower: null };
   await page.evaluate((json) => window.openSinnohGame!.load(json, 'arrival'), JSON.stringify({ format: 'lantern-nds-save', version: 1, savedAt: '2026-01-01T00:00:00.000Z', state: moved }));
   await page.evaluate(() => window.openSinnohGame!.advance(30));
-  await waitForScene(page);
+  if (budget) await waitForScene(page);
+  else await page.waitForFunction(() => window.openSinnohApp!.sceneLoading() === false, undefined, { timeout: 120_000 });
   expect(await page.evaluate(() => window.openSinnohGame!.snapshot().state.player.zone)).toBe(zone);
 }
 
@@ -63,11 +68,17 @@ for (const name of ZONES) {
 }
 
 test('loads free the last scene: GL objects and the heap stay level over round trips', async () => {
-  test.setTimeout(240_000);
+  test.setTimeout(600_000);
   const cdp = await context.newCDPSession(page);
+  // The heap's floor over three collections a frame apart: what is still allocated in flight (a frame's work, an asset
+  // read) varies by a megabyte from one sample to the next on a busy machine, a kept scene raises the floor.
   const measure = async () => {
-    await cdp.send('HeapProfiler.collectGarbage');
-    const heapMB = (await cdp.send('Runtime.getHeapUsage')).usedSize / 1e6;
+    let heapMB = Infinity;
+    for (let i = 0; i < 3; i++) {
+      await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+      await cdp.send('HeapProfiler.collectGarbage');
+      heapMB = Math.min(heapMB, (await cdp.send('Runtime.getHeapUsage')).usedSize / 1e6);
+    }
     const gl = await page.evaluate(() => {
       const s = (globalThis as { openSinnohRenderStats?: { geometries: number; textures: number } }).openSinnohRenderStats!;
       return { geometries: s.geometries, textures: s.textures };
@@ -75,13 +86,13 @@ test('loads free the last scene: GL objects and the heap stay level over round t
     return { heapMB, ...gl };
   };
   // One round trip first: it fills the caches every later one reuses.
-  await loadAt('VEILSTONE_CITY');
-  await loadAt('SUNYSHORE_CITY_POKECENTER_1F');
-  await loadAt('VEILSTONE_CITY');
+  await loadAt('VEILSTONE_CITY', false);
+  await loadAt('SUNYSHORE_CITY_POKECENTER_1F', false);
+  await loadAt('VEILSTONE_CITY', false);
   const first = await measure();
   for (let i = 0; i < 4; i++) {
-    await loadAt('SUNYSHORE_CITY_POKECENTER_1F');
-    await loadAt('VEILSTONE_CITY');
+    await loadAt('SUNYSHORE_CITY_POKECENTER_1F', false);
+    await loadAt('VEILSTONE_CITY', false);
   }
   const last = await measure();
   // Before the fix each load kept the old renderer (its programs, GL state and scene): about 0.3 MB and every

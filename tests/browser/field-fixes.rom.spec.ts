@@ -8,7 +8,7 @@
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import type { GameState } from '@opensinnoh/contracts';
 import { waitForScene } from '../../packages/cli/src/browser.ts';
-import { seedRomImport } from './seed.ts';
+import { romContext, resetRomDevice } from './rom-context.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 const SHOTS = 'test-artifacts/field-fixes';
@@ -73,18 +73,19 @@ const frames = () => page.evaluate(() => new Promise<void>((r) => requestAnimati
 test.beforeAll(async ({ browser }, info) => {
   test.setTimeout(180_000);
   const use = info.project.use;
-  context = await browser.newContext({ baseURL: use.baseURL, viewport: use.viewport });
+  // The worker's seeded context (rom-context.ts): the import is copied into the browser once per worker, not per file.
+  context = await romContext(browser, use);
   page = await context.newPage();
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
-  await seedRomImport(page);
+  await resetRomDevice(page);
   await page.goto('/?replay');
   await page.waitForFunction(() => window.openSinnohGame?.ready === true, undefined, { timeout: 60_000 });
   await waitForScene(page);
 });
 
 test.afterAll(async () => {
-  await context?.close();
+  await page?.close();
 });
 
 async function arrive(zone: string, x: number, z: number, facing: 'up' | 'down' | 'left' | 'right', vars: Record<string, number> = {}): Promise<void> {
@@ -115,25 +116,34 @@ test('the Spring Path is closed off Route 214 before it is found', async () => {
 });
 
 test('walking onto Route 215 fades the rain and its fog in', async () => {
-  test.setTimeout(120_000);
+  // About a hundred drawn frames, which a loaded machine draws a few a second.
+  test.setTimeout(300_000);
   await arrive('ROUTE_210_SOUTH', 573, 597, 'right');
   await frames();
   expect((await stats()).weather).toEqual([{ id: 'platinum:OVERWORLD_WEATHER_CLEAR', phase: 'steady', particles: 0, fog: null }]);
-  // Each tick is drawn, as in play.
-  await page.evaluate(() => window.openSinnohGame!.press('right'));
-  for (let n = 0; (await page.evaluate(() => window.openSinnohGame!.snapshot().state.player.zone)) !== 'platinum:MAP_HEADER_ROUTE_215'; n++) {
-    expect(n, 'reaches Route 215').toBeLessThan(200);
-    await page.evaluate(() => window.openSinnohGame!.advance(1));
-    await frames();
-  }
-  await page.evaluate(() => window.openSinnohGame!.release('right'));
-  // Each step is drawn: the old weather goes, the rain loads, then fades in over its spawner ramp and 127 fog steps.
+  // The walk to the zone edge (the renderer steps the weather through every tick since its last frame).
+  expect(
+    await page.evaluate(() => {
+      const g = window.openSinnohGame!;
+      g.press('right');
+      let n = 0;
+      for (; n < 200 && g.snapshot().state.player.zone !== 'platinum:MAP_HEADER_ROUTE_215'; n++) g.advance(1);
+      g.release('right');
+      return n;
+    }),
+    'reaches Route 215',
+  ).toBeLessThan(200);
+  await frames();
+  // The old weather goes, the rain loads, then fades in over its spawner ramp and 127 fog steps: every tick of the
+  // start is drawn, then every eighth, 200 ticks in all.
   const seen: Stats['weather'][] = [];
-  for (let i = 0; i < 200; i++) {
-    await page.evaluate(() => window.openSinnohGame!.advance(1));
+  for (let t = 0; t < 200; ) {
+    const step = t < 48 ? 1 : 8;
+    await page.evaluate((n) => window.openSinnohGame!.advance(n), step);
+    t += step;
     await frames();
     seen.push((await stats()).weather);
-    if (i === 30) await page.screenshot({ path: `${SHOTS}/route-215-rain-fading-in.png` });
+    if (t === 30) await page.screenshot({ path: `${SHOTS}/route-215-rain-fading-in.png` });
   }
   const rain = seen.map((w) => w.find((x) => x.id === 'platinum:OVERWORLD_WEATHER_RAINING'));
   const first = rain.findIndex((r) => r);

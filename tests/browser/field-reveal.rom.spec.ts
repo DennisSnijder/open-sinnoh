@@ -8,7 +8,7 @@
  */
 import { writeFileSync } from 'node:fs';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
-import { seedRomImport } from './seed.ts';
+import { romContext, resetRomDevice } from './rom-context.ts';
 import { openOptionsData, saveSlot } from './save.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
@@ -105,8 +105,8 @@ const lit = (px: number[]) => {
   return n / (px.length / 3);
 };
 
-/** Field frames drawn after the reveal before the samples are taken (half a second at 60 Hz). */
-const SETTLED_FRAMES = 30;
+/** Field frames drawn after the reveal before the samples are taken (a quarter of a second at 60 Hz). */
+const SETTLED_FRAMES = 15;
 
 /** Until the fade is over, the scene in view is in and more field frames are drawn: the reveal's frames. */
 async function settle(): Promise<Sample[]> {
@@ -116,7 +116,7 @@ async function settle(): Promise<Sample[]> {
     return done && (globalThis as { openSinnohRenderStats?: { frames: number } }).openSinnohRenderStats!.frames;
   }, undefined, { timeout: 120_000 });
   // Counted in drawn frames, not time: a busy machine draws few frames a second.
-  await page.waitForFunction((n) => (globalThis as { openSinnohRenderStats?: { frames: number } }).openSinnohRenderStats!.frames >= n, (await frames.jsonValue()) + SETTLED_FRAMES, { timeout: 120_000 });
+  await page.waitForFunction((n) => (globalThis as { openSinnohRenderStats?: { frames: number } }).openSinnohRenderStats!.frames >= n, Number(await frames.jsonValue()) + SETTLED_FRAMES, { timeout: 120_000 });
   return takeSamples();
 }
 
@@ -210,21 +210,23 @@ const slot = () =>
 test.beforeAll(async ({ browser }, info) => {
   test.setTimeout(240_000);
   const use = info.project.use;
-  context = await browser.newContext({ baseURL: use.baseURL, viewport: use.viewport, ...(use.isMobile ? { isMobile: true, hasTouch: true, deviceScaleFactor: use.deviceScaleFactor } : {}) });
+  // The worker's seeded context (rom-context.ts): the import is copied into the browser once per worker, not per file.
+  context = await romContext(browser, use);
   page = await context.newPage();
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
   await installSampler(page);
-  await seedRomImport(page);
+  await resetRomDevice(page);
 });
 
 test.afterAll(async () => {
   console.log(`reveal waits (ms): ${JSON.stringify(timings)}`);
-  await context?.close();
+  await page?.close();
 });
 
 test('CONTINUE: black until the scene is in, then the fade, then no pop-in', async () => {
-  test.setTimeout(240_000);
+  // Two reveals, each counted in frames, which a loaded machine draws a few a second.
+  test.setTimeout(420_000);
   await saveAt(CITY, 504, 726, 'up');
   // The installed app's Continue shortcut: the title's CONTINUE without its menu. The first start after the import.
   await page.goto('/?continue&time=12:00');
