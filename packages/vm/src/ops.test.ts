@@ -32,7 +32,7 @@ const registries = merge(
   bank(BANKS.speciesNameWithArticles, 'ARTICLE', ['-', 'a Mosslet', 'an Emberkit', 'a Dripling']),
   { textBanks: [{ id: 'test:RATINGS' as Id, sourceIndex: BANKS.pokedexRatings, messages: ['test:Intro', 'platinum:PokedexRatings_Text_OakPokemonCaughtUnder40', 'platinum:PokedexRatings_Text_RowanPokemonSeenUpTo15'] as Id[] }] },
   { texts: [{ id: 'test:Intro' as Id, text: 'Intro' }, { id: 'platinum:PokedexRatings_Text_OakPokemonCaughtUnder40' as Id, text: 'Oak' }, { id: 'platinum:PokedexRatings_Text_RowanPokemonSeenUpTo15' as Id, text: 'Seen few.' }] },
-  bank(900, 'LOCAL', ['Local zero', '{var 0} {var 1} {var 2} {var 3} {var 4}', 'Choice A', 'Choice B']),
+  bank(900, 'LOCAL', ['Local zero', '{var 0} {var 1} {var 2} {var 3} {var 4}', 'Choice A', 'Choice B', 'One{scroll}Two']),
   {
     vars: [
       { id: 'test:VAR_A' as Id, sourceIndex: 0x8000, initial: 0, scope: 'temp' },
@@ -167,6 +167,29 @@ test:Buffers::
     expect(d.vm.running()).toBe(true);
     d.press('b');
     d.until(() => !d.vm.running());
+  });
+
+  it('message_no_skip: A does not speed it up (canSkipDelay FALSE); message_auto_scroll goes past a scroll by itself', () => {
+    const ticksPressingA = (op: string) => {
+      const d = drive(`test:M::\n  ${op} 0, 900\n  end\n`);
+      d.vm.start({ label: 'test:M', zone: 'fixture:TOWN', source: 'test' });
+      let n = 0;
+      for (; d.vm.running(); n++) d.press('a');
+      return n;
+    };
+    const plain = ticksPressingA('message_var');
+    const noSkip = ticksPressingA('message_no_skip');
+    expect(noSkip).toBeGreaterThan(plain);
+    // 'Local zero': 10 characters at the normal speed, two printer steps a tick.
+    expect(noSkip).toBeGreaterThanOrEqual(20);
+
+    const auto = drive('test:A::\n  message_auto_scroll 4, 900\n  end\n');
+    auto.vm.start({ label: 'test:A', zone: 'fixture:TOWN', source: 'test' });
+    // The scroll waits AUTO_SCROLL_WAIT (100) printer steps, two a tick, instead of a button.
+    expect(auto.until(() => !auto.vm.running(), 400)).toBeGreaterThan(50);
+    const waits = drive('test:W::\n  message_var 4, 900\n  end\n');
+    waits.vm.start({ label: 'test:W', zone: 'fixture:TOWN', source: 'test' });
+    expect(() => waits.until(() => !waits.vm.running(), 400)).toThrow('condition not met');
   });
 
   it('message_var without a bank operand fails loudly', () => {

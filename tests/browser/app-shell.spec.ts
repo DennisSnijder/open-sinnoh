@@ -263,14 +263,19 @@ test('the real engine on the fixture pack: layout, input, talk, warp, starter by
 
 test('a pixel ratio change alone (no resize event) lays the canvases out again', async ({ page }, info) => {
   test.skip(info.project.name !== 'desktop', 'CDP device metrics at the desktop size');
+  test.setTimeout(120_000);
   const errors = await open(page);
   const widths = () => page.evaluate(() => ['main-canvas', 'battle-canvas'].map((id) => (document.getElementById(id) as HTMLCanvasElement).width));
   const { width, height } = page.viewportSize()!;
   expect(await widths()).toEqual([width, width]);
   const cdp = await page.context().newCDPSession(page);
   for (const dpr of [2, 3, 1]) {
+    const frames = await page.evaluate(() => window.openSinnohApp!.loop.frames);
     await cdp.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: dpr, mobile: false });
-    await expect.poll(widths).toEqual([width * dpr, width * dpr]);
+    // The next frame lays out again. Two frames on, one began after the change; with software GL beside other test
+    // workers a frame can take several seconds.
+    await page.waitForFunction((n) => window.openSinnohApp!.loop.frames >= n + 2, frames, { timeout: 60_000 });
+    expect(await widths()).toEqual([width * dpr, width * dpr]);
   }
   expect(errors).toEqual([]);
 });

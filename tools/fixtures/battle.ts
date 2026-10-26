@@ -181,6 +181,7 @@ export function battleTexts(id: (name: string) => Id, moves: { sourceIndex?: num
   for (const name of PROTOCOL_STRINGS.pair) {
     for (const pair of ['AllyAlly', 'AllyWild', 'AllyFoe', 'WildAlly', 'WildWild', 'FoeAlly', 'FoeFoe']) add(`${name}_${pair}`, protocolText(name, prefix[pair.match(/^(Ally|Wild|Foe)/)![1] as 'Ally']));
   }
+  for (const name of PROTOCOL_STRINGS.species) for (const who of ['Ally', 'Wild', 'Foe'] as const) add(`${name}_${who}Ally`, `${protocolText(name, prefix[who])} {var 1}`);
 
   const top = Math.max(...moves.map((m) => m.sourceIndex ?? 0));
   const used: Id[] = [];

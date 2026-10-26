@@ -7,7 +7,7 @@
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import { fakeImports, fakeImportWorker, fakeRom, importDone } from './fake-import.ts';
 import { skipSetup } from './intro.ts';
-import { saveGame } from './save.ts';
+import { saveSlot } from './save.ts';
 
 interface Sent {
   api_key: string;
@@ -85,23 +85,20 @@ test('CONTINUE sends game_continue; replays send nothing', async ({ page, contex
   const sent = await intercept(context);
   await optIn(page);
   await skipSetup(page);
-  await page.goto('/?packs=fixture');
-  await page.waitForFunction(() => window.openSinnohApp?.game.scripts.view().message?.waitingForInput === true, undefined, { timeout: 20_000 });
-  await page.keyboard.press('z');
-  await page.waitForFunction(() => window.openSinnohApp!.game.canSave());
-  await saveGame(page);
-  // The installed app's Continue shortcut: the title loads the save at once.
-  await page.goto('/?packs=fixture&title&continue');
-  await expect(page.locator('#title')).toHaveCount(0, { timeout: 30_000 });
-  await expect.poll(() => sent.map((e) => e.event)).toEqual(['app_open', 'app_open', 'game_continue']);
-  expect(Object.keys(sent[2]!.properties).sort()).toEqual([...COMMON].sort());
-  expect(await context.cookies()).toEqual([]);
-  expect(await traces(page)).toEqual({ cookie: '', local: [], session: [], dbs: [] });
-
+  // A save made on the replay bridge (its ticks are the test's, not the wall clock's), which sends nothing.
   await page.goto('/?packs=fixture&replay');
   await page.waitForFunction(() => window.openSinnohGame?.ready === true);
-  await page.evaluate(() => new Promise((r) => setTimeout(r, 1500)));
-  expect(sent).toHaveLength(3);
+  expect(await page.evaluate(() => window.openSinnohGame!.advanceText(3000))).not.toBeNull();
+  expect(await page.evaluate(() => window.openSinnohGame!.until({ kind: 'idle' }, 600))).not.toBeNull();
+  await saveSlot(page);
+  // The installed app's Continue shortcut: the title loads the save at once. Wait on the event itself: `#title`
+  // is not there yet while the app still loads, so its absence says nothing.
+  await page.goto('/?packs=fixture&title&continue');
+  await expect.poll(() => sent.map((e) => e.event), { timeout: 60_000 }).toEqual(['app_open', 'game_continue']);
+  await expect(page.locator('#title')).toHaveCount(0, { timeout: 30_000 });
+  expect(Object.keys(sent[1]!.properties).sort()).toEqual([...COMMON].sort());
+  expect(await context.cookies()).toEqual([]);
+  expect(await traces(page)).toEqual({ cookie: '', local: [], session: [], dbs: [] });
 });
 
 for (const signal of ['Do Not Track', 'Global Privacy Control', 'no opt-in'] as const) {

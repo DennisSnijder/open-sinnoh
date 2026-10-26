@@ -8,7 +8,7 @@
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import type { GameState } from '@opensinnoh/contracts';
 import { waitForScene } from '../../packages/cli/src/browser.ts';
-import { seedRomImport } from './seed.ts';
+import { romContext, resetRomDevice } from './rom-context.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 const SHOTS = 'test-artifacts/field-fixes';
@@ -65,7 +65,11 @@ const weatherPixels = () =>
     };
     return { ...diff(on, off), noise: diff(off, still).bright };
   });
-const enhanced = (config: string | null) => page.evaluate((c) => (window as unknown as { openSinnohEnhanced: (c: string | null) => void }).openSinnohEnhanced(c), config);
+const enhanced = async (config: string | null) => {
+  await page.evaluate((c) => (window as unknown as { openSinnohEnhanced: (c: string | null) => void }).openSinnohEnhanced(c), config);
+  // Until the field is drawn the new way (the enhanced pipeline builds its targets and programs first).
+  await page.waitForFunction((on) => ((globalThis as unknown as { openSinnohRenderStats: { enhancedFrame: object | null } }).openSinnohRenderStats.enhancedFrame !== null) === on, config !== null, { timeout: 120_000 });
+};
 
 /** Two frames, so the renderer has drawn the current state. */
 const frames = () => page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
@@ -73,18 +77,19 @@ const frames = () => page.evaluate(() => new Promise<void>((r) => requestAnimati
 test.beforeAll(async ({ browser }, info) => {
   test.setTimeout(180_000);
   const use = info.project.use;
-  context = await browser.newContext({ baseURL: use.baseURL, viewport: use.viewport });
+  // The worker's seeded context (rom-context.ts): the import is copied into the browser once per worker, not per file.
+  context = await romContext(browser, use);
   page = await context.newPage();
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
-  await seedRomImport(page);
+  await resetRomDevice(page);
   await page.goto('/?replay');
   await page.waitForFunction(() => window.openSinnohGame?.ready === true, undefined, { timeout: 60_000 });
   await waitForScene(page);
 });
 
 test.afterAll(async () => {
-  await context?.close();
+  await page?.close();
 });
 
 async function arrive(zone: string, x: number, z: number, facing: 'up' | 'down' | 'left' | 'right', vars: Record<string, number> = {}): Promise<void> {
@@ -115,11 +120,13 @@ test('the Spring Path is closed off Route 214 before it is found', async () => {
 });
 
 test('walking onto Route 215 fades the rain and its fog in', async () => {
-  test.setTimeout(120_000);
+  // About a hundred drawn frames, which a loaded machine draws a few a second.
+  test.setTimeout(300_000);
   await arrive('ROUTE_210_SOUTH', 573, 597, 'right');
   await frames();
   expect((await stats()).weather).toEqual([{ id: 'platinum:OVERWORLD_WEATHER_CLEAR', phase: 'steady', particles: 0, fog: null }]);
-  // Each tick is drawn, as in play.
+  // Each tick of the walk is drawn, as in play: the renderer steps the ticks it missed with the weather it sees now,
+  // so a frame first drawn after the zone change would count the new weather's load gap as already gone.
   await page.evaluate(() => window.openSinnohGame!.press('right'));
   for (let n = 0; (await page.evaluate(() => window.openSinnohGame!.snapshot().state.player.zone)) !== 'platinum:MAP_HEADER_ROUTE_215'; n++) {
     expect(n, 'reaches Route 215').toBeLessThan(200);
@@ -127,13 +134,16 @@ test('walking onto Route 215 fades the rain and its fog in', async () => {
     await frames();
   }
   await page.evaluate(() => window.openSinnohGame!.release('right'));
-  // Each step is drawn: the old weather goes, the rain loads, then fades in over its spawner ramp and 127 fog steps.
+  // The old weather goes, the rain loads, then fades in over its spawner ramp and 127 fog steps: every tick of the
+  // start is drawn, then every eighth, 200 ticks in all.
   const seen: Stats['weather'][] = [];
-  for (let i = 0; i < 200; i++) {
-    await page.evaluate(() => window.openSinnohGame!.advance(1));
+  for (let t = 0; t < 200; ) {
+    const step = t < 48 ? 1 : 8;
+    await page.evaluate((n) => window.openSinnohGame!.advance(n), step);
+    t += step;
     await frames();
     seen.push((await stats()).weather);
-    if (i === 30) await page.screenshot({ path: `${SHOTS}/route-215-rain-fading-in.png` });
+    if (t === 30) await page.screenshot({ path: `${SHOTS}/route-215-rain-fading-in.png` });
   }
   const rain = seen.map((w) => w.find((x) => x.id === 'platinum:OVERWORLD_WEATHER_RAINING'));
   const first = rain.findIndex((r) => r);
@@ -152,14 +162,15 @@ test('walking onto Route 215 fades the rain and its fog in', async () => {
   expect(drops.changed, 'only the drops change').toBeLessThan(0.05);
   // CINEMATIC draws the field through its post chain; the weather still goes over it, to the screen.
   await enhanced('cinematic');
-  await expect.poll(async () => ((p) => p.bright - 3 * p.noise)(await weatherPixels()), { timeout: 20_000 }).toBeGreaterThan(0.0005);
+  await expect.poll(async () => ((p) => p.bright - 3 * p.noise)(await weatherPixels()), { timeout: 90_000 }).toBeGreaterThan(0.0005);
   await page.screenshot({ path: `${SHOTS}/route-215-rain-cinematic.png` });
   await enhanced(null);
   expect(errors).toEqual([]);
 });
 
 test('the snow routes draw the weather tasks flakes, in the DS look and CINEMATIC', async () => {
-  test.setTimeout(120_000);
+  // The post chain settles over frames, which a loaded machine draws a few a second.
+  test.setTimeout(300_000);
   for (const [zone, x, z, weather] of [
     ['ROUTE_216', 298, 402, 'platinum:OVERWORLD_WEATHER_HEAVY_SNOW'],
     ['ROUTE_217', 299, 308, 'platinum:OVERWORLD_WEATHER_BLIZZARD'],
@@ -174,7 +185,7 @@ test('the snow routes draw the weather tasks flakes, in the DS look and CINEMATI
     expect(flakes.bright, `${zone} flake pixels`).toBeGreaterThan(0.002 + 3 * flakes.noise);
     await page.screenshot({ path: `${SHOTS}/${zone.toLowerCase()}-snow.png` });
     await enhanced('cinematic');
-    await expect.poll(async () => ((p) => p.bright - 3 * p.noise)(await weatherPixels()), { timeout: 20_000 }).toBeGreaterThan(0.002);
+    await expect.poll(async () => ((p) => p.bright - 3 * p.noise)(await weatherPixels()), { timeout: 90_000 }).toBeGreaterThan(0.002);
     await page.screenshot({ path: `${SHOTS}/${zone.toLowerCase()}-snow-cinematic.png` });
     await enhanced(null);
   }

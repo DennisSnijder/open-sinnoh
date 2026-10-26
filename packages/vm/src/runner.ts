@@ -47,6 +47,7 @@ import { sealHandlers } from './seal-ops.ts';
 import { gameCornerHandlers } from './game-corner-ops.ts';
 import { encounterHandlers } from './encounter-ops.ts';
 import { undergroundHandlers } from './underground-ops.ts';
+import { appearanceHandlers } from './appearance-ops.ts';
 import { mysteryGiftHandlers } from './mystery-gift-ops.ts';
 import { hofHandlers } from './hof-ops.ts';
 import { villaHandlers } from './villa-ops.ts';
@@ -677,10 +678,11 @@ export class Runner implements ScriptRunner {
 
   // ---------------------------------------------------------------- UI
 
-  showMessage(t: Thread, text: Id, speed: number): TextPrinter {
+  /** Decomp ScriptMessage_Show: `canSpeedUp` is its canSkipDelay (A/B speed up), `autoScroll` the options' autoScroll. */
+  showMessage(t: Thread, text: Id, speed: number, opts: { canSpeedUp?: boolean; autoScroll?: { skip: boolean } } = {}): TextPrinter {
     const rec = this.registries.texts.get(text);
     if (!rec) throw new Error(`unknown text ${text}`);
-    const printer = new TextPrinter(toPrintOps(rec.text, t.slots), { speed, canSpeedUp: true });
+    const printer = new TextPrinter(toPrintOps(rec.text, t.slots), { speed, canSpeedUp: opts.canSpeedUp ?? true, ...(opts.autoScroll ? { autoScroll: opts.autoScroll } : {}) });
     this.ui.message = { printer };
     return printer;
   }
@@ -1049,6 +1051,7 @@ export class Runner implements ScriptRunner {
       ...tvHandlers(this),
       ...npcHandlers(this),
       ...townFieldHandlers(this),
+      ...appearanceHandlers(this),
     };
   }
 

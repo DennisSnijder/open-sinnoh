@@ -226,6 +226,12 @@ export interface GameState {
   gender: 'male' | 'female';
   /** The player's trainer id (low 16 bits) and secret id (high 16 bits), rolled at new game (decomp TrainerInfo id). */
   trainerId: number;
+  /**
+   * 0.47.1. The player's trainer appearance (decomp TrainerInfo appearance: an `index` of sTrainerAppearances, the
+   * Union Room look): `set_trainer_info_appearance` writes it (Oreburgh's Pokémon Center). Absent: the new-game
+   * appearance (decomp InitializeNewSave: variant 0 of the trainer id's row of sAppearanceShuffleTable).
+   */
+  appearance?: number;
   /** Only flags/vars that differ from their registry `initial` value. */
   flags: Record<Id, boolean>;
   vars: Record<Id, number>;

@@ -269,7 +269,10 @@ function paletteFade(vm: AnimVm, c: PokeCopy, from: number, to: number, color: n
  * Spite: the defender's picture in BG2 (loaded by the script just after) fades in over the scene (EVA 0 → 8, EVB
  * 16 → 8 over 24 frames) under a 5 px sine scroll, holds 32 frames, fades out. In singles BG2 is raised over the
  * defender's sprite; in doubles the defender's copy (sprite 0) draws over it where the 3D layer would hide it. The decomp
- * darkens BG2's palette slot first (PaletteData_BlendMulti), which the picture's palette load then replaces: not done.
+ * darkens BG palette 8 (PaletteData_BlendMulti, half black, into the faded buffer), but the script's very next command,
+ * LoadPokemonSpriteIntoBg, loads the picture's palette into slot 8 of both buffers in the same script frame
+ * (BattleAnimScript_Execute runs on until a delay), before the VBlank transfer: the darkening never reaches the screen,
+ * so the picture shows in its own colours.
  */
 const spite: Func = (vm) => {
   vm.bg2.blended = true;

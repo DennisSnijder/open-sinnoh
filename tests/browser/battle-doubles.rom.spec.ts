@@ -18,7 +18,7 @@ import type { ReplayLine } from '@opensinnoh/core';
 import type { BattleMoveView, BattlePrompt, BattleView, Registries } from '@opensinnoh/contracts';
 import { loadGamePacks, runReplay } from '@opensinnoh/game';
 import { romSlice } from '../rom.ts';
-import { seedRomImport } from './seed.ts';
+import { romContext, resetRomDevice } from './rom-context.ts';
 import { pageDriver, waitForScene } from '../../packages/cli/src/browser.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
@@ -39,18 +39,20 @@ test.beforeAll(async ({ browser }, info) => {
   test.skip(info.project.name !== 'desktop', 'the spec sets its own viewports');
   test.setTimeout(420_000);
   registries = loadGamePacks([romSlice().pack]).registries;
-  context = await browser.newContext({ baseURL: info.project.use.baseURL, viewport: { width: 1280, height: 720 } });
+  // The worker's seeded context (rom-context.ts): the import is copied into the browser once per worker, not per file.
+  context = await romContext(browser, info.project.use);
   page = await context.newPage();
+  await page.setViewportSize({ width: 1280, height: 720 });
   cdp = await context.newCDPSession(page);
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
-  await seedRomImport(page);
+  await resetRomDevice(page);
   await page.goto('/?replay');
   await page.waitForFunction(() => window.openSinnohGame?.ready === true, undefined, { timeout: 60_000 });
 });
 
 test.afterAll(async () => {
-  await context?.close();
+  await page?.close();
 });
 
 const VIEWPORTS = [
@@ -78,7 +80,7 @@ interface Box {
 const battleView = () => page.evaluate(() => window.openSinnohGame!.battleView()) as Promise<BattleView | null>;
 const frames = () => page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 
-/** Waits until the battle canvas has the new view's width in device px and keeps its size for 10 frames. */
+/** Waits until the battle canvas has the new view's width in device px and keeps its size for 3 frames. */
 async function settle(width: number): Promise<void> {
   // Polled from here: waitForFunction takes the predicate's promise as its truthy answer and would not wait.
   await expect.poll(() => page.evaluate(
@@ -92,13 +94,14 @@ async function settle(width: number): Promise<void> {
           const s = window.openSinnohApp!.battleScene();
           const dpr = c.width / c.getBoundingClientRect().width;
           if (`${c.width}x${c.height}` !== size || c.width !== w || Math.abs(s.rect.width * dpr - s.scale * 256) > 1 || Math.abs(devicePixelRatio - dpr) > 1e-6) return resolve(false);
-          if (++n >= 10) return resolve(true);
+          if (++n >= 3) return resolve(true);
           requestAnimationFrame(step);
         };
         requestAnimationFrame(step);
       }),
     width,
-  ), { timeout: 20_000 }).toBe(true);
+    // Three agreeing frames in a row; a loaded machine with software GL draws a frame every second or two.
+  ), { timeout: 90_000 }).toBe(true);
 }
 
 /** Ticks until the battle waits on a prompt matching `ok` (or fails). */

@@ -71,13 +71,16 @@ test('berry soil keeps its look while the player walks down and up past the plot
       g.drawImage(canvas, 0, 0);
       return g.getImageData(0, 0, copy.width, copy.height).data;
     };
+    // Loading is read right after a render: a sprite whose texture comes in after it is drawn only by the next one
+    // (until then its drawables sit unplaced).
     const settle = async () => {
       const deadline = performance.now() + 60_000;
-      do {
+      for (;;) {
         field.render(1);
+        if (!field.loading()) return;
         if (performance.now() > deadline) throw new Error('the scene did not finish loading');
         await new Promise(requestAnimationFrame);
-      } while (field.loading());
+      }
     };
     /** Pixels the soil models change: the frame with them against the frame without. */
     const soilPixels = () => {
@@ -197,12 +200,14 @@ for (const scene of SCENES) {
           return g.getImageData(0, 0, copy.width, copy.height).data;
         };
         try {
+          // Loading is read right after a render, as in the soil test.
           const deadline = performance.now() + 60_000;
-          do {
+          for (;;) {
             field.render(1);
+            if (!field.loading()) break;
             if (performance.now() > deadline) throw new Error('the scene did not finish loading');
             await new Promise(requestAnimationFrame);
-          } while (field.loading());
+          }
           const reflections = [...internals.actors.values()].flatMap((a) => (a.reflection?.visible ? [a.reflection] : []));
           const shown = frame();
           const image = copy.toDataURL();

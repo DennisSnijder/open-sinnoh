@@ -328,6 +328,20 @@ export interface BattlerView {
    * leaves the field; absent while none has. Not drawn; the replay auto policy reads it.
    */
   ability?: Id;
+  /**
+   * 0.48.0. The picture shown in place of its own after Transform (decomp BtlCmd_Transform: the target's species, form
+   * and shininess, `transformedGender`), from the move to the battler leaving the field; absent otherwise. The name,
+   * level and healthbox stay its own.
+   */
+  look?: BattlerLook;
+}
+
+/** 0.48.0. What a battler's sprite shows (`BattlerView.look`). */
+export interface BattlerLook {
+  species: Id;
+  form: number;
+  shiny: boolean;
+  gender: Gender;
 }
 
 export interface BattleView {

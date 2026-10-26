@@ -498,9 +498,13 @@ export class BattleScene {
     drawBgMon(this.ctx, c, m, this.origin, this.scale);
   }
 
-  /** A battler's picture: its form, face and atlas (the battler's gender and shininess when it is on the field). */
+  /**
+   * A battler's picture: its form, face and atlas (the battler's gender and shininess when it is on the field: those it
+   * shows, its `look` after Transform).
+   */
   private picture(p: AnimPicture): { form: PokemonSpriteForm | undefined; face: PokemonFace | undefined; img: Img | null } {
-    const b = this.battlers.find((v) => v.battler === p.battler);
+    const v = this.battlers.find((x) => x.battler === p.battler);
+    const b = v?.look ?? v;
     const sprites = this.deps.registries().pokemonSprites.get(p.species);
     const form = sprites?.forms[p.form] ?? sprites?.forms[0];
     const name = p.back ? 'back' : 'front';
@@ -518,10 +522,11 @@ export class BattleScene {
   private drawOverlay(view: BattleView, o: NonNullable<NonNullable<BattleView['anim']>['overlay']>): void {
     const b = view.battlers.find((v) => v.battler === o.mask);
     const s = this.sheet(o.sheet);
-    const sprites = b ? this.deps.registries().pokemonSprites.get(b.species) : undefined;
-    const form = sprites?.forms[b!.form] ?? sprites?.forms[0];
-    const face = b && ((b.gender === 'female' && form?.[b.side === 'enemy' ? 'frontFemale' : 'backFemale']) || form?.[b.side === 'enemy' ? 'front' : 'back']);
-    const img = b && form ? this.image(b.shiny ? form.shinyAtlas : form.atlas) : null;
+    const look = b?.look ?? b;
+    const sprites = look ? this.deps.registries().pokemonSprites.get(look.species) : undefined;
+    const form = sprites?.forms[look!.form] ?? sprites?.forms[0];
+    const face = b && look && ((look.gender === 'female' && form?.[b.side === 'enemy' ? 'frontFemale' : 'backFemale']) || form?.[b.side === 'enemy' ? 'front' : 'back']);
+    const img = look && form ? this.image(look.shiny ? form.shinyAtlas : form.atlas) : null;
     const cell = s?.sheet.cells[0];
     if (!b?.visible || !s || !cell || !img || !face) return;
     const g = this.scratchCtx(80, 80);
@@ -756,7 +761,8 @@ export class BattleScene {
     const t: AnimBattlerView | null = copy ? { battler: b.battler, dx: copy.x, dy: copy.y, scaleX: copy.scaleX, scaleY: copy.scaleY, rotation: copy.rotation, pivotX: 0, pivotY: 0, hidden: false, fade: copy.fade, alpha: copy.alpha } : anim;
     const pos = this.place(b);
     // Another battler's picture in its place (Transform, Role Play), at that picture's height.
-    const picture = (copy ? copy.picture : anim?.picture) ?? { battler: b.battler, species: b.species, form: b.form, back: b.side !== 'enemy' };
+    const look = b.look ?? b;
+    const picture = (copy ? copy.picture : anim?.picture) ?? { battler: b.battler, species: look.species, form: look.form, back: b.side !== 'enemy' };
     const { form, face, img } = this.picture(picture);
     const mosaic = copy?.mosaic ?? 0;
     const k = this.scale;

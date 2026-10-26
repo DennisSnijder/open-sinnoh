@@ -22,7 +22,7 @@ for (const [name, types, baseExp] of [
 }
 const moves = new Map(base.moves);
 const gen4 = SimDex.forGen(4);
-for (const name of ['SHADOW_FORCE', 'SEISMIC_TOSS', 'QUICK_ATTACK', 'NIGHT_SHADE', 'SPLASH', 'WATER_GUN', 'DEFOG', 'WEATHER_BALL', 'MOONLIGHT', 'MORNING_SUN', 'SYNTHESIS', 'HAIL', 'SOLAR_BEAM', 'SELF_DESTRUCT']) {
+for (const name of ['SHADOW_FORCE', 'SEISMIC_TOSS', 'QUICK_ATTACK', 'NIGHT_SHADE', 'SPLASH', 'WATER_GUN', 'DEFOG', 'WEATHER_BALL', 'MOONLIGHT', 'MORNING_SUN', 'SYNTHESIS', 'HAIL', 'SOLAR_BEAM', 'SELF_DESTRUCT', 'TRANSFORM']) {
   const m = gen4.moves.get(name.replaceAll('_', ''));
   moves.set(f(`MOVE_${name}`), { ...base.moves.get(f('MOVE_BOP'))!, id: f(`MOVE_${name}`), name: m.name, sourceIndex: m.num, type: f(`TYPE_${m.type.toUpperCase()}`), power: m.basePower, accuracy: m.accuracy === true ? 0 : m.accuracy, pp: m.pp, priority: m.priority, category: m.category.toLowerCase() as 'physical' | 'special' | 'status', target: m.target === 'self' ? 'USER' : 'SINGLE_TARGET' });
 }

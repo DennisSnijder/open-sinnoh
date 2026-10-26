@@ -1438,7 +1438,7 @@ export async function importPlatinum(
       if (!e) throw new ImportError(`names: no ${name}`);
       return names.flag(e[0]);
     };
-    newGame.objectives = objectiveTables({ flag: flagByName, var: varByName });
+    newGame.objectives = objectiveTables({ flag: flagByName, var: varByName }, newGame.townMap.locations.map((l) => l.zone));
     const gfxNumber = (name: string) => {
       const gfx = [...names.gfxNames].find(([, n]) => n === name)?.[0];
       if (gfx === undefined) throw new ImportError(`names: no ${name}`);

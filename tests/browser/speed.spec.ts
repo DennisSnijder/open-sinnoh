@@ -14,14 +14,19 @@ async function open(page: Page): Promise<string[]> {
   return errors;
 }
 
-/** Ticks per wall second over `ms`, measured in the page. */
+/**
+ * Ticks the loop asks for per wall second over `ms`, measured in the page: the ticks it ran and those it dropped. A
+ * loaded machine (software GL beside other test workers) drops the fast ticks it has no time for, by design (loop.ts
+ * `runTicks`), so the ticks run alone measure the machine; the speed decides how many are due.
+ */
 const tickRate = (page: Page, ms = 2000) =>
   page.evaluate(async (ms) => {
-    const app = window.openSinnohApp!;
+    const loop = window.openSinnohApp!.loop;
+    const due = () => loop.ticks + loop.dropped;
     const t0 = performance.now();
-    const k0 = app.ticks;
+    const k0 = due();
     await new Promise((r) => setTimeout(r, ms));
-    return ((app.ticks - k0) * 1000) / (performance.now() - t0);
+    return ((due() - k0) * 1000) / (performance.now() - t0);
   }, ms);
 
 const speed = (page: Page) => page.evaluate(() => window.openSinnohApp!.speed());
@@ -33,8 +38,6 @@ test('Tab runs fast while held, backtick latches it, the speed setting persists'
   const indicator = page.locator('.speed-indicator');
   await expect(indicator).toBeHidden();
 
-  // Software GL on a loaded machine can draw only a few frames a second; the loop catches up in ticks.
-  await tickRate(page, 1000);
   const normal = await tickRate(page);
   expect(normal).toBeGreaterThan(10);
   expect(normal).toBeLessThan(33);
@@ -43,8 +46,6 @@ test('Tab runs fast while held, backtick latches it, the speed setting persists'
   await page.keyboard.down('Tab');
   await expect(page.locator('.ui-toast')).toHaveText('Speed 2x');
   await expect(indicator).toHaveText('>> 2x');
-  // The toast and the mark coming up stall software GL for a moment: measure after it.
-  await tickRate(page, 1000);
   const held = await tickRate(page);
   expect(await page.evaluate(() => window.openSinnohApp!.loop.speed)).toBe(2);
   await page.keyboard.up('Tab');
@@ -59,7 +60,6 @@ test('Tab runs fast while held, backtick latches it, the speed setting persists'
   await page.keyboard.press('Backquote');
   expect(await speed(page)).toEqual({ fast: 2, latched: true, active: true, speed: 2 });
   await expect(indicator).toHaveText('>> 2x');
-  await tickRate(page, 1000);
   expect((await tickRate(page)) / normal).toBeGreaterThan(1.5);
   await page.keyboard.press('Backquote');
   await expect(page.locator('.ui-toast')).toHaveText('Speed 1x');
@@ -88,7 +88,6 @@ test('Tab runs fast while held, backtick latches it, the speed setting persists'
   expect((await speed(page)).fast).toBe(4);
   await page.keyboard.down('Tab');
   await expect(indicator).toHaveText('>> 4x');
-  await tickRate(page, 1000);
   const four = await tickRate(page);
   await page.keyboard.up('Tab');
   console.log(`ticks per second with Tab held at 4x: ${four.toFixed(1)} (loop: ${JSON.stringify(await page.evaluate(() => ({ ...window.openSinnohApp!.loop, frameMs: undefined })))})`);

@@ -116,6 +116,9 @@ export function partyHandlers(r: Runner): Record<string, Handler> {
     check_has_two_alive_mons: (t, _c, a) => (dest(t, a[0], party().filter(alive).length >= 2 ? 1 : 0), 'continue'),
     count_party_non_eggs: (t, _c, a) => (dest(t, a[0], party().filter((m) => !m.isEgg).length), 'continue'),
     count_party_eggs: (t, _c, a) => (dest(t, a[0], party().filter((m) => m.isEgg).length), 'continue'),
+    // Decomp ScrCmd_CheckPartyHasBadEgg: an Egg whose data failed its checksum (MON_DATA_CHECKSUM_FAILED). Our Pokémon
+    // carry no checksum (saves are validated when loaded), so no party Egg is a Bad Egg.
+    check_party_has_bad_egg: (t, _c, a) => (dest(t, a[0], 0), 'continue'),
     count_alive_mons_except: (t, _c, a) => {
       const skip = val(t, a[1]);
       dest(t, a[0], party().filter((m, i) => i !== skip && alive(m)).length);

@@ -15,11 +15,15 @@
  *
  * The DS's touch screen only toggles the bottom screen's zoomed map, which this single screen does not show. Our
  * touch: a tap on an unlocked fly location's block moves the cursor to its cell and picks it, as A there would.
+ *
+ * With the objective option on (an OpenSinnoh addition), the current objective's destination town (its step's `to`:
+ * the first fly location of that zone) blinks in the hovered palette every 32 frames, drawn even while locked.
  */
 import type { Button } from '@opensinnoh/core';
 import { newGameRecord, type GameState, type InputFrame, type Registries, type TownMap, type TownMapView } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
 import type { MenuContext } from './context.ts';
+import { currentObjective } from './objective.ts';
 import { tapIndex, type Screen, type Step } from './stack.ts';
 
 /** TOWN_MAP_GRID_SPACING and its offsets: a cell's sprite position. */
@@ -36,6 +40,8 @@ const FADE_STEPS = 6;
 const BLACK = 16;
 /** TownMap_BlinkHoveredFlyLocation: the hovered block swaps palettes every 16 frames. */
 const BLINK = 16;
+/** The objective's destination blinks at half the hovered block's speed. */
+const OBJECTIVE_BLINK = 32;
 const DIRS: readonly Button[] = ['up', 'down', 'left', 'right'];
 
 /** The cursor's first cell (TownMapContext_Init, TownMap_Init's InitDefaultAppResources). */
@@ -96,6 +102,8 @@ export function townMapScreen(ctx: MenuContext, pick: (location: number) => Step
   const reg = ctx.registries;
   const unlocked = unlockedLocations(reg, ctx.state, map);
   const found = foundHidden(reg, ctx.state, map);
+  const objectiveZone = ctx.host.options().objective === 0 ? (currentObjective(ctx.state, reg)?.to ?? null) : null;
+  const objective = objectiveZone === null ? -1 : map.locations.findIndex((l) => l.zone === objectiveZone);
   const se = (name: string) => {
     const id = ctx.text.id(name);
     if (reg.sequences.has(id)) ctx.host.sound?.playSe(id);
@@ -222,10 +230,11 @@ export function townMapScreen(ctx: MenuContext, pick: (location: number) => Step
       hidden: map.hidden.flatMap((_, i) => (found & (1 << i) ? [i] : [])),
       blocks: map.locations.flatMap((l, i) => {
         // TownMap_LoadFlyLocations: Pal Park's and Victory Road's blocks are not drawn until unlocked.
-        if (!unlocked[i] && l.cell && !(l.cell[0] === 26 && l.cell[1] === 17)) return [];
-        const blinking = hovered === i && !blinkOn;
+        if (i !== objective && !unlocked[i] && l.cell && !(l.cell[0] === 26 && l.cell[1] === 17)) return [];
+        const marked = i === objective && Math.trunc(tick / OBJECTIVE_BLINK) % 2 === 0;
+        const blinking = (hovered === i && !blinkOn) || marked;
         const palette = blinking ? 8 + l.palette : 5 + l.palette + (unlocked[i] ? 1 : 0);
-        return [{ location: i, palette, shape: l.shape, x: l.sprite[0] + GRID_X, y: l.sprite[1] + GRID_Y, unlocked: unlocked[i]! }];
+        return [{ location: i, palette, shape: l.shape, x: l.sprite[0] + GRID_X, y: l.sprite[1] + GRID_Y, unlocked: unlocked[i]!, ...(i === objective ? { objective: true as const } : {}) }];
       }),
       player: { ...cellPosition(startX, startZ), gender: ctx.state.gender },
       cursor: cellPosition(cursorX, cursorZ),

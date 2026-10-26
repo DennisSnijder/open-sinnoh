@@ -534,6 +534,9 @@ export function frontierFieldHandlers(r: Runner): Record<string, Handler> {
     // answers COMM_CLUB_RET_CANCEL, so the script goes back to its menu.
     start_battle_client: (t, _c, a) => (r.log.stub('communication:link-club', 'the wireless link club is not available (no wireless): cancelled'), dest(t, a[3], COMM_CLUB_RET_CANCEL), 'continue'),
     start_battle_server: (t, _c, a) => (r.log.stub('communication:link-club', 'the wireless link club is not available (no wireless): cancelled'), dest(t, a[3], COMM_CLUB_RET_CANCEL), 'continue'),
+    // Decomp ScrCmd_ClearReceivedTempDataAllPlayers (CommTool_ClearReceivedTempDataAllPlayers): clears what the linked
+    // players sent. Offline no player is linked and nothing is received, so there is nothing to clear.
+    clear_received_temp_data_all_players: () => 'continue',
   };
 }
 

@@ -90,13 +90,13 @@ describe('the fly targets (sFlyLocations, sTownMapFlyLocationUnlockFlags)', () =
 });
 
 describe('the Town Map screen (TOWN_MAP_MODE_FLY)', () => {
-  const host = (): AppHost => {
-    const options = { ...DEFAULT_DEVICE_OPTIONS };
+  const host = (objective = DEFAULT_DEVICE_OPTIONS.objective): AppHost => {
+    const options = { ...DEFAULT_DEVICE_OPTIONS, objective };
     return { options: () => options, setOption: () => {}, save: () => {}, fieldMoveCheck: () => null, useFieldMove: () => {}, fieldItemCheck: () => null, useFieldItem: () => {}, clock: () => DEFAULT_CLOCK };
   };
-  const open = (s: GameState) => {
+  const open = (s: GameState, reg = registries, objective = DEFAULT_DEVICE_OPTIONS.objective) => {
     const picked: (number | 'cancel')[] = [];
-    const ctx = menuContext({ registries, state: s, log: { stub: () => {} }, host: host() });
+    const ctx = menuContext({ registries: reg, state: s, log: { stub: () => {} }, host: host(objective) });
     const pick = (i: number): Step => (picked.push(i), { close: { app: 'start-menu' } });
     const app = new AppStack(townMapScreen(ctx, pick, () => (picked.push('cancel'), 'pop')), { app: 'start-menu' });
     return { app, picked, view: () => app.view() as TownMapView };
@@ -173,5 +173,20 @@ describe('the Town Map screen (TOWN_MAP_MODE_FLY)', () => {
     expect(view().cursor).toEqual(cellPosition(4, 23));
     run(app, 8);
     expect(picked).toEqual([0]);
+  });
+
+  it('marks the objective’s destination, even a locked block the DS hides, blinking at half the hover’s speed', () => {
+    const title = [...registries.texts.keys()][0]!;
+    const objectives = { title, explore: title, steps: [{ text: title, done: [{ kind: 'badge' as const, badge: id('BADGE_NONE') }], to: ROUTE }] };
+    const withObjective: Registries = { ...registries, newGame: new Map([[record.id, { ...record, townMap: map, objectives }]]) };
+    const marked = (v: TownMapView) => v.blocks.filter((b) => b.objective).map((b) => [b.location, b.palette]);
+    const { app, view } = open(atTerrain(), withObjective, 0);
+    expect(marked(view())).toEqual([[2, 9]]);
+    run(app, 32);
+    expect(marked(view())).toEqual([[2, 6]]);
+    run(app, 32);
+    expect(marked(view())).toEqual([[2, 9]]);
+    // The option off: no mark, and the locked one-cell block stays hidden.
+    expect(open(atTerrain(), withObjective, 1).view().blocks.map((b) => b.location)).toEqual([0, 1]);
   });
 });
