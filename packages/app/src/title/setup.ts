@@ -4,7 +4,7 @@
  * design system (@opensinnoh/ui), not the game's message box, since these are the app's questions, not Rowan's.
  * It asks whether to send error reports (nothing is sent before the answer), whether to add the optional
  * HeartGold/SoulSilver ROM (following Pokémon for every species; only where the add-on can be imported), and the
- * text speed. Each answer is stored at once as a device option, changeable in Options; a question already
+ * text speed and the visual style (DS by default; asked only until the device has chosen one). Each answer is stored at once as a device option, changeable in Options; a question already
  * answered on this device is not asked again (picking the add-on opens the ROM page's import, whose Start playing comes back here for the rest).
  * Keys and the pad move the cursor (up/down) and choose (A); a tap on an answer sends `menu:<i>`.
  */

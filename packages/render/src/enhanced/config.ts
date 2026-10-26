@@ -3,7 +3,7 @@
  * cost; the pipeline (pipeline.ts) is a lazy chunk loaded only once a config turns something on. The app sets one
  * from the Options' VISUAL STYLE and ANGLED CAMERA (`visualStyleConfig`); replays and tests never do.
  *
- * Dev and test builds also take a preset (`subtle`, `cinematic`) or a list of switches through `parseEnhanced`:
+ * Dev and test builds also take a list of a preset (`subtle`, `cinematic`) and switches through `parseEnhanced`:
  * `camera` (angled), `follow` (angled with lag and lookahead), `dof`, `particles`, `bloom`, `grade`, `ao`, `lamps`, `sun`.
  */
 import type { Zone } from '@opensinnoh/contracts';
@@ -53,10 +53,10 @@ const SWITCHES = ['dof', 'particles', 'bloom', 'grade', 'ao', 'lamps', 'sun'] as
 /** A preset or switch list (see above); null for none or an empty list. Throws on an unknown switch. */
 export function parseEnhanced(value: string | null): EnhancedConfig | null {
   if (!value) return null;
-  if (value in ENHANCED_PRESETS) return { ...ENHANCED_PRESETS[value as keyof typeof ENHANCED_PRESETS] };
-  const out: EnhancedConfig = { ...ENHANCED_OFF };
+  let out: EnhancedConfig = { ...ENHANCED_OFF };
   for (const s of value.split(',').filter(Boolean)) {
-    if (s === 'camera') out.camera = 'angled';
+    if (s in ENHANCED_PRESETS) out = { ...ENHANCED_PRESETS[s as keyof typeof ENHANCED_PRESETS], camera: out.camera };
+    else if (s === 'camera') out.camera = 'angled';
     else if (s === 'follow') out.camera = 'follow';
     else if ((SWITCHES as readonly string[]).includes(s)) out[s as (typeof SWITCHES)[number]] = true;
     else throw new Error(`enhanced visuals: unknown switch "${s}"`);
@@ -88,10 +88,10 @@ export function enhancedVisuals(): EnhancedConfig | null {
 }
 
 /**
- * Where the angled camera may replace the DS camera: outdoor towns, cities and routes without fog. Caves show the void
- * past their rooms and props south of the player cover it; fog's depth table is the DS projection's (until fog reads
- * linear depth); interiors are orthographic anyway.
+ * Where the angled camera may replace the DS camera: outdoor towns, cities and routes (fogged ones too: the fog then
+ * reads linear depth, composite.ts LinearFog). Caves show the void past their rooms and props south of the player
+ * cover it; interiors are orthographic anyway.
  */
-export function cameraAllowed(zone: Zone, fog: boolean): boolean {
-  return (['town', 'city', 'route', 'outdoors'] as Zone['mapType'][]).includes(zone.mapType) && !fog;
+export function cameraAllowed(zone: Zone): boolean {
+  return (['town', 'city', 'route', 'outdoors'] as Zone['mapType'][]).includes(zone.mapType);
 }

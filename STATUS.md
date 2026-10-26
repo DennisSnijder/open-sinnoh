@@ -41,7 +41,8 @@ Versions: contracts 0.47.0, importer `platinum-110`, HeartGold follower add-on `
   night, sound effects, fanfares and cries.
 - **App:** the ROM import in the browser, saves with file export and import, the setup, Options, following
   Pokémon and the optional HeartGold sprites, quality-of-life options (the start menu's objective among them), remappable controls, zoom,
-  fast-forward, accessibility options, touch controls and an installable, offline-capable app.
+  fast-forward, accessibility options, touch controls and an installable, offline-capable app; optional enhanced
+  visuals (a visual style and an angled camera, asked once in the setup, DS by default).
 
 ## Not yet
 

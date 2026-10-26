@@ -7,7 +7,6 @@ import type { EnhancedConfig } from './config.ts';
 import { AO_SHADER, DOF_SHADER, GRADE_SHADER, SUN_SHADER } from './shaders.ts';
 import { Particles, particleKinds } from './particles.ts';
 import { LampGlows } from './lamps.ts';
-import type { LampPoint } from './lamp-points.ts';
 import { bloomAt, goldenAt, gradeAt, nightAt, sunDirection } from './time.ts';
 
 /**
@@ -46,12 +45,14 @@ export interface EnhancedFrame {
   zone: Zone;
   /** A weather draws (rain, snow, fog, sandstorm): no particles. */
   weather: boolean;
+  /** The field is fogged: no sun, and the bloom spares the fog's pale colour. */
+  fog: boolean;
   /** The player's feet (world), for the focus. */
   player: THREE.Vector3 | null;
   /** The camera target (world). */
   target: THREE.Vector3;
-  /** Lamps and lit windows in the scene (world). */
-  lamps: readonly LampPoint[];
+  /** The scene's light-source meshes (light-sources.ts). */
+  glows: readonly THREE.Mesh[];
 }
 
 export class EnhancedPipeline {
@@ -91,10 +92,20 @@ export class EnhancedPipeline {
     const resize = config.lowPower !== this.config.lowPower;
     this.config = config;
     if (resize) this.setSize(this.size.x, this.size.y);
+    // Phones: the cheaper AO, sun and depth of field (shaders.ts `LOW`).
+    for (const pass of [this.ao, this.sun, this.dofH, this.dofV]) {
+      const low = 'LOW' in pass.material.defines;
+      if (low === config.lowPower) continue;
+      if (config.lowPower) pass.material.defines.LOW = '';
+      else delete pass.material.defines.LOW;
+      pass.material.needsUpdate = true;
+    }
     this.ao.enabled = config.ao;
     this.bloom.enabled = config.bloom || config.lamps;
     this.sun.enabled = config.sun;
-    this.dofH.enabled = this.dofV.enabled = config.dof;
+    this.dofH.enabled = config.dof;
+    // Phones blur in the first pass alone (a disc).
+    this.dofV.enabled = config.dof && !config.lowPower;
     // The grade pass always runs last: it writes the screen (neutral when grading is off).
     this.grade.enabled = true;
   }
@@ -107,6 +118,11 @@ export class EnhancedPipeline {
     if (this.config.lowPower) this.bloom.setSize(Math.max(2, Math.round(width / 2)), Math.max(2, Math.round(height / 2)));
   }
 
+  /** The post chain's quality: `phone` takes the cheaper passes and a quarter-size bloom. */
+  get quality(): 'full' | 'phone' {
+    return this.config.lowPower ? 'phone' : 'full';
+  }
+
   /** A new map: the follow camera snaps. */
   reset(): void {
     this.follow = null;
@@ -115,8 +131,7 @@ export class EnhancedPipeline {
   /**
    * The angled camera, after the DS placed `camera` (`dsFov`: the DS preset's FOV widened to the view): lower pitch,
    * wider FOV, nearer, framing the same ground size at the target; `follow` lags and looks ahead of the target. The
-   * view reaches farther, so the far plane moves out (the DS fog's depth table then lands nearer; no field map with
-   * fog uses this camera's look in the showcase). Returns how far the view reaches on the ground, for chunk loading, or
+   * view reaches farther, so the far plane moves out (fog then reads linear depth: composite.ts LinearFog). Returns how far the view reaches on the ground, for chunk loading, or
    * null when the DS camera stays: the camera is off, the preset is orthographic, or the zone is not `cameraAllowed`.
    */
   placeCamera(camera: THREE.PerspectiveCamera | THREE.OrthographicCamera, rec: CameraRecord, target: THREE.Vector3, velocity: THREE.Vector3, dsFov: number, zoom: number, allowed: boolean): Reach | null {
@@ -191,7 +206,7 @@ export class EnhancedPipeline {
     const hour = outdoors ? frame.seconds / 3600 : 12;
     const night = nightAt(frame.seconds / 3600);
     // No sun at night (the flare and the shafts would streak the lamps and fireflies).
-    const sunOn = this.config.sun && outdoors && night < 0.9;
+    const sunOn = this.config.sun && outdoors && night < 0.9 && !frame.fog;
     const golden = goldenAt(hour);
     const [w, h] = [this.size.x, this.size.y];
     const persp = camera instanceof THREE.PerspectiveCamera;
@@ -205,7 +220,7 @@ export class EnhancedPipeline {
     }
     // Lamps and windows light at night, outdoors only.
     const lampLevel = outdoors ? night : 0;
-    if (this.config.lamps && lampLevel > 0.05) this.lamps.draw(r, camera, frame.lamps, depth, w, h, projScale, persp, lampLevel);
+    if (this.config.lamps && lampLevel > 0.05) this.lamps.draw(r, camera, frame.glows, depth, w, h, persp, lampLevel);
 
     if (this.config.ao) {
       set(this.ao, { tDepth: depth, uProjScale: projScale, uStrength: 0.55 });
@@ -214,8 +229,8 @@ export class EnhancedPipeline {
     }
     if (this.bloom.enabled) {
       const b = bloomAt(hour, this.config.lamps);
-      this.bloom.strength = b.strength;
-      this.bloom.threshold = b.threshold;
+      this.bloom.strength = frame.fog ? b.strength * 0.5 : b.strength;
+      this.bloom.threshold = frame.fog ? Math.max(b.threshold, 0.99) : b.threshold;
       this.bloom.radius = b.radius;
     }
     this.sun.enabled = sunOn;
@@ -246,6 +261,7 @@ export class EnhancedPipeline {
         [this.dofH, new THREE.Vector2(1 / w, 0)],
         [this.dofV, new THREE.Vector2(0, 1 / h)],
       ] as const) {
+        (uniforms(pass).uTexel!.value as THREE.Vector2).set(1 / w, 1 / h);
         set(pass, { tDepth: depth, uDir: dir, uFocusY: screen.y * 0.5 + 0.5, uFocusZ: focusZ, uBand: 0.12, uMaxR: Math.max(4, h / 90) });
         setLin(pass, lin);
       }
