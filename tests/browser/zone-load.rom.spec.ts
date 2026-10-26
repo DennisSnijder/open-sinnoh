@@ -70,40 +70,49 @@ for (const name of ZONES) {
 test('loads free the last scene: GL objects and the heap stay level over round trips', async () => {
   test.setTimeout(600_000);
   const cdp = await context.newCDPSession(page);
-  // The heap's floor over three collections a frame apart.
+  /**
+   * The live objects' size in MB: a heap snapshot (which collects first), every node but compiled code. The used heap
+   * also counts the code the JIT compiles in the background, a few MB more or less from one round trip to the next on
+   * a busy machine.
+   */
+  const objectsMB = async () => {
+    const chunks: string[] = [];
+    const chunk = (e: { chunk: string }) => chunks.push(e.chunk);
+    cdp.on('HeapProfiler.addHeapSnapshotChunk', chunk);
+    await cdp.send('HeapProfiler.takeHeapSnapshot', { reportProgress: false });
+    cdp.off('HeapProfiler.addHeapSnapshotChunk', chunk);
+    const snap = JSON.parse(chunks.join('')) as { snapshot: { meta: { node_fields: string[]; node_types: [string[]] } }; nodes: number[] };
+    const fields = snap.snapshot.meta.node_fields;
+    const type = fields.indexOf('type');
+    const size = fields.indexOf('self_size');
+    const code = snap.snapshot.meta.node_types[0].indexOf('code');
+    let bytes = 0;
+    for (let i = 0; i < snap.nodes.length; i += fields.length) if (snap.nodes[i + type] !== code) bytes += snap.nodes[i + size]!;
+    return bytes / 1e6;
+  };
   const measure = async () => {
-    let heapMB = Infinity;
-    for (let i = 0; i < 3; i++) {
-      await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-      await cdp.send('HeapProfiler.collectGarbage');
-      heapMB = Math.min(heapMB, (await cdp.send('Runtime.getHeapUsage')).usedSize / 1e6);
-    }
+    const objects = await objectsMB();
     const gl = await page.evaluate(() => {
       const s = (globalThis as { openSinnohRenderStats?: { geometries: number; textures: number } }).openSinnohRenderStats!;
       return { geometries: s.geometries, textures: s.textures };
     });
-    return { heapMB, ...gl };
+    return { objects, ...gl };
   };
   // One round trip first: it fills the caches every later one reuses.
   await loadAt('VEILSTONE_CITY', false);
   await loadAt('SUNYSHORE_CITY_POKECENTER_1F', false);
   await loadAt('VEILSTONE_CITY', false);
   const first = await measure();
-  const heap = [first.heapMB];
   for (let i = 0; i < 4; i++) {
     await loadAt('SUNYSHORE_CITY_POKECENTER_1F', false);
     await loadAt('VEILSTONE_CITY', false);
-    if (i < 3) heap.push((await measure()).heapMB);
   }
   const last = await measure();
-  heap.push(last.heapMB);
-  console.log(`heap floor per round trip (MB): ${heap.map((h) => h.toFixed(2)).join(' ')}`);
+  console.log(`live objects (MB): ${first.objects.toFixed(2)} → ${last.objects.toFixed(2)}`);
   // Before the fix each load kept the old renderer (its programs, GL state and scene): about 0.3 MB and every
   // texture and geometry of the scene per load.
   expect(last.geometries).toBeLessThanOrEqual(first.geometries);
   expect(last.textures).toBeLessThanOrEqual(first.textures);
-  // The floor still moves by a megabyte or more from one round trip to the next on a busy machine, either way: the
-  // lower of the first two against the lower of the last two. A kept scene raises every later one.
-  expect(Math.min(heap[3]!, heap[4]!) - Math.min(heap[0]!, heap[1]!)).toBeLessThan(2);
+  expect(last.objects - first.objects).toBeLessThan(2);
   expect(errors).toEqual([]);
 });

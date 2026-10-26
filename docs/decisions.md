@@ -705,7 +705,9 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
 - **`pnpm flaky`** repeats a test in fresh processes, without retries, to measure a pass rate.
 - **Specs hold under a full-suite load** (ten workers on software GL, where a frame can take seconds): waits count drawn
   frames or wait for the state or event itself, never wall time; speed checks measure the ticks the loop asks for (run
-  and dropped), and perf checks compare with the same machine's 1x; each test in a serial file sets up its own start.
+  and dropped), and perf checks compare with the same machine's 1x; heap checks count live objects in a snapshot, not
+  the used heap (the JIT's code comes and goes); ROM specs take the worker's seeded context (`romContext`) instead of
+  copying the import per file; each test in a serial file sets up its own start.
 - **The zone sweep** spawns at every warp arrival and every zone, with exemptions as exact lists.
 
 ## Performance
