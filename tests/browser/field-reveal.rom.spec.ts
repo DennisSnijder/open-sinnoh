@@ -105,13 +105,18 @@ const lit = (px: number[]) => {
   return n / (px.length / 3);
 };
 
-/** Until the fade is over, the scene in view is in and a moment has passed: the reveal's frames. */
+/** Field frames drawn after the reveal before the samples are taken (half a second at 60 Hz). */
+const SETTLED_FRAMES = 30;
+
+/** Until the fade is over, the scene in view is in and more field frames are drawn: the reveal's frames. */
 async function settle(): Promise<Sample[]> {
-  await page.waitForFunction(() => {
+  const frames = await page.waitForFunction(() => {
     const app = window.openSinnohApp;
-    return !!app && !document.getElementById('title') && app.game.world.fadeState() === null && !app.sceneLoading();
+    const done = !!app && !document.getElementById('title') && app.game.world.fadeState() === null && !app.sceneLoading();
+    return done && (globalThis as { openSinnohRenderStats?: { frames: number } }).openSinnohRenderStats!.frames;
   }, undefined, { timeout: 120_000 });
-  await page.waitForTimeout(1500);
+  // Counted in drawn frames, not time: a busy machine draws few frames a second.
+  await page.waitForFunction((n) => (globalThis as { openSinnohRenderStats?: { frames: number } }).openSinnohRenderStats!.frames >= n, (await frames.jsonValue()) + SETTLED_FRAMES, { timeout: 120_000 });
   return takeSamples();
 }
 
@@ -231,7 +236,11 @@ test('CONTINUE: black until the scene is in, then the fade, then no pop-in', asy
 });
 
 test('a save file imported in the field: the same reveal', async () => {
-  test.setTimeout(180_000);
+  test.setTimeout(240_000);
+  // Its own save and field (the test runs alone too).
+  await saveAt(CITY, 504, 726, 'up');
+  await page.goto('/?continue&time=12:00');
+  await settle();
   const file = test.info().outputPath('save.json');
   writeFileSync(file, await slot());
   await openOptionsData(page);

@@ -1222,6 +1222,8 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
           var: obj({ kind: lit('var'), var: ref('vars'), atLeast: int(0, 0xffff) }),
           badge: obj({ kind: lit('badge'), badge: id }),
         })),
+        // 0.48.0: the zone of the Town Map fly location it leads to.
+        to: opt(ref('zones')),
       }, (v) => ((v.done as unknown[]).length === 0 ? 'an objective step needs a check' : undefined))),
     })),
   }, (v) => {

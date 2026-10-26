@@ -177,7 +177,7 @@ describe('the Town Map screen (TOWN_MAP_MODE_FLY)', () => {
 
   it('marks the objective’s destination, even a locked block the DS hides, blinking at half the hover’s speed', () => {
     const title = [...registries.texts.keys()][0]!;
-    const objectives = { title, explore: title, steps: [{ text: title, done: [], to: ROUTE }] };
+    const objectives = { title, explore: title, steps: [{ text: title, done: [{ kind: 'badge' as const, badge: id('BADGE_NONE') }], to: ROUTE }] };
     const withObjective: Registries = { ...registries, newGame: new Map([[record.id, { ...record, townMap: map, objectives }]]) };
     const marked = (v: TownMapView) => v.blocks.filter((b) => b.objective).map((b) => [b.location, b.palette]);
     const { app, view } = open(atTerrain(), withObjective, 0);

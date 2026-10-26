@@ -148,6 +148,15 @@ test('frame times at 4x and 8x while walking (perf)', async ({ browserName: _ },
   for (const fast of [4, 8]) {
     await page.evaluate((fast) => localStorage.setItem('lantern-nds:speed', String(fast)), fast);
     await launch();
+    // The frame rate at 1x first: the machine's, which the fast run is judged against (other test workers and
+    // software GL decide the absolute rate).
+    const base = await page.evaluate(async () => {
+      const s = window.openSinnohApp!.loop;
+      const f0 = s.frames;
+      const t0 = performance.now();
+      await new Promise((r) => setTimeout(r, 2000));
+      return ((s.frames - f0) * 1000) / (performance.now() - t0);
+    });
     await page.keyboard.press('Backquote');
     await expect(page.locator('.speed-indicator')).toHaveText(`>> ${fast}x`);
     await page.evaluate(() => {
@@ -169,6 +178,7 @@ test('frame times at 4x and 8x while walking (perf)', async ({ browserName: _ },
       const render = (globalThis as { openSinnohRenderStats?: { renderMs: number[] } }).openSinnohRenderStats!.renderMs;
       return {
         tps: ((window.openSinnohApp!.ticks - t0.ticks) * 1000) / (performance.now() - t0.at),
+        fps: (s.frameMs.length * 1000) / (performance.now() - t0.at),
         frames: s.frameMs.length,
         frameP50: pct(s.frameMs, 0.5),
         frameP95: pct(s.frameMs, 0.95),
@@ -181,10 +191,11 @@ test('frame times at 4x and 8x while walking (perf)', async ({ browserName: _ },
     }, t0);
     await page.keyboard.press('Backquote');
     const synth = await page.evaluate(() => window.openSinnohApp!.audio.status());
-    const report = `${fast}x: ${r.tps.toFixed(1)} ticks/s (${(r.tps / 30).toFixed(2)}x), ${r.frames} frames in 8 s, frame work p50 ${r.frameP50.toFixed(2)} ms p95 ${r.frameP95.toFixed(2)} ms max ${r.frameMax.toFixed(1)} ms, render p95 ${r.renderP95.toFixed(2)} ms, dropped ${r.dropped}, effective ${r.effective.toFixed(2)}, behind ${r.behind}; synth late quanta ${synth.late}, load ${((synth.renderMs / synth.audioMs) * 100).toFixed(1)}%`;
+    const report = `${fast}x: ${r.tps.toFixed(1)} ticks/s (${(r.tps / 30).toFixed(2)}x), ${r.frames} frames in 8 s (${r.fps.toFixed(1)} fps; ${base.toFixed(1)} at 1x), frame work p50 ${r.frameP50.toFixed(2)} ms p95 ${r.frameP95.toFixed(2)} ms max ${r.frameMax.toFixed(1)} ms, render p95 ${r.renderP95.toFixed(2)} ms, dropped ${r.dropped}, effective ${r.effective.toFixed(2)}, behind ${r.behind}; synth late quanta ${synth.late}, load ${((synth.renderMs / synth.audioMs) * 100).toFixed(1)}%`;
     console.log(report);
     info.annotations.push({ type: 'perf', description: report });
-    expect(r.frames).toBeGreaterThan(20);
+    // Fast ticks run only within the frame's tick budget (loop.ts FAST_TICK_BUDGET_MS): the loop keeps drawing.
+    expect(r.fps).toBeGreaterThan(base / 3);
   }
   expect(await page.evaluate(() => window.openSinnohApp!.audio.errors)).toEqual([]);
   expect(errors).toEqual([]);
