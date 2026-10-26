@@ -37,6 +37,28 @@ export function fogDensity(depth: number, fog: NonNullable<Weather['fog']>): num
   return v >= 127 ? 128 : v;
 }
 
+/**
+ * Fog under the enhanced angled camera (enhanced/): its depth buffer is not the DS projection's, so the fog reads
+ * linear view depth instead, moved by `shift` (the DS camera's distance to the target less this camera's: the player
+ * stands in the same fog as under the DS camera) and mapped back through the DS camera's near and far planes to the
+ * window depth the density table is indexed by.
+ */
+export interface LinearFog {
+  /** The drawing camera's planes. */
+  near: number;
+  far: number;
+  /** The DS camera's planes. */
+  dsNear: number;
+  dsFar: number;
+  shift: number;
+}
+
+/** The DS window depth (0..1) linear fog gives a drawn window depth (the shader's formula; exported for tests). */
+export function linearFogDepth(depth: number, l: LinearFog): number {
+  const z = (l.near * l.far) / (l.far - depth * (l.far - l.near)) + l.shift;
+  return Math.min(1, Math.max(0, (l.dsFar * (z - l.dsNear)) / (z * (l.dsFar - l.dsNear))));
+}
+
 /** Coverage the DS anti-aliasing gives an edge-marked pixel, +1 as the blend uses it (melonDS: 0x10 + 1, of 32). */
 export const EDGE_COVERAGE = 17;
 
@@ -169,11 +191,24 @@ uniform float uDensity[32];
 uniform vec3 uFogColor;
 uniform bool uRearTransparent;
 uniform float uFogAlpha;
+uniform bool uLinearFog;
+uniform vec4 uFogPlanes;
+uniform float uFogShift;
 
 int fieldId(vec4 field) { return int(field.r * 63.0 + 0.5); }
 
+// LinearFog: x, y the drawing camera's near and far, z, w the DS camera's.
+float linearFogDepth(float depth) {
+  float z = uFogPlanes.x * uFogPlanes.y / (uFogPlanes.y - depth * (uFogPlanes.y - uFogPlanes.x)) + uFogShift;
+  return clamp(uFogPlanes.w * (z - uFogPlanes.z) / (z * (uFogPlanes.w - uFogPlanes.z)), 0.0, 1.0);
+}
+
 float fogAmount(vec4 field, float depth) {
-  if (!uFog || field.a < 0.5) return 0.0;
+  if (!uFog) return 0.0;
+  // The angled camera sees past the map where the DS camera never looks: the rear plane takes the fog's colour.
+  if (uLinearFog && depth >= 1.0) return 1.0;
+  if (field.a < 0.5) return 0.0;
+  if (uLinearFog) depth = linearFogDepth(depth);
   float t = (depth * 32767.0 - uFogOffset) / uFogStep;
   float d;
   if (t <= 0.0) d = uDensity[0];
@@ -256,6 +291,9 @@ export class Composite {
         uFogColor: { value: new THREE.Color() },
         uRearTransparent: { value: false },
         uFogAlpha: { value: 31 },
+        uLinearFog: { value: false },
+        uFogPlanes: { value: new THREE.Vector4(1, 2, 1, 2) },
+        uFogShift: { value: 0 },
       },
     });
     this.scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.material));
@@ -273,6 +311,8 @@ export class Composite {
    */
   configure(fog: Weather['fog'] | null, indoors: boolean, debug: { edges: boolean; ids: boolean } = { edges: true, ids: false }, under = false): void {
     const u = this.material.uniforms;
+    // The DS's window depth until `linearFog` says otherwise (each frame, after this).
+    u.uLinearFog!.value = false;
     // `under`: a layer is drawn under the field (the Distortion World's sky): the rear plane is clear and the
     // fog's alpha (GX_FOGBLEND_COLOR_ALPHA) fades the far field into it.
     u.uRearTransparent!.value = under;
@@ -287,6 +327,15 @@ export class Composite {
     u.uFogStep!.value = 0x400 >> fog.slope;
     u.uDensity!.value = fog.densities;
     (u.uFogColor!.value as THREE.Color).setRGB(...fog.color);
+  }
+
+  /** Fog from linear view depth (the enhanced angled camera), or null: the DS's window depth. */
+  linearFog(l: LinearFog | null): void {
+    const u = this.material.uniforms;
+    u.uLinearFog!.value = !!l;
+    if (!l) return;
+    (u.uFogPlanes!.value as THREE.Vector4).set(l.near, l.far, l.dsNear, l.dsFar);
+    u.uFogShift!.value = l.shift;
   }
 
   /**

@@ -159,7 +159,7 @@ test('the optional HeartGold/SoulSilver add-on: picked in the first-run setup wh
   test.skip(!HGSS, 'OPENSINNOH_HGSS_ROM is not set');
   test.setTimeout(600_000);
   // A player who has not answered the add-on's question, choosing the ROM: the setup asks it during the import.
-  await page.evaluate(() => localStorage.setItem('lantern-nds:setup', '["reports","textSpeed"]'));
+  await page.evaluate(() => localStorage.setItem('lantern-nds:setup', '["reports","textSpeed","visualStyle"]'));
   await page.goto('/?reimport');
   // The picker is hidden until IndexedDB initialization finishes and its change handlers are wired.
   await expect(page.locator('#picker')).toBeVisible();

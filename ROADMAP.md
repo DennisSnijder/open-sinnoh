@@ -91,6 +91,11 @@ cries, battle music by encounter, the title and app music.
 - a trade-evolution substitute;
 - the current objective in the start menu.
 
+**Enhanced visuals (opt-in).** Options › Device's VISUAL STYLE (DS, Subtle, Cinematic) and ANGLED CAMERA, also asked
+once in the setup (DS by default): bloom, grading by the hour, particles, depth of field, ambient occlusion, golden-hour
+sun; the angled camera on fogged routes too (fog from linear depth); night glows on the map's lamps, signs and windows;
+a cheaper post chain on phones. Replays and tests keep the DS look.
+
 **HeartGold/SoulSilver add-on.** An optional second import adds the HGSS follower set for Platinum's following
 Pokémon, follower talk and the HGSS look.
 
@@ -105,8 +110,8 @@ Pokémon, follower talk and the HGSS look.
   Battle Frontier, with its own checkpoint suite.
 - **Beyond the original (opt-in):** higher resolution, widescreen camera options, texture filtering, replacement
   model and texture packs.
-- **Enhanced visuals:** refine enhanced visuals (fog from linear depth so the angled camera works under fog, lamp
-  and window glows, phone cost); consider an onboarding choice.
+- **Enhanced visuals:** glows on street lamps the map draws as plain land (Jubilife's plaza lamps), an auto quality
+  step on slow phones.
 - **An original demo pack** that needs no ROM.
 - **Later:** the one-way cartridge `.sav` import, Diamond and Pearl, other ROM regions.
 
