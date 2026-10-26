@@ -17,10 +17,13 @@ function holds(check: ObjectiveCheck, state: GameState, registries: Registries):
   }
 }
 
-/** The text id of the current objective, or null when the packs have no objective table. */
-export function currentObjective(state: GameState, registries: Registries): { title: Id; text: Id } | null {
+/**
+ * The text id of the current objective and the zone it leads to (`to`, when the step names one), or null when the
+ * packs have no objective table.
+ */
+export function currentObjective(state: GameState, registries: Registries): { title: Id; text: Id; to: Id | null } | null {
   const table = newGameRecord(registries).objectives;
   if (!table) return null;
   const step = table.steps.find((s) => !s.done.some((c) => holds(c, state, registries)));
-  return { title: table.title, text: step ? step.text : table.explore };
+  return { title: table.title, text: step ? step.text : table.explore, to: step?.to ?? null };
 }

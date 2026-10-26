@@ -48,6 +48,8 @@ describe.skipIf(!ROM)('the objective through the story (OPENSINNOH_NDS_ROM)', ()
     expect(o.text).toBe(objective('VisitBarry'));
     expect(game.registries.texts.get(o.title)?.text).toBe('OBJECTIVE');
     expect(game.registries.texts.get(o.text)?.text).toBe('Visit Barry in the house next door.');
+    // The Town Map marks its destination.
+    expect(o.to).toBe('platinum:MAP_HEADER_TWINLEAF_TOWN');
   });
 
   it('each checkpoint ends with the next story beat as the objective', async () => {

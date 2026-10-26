@@ -4,7 +4,7 @@ OpenSinnoh is in beta. Pokémon Platinum (US, rev 0) plays from a new game throu
 Fame and the credits, and on into the post-game. What's next is in [ROADMAP.md](ROADMAP.md); the design
 decisions are in [docs/decisions.md](docs/decisions.md).
 
-Versions: contracts 0.47.1, importer `platinum-110`, HeartGold follower add-on `hgss-followers-4`.
+Versions: contracts 0.48.0, importer `platinum-111`, HeartGold follower add-on `hgss-followers-4`.
 
 ## Works
 
@@ -40,7 +40,7 @@ Versions: contracts 0.47.1, importer `platinum-110`, HeartGold follower add-on `
 - **Audio:** the ROM's sound archive on a DS sequencer and synth in an AudioWorklet: zone music by day and
   night, sound effects, fanfares and cries.
 - **App:** the ROM import in the browser, saves with file export and import, the setup, Options, following
-  Pokémon and the optional HeartGold sprites, quality-of-life options (the start menu's objective among them), remappable controls, zoom,
+  Pokémon and the optional HeartGold sprites, quality-of-life options (the start menu's objective among them, its destination marked on the Town Map), remappable controls, zoom,
   fast-forward, accessibility options, touch controls and an installable, offline-capable app.
 
 ## Not yet

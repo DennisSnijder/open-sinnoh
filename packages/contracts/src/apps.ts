@@ -1378,7 +1378,11 @@ export interface DiplomaView {
 export interface TownMapView {
   app: 'town-map';
   hidden: number[];
-  blocks: { location: number; palette: number; shape: number; x: number; y: number; unlocked: boolean }[];
+  /**
+   * 0.48.0: `objective` marks the current objective's destination (`ObjectiveTables` step `to`, with the objective option
+   * on): drawn even where the DS hides a locked block, blinking in the hovered palette at half the hover's speed.
+   */
+  blocks: { location: number; palette: number; shape: number; x: number; y: number; unlocked: boolean; objective?: true }[];
   player: { x: number; y: number; gender: 'male' | 'female' };
   cursor: { x: number; y: number };
   tick: number;

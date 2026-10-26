@@ -19170,6 +19170,18 @@
    "text": "rival {var 0}: PokemonIsReadyToHelpPokemon"
   },
   {
+   "id": "fixture:BattleStrings_Text_PokemonTransformedIntoPokemon_AllyAlly",
+   "text": "{var 0}: PokemonTransformedIntoPokemon {var 1}"
+  },
+  {
+   "id": "fixture:BattleStrings_Text_PokemonTransformedIntoPokemon_WildAlly",
+   "text": "wild {var 0}: PokemonTransformedIntoPokemon {var 1}"
+  },
+  {
+   "id": "fixture:BattleStrings_Text_PokemonTransformedIntoPokemon_FoeAlly",
+   "text": "rival {var 0}: PokemonTransformedIntoPokemon {var 1}"
+  },
+  {
    "id": "fixture:Text_MoveUsed_0_0",
    "text": "..."
   },

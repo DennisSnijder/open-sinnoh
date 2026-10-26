@@ -911,6 +911,7 @@ class BattleController implements Battle {
         ...v,
         healthbox: { ...v.healthbox, ...(this.doubles && v.side === 'player' ? { numbers: this.hpNumbers } : {}) },
         ...(v.exp ? { exp: { ...v.exp } } : {}),
+        ...(v.look ? { look: { ...v.look } } : {}),
       })),
       message: this.message && { ...this.message },
       prompt: this.prompt && structuredClone(this.prompt),
@@ -2462,6 +2463,17 @@ class BattleController implements Battle {
         if (from === 'move: Belly Drum') yield* sided(this.sideOf(a), 'PokemonCutItsOwnHPAndMaximizedItsAttack', [this.sideOf(a).view.name]);
         else this.stub(parts);
         return;
+      case '-transform': {
+        // Decomp subscript_transform_into_target: BtlCmd_Transform copies the target's species, form and shininess (its
+        // look, when it is itself transformed) and its gender, which the sprite keeps until the battler leaves.
+        const t = this.sideOf(a);
+        const of = this.sideOf(b);
+        const look = of.view.look ?? { species: of.view.species, form: of.view.form, shiny: of.view.shiny, gender: of.view.gender };
+        t.view.look = { ...look, gender: of.view.gender };
+        const species = this.deps.registries.species.get(look.species)!.name;
+        yield* this.say(this.text.get('PokemonTransformedIntoPokemon', [t.view.name, species], `${this.who(t)}Ally`));
+        return;
+      }
       case '-endability':
         yield* sided(this.sideOf(a), 'PokemonsAbilityWasSuppressed', [this.sideOf(a).view.name]);
         return;
@@ -2590,10 +2602,12 @@ class BattleController implements Battle {
     // Every battler by its DS id; in doubles an empty slot (nobody out, a battler that fainted) is none.
     const battler = (s: Side) => {
       if (this.doubles && !s.view.visible && s !== user && s !== target) return null;
-      const sprites = this.deps.registries.pokemonSprites.get(s.mon.species);
-      const form = sprites?.forms[s.mon.form] ?? sprites?.forms[0];
+      // A transformed battler's picture is its target's (BattlerView.look).
+      const look = s.view.look ?? s.mon;
+      const sprites = this.deps.registries.pokemonSprites.get(look.species);
+      const form = sprites?.forms[look.form] ?? sprites?.forms[0];
       const face = s.id & 1 ? form?.front : form?.back;
-      return { species: s.mon.species, form: s.mon.form, height: face?.yOffset ?? 0, visible: s.view.visible };
+      return { species: look.species, form: look.form, height: face?.yOffset ?? 0, visible: s.view.visible };
     };
     const weather = ({ raindance: 'rain', sandstorm: 'sandstorm', sunnyday: 'sun', hail: 'hail' } as const)[this.sim.field.weather as 'raindance'] ?? null;
     const vm = new AnimVm(record.code, {

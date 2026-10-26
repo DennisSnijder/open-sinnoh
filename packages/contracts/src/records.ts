@@ -1154,12 +1154,13 @@ export interface NewGame {
  * 0.44.0. The objective the start menu shows (an OpenSinnoh addition, `DeviceOptions.objective`; our own words, not the
  * ROM's). `steps` are in story order; the current objective is the first step that is not done, and a step is done
  * when any of its `done` checks holds (a step lists the later beats that prove it too, so a skipped or reset marker
- * never brings it back). With every step done, `explore` is shown. `title` heads the window.
+ * never brings it back). With every step done, `explore` is shown. `title` heads the window. 0.48.0: a step's `to` is
+ * the zone of the Town Map fly location it leads to, which the Town Map marks.
  */
 export interface ObjectiveTables {
   title: Id;
   explore: Id;
-  steps: { text: Id; done: ObjectiveCheck[] }[];
+  steps: { text: Id; done: ObjectiveCheck[]; to?: Id }[];
 }
 
 /** 0.44.0. One check of an objective step: a flag is set, a var is at least `atLeast`, a badge is held. */

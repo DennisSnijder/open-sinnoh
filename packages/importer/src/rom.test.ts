@@ -279,7 +279,7 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
           title: 'platinum:OpenSinnoh_Objective_Title',
           explore: 'platinum:OpenSinnoh_Objective_Explore',
           steps: expect.arrayContaining([
-            { text: 'platinum:OpenSinnoh_Objective_VisitBarry', done: [{ kind: 'flag', flag: 'platinum:FLAG_RIVAL_LEFT_HOME' }, { kind: 'var', var: 'platinum:VAR_PLAYER_STARTER', atLeast: 1 }] },
+            { text: 'platinum:OpenSinnoh_Objective_VisitBarry', done: [{ kind: 'flag', flag: 'platinum:FLAG_RIVAL_LEFT_HOME' }, { kind: 'var', var: 'platinum:VAR_PLAYER_STARTER', atLeast: 1 }], to: 'platinum:MAP_HEADER_TWINLEAF_TOWN' },
             { text: 'platinum:OpenSinnoh_Objective_StarkDepths', done: [{ kind: 'flag', flag: 'platinum:FLAG_BATTLED_STARK_MOUNTAIN_ROOM_3_HEATRAN' }, { kind: 'flag', flag: 'platinum:FLAG_CAUGHT_HEATRAN' }] },
           ]),
         }),

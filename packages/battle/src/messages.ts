@@ -134,7 +134,7 @@ export const BATTLE_STRINGS: Record<string, boolean> = {
  * (`_Ally`/`_Wild`/`_Foe`) or naming two battlers (`_AllyFoe` …, see `WhoPair`). Names and the battler order
  * of each follow the decomp subscript that prints it. Checked when a battle starts, like `BATTLE_STRINGS`.
  */
-export const PROTOCOL_STRINGS: { plain: readonly string[]; sided: readonly string[]; pair: readonly string[] } = {
+export const PROTOCOL_STRINGS: { plain: readonly string[]; sided: readonly string[]; pair: readonly string[]; species: readonly string[] } = {
   plain: [
     'ItHurtItselfInItsConfusion', 'HitXTimes', 'ButNothingHappened', 'ButThereWasNoTarget', 'ItsAOneHitKO', 'MagnitudeX', 'AllStatChangesWereEliminated',
     'ASoothingAromaWaftedThroughTheArea', 'ABellChimed', 'TheBattlersSharedTheirPain', 'AllPokemonHearingTheSongWillFaintInThreeTurns', 'GravityIntensified',
@@ -188,6 +188,8 @@ export const PROTOCOL_STRINGS: { plain: readonly string[]; sided: readonly strin
     // Doubles: Helping Hand.
     'PokemonIsReadyToHelpPokemon',
   ],
+  // A battler, then a species name (TAG_NICKNAME_POKE): by the battler's side only (`_AllyAlly`, `_WildAlly`, `_FoeAlly`).
+  species: ['PokemonTransformedIntoPokemon'],
 };
 /**
  * Messages of the battle party sheet (decomp battle_party.gmm, `BattleParty_Text_<name>`): what a medicine
@@ -218,6 +220,7 @@ export function battleStringNames(): string[] {
     ...PROTOCOL_STRINGS.plain,
     ...PROTOCOL_STRINGS.sided.flatMap((name) => ['Ally', 'Wild', 'Foe'].map((w) => `${name}_${w}`)),
     ...PROTOCOL_STRINGS.pair.flatMap((name) => PAIRS.map((w) => `${name}_${w}`)),
+    ...PROTOCOL_STRINGS.species.flatMap((name) => ['Ally', 'Wild', 'Foe'].map((w) => `${name}_${w}Ally`)),
   ];
 }
 

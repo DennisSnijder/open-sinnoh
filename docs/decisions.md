@@ -380,9 +380,13 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   (LoadPokemonSpriteIntoBg) is a view of its own (`AnimView.bgMon`: the picture, the layer's offsets, its HBlank lines,
   blend, priority and window 0), Surf's and Muddy Water's waves are a background in BG2 (`AnimBgView.custom`), and
   StartBattlerSlideIn mode 0 is the decomp's picture swap (`picture` on battlers and copies), not a slide. Blends draw
-  as BG2's or the OBJ's EVA alone, as the other translucent effects do. Spite's darkening of BG2's palette is not done:
-  the script loads the picture's palette over it. Substitute's doll (mode 2) is not in the packs; it keeps its slide.
-  Transform's swapped picture lasts to the animation's end only: the battle view does not keep it.
+  as BG2's or the OBJ's EVA alone, as the other translucent effects do. Spite's darkening of BG palette 8 never shows on
+  the DS: LoadPokemonSpriteIntoBg, the next command in the same script frame, loads the picture's palette over both
+  buffers before the VBlank transfer, so the picture keeps its own colours. Substitute's doll (mode 2) is not in the
+  packs; it keeps its slide.
+- **Transform's look stays** (`BattlerView.look`): from the `-transform` line the battler's sprite shows the target's
+  species, form, shininess and gender (BtlCmd_Transform's copy, `transformedGender`) until it leaves the field, in the
+  scene, the animations' pictures and BG2. Its name, level and healthbox stay its own.
 - **The shiny sparkle** is common animation 11 (`shiny`) on the animation VM, played once a shiny Pokémon is in place
   (wild after its slide-in, a send-out after the flash and any capsule seals), before the healthbox slides in. The DS
   runs it beside the healthbox and plays a doubles pair's at once; we play them in turn. Like the DS
@@ -464,6 +468,10 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   the importer) whose first step with no check holding is shown; each step also lists a later beat that proves it
   (the next badge, the Champion's clear), so a skipped or reset marker never brings an old step back. With every
   step done it says "Explore Sinnoh." The ROM test checks it at every story checkpoint's end.
+  A step that leads to a town or city names it (`to`, a Town Map fly location's zone); the Town Map marks that block
+  in its own hovered palette, blinking at half the hover's speed and drawn even while locked. The Pokétch's Marking
+  Map has no sprite that reads as a destination (its markers are the player's, the roamer dot means a roamer), so it
+  shows none.
 - **Off by default:** EV/IV view on the summary; RENAME on the summary; the HGSS player characters with
   the add-on; the Spiritomb substitute (Underground vendor talks count in place of link players).
 - **Game speed:** fast-forward at 2x to 8x, presentation only (the same 30 Hz ticks, more per wall

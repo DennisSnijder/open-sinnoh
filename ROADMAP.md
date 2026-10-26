@@ -89,7 +89,7 @@ cries, battle music by encounter, the title and app music.
 - the EV/IV view, RENAME in the summary, a Pokédex name search;
 - skipping the intro on a repeat play, a suspend point;
 - a trade-evolution substitute;
-- the current objective in the start menu.
+- the current objective in the start menu, its destination marked on the Town Map.
 
 **HeartGold/SoulSilver add-on.** An optional second import adds the HGSS follower set for Platinum's following
 Pokémon, follower talk and the HGSS look.
@@ -97,8 +97,6 @@ Pokémon, follower talk and the HGSS look.
 ## Next
 
 - **Town extras:** the TV's group segments, once groups exist.
-- **Polish:** Transform's look kept after the move (the battle view goes back to the user's own picture when the
-  animation ends).
 - **Modding 1.0:** script eject to TypeScript, a mod sandbox, mod docs, and Gen 4 extension points (3D model
   replacement, mod Pokétch apps, camera hooks).
 - **HeartGold/SoulSilver** as a second base pack: Johto and Kanto, the Pokégear, Apricorns, its Safari Zone and
