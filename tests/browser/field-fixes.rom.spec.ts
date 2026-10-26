@@ -65,7 +65,11 @@ const weatherPixels = () =>
     };
     return { ...diff(on, off), noise: diff(off, still).bright };
   });
-const enhanced = (config: string | null) => page.evaluate((c) => (window as unknown as { openSinnohEnhanced: (c: string | null) => void }).openSinnohEnhanced(c), config);
+const enhanced = async (config: string | null) => {
+  await page.evaluate((c) => (window as unknown as { openSinnohEnhanced: (c: string | null) => void }).openSinnohEnhanced(c), config);
+  // Until the field is drawn the new way (the enhanced pipeline builds its targets and programs first).
+  await page.waitForFunction((on) => ((globalThis as unknown as { openSinnohRenderStats: { enhancedFrame: object | null } }).openSinnohRenderStats.enhancedFrame !== null) === on, config !== null, { timeout: 120_000 });
+};
 
 /** Two frames, so the renderer has drawn the current state. */
 const frames = () => page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
@@ -158,14 +162,15 @@ test('walking onto Route 215 fades the rain and its fog in', async () => {
   expect(drops.changed, 'only the drops change').toBeLessThan(0.05);
   // CINEMATIC draws the field through its post chain; the weather still goes over it, to the screen.
   await enhanced('cinematic');
-  await expect.poll(async () => ((p) => p.bright - 3 * p.noise)(await weatherPixels()), { timeout: 20_000 }).toBeGreaterThan(0.0005);
+  await expect.poll(async () => ((p) => p.bright - 3 * p.noise)(await weatherPixels()), { timeout: 90_000 }).toBeGreaterThan(0.0005);
   await page.screenshot({ path: `${SHOTS}/route-215-rain-cinematic.png` });
   await enhanced(null);
   expect(errors).toEqual([]);
 });
 
 test('the snow routes draw the weather tasks flakes, in the DS look and CINEMATIC', async () => {
-  test.setTimeout(120_000);
+  // The post chain settles over frames, which a loaded machine draws a few a second.
+  test.setTimeout(300_000);
   for (const [zone, x, z, weather] of [
     ['ROUTE_216', 298, 402, 'platinum:OVERWORLD_WEATHER_HEAVY_SNOW'],
     ['ROUTE_217', 299, 308, 'platinum:OVERWORLD_WEATHER_BLIZZARD'],
@@ -180,7 +185,7 @@ test('the snow routes draw the weather tasks flakes, in the DS look and CINEMATI
     expect(flakes.bright, `${zone} flake pixels`).toBeGreaterThan(0.002 + 3 * flakes.noise);
     await page.screenshot({ path: `${SHOTS}/${zone.toLowerCase()}-snow.png` });
     await enhanced('cinematic');
-    await expect.poll(async () => ((p) => p.bright - 3 * p.noise)(await weatherPixels()), { timeout: 20_000 }).toBeGreaterThan(0.002);
+    await expect.poll(async () => ((p) => p.bright - 3 * p.noise)(await weatherPixels()), { timeout: 90_000 }).toBeGreaterThan(0.002);
     await page.screenshot({ path: `${SHOTS}/${zone.toLowerCase()}-snow-cinematic.png` });
     await enhanced(null);
   }
