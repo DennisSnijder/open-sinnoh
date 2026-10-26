@@ -613,7 +613,10 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     if (speed !== 1 && speedIndicator.textContent !== `>> ${speed}x`) speedIndicator.textContent = `>> ${speed}x`;
     battleCovers = battle.covers();
     if (!battleCovers) session.renderer.render(session.game.inBattle() ? 1 : alpha);
-    completeFrames = battleCovers || session.renderer.loading() ? 0 : Math.min(completeFrames + 1, 2);
+    // The count matters only under the full black (`revealing`); elsewhere the scene's loading is not asked for (it
+    // builds the world's view again) and the field counts as complete.
+    const black = (session.game.world.fadeState()?.alpha ?? 0) >= 1;
+    completeFrames = battleCovers || (black && session.renderer.loading()) ? 0 : black ? Math.min(completeFrames + 1, 2) : 2;
     battle.frame();
     session.drawOverlay(overlayCtx, overlayFrame(), zoomScale * (devicePixelRatio || 1));
     if (!battleCovers) {

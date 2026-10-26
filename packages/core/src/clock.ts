@@ -62,9 +62,14 @@ export function isTime(s: string): boolean {
   return !!m && Number(m[1]) < 24 && Number(m[2]) < 60;
 }
 
+/** The last date `checkClock` found valid: the game reads the clock several times a frame, on the same date. */
+let checkedDate = '';
+
 /** Checks a reading (boundaries: saves, options, the bridge); returns it. */
 export function checkClock(c: ClockTime): ClockTime {
-  const ok = isDate(c.date) && [c.hour, c.minute, c.second].every(Number.isInteger) && c.hour >= 0 && c.hour < 24 && c.minute >= 0 && c.minute < 60 && c.second >= 0 && c.second < 60;
+  const date = c.date === checkedDate || isDate(c.date);
+  if (date) checkedDate = c.date;
+  const ok = date && Number.isInteger(c.hour) && Number.isInteger(c.minute) && Number.isInteger(c.second) && c.hour >= 0 && c.hour < 24 && c.minute >= 0 && c.minute < 60 && c.second >= 0 && c.second < 60;
   if (!ok) throw new Error(`clock: invalid reading ${JSON.stringify(c)}`);
   return c;
 }

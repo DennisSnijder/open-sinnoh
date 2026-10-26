@@ -8,7 +8,7 @@
  * The rest of the app sees `Session`.
  */
 import type { ClockTime, Id, PackData } from '@opensinnoh/core';
-import type { AssetSource, FieldRenderer, Font, InputFrame, LoadedFont, MapEntry, NineSliceArt, OverlayFrames } from '@opensinnoh/contracts';
+import type { AssetRef, AssetSource, FieldRenderer, Font, InputFrame, LoadedFont, MapEntry, NineSliceArt, OverlayFrames } from '@opensinnoh/contracts';
 import { createGame, saveFromJson, saveToJson, type Game, type GameDevice, type NewGameOptions } from '@opensinnoh/game';
 import { createApp, createPoketch } from '@opensinnoh/menus';
 import { mountFieldRenderer } from '@opensinnoh/render';
@@ -118,10 +118,12 @@ export async function createSession(
   const fontRecord = messageFontRecord(game);
   const chosen = newGame?.(fontRecord.chars);
   if (chosen) game.reset(seed, chosen);
-  const font = loadFont(fontRecord, await createImageBitmap(await assets.get(fontRecord.atlas)));
   const unownRecord = unownFontRecord(game);
-  const unownFont = unownRecord ? loadFont(unownRecord, await createImageBitmap(await assets.get(unownRecord.atlas))) : undefined;
-  const frameArt = await loadFrames(game, assets);
+  // Asked for together: the stored reads share one transaction (store.ts batchedReader).
+  const bitmap = async (atlas: AssetRef) => createImageBitmap(await assets.get(atlas));
+  const [fontImage, unownImage, frameArt] = await Promise.all([bitmap(fontRecord.atlas), unownRecord ? bitmap(unownRecord.atlas) : undefined, loadFrames(game, assets)]);
+  const font = loadFont(fontRecord, fontImage);
+  const unownFont = unownRecord ? loadFont(unownRecord, unownImage!) : undefined;
   /** The FRAME option (saved with the game) picks the message box frame. */
   const frames = (): OverlayFrames | undefined => (frameArt ? { message: frameArt.message[game.state.options.frame]!, window: frameArt.window } : undefined);
   const drawPreview = createPreviewDrawer(assets, () => game.registries);

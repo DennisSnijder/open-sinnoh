@@ -113,6 +113,8 @@ const CAMERA_Y_DELAY = 6;
  * past the edge of any view the renderer draws (DS framing: 12 tiles high when wide, 16 wide when tall).
  */
 const PREVIEW_RANGE = 32;
+/** A key for a PREVIEW_RANGE-sized square of tiles (world.previews); square coordinates stay far inside ±32768. */
+const previewSquare = (x: number, z: number) => x * 65536 + z;
 
 /**
  * Running = B held + `state.runningShoes`. The zone's `flags.running` (decomp `isRunningAllowed`) is
@@ -229,8 +231,11 @@ export class FieldWorld implements OpenSinnohWorld {
   /** Zone connections so far, and the objects the latest one deleted (FieldView.departed; null after a map load). */
   private crossings = 0;
   private departed: FieldView['departed'] | null = null;
-  /** Every object event of the zones in the matrix's cells, for FieldView.previews (built once per matrix). */
-  private matrixEvents: { matrix: Id; events: { zone: Id; ev: ObjectEvent }[] } | null = null;
+  /**
+   * Every object event of the zones in the matrix's cells, for FieldView.previews (built once per matrix), and their
+   * indices by PREVIEW_RANGE-sized square of the map: a view reads only the nine squares around the player.
+   */
+  private matrixEvents: { matrix: Id; events: { zone: Id; ev: ObjectEvent }[]; squares: Map<number, number[]> } | null = null;
   private cameraYHistory: number[] = [];
   private cameraCur: Vec3 = [0, 0, 0];
   private cameraPrev: Vec3 = [0, 0, 0];
@@ -2089,14 +2094,29 @@ export class FieldWorld implements OpenSinnohWorld {
         if (id === null) continue;
         for (const ev of this.get('zones', id).events.objects) if (!ev.cloneOf && typeof ev.sprite === 'string') events.push({ zone: id, ev });
       }
-      this.matrixEvents = { matrix: this.matrix.id, events };
+      const squares = new Map<number, number[]>();
+      for (const [i, { ev }] of events.entries()) {
+        const key = previewSquare(Math.floor(ev.x / PREVIEW_RANGE), Math.floor(ev.z / PREVIEW_RANGE));
+        const list = squares.get(key);
+        if (list) list.push(i);
+        else squares.set(key, [i]);
+      }
+      this.matrixEvents = { matrix: this.matrix.id, events, squares };
     }
     const p = this.hero;
-    const live = new Set([...this.actors.values()].map((a) => `${a.cloneOf ?? a.zone}/${a.cloneLocalId ?? a.localId}:${a.sprite}`));
+    // Events within PREVIEW_RANGE of the player lie in the nine squares around its own; taken in the events' order.
+    const near: number[] = [];
+    const sx = Math.floor(p.x / PREVIEW_RANGE), sz = Math.floor(p.z / PREVIEW_RANGE);
+    for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++) near.push(...(this.matrixEvents.squares.get(previewSquare(sx + dx, sz + dz)) ?? []));
+    near.sort((a, b) => a - b);
+    let live: Set<string> | null = null;
     const out: ActorView[] = [];
-    for (const { zone, ev } of this.matrixEvents.events) {
+    for (const i of near) {
+      const { zone, ev } = this.matrixEvents.events[i]!;
       if (zone === this.zone.id || Math.abs(ev.x - p.x) > PREVIEW_RANGE || Math.abs(ev.z - p.z) > PREVIEW_RANGE) continue;
-      if ((ev.hideFlag && this.flag(ev.hideFlag)) || live.has(`${zone}/${ev.localId}:${ev.sprite as Id}`)) continue;
+      if (ev.hideFlag && this.flag(ev.hideFlag)) continue;
+      live ??= new Set([...this.actors.values()].map((a) => `${a.cloneOf ?? a.zone}/${a.cloneLocalId ?? a.localId}:${a.sprite}`));
+      if (live.has(`${zone}/${ev.localId}:${ev.sprite as Id}`)) continue;
       const a = createActor(ev.localId, ev.sprite as Id, ev.x, ev.z, ev.y, ev.facing, ev.movementType, zone);
       if (DISGUISE_TYPES.has(ev.movementType)) a.lift = DISGUISE_DEPTH;
       a.y = this.heightAt(a.cur[0], a.cur[2], a.y);
