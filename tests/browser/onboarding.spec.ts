@@ -88,8 +88,18 @@ test('setup once per device, then the intro from NEW GAME to the field', async (
   await expect(setup.locator('[data-tap="menu:1"]')).toHaveAttribute('aria-current', 'true');
   await chooseSetup(page, setup, touch, 2);
   await expect.poll(() => page.evaluate(() => (JSON.parse(localStorage.getItem('lantern-nds:options') ?? '{}') as { textSpeed?: number }).textSpeed)).toBe(2);
+  // The visual style: optional, the cursor on DS; each answer says what it adds.
+  await expect.poll(() => page.evaluate(() => window.openSinnohTitle!.question)).toBe('visualStyle');
+  expect(await setupAnswers(setup)).toEqual(['DS', 'Subtle', 'Cinematic']);
+  await expect(setup.locator('[data-tap="menu:0"]')).toHaveAttribute('aria-current', 'true');
+  await expect(setup).toContainText('Heavier on phones');
+  await page.screenshot({ path: `${SHOTS}/${project}-setup-visual-style.png` });
+  await chooseSetup(page, setup, touch, 0);
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('lantern-nds:visual-style'))).toBe('ds');
   await expect.poll(() => page.evaluate(() => window.openSinnohTitle!.phase)).toBe('menu');
-  await expect.poll(() => page.evaluate(() => localStorage.getItem('lantern-nds:setup'))).toBe('["reports","textSpeed"]');
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('lantern-nds:setup'))).toBe('["reports","textSpeed","visualStyle"]');
+  // DS draws the DS look.
+  await expect.poll(() => page.evaluate(() => (globalThis as unknown as { openSinnohRenderStats?: { enhanced: unknown } }).openSinnohRenderStats?.enhanced ?? null)).toBeNull();
 
   // Asked once: a new launch goes straight to the main menu.
   await page.reload();
@@ -178,6 +188,7 @@ test('answered on the ROM page while the ROM imported: the title asks nothing', 
   await wizard.locator('.os-choice', { hasText: 'Skip' }).click();
   await wizard.locator('.os-choice', { hasText: "Don't allow" }).click();
   await wizard.locator('.os-choice', { hasText: 'Slow' }).click();
+  await wizard.locator('.os-choice', { hasText: 'The original look' }).click();
   await expect(wizard).toContainText('All set');
   await page.goto('/?packs=fixture&title');
   await page.waitForFunction(() => window.openSinnohTitle?.phase === 'title' && !window.openSinnohTitle.inputBlocked);

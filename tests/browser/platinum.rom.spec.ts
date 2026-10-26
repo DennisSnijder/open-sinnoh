@@ -275,6 +275,7 @@ async function importThroughPicker(project: string): Promise<void> {
   await wizard.locator('.os-choice', { hasText: 'Skip' }).click();
   await wizard.locator('.os-choice', { hasText: "Don't allow" }).click();
   await wizard.locator('.os-choice', { hasText: 'Mid' }).click();
+  await wizard.locator('.os-choice', { hasText: 'The original look' }).click();
   await expect(wizard).toContainText('All set');
   await expect(start).not.toHaveAttribute('aria-disabled', { timeout: 240_000 });
   await expect(page.locator('#base-job')).toContainText('Pokémon Platinum is imported');

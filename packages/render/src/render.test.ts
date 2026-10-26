@@ -323,6 +323,24 @@ it('fogs by the DS Z-buffer depth: FOG is ~86% at the player on the field camera
   expect(fogDensity(ds(distance - 4 * tile), fog)).toBe(0);
 });
 
+it('fogs the angled camera by linear depth: the DS window depth at the same distance from the target', async () => {
+  const { linearFogDepth } = await import('./composite.ts');
+  const [near, far, distance] = [150, 900, 666.922119140625];
+  const window = (camera: THREE.PerspectiveCamera, d: number) => (new THREE.Vector3(0, 0, -d).project(camera).z + 1) / 2;
+  const ds = new THREE.PerspectiveCamera(16, 4 / 3, near, far);
+  const angled = new THREE.PerspectiveCamera(22, 4 / 3, near, far * 1.8);
+  ds.updateProjectionMatrix();
+  angled.updateProjectionMatrix();
+  // The angled camera is nearer the target: the shift puts the target back at the DS camera's distance.
+  const nearer = distance / 1.37;
+  const l = { near, far: far * 1.8, dsNear: near, dsFar: far, shift: distance - nearer };
+  for (const off of [0, -40, 60]) expect(linearFogDepth(window(angled, nearer + off), l)).toBeCloseTo(window(ds, distance + off), 5);
+  // Past the DS far plane: the table's end.
+  expect(linearFogDepth(window(angled, far * 1.5), l)).toBe(1);
+  // No shift and the same planes: the DS depth itself.
+  expect(linearFogDepth(0.7, { near, far, dsNear: near, dsFar: far, shift: 0 })).toBeCloseTo(0.7, 6);
+});
+
 it('plays field-effect animations once (holding the last frame) or looping; fades footprints; bobs the surf blob', async () => {
   const { effectFrame, fadeAlpha, surfBob } = await import('./effects.ts');
   const rustle = [

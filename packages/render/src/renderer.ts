@@ -13,7 +13,7 @@ import { cardFoot, restCards } from './cards.ts';
 import { billboardMaterial, billboardMatrix, faceCameraNodes, nodeBillboard, reflectionMaterial } from './billboard.ts';
 import { Composite, fieldOutputs } from './composite.ts';
 import { cameraAllowed, enhancedVisuals, needsPost, type EnhancedConfig } from './enhanced/config.ts';
-import { lampPoints, type LampPoint } from './enhanced/lamp-points.ts';
+import { glowKind, type GlowKind } from './enhanced/light-sources.ts';
 import type { EnhancedPipeline } from './enhanced/pipeline.ts';
 import { FieldEffects } from './effects.ts';
 import { FeatureModels } from './gyms/index.ts';
@@ -442,6 +442,11 @@ export interface RenderStats {
   actors: { key: string; sprite: Id; at: Vec3; visible: boolean; object: string | null; kind: 'live' | 'departed' | 'preview'; onScreen: boolean; frame?: number }[];
   /** The enhanced visuals drawn in the last frame (enhanced/config.ts), null for the DS look (or while their chunk loads). */
   enhanced: EnhancedConfig | null;
+  /**
+   * The enhanced visuals' last field frame: whether the angled camera drew it, the lamp glows in the scene and the
+   * post chain's quality (enhanced/pipeline.ts `quality`); null for the DS look.
+   */
+  enhancedFrame: { angled: boolean; lamps: number; quality: 'full' | 'phone' } | null;
   /** The weathers on screen in their fades (render/weather.ts): phase, live particles, and the fog's farthest density. */
   weather: { id: Id; phase: 'in' | 'steady' | 'out'; particles: number; fog: number | null }[];
 }
@@ -550,7 +555,7 @@ class Field implements FieldRenderer {
   private enhancedLoading = false;
   /** The enhanced camera replaced the DS camera's projection last frame. */
   private enhancedCamera = false;
-  private lamps: { key: string; list: LampPoint[] } = { key: '', list: [] };
+  private glows: { key: string; list: THREE.Mesh[] } = { key: '', list: [] };
   /** `RenderDebug.syncTiming`'s GPU timer queries in flight (null: the browser has no timer query). */
   private gpuQueries: { ext: { TIME_ELAPSED_EXT: number; GPU_DISJOINT_EXT: number } | null; pending: WebGLQuery[] } | null = null;
   private matrix: Id | null = null;
@@ -577,7 +582,7 @@ class Field implements FieldRenderer {
   private failure: Error | null = null;
   private disposed = false;
   readonly debug: RenderDebug = { spritesOnly: false, heldTextureAnimations: [], edges: true, polygonIds: false, weather: true, syncTiming: false };
-  readonly stats: RenderStats = { frames: 0, renderMs: [], gpuMs: [], enhanced: null, chunks: 0, chunkBuilds: 0, doors: 0, doorsPosed: 0, geometries: 0, textures: 0, cachedModels: 0, actors: [], weather: [] };
+  readonly stats: RenderStats = { frames: 0, renderMs: [], gpuMs: [], enhanced: null, enhancedFrame: null, chunks: 0, chunkBuilds: 0, doors: 0, doorsPosed: 0, geometries: 0, textures: 0, cachedModels: 0, actors: [], weather: [] };
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -697,8 +702,9 @@ class Field implements FieldRenderer {
     const loops: LoopingProp[] = [];
     const healBalls: HealPart[] = [];
     const elevators: ElevatorLights[] = [];
-    // Enhanced visuals' lamp glows (enhanced/): only with a config on, so the DS path does no work.
-    const lamps: LampPoint[] | null = enhancedVisuals() ? [] : null;
+    // Enhanced visuals' night glows (enhanced/): the light-source materials, found only with a config on, so the DS
+    // path does no work.
+    const glowing: Map<THREE.Material, GlowKind> | null = enhancedVisuals() ? new Map() : null;
     const machine = [...this.reg.newGame.values()][0]?.healMachine;
     const lifts = [...this.reg.newGame.values()][0]?.platformLiftProps;
     const boat = [...this.reg.newGame.values()][0]?.boat;
@@ -725,7 +731,8 @@ class Field implements FieldRenderer {
         const geometry = mesh.geometry.index ? mesh.geometry.toNonIndexed() : mesh.geometry.clone();
         const material = await this.materials.convert(singleMaterial(mesh, modelId), set, 'color' in geometry.attributes, this.modelAnimations.get(modelId), ownSet);
         geometry.applyMatrix4(new THREE.Matrix4().multiplyMatrices(placement, mesh.matrixWorld));
-        if (lamps) lamps.push(...lampPoints(singleMaterial(mesh, modelId).name, geometry));
+        const glow = glowing && glowKind(singleMaterial(mesh, modelId).name);
+        if (glow) glowing!.set(material, glow);
         // A card is a whole prop model; one quad of a larger model belongs to that model's shape.
         const foot = camera.projection === 'perspective' && meshes.length === 1 ? cardFoot(geometry, material) : null;
         if (foot) cards.push({ geometry, foot });
@@ -930,6 +937,8 @@ class Field implements FieldRenderer {
       if (!merged) throw new Error(`render: could not merge chunk ${chunkId} geometry for ${material.name}`);
       for (const g of geometries) if (g !== merged) g.dispose();
       const mesh = new THREE.Mesh(merged, material);
+      const glow = glowing?.get(material);
+      if (glow) mesh.userData.glow = glow;
       if (lits.length) {
         const normals = new Float32Array(lits.reduce((n, l) => n + l.normals.length, 0));
         lits.reduce((at, l) => (normals.set(l.normals, at), at + l.normals.length), 0);
@@ -940,7 +949,7 @@ class Field implements FieldRenderer {
     }
     withTranslucentParts(out);
     out.userData.lightKey = lightKey;
-    if (lamps) out.userData.lamps = lamps;
+    if (glowing) out.userData.glows = out.children.filter((m): m is THREE.Mesh => m instanceof THREE.Mesh && !!m.userData.glow);
     return { group: out, doors, loops, healBalls, elevators };
   }
 
@@ -1615,7 +1624,7 @@ class Field implements FieldRenderer {
       this.enhancedCamera = false;
     }
     this.reach = this.baseReach;
-    // Lamp glows read the chunks' lamps, found only while a config is on: build the chunks again.
+    // Night glows read the chunks' light sources, found only while a config is on: build the chunks again.
     if (config?.lamps && !before?.lamps) this.clearChunks();
     if (!config) {
       this.enhanced?.dispose();
@@ -1639,12 +1648,12 @@ class Field implements FieldRenderer {
       .catch(this.failed('enhanced visuals'));
   }
 
-  /** The lamps and windows of the built chunks (world), for the enhanced lamp glows. */
-  private lampList(): LampPoint[] {
-    const groups = [...this.chunks.values()].flatMap((c) => (c.group?.userData.lamps ? [c.group] : []));
+  /** The light-source meshes of the built chunks, for the enhanced night glows (the same list while the chunks stay). */
+  private glowList(): THREE.Mesh[] {
+    const groups = [...this.chunks.values()].flatMap((c) => (c.group?.userData.glows ? [c.group] : []));
     const key = groups.map((g) => g.uuid).join();
-    if (key !== this.lamps.key) this.lamps = { key, list: groups.flatMap((g) => (g.userData.lamps as LampPoint[]).map((l) => ({ kind: l.kind, at: l.at.clone().add(g.position) }))) };
-    return this.lamps.list;
+    if (key !== this.glows.key) this.glows = { key, list: groups.flatMap((g) => g.userData.glows as THREE.Mesh[]) };
+    return this.glows.list;
   }
 
   /**
@@ -1844,9 +1853,8 @@ class Field implements FieldRenderer {
     const enhanced = dw || view.viewCamera ? null : this.enhanced;
     if (enhanced) {
       const velocity = new THREE.Vector3(...view.camera.cur).sub(new THREE.Vector3(...view.camera.prev));
-      const fog = !!(view.features?.fog ?? this.weather.fog());
-      const r = enhanced.placeCamera(this.camera, this.cameraRecord!, aim, velocity, this.dsFov, view.cameraDistance ?? 0, cameraAllowed(zone, fog));
-      // Back to the DS camera (a cave, fog, the switch off): its own projection and far plane again.
+      const r = enhanced.placeCamera(this.camera, this.cameraRecord!, aim, velocity, this.dsFov, view.cameraDistance ?? 0, cameraAllowed(zone));
+      // Back to the DS camera (a cave, a building, the switch off): its own projection and far plane again.
       if (!r && this.enhancedCamera) {
         this.camera.far = this.cameraRecord!.far;
         this.applyProjection();
@@ -1870,6 +1878,11 @@ class Field implements FieldRenderer {
     if (dw) this.composite.configure(DISTORTION_FOG, false, { edges: this.debug.edges, ids: this.debug.polygonIds }, true);
     // A weather BG behind the field (CLEAR_8, CLEAR_13) shows through its clear rear plane.
     else this.composite.configure(view.features?.fog ?? this.weather.fog(), zone.mapType !== 'outdoors' && zone.mapType !== 'town', { edges: this.debug.edges, ids: this.debug.polygonIds }, this.weather.under());
+    // The angled camera's fog reads linear view depth; at the target it is the DS camera's (composite.ts LinearFog).
+    if (enhanced && this.enhancedCamera) {
+      const depth = -aim.clone().applyMatrix4(this.camera.matrixWorldInverse).z;
+      this.composite.linearFog({ near: this.camera.near, far: this.camera.far, dsNear: rec.near, dsFar: rec.far, shift: rec.distance + (view.cameraDistance ?? 0) - depth });
+    }
 
     // The 3D field into colour + polygon ID/fog flag + depth, then edge marking and fog to the screen,
     // then the 2D layers (weather, darkness) and the fade.
@@ -1896,9 +1909,10 @@ class Field implements FieldRenderer {
         seconds: view.clock.seconds,
         zone,
         weather: this.weather.active(),
+        fog: !!(view.features?.fog ?? this.weather.fog()),
         player: player ? lerp3(player.prev, player.cur, alpha) : null,
         target: aim,
-        lamps: this.enhancedConfig!.lamps ? this.lampList() : [],
+        glows: this.enhancedConfig!.lamps ? this.glowList() : [],
       });
     }
     if (this.weather.active() && this.debug.weather) this.weather.draw(this.renderer);
@@ -1941,6 +1955,7 @@ class Field implements FieldRenderer {
     s.textures = this.renderer.info.memory.textures;
     s.cachedModels = this.assets.sizes().models;
     s.enhanced = this.enhanced ? this.enhancedConfig : null;
+    s.enhancedFrame = enhanced ? { angled: this.enhancedCamera, lamps: this.enhancedConfig!.lamps ? this.glowList().length : 0, quality: enhanced.quality } : null;
   }
 
   loading(): boolean {

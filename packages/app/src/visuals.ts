@@ -26,6 +26,15 @@ export function readVisuals(): Visuals {
   }
 }
 
+/** Whether this device has chosen a style (the setup asks only until then). */
+export function visualStyleChosen(): boolean {
+  try {
+    return localStorage.getItem(VISUAL_STYLE_KEY) !== null;
+  } catch {
+    return false;
+  }
+}
+
 /** Stores the choice; returns the error message when storage refuses (private mode). */
 export function storeVisuals(v: Visuals): string | null {
   try {
