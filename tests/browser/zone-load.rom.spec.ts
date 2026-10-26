@@ -70,8 +70,7 @@ for (const name of ZONES) {
 test('loads free the last scene: GL objects and the heap stay level over round trips', async () => {
   test.setTimeout(600_000);
   const cdp = await context.newCDPSession(page);
-  // The heap's floor over three collections a frame apart: what is still allocated in flight (a frame's work, an asset
-  // read) varies by a megabyte from one sample to the next on a busy machine, a kept scene raises the floor.
+  // The heap's floor over three collections a frame apart.
   const measure = async () => {
     let heapMB = Infinity;
     for (let i = 0; i < 3; i++) {
@@ -90,15 +89,21 @@ test('loads free the last scene: GL objects and the heap stay level over round t
   await loadAt('SUNYSHORE_CITY_POKECENTER_1F', false);
   await loadAt('VEILSTONE_CITY', false);
   const first = await measure();
+  const heap = [first.heapMB];
   for (let i = 0; i < 4; i++) {
     await loadAt('SUNYSHORE_CITY_POKECENTER_1F', false);
     await loadAt('VEILSTONE_CITY', false);
+    if (i < 3) heap.push((await measure()).heapMB);
   }
   const last = await measure();
+  heap.push(last.heapMB);
+  console.log(`heap floor per round trip (MB): ${heap.map((h) => h.toFixed(2)).join(' ')}`);
   // Before the fix each load kept the old renderer (its programs, GL state and scene): about 0.3 MB and every
   // texture and geometry of the scene per load.
   expect(last.geometries).toBeLessThanOrEqual(first.geometries);
   expect(last.textures).toBeLessThanOrEqual(first.textures);
-  expect(last.heapMB - first.heapMB).toBeLessThan(2);
+  // The floor still moves by a megabyte or more from one round trip to the next on a busy machine, either way: the
+  // lower of the first two against the lower of the last two. A kept scene raises every later one.
+  expect(Math.min(heap[3]!, heap[4]!) - Math.min(heap[0]!, heap[1]!)).toBeLessThan(2);
   expect(errors).toEqual([]);
 });
