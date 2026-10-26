@@ -741,6 +741,14 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
 - **Pack records are validated in a fast pass** without paths or errors; only a failing record is walked again for the
   message.
 - **A hidden page stops the loop;** hidden time is not played back.
+- **The field builds the world's view once per frame.** The reveal's frame count asks the renderer whether the scene is
+  loading only under the full black (it builds the view again); the neighbouring zones' preview objects are read from
+  the nine 32-tile squares around the player, not from every object of the matrix; a clock reading's date is checked
+  once; the ceiling index keys vertices by number; the session's font and window art are read in one transaction.
+  The same pictures and ticks. Measured on a loaded machine, phone-4× (390×844, DPR 3, two runs each, base → after):
+  Jubilife frame p50/p95 6.0/8.8 → 4.2/5.8 ms, Route 205 4.9/6.8 → 3.8/4.8 ms, CONTINUE to the field 1.3 → 0.95 s, the
+  first warp into Jubilife holds the black 835 → 335 ms. Desktop frames stay about 1 ms. What is left of the frame is
+  mostly three.js's own per-draw work (about 100 draws in Jubilife).
 
 ## Privacy and telemetry
 

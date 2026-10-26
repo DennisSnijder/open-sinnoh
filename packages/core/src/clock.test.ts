@@ -26,6 +26,10 @@ describe('clock', () => {
     expect(() => withClock(c, '2023-02-29')).toThrow(/date/);
     expect(() => withClock(c, undefined, '24:00')).toThrow(/time/);
     expect(() => checkClock({ ...c, minute: 60 })).toThrow(/invalid/);
+    // A date checked before is not checked again; another one is.
+    expect(checkClock(c)).toBe(c);
+    expect(() => checkClock({ ...c, date: '2009-02-30' })).toThrow(/invalid/);
+    expect(() => checkClock({ ...c, hour: 1.5 })).toThrow(/invalid/);
   });
 
   it('counts seconds and weekdays', () => {
