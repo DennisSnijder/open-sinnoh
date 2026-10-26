@@ -55,7 +55,8 @@ const RULES: [Bucket, RegExp][] = [
 
 /**
  * Per-command triage of the "other" bucket and the unnamed decomp handlers that ROM scripts use
- * ("unknown 77"). Each entry was read from its decomp handler. `zero` lists the operands its stub sets
+ * ("unknown 77"), and of named stubs whose reason is not their bucket's (state the engine does not keep, unreachable
+ * maps). Each entry was read from its decomp handler. `zero` lists the operands its stub sets
  * to 0 when their names do not say so (`arg0`); `milestone` overrides the bucket's.
  */
 interface Triage {
@@ -83,6 +84,15 @@ export const TRIAGE: Record<string, Triage> = {
   scr_cmd_1e2: { bucket: 'battle', milestone: TOWER, note: 'Battle Tower save task' },
   scr_cmd_1e3: { bucket: 'battle', milestone: TOWER, note: 'Wi-Fi tower match indices', zero: [0, 1] },
   scr_cmd_1e4: { bucket: 'battle', milestone: TOWER, note: 'Wi-Fi tower match list present', zero: [0] },
+  count_mail_in_mailbox: { bucket: 'party', milestone: 'M3 (mailbox)', note: 'Mailbox_CountMail: the engine keeps no PC mailbox (Mail is never sent to it), so the PC says it is empty' },
+  set_favorite_mon: { bucket: 'party', milestone: 'out', note: 'MiscSaveBlock_SetFavoriteMon: only the Wi-Fi Plaza reads the favorite; not kept' },
+  turn_on_pokedex_form_detection: { bucket: 'party', milestone: 'later (Pokédex form detection)', note: 'Pokedex_TurnOnFormDetection: the saved canDetectForms is not kept; our Pokédex shows the forms page from the start' },
+  check_all_tough_words_unlocked: { bucket: 'menus', milestone: 'later (easy chat words)', note: 'EasyChatWords_AreAllToughWordsUnlocked: the unlocked easy chat words are not kept' },
+  try_buffer_and_unlock_random_tough_word: { bucket: 'menus', milestone: 'later (easy chat words)', note: 'EasyChatWords_TryUnlockRandomToughWord: the unlocked easy chat words are not kept' },
+  check_is_today_player_birthday: { bucket: 'objects', milestone: 'out (DS firmware data)', note: "the DS owner's birthday is firmware data (SystemData), not available: never the birthday" },
+  move_hearthome_gym_dp_lift: { bucket: 'field', milestone: 'unscheduled (Diamond/Pearl leftover maps)', note: "HearthomeGym_MoveLift: only the DP_GYM elevator rooms run it; Platinum's leader room warps to them lie outside its walls" },
+  set_mon_summary: { bucket: 'party', note: "the daycare's and contests' party menus open the summary themselves, so the scripts' summary loop is not taken" },
+  get_mon_party_slot: { bucket: 'party', note: "the daycare's and contests' party menus open the summary themselves, so the scripts' summary loop is not taken" },
   scr_cmd_0a2: comm('Communication Club task'),
   scr_cmd_0a3: comm('comm app (mode 2)'),
   scr_cmd_0a5: comm('Union Room easy chat window'),

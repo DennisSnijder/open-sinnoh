@@ -1,6 +1,7 @@
 /**
  * The daycare and egg commands (decomp src/scrcmd_daycare.c, scrcmd_party.c ScrCmd_GiveEgg, scrcmd.c
- * ScrCmd_HatchEgg and the daycare party menu, overlay005 ScrCmd_TryRevertPokemonForm) over core's daycare
+ * ScrCmd_HatchEgg and the daycare party menu, overlay005 ScrCmd_TryRevertPokemonForm and
+ * ScrCmd_TryRevertPartyPokemonForms) over core's daycare
  * rules (`egg.ts`). The daycare's party menu and the hatch scene are menu apps the script waits on.
  */
 import { compatibilityLevel, createEgg, daycareFee, daycareLevel, daycareLevelsGained, daycareState, depositMon, eggFromDaycare, firstHatchingEgg, hatchEgg, monGender, PARTY_SIZE, withdrawMon, type Arg, type Id, type Pokemon } from '@opensinnoh/core';
@@ -106,6 +107,21 @@ export function daycareHandlers(r: Runner): Record<string, Handler> {
         m.heldItem = null;
       }
       revertForm(r.registries, m);
+      return 'continue';
+    },
+    // Decomp ScrCmd_TryRevertPartyPokemonForms (before a link room): every held Griseous Orb goes back to the bag in one
+    // Bag_TryAddItem, or nothing changes and the var reads 0xFF; then each party Pokémon in another form reverts.
+    try_revert_party_pokemon_forms: (t, _c, a) => {
+      dest(t, a[0], 0);
+      const holders = state().party.filter((m) => local(m.heldItem) === 'ITEM_GRISEOUS_ORB');
+      if (holders.length) {
+        if (!giveItem(state(), r.registries, holders[0]!.heldItem!, holders.length)) {
+          dest(t, a[0], ORB_NOT_REMOVED);
+          return 'continue';
+        }
+        for (const m of holders) m.heldItem = null;
+      }
+      for (const m of state().party) revertForm(r.registries, m);
       return 'continue';
     },
     // Decomp Party_StringTemplateSetNicknameReturnSpecies (the first operand is unused).

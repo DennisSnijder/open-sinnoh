@@ -769,7 +769,8 @@ const dressUpPhotoSchema: Schema = obj(
 );
 
 export const GAME_STATE_SCHEMA: Schema = obj(
-  { ...stateV22Fields, schemaVersion: lit(SAVE_SCHEMA_VERSION), tv: tvSchema, dressUpPhotos: arr(nullable(dressUpPhotoSchema)) },
+  // 0.47.1, same schema v23: the trainer appearance (decomp TrainerInfo appearance, a u8); older saves hold none.
+  { ...stateV22Fields, schemaVersion: lit(SAVE_SCHEMA_VERSION), tv: tvSchema, dressUpPhotos: arr(nullable(dressUpPhotoSchema)), appearance: opt(int(0, 0xff)) },
   (v) => stateV22FullCheck(v) ?? ((v.dressUpPhotos as unknown[]).length !== DRESS_UP_PHOTOS.count ? `dressUpPhotos must have ${DRESS_UP_PHOTOS.count} slots` : undefined),
 );
 

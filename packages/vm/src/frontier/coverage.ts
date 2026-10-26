@@ -3,15 +3,18 @@
  * is a logged stand-in (`FRONTIER_STUBBED`); a command without one logs once (`frontier:<op>`) and does nothing.
  */
 import { FRONTIER_COMMANDS } from './commands.ts';
-import { frontierHandlers } from './ops.ts';
+import { FRONTIER_LINK_OPS, frontierHandlers } from './ops.ts';
 import { towerFrontierHandlers } from './tower-ops.ts';
 import { factoryFrontierHandlers } from './factory-ops.ts';
 import { hallFrontierHandlers } from './hall-ops.ts';
 import { castleFrontierHandlers } from './castle-ops.ts';
 import { arcadeFrontierHandlers } from './arcade-ops.ts';
 
-/** Frontier handlers that are logged stand-ins: battle videos (the Vs. Recorder: none is saved, saving one fails). */
-export const FRONTIER_STUBBED = ['fr_cmd_70', 'fr_cmd_6d', 'fr_init_new_battle_recording', 'fr_free_battle_recording'];
+/**
+ * Frontier handlers that are logged stand-ins: battle videos (the Vs. Recorder: none is saved, saving one fails), and
+ * the link and Wi-Fi commands (no connection offline).
+ */
+export const FRONTIER_STUBBED = ['fr_cmd_70', 'fr_cmd_6d', 'fr_init_new_battle_recording', 'fr_free_battle_recording', ...FRONTIER_LINK_OPS];
 
 export interface FrontierOpClassification {
   op: string;

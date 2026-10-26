@@ -315,7 +315,7 @@ test:Unknown::
   check_step_flag var(fixture:VAR_RESULT)
   check_step_flag var(fixture:VAR_RESULT)
   set_var_from_value var(fixture:VAR_SCENE), 7
-  check_party_has_bad_egg var(fixture:VAR_SCENE)
+  check_has_enough_mon_for_catching_show var(fixture:VAR_SCENE)
   scr_cmd_1e4 var(fixture:VAR_SCENE)
   end
 `);
@@ -323,7 +323,7 @@ test:Unknown::
     d.tick();
     expect(d.vm.running()).toBe(false);
     expect(d.log.keys.get('cmd:check_step_flag')).toBe(2); // StubLog dedupes; the VM reports every hit
-    expect(d.log.keys.get('stub:check_party_has_bad_egg')).toBe(1);
+    expect(d.log.keys.get('stub:check_has_enough_mon_for_catching_show')).toBe(1);
     expect(d.log.keys.get('stub:scr_cmd_1e4')).toBe(1);
     expect(d.state.vars['fixture:VAR_SCENE']).toBeUndefined(); // the stub returned 0 (the initial value)
   });

@@ -1,14 +1,20 @@
 /**
  * The Underground's and the fossils' script commands (decomp scrcmd_underground_inventory.c ScrCmd_GiveSphere,
  * ScrCmd_GiveTrap, ScrCmd_SendGoodToPC, ScrCmd_CheckHasRoomForGoodsInPC; scrcmd.c ScrCmd_GetCapturedFlagCount,
- * ScrCmd_UndergroundNPCMessage, ScrCmd_CloseUndergroundNPCMessage, ScrCmd_SetCommPlayerDir, ScrCmd_Dummy19E;
- * scrcmd_fossil.c). The rules are core's (underground.ts); the tables are `NewGame.underground`.
+ * ScrCmd_UndergroundNPCMessage, ScrCmd_CloseUndergroundNPCMessage, ScrCmd_SetCommPlayerDir, ScrCmd_Dummy19E, the
+ * ScrCmd_GetUnderground* counters; scrcmd_fossil.c). The rules are core's (underground.ts); the tables are `NewGame.underground`.
  */
 import { itemCount, newGameRecord, type UndergroundTables } from '@opensinnoh/contracts';
 import { createUnderground, goodsPcHasRoom, readUnderground, tryAddGoodPc, tryAddSphere, tryAddTrap, undergroundInitSeed, type Arg, type Id } from '@opensinnoh/core';
 import { plainMarkup } from '@opensinnoh/text';
 import type { Handler, Runner, Thread } from './runner.ts';
 
+/**
+ * The Underground's system vars (decomp VAR_UNDERGROUND_FOSSILS_UNEARTHED, _TRAPS_SET, _TALK_COUNTER, _ITEMS_GIVEN_AWAY;
+ * `vars` sourceIndex), read by Hearthome's Underground fan. Mining and the traps count the first two; the other two count
+ * talks with and gifts to other players (UndergroundPlayer, UndergroundTalk), so a solo game leaves them at 0.
+ */
+const COUNTER_VARS = { fossils: 0x4047, traps: 0x4048, talks: 0x4049, gifts: 0x4054 } as const;
 /** Decomp DIR_NORTH, DIR_SOUTH, DIR_WEST, DIR_EAST. */
 const DIRS = ['up', 'down', 'left', 'right'] as const;
 
@@ -25,6 +31,7 @@ export function undergroundHandlers(r: Runner): Record<string, Handler> {
     return n;
   };
   const count = (item: Id) => itemCount(r.state, item);
+  const counter = (t: Thread, name: keyof typeof COUNTER_VARS) => r.getVar(t, r.source('vars', COUNTER_VARS[name])!);
   const underground = () => createUnderground(r.state, undergroundInitSeed(r.clock(), r.state.trainerId));
   /** TEXT_BANK_UNDERGROUND_NPCS, the bank the Underground's NPC messages come from. */
   const npcText = (n: number): Id => {
@@ -82,6 +89,11 @@ export function undergroundHandlers(r: Runner): Record<string, Handler> {
     dummy19_e: () => {
       throw new Error('dummy19_e: an Underground vendor script ran; the field opens the vendors\' shops (World.undergroundRequest)');
     },
+    /** ScrCmd_GetUndergroundFossilsUnearthed, …TrapsSet, …TalkCounter, …ItemsGivenAway: the SystemVars_Get* counters. */
+    get_underground_fossils_unearthed: (t, _c, a) => (dest(t, a[0], counter(t, 'fossils')), 'continue'),
+    get_underground_traps_set: (t, _c, a) => (dest(t, a[0], counter(t, 'traps')), 'continue'),
+    get_underground_talk_counter: (t, _c, a) => (dest(t, a[0], counter(t, 'talks')), 'continue'),
+    get_underground_items_given_away: (t, _c, a) => (dest(t, a[0], counter(t, 'gifts')), 'continue'),
     /** ScrCmd_GetFossilCount: every fossil item in the bag, summed. */
     get_fossil_count: (t, _c, a) => {
       dest(t, a[0], tables('get_fossil_count').fossils.reduce((n, f) => n + count(f.item), 0));

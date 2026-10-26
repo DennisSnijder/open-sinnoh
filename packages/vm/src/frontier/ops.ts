@@ -12,7 +12,7 @@ import { CONDITIONS } from '../commands.ts';
 import { LIST_HEADER, MENU_RESULT, NO_ALT_TEXT, ScriptMenu, type MenuKind } from '../menu.ts';
 import { M1B_BANKS } from '../m1b-ops.ts';
 import { measureText } from '../ops.ts';
-import { FRONTIER_TABLE } from './commands.ts';
+import { FRONTIER_COMMAND_BY_NAME, FRONTIER_TABLE } from './commands.ts';
 import type { FrontierContext, FrontierHandler, FrontierResult, FrontierRunner } from './runner.ts';
 
 /** Decomp sConditionTable: [condition][comparison result 0 <, 1 ==, 2 >]. */
@@ -412,6 +412,39 @@ export function frontierHandlers(): Record<string, FrontierHandler> {
     // ---------------------------------------------------------------- link (no wireless)
     // Decomp FrontierScrCmd_SyncConnectedPlayers: with fewer than two players connected, no wait.
     fr_sync_connected_players: () => 'yield',
+    // Decomp FrontierScrCmd_ClearReceivedTempDataAllPlayers: clears what the linked players sent; offline nothing is received.
+    fr_clear_received_temp_data_all_players: () => 'continue',
+    ...Object.fromEntries(FRONTIER_LINK_OPS.map((op) => [op, linkStub(op)])),
+  };
+}
+
+/**
+ * The frontier's link and Wi-Fi commands (the multi challenges with a wireless partner, the Wi-Fi facility selector and
+ * Wi-Fi tower): each script reaches them only on its link branch (CallBattleTowerFunction's BATTLE_TOWER_MODE_LINK_MULTI,
+ * the facilities' multi-with-a-friend checks). There is no connection offline: `linkStub` logs, writes 0 to every
+ * result var and buffers an empty partner name (logged stand-ins, `FRONTIER_STUBBED`).
+ */
+export const FRONTIER_LINK_OPS = [
+  'fr_buffer_partner_name', 'fr_end_communication', 'fr_cmd_4b', 'fr_set_wi_fi_list_host_friend_current_date', 'fr_cmd_c8', 'fr_cmd_c9',
+  'fr_battle_factory_send_comm_message', 'fr_battle_factory_wait_for_comm_responses', 'fr_battle_hall_send_comm_message', 'fr_cmd_94',
+  'fr_battle_castle_send_comm_message', 'fr_battle_castle_wait_for_comm_responses', 'fr_battle_arcade_send_comm_message',
+  'fr_battle_arcade_wait_for_comm_responses', 'fr_cmd_89', 'fr_cmd_8a', 'fr_init_wfc_facility_selector', 'fr_free_wfc_facility_selector',
+  'fr_wfc_facility_selector_send_comm_message', 'fr_wfc_facility_selector_wait_for_comm_responses', 'fr_check_if_same_facility_chosen',
+  'fr_manage_facility_selector_sub_app', 'fr_get_selected_party_menu_slots', 'fr_check_if_partner_dropped_out',
+  'fr_call_wfc_facility_selector_function', 'fr_init_battle_tower', 'fr_send_tower_trainer_id_list', 'fr_wait_for_tower_trainer_id_list_responses',
+  'fr_free_battle_tower',
+];
+
+function linkStub(op: string): FrontierHandler {
+  const spec = FRONTIER_COMMAND_BY_NAME.get(op);
+  if (!spec) throw new Error(`no frontier command ${op}`);
+  return (f, c, a) => {
+    f.r.log.stub(`frontier:${op}`, `${op}: link and Wi-Fi play are not available (no connection): results 0`);
+    spec.operands.forEach((o, i) => {
+      if (o.kind === 'var') f.set(c, a[i], 0);
+    });
+    if (op === 'fr_buffer_partner_name') f.slots[f.int(a[0])] = '';
+    return 'continue';
   };
 }
 

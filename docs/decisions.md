@@ -176,6 +176,10 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   and after a battle. The field itself stays up; only the scripts and the dynamic features run again.
 - **Choices where the decomp is undefined** throw rather than guess (for example AI commands that never
   advance, an unknown operand).
+- **Link commands answer "no connection".** Field link stubs return 0 or a cancelled connection; the frontier's link and
+  Wi-Fi commands (each script reaches them only on its link branch) are logged stand-ins that write 0. Clearing the
+  linked players' received data (`clear_received_temp_data_all_players`, its frontier twin) is real: offline nothing is
+  received, so there is nothing to clear. Our Pokémon carry no checksum, so `check_party_has_bad_egg` is always no.
 
 ## World and field
 

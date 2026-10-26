@@ -5,6 +5,7 @@
  * a field task the decomp waits on (FieldTask_InitCall) is polled with `pause`.
  */
 import type { Arg, Id } from '@opensinnoh/core';
+import { BOX_SIZE } from '@opensinnoh/contracts';
 import { plainMarkup, toPrintOps } from '@opensinnoh/text';
 import { MOVES } from './commands.ts';
 import { bikeMusic } from './audio-ops.ts';
@@ -24,6 +25,7 @@ export const M1B_BANKS = {
   speciesNameWithArticles: 413,
   berryNames: 424,
   npcTrainerNames: 618,
+  trainerClassNames: 619,
   trainerClassNamesWithArticles: 620,
   typeNames: 624,
   undergroundGoods: 626,
@@ -323,6 +325,14 @@ export function m1bHandlers(r: Runner): Record<string, Handler> {
       slot(t, a[0], plainMarkup(m.nickname ?? r.registries.species.get(m.species)!.name));
       return 'continue';
     },
+    // Decomp ScrCmd_BufferMonNicknameFromPC: the box Pokémon at box * MAX_MONS_PER_BOX + slot (the Jubilife TV lottery's winner).
+    buffer_mon_nickname_from_pc: (t, _c, a) => {
+      const i = val(t, a[1]);
+      const m = r.state.boxes[Math.floor(i / BOX_SIZE)]?.slots[i % BOX_SIZE];
+      if (!m) throw new Error(`buffer_mon_nickname_from_pc: no Pokémon in box slot ${i}`);
+      slot(t, a[0], plainMarkup(m.nickname ?? r.registries.species.get(m.species)!.name));
+      return 'continue';
+    },
     buffer_nature_name: bankBuffer(M1B_BANKS.natureNames),
     buffer_type_name: bankBuffer(M1B_BANKS.typeNames),
     buffer_accessory_name: bankBuffer(M1B_BANKS.accessoryNames),
@@ -333,6 +343,7 @@ export function m1bHandlers(r: Runner): Record<string, Handler> {
     buffer_item_name_plural: bankBuffer(M1B_BANKS.itemNamesPlural),
     buffer_item_name_with_article: bankBuffer(M1B_BANKS.itemNamesWithArticles),
     buffer_species_name_with_article: bankBuffer(M1B_BANKS.speciesNameWithArticles),
+    buffer_trainer_class_name: bankBuffer(M1B_BANKS.trainerClassNames),
     buffer_trainer_class_name_with_article: bankBuffer(M1B_BANKS.trainerClassNamesWithArticles),
     buffer_trainer_name: bankBuffer(M1B_BANKS.npcTrainerNames),
     buffer_berry_name: bankBuffer(M1B_BANKS.berryNames, (item) => item - FIRST_BERRY_ITEM),

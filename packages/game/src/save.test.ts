@@ -731,3 +731,16 @@ describe('game clock (decomp GameTime)', () => {
     expect(game.clock()).toEqual({ date: '2026-10-14', hour: 9, minute: 1, second: 2 });
   });
 });
+
+describe('the trainer appearance (0.47.1, same schema v23)', () => {
+  it('absent in older saves; round-trips and is a u8', () => {
+    const game = newGame();
+    expect(game.state.appearance).toBeUndefined();
+    game.state.appearance = 51;
+    game.load(JSON.parse(JSON.stringify(game.save())));
+    expect(game.state.appearance).toBe(51);
+    const s = JSON.parse(JSON.stringify(game.save())) as { state: { appearance?: unknown } };
+    s.state.appearance = 256;
+    expect(() => game.load(s)).toThrow(/invalid save/);
+  });
+});
