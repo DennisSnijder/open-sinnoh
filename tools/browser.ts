@@ -12,10 +12,12 @@ const CANDIDATES = [
   'chrome-headless-shell-mac-arm64/chrome-headless-shell',
   'chrome-headless-shell-mac-x64/chrome-headless-shell',
   'chrome-headless-shell-linux64/chrome-headless-shell',
+  'chrome-headless-shell-win64/chrome-headless-shell.exe',
   'chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing',
   'chrome-mac-x64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing',
   'chrome-linux64/chrome',
   'chrome-linux/chrome',
+  'chrome-win64/chrome.exe',
 ];
 
 const SYSTEM = ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/usr/bin/google-chrome', '/usr/bin/google-chrome-stable', '/usr/bin/chromium', '/usr/bin/chromium-browser'];
@@ -26,7 +28,8 @@ export function browserExecutable(): string {
     if (!existsSync(explicit)) throw new Error(`OPENSINNOH_BROWSER_EXECUTABLE does not exist: ${explicit}`);
     return explicit;
   }
-  const roots = [process.env.PLAYWRIGHT_BROWSERS_PATH, join(homedir(), 'Library/Caches/ms-playwright'), join(homedir(), '.cache/ms-playwright')].filter((p): p is string => !!p && existsSync(p));
+  // Playwright's cache: macOS, Linux, Windows.
+  const roots = [process.env.PLAYWRIGHT_BROWSERS_PATH, join(homedir(), 'Library/Caches/ms-playwright'), join(homedir(), '.cache/ms-playwright'), process.env.LOCALAPPDATA && join(process.env.LOCALAPPDATA, 'ms-playwright')].filter((p): p is string => !!p && existsSync(p));
   for (const root of roots) {
     // Headless shells first, newest version first.
     const versions = readdirSync(root).sort().reverse();

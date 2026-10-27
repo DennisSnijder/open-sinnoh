@@ -36,7 +36,7 @@ export function describeServicesM3a(group: 0 | 1): void {
     };
 
     if (group === 0) it('svc-repel is a real test: without the Repel the same walk meets wild Pokémon on seeds 1–3', async () => {
-      const text = read('svc-repel.replay');
+      const text = read('svc-repel.replay').replace(/\r\n/g, '\n'); // a Windows checkout has CRLF line ends
       // The same replay with no Repel steps and, in place of its asserts, a wild encounter met on the way.
       const without = `${text.replace(/^set state repel 100\n/m, '').replace(/^\+0 assert (battles wild 0|state repel \d+)\n/gm, '')}+0 assert state battles[0].kind "wild"\n`;
       expect(without.split('\n').filter((l) => !l.startsWith('#')).join('\n')).not.toMatch(/repel|assert battles/);

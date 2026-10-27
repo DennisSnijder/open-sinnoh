@@ -8,7 +8,7 @@
  * task that no longer throws, imported records, or a short replay that exercises the behaviour.
  */
 import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { join, posix } from 'node:path';
 import type { Id } from '@opensinnoh/core';
 import type { Game, ReplayResolver, ReplayResult } from '@opensinnoh/game';
 import { STUBBED, implementedOps } from '@opensinnoh/vm';
@@ -17,7 +17,8 @@ export const REPLAY_DIR = import.meta.dirname;
 
 /** `from` lines resolve against the naming replay's folder (parts chain inside `parts/`). */
 export const resolveReplay: ReplayResolver = (file, base) => {
-  const name = join(base ? dirname(base) : '', file);
+  // Names keep forward slashes on every OS (`chainedScreenshots: /^parts\//` matches them).
+  const name = posix.join(base ? posix.dirname(base) : '', file);
   return { name, text: readFileSync(join(REPLAY_DIR, name), 'utf8') };
 };
 
