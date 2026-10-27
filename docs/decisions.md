@@ -292,7 +292,11 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   modern display is not what the DS's LCD showed. Ties between translucent and coplanar opaque polygons
   go to the translucent one.
 - **Whole device pixels.** DS screens and scenes are drawn at a whole device-pixel scale; a fractional
-  fit is a counted last resort that tests require to stay at zero.
+  fit is a counted last resort that tests require to stay at zero. The UI's `dot` and `unit` are whole device
+  pixels too (at 175 % a 2-px dot is 3.5 device px, and pixel text drawn at 4 wrapped out of its box): the nearest
+  whole size that fits, else the one below.
+- **Message boxes are the DS's text window.** Scene boxes use the field's full-width window (2,19) 27×4, 216 px
+  of text; the waiting arrow takes no width, so a line never re-wraps when it shows.
 - **Render scale:** Auto caps the field's 3D at 2 device px per CSS px on coarse pointers; 2D keeps the
   full ratio.
 - **One WebGL renderer per canvas;** a disposed field frees its scene. Cinematic scene models load on

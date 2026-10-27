@@ -17,13 +17,16 @@
 .ui-screen.rom-frame { box-shadow: none; clip-path: none; }
 .msg-box {
   min-height: calc(var(--dot) * 32); padding: calc(var(--dot) * 2) calc(var(--dot) * 4);
-  display: flex; align-items: flex-start; gap: calc(var(--dot) * 4);
+  display: flex; align-items: flex-start;
 }
+/* The text takes the whole row, as the DS's window does; the waiting arrow takes no width (it sits over the row's end),
+ * so a line does not re-wrap when the arrow shows. */
+.msg-box > .px-flow { flex: 1 1 auto; }
 .msg-box:not(.rom-frame) { background: var(--paper); box-shadow: inset 0 0 0 var(--dot) var(--frame-hi); }
 .msg-box.rom-frame { padding: 0; min-height: calc(var(--dot) * 48); }
 .msg-box.waiting { cursor: pointer; }
 .msg-box.waiting::after {
-  content: ''; margin-left: auto; align-self: flex-end; flex: none; width: calc(var(--dot) * 6); height: calc(var(--dot) * 4);
+  content: ''; margin-left: calc(var(--dot) * -6); align-self: flex-end; flex: none; width: calc(var(--dot) * 6); height: calc(var(--dot) * 4);
   background: var(--cursor); clip-path: polygon(0 0, 100% 0, 50% 100%); animation: msg-arrow 0.6s steps(2) infinite;
 }
 @keyframes msg-arrow { 50% { transform: translateY(var(--dot)); } }
