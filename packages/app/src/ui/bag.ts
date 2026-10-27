@@ -13,11 +13,6 @@ import { el } from './core.ts';
 import { animCell, bgPicture, sprite, tapButton } from './sprites.ts';
 import './bag.css';
 
-/** Pocket types (decomp POCKET_*): the field bag's pockets are the DS's eight in order; the battle bag's four. */
-const FIELD_POCKETS = 8;
-/** The battle pockets (HP/PP, status, balls, battle items) drawn as the medicine, ball and battle-item pockets. */
-const BATTLE_POCKET_TYPES = [1, 1, 2, 6];
-
 /** sprites.c sBagUISpriteTemplates (sprite positions: the cell's origin). */
 const SPRITES = { bag: [48, 50], prevArrow: [2, 96], nextArrow: [98, 96], item: [22, 172] } as const;
 /** BagUI_DrawPocketSelectorIcons: the icons' row (window at tile row 11, + 3 px), 10 px icons. */
@@ -34,16 +29,11 @@ const REGISTERED_X = 96;
 /** The description window (0, 18) 32 × 6 tiles, text from x 40. */
 const DESCRIPTION = { x: 40, y: 144, w: 216, h: 48 };
 
-function pocketTypes(v: BagView): number[] {
-  if (v.mode === 'battle') return BATTLE_POCKET_TYPES;
-  if (v.pockets.length !== FIELD_POCKETS) throw new Error(`ui: the bag has ${v.pockets.length} pockets, the DS ${FIELD_POCKETS}`);
-  return v.pockets.map((_, i) => i);
-}
-
 export function bag(wide: DrawContext, v: BagView): HTMLElement {
   const d = boardContext(wide);
   const root = board(`ds-screen bag-board bag-${v.mode}`);
-  const types = pocketTypes(v);
+  const types = v.pocketTypes;
+  if (types.length !== v.pockets.length) throw new Error(`ui: the bag has ${v.pockets.length} pockets and ${types.length} pocket types`);
   const screen = bgPicture(d, 'bag/screen', 0, 0);
   root.classList.toggle('rom', !!screen);
   if (screen) root.dataset.backdrop = 'bag/screen';
@@ -86,7 +76,10 @@ export function bag(wide: DrawContext, v: BagView): HTMLElement {
   return root;
 }
 
-/** The pocket icons (BagUI_DrawPocketSelectorIcons) as tabs, the highlight, the arrows and the pocket's name. */
+/**
+ * The pocket icons (BagUI_DrawPocketSelectorIcons) as tabs, the highlight, the arrows and the pocket's name. As on the DS
+ * (InitSprites), one pocket has no arrows and the Poffin bag (BAG_MODE_POFFIN_*) no highlight.
+ */
 function pockets(d: DrawContext, v: BagView, types: number[]): HTMLElement[] {
   const n = v.pockets.length;
   // main.c: pocketSelectorIconsX and pocketSelectorIconsSpacing.
@@ -105,7 +98,7 @@ function pockets(d: DrawContext, v: BagView, types: number[]): HTMLElement[] {
     tabs.append(at(tab, iconsX + spacing * i - (spacing - ICON) / 2, ICON_Y - 3, spacing, 16));
   });
   const out: HTMLElement[] = [tabs];
-  const hl = sprite(d, 'bag/pocket_highlight', 0, iconsX + spacing * v.pocket + ICON / 2, ICON_Y + ICON / 2, 'pocket-highlight');
+  const hl = v.mode === 'poffin' ? null : sprite(d, 'bag/pocket_highlight', 0, iconsX + spacing * v.pocket + ICON / 2, ICON_Y + ICON / 2, 'pocket-highlight');
   if (hl) out.push(hl);
   const arrow = (dir: 'prev' | 'next') => {
     const [x, y] = dir === 'prev' ? SPRITES.prevArrow : SPRITES.nextArrow;
@@ -115,8 +108,10 @@ function pockets(d: DrawContext, v: BagView, types: number[]): HTMLElement[] {
     if (art) out.push(art);
     out.push(at(tapButton(d, dir, `pocket-arrow ${dir}${art ? ' rom' : ''}`, [], dir === 'prev' ? 'Previous pocket' : 'Next pocket'), Math.max(0, x - 8), y - 8, dir === 'prev' ? 12 : 14, 16));
   };
-  arrow('prev');
-  arrow('next');
+  if (n > 1) {
+    arrow('prev');
+    arrow('next');
+  }
   // windows.c PrintPocketNameCentered: centred at x 50, 2 px into the window at tile row 13.
   out.push(at(el('div', 'pocket-name', d.text(v.pockets[v.pocket]!)), 0, 106, 100, 16));
   return out;

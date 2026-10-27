@@ -724,6 +724,12 @@ export interface BagView {
   mode: 'field' | 'give' | 'battle' | 'pick' | 'poffin';
   title: string;
   pockets: string[];
+  /**
+   * 0.49.0. The DS pocket type each of `pockets` is drawn as (decomp POCKET_*: its icon and the bag picture): the field
+   * bag's eight in order, the battle bag's four as medicine, medicine, balls and battle items, and the one pocket of
+   * `pick` and `poffin`.
+   */
+  pocketTypes: number[];
   pocket: number;
   rows: { item: Id; label: string; count: string | null; registered: boolean }[];
   cancel: string;

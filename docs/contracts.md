@@ -36,6 +36,7 @@ a reviewed step: bump `CONTRACTS_VERSION` and add a line below.
   replays, stepped by `date`/`time` lines. Periods are core `dayPeriod(hour)` (decomp TimeOfDayForHour).
 
 ## Changelog
+- 0.49.0 (the one-pocket bag, on 0.48.0; same schema v23): `BagView.pocketTypes` (the DS pocket type each listed pocket is drawn as), so the `pick` and `poffin` bags, which list one pocket, draw it instead of failing.
 - 0.48.0 (loose ends, on 0.47.1; same schema v23; importer platinum-111): `BattlerView.look?` (`BattlerLook`: the species, form, shininess and gender a transformed battler's sprite shows until it leaves); `ObjectiveTables` steps' `to?` (the zone of the Town Map fly location the step leads to); `TownMapView.blocks[].objective?` (the objective's destination, marked).
 - 0.47.1 (the trainer appearance, on 0.47.0; same schema v23): optional `GameState.appearance` (decomp TrainerInfo appearance, a u8: the Union Room look picked at Oreburgh's Pokémon Center; absent = the new-game one, variant 0 of the trainer id's row).
 - 0.47.0 (weather sprites, on 0.46.0; same schema v23; importer platinum-110): `Weather.particles.sprites` (`WeatherSprites`: the task's weather_sys OAM set as a packed PNG, its cells and the cell per animation frame) and `.spawner` (`WeatherSpawner`: the map load's and the faded-in spawner, the map load's prewarm); `Weather.layer.under?` (BG2 behind the 3D field: CLEAR_8, CLEAR_13).
