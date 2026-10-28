@@ -195,8 +195,54 @@ describe('wild battle (fixture pack)', () => {
     expect(() => b.choose({ kind: 'move', slot: 0 })).toThrow(/no prompt/);
     until(b);
     expect(() => b.choose({ kind: 'move', slot: 2 })).toThrow(/no move in slot 3/);
-    expect(() => b.choose({ kind: 'move', slot: 1 })).toThrow(/no PP/);
+    // From the command prompt (replays) a move that can't be used is an error; the move list refuses it (below).
+    expect(() => b.choose({ kind: 'move', slot: 1 })).toThrow(/Stare can't be used now: That move has run dry!/);
     b.choose({ kind: 'move', slot: 0 });
+  });
+
+  it('the move list refuses a move with no PP (decomp BattleSystem_CanUseMove): its message, then the list again on it', () => {
+    const lead = mon('SPECIES_MOSSLET', 8, { moves: ['MOVE_BOP', 'MOVE_STARE'] });
+    lead.pp[1] = 0;
+    const b = battle([lead], { species: 'SPECIES_SKYLET', level: 3 }, 1);
+    until(b);
+    const press = (button: InputFrame['pressed'][number]) => b.step({ held: [button], pressed: [button], touch: null });
+    // The d-pad: A on Stare.
+    press('a');
+    press('right');
+    expect(b.view().prompt).toMatchObject({ kind: 'fight', cursor: 1 });
+    press('a');
+    expect(b.view().prompt).toBeNull();
+    let shown = until(b);
+    expect(shown.messages).toEqual(['That move has\nrun dry!']);
+    expect(shown.view.prompt).toMatchObject({ kind: 'fight', cursor: 1 });
+    // The card (a click answers between ticks): the same, and a key press in the next tick is no second answer.
+    b.choose({ kind: 'move', slot: 1 });
+    press('a');
+    shown = until(b);
+    expect(shown.messages).toEqual(['That move has\nrun dry!']);
+    expect(shown.view.prompt).toMatchObject({ kind: 'fight', cursor: 1 });
+    // B goes back to the commands, which ask again.
+    press('b');
+    shown = until(b);
+    expect(shown.messages).toEqual(['What should Mosslet try?']);
+    expect(shown.view.prompt).toMatchObject({ kind: 'command' });
+    press('a');
+    press('left');
+    press('a');
+    expect(until(b).messages[0]).toMatch(/^Mosslet tries\nBop!|^The wild Skylet tries\n/);
+  });
+
+  it('a key press in the tick after the card answered is not a second answer', () => {
+    const b = battle([mon('SPECIES_MOSSLET', 8, { moves: ['MOVE_BOP', 'MOVE_STARE', 'MOVE_LEAF_TAP', 'MOVE_DIG_PAW'] })], { species: 'SPECIES_SKYLET', level: 3 }, 1);
+    until(b);
+    b.choose({ kind: 'fight' });
+    b.step({ held: ['down'], pressed: ['down'], touch: null });
+    b.step({ held: ['right'], pressed: ['right'], touch: null });
+    expect(b.view().prompt).toMatchObject({ kind: 'fight', cursor: 3 });
+    // The card picks Bop; A on Dig Paw arrives in the same tick: Bop is used.
+    b.choose({ kind: 'move', slot: 0 });
+    expect(() => b.step({ held: ['a'], pressed: ['a'], touch: null })).not.toThrow();
+    expect(until(b).messages.join('|')).toMatch(/Mosslet tries\nBop!/);
   });
 
   it('Fight remembers the last chosen move after a turn and after cancelling', () => {

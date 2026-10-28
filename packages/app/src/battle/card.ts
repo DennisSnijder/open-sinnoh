@@ -16,7 +16,7 @@
  * (up to the caller's) at which nothing in the card overflows.
  */
 import type { Id } from '@opensinnoh/core';
-import type { AssetRef, AssetSource, BattleMoveView, BattlePrompt, BattleView, Registries, Ui2dSheet } from '@opensinnoh/contracts';
+import type { AssetRef, AssetSource, BattleChoice, BattleMoveView, BattlePrompt, BattleView, Registries, Ui2dSheet } from '@opensinnoh/contracts';
 import type { Game } from '@opensinnoh/game';
 import { ppColor } from '@opensinnoh/battle/formulas';
 import { el } from '../ui/core.ts';
@@ -46,6 +46,8 @@ const TARGET_CANCEL = 4;
 export class BattleCard {
   readonly el = el('div', 'battle-card');
   private key = '';
+  /** A button of the card shown answered (`chooser`). */
+  private answered = false;
   private readonly pokemonArt: Art;
   private readonly loadedIcons = new Set<AssetRef>();
   private targetsKey = '';
@@ -110,6 +112,7 @@ export class BattleCard {
     const layout = `${mode}|${box}|${message}|${this.targetsKey}|${JSON.stringify('cursor' in prompt ? { ...prompt, cursor: 0 } : prompt)}`;
     if (`${layout}|${cursor}` === this.key) return;
     this.key = `${layout}|${cursor}`;
+    this.answered = false;
     this.el.dataset.kind = mode;
     const maxPixel = Math.max(1, Math.floor(maxDot * dpr));
     const minPixel = Math.min(maxPixel, Math.max(1, Math.ceil(dpr)));
@@ -122,6 +125,21 @@ export class BattleCard {
       if (this.fits()) break;
     }
     this.fitted = { layout, dot: this.dot };
+  }
+
+  /**
+   * The buttons' way to answer: once per card shown. The battle takes the answer at its next tick, so a second click
+   * before then (a double click) is ignored rather than answered twice.
+   */
+  private chooser(): { battleChoose(choice: BattleChoice): void } {
+    const game = this.deps.game();
+    return {
+      battleChoose: (choice) => {
+        if (this.answered) return;
+        this.answered = true;
+        game.battleChoose(choice);
+      },
+    };
   }
 
   /** Nothing in the card overflows its box: the card, its rows and grids, and every button. */
@@ -175,7 +193,7 @@ export class BattleCard {
    * the screen's link bars (BattleSubscreen_DrawTargetSelectBg), and any of them confirms it.
    */
   private targetScreen(p: Extract<BattlePrompt, { kind: 'target' }>, view: BattleView): HTMLElement {
-    const game = this.deps.game();
+    const game = this.chooser();
     const aim = p.move.aim;
     if (!aim) throw new Error(`battle card: ${p.move.name} has no targets to choose from`);
     const root = el('div', `bc-targets${aim.group ? ' is-group' : ''}`);
@@ -225,7 +243,7 @@ export class BattleCard {
 
   private build(p: BattlePrompt, view: BattleView): HTMLElement {
     const s = this.deps.strings();
-    const game = this.deps.game();
+    const game = this.chooser();
     if (p.kind === 'command') {
       const button = (i: number, cls: string, text: string, onClick: () => void, art = cls.slice(3)) => {
         const b = this.button(cls, art, p.cursor === i, this.label(text));
@@ -311,7 +329,8 @@ export class BattleCard {
     const pp = el('span', 'bc-pp', this.label(s.t('battlePp'), ppInk), this.label(`${m.pp}/${m.maxPp}`, ppInk));
     pp.dataset.pp = level;
     const b = this.button(`bc-move${extra ? ` ${extra}` : ''}`, `move_${type}`, cursor, el('span', 'bc-name', this.label(m.name, 'ink')), el('span', 'bc-info', this.typeIcon(type), pp));
-    b.disabled = m.pp === 0 && !extra;
+    // Every move can be pressed (decomp: the move list draws 0 PP in red only): the battle refuses one that can't be
+    // used now with its message.
     b.setAttribute('aria-label', `${m.name}, ${type}, PP ${m.pp} of ${m.maxPp}`);
     b.addEventListener('click', onClick);
     return b;

@@ -12,6 +12,7 @@ import { join } from 'node:path';
 import { expect, test, type BrowserContext, type CDPSession, type Page } from '@playwright/test';
 import type { ReplayLine } from '@opensinnoh/core';
 import type { BattlePrompt, BattleView, Registries } from '@opensinnoh/contracts';
+import { BattleText, pages } from '@opensinnoh/battle';
 import { loadGamePacks, runReplay } from '@opensinnoh/game';
 import { romSlice } from '../rom.ts';
 import { romContext, resetRomDevice } from './rom-context.ts';
@@ -248,5 +249,47 @@ test('pointer Fight restores the last move and keyboard arrows keep controlling 
   await page.evaluate(() => window.openSinnohGame!.advance(1));
   await expect(page.locator('.bc-move').nth(2)).toHaveClass(/is-cursor/);
   expect((await battleView())?.prompt).toMatchObject({ kind: 'fight', cursor: 2 });
+  expect(errors).toEqual([]);
+});
+
+test('a move with no PP is refused with the ROM message and the list comes back; a click and a key in one tick answer once', async () => {
+  test.setTimeout(300_000);
+  const result = await runReplay(pageDriver(page, 'test-artifacts/battle-card', 'refusal'), REPLAY.replace('party[0].pp[2] 6', 'party[0].pp[2] 0'), {
+    registries, seed: 1, repeat: false,
+    beforeLine: (line) => line.action.type !== 'screenshot',
+  });
+  expect(result.error).toBeUndefined();
+  await page.evaluate(() => {
+    const bridge = window.openSinnohGame!;
+    for (let tick = 0; tick < 5000 && bridge.battleView()?.prompt?.kind !== 'command'; tick++) bridge.advance(1);
+  });
+  await page.locator('.bc-fight').click();
+  await expect(page.locator('.battle-card')).toHaveAttribute('data-kind', 'fight');
+  // Ember (0 PP) can be pressed: the list closes while "There's no PP left for this move!" prints, then comes back on it.
+  await expect(page.locator('.bc-move').nth(2)).toBeEnabled();
+  await page.locator('.bc-move').nth(2).click();
+  expect((await battleView())?.prompt).toBeNull();
+  const shown = await page.evaluate(() => {
+    const bridge = window.openSinnohGame!;
+    let text = '';
+    for (let tick = 0; tick < 5000 && !bridge.battleView()?.prompt; tick++) {
+      bridge.advance(1);
+      const m = bridge.battleView()?.message;
+      if (m?.done) text = m.text;
+    }
+    return { text, prompt: bridge.battleView()?.prompt };
+  });
+  expect(shown.text).toBe(pages(new BattleText(registries).get('TheresNoPPLeftForThisMove'), [])[0]);
+  expect(shown.prompt).toMatchObject({ kind: 'fight', cursor: 2 });
+  await expect(page.locator('.battle-card')).toHaveAttribute('data-kind', 'fight');
+  // Leer by mouse, then A (Space) before the next tick: one answer, no error (OPEN-SINNOH-8).
+  await page.locator('.bc-move').nth(1).click();
+  await page.keyboard.press('Space');
+  await page.evaluate(() => {
+    const bridge = window.openSinnohGame!;
+    bridge.advance(1);
+    for (let tick = 0; tick < 5000 && bridge.battleView()?.prompt?.kind !== 'command'; tick++) bridge.advance(1);
+  });
+  expect((await battleView())?.prompt?.kind).toBe('command');
   expect(errors).toEqual([]);
 });
