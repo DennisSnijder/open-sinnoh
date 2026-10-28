@@ -93,41 +93,53 @@ until state app.round.dress.seconds 59 60
 +1 assert state app.round.dress.page 8
 +1 press x
 +1 release x
+# The judging's MC: four messages, the first two back to back, then three more about 70 ticks apart (the app closes
+# about as long after the last). A on every page, however many pages the build's language has: from the first page,
+# A every five ticks, more presses than the message has pages (a spare lands in the pause after it, where A does
+# nothing).
 until state app.round.message.waiting true 300
 +0 press a
++1 release a
++4 press a
++1 release a
++4 press a
++1 release a
++4 press a
++1 release a
++4 press a
++1 release a
++4 press a
++1 release a
++4 press a
++1 release a
++4 press a
 +1 release a
 until state app.round.message.waiting true 300
 +0 press a
 +1 release a
-until state app.round.message.waiting true 300
-+0 press a
++4 press a
++1 release a
++4 press a
++1 release a
++4 press a
 +1 release a
 until state app.round.message.waiting true 300
 +0 press a
 +1 release a
-until state app.round.message.waiting true 300
-+0 press a
++4 press a
++1 release a
++4 press a
++1 release a
++4 press a
 +1 release a
 until state app.round.message.waiting true 300
 +0 press a
 +1 release a
-until state app.round.message.waiting true 300
-+0 press a
++4 press a
 +1 release a
-until state app.round.message.waiting true 300
-+0 press a
++4 press a
 +1 release a
-until state app.round.message.waiting true 300
-+0 press a
-+1 release a
-until state app.round.message.waiting true 300
-+0 press a
-+1 release a
-until state app.round.message.waiting true 300
-+0 press a
-+1 release a
-until state app.round.message.waiting true 300
-+0 press a
++4 press a
 +1 release a
 until app none 600
 advance text 6000

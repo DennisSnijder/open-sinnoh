@@ -8,7 +8,7 @@ import { DEFAULT_CLOCK, type Id, type Pokemon } from '@opensinnoh/core';
 import { DEFAULT_DEVICE_OPTIONS, SEALS, setupPokemon, type AppHost, type CapsuleEditorView, type NewGame, type Registries } from '@opensinnoh/contracts';
 import { CountingStubLog, loadGamePacks, newGameState } from '@opensinnoh/game';
 import { createBattle } from '@opensinnoh/battle';
-import { createApp } from '@opensinnoh/menus';
+import { createApp, MenuText } from '@opensinnoh/menus';
 import { romSlice } from '../rom.ts';
 import { poffinReplay } from './poffin-replays.ts';
 
@@ -72,13 +72,15 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('Seals (OPENSINNOH_NDS_ROM)', (
     const press = (b: 'a') => (app.step({ held: [b], pressed: [b], touch: null }), app.step(idle));
     const tap = (t: string) => app.step({ ...idle, tap: t });
     const v = () => app.view() as CapsuleEditorView;
-    expect(v().message!.text).toBe('Choose a capsule.');
+    const t = new MenuText(registries as Registries);
+    expect(v().message!.text).toBe(t.t('capsuleChoose'));
     press('a');
-    expect(v().menu!.entries.map((e) => e.label)).toEqual(['EDIT', 'SHIFT', 'QUIT']);
+    expect(v().menu!.entries.map((e) => e.label)).toEqual([t.t('capsuleEdit'), t.t('capsuleShift'), t.t('capsuleQuit')]);
     press('a');
     expect(v()).toMatchObject({ screen: 'edit', list: [{ cell: tables().types[50]!.sheet - 184, count: '  1' }] });
     tap('seal:16,24');
-    expect(v().status).toBe('A Seal');
+    // Its name (TEXT_BANK_SEAL_NAMES, pl_msg 12).
+    expect(v().status).toBe(t.message(`pl_msg_00000012_${String(tables().types[50]!.name).padStart(5, '0')}`));
     tap('seal:200,60');
     tap('seal-up');
     // Test: Piplup comes out of its ball with the A Seal's `ball_particle.narc` system (the battle's send-out effect) and
@@ -101,7 +103,7 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('Seals (OPENSINNOH_NDS_ROM)', (
     tap('seal-up');
     expect(s.sealCase.capsules[0]).toEqual([{ seal: 50, x: 200, y: 60 }]);
     expect(s.sealCase.counts[49]).toBe(0);
-    expect(v().message!.text).toBe('Finished editing the capsule.');
+    expect(v().message!.text).toBe(t.t('capsuleFinished'));
   });
 
   poffinReplay('sys-seals-solaceon');

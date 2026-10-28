@@ -6,10 +6,10 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
-import type { PackData, ReplayLine } from '@opensinnoh/core';
-import type { PokedexEntryView, PokedexListView, PokedexSearchView } from '@opensinnoh/contracts';
+import type { Id, PackData, ReplayLine } from '@opensinnoh/core';
+import { newGameRecord, type PokedexEntryView, type PokedexListView, type PokedexSearchView, type Registries } from '@opensinnoh/contracts';
 import { CountingStubLog, createGame, gameDriver, runReplay, type Game } from '@opensinnoh/game';
-import { createApp } from '@opensinnoh/menus';
+import { createApp, MenuText } from '@opensinnoh/menus';
 import { createScriptRunner } from '@opensinnoh/vm';
 import { createWorld } from '@opensinnoh/world';
 import { romSlice } from '../rom.ts';
@@ -18,8 +18,14 @@ const romPath = process.env.OPENSINNOH_NDS_ROM;
 const REPLAY = readFileSync(join(import.meta.dirname, '../rom-replays/svc-dex.replay'), 'utf8');
 const P = (s: string) => `platinum:SPECIES_${s}`;
 
-/** What each beat shows. */
-const BEATS: Record<string, (v: PokedexListView | PokedexEntryView | PokedexSearchView) => void> = {
+/** What each beat shows: the Pokédex's own texts (pl_msg_pokedex_*) and the species' records, read from the ROM. */
+const beats = (registries: Registries): Record<string, (v: PokedexListView | PokedexEntryView | PokedexSearchView) => void> => {
+  const menu = new MenuText(registries);
+  const dex = (key: string) => menu.message(`pl_msg_pokedex_${key}`);
+  const record = (id: Id) => menu.text(id).trim();
+  const piplup = registries.species.get(P('PIPLUP') as Id)!.dex!;
+  const unknown = newGameRecord(registries).pokedexUnknown!;
+  return {
   'dex-list': (v) => {
     const l = v as PokedexListView;
     expect(l.screen).toBe('list');
@@ -30,28 +36,28 @@ const BEATS: Record<string, (v: PokedexListView | PokedexEntryView | PokedexSear
       ['013', P('BIDOOF'), false],
     ]);
     expect(l.counts.map((c) => [c.label, c.value])).toEqual([
-      ['SEEN', '3'],
-      ['OBTAINED', '1'],
+      [dex('seen'), '3'],
+      [dex('obtained'), '1'],
     ]);
     expect(l.switchLabel).toBeNull();
   },
   'dex-scrolled': (v) => expect((v as PokedexListView).cursor).toBe(9),
   'dex-entry-caught': (v) => {
-    expect(v).toMatchObject({ screen: 'entry', page: 'info', species: P('PIPLUP'), number: '007', caught: true, category: 'Penguin Pokémon', types: ['platinum:TYPE_WATER'], height: { value: '1’04”' }, weight: { value: '11.5 lbs.' } });
-    expect((v as PokedexEntryView).description).toMatch(/^A poor walker, it often falls down\./);
+    expect(v).toMatchObject({ screen: 'entry', page: 'info', species: P('PIPLUP'), number: '007', caught: true, category: record(piplup.category), types: ['platinum:TYPE_WATER'], height: { value: record(piplup.heightText) }, weight: { value: record(piplup.weightText) } });
+    expect((v as PokedexEntryView).description).toBe(record(piplup.description));
   },
   // The cry page (the app draws its waveform and meter from the cry; headless there is no sound).
   'dex-cry': (v) => expect(v).toMatchObject({ screen: 'entry', page: 'cry', species: P('PIPLUP') }),
-  'dex-area-unknown': (v) => expect((v as PokedexEntryView).area).toMatchObject({ unknown: 'Area Unknown', cells: [], dungeons: [] }),
-  'dex-size': (v) => expect((v as PokedexEntryView).size).toMatchObject({ pokemon: { height: '1’04”' }, trainer: { gender: 'male', height: '4’8”' } }),
+  'dex-area-unknown': (v) => expect((v as PokedexEntryView).area).toMatchObject({ unknown: dex('areaunknown'), cells: [], dungeons: [] }),
+  'dex-size': (v) => expect((v as PokedexEntryView).size).toMatchObject({ pokemon: { height: record(piplup.heightText) }, trainer: { gender: 'male', height: dex('lucasheight') } }),
   // GameState v9 seen forms: Piplup seen as a female, then a male; the forms page lists both, first seen first.
   'dex-forms': (v) =>
     expect((v as PokedexEntryView).forms!.list).toEqual([
-      { form: 0, female: true, label: 'Female' },
-      { form: 0, female: false, label: 'Male' },
+      { form: 0, female: true, label: dex('female') },
+      { form: 0, female: false, label: dex('male') },
     ]),
   'dex-entry-seen': (v) => {
-    expect(v).toMatchObject({ screen: 'entry', species: P('STARLY'), caught: false, category: '????? Pokémon', types: [], description: '', footprint: null });
+    expect(v).toMatchObject({ screen: 'entry', species: P('STARLY'), caught: false, category: record(unknown.category), types: [], description: '', footprint: null });
     expect((v as PokedexEntryView).pages.find((p) => p.id === 'size')!.enabled).toBe(false);
   },
   'dex-area': (v) => {
@@ -62,6 +68,7 @@ const BEATS: Record<string, (v: PokedexListView | PokedexEntryView | PokedexSear
   },
   'dex-search': (v) => expect((v as PokedexSearchView).rows[0]!.value).toBe(1),
   'dex-results': (v) => expect((v as PokedexListView).rows.map((r) => r.species)).toEqual([P('BIDOOF'), P('PIPLUP'), P('STARLY')]),
+  };
 };
 
 describe.skipIf(!romPath)('svc-dex (OPENSINNOH_NDS_ROM)', () => {
@@ -74,6 +81,7 @@ describe.skipIf(!romPath)('svc-dex (OPENSINNOH_NDS_ROM)', () => {
     const log = new CountingStubLog(() => {});
     const game: Game = createGame({ packs: [pack], createWorld, createScriptRunner, createApp, seed: 1, log, now: () => '2026-01-01T00:00:00.000Z' });
     const seen: string[] = [];
+    const BEATS = beats(game.registries);
     const result = await runReplay(gameDriver(game), REPLAY, {
       registries: game.registries,
       seed: 1,
