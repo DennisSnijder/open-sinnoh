@@ -22,8 +22,10 @@ describe.skipIf(!romPath)('decode scr_seq on the ROM', () => {
       `decoded ${r.files} files, ${Object.keys(r.ir.labels).length} labels, ${r.instructions} instructions, ${r.opcodes.size} distinct opcodes, ${r.movements.length} movements; VM implements ${cov.usedImplemented.length}/${cov.used.length} used ops`,
     );
     expect(r.files).toBe(575); // 574 script files + the dummy for script id 0
-    // The German scripts use two commands fewer than the US ones (measured on CPUD rev 0).
-    expect(r.opcodes.size).toBe({ CPUE: 720, CPUD: 718 }[rom!.gameCode]);
+    // The European builds (German, European English) use two commands fewer than US rev 0: the slot machine game and
+    // its bonus-streak prize (0x267, 0x275), as their Game Corner has no playable slot machines.
+    const us = rom!.gameCode === 'CPUE' && rom!.revision === 0;
+    expect(r.opcodes.size).toBe(us ? 720 : 718);
   });
 
   it('decodes every level-script table', () => {

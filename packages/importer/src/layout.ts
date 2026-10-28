@@ -64,9 +64,10 @@ export interface PinPlace {
 
 export type Layout = Readonly<Record<string, PinPlace>>;
 
-/** By SupportedRom id; US rev 0 is the constants themselves. */
+/** By SupportedRom id; US rev 0 is the constants themselves, and the European build has every table in its place. */
 const LAYOUTS: Readonly<Record<string, Layout>> = {
   'platinum-us-rev0': {},
+  'platinum-eu-rev10': {},
   'platinum-de-rev0': PLATINUM_DE,
 };
 

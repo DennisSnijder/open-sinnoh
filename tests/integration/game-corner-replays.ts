@@ -2,7 +2,7 @@
  * The Game Corner's `sys-` replays (the clerk, a machine played into and out of a bonus, the Prize Exchange), spread over
  * files: each runs twice on seeds 1–3 with the driver's save round trip.
  *
- * Not every build has the slot machines: the European ones (the German Platinum) have no slot launcher (ScrCmd_267) and
+ * Not every build has the slot machines: the European ones (the German and the European English Platinum) have no slot launcher (ScrCmd_267) and
  * no bonus-streak prize at the clerk (ScrCmd_CheckBonusRoundStreak). A replay that needs such a command is skipped on a
  * build whose scripts never use it.
  */

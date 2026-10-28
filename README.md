@@ -56,6 +56,8 @@ bases, Wi-Fi features (answered as "no connection"), modding tools, then HeartGo
 | Game | Region and revision | SHA-1 of the whole `.nds` file | Use |
 |---|---|---|---|
 | Pokémon Platinum | US, rev 0 | `ce81046eda7d232513069519cb2085349896dec7` | The game |
+| Pokémon Platinum | Europe (English), rev 10 | `6b1bd310a0f7293b0d6b260cc6684183146270cc` | The game |
+| Pokémon Platin-Edition | Germany, rev 0 | `5d009a175c77d4387cde26d34efb71aee825a938` | The game, in German |
 | Pokémon HeartGold | US, rev 0 | `4fcded0e2713dc03929845de631d0932ea2b5a37` | Optional follower add-on |
 
 Other dumps are refused with a message. The list lives in `packages/nds/src/supported-roms.ts`.
