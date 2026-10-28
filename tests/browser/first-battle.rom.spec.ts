@@ -17,6 +17,7 @@ import { gameDriver, runReplay, saveToJson } from '@opensinnoh/game';
 import { storyGame } from '../integration/checkpoints-anchors.ts';
 import { saveSlot } from './save.ts';
 import { seedRomImport } from './seed.ts';
+import { appStrings } from './words.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 /** The game may stand still (no tick) this long at most; the app's own hold limit is 5 s. */
@@ -194,6 +195,6 @@ test('battle art that never loads stops the game with a visible error, never a s
   );
   expect(s.battle?.prompt ?? null, trace).toBeNull();
   expect(s.fatal, trace).toMatch(/the battle's art did not load within 5 s \(still loading: platinum:/);
-  await expect(page.getByRole('alertdialog', { name: 'Something went wrong' })).toBeVisible();
+  await expect(page.getByRole('alertdialog', { name: appStrings().crash.title })).toBeVisible();
   expect(errors.some((e) => e.includes("the battle's art did not load"))).toBe(true);
 });

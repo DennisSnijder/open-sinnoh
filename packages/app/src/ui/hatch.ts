@@ -11,6 +11,7 @@ import { capFlash } from '@opensinnoh/render/flash';
 import { framed, messageBox, stop, type DrawContext } from './apps.ts';
 import { el } from './core.ts';
 import { layoutScene, MESSAGE, place, sceneContext } from './evolution.ts';
+import { S } from '../strings/index.ts';
 
 const W = 256;
 const H = 192;
@@ -27,7 +28,7 @@ export function hatch(ctx: DrawContext, v: HatchView): HTMLElement {
   const boxes = el('div', 'ds-scene-boxes');
   const stage = el('div', 'ds-scene-stage', canvas, boxes);
   const root = el('section', 'ds-scene hatch-scene', stage);
-  root.setAttribute('aria-label', v.message?.text ?? 'Egg');
+  root.setAttribute('aria-label', v.message?.text ?? S.aria.egg);
   const d = sceneContext(ctx, layoutScene(ctx, root, stage));
   void paint(d, v, canvas);
   if (v.message) {

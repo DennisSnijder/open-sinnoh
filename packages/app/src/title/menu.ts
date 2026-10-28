@@ -17,6 +17,7 @@ import type { Sheet, TitleFlow } from './new-game-flow.ts';
 import type { OptionsFlow } from './options-flow.ts';
 import type { TitleStrings } from './strings.ts';
 import { FOCUS_CYCLE } from './timeline.ts';
+import { S } from '../strings/index.ts';
 
 export interface ContinueInfo {
   player: string;
@@ -78,7 +79,7 @@ export class MainMenu {
   constructor(private readonly deps: MenuDeps) {
     this.root = el('div', 'title-menu');
     this.root.setAttribute('role', 'dialog');
-    this.root.setAttribute('aria-label', 'Main menu');
+    this.root.setAttribute('aria-label', S.title.mainMenu);
     this.status = el('p', 'tm-status');
     this.status.setAttribute('role', 'status');
     this.build();

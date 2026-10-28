@@ -15,6 +15,7 @@ import { romSlice } from '../rom.ts';
 import { narrowRowHits } from './row-hits.ts';
 import { seedRomImport } from './seed.ts';
 import { settle } from './settle.ts';
+import { appStrings } from './words.ts';
 import { pageDriver } from '../../packages/cli/src/browser.ts';
 import { plainText } from '../../packages/app/src/ui/strings.ts';
 
@@ -259,7 +260,7 @@ async function holdDown(n: number, phone: boolean): Promise<void> {
     await page.keyboard.up('ArrowDown');
     return;
   }
-  const down = (await page.getByRole('button', { name: 'Down', exact: true }).boundingBox())!;
+  const down = (await page.getByRole('button', { name: appStrings().page.down, exact: true }).boundingBox())!;
   const cdp = await context.newCDPSession(page);
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: down.x + down.width / 2, y: down.y + down.height / 2 }] });
   await ticks(n);

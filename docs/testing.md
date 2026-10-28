@@ -45,8 +45,8 @@ Rules:
 - Any change to what the importer writes bumps `IMPORTER_VERSION` in `packages/app/src/importer.ts`, or browsers keep
   a stale cached import.
 - Look at screenshots. A test can pass on a black screen.
-- ROM tests and specs hold on every supported ROM: name the game's words they expect by text or record id (a
-  message's own words without its slots: `fixedPart` in `tests/browser/words.ts`), never as English literals.
+- ROM tests and specs hold on every supported ROM: name the words they expect by text or record id, or take them
+  from the app's string tables for the game's language (`tests/browser/words.ts`), never as English literals.
 
 Browser runner details (workers, sharding, changed-spec selection) are in `docs/browser-tests.md`. Measured suite
 timings are in `docs/test-speed.md`. Performance budgets are in `docs/performance.md`.

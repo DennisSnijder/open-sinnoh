@@ -15,6 +15,7 @@ import type { Art } from './art.ts';
 import { el } from './core.ts';
 import { MESSAGE, place, sceneContext } from './evolution.ts';
 import './evolution.css';
+import { S } from '../strings/index.ts';
 
 const W = 256;
 const H = 192;
@@ -252,7 +253,7 @@ class IntroScene {
       const button = el('button', 'intro-ball');
       button.type = 'button';
       button.dataset.tap = 'ball';
-      button.setAttribute('aria-label', 'The button on the Poké Ball');
+      button.setAttribute('aria-label', S.aria.ballButton);
       button.addEventListener('click', () => d.tap('ball'));
       place(button, BALL_BUTTON);
       parts.push(button);
@@ -266,7 +267,7 @@ class IntroScene {
         const b = el('button', 'intro-avatar');
         b.type = 'button';
         b.dataset.tap = kind;
-        b.setAttribute('aria-label', kind === 'boy' ? 'Boy' : 'Girl');
+        b.setAttribute('aria-label', kind === 'boy' ? S.aria.boy : S.aria.girl);
         b.setAttribute('aria-pressed', String((v.gender === 'male') === (kind === 'boy')));
         b.addEventListener('click', () => d.tap(kind));
         place(b, rect);

@@ -22,6 +22,7 @@ import type { Art } from './art.ts';
 import { el } from './core.ts';
 import { place, sceneContext } from './evolution.ts';
 import './contest-acting.css';
+import { S } from '../strings/index.ts';
 
 const W = 256;
 const H = 192;
@@ -72,7 +73,7 @@ class ActingScene {
     });
     this.stage.append(this.canvas, this.boxes, this.card);
     this.root.append(this.stage);
-    this.root.setAttribute('aria-label', 'Acting competition');
+    this.root.setAttribute('aria-label', S.aria.acting);
   }
 
   private image(ref: string): Img | null {

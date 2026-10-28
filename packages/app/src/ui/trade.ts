@@ -13,6 +13,7 @@ import { capFlash } from '@opensinnoh/render/flash';
 import { messageBox, type DrawContext } from './apps.ts';
 import { el } from './core.ts';
 import { layoutScene, MESSAGE, place, sceneContext } from './evolution.ts';
+import { S } from '../strings/index.ts';
 
 const W = 256;
 const H = 192;
@@ -35,7 +36,7 @@ export function trade(ctx: DrawContext, v: TradeView): HTMLElement {
   const stage = el('div', 'ds-scene-stage', canvas, boxes);
   const root = el('section', 'ds-scene trade-scene', stage);
   root.dataset.phase = v.phase;
-  root.setAttribute('aria-label', v.message?.text ?? 'Trade');
+  root.setAttribute('aria-label', v.message?.text ?? S.aria.trade);
   const d = sceneContext(ctx, layoutScene(ctx, root, stage));
   void paint(d, v, canvas);
   if (v.message) {

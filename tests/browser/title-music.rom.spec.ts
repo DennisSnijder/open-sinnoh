@@ -10,6 +10,7 @@ import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import { press, TitleScreens } from './intro.ts';
 import { saveSlot } from './save.ts';
 import { seedRomImport } from './seed.ts';
+import { appStrings } from './words.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 
@@ -74,10 +75,11 @@ test('title, menu, options, back to the title, the intro and the field: one BGM 
   await press(page, 'ArrowDown');
   expect(await page.evaluate(() => window.openSinnohTitle!.focused)).toBe('options');
   await press(page, 'Enter');
-  await expect(page.getByRole('dialog', { name: 'Options' })).toBeVisible();
+  const options = page.getByRole('dialog', { name: appStrings().title.options });
+  await expect(options).toBeVisible();
   await expectMusic(null);
   await press(page, 'KeyX');
-  await expect(page.getByRole('dialog', { name: 'Options' })).toHaveCount(0);
+  await expect(options).toHaveCount(0);
   await expectMusic(null);
 
   // B: the title again, its theme again; then the menu.

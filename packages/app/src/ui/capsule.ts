@@ -25,6 +25,7 @@ import { ICON_ANIM } from './art.ts';
 import { at, atTiles, board, boardContext, DS_HEIGHT, DS_WIDTH } from './board.ts';
 import { el } from './core.ts';
 import './capsule.css';
+import { S } from '../strings/index.ts';
 
 const W = DS_WIDTH;
 /** The DS screen and the message strip under it (six tiles: a two-line message box). */
@@ -314,6 +315,6 @@ function capsuleCell(d: DrawContext, c: CapsuleEditorView['capsules'][number], i
     content.push(icon);
   }
   const b = stop(d, `capsule:${i}`, content, 'capsule-cell', cursor);
-  b.setAttribute('aria-label', `Capsule ${i + 1}`);
+  b.setAttribute('aria-label', S.aria.capsule(i + 1));
   return at(b, p.x - CELL.w / 2, p.y - CELL.h / 2, CELL.w, CELL.h);
 }

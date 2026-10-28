@@ -17,6 +17,7 @@ import { loadGamePacks } from '@opensinnoh/game';
 import { romSlice } from '../rom.ts';
 import { openData } from './save.ts';
 import { seedRomImport } from './seed.ts';
+import { appStrings, fixedPart } from './words.ts';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -109,7 +110,8 @@ test('the bundled platinum-demo mod: on swaps the starters and the collector lin
     await openData(page);
     const row = page.locator('[data-setting="mod/platinum-demo"] .options-value');
     // The list fills once the app has asked for its mods (slow under load as well).
-    await expect(row).toHaveText(on ? 'OFF' : 'ON', { timeout: 60_000 });
+    const words = appStrings();
+    await expect(row).toHaveText(on ? words.options.off : words.options.on, { timeout: 60_000 });
     await row.click();
     await page.evaluate(() => window.openSinnohGame!.advance(2));
     // The confirm dialog's YES.
@@ -117,7 +119,7 @@ test('the bundled platinum-demo mod: on swaps the starters and the collector lin
     await page.evaluate(() => window.openSinnohGame!.advance(2));
     // The toggle rebuilds the game from the whole ROM pack and mounts the field renderer twice (the new game,
     // then the last save): 4–11 s on a loaded machine with software GL, past the 5 s default.
-    await expect(page.locator('.ui-notice').last()).toContainText(on ? 'Enabled' : 'Disabled', { timeout: 60_000 });
+    await expect(page.locator('.ui-notice').last()).toContainText(fixedPart((name, result) => words.game.modToggled(on, name, result)), { timeout: 60_000 });
   };
 
   expect(await starterSlots()).toEqual([1, 2]);

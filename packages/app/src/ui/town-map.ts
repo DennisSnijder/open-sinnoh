@@ -14,6 +14,7 @@ import type { Art } from './art.ts';
 import { el } from './core.ts';
 import { layoutScene, place, sceneContext } from './evolution.ts';
 import './evolution.css';
+import { S } from '../strings/index.ts';
 
 const W = 256;
 const H = 192;
@@ -43,7 +44,7 @@ class TownMapScene {
     this.g = this.canvas.getContext('2d')!;
     this.stage.append(this.canvas, this.boxes);
     this.root.append(this.stage);
-    this.root.setAttribute('aria-label', 'Town Map');
+    this.root.setAttribute('aria-label', S.aria.townMap);
   }
 
   private image(ref: Id): Img | null {
@@ -108,7 +109,7 @@ class TownMapScene {
       // Keys move the map's own cursor (A flies): the blocks are for pointers and touch, not browser focus.
       button.tabIndex = -1;
       button.dataset.tap = `town:${b.location}`;
-      button.setAttribute('aria-label', `Fly to ${d.registries.zones.get(newGameRecord(d.registries).townMap!.locations[b.location]!.zone)?.name ?? 'here'}`);
+      button.setAttribute('aria-label', S.aria.flyTo(d.registries.zones.get(newGameRecord(d.registries).townMap!.locations[b.location]!.zone)?.name ?? null));
       button.addEventListener('click', () => d.tap(`town:${b.location}`));
       place(button, { x: b.x - HIT / 2, y: b.y - HIT / 2, w: HIT, h: HIT });
       parts.push(button);

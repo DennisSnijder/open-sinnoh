@@ -19,6 +19,7 @@ import { at, atTiles, board, boardContext, DS_HEIGHT, DS_WIDTH } from './board.t
 import { el } from './core.ts';
 import { layoutScene, place, sceneContext } from './evolution.ts';
 import './underground.css';
+import { S } from '../strings/index.ts';
 
 type Img = HTMLImageElement;
 const W = DS_WIDTH;
@@ -132,7 +133,7 @@ class MiningScene {
     this.g = this.canvas.getContext('2d')!;
     this.stage.append(this.canvas, this.boxes);
     this.root.append(this.stage);
-    this.root.setAttribute('aria-label', 'Mining: dig the wall');
+    this.root.setAttribute('aria-label', S.aria.mining);
     // The stylus: a press is a strike (or a side button) at its DS point (decomp gSystem.touchPressed).
     this.stage.addEventListener('pointerdown', (e) => {
       if (!this.last || (e.target as HTMLElement).closest('button, .msg-box')) return;
@@ -356,7 +357,7 @@ class TrapScene {
     this.canvas.setAttribute('aria-hidden', 'true');
     this.g = this.canvas.getContext('2d')!;
     this.root.append(at(this.canvas, 0, 0, W, H), this.boxes);
-    this.root.setAttribute('aria-label', 'Underground trap');
+    this.root.setAttribute('aria-label', S.aria.trap);
     const point = (e: PointerEvent) => {
       const r = this.canvas.getBoundingClientRect();
       return `${Math.max(0, Math.min(W - 1, Math.floor(((e.clientX - r.left) / r.width) * W)))},${Math.max(0, Math.min(H - 1, Math.floor(((e.clientY - r.top) / r.height) * H)))}`;

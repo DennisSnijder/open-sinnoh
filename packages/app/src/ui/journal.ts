@@ -16,6 +16,7 @@ import type { Art } from './art.ts';
 import { el } from './core.ts';
 import { layoutScene, place } from './evolution.ts';
 import './evolution.css';
+import { S } from '../strings/index.ts';
 
 const W = 256;
 const H = 192;
@@ -26,9 +27,9 @@ const EVENTS = { x: 32, y: 32 };
 const WEEKDAY_GAP = 12;
 /** Tap zones (DS px): the edges turn pages, the corner closes. */
 const ZONES = [
-  { id: 'prev', x: 0, y: 24, w: 32, h: H - 24, label: 'Newer page' },
-  { id: 'next', x: W - 32, y: 24, w: 32, h: H - 24, label: 'Older page' },
-  { id: 'back', x: W - 40, y: 0, w: 40, h: 24, label: 'Close' },
+  { id: 'prev', x: 0, y: 24, w: 32, h: H - 24, label: () => S.aria.newerPage },
+  { id: 'next', x: W - 32, y: 24, w: 32, h: H - 24, label: () => S.aria.olderPage },
+  { id: 'back', x: W - 40, y: 0, w: 40, h: 24, label: () => S.aria.close },
 ] as const;
 
 const sheetPath = (id: Id) => id.slice(id.indexOf(':') + 'ui2d/'.length + 1);
@@ -145,7 +146,7 @@ export function journal(d: DrawContext, v: JournalView): HTMLElement {
       b.type = 'button';
       b.tabIndex = -1;
       b.dataset.tap = z.id;
-      b.setAttribute('aria-label', z.label);
+      b.setAttribute('aria-label', z.label());
       b.addEventListener('click', () => d.tap(z.id));
       place(b, z);
       return b;
@@ -183,7 +184,7 @@ export function diploma(d: DrawContext, v: DiplomaView): HTMLElement {
     next.type = 'button';
     next.tabIndex = -1;
     next.dataset.tap = 'next';
-    next.setAttribute('aria-label', 'Close');
+    next.setAttribute('aria-label', S.aria.close);
     next.addEventListener('click', () => d.tap('next'));
     place(next, { x: 0, y: 0, w: W, h: H });
     s.boxes.replaceChildren(text, next);
