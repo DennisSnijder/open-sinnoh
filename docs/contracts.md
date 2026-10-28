@@ -36,6 +36,7 @@ a reviewed step: bump `CONTRACTS_VERSION` and add a line below.
   replays, stepped by `date`/`time` lines. Periods are core `dayPeriod(hour)` (decomp TimeOfDayForHour).
 
 ## Changelog
+- 0.49.7 (the game's language, on 0.49.6; same schema v24; importer platinum-112): `NewGame.language?` (the game's Gen 4 language id: 2 English; absent = English). Core `Dex.language` reads it, and `createPokemon` gives new Pokémon that language unless told otherwise.
 - 0.49.6 (replays that wait, on 0.49.5; same schema v24): `ScriptView.waitsForAB?` (a script waits for A or B with no arrow: ScrCmd_WaitABPress, ScrCmd_WaitABPadPress). Replays: `advance message [max]`; `assert state <path> <record id>`; `assert text` slot values may be record ids; the Easy Chat tap `word:<text id>`.
 - 0.49.5 (the one-pocket bag, on 0.49.4): `BagView.pocketTypes` (the DS pocket type each listed pocket is drawn as), so the `pick` and `poffin` bags, which list one pocket, draw it instead of failing.
 - 0.49.4 (on 0.49.3): `PartySlotView.shiny?` (the front picture of the Modern party; a view field, not state).

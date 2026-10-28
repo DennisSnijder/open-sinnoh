@@ -28,7 +28,7 @@ import { matrixVariants } from './matrix-variants.ts';
 import { flyDestinations, readTownMap } from './town-map.ts';
 import { frontierSceneEntry, importFrontier, type FrontierRomTables } from './frontier.ts';
 import { PLATINUM_FOLLOW_MODES, platinumFollowers } from './followers.ts';
-import { decodeMessageBank, NitroFs, Reader, readNarc, sha1Hex, SUPPORTED_ROMS, type HashedRom } from '@opensinnoh/nds';
+import { decodeMessageBank, NitroFs, Reader, readNarc, sha1Hex, SUPPORTED_ROMS, type HashedRom, type RomLanguage } from '@opensinnoh/nds';
 import charmapFile from '../data/charmap.json' with { type: 'json' };
 import namesFile from '../data/names.json' with { type: 'json' };
 import { readCameraTable } from './formats/camera.ts';
@@ -542,6 +542,8 @@ const SPECIAL_ENCOUNTERS = {
   sounds: { radar: 'SEQ_KUSAGASA', sweetScent: 'SEQ_SE_DP_FW230' },
 };
 const DEFAULT_NAMES = { player: 'Lucas', rival: 'Barry' };
+/** Decomp LANGUAGE_ENGLISH: the game's language id by ROM language. */
+const GAME_LANGUAGES: Record<RomLanguage, number> = { en: 2 };
 /** decomp SEQ_EYE_KID: FieldBGM_GetEyesMeetForTrainer's default. */
 const SEQ_EYE_KID = 1101;
 /** pl_font.narc member of the message font (decomp FONT_MESSAGE). */
@@ -1145,6 +1147,7 @@ export async function importPlatinum(
     ...(newGameLabel ? { label: newGameLabel } : {}),
     names: options.names ?? DEFAULT_NAMES,
     gender: options.gender ?? 'male',
+    language: GAME_LANGUAGES[supported.language],
     playerSprite: { male: playerGfx('OBJ_EVENT_GFX_PLAYER_M'), female: playerGfx('OBJ_EVENT_GFX_PLAYER_F') },
     playerHealSprite: { male: playerGfx('OBJ_EVENT_GFX_PLAYER_M_POKECENTER_HEAL'), female: playerGfx('OBJ_EVENT_GFX_PLAYER_F_POKECENTER_HEAL') },
     playerVsSeekerSprite: { male: playerGfx('OBJ_EVENT_GFX_PLAYER_M_VS_SEEKER'), female: playerGfx('OBJ_EVENT_GFX_PLAYER_F_VS_SEEKER') },
