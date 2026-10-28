@@ -50,7 +50,7 @@ export interface Layout {
  *   screens); views too small for ×3 with a margin fill instead (largest whole-device-pixel fit); phones in
  *   portrait fit the DS width.
  * - `dot`: CSS px per font pixel on the generic sheets (400 × 300 dots, centred): 3 once the unit is 4, else 2,
- *   or what fits on small views. Phones in portrait (`compact`) get full-screen sheets at 2.
+ *   or what fits on small views. Both are whole device pixels (the nearest that fits at fractional scaling). Phones in portrait (`compact`) get full-screen sheets at 2.
  */
 export interface UiScales {
   dot: number;
@@ -67,15 +67,21 @@ const UNIT_HEIGHT_SHARE = 0.55;
 
 export function uiScales(width: number, height: number, dpr: number, portrait: boolean): UiScales {
   const whole = (css: number) => Math.max(1, Math.floor(css * dpr + 1e-6)) / dpr;
+  // Pixel text snaps to whole device pixels (pixel-font.ts), so the boxes it fills must too: at 175 % a 2-px dot is
+  // 3.5 device px, and text drawn at 4 overflows its box. The nearest whole size when it still fits, else the one below.
+  const snap = (css: number, ok: (s: number) => boolean) => {
+    const near = Math.max(1, Math.round(css * dpr)) / dpr;
+    return ok(near) ? near : whole(css);
+  };
   const compact = portrait && width < 700;
   const fit = Math.min((width - 2 * UI_MARGIN) / DS.width, (height - 2 * UI_MARGIN) / DS.height);
   const unit =
     compact ? whole(width / DS.width)
-    : fit >= UNIT_MIN ? Math.min(Math.floor(fit), Math.max(UNIT_MIN, Math.floor((height * UNIT_HEIGHT_SHARE) / DS.height)))
+    : fit >= UNIT_MIN ? snap(Math.min(Math.floor(fit), Math.max(UNIT_MIN, Math.floor((height * UNIT_HEIGHT_SHARE) / DS.height))), (u) => u <= fit)
     : whole(Math.min(width / DS.width, height / DS.height));
-  if (compact) return { dot: 2, unit, compact };
+  if (compact) return { dot: whole(2), unit, compact };
   const fits = (dot: number) => SHEET.width * dot <= width - 2 * UI_MARGIN && SHEET.height * dot <= height - 2 * UI_MARGIN;
-  const dot = unit >= 4 && fits(3) ? 3 : fits(2) ? 2 : whole(Math.min(width / SHEET.width, height / SHEET.height));
+  const dot = unit >= 4 && fits(3) ? snap(3, fits) : fits(2) ? snap(2, fits) : whole(Math.min(width / SHEET.width, height / SHEET.height));
   return { dot, unit, compact };
 }
 

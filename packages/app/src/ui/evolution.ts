@@ -22,8 +22,11 @@ import './evolution.css';
 /** decomp Evolution_CreateSprites: both pictures centred here. */
 const CENTRE = { x: 128, y: 80 };
 const PICTURE = 80;
-/** The message window with its frame (tiles 1–29 × 18–23) and YES/NO with its frame (tiles 22–30 × 12–17), in DS px. */
-export const MESSAGE = { x: 8, y: 144, w: 240, h: 48 };
+/**
+ * The message window (2,19) 27×4 with its frame (2 tiles left, 3 right: the whole screen, as the field's) and YES/NO with
+ * its frame (tiles 22–30 × 12–17), in DS px.
+ */
+export const MESSAGE = { x: 0, y: 144, w: 256, h: 48 };
 const YES_NO = { x: 176, y: 96, w: 72, h: 48 };
 
 type Img = HTMLImageElement;
