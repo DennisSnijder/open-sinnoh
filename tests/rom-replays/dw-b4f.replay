@@ -114,11 +114,12 @@ until idle 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
 +0 press a
 +1 release a
-+128 press a
+# Surf: yes
+advance text
+until yesno
++0 press a
 +1 release a
-+37 press a
-+1 release a
-until idle 6000
+advance text 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
 +0 press up
 until state player.z 58 400
@@ -388,11 +389,12 @@ until idle 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
 +0 press a
 +1 release a
-+128 press a
+# Surf: yes
+advance text
+until yesno
++0 press a
 +1 release a
-+37 press a
-+1 release a
-until idle 6000
+advance text 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B4F"
 +0 press up
 until state player.z 72 400

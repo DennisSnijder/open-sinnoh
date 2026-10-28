@@ -6,7 +6,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { REGISTRIES, newGameRecord, type GameState, type Registries } from '@opensinnoh/contracts';
+import { REGISTRIES, dexOf, newGameRecord, type GameState, type Registries } from '@opensinnoh/contracts';
 import { loadPacks, type Id } from '@opensinnoh/core';
 import { NitroFs } from '@opensinnoh/nds';
 import { BODY_SHAPES, dexLists, numericalRows, searchDex, NO_QUERY, type DexQuery } from '@opensinnoh/menus';
@@ -69,13 +69,13 @@ describe.skipIf(!romPath)('Pokédex data (OPENSINNOH_NDS_ROM)', () => {
     expect(national).toHaveLength(493);
     const all = national.map((e) => e.species.id);
     const state = { pokedex: { obtained: true, national: true, seen: all, caught: all } } as unknown as GameState;
-    const numbers = (q: Partial<DexQuery>) => searchDex(national, { ...NO_QUERY, ...q }, state, types).map((e) => e.national);
+    const numbers = (q: Partial<DexQuery>) => searchDex(national, { ...NO_QUERY, ...q }, state, types, dexOf(reg).language).map((e) => e.national);
     expect(numericalRows(national, state).map((e) => e!.national)).toEqual(romLists[0]);
     expect(regional.map((e) => e.national)).toEqual(romLists[1]);
     for (let order = 1; order <= 5; order++) expect(numbers({ order }), `order ${order}`).toEqual(romLists[1 + order]);
     for (let g = 1; g <= 9; g++) expect(numbers({ order: 1, name: g }), `name group ${g}`).toEqual(romLists[6 + g]);
     // ROM type lists: type order without Mystery, as the menus' type options.
-    expect(types.map((t) => reg.types.get(t)!.name)).toEqual(['NORMAL', 'FIGHTING', 'FLYING', 'POISON', 'GROUND', 'ROCK', 'BUG', 'GHOST', 'STEEL', 'FIRE', 'WATER', 'GRASS', 'ELECTRIC', 'PSYCHIC', 'ICE', 'DRAGON', 'DARK']);
+    expect(types).toEqual(['NORMAL', 'FIGHTING', 'FLYING', 'POISON', 'GROUND', 'ROCK', 'BUG', 'GHOST', 'STEEL', 'FIRE', 'WATER', 'GRASS', 'ELECTRIC', 'PSYCHIC', 'ICE', 'DRAGON', 'DARK'].map((t) => P(`TYPE_${t}`)));
     types.forEach((_, t) => expect(numbers({ type1: t + 1 }), `type ${t}`).toEqual(romLists[16 + t]));
     for (let s = 0; s < BODY_SHAPES; s++) expect(numbers({ shape: s + 1 }), `shape ${s}`).toEqual(romLists[33 + s]);
   });

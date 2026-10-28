@@ -42,7 +42,8 @@
     "preview": "vite preview",
     "perf": "tsx tools/perf.ts",
     "flaky": "tsx tools/flaky.ts",
-    "clean:worktrees": "tsx tools/clean-worktrees.ts"
+    "clean:worktrees": "tsx tools/clean-worktrees.ts",
+    "relocate": "tsx tools/relocate.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -99,6 +99,10 @@ a cheaper post chain on phones. Replays and tests keep the DS look.
 **HeartGold/SoulSilver add-on.** An optional second import adds the HGSS follower set for Platinum's following
 Pokémon, follower talk and the HGSS look.
 
+**Tests in every language.** The ROM replays wait on the game (`advance message`, `advance text`) instead of counting
+A presses, and the ROM tests and browser specs name the game's texts by id, so the story chain, every system replay
+and the browser suite hold in any language the game speaks.
+
 ## Next
 
 - **Town extras:** the TV's group segments, once groups exist.

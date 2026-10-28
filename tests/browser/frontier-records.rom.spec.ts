@@ -1,13 +1,14 @@
 /**
  * The Frontier's record viewer and the facilities' pre-battle wipes in the app on the real ROM (OPENSINNOH_NDS_ROM;
- * desktop and phone): sys-frontier-records (after the Hall singles challenge, the Hall's record list and Garchomp's
- * record, a DS scene inside the screen from the ROM's art with its lines), the Hall's block wipe (sys-hall-single: part
+ * desktop and phone): sys-frontier-records (after the Hall singles challenge, the Hall's record list and the singles
+ * record, moved to Lucario, a DS scene inside the screen from the ROM's art with its lines), the Hall's block wipe (sys-hall-single: part
  * of the room black, the rest still drawn) and the Factory's line wipe (sys-factory-single: the room's rows still drawn,
  * darker), each sampled as the overlay draws it. Screenshots go to test-artifacts/frontier-records (ROM content, never
  * commit).
  */
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import type { FrontierRecordsView, FrontierView, Registries } from '@opensinnoh/contracts';
+import type { Id } from '@opensinnoh/core';
 import { loadGamePacks, runReplay } from '@opensinnoh/game';
 import { pageDriver } from '../../packages/cli/src/browser.ts';
 import { romSlice } from '../rom.ts';
@@ -70,8 +71,9 @@ function region(x0: number, y0: number, x1: number, y1: number) {
 
 const view = () => page.evaluate(() => window.openSinnohApp!.game.scripts.view().frontier ?? null) as Promise<FrontierView | null>;
 
-test("the record viewer: the Hall's record list, then Garchomp's record from the ROM's art", async () => {
+test("the record viewer: the Hall's record list, then Lucario's record from the ROM's art", async () => {
   test.setTimeout(900_000);
+  const lucario = registries.species.get('platinum:SPECIES_LUCARIO' as Id)!.name;
   const project = test.info().project.name;
   const base = pageDriver(page, SHOTS, `${project}-records`);
   let checked = 0;
@@ -80,7 +82,7 @@ test("the record viewer: the Hall's record list, then Garchomp's record from the
     async screenshot(name: string) {
       if (name === 'records-list') {
         const menu = await page.evaluate(() => window.openSinnohGame!.snapshot().view.menu?.entries ?? null);
-        expect(menu, name).toEqual(['GARCHOMP', 'EXIT']);
+        expect(menu, name).toEqual([lucario, registries.texts.get('platinum:MenuEntries_Text_ListMenu_Exit' as Id)!.text]);
         checked++;
       }
       if (name === 'records-hall') {
@@ -98,7 +100,7 @@ test("the record viewer: the Hall's record list, then Garchomp's record from the
         expect(box!.x + box!.width, name).toBeLessThanOrEqual(vp.width + 0.5);
         expect(box!.y + box!.height, name).toBeLessThanOrEqual(vp.height + 0.5);
         expect(Math.abs(box!.width / box!.height - 256 / 192), name).toBeLessThan(0.01);
-        expect(await page.locator('.frontier-records .sr-only').textContent(), name).toContain('GARCHOMP’s record');
+        expect(await page.locator('.frontier-records .sr-only').textContent(), name).toContain(lucario);
         checked++;
       }
       return base.screenshot!(name);

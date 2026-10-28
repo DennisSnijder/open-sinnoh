@@ -46,6 +46,18 @@ describe('M5 commands', () => {
     }
   });
 
+  it('wait_ab_pad_press after a message: the script waits for A or B (no arrow) until the press', () => {
+    const d = run(`
+      message text(fixture:Text_HelperAgain)
+      wait_ab_pad_press
+      close_message`);
+    d.until(() => d.vm.view().waitsForAB === true);
+    expect(d.vm.view().message?.waitingForInput).toBe(false);
+    d.press('a');
+    d.until(() => !d.vm.running());
+    expect(d.vm.view().message).toBeNull();
+  });
+
   it('check_distribution_event: TRUE only when the event var holds its magic number (decomp SystemVars_CheckDistributionEvent)', () => {
     const result = (edit: (d: Driver) => void, event = 2) => {
       const d = run(`check_distribution_event ${event}, var(test:VAR_RESULT)\nset_var_from_var var(test:VAR_DARKRAI), var(test:VAR_RESULT)`, edit);

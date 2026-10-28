@@ -26,27 +26,12 @@ until yesno
 +1 release a
 until message
 +0 assert text platinum:JubilifeTV2FGallery_Text_DressItUpAdorably 0
-+0 press a
-+1 release a
-until app gallery-dress-up 600
+advance text
++0 assert app gallery-dress-up
 until state app.phase "intro" 60
 +2 screenshot tv-gallery-help
-# The help's seven pages
-+0 press a
-+1 release a
-+2 press a
-+1 release a
-+2 press a
-+1 release a
-+2 press a
-+1 release a
-+2 press a
-+1 release a
-+2 press a
-+1 release a
-+0 assert state app.phase "intro"
-+2 press a
-+1 release a
+# The help's pages (seven in English)
+advance message 600
 +0 assert state app.phase "dress"
 +0 assert state app.message null
 # A White Fluff onto Staravia's head by keys
@@ -98,19 +83,15 @@ until app none 60
 +0 assert state dressUpPhotos[0].trainerName "Lucas"
 # The title: EVERYONE
 until message 600
-+0 press a
-+1 release a
-until message 300
-+0 press a
-+1 release a
-until app easy-chat 120
+advance text
++0 assert app easy-chat
 +1 tap slot:0
 +1 tap group:4
-+1 tap word:6
++1 tap word:platinum:PeopleWords_Text_Everyone
 +1 tap yes
 until app none
 until message 300
-+0 assert text platinum:JubilifeTV2FGallery_Text_IGetItNow 0 0=EVERYONE
++0 assert text platinum:JubilifeTV2FGallery_Text_IGetItNow 0 0=platinum:PeopleWords_Text_Everyone
 +0 assert state dressUpPhotos[0].title 1177
 advance text
 until idle
@@ -128,7 +109,7 @@ until idle
 +1 release a
 until app gallery-photo 120
 +0 assert state app.lines[0] "Lucas"
-+0 assert state app.lines[1] "EVERYONE"
++0 assert state app.lines[1] platinum:PeopleWords_Text_Everyone
 +0 assert state app.picture.mon.x 116
 +0 assert state app.picture.mon.y 64
 +0 assert state app.picture.accessories.length 1

@@ -121,6 +121,18 @@ export interface MonRegistries {
   growthRates: ReadonlyMap<Id, GrowthRateData>;
   natures: ReadonlyMap<Id, NatureData>;
   items: ReadonlyMap<Id, HeldItemData>;
+  /** The base pack's new game (its `language`); absent in Pokémon-only registries. */
+  newGame?: ReadonlyMap<Id, { language?: number }>;
+}
+
+/** Decomp LANGUAGE_ENGLISH: a pack's language when its new game names none. */
+export const ENGLISH = 2;
+
+/** The game language's entry of a per-language table; throws for a language the table lacks. */
+export function forLanguage<T>(language: number, table: Readonly<Record<number, T>>): T {
+  const value = table[language];
+  if (value === undefined) throw new Error(`no wording for game language ${language}`);
+  return value;
 }
 
 /** How and where a Pokémon was met (decomp met location/level/date; level 0 = hatched). */
@@ -214,6 +226,12 @@ export class Dex {
   private natureList: NatureData[] | undefined;
 
   constructor(readonly data: MonRegistries) {}
+
+  /** The game's language (NewGame `language`): the Pokémon the game creates are from it. */
+  get language(): number {
+    const record = this.data.newGame?.values().next().value;
+    return record?.language ?? ENGLISH;
+  }
 
   species(id: Id): SpeciesData {
     const s = this.data.species.get(id);
@@ -407,7 +425,7 @@ export function createPokemon(dex: Dex, o: CreateOptions): Pokemon {
     otId: u32(o.otId),
     otName: o.otName,
     otGender: o.otGender,
-    language: o.language ?? 2,
+    language: o.language ?? dex.language,
     level: o.level,
     exp: dex.expTable(data.growthRate)[o.level]!,
     ivs,

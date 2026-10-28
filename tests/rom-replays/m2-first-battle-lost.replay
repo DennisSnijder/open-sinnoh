@@ -9,25 +9,8 @@ battle auto move 2 18000
 +0 assert state money 2960
 +0 assert state party[0].hp 0
 +0 assert var platinum:VAR_FOLLOWER_RIVAL_STATE 1
-# the rival's "I won!" lines (Route201_Text_IWonLetsGoHome, six pages), then the warp home
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
+# the rival's "I won!" lines (Route201_Text_IWonLetsGoHome), then the warp home
+advance message
 until position 2 6
 +0 assert position platinum:MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_1F 2 6
 +0 assert var platinum:VAR_FOLLOWER_RIVAL_STATE 2

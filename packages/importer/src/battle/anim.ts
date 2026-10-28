@@ -13,6 +13,7 @@
  * Scripts stay words (records); the battle package's VM runs them. Textures become one `ui2d` sheet per
  * particle file (`battle/particles/<n>`, cell n = texture n) through the shared 2D encoder.
  */
+import { placeTables, type Layout } from '../layout.ts';
 import { animSpriteKey, scriptUse, type AnimSpriteResource, type BattleAnimation, type BattleAnimData, type ParticleSystem } from '@opensinnoh/contracts';
 import { asId, type Id } from '@opensinnoh/core';
 import { readNarc, sha1Hex, type NitroFs } from '@opensinnoh/nds';
@@ -114,6 +115,8 @@ const TABLES = {
     sha1: 'b20b7ba18c9c8bfd0e0d6b08acbaf600af9fd256',
   },
 } as const;
+/** The US layout of these tables (tools/relocate.ts finds them in other builds). */
+export { TABLES as ANIM_TABLES };
 const BATT_BG = '/battle/graphic/pl_batt_bg.narc';
 /** BATTLE_BG_PALETTE_EFFECT: the palette slot a switched background's NCLR is loaded into (its tilemaps name it). */
 const EFFECT_PALETTE = 9;
@@ -129,7 +132,8 @@ export interface AnimImport {
 }
 
 /** `moveIds[n]`: the id of move n (from the move records' `sourceIndex`). */
-export async function importBattleAnims(fs: NitroFs, moveIds: Map<number, Id>, sheets: Sheets): Promise<AnimImport> {
+export async function importBattleAnims(fs: NitroFs, layout: Layout, moveIds: Map<number, Id>, sheets: Sheets): Promise<AnimImport> {
+  const tables = placeTables(TABLES, layout, 'anim');
   const words = (b: Uint8Array, what: string): number[] => {
     if (b.length % 4) throw new Error(`${what}: ${b.length} bytes is not whole words`);
     const dv = new DataView(b.buffer, b.byteOffset, b.length);
@@ -210,7 +214,7 @@ export async function importBattleAnims(fs: NitroFs, moveIds: Map<number, Id>, s
   ];
 
   const table = async (key: keyof typeof TABLES): Promise<Int32Array> => {
-    const t = TABLES[key];
+    const t = tables[key];
     const bytes = fs.overlay(t.overlay).subarray(t.offset, t.offset + t.size);
     const got = await sha1Hex(bytes);
     if (got !== t.sha1) throw new Error(`ROM table ${key} at ${t.overlay}:0x${t.offset.toString(16)} has SHA1 ${got}, expected ${t.sha1}`);

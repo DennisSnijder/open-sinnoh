@@ -8,6 +8,7 @@ warp platinum:MAP_HEADER_PASTORIA_CITY_OBSERVATORY_GATE_2F 6 4 up
 until idle
 +0 press a
 +1 release a
+advance text
 until yesno
 +0 assert text platinum:PastoriaCityObservatoryGate2F_Text_AskPut100InBinoculars 0
 +0 press a
