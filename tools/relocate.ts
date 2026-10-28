@@ -1,5 +1,5 @@
 /**
- * Finds the importer's US-pinned ROM regions in another build of Platinum:
+ * Finds the importer's US-pinned ROM regions in another build of Platinum (the German CPUD first):
  *
  *   pnpm relocate <target.nds> [--us <us.nds>] [--out <dir>]     (default out: .opensinnoh-cache/relocate)
  *
@@ -7,7 +7,7 @@
  * SHA-1) to the gitignored out dir. With `--layout`, also the importer's layout for that build (offsets and hashes
  * only, no ROM bytes: committed), from the pins found and the manual entries in tools/relocate-pins.ts. With the US ROM, tables with pointers are found by masking pointer
  * words; without it, by mapping the target's pointers back through the moved data (function pointers then fail).
- * Method and status meanings: tools/relocate-scan.ts.
+ * Method and status meanings: tools/relocate-scan.ts; the migration plan: docs/research/german-rom.md.
  */
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';

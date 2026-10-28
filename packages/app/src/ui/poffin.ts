@@ -10,7 +10,7 @@
  * Packs without the art (the fixture) get plain shapes in the same places.
  */
 import { dexOf, type PoffinCaseView, type PoffinCookingView, type PoffinFeedView, type Ui2dSheet } from '@opensinnoh/contracts';
-import { ENGLISH, forLanguage, type Id } from '@opensinnoh/core';
+import { ENGLISH, forLanguage, GERMAN, type Id } from '@opensinnoh/core';
 import { framed, messageBox, stop, type DrawContext } from './apps.ts';
 import type { Art } from './art.ts';
 import { at, atTiles, board, boardContext, DS_HEIGHT, DS_WIDTH, dsPair } from './board.ts';
@@ -261,8 +261,8 @@ const CASE = {
   buttons: [[128, 48], [192, 96], [168, 162], [88, 164], [64, 96], [128, 116]] as const,
 };
 
-/** A list row's level before its number, per game language (English as before). */
-const POFFIN_LEVEL: Readonly<Record<number, string>> = { [ENGLISH]: 'Lv. ' };
+/** A list row's level before its number, per game language (English as before; German as the German ROM's PoffinCase_Text_ListItem). */
+const POFFIN_LEVEL: Readonly<Record<number, string>> = { [ENGLISH]: 'Lv. ', [GERMAN]: 'Lv.' };
 
 /** The Poffin Case: the list (top screen) and the flavour buttons (touch screen) as a DS pair. */
 export function poffinCase(wide: DrawContext, v: PoffinCaseView): HTMLElement {

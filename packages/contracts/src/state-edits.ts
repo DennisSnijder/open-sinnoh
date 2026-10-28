@@ -3,7 +3,7 @@
  * model's `Dex`, and the deterministic Pokémon of replay setup lines and save migrations. The VM, the
  * game and the app use these, so they agree on the rules.
  */
-import { addItem, bagCount, canAddItem, createPokemon, dayPeriod, Dex, ENGLISH, heal, isNight, monGender, PARTY_SIZE, Prng, randomIvs, randomPid, removeItem, type BagPocket, type ClockTime, type EvolutionTrigger, type Id, type Pokemon, type Stats } from '@opensinnoh/core';
+import { addItem, bagCount, canAddItem, createPokemon, dayPeriod, Dex, ENGLISH, GERMAN, heal, isNight, monGender, PARTY_SIZE, Prng, randomIvs, randomPid, removeItem, type BagPocket, type ClockTime, type EvolutionTrigger, type Id, type Pokemon, type Stats } from '@opensinnoh/core';
 import type { NewGame } from './records.ts';
 import type { Registries } from './runtime.ts';
 import { HALL_OF_FAME_ENTRIES, HALL_OF_FAME_TOTAL_MAX, ROAMING_SLOTS, SIGNATURE_HEIGHT, SIGNATURE_WIDTH, type GameState, type HallOfFameMon, type MysteryGiftId, type RoamerState, type SeenForm } from './state.ts';
@@ -279,7 +279,7 @@ export const MYSTERY_GIFTS: Readonly<Record<MysteryGiftId, { type: number; speci
 };
 
 /**
- * The built-in Mystery Gifts' Wonder Card text per game language (core ENGLISH; our own words, the card shows
+ * The built-in Mystery Gifts' Wonder Card text per game language (core ENGLISH, GERMAN; our own words, the card shows
  * three lines of text): the title and the description.
  */
 export const MYSTERY_GIFT_TEXT: Readonly<Record<number, Readonly<Record<MysteryGiftId, { title: string; description: string }>>>> = {
@@ -289,6 +289,13 @@ export const MYSTERY_GIFT_TEXT: Readonly<Record<number, Readonly<Record<MysteryG
     arceus: { title: 'Azure Flute', description: 'A flute with an otherworldly melody. Play it at Spear Pillar, atop Mt. Coronet, and see what answers.' },
     rotom: { title: 'Secret Key', description: 'The key to a hidden room in the Galactic Eterna Building, full of appliances a Pokémon may like.' },
     regigigas: { title: 'Regigigas', description: 'A Regigigas met in a fateful encounter. Take it to Sinnoh’s ancient ruins, and the titans may stir.' },
+  },
+  [GERMAN]: {
+    darkrai: { title: 'Mitgliedskarte', description: 'Eine Mitgliedskarte für das Hotel am Hafen von Fleetburg. Wer dort übernachtet, träumt vielleicht von einer fernen Insel.' },
+    shaymin: { title: 'Eichs Brief', description: 'Ein Brief von Professor Eich. Bring ihn zur Route 224, sobald du den Nationalen Pokédex besitzt.' },
+    arceus: { title: 'Azurflöte', description: 'Eine Flöte mit einer überirdischen Melodie. Spiele sie auf der Speersäule am Kraterberg und sieh, was antwortet.' },
+    rotom: { title: '?-Öffner', description: 'Der Schlüssel zu einem verborgenen Raum im Galaktik-Gebäude in Ewigenau, voller Geräte, die einem Pokémon gefallen könnten.' },
+    regigigas: { title: 'Regigigas', description: 'Ein Regigigas aus einer schicksalhaften Begegnung. Bring es zu Sinnohs uralten Ruinen, und die Titanen erwachen vielleicht.' },
   },
 };
 

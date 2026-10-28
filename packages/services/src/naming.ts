@@ -3,7 +3,7 @@
  * sCharCodes*, as the message font's Unicode) of the game's language, the length per kind and the "all spaces
  * keeps the old name" rule. Typed text is user input: only characters on the pages are taken.
  */
-import { ENGLISH, forLanguage } from '@opensinnoh/core';
+import { ENGLISH, forLanguage, GERMAN } from '@opensinnoh/core';
 import type { NamingRequest } from '@opensinnoh/contracts';
 
 const row = (s: string) => {
@@ -20,7 +20,16 @@ const US_PAGES: Pages = [
   ['abcdefghij ,.', 'klmnopqrst ’-', 'uvwxyz     ♂♀', '             ', '0123456789   '].map(row),
   [',.:;!?   ♂♀  ', '“”‘’()       ', '…·~@#%+-*/=  ', '◉●■▲◆♠♥♦♣★♪  ', '☀☁☂☃☺♚♛☹☽↗↘  '].map(row),
 ];
-const PAGES: Readonly<Record<number, Pages>> = { [ENGLISH]: US_PAGES };
+/**
+ * The German build's tables (its arm9 next to the US ones' place): the US pages with Ä Ö Ü and ä ö ü ß on the
+ * fourth row and „ after “ on Others.
+ */
+const GERMAN_PAGES: Pages = [
+  ['ABCDEFGHIJ ,.', 'KLMNOPQRST ’-', 'UVWXYZ     ♂♀', 'ÄÖÜ          ', '0123456789   '].map(row),
+  ['abcdefghij ,.', 'klmnopqrst ’-', 'uvwxyz     ♂♀', 'äöüß         ', '0123456789   '].map(row),
+  [',.:;!?   ♂♀  ', '“„”‘’()      ', '…·~@#%+-*/=  ', '◉●■▲◆♠♥♦♣★♪  ', '☀☁☂☃☺♚♛☹☽↗↘  '].map(row),
+];
+const PAGES: Readonly<Record<number, Pages>> = { [ENGLISH]: US_PAGES, [GERMAN]: GERMAN_PAGES };
 const CHARS: Readonly<Record<number, ReadonlySet<string>>> = Object.fromEntries(Object.entries(PAGES).map(([l, p]) => [l, new Set(p.flatMap((r) => r.flat()))]));
 
 /** The keyboard pages of the game's language (services `gameLanguage`). */

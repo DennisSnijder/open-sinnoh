@@ -1,6 +1,6 @@
 # Roadmap
 
-OpenSinnoh reimplements Pokémon Platinum (US) in TypeScript for the browser. You bring your own ROM.
+OpenSinnoh reimplements Pokémon Platinum (US and German) in TypeScript for the browser. You bring your own ROM.
 [STATUS.md](STATUS.md) has the current numbers. [docs/scope.md](docs/scope.md) has the scope and the rules.
 
 ## Done
@@ -103,8 +103,8 @@ a cheaper post chain on phones. Replays and tests keep the DS look.
 Pokémon, follower talk and the HGSS look.
 
 **Tests in every language.** The ROM replays wait on the game (`advance message`, `advance text`) instead of counting
-A presses, and the ROM tests and browser specs name the game's texts by id, so the story chain, every system replay
-and the browser suite hold in any language the game speaks.
+A presses, and the ROM tests and browser specs name texts by id, so the story chain, every system replay and the
+browser suite pass on the US and the German game.
 
 ## Next
 
@@ -117,7 +117,8 @@ and the browser suite hold in any language the game speaks.
 - **Beyond the original (opt-in):** higher resolution, widescreen camera options, texture filtering, replacement
   model and texture packs.
 - **An original demo pack** that needs no ROM.
-- **Later:** the one-way cartridge `.sav` import, Diamond and Pearl, other ROM regions.
+- **Later:** the one-way cartridge `.sav` import, Diamond and Pearl, other ROM languages (the German port is the
+  pattern: `pnpm relocate`, a layout, a paths table, a strings table).
 
 ## Out of scope
 

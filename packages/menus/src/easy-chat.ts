@@ -37,7 +37,7 @@ export const EASY_CHAT_MESSAGES = [...Object.values(TEXT), ...GROUPS.map((g) => 
 
 /**
  * A group's words: each bank's named entries, the duplicates the decomp keeps (sDummy*) once, in the game language's
- * order (services `wordOrder`).
+ * order (services `wordOrder`; the German one is the German ROM's own word lists' order).
  */
 function groupWords(registries: Registries, text: MenuText, state: GameState, banks: readonly EasyChatBank[]): { word: number; text: string }[] {
   const seen = new Set(state.pokedex.seen);

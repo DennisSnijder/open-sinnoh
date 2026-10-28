@@ -17,11 +17,11 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
   let pack: PackData;
   let report: ImportReport;
   let assets: Map<string, Uint8Array>;
-  /** The build's game language (decomp LANGUAGE_ENGLISH 2). */
+  /** The build's game language (decomp LANGUAGE_ENGLISH 2, LANGUAGE_GERMAN 5). */
   let language: number;
   beforeAll(async () => {
     const rom = new Uint8Array(readFileSync(romPath as string));
-    language = { en: 2 }[romBuildOfHeader(rom).rom.language];
+    language = { en: 2, de: 5 }[romBuildOfHeader(rom).rom.language];
     ({ pack, report, assets } = await importPlatinum(rom, (s) => stages.add(s), { names: { player: 'Ari', rival: 'Bo' }, gender: 'female' }));
   });
   const reg = <T>(name: string) => new Map(((pack.registries[name] ?? []) as unknown as (T & { id: Id })[]).map((r) => [r.id, r]));
@@ -308,16 +308,24 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
           labels: { outOfSteps: 'platinum:SafariGame_OutOfSteps', outOfBalls: 'platinum:SafariGame_OutOfSafariBalls_Field', outOfBallsBattle: 'platinum:SafariGame_OutOfSafariBalls_Battle', retire: 'platinum:SafariGame_Retire', noRoom: 'platinum:SafariGame_OutOfRoomForPokemon' },
           tram: 'platinum:prop/475',
         }),
-        // sEndCreditStringProps (overlay 99): 237 rows, the first two centred, the last the final screen's.
+        // sEndCreditStringProps (overlay 99): 237 rows in US, 224 in German, the first two centred, the last the final screen's.
         creditsRide: expect.objectContaining({ models: expect.any(Array), rows: expect.any(Array), nightTrees: expect.any(Array) }),
-        credits: expect.arrayContaining([
-          { text: 'platinum:pl_msg_00000548_00000', y: 0, centered: true },
-          { text: 'platinum:pl_msg_00000548_00002', y: 146, centered: false },
-          { text: 'platinum:pl_msg_00000548_00236', y: 7581, centered: false },
-        ]),
+        credits: expect.arrayContaining(
+          language === 5
+            ? [
+                { text: 'platinum:pl_msg_00000548_00000', y: 0, centered: true },
+                { text: 'platinum:pl_msg_00000548_00002', y: 171, centered: false },
+                { text: 'platinum:pl_msg_00000548_00223', y: 7562, centered: false },
+              ]
+            : [
+                { text: 'platinum:pl_msg_00000548_00000', y: 0, centered: true },
+                { text: 'platinum:pl_msg_00000548_00002', y: 146, centered: false },
+                { text: 'platinum:pl_msg_00000548_00236', y: 7581, centered: false },
+              ],
+        ),
       },
     ]);
-    expect((pack.registries.newGame![0] as unknown as NewGame).credits).toHaveLength(237);
+    expect((pack.registries.newGame![0] as unknown as NewGame).credits).toHaveLength(language === 5 ? 224 : 237);
     // The SHA1-checked gym tables (structure and names only; overlay 8 gym_features.c).
     const gyms = (pack.registries.newGame![0] as unknown as NewGame).gyms!;
     expect(gyms.eterna).toMatchObject({ zone: 'platinum:MAP_HEADER_ETERNA_CITY_GYM', clockVar: 'platinum:VAR_ETERNA_GYM_FLOWER_CLOCK_STATE', message: 'platinum:EternaGym_Text_FountainWaterLevelDropped' });

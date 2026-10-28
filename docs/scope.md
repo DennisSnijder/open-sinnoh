@@ -50,7 +50,7 @@ Format names here are the community's common names. Each one is verified against
 | Clock | The device's real-time clock drives time of day, berries, honey trees, daily events and the Pokétch, as on the DS. Replays freeze and step it. |
 | UI | Screens that recreate the DS (battle, bag, party, summary, Pokédex, PC, naming) stay faithful and use the ROM's art. OpenSinnoh's own screens (Options, setup, crash, data, mods) use OpenSinnoh UI (`docs/design-system.md`). |
 | QoL | Each quality-of-life change is an option whose contract default is the DS behaviour, so replays and tests are unaffected. |
-| ROM support | Platinum US rev0, keyed by SHA-1. HGSS US later. |
+| ROM support | Platinum US rev0 and German rev0, keyed by SHA-1. HGSS US later. |
 
 ## 4. Hard rules
 

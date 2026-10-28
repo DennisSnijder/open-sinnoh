@@ -25,4 +25,13 @@ export interface ManualPin {
   why: string;
 }
 
-export const MANUAL: Record<string, Record<string, ManualPin>> = {};
+export const MANUAL: Record<string, Record<string, ManualPin>> = {
+  'CPUD-rev0': {
+    'platinum.weatherTasks': { offset: 0x31018, why: 'ov5 function pointers (code moves unlike data). Shift +0x20 (not the +0x1c before it): each 28-byte row has its task function at +24 there. formats/weather.ts matches the tasks by rank.' },
+    'platinum.contestEffectClasses': { offset: 0x189bc, why: 'ov17 handler pointers (not read); at the ov17 shift +0x4, after contestActingMessages.' },
+    'platinum.credits': { offset: 0x3f64, count: 224, why: 'German staff rows: 224 (US 237), messages 0–223 in order; creditsRows after it moved −0x50.' },
+    'platinum.factoryLevel50Pools': { offset: 0x125ac, why: 'Other set ranges than US (no pointers); its ov104 neighbours are unmoved.' },
+    'platinum.factoryOpenOpponentPools': { offset: 0x125fc, why: 'Other set ranges than US (no pointers); its ov104 neighbours are unmoved.' },
+    'ui2d.healthboxParts': { offset: 0x34588, why: 'German status icons; the ov16 shift +0x1c (the tiles line up at +0x1c, not +0x20).' },
+  },
+};

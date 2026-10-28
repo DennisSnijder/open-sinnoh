@@ -22,7 +22,8 @@ describe.skipIf(!romPath)('decode scr_seq on the ROM', () => {
       `decoded ${r.files} files, ${Object.keys(r.ir.labels).length} labels, ${r.instructions} instructions, ${r.opcodes.size} distinct opcodes, ${r.movements.length} movements; VM implements ${cov.usedImplemented.length}/${cov.used.length} used ops`,
     );
     expect(r.files).toBe(575); // 574 script files + the dummy for script id 0
-    expect(r.opcodes.size).toBe(720);
+    // The German scripts use two commands fewer than the US ones (measured on CPUD rev 0).
+    expect(r.opcodes.size).toBe({ CPUE: 720, CPUD: 718 }[rom!.gameCode]);
   });
 
   it('decodes every level-script table', () => {
