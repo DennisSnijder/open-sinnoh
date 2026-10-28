@@ -213,7 +213,7 @@ describe('drawScriptOverlay', () => {
       drawImage: (...a: unknown[]) => calls.push(['drawImage', ...a.slice(1)]),
     } as unknown as CanvasRenderingContext2D;
     const font: LoadedFont = loadFont({ chars: 'HiYESNO', widths: [6, 3, 6, 6, 6, 6, 6], cellWidth: 8, cellHeight: 16 }, { width: 64 } as unknown as CanvasImageSource);
-    const view: ScriptView = { message: { text: 'Hi', waitingForInput: true }, yesNo: { cursor: 1 }, menu: null, panel: { kind: 'idle', title: '' }, app: null };
+    const view: ScriptView = { message: { text: 'Hi', waitingForInput: true }, yesNo: { yes: 'YES', no: 'NO', cursor: 1 }, menu: null, panel: { kind: 'idle', title: '' }, app: null };
     drawScriptOverlay(ctx, view, font, 2);
     const glyphs = calls.filter((c) => c[0] === 'drawImage');
     // 'H' at message box (16,152) → canvas (32,304), 'i' after 6 px → x 44.

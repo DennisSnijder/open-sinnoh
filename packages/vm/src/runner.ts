@@ -373,7 +373,7 @@ export class Runner implements ScriptRunner {
     const sp = this.ui.signpost;
     return {
       message: m ? { text: m.printer.text(), waitingForInput: m.printer.waiting || this.ui.buttonWait, ...(sp ? { signpost: { kind: sp.kind, offset: sp.offset } } : {}), ...(m.font ? { font: m.font } : {}) } : null,
-      yesNo: this.ui.yesNo ? { cursor: this.ui.yesNo.cursor } : null,
+      yesNo: this.ui.yesNo ? { ...this.yesNoLabels(), cursor: this.ui.yesNo.cursor } : null,
       menu: this.ui.menu?.shown ? this.ui.menu.view() : null,
       ...(this.ui.floorWindow ? { floorWindow: this.ui.floorWindow.view } : {}),
       ...(this.ui.moneyWindow ? { moneyWindow: { ...this.ui.moneyWindow } } : {}),
@@ -468,6 +468,12 @@ export class Runner implements ScriptRunner {
   setFieldVar(id: Id, value: number): void {
     if (!this.thread) throw new Error(`field var ${id}: no field script runs`);
     this.setVar(this.thread, id, value);
+  }
+
+  /** The YES/NO box's labels (decomp Menu_MakeYesNoChoice: MenuEntries_Text_Yes and _No of the base pack). */
+  private yesNoLabels(): { yes: string; no: string } {
+    const ns = newGameRecord(this.registries).id.split(':')[0]!;
+    return { yes: this.plainText(`${ns}:MenuEntries_Text_Yes` as Id), no: this.plainText(`${ns}:MenuEntries_Text_No` as Id) };
   }
 
   textOf(id: Id): string {

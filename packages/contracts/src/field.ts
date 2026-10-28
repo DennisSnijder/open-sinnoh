@@ -361,7 +361,8 @@ export interface ScriptView {
    * `NewGame.unownFont`.
    */
   message: { text: string; waitingForInput: boolean; signpost?: { kind: SignpostKind; offset: number }; font?: 'unown' } | null;
-  yesNo: { cursor: 0 | 1 } | null;
+  /** The YES/NO box: its labels (the base pack's `MenuEntries_Text_Yes`/`_No`, decomp Menu_MakeYesNoChoice) and the cursor. */
+  yesNo: { yes: string; no: string; cursor: 0 | 1 } | null;
   /** Scripted multichoice / list menu (VM-owned box over the field). */
   menu: MenuView | null;
   /**

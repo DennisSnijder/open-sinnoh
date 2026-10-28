@@ -11374,6 +11374,18 @@
    "text": "TIME"
   },
   {
+   "id": "fixture:MenuEntries_Text_Yes",
+   "text": "YES"
+  },
+  {
+   "id": "fixture:MenuEntries_Text_No",
+   "text": "NO"
+  },
+  {
+   "id": "fixture:PokemonSummary_Text_LabelPp",
+   "text": "PP"
+  },
+  {
    "id": "fixture:OptionsMenu_Text_ConfirmDialogYes",
    "text": "YES"
   },

@@ -6,7 +6,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { REGISTRIES, newGameRecord, type GameState, type Registries } from '@opensinnoh/contracts';
+import { REGISTRIES, dexOf, newGameRecord, type GameState, type Registries } from '@opensinnoh/contracts';
 import { loadPacks, type Id } from '@opensinnoh/core';
 import { NitroFs } from '@opensinnoh/nds';
 import { BODY_SHAPES, dexLists, numericalRows, searchDex, NO_QUERY, type DexQuery } from '@opensinnoh/menus';
@@ -69,7 +69,7 @@ describe.skipIf(!romPath)('Pokédex data (OPENSINNOH_NDS_ROM)', () => {
     expect(national).toHaveLength(493);
     const all = national.map((e) => e.species.id);
     const state = { pokedex: { obtained: true, national: true, seen: all, caught: all } } as unknown as GameState;
-    const numbers = (q: Partial<DexQuery>) => searchDex(national, { ...NO_QUERY, ...q }, state, types).map((e) => e.national);
+    const numbers = (q: Partial<DexQuery>) => searchDex(national, { ...NO_QUERY, ...q }, state, types, dexOf(reg).language).map((e) => e.national);
     expect(numericalRows(national, state).map((e) => e!.national)).toEqual(romLists[0]);
     expect(regional.map((e) => e.national)).toEqual(romLists[1]);
     for (let order = 1; order <= 5; order++) expect(numbers({ order }), `order ${order}`).toEqual(romLists[1 + order]);

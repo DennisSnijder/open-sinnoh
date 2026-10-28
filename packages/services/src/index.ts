@@ -5,6 +5,7 @@ export * from './forms.ts';
 export * from './storage.ts';
 export * from './naming.ts';
 export * from './dex.ts';
+export * from './language.ts';
 export * from './score.ts';
 export * from './signature.ts';
 export * from './berries.ts';

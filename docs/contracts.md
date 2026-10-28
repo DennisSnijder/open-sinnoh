@@ -36,6 +36,7 @@ a reviewed step: bump `CONTRACTS_VERSION` and add a line below.
   replays, stepped by `date`/`time` lines. Periods are core `dayPeriod(hour)` (decomp TimeOfDayForHour).
 
 ## Changelog
+- 0.49.0 (game-drawn text from the ROM, on 0.48.2; same schema v23): `ScriptView.yesNo` is `{ yes, no, cursor }` (the labels from the ROM, MenuEntries_Text_Yes/No). `MYSTERY_GIFTS` lost `title`/`description`; `MYSTERY_GIFT_TEXT` holds them per language.
 - 0.48.2 (the game's language, on 0.48.1; same schema v23; importer platinum-112): `NewGame.language?` (the game's Gen 4 language id: 2 English; absent = English). Core `Dex.language` reads it, and `createPokemon` gives new Pokémon that language unless told otherwise.
 - 0.48.1 (replays that wait, on 0.48.0; same schema v23): `ScriptView.waitsForAB?` (a script waits for A or B with no arrow: ScrCmd_WaitABPress, ScrCmd_WaitABPadPress). Replays: `advance message [max]`; `assert state <path> <record id>`; `assert text` slot values may be record ids; the Easy Chat tap `word:<text id>`.
 - 0.48.0 (loose ends, on 0.47.1; same schema v23; importer platinum-111): `BattlerView.look?` (`BattlerLook`: the species, form, shininess and gender a transformed battler's sprite shows until it leaves); `ObjectiveTables` steps' `to?` (the zone of the Town Map fly location the step leads to); `TownMapView.blocks[].objective?` (the objective's destination, marked).

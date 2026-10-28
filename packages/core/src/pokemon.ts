@@ -128,6 +128,13 @@ export interface MonRegistries {
 /** Decomp LANGUAGE_ENGLISH: a pack's language when its new game names none. */
 export const ENGLISH = 2;
 
+/** The game language's entry of a per-language table; throws for a language the table lacks. */
+export function forLanguage<T>(language: number, table: Readonly<Record<number, T>>): T {
+  const value = table[language];
+  if (value === undefined) throw new Error(`no wording for game language ${language}`);
+  return value;
+}
+
 /** How and where a Pokémon was met (decomp met location/level/date; level 0 = hatched). */
 export interface MetData {
   zone: Id | null;

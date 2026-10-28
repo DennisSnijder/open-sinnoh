@@ -1,5 +1,5 @@
 import { doorSounds } from './assets/door-sounds.ts';
-import { OBJECTIVE_TEXTS, objectiveTables } from './objectives.ts';
+import { objectiveTables, objectiveTexts } from './objectives.ts';
 import { importSpearPillar } from './spear-pillar.ts';
 import { animationFrames } from './gyms/index.ts';
 import { readSunyshoreTables, SUNYSHORE_REGION } from './gyms/sunyshore.ts';
@@ -373,7 +373,7 @@ const DW_TABLES: Overlay9Layout = {
 
 /** The modern options' labels (original wording, ours): the OPTIONS row and its description; the QoL additions' texts.
  * The `Lantern_` ids are the pre-rename names, kept: stored imports and mods use them. */
-const MODERN_OPTION_TEXTS = {
+const MODERN_OPTION_TEXTS_EN = {
   Lantern_Options_TradeEvolution: 'TRADE EVOS',
   Lantern_Options_TradeEvolutionDescription: 'Pokémon that evolve by trading\nevolve by leveling up instead.',
   Lantern_Options_FollowerStyle: 'FOLLOWER STYLE',
@@ -418,6 +418,11 @@ const MODERN_OPTION_TEXTS = {
   Lantern_Contest_Dance: 'DANCE',
   Lantern_Contest_Acting: 'ACTING',
   Lantern_Contest_Total: 'TOTAL',
+};
+
+/** The same by ROM language. */
+const MODERN_OPTION_TEXTS: Record<RomLanguage, Record<keyof typeof MODERN_OPTION_TEXTS_EN, string>> = {
+  en: MODERN_OPTION_TEXTS_EN,
 };
 
 /** Offsets inside a pinned region, moved with it (the region matched whole, so its insides kept their places). */
@@ -646,9 +651,9 @@ export async function importPlatinum(
   });
   for (const [c, n] of textStats.unknownChars) unknown('char', `0x${c.toString(16)} ×${n}`);
   // Our own labels for the modern options (not in the ROM; docs/decisions.md: trade-only evolutions in single player).
-  for (const [name, text] of Object.entries(MODERN_OPTION_TEXTS)) texts.push({ id: asId(`platinum:${name}`), text });
+  for (const [name, text] of Object.entries(MODERN_OPTION_TEXTS[supported.language])) texts.push({ id: asId(`platinum:${name}`), text });
   // The start menu's objectives and their option (our words; objectives.ts).
-  for (const [name, text] of Object.entries(OBJECTIVE_TEXTS)) texts.push({ id: asId(`platinum:${name}`), text });
+  for (const [name, text] of Object.entries(objectiveTexts(supported.language))) texts.push({ id: asId(`platinum:${name}`), text });
   const bankText = (bank: number, msg: number) => {
     const t = bankTexts[bank]?.[msg];
     if (t === undefined) throw new ImportError(`text bank ${bank} has no message ${msg}`);

@@ -102,7 +102,7 @@ test('the repeat-Repel prompt: "Use another …?" with YES/NO after the ROM\'s w
   await setOption('repelPrompt', 0);
   await play('repel', 'svc-repel-repeat.replay', '+1 press a\n+1 release a\nuntil message 60');
   const v = await page.evaluate(() => window.openSinnohGame!.snapshot().view);
-  expect(v.yesNo).toEqual({ cursor: 0 });
+  expect(v.yesNo).toMatchObject({ cursor: 0 });
   expect(v.message?.text).toContain(registries.items.get('platinum:ITEM_REPEL' as Id)!.name);
   await shot('repel-prompt');
   expect((await mainCanvasStats(page)).colours).toBeGreaterThan(8);
