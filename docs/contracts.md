@@ -36,6 +36,7 @@ a reviewed step: bump `CONTRACTS_VERSION` and add a line below.
   replays, stepped by `date`/`time` lines. Periods are core `dayPeriod(hour)` (decomp TimeOfDayForHour).
 
 ## Changelog
+- 0.48.2 (the game's language, on 0.48.1; same schema v23; importer platinum-112): `NewGame.language?` (the game's Gen 4 language id: 2 English; absent = English). Core `Dex.language` reads it, and `createPokemon` gives new Pokémon that language unless told otherwise.
 - 0.48.1 (replays that wait, on 0.48.0; same schema v23): `ScriptView.waitsForAB?` (a script waits for A or B with no arrow: ScrCmd_WaitABPress, ScrCmd_WaitABPadPress). Replays: `advance message [max]`; `assert state <path> <record id>`; `assert text` slot values may be record ids; the Easy Chat tap `word:<text id>`.
 - 0.48.0 (loose ends, on 0.47.1; same schema v23; importer platinum-111): `BattlerView.look?` (`BattlerLook`: the species, form, shininess and gender a transformed battler's sprite shows until it leaves); `ObjectiveTables` steps' `to?` (the zone of the Town Map fly location the step leads to); `TownMapView.blocks[].objective?` (the objective's destination, marked).
 - 0.47.1 (the trainer appearance, on 0.47.0; same schema v23): optional `GameState.appearance` (decomp TrainerInfo appearance, a u8: the Union Room look picked at Oreburgh's Pokémon Center; absent = the new-game one, variant 0 of the trainer id's row).

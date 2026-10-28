@@ -43,6 +43,7 @@ import {
   calcStats,
   createPokemon,
   createRandomPokemon,
+  ENGLISH,
   shinyPid,
   createTrainerPokemon,
   expGain,
@@ -2789,7 +2790,7 @@ class BattleController implements Battle {
       const player = this.deps.player;
       const outsider = mon.otId !== player.trainerId || mon.otName !== player.name || mon.otGender !== player.gender;
       const base = (fought.includes(i) ? gained : 0) + (holders.includes(i) ? shared : 0);
-      const exp = expGain(base, { luckyEgg: this.dex.holdEffect(mon.heldItem).holdEffect === 'EXP_UP', trainerBattle: (this.battleType & BATTLE_TYPE.TRAINER) !== 0, outsider: outsider ? (mon.language ?? 2) === (player.language ?? 2) ? 'same-language' : 'other-language' : false });
+      const exp = expGain(base, { luckyEgg: this.dex.holdEffect(mon.heldItem).holdEffect === 'EXP_UP', trainerBattle: (this.battleType & BATTLE_TYPE.TRAINER) !== 0, outsider: outsider ? (mon.language ?? ENGLISH) === (player.language ?? this.dex.language) ? 'same-language' : 'other-language' : false });
       gainEvs(this.dex, mon, foeData.evYield);
       const name = this.nameOf(mon);
       yield* this.say(this.text.get(outsider ? 'PokemonGainedABoostedExpPoints' : 'PokemonGainedExpPoints', [name, String(exp)]));
