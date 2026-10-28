@@ -403,6 +403,26 @@ describe('bag use (field)', () => {
   });
 });
 
+describe('bag pockets', () => {
+  // The DS pocket type each listed pocket is drawn as (decomp POCKET_*); the one-pocket bags list just theirs.
+  it('the field bag lists the eight in order, the one-pocket bags their own, the battle bag its four', () => {
+    const s = fresh();
+    const field = open(s, { app: 'start-menu' });
+    openEntry(field, 'bag');
+    expect(bag(field).pocketTypes).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+    for (const [pocket, type] of [['items', 0], ['berries', 4]] as const) {
+      const v = bag(open(s, { app: 'bag-pick', pocket }));
+      expect(v).toMatchObject({ mode: 'pick', pocket: 0, pocketTypes: [type] });
+      expect(v.pockets).toHaveLength(1);
+    }
+    const poffin = bag(open(s, { app: 'poffin-cooking' }));
+    expect(poffin).toMatchObject({ mode: 'poffin', pocket: 0, pocketTypes: [4] });
+    expect(poffin.pockets).toHaveLength(1);
+    const battle = bag(open(s, { app: 'bag-select', mode: 'battle', party: s.party, active: 0, bag: s.bag, noRoomForBall: false, noEffect: [] }));
+    expect(battle).toMatchObject({ mode: 'battle', pocketTypes: [1, 1, 2, 6] });
+  });
+});
+
 describe('the item wheel (OpenSinnoh option itemWheel)', () => {
   it('REGISTER adds to the wheel (the oldest leaves a full one) and Y keeps the newest; DESELECT takes one off', () => {
     const s = fresh();
