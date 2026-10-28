@@ -31,6 +31,17 @@ export function readWeatherTasks(bytes: Uint8Array): RawWeatherTask[] {
   });
 }
 
+/**
+ * The tasks with their function addresses as the US build's (`WEATHER_TASKS` keys). Another build's code sits
+ * elsewhere but in the same order, so its addresses map to the US ones by rank; the set of tasks must be the same.
+ */
+export function usWeatherTasks(tasks: RawWeatherTask[]): RawWeatherTask[] {
+  const own = [...new Set(tasks.map((t) => t.task))].sort((a, b) => a - b);
+  const us = Object.keys(WEATHER_TASKS).map(Number).sort((a, b) => a - b);
+  if (own.length !== us.length) throw new Error(`weather task table: ${own.length} task functions, expected ${us.length}`);
+  return tasks.map((t) => ({ ...t, task: us[own.indexOf(t.task)]! }));
+}
+
 /** Fog of a task: GX fog slope (shift), offset, GX_RGB colour (0–31). */
 type TaskFog = [slope: number, offset: number, rgb: [number, number, number]];
 
