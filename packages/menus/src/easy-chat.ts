@@ -3,12 +3,12 @@
  * mode: the blanks under "Please enter a phrase or word.", the group list, then the group's words in two columns. A
  * word fills the blank and the cursor moves on; once every blank is filled, "Is this your answer?". B on the blanks
  * asks "Quit without doing anything?". Our groups are the word banks themselves (decomp easy_chat_word_list.c sorts
- * its own lists; POKéMON lists the seen species, as the DS does); POKéMON 2, MOVE 2, ABC mode and the locked words
- * are not offered.
+ * its own lists; POKéMON lists the seen species and TOUGH WORDS the unlocked ones, as the DS does); POKéMON 2, MOVE 2
+ * and ABC mode are not offered, and every greeting is (the DS locks the other languages' ones).
  */
 import type { Button, Id } from '@opensinnoh/core';
 import type { EasyChatView, GameState, Registries } from '@opensinnoh/contracts';
-import { easyChatWord, WORD_NONE, type EasyChatBank } from '@opensinnoh/services';
+import { easyChatWord, isToughWordUnlocked, WORD_NONE, type EasyChatBank } from '@opensinnoh/services';
 import { Dialog } from './dialog.ts';
 import { moveCursor, tapIndex, type Screen, type Step } from './stack.ts';
 import { MenuText } from './strings.ts';
@@ -48,6 +48,7 @@ function groupWords(registries: Registries, text: MenuText, state: GameState, ba
         const species = speciesAt.get(entry);
         if (!species || !seen.has(species)) return;
       }
+      if (bank === 'TEXT_BANK_TOUGH_WORDS' && !isToughWordUnlocked(state.unlockedToughWords, entry)) return;
       const s = text.text(id);
       // Entry 0 of the name banks ("-----") and the empty ones are not words.
       if (!/[A-Za-z0-9]/.test(s) || words.has(s)) return;

@@ -37,7 +37,7 @@ const MILESTONE_RULES: [RegExp, string][] = [
   [/received_temp_data/, 'later (Battle Frontier)'],
   [/^get_player3_d_pos$/, 'M5 (Distortion World)'],
   [/^lock_last_talked$/, 'unscheduled (no ROM script uses it)'],
-  [/regi_ruins|spiritomb|amity_square|villa|boat|vista_lighthouse|hall_of_fame|tough_word|h_blank|bg3|field_scene|sub_scene|text_speed/, 'later (systems and scenes after M1)'],
+  [/regi_ruins|spiritomb|amity_square|villa|boat|vista_lighthouse|hall_of_fame|h_blank|bg3|field_scene|sub_scene|text_speed/, 'later (systems and scenes after M1)'],
 ];
 
 /** First match wins; checked in this order. */
@@ -87,8 +87,6 @@ export const TRIAGE: Record<string, Triage> = {
   count_mail_in_mailbox: { bucket: 'party', milestone: 'M3 (mailbox)', note: 'Mailbox_CountMail: the engine keeps no PC mailbox (Mail is never sent to it), so the PC says it is empty' },
   set_favorite_mon: { bucket: 'party', milestone: 'out', note: 'MiscSaveBlock_SetFavoriteMon: only the Wi-Fi Plaza reads the favorite; not kept' },
   turn_on_pokedex_form_detection: { bucket: 'party', milestone: 'later (Pokédex form detection)', note: 'Pokedex_TurnOnFormDetection: the saved canDetectForms is not kept; our Pokédex shows the forms page from the start' },
-  check_all_tough_words_unlocked: { bucket: 'menus', milestone: 'later (easy chat words)', note: 'EasyChatWords_AreAllToughWordsUnlocked: the unlocked easy chat words are not kept' },
-  try_buffer_and_unlock_random_tough_word: { bucket: 'menus', milestone: 'later (easy chat words)', note: 'EasyChatWords_TryUnlockRandomToughWord: the unlocked easy chat words are not kept' },
   check_is_today_player_birthday: { bucket: 'objects', milestone: 'out (DS firmware data)', note: "the DS owner's birthday is firmware data (SystemData), not available: never the birthday" },
   move_hearthome_gym_dp_lift: { bucket: 'field', milestone: 'unscheduled (Diamond/Pearl leftover maps)', note: "HearthomeGym_MoveLift: only the DP_GYM elevator rooms run it; Platinum's leader room warps to them lie outside its walls" },
   set_mon_summary: { bucket: 'party', note: "the daycare's and contests' party menus open the summary themselves, so the scripts' summary loop is not taken" },

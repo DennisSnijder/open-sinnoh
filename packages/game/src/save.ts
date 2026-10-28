@@ -374,7 +374,7 @@ const stateV17Fields: Record<string, Schema> = {
 export const GAME_STATE_V17_SCHEMA: Schema = obj(stateV17Fields, stateV7Check);
 
 /** The state version this build writes (older ones are migrated on load). */
-export const SAVE_SCHEMA_VERSION = 23;
+export const SAVE_SCHEMA_VERSION = 24;
 
 /** Decomp BerryPatch (0.29.0): an empty patch has no berry, stage none and no yield. */
 const berryPatchSchema: Schema = obj(
@@ -768,11 +768,19 @@ const dressUpPhotoSchema: Schema = obj(
   (v) => ((v as unknown as DressUpPhoto).dressUp.accessories.length > DRESS_UP_PHOTOS.accessories ? `a gallery photo keeps at most ${DRESS_UP_PHOTOS.accessories} accessories` : undefined),
 );
 
-export const GAME_STATE_SCHEMA: Schema = obj(
+const stateV23Fields: Record<string, Schema> = {
+  ...stateV22Fields,
+  tv: tvSchema,
+  dressUpPhotos: arr(nullable(dressUpPhotoSchema)),
   // 0.47.1, same schema v23: the trainer appearance (decomp TrainerInfo appearance, a u8); older saves hold none.
-  { ...stateV22Fields, schemaVersion: lit(SAVE_SCHEMA_VERSION), tv: tvSchema, dressUpPhotos: arr(nullable(dressUpPhotoSchema)), appearance: opt(int(0, 0xff)) },
-  (v) => stateV22FullCheck(v) ?? ((v.dressUpPhotos as unknown[]).length !== DRESS_UP_PHOTOS.count ? `dressUpPhotos must have ${DRESS_UP_PHOTOS.count} slots` : undefined),
-);
+  appearance: opt(int(0, 0xff)),
+};
+const stateV23Check = (v: Record<string, unknown>) => stateV22FullCheck(v) ?? ((v.dressUpPhotos as unknown[]).length !== DRESS_UP_PHOTOS.count ? `dressUpPhotos must have ${DRESS_UP_PHOTOS.count} slots` : undefined);
+/** Saves of the TV and the gallery (v23) before the tough words. Only read to migrate. */
+export const GAME_STATE_V23_SCHEMA: Schema = obj({ ...stateV23Fields, schemaVersion: lit(23) }, stateV23Check);
+
+/** v24: the unlocked tough words (decomp unlockedToughWordBits, a u32). */
+export const GAME_STATE_SCHEMA: Schema = obj({ ...stateV23Fields, schemaVersion: lit(SAVE_SCHEMA_VERSION), unlockedToughWords: int(0, 0xffffffff) }, stateV23Check);
 
 const envelope = (state: Schema): Schema =>
   obj({
@@ -805,6 +813,7 @@ const OLD_SAVE_SCHEMAS: Record<number, Schema> = {
   20: envelope(GAME_STATE_V20_SCHEMA),
   21: envelope(GAME_STATE_V21_SCHEMA),
   22: envelope(GAME_STATE_V22_SCHEMA),
+  23: envelope(GAME_STATE_V23_SCHEMA),
 };
 
 /**
@@ -834,8 +843,10 @@ type PokemonV18 = Omit<Pokemon, 'condition'>;
 /** v18 (berries, Mystery Gift): no condition, no Poffin Case, no Fashion Case. */
 /** v20 (the contest photos): the Underground without laid traps, a base or their records. */
 type UndergroundV20 = Omit<UndergroundState, 'placedTraps' | 'base' | 'records'> & { records: Omit<UndergroundState['records'], 'trapsTriggered' | 'baseMoves'> };
+/** v23 (the TV, the gallery): no unlocked tough words. */
+type StateV23 = Omit<GameState, 'schemaVersion' | 'unlockedToughWords'> & { schemaVersion: 23 };
 /** v22 (the Seal Case, the journal): no TV, no gallery photos. */
-type StateV22 = Omit<GameState, 'schemaVersion' | 'tv' | 'dressUpPhotos'> & { schemaVersion: 22 };
+type StateV22 = Omit<StateV23, 'schemaVersion' | 'tv' | 'dressUpPhotos'> & { schemaVersion: 22 };
 /** v21 (the Underground's traps and base): no Seal Case. */
 type StateV21 = Omit<StateV22, 'schemaVersion' | 'sealCase' | 'journal'> & { schemaVersion: 21 };
 type StateV20 = Omit<StateV21, 'schemaVersion' | 'underground'> & { schemaVersion: 20; underground?: UndergroundV20 };
@@ -1118,8 +1129,16 @@ export function migrateStateV21(v21: StateV21): StateV22 {
  * v22 → v23 (the TV, the gallery): an empty TV (no segment could be recorded before: every recorder was a logged stub) whose
  * slot ends at the next minute, and no gallery photo (the gallery's dress-up was a logged stub).
  */
-export function migrateStateV22(v22: StateV22): GameState {
+export function migrateStateV22(v22: StateV22): StateV23 {
   return { ...v22, schemaVersion: 23, tv: newTvState(), dressUpPhotos: Array.from({ length: DRESS_UP_PHOTOS.count }, () => null) };
+}
+
+/**
+ * v23 → v24 (the tough words): none unlocked, as at a new game (decomp EasyChatWords_Init); the Snowpoint expert's
+ * commands were logged stubs, so no word could be unlocked before.
+ */
+export function migrateStateV23(v23: StateV23): GameState {
+  return { ...v23, schemaVersion: 24, unlockedToughWords: 0 };
 }
 
 export class SaveError extends Error {}
@@ -1142,7 +1161,7 @@ export class PackMismatchError extends SaveError {
 
 /**
  * Validates an untrusted save against the loaded packs. Throws SaveError naming the field.
- * v1–v22 saves are migrated to v23 (`migrateStateV1` … `migrateStateV22`) after validation. `packs` is the current load order; a save must have been made with the same packs and versions, cosmetic packs aside.
+ * v1–v23 saves are migrated to v24 (`migrateStateV1` … `migrateStateV23`) after validation. `packs` is the current load order; a save must have been made with the same packs and versions, cosmetic packs aside.
  */
 export function validateSave(input: unknown, registries: Registries, packs: readonly { id: string; version: string; cosmetic?: true }[], labels: Labels): SaveEnvelope {
   if (typeof input !== 'object' || input === null || (input as { format?: unknown }).format !== 'lantern-nds-save') throw new NotASaveError('This file is not an OpenSinnoh save.');
@@ -1179,7 +1198,8 @@ export function validateSave(input: unknown, registries: Registries, packs: read
   const v20 = v19 ? migrateStateV19(v19) : version === 20 ? (state as StateV20) : null;
   const v21 = v20 ? migrateStateV20(v20) : version === 21 ? (state as StateV21) : null;
   const v22 = v21 ? migrateStateV21(v21) : version === 22 ? (state as StateV22) : null;
-  const env: SaveEnvelope = v22 ? { ...(input as SaveEnvelope), state: migrateStateV22(v22) } : (input as SaveEnvelope);
+  const v23 = v22 ? migrateStateV22(v22) : version === 23 ? (state as StateV23) : null;
+  const env: SaveEnvelope = v23 ? { ...(input as SaveEnvelope), state: migrateStateV23(v23) } : (input as SaveEnvelope);
   // Cosmetic packs (art only) are not part of a save's identity: one made before such a pack was added, or
   // while it was loaded, still loads. A save from before the flag may list one; it is dropped here.
   const cosmetic = new Set(packs.filter((p) => p.cosmetic).map((p) => p.id));

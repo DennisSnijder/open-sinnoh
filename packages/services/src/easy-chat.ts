@@ -52,3 +52,31 @@ export function easyChatWordText(registries: Registries, word: number): Id {
   }
   throw new Error(`easy chat: no word ${word}`);
 }
+
+/** The tough words' count (decomp TEXT_BANK_TOUGH_WORDS_ENTRY_COUNT): the bank's entries, at most the 32 bits of `GameState.unlockedToughWords`. */
+export function toughWordCount(registries: Registries): number {
+  const n = bankMessages(registries, 'TEXT_BANK_TOUGH_WORDS').length;
+  if (n > 32) throw new Error(`easy chat: ${n} tough words do not fit the 32 unlock bits`);
+  return n;
+}
+
+/** Decomp EasyChatWords_IsToughWordUnlocked: the tough word at bank entry `entry` is unlocked. */
+export const isToughWordUnlocked = (bits: number, entry: number): boolean => ((bits >>> entry) & 1) === 1;
+
+/** Decomp EasyChatWords_AreAllToughWordsUnlocked. */
+export function allToughWordsUnlocked(registries: Registries, bits: number): boolean {
+  const n = toughWordCount(registries);
+  for (let i = 0; i < n; i++) if (!isToughWordUnlocked(bits, i)) return false;
+  return true;
+}
+
+/**
+ * Decomp EasyChatWords_TryUnlockRandomToughWord: `random()` (LCRNG_Next) % the locked count picks among the locked
+ * tough words in bank order. The new bits and the word's bank entry, or null when every word is unlocked (no draw).
+ */
+export function unlockRandomToughWord(registries: Registries, bits: number, random: () => number): { bits: number; entry: number } | null {
+  const locked = Array.from({ length: toughWordCount(registries) }, (_, i) => i).filter((i) => !isToughWordUnlocked(bits, i));
+  if (!locked.length) return null;
+  const entry = locked[(random() >>> 0) % locked.length]!;
+  return { bits: (bits | (1 << entry)) >>> 0, entry };
+}

@@ -297,7 +297,7 @@ export function newGameState(record: NewGame, registries: Pick<Registries, 'zone
   const fieldRng = new Prng(fieldSeed(seed));
   const dailyRandom = newDailyRandom(fieldRng.next());
   return {
-    schemaVersion: 23,
+    schemaVersion: 24,
     packs: order.map((p) => ({ ...p })),
     names: { ...(options?.names ?? record.names) },
     gender: options?.gender ?? record.gender,
@@ -349,6 +349,7 @@ export function newGameState(record: NewGame, registries: Pick<Registries, 'zone
     journal: [],
     tv: newTvState(),
     dressUpPhotos: Array.from({ length: DRESS_UP_PHOTOS.count }, () => null),
+    unlockedToughWords: 0,
   };
 }
 
