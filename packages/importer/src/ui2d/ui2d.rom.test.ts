@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { NitroFs } from '@opensinnoh/nds';
 import namesFile from '../../data/names.json' with { type: 'json' };
+import { romBuildOfHeader } from '../layout.ts';
 import { Names, type NamesFile } from '../names.ts';
 import { decodeImage } from './png.ts';
 import { importUi2d, type Ui2dImport } from './index.ts';
@@ -23,9 +24,11 @@ describe.skipIf(!romPath)('2D art import (OPENSINNOH_NDS_ROM)', () => {
   };
   beforeAll(async () => {
     const names = new Names(namesFile as NamesFile);
-    const fs = new NitroFs(new Uint8Array(readFileSync(romPath!)));
+    const bytes = new Uint8Array(readFileSync(romPath!));
+    const fs = new NitroFs(bytes, { paths: romBuildOfHeader(bytes).paths });
     out = await importUi2d(
       fs,
+      romBuildOfHeader(bytes),
       names.file.species.map((_, i) => names.species(i)),
       names.file.trainerClasses.map((_, i) => names.trainerClass(i)),
     );

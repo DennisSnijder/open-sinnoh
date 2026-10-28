@@ -29,7 +29,7 @@ export function hasSave(page: Page): Promise<boolean> {
 export async function saveGame(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Start menu', exact: true }).click();
   await page.locator('[data-screen="start-menu"] [data-entry="save"]').click();
-  await page.locator('[data-screen="save"]').getByRole('button', { name: 'YES' }).click();
+  await page.locator('[data-screen="save"] [data-tap="yes"]').click();
   await expect.poll(() => hasSave(page)).toBe(true);
   await page.keyboard.press('Escape');
   await expect(page.locator('[data-screen]')).toHaveCount(0);

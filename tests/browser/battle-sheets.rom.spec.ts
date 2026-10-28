@@ -21,6 +21,7 @@ import { settle } from './settle.ts';
 import { plainText } from '../../packages/app/src/ui/strings.ts';
 import { pageDriver, waitForScene } from '../../packages/cli/src/browser.ts';
 import { ballMask, canvasStats, turnedPixels } from './canvas.ts';
+import { fixedPart } from './words.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 const SHOTS = process.env.OPENSINNOH_BATTLE_SHOTS ?? 'test-artifacts/battle-sheets';
@@ -264,9 +265,10 @@ test('m2-switch: POKéMON on the card opens the battle party; a tap on Starly sw
       // The Pokémon in battle is refused with the DS message; Starly goes in.
       await press(party.locator('[data-tap="slot:0"]'));
       await page.evaluate(() => window.openSinnohGame!.advance(1));
-      await expect(party).toContainText('already');
+      const inBattle = fixedPart((...slots) => plainText(registries.texts.get('platinum:BattleParty_Text_CantSwitchWithPokemonAlreadyInBattle' as never)!.text, slots));
+      await expect(party).toContainText(inBattle);
       // In the two-line message window (the DS's error window), both lines inside it; a tap clears it.
-      const box = party.locator('.msg-box', { hasText: 'already' });
+      const box = party.locator('.msg-box', { hasText: inBattle });
       const outside = await box.evaluate((b) => {
         const r = b.getBoundingClientRect();
         return [...b.querySelectorAll('*')].map((e) => e.getBoundingClientRect()).filter((e) => e.width && (e.left < r.left - 0.5 || e.right > r.right + 0.5 || e.top < r.top - 0.5 || e.bottom > r.bottom + 0.5)).length;
@@ -274,7 +276,7 @@ test('m2-switch: POKéMON on the card opens the battle party; a tap on Starly sw
       expect(outside).toBe(0);
       await press(party.locator('[data-tap="slot:1"]'));
       await page.evaluate(() => window.openSinnohGame!.advance(1));
-      await expect(party).not.toContainText('already');
+      await expect(party).not.toContainText(inBattle);
       await press(party.locator('[data-tap="slot:1"]'));
       await page.evaluate(() => window.openSinnohGame!.advance(1));
       await expect(party).toBeHidden();

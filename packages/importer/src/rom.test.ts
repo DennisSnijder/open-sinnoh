@@ -4,6 +4,7 @@ import { REGISTRIES, type NewGame, type Ui2dSheet, type Zone } from '@opensinnoh
 import { loadPacks, type Id, type JsonValue, type PackData, type RegistryRecord } from '@opensinnoh/core';
 import { importPlatinum, type ImportReport } from './platinum.ts';
 import { decodeImage } from './ui2d/index.ts';
+import { romBuildOfHeader } from './layout.ts';
 
 it('rejects ROMs it does not support, with the hash it saw', async () => {
   await expect(importPlatinum(new Uint8Array([1, 2, 3]))).rejects.toThrow(/Unsupported ROM: SHA1 7037807198c22a7d2b0807371d763779a84fdfcf.*Platinum \(US, rev 0\)/);
@@ -16,8 +17,11 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
   let pack: PackData;
   let report: ImportReport;
   let assets: Map<string, Uint8Array>;
+  /** The build's game language (decomp LANGUAGE_ENGLISH 2). */
+  let language: number;
   beforeAll(async () => {
     const rom = new Uint8Array(readFileSync(romPath as string));
+    language = { en: 2 }[romBuildOfHeader(rom).rom.language];
     ({ pack, report, assets } = await importPlatinum(rom, (s) => stages.add(s), { names: { player: 'Ari', rival: 'Bo' }, gender: 'female' }));
   });
   const reg = <T>(name: string) => new Map(((pack.registries[name] ?? []) as unknown as (T & { id: Id })[]).map((r) => [r.id, r]));
@@ -215,6 +219,7 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
         label: 'platinum:InitNewGame',
         names: { player: 'Ari', rival: 'Bo' },
         gender: 'female',
+        language,
         playerSprite: { male: 'platinum:OBJ_EVENT_GFX_PLAYER_M', female: 'platinum:OBJ_EVENT_GFX_PLAYER_F' },
         playerHealSprite: { male: 'platinum:OBJ_EVENT_GFX_PLAYER_M_POKECENTER_HEAL', female: 'platinum:OBJ_EVENT_GFX_PLAYER_F_POKECENTER_HEAL' },
         playerVsSeekerSprite: { male: 'platinum:OBJ_EVENT_GFX_PLAYER_M_VS_SEEKER', female: 'platinum:OBJ_EVENT_GFX_PLAYER_F_VS_SEEKER' },

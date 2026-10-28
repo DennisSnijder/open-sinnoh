@@ -146,6 +146,8 @@ export class Runner implements ScriptRunner {
     /** `font`: `message_unown`'s FONT_UNOWN. */
     message: { printer: TextPrinter; font?: 'unown' } | null;
     buttonWait: boolean;
+    /** wait_ab_press / wait_ab_pad_press: a wait for A or B without the arrow (`ScriptView.waitsForAB`). */
+    abWait: boolean;
     yesNo: { cursor: 0 | 1 } | null;
     menu: ScriptMenu | null;
     signpost: Signpost | null;
@@ -166,6 +168,7 @@ export class Runner implements ScriptRunner {
   } = {
     message: null,
     buttonWait: false,
+    abWait: false,
     yesNo: null,
     menu: null,
     floorWindow: null,
@@ -343,6 +346,7 @@ export class Runner implements ScriptRunner {
         this.thread = null;
         this.startMenuReady = t.startMenu;
         this.ui.buttonWait = false;
+        this.ui.abWait = false;
         this.ui.menu = null;
         // A signpost that is scrolling out finishes after the script (the field runs its command).
         if (!this.ui.signpost || this.ui.signpost.command === SIGNPOST_CMD.none) {
@@ -378,6 +382,7 @@ export class Runner implements ScriptRunner {
       ...(this.ui.coinWindow ? { coinWindow: { ...this.ui.coinWindow } } : {}),
       ...(this.ui.saveInfo ? { saveInfo: this.ui.saveInfo } : {}),
       ...(this.ui.savingIcon ? { savingIcon: true } : {}),
+      ...(this.ui.abWait ? { waitsForAB: true as const } : {}),
       ...(this.frontier && !this.frontier.done ? { frontier: this.frontier.view() } : {}),
       panel: this.ui.panel,
       app: this.app && !this.app.result ? this.app.request : null,

@@ -34,7 +34,7 @@ function tables() {
 describe('Sunyshore pointer tables', () => {
   it('reads packed axes/directions and follows all four state pointers outside the former gym region', () => {
     const { bytes } = tables();
-    const rooms = readSunyshoreTables(bytes, (n) => asId(`original:PROP_${n}`));
+    const rooms = readSunyshoreTables(bytes, 0x02249960 + SUNYSHORE_REGION.offset, (n) => asId(`original:PROP_${n}`));
     expect(rooms.map((r) => r.gears.length)).toEqual([3, 6, 13]);
     expect(rooms.map((r) => r.rectangles.length)).toEqual([12, 18, 40]);
     expect(rooms[1]!.gears[1]).toMatchObject({ x: 2, y: 1, z: 3, initialRotation: 1, clockwise: true, vertical: true });
@@ -43,6 +43,6 @@ describe('Sunyshore pointer tables', () => {
   it('rejects a pointer outside the pin at the import boundary', () => {
     const { bytes, v, at } = tables();
     v.setUint32(at(0x2de0), 0x02249960 + 0x20, true);
-    expect(() => readSunyshoreTables(bytes, (n) => asId(`original:P${n}`))).toThrow(/outside/);
+    expect(() => readSunyshoreTables(bytes, 0x02249960 + SUNYSHORE_REGION.offset, (n) => asId(`original:P${n}`))).toThrow(/outside/);
   });
 });
