@@ -81,7 +81,8 @@ test("Palmer's cut-in: the banner in its band, the lit mugshot, the room dimmed"
     resolve: resolveReplay,
     repeat: false,
     async beforeLine(line) {
-      if (line.action.type !== 'advance-text' || ++advanceTexts !== 2) return true;
+      // The second `advance text` (an `advance message` is one with `close`).
+      if (line.action.type !== 'advance-text' || line.action.close || ++advanceTexts !== 2) return true;
       // Palmer's intro, pressed through, up to the cut-in's lit hold (the name shown, the flash faded).
       const ticks = await page.evaluate(() => {
         const g = window.openSinnohApp!.game;

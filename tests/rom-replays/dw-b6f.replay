@@ -140,11 +140,7 @@ until idle 6000
 +1 release down
 until idle 600
 +0 field move 0 platinum:MOVE_STRENGTH
-+46 press a
-+1 release a
-+184 press a
-+1 release a
-until idle 6000
+advance text 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B6F"
 +0 press down
 +20 release down
@@ -175,9 +171,7 @@ until idle 6000
 until idle 600
 +0 press left
 +20 release left
-+66 press a
-+1 release a
-until idle 6000
+advance text 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B6F"
 +0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_B6F","x":87,"z":60,"y":1840,"facing":"left"}
 +0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 6
@@ -318,9 +312,7 @@ until idle 6000
 until idle 600
 +0 press up
 +20 release up
-+72 press a
-+1 release a
-until idle 6000
+advance text 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B6F"
 +0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_B6F","x":68,"z":69,"y":1840,"facing":"up"}
 +0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 6
@@ -534,9 +526,7 @@ until idle 6000
 until idle 600
 +0 press down
 +20 release down
-+70 press a
-+1 release a
-until idle 6000
+advance text 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B6F"
 +0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_B6F","x":96,"z":66,"y":1840,"facing":"down"}
 +0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 6
@@ -644,15 +634,7 @@ until idle 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B6F"
 +0 press a
 +1 release a
-+124 press a
-+1 release a
-+134 press a
-+1 release a
-+92 press a
-+1 release a
-+86 press a
-+1 release a
-until idle 6000
+advance text 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B6F"
 +0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_B6F","x":85,"z":79,"y":1840,"facing":"down"}
 +0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 7
@@ -688,9 +670,7 @@ until state player.z 86 400
 +0 release down
 +8 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B6F"
 +223 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
-+161 press a
-+1 release a
-until idle 6000
+advance text 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
 +0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_B7F","x":85,"z":86,"y":1040,"facing":"up"}
 +0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 8

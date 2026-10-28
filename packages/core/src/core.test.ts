@@ -99,6 +99,9 @@ describe('replay', () => {
         'until wild fixture:SPECIES_SKYLET up down 20000',
         'advance text',
         '+0 advance text 300',
+        'advance message',
+        '+0 advance message 300',
+        '+0 tap word:fixture:Words_Text_Everyone',
         '+0 assert battle trainer fixture:TRAINER_A won',
         '+0 assert battle wild * fled',
         '+0 assert battles scripted 2',
@@ -120,11 +123,14 @@ describe('replay', () => {
       { type: 'until', until: { kind: 'wild', species: 'fixture:SPECIES_SKYLET', walk: ['up', 'down'] }, max: 20000 },
       { type: 'advance-text', max: UNTIL_MAX },
       { type: 'advance-text', max: 300 },
+      { type: 'advance-text', max: UNTIL_MAX, close: true },
+      { type: 'advance-text', max: 300, close: true },
+      { type: 'tap', id: 'word:fixture:Words_Text_Everyone' },
       { type: 'assert', what: 'battle', kind: 'trainer', match: 'fixture:TRAINER_A', result: 'won' },
       { type: 'assert', what: 'battle', kind: 'wild', match: null, result: 'fled' },
       { type: 'assert', what: 'battles', kind: 'scripted', count: 2 },
     ]);
-    for (const bad of ['until talk', 'until message 0', 'until position 1', 'until state vars nope', 'until wild', 'until wild SKYLET', 'until wild fixture:SPECIES_SKYLET left', 'until wild fixture:SPECIES_SKYLET left north', 'advance texts', 'assert battle gym fixture:A won', 'assert battle trainer fixture:A draw', 'assert battles wild -1']) {
+    for (const bad of ['until talk', 'until message 0', 'until position 1', 'until state vars nope', 'until wild', 'until wild SKYLET', 'until wild fixture:SPECIES_SKYLET left', 'until wild fixture:SPECIES_SKYLET left north', 'advance texts', 'advance message 300 400', 'assert battle gym fixture:A won', 'assert battle trainer fixture:A draw', 'assert battles wild -1']) {
       expect(() => parseReplay(bad), bad).toThrow(/line 1/);
     }
   });
@@ -160,6 +166,7 @@ describe('replay', () => {
         '0 assert state pokedex.obtained true',
         '+2 assert state battles[0].trainers ["fixture:T1", "fixture:T2"]',
         '+0 assert state items["fixture:ITEM_X"] 1',
+        '+0 assert state party[1].nickname fixture:Text_Name',
       ].join('\n'),
     );
     expect(r.from).toEqual({ line: 2, file: 'cp1.replay' });
@@ -176,6 +183,7 @@ describe('replay', () => {
       { type: 'assert', what: 'state', path: ['pokedex', 'obtained'], source: 'pokedex.obtained', value: true },
       { type: 'assert', what: 'state', path: ['battles', 0, 'trainers'], source: 'battles[0].trainers', value: ['fixture:T1', 'fixture:T2'] },
       { type: 'assert', what: 'state', path: ['items', 'fixture:ITEM_X'], source: 'items["fixture:ITEM_X"]', value: 1 },
+      { type: 'assert', what: 'state', path: ['party', 1, 'nickname'], source: 'party[1].nickname', value: null, name: 'fixture:Text_Name' },
     ]);
     expect(() => parseReplay('0 press a\nfrom x.replay')).toThrow(/line 2: "from <replay>" must be the first line/);
     expect(() => parseReplay('0 press a\nwarp fixture:ROOM 1 2')).toThrow(/line 2: setup lines must come before/);

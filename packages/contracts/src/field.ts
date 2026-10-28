@@ -416,6 +416,11 @@ export interface ScriptView {
    * messages, menus and yes/no boxes are this view's `message`, `menu` and `yesNo`. Absent outside the frontier.
    */
   frontier?: FrontierView;
+  /**
+   * 0.48.1. A script waits for A or B with no "more" arrow (decomp ScrCmd_WaitABPress, ScrCmd_WaitABPadPress): nothing on
+   * the screen shows it; replays' `advance text` presses A for it as for a message waiting for input.
+   */
+  waitsForAB?: true;
   panel: PanelView;
   /**
    * The menu app a script op waits on (0.11.0; decomp: the script waits on a field task that runs the

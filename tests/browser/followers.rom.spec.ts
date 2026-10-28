@@ -8,6 +8,7 @@
  */
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import type { Registries } from '@opensinnoh/contracts';
+import type { Id } from '@opensinnoh/core';
 import { loadGamePacks, runReplay } from '@opensinnoh/game';
 import { mainCanvasStats, pageDriver, waitForScene } from '../../packages/cli/src/browser.ts';
 import { romSlice } from '../rom.ts';
@@ -77,8 +78,10 @@ async function followerStyle(value: number): Promise<void> {
   await page.locator('[data-screen="options"] [data-section="device"]').click();
   await page.evaluate(() => window.openSinnohGame!.advance(2));
   const row = page.locator('[data-setting="followerStyle"]');
-  await expect(row.locator('.options-label')).toHaveText('Follower style');
-  await expect(row.locator('.options-value')).toHaveText(['Still', 'Walk in place']);
+  // The labels in the game's language (the label in its casing: compared without case).
+  const words = (name: string) => registries.texts.get(`platinum:${name}` as Id)!.text;
+  await expect(row.locator('.options-label')).toHaveText(new RegExp(`^${words('Lantern_Options_FollowerStyle')}$`, 'i'));
+  await expect(row.locator('.options-value')).toHaveText([words('Lantern_Options_FollowerStill'), words('Lantern_Options_FollowerWalk')]);
   await row.locator('.options-value').nth(value).click();
   await page.evaluate(() => window.openSinnohGame!.advance(2));
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('lantern-nds:options')!).followerStyle)).toBe(value);

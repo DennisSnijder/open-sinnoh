@@ -27,7 +27,7 @@ until app start-menu
 +1 press a
 +1 release a
 +1 tap slot:2
-+30 assert text platinum:PartyMenu_Text_MonsHPWasRestored 0 0=BIDOOF 1=20
++30 assert text platinum:PartyMenu_Text_MonsHPWasRestored 0 0=platinum:SPECIES_BIDOOF 1=20
 +0 assert state party[0].hp 1
 +0 assert state party[2].hp 21
 +1 press a
@@ -36,14 +36,14 @@ until app start-menu
 +1 tap slot:1
 +1 tap menu:1
 +1 tap slot:2
-+30 assert text platinum:PartyMenu_Text_MonsHPWasRestored 0 0=BIDOOF 1=16
++30 assert text platinum:PartyMenu_Text_MonsHPWasRestored 0 0=platinum:SPECIES_BIDOOF 1=16
 +0 assert state party[2].hp 37
 +1 press a
 +1 release a
 +1 tap slot:1
 +1 tap menu:1
 +1 tap slot:0
-+30 assert text platinum:PartyMenu_Text_MonsHPWasRestored 0 0=CHANSEY 1=16
++30 assert text platinum:PartyMenu_Text_MonsHPWasRestored 0 0=platinum:SPECIES_CHANSEY 1=16
 +0 assert state party[0].hp 17
 +0 assert state party[1].hp 48
 +1 press a

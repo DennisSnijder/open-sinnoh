@@ -162,11 +162,13 @@ test:Buffers::
     d.tick();
     d.tick();
     d.tick();
+    d.until(() => d.vm.view().waitsForAB === true);
     expect(d.vm.view().message?.waitingForInput).toBe(false); // wait_ab_press shows no arrow
     d.press('up');
     expect(d.vm.running()).toBe(true);
     d.press('b');
     d.until(() => !d.vm.running());
+    expect(d.vm.view().waitsForAB).toBeUndefined();
   });
 
   it('message_no_skip: A does not speed it up (canSkipDelay FALSE); message_auto_scroll goes past a scroll by itself', () => {

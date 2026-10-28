@@ -6,7 +6,10 @@
  */
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import type { GameState } from '@opensinnoh/contracts';
+import type { Id } from '@opensinnoh/core';
+import { loadGamePacks } from '@opensinnoh/game';
 import { waitForScene } from '../../packages/cli/src/browser.ts';
+import { romSlice } from '../rom.ts';
 import { seedRomImport } from './seed.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
@@ -19,9 +22,12 @@ test.skip(!ROM, 'OPENSINNOH_NDS_ROM is not set');
 
 let context: BrowserContext;
 let page: Page;
+/** Route 201's name in the game's language. */
+let route201: string;
 
 test.beforeAll(async ({ browser }, info) => {
   test.setTimeout(120_000);
+  route201 = loadGamePacks([romSlice().pack]).registries.zones.get('platinum:MAP_HEADER_ROUTE_201' as Id)!.name;
   const use = info.project.use;
   context = await browser.newContext({ baseURL: use.baseURL, viewport: use.viewport, hasTouch: use.hasTouch, isMobile: use.isMobile, deviceScaleFactor: use.deviceScaleFactor });
   page = await context.newPage();
@@ -99,7 +105,7 @@ test('walking onto Route 201 draws the route signboard in the top-left corner', 
   expect(ticks).toBeGreaterThan(0);
   const popup = await page.evaluate(() => window.openSinnohGame!.snapshot().mapPopup);
   expect(popup).toMatchObject({ window: 'platinum:ui2d/map_popups/route', offset: 0, phase: 'hold' });
-  expect(popup!.name.toUpperCase()).toBe('ROUTE 201');
+  expect(popup!.name).toBe(route201);
 
   // The board loads on first use: poll a few frames.
   let shown = await overlayRegion(...corner);

@@ -50,7 +50,7 @@ describe.skipIf(!ROM)('form round trips: save → load → battle (OPENSINNOH_ND
         { registries: reg, party: [loaded], bag: {}, pc: { current: { box: 0, name: 'BOX 1' }, free: { box: 0, name: 'BOX 1' }, metBebe: false }, met: { zone: null, date: null }, player: { name: 'Lucas', gender: 'male', trainerId: 1, rival: 'Barry' }, money: 0, badges: 8, caught: [], seed: 1, textSpeed: 1, log: new CountingStubLog(() => {}) },
       ) as ReturnType<typeof createBattle> & { sim: SimView };
       const sim = b.sim.p1.active[0]!;
-      const ability = reg.abilities.get(loaded.ability!)!.name.toLowerCase().replace(/[^a-z]/g, '');
+      const ability = loaded.ability!.replace('platinum:ABILITY_', '').toLowerCase().replace(/[^a-z]/g, '');
       expect([sim.species.name, sim.ability]).toEqual([forme, ability]);
       expect(sim.moveSlots.map((m) => m.id)).toContain(move);
       expect(sim.storedStats).toEqual({ atk: loaded.stats.attack, def: loaded.stats.defense, spa: loaded.stats.spAttack, spd: loaded.stats.spDefense, spe: loaded.stats.speed });

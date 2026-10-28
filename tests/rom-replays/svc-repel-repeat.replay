@@ -126,15 +126,14 @@ until position 119 853
 +0 assert state repel 0
 +1 press a
 +1 release a
-until yesno 60
-+0 assert text platinum:Lantern_Repel_UseAnother 0 0=Repel
+advance text 600
+until yesno 600
++0 assert text platinum:Lantern_Repel_UseAnother 0 0=platinum:ITEM_REPEL
 +1 press a
 +1 release a
-until message 60
+until message 600
 +0 assert text platinum:Bag_Text_UsedRepel 0
-+1 press a
-+1 release a
-until idle
+advance text
 +0 assert state repel 100
 +0 assert state bag.items []
 +0 assert battles wild 0

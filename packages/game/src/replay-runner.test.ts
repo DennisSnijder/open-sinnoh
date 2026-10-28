@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_CLOCK, formatClock } from '@opensinnoh/core';
+import { DEFAULT_CLOCK, formatClock, type Id } from '@opensinnoh/core';
 import type { GameSnapshot, Registries } from '@opensinnoh/contracts';
 import { createGame } from './game.ts';
 import { checkAssert, gameDriver, runReplay } from './replay-runner.ts';
@@ -21,6 +21,27 @@ describe('checkAssert text by id', () => {
     expect(checkAssert(a(0), snap(null), registries)).toMatch(/got null/);
     expect(checkAssert(a(5), snap('x'), registries)).toMatch(/no such page/);
     expect(checkAssert({ ...a(0), id: 't:Nope' as never }, snap('x'), registries)).toMatch(/unknown text/);
+  });
+
+  it('a slot value that is a record id stands for its name in the game\'s language, a text id for its words', () => {
+    const named = {
+      texts: new Map([...registries.texts, ['t:Word', { id: 't:Word', text: 'ALLE' }]]),
+      species: new Map([['t:SPECIES_BIDOOF', { name: 'BIDIZA' }]]),
+      items: new Map(),
+      moves: new Map(),
+      abilities: new Map(),
+    } as unknown as Registries;
+    expect(checkAssert(a(0, { 0: 't:SPECIES_BIDOOF' }), snap('Hello, BIDIZA.'), named)).toBeUndefined();
+    expect(checkAssert(a(0, { 0: 't:Word' }), snap('Hello, ALLE.'), named)).toBeUndefined();
+    expect(checkAssert(a(0, { 0: 't:SPECIES_BIDOOF' }), snap('Hello, BIDOOF.'), named)).toMatch(/expected that page/);
+    expect(() => checkAssert(a(0, { 0: 't:SPECIES_NOPE' }), snap('Hello, x.'), named)).toThrow(/no record t:SPECIES_NOPE/);
+  });
+  it('assert state with a record id expects that record\'s words', () => {
+    const named = { texts: new Map([['t:Nick', { id: 't:Nick', text: 'Kadabi' }]]), species: new Map(), items: new Map(), moves: new Map(), abilities: new Map() } as unknown as Registries;
+    const state = (nickname: string) => ({ state: { party: [{ nickname }] } }) as unknown as GameSnapshot;
+    const nick = { type: 'assert' as const, what: 'state' as const, path: ['party', 0, 'nickname'], source: 'party[0].nickname', value: null, name: 't:Nick' as Id };
+    expect(checkAssert(nick, state('Kadabi'), named)).toBeUndefined();
+    expect(checkAssert(nick, state('Kazza'), named)).toBe('assert state party[0].nickname: expected "Kadabi", got "Kazza"');
   });
 });
 
@@ -138,6 +159,16 @@ describe('runReplay (headless, fake world and VM)', () => {
     expect(missing.error).toMatch(/assert battle trainer fixture:TRAINER_NOBODY: no such entry/);
     const stuck = await runReplay(gameDriver(g), 'until position 99 99 10\n', { registries: g.registries });
     expect(stuck.error).toMatch(/^Replay line 1 \(tick 0\): until position 99 99: still not there after 10 ticks \(player fixture:ROOM /);
+  });
+
+  it('advance message answers the box page by page and ends on the tick it closes, as a press a / release a chain does', async () => {
+    const g = game('fixture');
+    const chain = await runReplay(gameDriver(g), ['until message 200', '+0 press a', '+1 release a', '+0 assert message closed'].join('\n'), { registries: g.registries });
+    const close = await runReplay(gameDriver(g), ['until message 200', 'advance message', '+0 assert message closed'].join('\n'), { registries: g.registries });
+    expect(chain).toMatchObject({ ok: true });
+    expect(close).toMatchObject({ ok: true, ticks: chain.ticks, determinism: 'identical' });
+    const stuck = await runReplay(gameDriver(g), ['until message 200', 'advance message', 'advance message 5'].join('\n'), { registries: g.registries });
+    expect(stuck.error).toMatch(/advance message: /);
   });
 
   it('until position reads {path} and {path|k=v} arguments from the state when the step runs, and fails loudly', async () => {

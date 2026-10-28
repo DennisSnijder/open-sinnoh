@@ -8,9 +8,7 @@ until idle 6000
 until state player.z 24 400
 +0 release up
 +8 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
-+58 press a
-+1 release a
-until idle 6000
+advance text 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
 +0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM","x":15,"z":24,"y":16,"facing":"up"}
 +0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 11
@@ -51,9 +49,7 @@ until idle 6000
 until state player.z 14 400
 +0 release up
 +24 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
-+397 press a
-+1 release a
-until idle 6000
+advance text 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
 +0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM","x":15,"z":14,"y":16,"facing":"up"}
 +0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 13
@@ -70,75 +66,7 @@ until idle 6000
 +1 release a
 +16 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
 battle auto 30000
-+144 press a
-+1 release a
-+47 press a
-+1 release a
-+71 press a
-+1 release a
-+176 press a
-+1 release a
-+116 press a
-+1 release a
-+118 press a
-+1 release a
-+98 press a
-+1 release a
-+124 press a
-+1 release a
-+72 press a
-+1 release a
-+55 press a
-+1 release a
-+50 press a
-+1 release a
-+120 press a
-+1 release a
-+140 press a
-+1 release a
-+72 press a
-+1 release a
-+120 press a
-+1 release a
-+21 press a
-+1 release a
-+69 press a
-+1 release a
-+110 press a
-+1 release a
-+126 press a
-+1 release a
-+34 press a
-+1 release a
-+124 press a
-+1 release a
-+124 press a
-+1 release a
-+80 press a
-+1 release a
-+118 press a
-+1 release a
-+130 press a
-+1 release a
-+102 press a
-+1 release a
-+46 press a
-+1 release a
-+139 press a
-+1 release a
-+80 press a
-+1 release a
-+84 press a
-+1 release a
-+49 press a
-+1 release a
-+120 press a
-+1 release a
-+142 press a
-+1 release a
-+116 press a
-+1 release a
-until idle 6000
+advance text 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM"
 +0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_GIRATINA_ROOM","x":15,"z":14,"y":16,"facing":"down"}
 +0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 14
@@ -152,32 +80,14 @@ until idle 6000
 +0 press up
 +1 release up
 until idle 600
+# the portal: go through (yes), then the talk at Sendoff Spring
 +0 press a
 +1 release a
-+138 press a
+advance text
+until yesno
++0 press a
 +1 release a
-+57 press a
-+1 release a
-+23 assert state player.zone "platinum:MAP_HEADER_SENDOFF_SPRING"
-+49 press a
-+1 release a
-+101 press a
-+1 release a
-+96 press a
-+1 release a
-+144 press a
-+1 release a
-+102 press a
-+1 release a
-+122 press a
-+1 release a
-+116 press a
-+1 release a
-+100 press a
-+1 release a
-+128 press a
-+1 release a
-until idle 6000
+advance text 6000
 +6 assert state player.zone "platinum:MAP_HEADER_SENDOFF_SPRING"
 +0 assert state player {"zone":"platinum:MAP_HEADER_SENDOFF_SPRING","x":32,"z":17,"y":32,"facing":"left"}
 +0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 14

@@ -28,6 +28,7 @@ until menu 600
 +1 release down
 +2 press a
 +1 release a
+advance text 600
 until yesno 600
 +0 assert text platinum:VeilstoneCityPrizeExchange_Text_IsYourChoiceThisTM 0
 +4 press a
@@ -38,6 +39,7 @@ until menu 600
 +0 assert state bag.tmhms[item="platinum:ITEM_TM58"].count 1
 +4 press a
 +1 release a
+advance text 600
 until yesno 600
 +4 press a
 +1 release a

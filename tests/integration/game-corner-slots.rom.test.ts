@@ -2,4 +2,4 @@
 import { describe } from 'vitest';
 import { gameCornerReplay } from './game-corner-replays.ts';
 
-describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('Game Corner: slots (OPENSINNOH_NDS_ROM)', () => gameCornerReplay('sys-game-corner-slots'));
+describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('Game Corner: slots (OPENSINNOH_NDS_ROM)', () => gameCornerReplay('sys-game-corner-slots', ['scr_cmd_267']));

@@ -15,7 +15,8 @@ until yesno
 +0 press a
 +1 release a
 # "Which Pokémon's nickname should I critique?" waits for A or B without an arrow (wait_ab_press)
-+90 press a
+until message 600
++0 press a
 +1 release a
 until app party
 +0 assert app party
@@ -34,7 +35,8 @@ until yesno
 +0 press a
 +1 release a
 # "Which Pokémon's nickname should I critique?" waits for A or B without an arrow (wait_ab_press)
-+90 press a
+until message 600
++0 press a
 +1 release a
 until app party
 +0 screenshot pick

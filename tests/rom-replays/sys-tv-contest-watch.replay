@@ -22,7 +22,7 @@ until message 300
 +0 press a
 +1 release a
 until message 300
-+0 assert text platinum:TVProgramInterviews_Text_ContestHall_Win 0 0=STARAVIA
++0 assert text platinum:TVProgramInterviews_Text_ContestHall_Win 0 0=platinum:SPECIES_STARAVIA
 +0 assert state tv.played [1]
 +0 assert state tv.interviews[0].plays 1
 advance text 3000

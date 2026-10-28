@@ -692,6 +692,7 @@ until idle
 until idle
 +1 press a
 +1 release a
+advance text
 until yesno
 +1 press a
 +1 release a

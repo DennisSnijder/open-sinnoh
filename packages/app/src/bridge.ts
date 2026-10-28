@@ -6,15 +6,15 @@
  */
 import type { Button, Id, UntilCondition } from '@opensinnoh/core';
 import type { DeviceOptions, GameSnapshot, OpenSinnohBridge } from '@opensinnoh/contracts';
-import { advanceText, battleAuto, battleCatch, grind, runUntil, saveToJson, type UntilTarget } from '@opensinnoh/game';
+import { advanceMessage, advanceText, battleAuto, battleCatch, grind, runUntil, saveToJson, type UntilTarget } from '@opensinnoh/game';
 import type { Session } from './boot.ts';
 import type { InputState } from './input.ts';
 
 export interface AppBridge extends OpenSinnohBridge {
   /** `until …` (game `runUntil`): the ticks advanced, or null after `max`. */
   until(until: UntilCondition, max: number): number | null;
-  /** `advance text` (game `advanceText`): the ticks advanced, or null after `max`. */
-  advanceText(max: number): number | null;
+  /** `advance text` (game `advanceText`), or with `close` `advance message` (game `advanceMessage`): the ticks advanced, or null after `max`. */
+  advanceText(max: number, close?: boolean): number | null;
   /** `battle auto` (game `battleAuto`): the ticks advanced, or null when it failed. */
   battleAuto(max: number, move?: number): number | null;
   /** `grind` (game `grind`): the ticks advanced, or null when it failed. */
@@ -81,7 +81,7 @@ export function createBridge(deps: {
       return save ? saveToJson(save) : null;
     },
     until: (until, max) => runUntil(target, until, max),
-    advanceText: (max) => advanceText(target, max),
+    advanceText: (max, close) => (close ? advanceMessage : advanceText)(target, max),
     battleAuto: (max, move) => battleAuto(target, max, move),
     grind: (slot, level, dirs, max) => grind(target, slot, level, dirs, max),
     battleCatch: (ball, max) => battleCatch(target, ball, max),

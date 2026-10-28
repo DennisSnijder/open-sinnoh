@@ -9,7 +9,7 @@ import { DEV_EVENTS, giveItem, grantDevEvent, markCaught, MONEY_MAX, setupPokemo
 import type { Game } from './game.ts';
 import { canonicalState } from './save.ts';
 import { saveFromJson, saveToJson } from './storage.ts';
-import { advanceText, battleAuto, battleCatch, grind, runUntil, type UntilTarget } from './until.ts';
+import { advanceMessage, advanceText, battleAuto, battleCatch, grind, runUntil, type UntilTarget } from './until.ts';
 import { allowTestGiftCodes } from '@opensinnoh/services';
 
 type MaybePromise<T> = T | Promise<T>;
@@ -32,8 +32,8 @@ export interface ReplayDriver {
   resetSave(): MaybePromise<string | null>;
   /** `until …` (see `runUntil`): the ticks advanced, or null when the condition still fails after `max`. */
   until(until: UntilCondition, max: number): MaybePromise<number | null>;
-  /** `advance text` (see `advanceText`): the ticks advanced, or null after `max`. */
-  advanceText(max: number): MaybePromise<number | null>;
+  /** `advance text` (see `advanceText`), or with `close` `advance message` (`advanceMessage`): the ticks advanced, or null after `max`. */
+  advanceText(max: number, close?: boolean): MaybePromise<number | null>;
   /** `field move <slot> <move>` (game `useFieldMove`). */
   fieldMove(slot: number, move: Id): MaybePromise<void>;
   /** The `date`/`time` lines (game `setClock`: freezes the clock; a reset restores the game's clock option). */
@@ -139,7 +139,7 @@ export function gameDriver(game: Game): ReplayDriver {
       return save ? saveToJson(save) : null;
     },
     until: (until, max) => runUntil(untilTarget(game), until, max),
-    advanceText: (max) => advanceText(untilTarget(game), max),
+    advanceText: (max, close) => (close ? advanceMessage : advanceText)(untilTarget(game), max),
     fieldMove: (slot, move) => game.useFieldMove(slot, move),
     setClock: (date, time) => game.setClock(date, time),
     battleChoose: (choice) => game.battleChoose(choice),
@@ -335,9 +335,9 @@ async function playReplay(run: Run, replay: Replay, name: string | undefined, ma
             throw new Error(`${where}: ${(e as Error).message}`, { cause: e });
           }
         }
-        const n = until ? await driver.until(until, a.max) : await driver.advanceText(a.max);
+        const n = until ? await driver.until(until, a.max) : await driver.advanceText(a.max, a.type === 'advance-text' && a.close);
         if (n === null) {
-          const what = until ? `until ${untilText(until)}` : 'advance text';
+          const what = until ? `until ${untilText(until)}` : a.type === 'advance-text' && a.close ? 'advance message' : 'advance text';
           throw new Error(`${where}: ${what}: still ${until && until.kind !== 'idle' ? 'not there' : 'busy'} after ${a.max} ticks${await stateHint(driver)}`);
         }
         cursor += n;
@@ -518,6 +518,20 @@ function firstDifference(a: string, b: string): string {
 
 type Assert = Extract<ReplayAction, { type: 'assert' }>;
 
+/**
+ * An `assert text` slot value: a record id (`ns:NAME`) stands for that record's name in the game's language (a
+ * species, item, move or ability) or a text record's words; anything else is the slot's text itself.
+ */
+function slotValue(value: string, registries: Registries): string {
+  if (!/^[a-z0-9-]+:/.test(value)) return value;
+  const id = value as Id;
+  const named = registries.species.get(id) ?? registries.items.get(id) ?? registries.moves.get(id) ?? registries.abilities.get(id);
+  if (named) return named.name;
+  const text = registries.texts.get(id);
+  if (!text) throw new Error(`assert text: no record ${id} for a slot`);
+  return text.text;
+}
+
 /** Returns a failure message, or undefined when the assertion holds. */
 export function checkAssert(a: Assert, snap: GameSnapshot, registries: Registries): string | undefined {
   const s = snap.state;
@@ -553,7 +567,7 @@ export function checkAssert(a: Assert, snap: GameSnapshot, registries: Registrie
       const escape = (t: string) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const source = page.split(/(\{var \d+\})/).map((part) => {
         const v = /^\{var (\d+)\}$/.exec(part);
-        if (v) return a.vars[Number(v[1])] !== undefined ? escape(a.vars[Number(v[1])]!) : '[^\\n]*';
+        if (v) return a.vars[Number(v[1])] !== undefined ? escape(slotValue(a.vars[Number(v[1])]!, registries)) : '[^\\n]*';
         if (/\{[^}]*\}/.test(part)) throw new Error(`assert text ${a.id} ${a.page}: the page has a control code other than {var n}`);
         return escape(part);
       });
@@ -570,7 +584,8 @@ export function checkAssert(a: Assert, snap: GameSnapshot, registries: Registrie
       // `battles…` reads the battle log, `mapPopup…` the popup and `app…` the open app's view next to the state; everything else reads GameState.
       const root = a.path[0] === 'battles' ? { battles: snap.battles } : a.path[0] === 'mapPopup' ? { mapPopup: snap.mapPopup } : a.path[0] === 'app' ? { app: snap.app } : s;
       const actual = readStatePath(root, a.path);
-      return jsonEqual(a.value, actual) ? undefined : `assert state ${a.source}: expected ${JSON.stringify(a.value)}, got ${actual === undefined ? 'nothing' : JSON.stringify(actual)}`;
+      const value = a.name ? slotValue(a.name, registries) : a.value;
+      return jsonEqual(value, actual) ? undefined : `assert state ${a.source}: expected ${JSON.stringify(value)}, got ${actual === undefined ? 'nothing' : JSON.stringify(actual)}`;
     }
     case 'battle': {
       const entries = snap.battles.filter((b) => b.kind === a.kind && (a.match === null || (b.trainers.includes(a.match) || b.species.includes(a.match))));

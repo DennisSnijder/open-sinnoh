@@ -1123,6 +1123,7 @@ until position 8 6 600
 until idle
 +0 press a
 +1 release a
+advance text 600
 until yesno 600
 +0 assert text platinum:GalacticHQControlRoom_Text_AskPressButton 0
 +0 press a

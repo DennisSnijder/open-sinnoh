@@ -16,26 +16,22 @@ until yesno
 until app easy-chat
 +1 tap slot:0
 +1 tap group:4
-+1 tap word:6
++1 tap word:platinum:PeopleWords_Text_Everyone
 +1 tap slot:1
 +1 tap group:7
-+1 tap word:20
++1 tap word:platinum:Feelings_Text_Happy
 +1 tap yes
 until app none
 until message
 +0 assert text platinum:JubilifeTV3F_Text_WhatFeedbackCanYouGive 0
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until app easy-chat
+advance text
++0 assert app easy-chat
 +1 tap slot:0
 +1 tap group:7
-+1 tap word:20
++1 tap word:platinum:Feelings_Text_Happy
 +1 tap slot:1
 +1 tap group:4
-+1 tap word:6
++1 tap word:platinum:PeopleWords_Text_Everyone
 +1 tap yes
 until app none
 until message
@@ -52,25 +48,21 @@ until yesno
 until app easy-chat
 +1 tap slot:0
 +1 tap group:4
-+1 tap word:6
++1 tap word:platinum:PeopleWords_Text_Everyone
 +1 tap slot:1
 +1 tap group:7
-+1 tap word:20
++1 tap word:platinum:Feelings_Text_Happy
 +1 tap yes
 until app none
 until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until app easy-chat
+advance text
++0 assert app easy-chat
 +1 tap slot:0
 +1 tap group:9
-+1 tap word:22
++1 tap word:platinum:UnionWords_Text_WiFi
 +1 tap slot:1
 +1 tap group:9
-+1 tap word:3
++1 tap word:platinum:UnionWords_Text_Connection
 +1 tap yes
 until app none
 until message

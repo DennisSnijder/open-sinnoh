@@ -38,8 +38,8 @@ advance text
 until yesno 600
 +2 press a
 +1 release a
-+300 press a
-+1 release a
+# The save, then "show you to the battle room" (wait_ab_press)
+advance message 1200
 until state player.zone "platinum:MAP_HEADER_BATTLE_TOWER_ELEVATOR" 1200
 +2000 press a
 +1 release a
@@ -54,6 +54,7 @@ until menu 3000
 +1 release down
 +10 press a
 +1 release a
+advance text 600
 until yesno 600
 +10 press up
 +1 release up

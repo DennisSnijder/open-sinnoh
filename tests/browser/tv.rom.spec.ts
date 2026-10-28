@@ -7,7 +7,10 @@
  */
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import type { GameSnapshot, Registries } from '@opensinnoh/contracts';
+import type { Id } from '@opensinnoh/core';
 import { loadGamePacks, runReplay } from '@opensinnoh/game';
+import { plainText } from '@opensinnoh/menus';
+import { easyChatWordText } from '@opensinnoh/services';
 import { pageDriver } from '../../packages/cli/src/browser.ts';
 import { romSlice } from '../rom.ts';
 import { seedRomImport } from './seed.ts';
@@ -46,8 +49,10 @@ test('import the ROM', async () => {
   await page.waitForFunction(() => window.openSinnohGame?.ready === true, undefined, { timeout: 60_000 });
 });
 
+/** The interview's Easy Chat word. */
+const WORD = 1177;
 const SETUP = `party 0 platinum:SPECIES_STARAVIA 20 platinum:MOVE_WING_ATTACK platinum:MOVE_QUICK_ATTACK
-set state tv.interviews[0] {"data":{"kind":"contest","species":"platinum:SPECIES_STARAVIA","type":0,"rank":0,"placement":1,"word":1177},"plays":0}
+set state tv.interviews[0] {"data":{"kind":"contest","species":"platinum:SPECIES_STARAVIA","type":0,"rank":0,"placement":1,"word":${WORD}},"plays":0}
 warp platinum:MAP_HEADER_CANALAVE_CITY_EAST_HOUSE 6 4 up
 time 14:20
 until idle
@@ -116,7 +121,7 @@ test('the TV shows the programme and the Contest Hall segment in the field messa
   expect(box.w).toBeGreaterThan(0);
   expect(box.x).toBeGreaterThanOrEqual(-0.5);
   expect(box.x + box.w).toBeLessThanOrEqual(box.vw + 0.5);
-  // Its pages name Staravia and the answer.
+  // Its pages name Staravia and the answer, as the ROM writes them.
   const pages: string[] = [];
   for (let i = 0; i < 60 && (await snapshot()).scriptRunning; i++) {
     const m = (await snapshot()).view.message;
@@ -127,7 +132,7 @@ test('the TV shows the programme and the Contest Hall segment in the field messa
     else await ticks(30);
   }
   expect((await snapshot()).scriptRunning).toBe(false);
-  expect(pages.join(' ')).toContain('STARAVIA');
-  expect(pages.join(' ')).toContain('EVERYONE');
+  expect(pages.join(' ')).toContain(registries.species.get('platinum:SPECIES_STARAVIA' as Id)!.name);
+  expect(pages.join(' ')).toContain(plainText(registries.texts.get(easyChatWordText(registries, WORD))!.text));
   expect(errors).toEqual([]);
 });

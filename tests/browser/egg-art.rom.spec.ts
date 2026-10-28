@@ -85,7 +85,7 @@ until app storage
 `);
     await expectEgg(page, '.box-preview-pic canvas', png, egg.front.y);
     // The DS heads an Egg's preview with its nickname and leaves the name line empty.
-    await expect(page.locator('.box-preview-species')).toHaveText('Egg');
+    await expect(page.locator('.box-preview-species')).toHaveText(registries.species.get('platinum:SPECIES_EGG' as Id)!.name);
     await expect(page.locator('.box-preview-name')).toHaveText('');
   });
 }

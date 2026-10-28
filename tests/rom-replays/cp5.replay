@@ -247,6 +247,7 @@ until idle
 +0 assert facing player right
 +0 press a
 +1 release a
+advance text
 until yesno
 +0 press a
 +1 release a
@@ -573,7 +574,7 @@ until position 12 15
 until state player.zone "platinum:MAP_HEADER_VALLEY_WINDWORKS_OUTSIDE" 3000
 +0 release down
 +0 release b
-advance text
+advance text 3600
 until idle
 # end of CP5: Looker has left the Windworks (the browser spec's beat)
 +0 screenshot windworks-end

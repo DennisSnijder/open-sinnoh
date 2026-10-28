@@ -15,6 +15,8 @@ import { romSlice } from '../rom.ts';
 import { seedRomImport } from './seed.ts';
 import { settle } from './settle.ts';
 import { pageDriver } from '../../packages/cli/src/browser.ts';
+import { plainText } from '../../packages/app/src/ui/strings.ts';
+import { fixedPart } from './words.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 const SHOTS = 'test-artifacts/evolve-rom';
@@ -48,18 +50,19 @@ test.afterAll(async () => {
 
 /** Steps the game until the evolution scene swaps (B could stop it) or "Congratulations!" waits, then `extra` ticks more. */
 async function stepUntil(phase: 'swap' | 'congratulations', extra: number): Promise<EvolutionView> {
+  const congratulations = fixedPart((...slots) => plainText(registries.texts.get('platinum:BattleStrings_Text_CongratulationsYourPokemonEvolvedIntoPokemon' as never)!.text, slots));
   const view = await page.evaluate(
-    ([p, n]) => {
+    ([p, n, done]) => {
       const g = window.openSinnohGame!;
       for (let i = 0; i < 1200; i++) {
         const v = g.snapshot().app;
-        if (v?.app === 'evolution' && (p === 'swap' ? v.cancellable : v.message?.waiting && v.message.text.includes('Congratulations'))) break;
+        if (v?.app === 'evolution' && (p === 'swap' ? v.cancellable : v.message?.waiting && v.message.text.includes(done))) break;
         g.advance(1);
       }
       g.advance(n);
       return JSON.stringify(g.snapshot().app);
     },
-    [phase, extra] as const,
+    [phase, extra, congratulations] as const,
   );
   return JSON.parse(view) as EvolutionView;
 }

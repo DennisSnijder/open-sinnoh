@@ -9,6 +9,7 @@ until idle
 +0 screenshot hq-contained
 +0 press a
 +1 release a
+advance text
 until yesno
 +0 press b
 +1 release b
@@ -17,6 +18,7 @@ until idle
 +0 assert flag platinum:FLAG_FREED_GALACTIC_HQ_POKEMON false
 +0 press a
 +1 release a
+advance text
 until yesno
 +0 press a
 +1 release a

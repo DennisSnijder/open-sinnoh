@@ -74,7 +74,8 @@ until state app.message null 400
 +1 tap seal-up
 +1 assert state sealCase.capsules[0].length 2
 +0 assert state sealCase.capsules[0][1] {"seal":1,"x":170,"y":58}
-until state app.message.text "Choose a capsule." 60
+# The finished message shows for 20 ticks, then the editor asks for a capsule again.
++22 assert text platinum:pl_msg_00000008_00007 0
 # SET: the party in its BALL_SEAL mode, SET on Staravia.
 +1 press a
 +1 release a

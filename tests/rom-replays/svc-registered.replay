@@ -15,9 +15,7 @@ until message
 +0 assert message open
 +0 assert text platinum:Bag_Text_KeyItemInfo 0
 +0 assert state playerState "walk"
-+1 press a
-+1 release a
-until idle
+advance text
 +0 assert message closed
 # The bag: KEY ITEMS, the Bicycle, REGISTER (USE, REGISTER, CANCEL)
 +1 press x

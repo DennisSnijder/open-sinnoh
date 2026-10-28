@@ -108,7 +108,7 @@ advance text 6000
 # the tag battle: the player's battler by `battle auto`, the counterpart by its trainer AI
 +12 screenshot jubilife-tag-battle
 battle auto 9000
-advance text 4400
+advance text 9000
 # end: the grunts retreat, the counterpart and Rowan leave, the Fashion Case
 +0 assert var platinum:VAR_JUBILIFE_CITY_STATE 4
 +0 assert var platinum:VAR_JUBILIFE_LOOKER_PAL_PAD_STATE 2

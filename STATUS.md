@@ -4,7 +4,7 @@ OpenSinnoh is in beta. Pokémon Platinum (US, rev 0) plays from a new game throu
 Fame and the credits, and on into the post-game. What's next is in [ROADMAP.md](ROADMAP.md); the design
 decisions are in [docs/decisions.md](docs/decisions.md).
 
-Versions: contracts 0.48.0, importer `platinum-111`, HeartGold follower add-on `hgss-followers-4`.
+Versions: contracts 0.48.1, importer `platinum-111`, HeartGold follower add-on `hgss-followers-4`.
 
 ## Works
 

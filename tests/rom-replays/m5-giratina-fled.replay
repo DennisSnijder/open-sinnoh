@@ -28,32 +28,14 @@ until idle 6000
 +0 press up
 +1 release up
 until idle 600
+# the portal: go through (yes), then the talk at Sendoff Spring
 +0 press a
 +1 release a
-+138 press a
+advance text
+until yesno
++0 press a
 +1 release a
-+57 press a
-+1 release a
-+23 assert state player.zone "platinum:MAP_HEADER_SENDOFF_SPRING"
-+49 press a
-+1 release a
-+101 press a
-+1 release a
-+96 press a
-+1 release a
-+144 press a
-+1 release a
-+102 press a
-+1 release a
-+122 press a
-+1 release a
-+116 press a
-+1 release a
-+100 press a
-+1 release a
-+128 press a
-+1 release a
-until idle 6000
+advance text 6000
 +6 assert state player.zone "platinum:MAP_HEADER_SENDOFF_SPRING"
 +0 assert state player {"zone":"platinum:MAP_HEADER_SENDOFF_SPRING","x":32,"z":17,"y":32,"facing":"left"}
 +0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 14
