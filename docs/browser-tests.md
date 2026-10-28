@@ -9,6 +9,11 @@ OPENSINNOH_TEST_WORKERS=4 pnpm test:browser tests/browser/debug.spec.ts
 pnpm test:browser:changed --list
 ```
 
+On Windows, Chromium is found in `%LOCALAPPDATA%\ms-playwright`. Check the repo out with LF line endings
+(`git config core.autocrlf false` before checking out): several specs read the replay files line by line. On many
+cores, set `OPENSINNOH_TEST_WORKERS` (8 on a 24-core machine): the default starts more software-GL browsers than the
+CPU can draw for, and specs time out.
+
 Without `OPENSINNOH_NDS_ROM`, ROM specs skip. `tools/browser-server.ts` builds once
 with `vite.browser.config.ts`, then serves static Vite preview files and fixture
 pack endpoints. It already did this before the runner tuning. The browser-only

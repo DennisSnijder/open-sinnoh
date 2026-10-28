@@ -8,6 +8,7 @@
  *   sweep <pack> [--zones regex] [--ticks n]             load every playable zone headless; errors and stubs per zone
  */
 import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { createServer } from 'vite';
 import { checkPack, checkSummary } from './check.ts';
 import { coverageReport, coverageSummary } from './coverage.ts';
@@ -130,7 +131,8 @@ export async function main(argv: readonly string[]): Promise<number> {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run as a script (a file URL on every OS: `file:///D:/…` on Windows).
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main(process.argv.slice(2)).then(
     (code) => process.exit(code),
     (e: Error) => {
