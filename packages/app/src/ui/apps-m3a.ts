@@ -12,6 +12,7 @@ import { at, atTiles, board, boardContext, dsPair } from './board.ts';
 import { el } from './core.ts';
 import type { Palette } from './pixel-font.ts';
 import { bgPicture, sprite, tapButton } from './sprites.ts';
+import { S } from '../strings/index.ts';
 
 /** Front: ID, name, money, Pokédex, score (17 tiles wide), time, adventure started (28 tiles) at card_text.c's windows; `started` is the last. */
 const FRONT_ROWS: [y: number, w: number][] = [[32, 136], [48, 136], [72, 136], [96, 136], [120, 136], [144, 224], [160, 224]];
@@ -74,7 +75,7 @@ function onPenUp(e: PointerEvent): void {
 
 function signaturePad(d: DrawContext, hex: string | null): HTMLElement {
   const pad = el('div', 'signature-pad', signatureCanvas(hex, d.unit));
-  pad.setAttribute('aria-label', 'Signature: draw with the pointer');
+  pad.setAttribute('aria-label', S.aria.signature);
   pad.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     if (stroke) return;

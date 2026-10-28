@@ -27,6 +27,7 @@ import './ui.css';
 import './apps.css';
 import './apps-m3a.css';
 import './naming.css';
+import { S } from '../strings/index.ts';
 
 export interface UiDeps {
   /** The #game element; the UI adds its own layer. */
@@ -158,12 +159,12 @@ export function mountUi(deps: UiDeps): InGameUi {
     b.addEventListener('click', onClick);
     return b;
   };
-  const watchButton = hudButton('watch', 'Watch', () => api.togglePoketch());
-  const menuButton = hudButton('menu', 'Start menu', () => api.openStartMenu());
+  const watchButton = hudButton('watch', S.aria.hud.watch, () => api.togglePoketch());
+  const menuButton = hudButton('menu', S.aria.hud.menu, () => api.openStartMenu());
   // Fast-forward on touch screens (keyboards and pads hold Tab or the trigger): a toggle, usable mid-event.
-  const fastButton = hudButton('fast', 'Fast-forward', () => deps.fastForward!.toggle());
+  const fastButton = hudButton('fast', S.aria.hud.fast, () => deps.fastForward!.toggle());
   fastButton.hidden = true;
-  const fullscreenButton = hudButton('fullscreen', 'Fullscreen', () => deps.fullscreen!.toggle());
+  const fullscreenButton = hudButton('fullscreen', S.aria.hud.fullscreen, () => deps.fullscreen!.toggle());
   fullscreenButton.hidden = !deps.fullscreen;
   fullscreenButton.setAttribute('aria-pressed', 'false');
   document.addEventListener('fullscreenchange', () => fullscreenButton.setAttribute('aria-pressed', String(!!deps.fullscreen?.active())));

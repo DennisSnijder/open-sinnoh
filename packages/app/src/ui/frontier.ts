@@ -19,8 +19,9 @@
  * The sprites animate on the canvas between views. Packs without the art (the fixture) get flat colours in the same
  * places.
  */
-import { newGameRecord, type ArcadeView, type CastleMonView, type CastleView, type FactoryView, type FrontierRecordsView, type HallBoardView, type Ui2dSheet } from '@opensinnoh/contracts';
+import { dexOf, newGameRecord, type ArcadeView, type CastleMonView, type CastleView, type FactoryView, type FrontierRecordsView, type HallBoardView, type Ui2dSheet } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
+import { levelMark } from '@opensinnoh/text';
 import { framed, messageBox, stop, type DrawContext } from './apps.ts';
 import type { Art } from './art.ts';
 import { hpColor, ICON_ANIM } from './art.ts';
@@ -29,6 +30,7 @@ import { layoutScene, place, sceneContext } from './evolution.ts';
 import { DsScene } from './journal.ts';
 import type { Palette } from './pixel-font.ts';
 import './frontier.css';
+import { S as words } from '../strings/index.ts';
 
 const W = 256;
 const H = 192;
@@ -196,7 +198,7 @@ const animTicks = () => Math.floor(performance.now() / (1000 / 30));
 
 class FactoryScene extends FrontierScene<FactoryView> {
   constructor(art: Art) {
-    super(art, 'factory-app', 'Battle Factory: rental Pokémon');
+    super(art, 'factory-app', words.aria.factory);
   }
 
   protected paint(d: DrawContext, v: FactoryView): void {
@@ -266,7 +268,7 @@ class FactoryScene extends FrontierScene<FactoryView> {
     if (v.stage === 'pick' || v.stage === 'receive') {
       v.balls.forEach((b, i) => {
         const button = stop(d, `ball:${i}`, [], 'frontier-ball', !v.cursor.menu && v.cursor.x === b.x && v.cursor.y === b.y);
-        button.setAttribute('aria-label', `Poké Ball ${i + 1}${b.picked ? ' (picked)' : ''}`);
+        button.setAttribute('aria-label', words.aria.ball(i + 1, !!b.picked));
         place(button, { x: b.x - 16, y: b.y - 16, w: 32, h: 32 });
         parts.push(button);
       });
@@ -288,7 +290,7 @@ class FactoryScene extends FrontierScene<FactoryView> {
 
 class HallBoardScene extends FrontierScene<HallBoardView> {
   constructor(art: Art) {
-    super(art, 'hall-board', 'Battle Hall: choose a type');
+    super(art, 'hall-board', words.aria.hall);
   }
 
   private rect(cell: number): { x: number; y: number; w: number; h: number } {
@@ -336,7 +338,7 @@ class HallBoardScene extends FrontierScene<HallBoardView> {
       // The cells as buttons (taps `cell:<i>`), the type name and rank drawn in them at their DS places.
       const r = this.rect(i);
       const b = stop(d, `cell:${i}`, [], 'frontier-cell', v.cursor === i);
-      b.setAttribute('aria-label', c.rank === null ? c.label || 'Summary' : `${c.label} rank ${c.rank}`);
+      b.setAttribute('aria-label', c.rank === null ? c.label || words.aria.summary : words.aria.rank(c.label, c.rank));
       place(b, r);
       parts.push(b);
       if (c.label) {
@@ -458,7 +460,7 @@ function castleBarAnim(m: CastleMonView): number {
 
 class CastleScene extends FrontierScene<CastleView> {
   constructor(art: Art) {
-    super(art, 'castle-app', 'Battle Castle');
+    super(art, 'castle-app', words.aria.castle);
   }
 
   /** A sprite animation of the apps' sheet at (x, y), or the flat stand-in without the art. */
@@ -563,9 +565,10 @@ class CastleScene extends FrontierScene<CastleView> {
     return { ...v, sparkle: undefined };
   }
 
-  /** The level mark and number at x, the gender symbol at `gender` (decomp PrintMonLevelAndGender). */
+  /** The level mark (the game language's) and number at x, the gender symbol at `gender` (decomp PrintMonLevelAndGender). */
   private level(d: DrawContext, m: CastleMonView, x: number, gender: number, y: number): HTMLElement[] {
-    const parts = [line(d, 'Lv', x, y), line(d, String(m.level), x + 16, y)];
+    const mark = levelMark(dexOf(d.registries).language);
+    const parts = [line(d, mark, x, y), line(d, String(m.level), x + 16, y)];
     if (m.gender !== 'none') parts.push(line(d, m.gender === 'male' ? '♂' : '♀', gender, y, m.gender));
     return parts;
   }
@@ -613,9 +616,9 @@ class CastleScene extends FrontierScene<CastleView> {
         const P = CASTLE_TEXT.panel;
         for (const l of v.lines ?? []) parts.push(line(d, l.text, P.x + l.x, P.y + l.y, 'ink', l.align));
         // The panel's taps: the side strips page through the Pokémon (left, right), the body goes back (A, B).
-        tap('page:-1', 'Previous Pokémon', CASTLE_TAPS.pageLeft);
-        tap('page:1', 'Next Pokémon', CASTLE_TAPS.pageRight);
-        tap('next', 'Back', CASTLE_TAPS.panel);
+        tap('page:-1', words.aria.previousMon, CASTLE_TAPS.pageLeft);
+        tap('page:1', words.aria.nextMon, CASTLE_TAPS.pageRight);
+        tap('next', words.aria.back, CASTLE_TAPS.panel);
       }
     }
     // Choosing a Pokémon or EXIT (taps `mon:<i>`, `exit`).
@@ -673,7 +676,7 @@ class ArcadeScene extends FrontierScene<ArcadeView> {
   private buttonState = { state: -1, since: 0 };
 
   constructor(art: Art) {
-    super(art, 'arcade-app', 'Battle Arcade');
+    super(art, 'arcade-app', words.aria.arcade);
     this.button.className = 'frontier-stop-art';
     this.button.setAttribute('aria-hidden', 'true');
   }
@@ -761,7 +764,7 @@ class ArcadeScene extends FrontierScene<ArcadeView> {
     const art = newGameRecord(d.registries).frontier?.arcade.art ?? null;
     // The touch screen's STOP (tap `stop`; A stops the board too).
     const b = stop(d, 'stop', [], `frontier-stop${art ? '' : ' is-flat'}`, false);
-    b.setAttribute('aria-label', 'Stop');
+    b.setAttribute('aria-label', words.aria.stop);
     b.dataset.state = String(v.button);
     b.disabled = v.button !== 0;
     place(b, { x: S.x - S.r, y: S.y - S.r, w: 2 * S.r, h: 2 * S.r });
@@ -810,7 +813,7 @@ const recordsScenes = new WeakMap<Art, DsScene>();
  */
 export function frontierRecords(d: DrawContext, v: FrontierRecordsView): HTMLElement {
   let scene = recordsScenes.get(d.art);
-  if (!scene || !scene.root.isConnected) recordsScenes.set(d.art, (scene = new DsScene(d.art, 'frontier-records', 'Battle Frontier records')));
+  if (!scene || !scene.root.isConnected) recordsScenes.set(d.art, (scene = new DsScene(d.art, 'frontier-records', words.aria.records)));
   const s = scene;
   s.redraw = () => frontierRecords(d, v);
   layoutScene(d, s.root, s.stage);
@@ -835,7 +838,7 @@ export function frontierRecords(d: DrawContext, v: FrontierRecordsView): HTMLEle
     back.type = 'button';
     back.tabIndex = -1;
     back.dataset.tap = 'back';
-    back.setAttribute('aria-label', 'Close');
+    back.setAttribute('aria-label', words.aria.close);
     back.addEventListener('click', () => d.tap('back'));
     place(back, { x: 0, y: 0, w: W, h: H });
     s.boxes.replaceChildren(text, back);

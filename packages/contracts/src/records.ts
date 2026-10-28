@@ -1009,6 +1009,11 @@ export interface NewGame {
   label?: Id;
   names: { player: string; rival: string };
   gender: 'male' | 'female';
+  /**
+   * The game's Gen 4 language id (0.48.2; decomp GAME_LANGUAGE: 2 English, 5 German): the language of the Pokémon
+   * the game creates and the player's own in the outsider check. Absent: English.
+   */
+  language?: number;
   playerSprite: { male: Id; female: Id };
   /** The avatar while cycling and surfing (0.12.0; decomp PLAYER_AVATAR_CYCLING / _SURFING gfx). */
   playerCycleSprite: { male: Id; female: Id };

@@ -8,9 +8,9 @@
  * SEQ_SE_DP_BOX02 when a character is entered; SEQ_SE_DP_SYU03 on a page change; SEQ_SE_DP_PIRORIRO on OK.
  * The DS also plays SEQ_SE_DP_NAMEIN_01 when its page slide ends; the page changes here at once, without it.
  */
-import type { Button } from '@opensinnoh/core';
+import { ENGLISH, forLanguage, GERMAN, type Button } from '@opensinnoh/core';
 import type { AppHost, NamingRequest, NamingView } from '@opensinnoh/contracts';
-import { finishName, KEYBOARD_PAGES, typedChars } from '@opensinnoh/services';
+import { finishName, gameLanguage, keyboardPages, typedChars } from '@opensinnoh/services';
 import { menuSe, type MenuContext } from './context.ts';
 import { tapIndex, type Screen, type Step } from './stack.ts';
 import type { MenuKey } from './strings.ts';
@@ -33,8 +33,8 @@ const OK = 4;
 /** Decomp sHomeRowAll: which home-row button sits over each key column. */
 const HOME_OF_COL = [0, 0, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4];
 const PROMPTS: Record<Exclude<NamingRequest['kind'], 'gift-code'>, MenuKey> = { player: 'namePlayer', rival: 'nameRival', pokemon: 'namePokemon', box: 'nameBox', tablet: 'nameTablet', 'dex-search': 'nameDexSearch' };
-/** Mystery Gift's gift code (our addition: the ROM has no such prompt). */
-export const GIFT_CODE_PROMPT = 'Gift code?';
+/** Mystery Gift's gift code prompt, per game language (our addition: the ROM has no such prompt). */
+export const GIFT_CODE_PROMPT: Readonly<Record<number, string>> = { [ENGLISH]: 'Gift code?', [GERMAN]: 'Geschenkcode?' };
 
 /**
  * `autoLowercase` is the OpenSinnoh option (not Platinum's): the first character of an empty name typed on the
@@ -42,6 +42,8 @@ export const GIFT_CODE_PROMPT = 'Gift code?';
  */
 export function namingScreen(ctx: NamingContext, request: NamingRequest, done: (name: string | null) => Step, autoLowercase: () => boolean = () => false): Screen {
   const t = ctx.text;
+  const language = gameLanguage(ctx.registries);
+  const keys = keyboardPages(language);
   let text = request.kind === 'box' ? request.initial : '';
   let page = 0;
   let row = 0;
@@ -74,7 +76,7 @@ export function namingScreen(ctx: NamingContext, request: NamingRequest, done: (
   };
   const press = (): Step => {
     if (row >= 0) {
-      if (enter(KEYBOARD_PAGES[page]![row]![col]!)) se(SE_KEY);
+      if (enter(keys[page]![row]![col]!)) se(SE_KEY);
       return;
     }
     if (col < 3) toPage(col);
@@ -100,14 +102,14 @@ export function namingScreen(ctx: NamingContext, request: NamingRequest, done: (
       return {
         app: 'naming',
         kind: request.kind,
-        prompt: request.kind === 'gift-code' ? GIFT_CODE_PROMPT : t.t(PROMPTS[request.kind], species?.name ?? ''),
+        prompt: request.kind === 'gift-code' ? forLanguage(language, GIFT_CODE_PROMPT) : t.t(PROMPTS[request.kind], species?.name ?? ''),
         gender: request.gender,
         pokemon: request.pokemon,
         text,
         maxLength: request.maxLength,
-        pages: KEYBOARD_PAGES.map((p) => p[0]!.slice(0, 3).join('')),
+        pages: keys.map((p) => p[0]!.slice(0, 3).join('')),
         page,
-        keys: KEYBOARD_PAGES[page]!.map((r) => [...r]),
+        keys: keys[page]!.map((r) => [...r]),
         cursor: { row, col },
         back: t.t('nameBack'),
         ok: t.t('nameOk'),
@@ -117,14 +119,14 @@ export function namingScreen(ctx: NamingContext, request: NamingRequest, done: (
       if ('tap' in i) {
         if (i.tap.startsWith('type:')) {
           let entered = false;
-          for (const c of typedChars(i.tap.slice(5))) entered = enter(c) || entered;
+          for (const c of typedChars(i.tap.slice(5), language)) entered = enter(c) || entered;
           if (entered) se(SE_KEY);
           return;
         }
         if (i.tap === 'del' || i.tap === 'back') return void del();
         if (i.tap === 'ok') return finish();
         const p = tapIndex(i.tap, 'page');
-        if (p !== null && p >= 0 && p < KEYBOARD_PAGES.length) return void toPage(p);
+        if (p !== null && p >= 0 && p < keys.length) return void toPage(p);
         const m = /^key:(\d):(\d+)$/.exec(i.tap);
         if (m && Number(m[1]) < ROWS && Number(m[2]) < COLS) {
           [row, col] = [Number(m[1]), Number(m[2])];
@@ -138,7 +140,7 @@ export function namingScreen(ctx: NamingContext, request: NamingRequest, done: (
         se(SE_CONFIRM);
       } else if (b === 'a') return press();
       else if (b === 'b') del();
-      else if (b === 'select') toPage((page + 1) % KEYBOARD_PAGES.length);
+      else if (b === 'select') toPage((page + 1) % keys.length);
       else if (b === 'start') {
         [row, col] = [-1, OK];
         se(SE_CONFIRM);

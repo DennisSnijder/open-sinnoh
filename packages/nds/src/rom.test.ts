@@ -16,9 +16,9 @@ describe.skipIf(!romPath)('real ROM (OPENSINNOH_NDS_ROM)', () => {
     expect(SUPPORTED_ROMS[await sha1Hex(rom)]).toBeDefined();
   });
 
-  it('walks NitroFS and decodes every message bank', () => {
+  it('walks NitroFS and decodes every message bank', async () => {
     const fs = new NitroFs(rom);
-    expect(fs.header.gameCode).toBe('CPUE');
+    expect(fs.header.gameCode).toBe(SUPPORTED_ROMS[await sha1Hex(rom)]!.gameCode);
     expect(fs.listPaths().length).toBeGreaterThan(300);
     const banks = readNarc(fs.file('/msgdata/pl_msg.narc'));
     expect(banks.length).toBe(724);

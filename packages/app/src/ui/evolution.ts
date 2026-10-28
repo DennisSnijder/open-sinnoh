@@ -18,6 +18,7 @@ import { framed, messageBox, stop, type DrawContext } from './apps.ts';
 import type { Art } from './art.ts';
 import { el } from './core.ts';
 import './evolution.css';
+import { S } from '../strings/index.ts';
 
 /** decomp Evolution_CreateSprites: both pictures centred here. */
 const CENTRE = { x: 128, y: 80 };
@@ -51,7 +52,7 @@ class EvolutionScene {
     this.scratch.height = PICTURE;
     this.stage.append(this.canvas, this.boxes);
     this.root.append(this.stage);
-    this.root.setAttribute('aria-label', 'Evolution');
+    this.root.setAttribute('aria-label', S.aria.evolution);
   }
 
   private image(ref: string): Img | null {

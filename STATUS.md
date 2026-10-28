@@ -1,10 +1,12 @@
 # Status
 
 OpenSinnoh is in beta. Pokémon Platinum (US, rev 0) plays from a new game through the Elite Four, the Hall of
-Fame and the credits, and on into the post-game. What's next is in [ROADMAP.md](ROADMAP.md); the design
-decisions are in [docs/decisions.md](docs/decisions.md).
+Fame and the credits, and on into the post-game. The European English Platinum (rev 10) plays as the US game. The German
+Platin-Edition (rev 0) imports and shows its game in German, with the shell in German too; the story chain and the
+system replays pass on both headless (see Tests). What's
+next is in [ROADMAP.md](ROADMAP.md); the design decisions are in [docs/decisions.md](docs/decisions.md).
 
-Versions: contracts 0.48.0, importer `platinum-111`, HeartGold follower add-on `hgss-followers-4`.
+Versions: contracts 0.49.0, importer `platinum-112`, HeartGold follower add-on `hgss-followers-4`.
 
 ## Works
 
@@ -56,3 +58,6 @@ Versions: contracts 0.48.0, importer `platinum-111`, HeartGold follower add-on `
 - `pnpm check`: lint, typecheck, about 1,700 unit tests and the fixture replays, no ROM needed.
 - ROM `pnpm test`: the importer, the story chain and every system replay against the real game.
 - ROM `pnpm test:browser`: the app on desktop and phone viewports, incl. the story in the browser.
+- German and European English ROMs: ROM `pnpm test` passes as on the US game (the replays wait on the game, the tests
+  name texts by id); the Game Corner's slot replays skip, as the European builds have no slot machines. ROM `pnpm test:browser` passes on both
+  languages too (the specs look their words up).

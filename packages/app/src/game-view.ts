@@ -43,6 +43,7 @@ import { reportsEnabled, setReportsEnabled } from './telemetry/index.ts';
 import { reportsAnswered } from './telemetry/settings.ts';
 import { readAnswered, storeAnswered, type SetupQuestion } from './title/setup.ts';
 import { fieldScale, readZoom, stepZoom, storeZoom, WheelSteps, zoomChoices, zoomLabel, type Zoom } from './zoom.ts';
+import { S } from './strings/index.ts';
 
 declare global {
   interface Window {
@@ -152,7 +153,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
       const stored = readNewGame();
       return stored === null ? undefined : checkNewGame(stored, fontChars);
     } catch (e) {
-      newGameProblem = `Your stored names are not used: ${(e as Error).message}`;
+      newGameProblem = S.game.namesUnused((e as Error).message);
       return undefined;
     }
   };
@@ -226,7 +227,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     const err = storeZoom(zoom);
     if (err) session.game.log.stub('ui:zoom-storage', `the zoom is kept for this visit only: ${err}`);
     relayout();
-    if (toast) ui!.toast(`Zoom ${zoom === 'auto' ? 'Auto' : zoomLabel(zoomScale)}`);
+    if (toast) ui!.toast(S.game.zoom(zoom === 'auto' ? S.game.auto : zoomLabel(zoomScale)));
   };
 
   // The phone settings of this device (phone.ts): control size and opacity, haptics, keeping the screen on.
@@ -262,13 +263,13 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   };
   const toggleFast = () => {
     fastForward.latched = !fastForward.latched;
-    ui!.toast(`Speed ${fastForward.speed()}x`);
+    ui!.toast(S.game.speed(fastForward.speed()));
   };
   let fastWas = false;
   /** The loop's speed for this frame: the pad's trigger is polled here; holding (not the latch) toasts as it starts. */
   const loopSpeed = () => {
     fastForward.hold('gamepad', gamepadFastForward());
-    if (fastForward.active && !fastWas && !fastForward.latched) ui!.toast(`Speed ${fastForward.fast}x`);
+    if (fastForward.active && !fastWas && !fastForward.latched) ui!.toast(S.game.speed(fastForward.fast));
     fastWas = fastForward.active;
     return fastForward.speed();
   };
@@ -341,7 +342,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
         ? {
             toggle: () => {
               const change = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen({ navigationUI: 'hide' });
-              change.catch((e: Error) => ui!.notice(`Fullscreen did not start: ${e.message}`));
+              change.catch((e: Error) => ui!.notice(S.game.fullscreenFailed(e.message)));
             },
             active: () => document.fullscreenElement !== null,
           }
@@ -350,7 +351,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   });
   if (device.problem) {
     session.game.log.stub('ui:options-reset', `stored options were invalid (${device.problem}); reset to the defaults`);
-    ui.notice(`Your stored options could not be read (${device.problem}) and were reset.`);
+    ui.notice(S.game.optionsReset(device.problem));
   }
 
   const pixelFonts = new WeakMap<object, PixelFont>();
@@ -502,7 +503,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
 
   // Input sources.
   attachKeyboard(window, input);
-  attachGamepadEvents(window, input, () => ui!.toast('Gamepad disconnected'));
+  attachGamepadEvents(window, input, () => ui!.toast(S.game.gamepadGone));
   panel.addEventListener('pointerdown', (e) => {
     panel.setPointerCapture(e.pointerId);
     panelTouch = toPanelPoint(e.clientX, e.clientY, panel.getBoundingClientRect());
@@ -699,7 +700,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
 
   // Anything that throws in a tick or frame stops the game: reported, and the crash screen shows it (telemetry/crash.ts).
   // A watchdog that stops the game calls `fatal` too.
-  const fatal = (e: Error) => crash(e, 'loop', opts.imported ? { secondary: { label: 'Re-import the ROM', run: () => opts.imported!.reimport() } } : {});
+  const fatal = (e: Error) => crash(e, 'loop', opts.imported ? { secondary: { label: S.crash.reimportRom, run: () => opts.imported!.reimport() } } : {});
   if (!opts.replay) {
     watchPerf(loopStats, () => fieldDpr);
     // Analytics: the play heartbeat and milestones (badges, Hall of Fame), checked once a second.
@@ -807,17 +808,17 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     const fresh = await open(next, opts.replay ? 1 : randomSeed());
     if (opts.replay) await fresh.game.loadBattleEngine();
     else warmBattleEngine(fresh.game);
-    let result = 'New game started.';
+    let result = S.game.newGameStarted;
     if (save !== null) {
       try {
         await fresh.load(save);
-        result = 'Back at your last save.';
+        result = S.game.backAtSave;
       } catch (e) {
         if (!(e instanceof PackMismatchError)) {
           fresh.dispose();
           throw e;
         }
-        result = 'New game started (your save was made with a different set of packs).';
+        result = S.game.newGameOtherPacks;
       }
     }
     mods = next;
@@ -839,15 +840,15 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   const dataActions: DataActions = {
     async exportSave() {
       const json = await saves.get(SAVE_SLOT);
-      if (json === undefined) throw new Error('Save first; the exported file is your last save.');
+      if (json === undefined) throw new Error(S.game.saveFirst);
       download(`opensinnoh-save-${new Date().toISOString().slice(0, 10)}.json`, json, 'application/json');
-      return 'Exported.';
+      return S.game.exported;
     },
     async importSave(ask) {
       const file = await pickFile('.json,application/json');
       if (!file) return '';
-      if (file.size > MAX_SAVE_FILE) throw new Error('This file is too large to be a save.');
-      if (!(await ask(titleActive ? 'Replace your saved game with this file?' : 'Replace this game with the save file? Progress since your last save is lost.'))) return '';
+      if (file.size > MAX_SAVE_FILE) throw new Error(S.game.saveTooLarge);
+      if (!(await ask(titleActive ? S.game.replaceSaved : S.game.replaceGame))) return '';
       const text = await file.text();
       // Loading validates it (strictly: shape, packs, ids) before anything is kept.
       try {
@@ -858,23 +859,23 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
       await suspend.loaded();
       if (!titleActive) {
         // The load closes the OPTIONS app that asked, so the line goes where it is still read.
-        const text = 'Loaded the save file. Save to keep it in this browser.';
+        const text = S.game.loadedSave;
         ui!.notice(text);
         return text;
       }
       await saves.put(SAVE_SLOT, saveFromJson(text) as SaveEnvelope);
       // The title read its save when it opened: start again so CONTINUE shows this one.
       location.reload();
-      return 'Saved. Restarting…';
+      return S.game.savedRestarting;
     },
     rom: imported && {
       addon: imported.addon,
       storage: {
-        line: () => (storage ? storageLine(storage) : 'Checking the storage of this browser…'),
+        line: () => (storage ? storageLine(storage) : S.game.checkingStorage),
         async keep() {
           const kept = await requestPersistence();
           await refreshStorage();
-          return kept ? 'Done. The browser will keep your game and saves.' : 'The browser did not agree. It may clear your game when space is low, so export your save now and then.';
+          return kept ? S.game.keepDone : S.game.keepRefused;
         },
       },
       async reimport() {
@@ -902,14 +903,14 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
         const name = modList.find((m) => m.id === id)!.name;
         const result = await setMods(toggleMod(mods, id, on));
         await refreshMods();
-        const text = `${on ? 'Enabled' : 'Disabled'} ${name}. ${result}`;
+        const text = S.game.modToggled(on, name, result);
         // The restart closes the OPTIONS app that asked.
         ui!.notice(text);
         return text;
       },
     },
   };
-  refreshMods().catch((e: Error) => ui!.notice(`The list of mods could not be read: ${e.message}`));
+  refreshMods().catch((e: Error) => ui!.notice(S.game.modsUnreadable(e.message)));
   if (newGameProblem) ui.notice(newGameProblem);
 
   /** The setup's questions not yet answered on this device and where each answer is kept (title/setup.ts). */
@@ -972,7 +973,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
         // MYSTERY GIFT edits the real save (never the suspend point), so it shows by that save's state.
         save = { player: s.names.player, gender: s.gender, ticks: s.tick, badges: s.badges.length, pokedex: s.pokedex.obtained, mysteryGift: s.mysteryGift?.unlocked === true && real !== undefined && saved === real };
       } catch (e) {
-        saveProblem = `Your save cannot be read: ${(e as Error).message}`;
+        saveProblem = S.game.saveUnreadable((e as Error).message);
       }
     }
     await showTitle({

@@ -82,7 +82,6 @@ test('start menu, bag and Pokétch labels come from the ROM text banks', async (
       text(n, [player]),
     ),
   );
-  expect(text('StartMenu_Text_Bag')).toBe('BAG');
   // The ROM's icons (one painted per entry, the cursor's wiggling) and cursor sprite (start_menu.c), DS-size rows
   // (24 DS px), each icon and the cursor on their row, nothing of our stand-ins.
   const measureStart = () =>
@@ -130,7 +129,7 @@ test('start menu, bag and Pokétch labels come from the ROM text banks', async (
   await page.keyboard.press('KeyP');
   await expect(page.locator('.poketch').getByRole('img')).toHaveAccessibleName(`${text('pl_msg_00000457_00000')} 12:00`);
   await page.evaluate(() => window.openSinnohGame!.advance(5));
-  await page.locator('.poketch').getByRole('button', { name: 'Next app' }).click();
+  await page.locator('.poketch').locator('.poketch-side.next').click();
   // Closes, waits and opens on the next app: 12 ticks.
   await page.evaluate(() => window.openSinnohGame!.advance(14));
   await expect(page.locator('.poketch').getByRole('img')).toHaveAccessibleName(text('pl_msg_00000457_00004'));

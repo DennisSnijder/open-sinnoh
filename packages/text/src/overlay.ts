@@ -12,7 +12,6 @@ import { MESSAGE_BOX } from './layout.ts';
 export const SCREEN = { width: 256, height: 192 } as const;
 /** Yes/no window interior (decomp: tiles 25,13, 6×4). */
 export const YES_NO_BOX = { x: 200, y: 104, width: 48, height: 32 } as const;
-export const YES_NO_LABELS = ['YES', 'NO'] as const;
 
 /**
  * Signpost windows (decomp FieldMessage_AddSignpostWindow, DrawSignpostTiles): map and arrow signs have a
@@ -146,7 +145,7 @@ export const drawScriptOverlay: DrawScriptOverlay = (ctx, view, font, scale, fra
   if (view.menu) drawMenu(view.menu, frame, px, text);
   if (view.yesNo) {
     frame(YES_NO_BOX);
-    YES_NO_LABELS.forEach((label, i) => text(label, YES_NO_BOX.x + 12, YES_NO_BOX.y + i * LINE_HEIGHT));
+    [view.yesNo.yes, view.yesNo.no].forEach((label, i) => text(label, YES_NO_BOX.x + 12, YES_NO_BOX.y + i * LINE_HEIGHT));
     drawArrow(px, YES_NO_BOX.x + 2, YES_NO_BOX.y + view.yesNo.cursor * LINE_HEIGHT + 4, 'right');
   }
   ctx.restore();

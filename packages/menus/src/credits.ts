@@ -8,16 +8,24 @@
  * Twinleaf pictures (crossfades shown as cuts), the final screen (A, Start or frame 10080). Then the OpenSinnoh
  * card (engine text). On a repeat clear Start skips to the final screen.
  */
+import { ENGLISH, forLanguage, GERMAN } from '@opensinnoh/core';
 import { newGameRecord, type CreditsView, type SceneLine } from '@opensinnoh/contracts';
+import { gameLanguage } from '@opensinnoh/services';
 import type { InputFrame } from '@opensinnoh/contracts';
 import type { MenuContext } from './context.ts';
 import type { Screen, Step } from './stack.ts';
 
-/** The OpenSinnoh card. */
-export const OPENSINNOH_CARD = {
-  title: 'OpenSinnoh',
-  lines: ['OpenSinnoh — an unofficial fan engine. Not affiliated with Nintendo, Game Freak or The Pokémon Company.', 'Made by the OpenSinnoh contributors.'],
-} as const;
+/** The OpenSinnoh card, per game language. */
+export const OPENSINNOH_CARD: Readonly<Record<number, { title: string; lines: readonly string[] }>> = {
+  [ENGLISH]: {
+    title: 'OpenSinnoh',
+    lines: ['OpenSinnoh — an unofficial fan engine. Not affiliated with Nintendo, Game Freak or The Pokémon Company.', 'Made by the OpenSinnoh contributors.'],
+  },
+  [GERMAN]: {
+    title: 'OpenSinnoh',
+    lines: ['OpenSinnoh — eine inoffizielle Fan-Engine. Nicht verbunden mit Nintendo, Game Freak oder The Pokémon Company.', 'Gemacht von den Mitwirkenden an OpenSinnoh.'],
+  },
+};
 /** The card fades in and out over 15 ticks and waits for A or Start (at least 60 ticks, at most 300). */
 const CARD_FADE = 15;
 const CARD_MIN = 60;
@@ -59,6 +67,7 @@ class Fade {
 
 export function creditsScreen(ctx: MenuContext, skippable: boolean): Screen {
   const rows = newGameRecord(ctx.registries).credits;
+  const cardText = forLanguage(gameLanguage(ctx.registries), OPENSINNOH_CARD);
   if (!rows?.length) throw new Error('credits: the pack has no NewGame.credits');
   const sound = ctx.host.sound;
   const music = ctx.text.id(MUSIC);
@@ -202,7 +211,7 @@ export function creditsScreen(ctx: MenuContext, skippable: boolean): Screen {
         brightness: art.value,
         screen: card ? card.fade.value : screen.value,
         final: !card && name === 'final' && loaded ? texts.at(-1)! : null,
-        card: card ? { title: OPENSINNOH_CARD.title, lines: [...OPENSINNOH_CARD.lines] } : null,
+        card: card ? { title: cardText.title, lines: [...cardText.lines] } : null,
       };
     },
   };

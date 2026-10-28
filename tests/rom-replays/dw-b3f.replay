@@ -32,61 +32,12 @@ until idle 6000
 until state player.z 41 400
 +0 release down
 +24 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
-+140 press a
+advance text 6000
+# Cyrus asks a yes/no: yes
+until yesno
++0 press a
 +1 release a
-+128 press a
-+1 release a
-+102 press a
-+1 release a
-+108 press a
-+1 release a
-+75 press a
-+1 release a
-+116 press a
-+1 release a
-+79 press a
-+1 release a
-+72 press a
-+1 release a
-+152 press a
-+1 release a
-+138 press a
-+1 release a
-+102 press a
-+1 release a
-+90 press a
-+1 release a
-+86 press a
-+1 release a
-+42 press a
-+1 release a
-+74 press a
-+1 release a
-+138 press a
-+1 release a
-+104 press a
-+1 release a
-+134 press a
-+1 release a
-+80 press a
-+1 release a
-+140 press a
-+1 release a
-+112 press a
-+1 release a
-+109 press a
-+1 release a
-+154 press a
-+1 release a
-+54 press a
-+1 release a
-+142 press a
-+1 release a
-+88 press a
-+1 release a
-+150 press a
-+1 release a
-until idle 6000
+advance text 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B3F"
 +0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_B3F","x":65,"z":41,"y":3088,"facing":"down"}
 +0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 6

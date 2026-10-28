@@ -15,6 +15,38 @@ export function h<K extends keyof HTMLElementTagNameMap>(tag: K, className = '',
   return e;
 }
 
+/** The few words the components write themselves; the app sets them for its language (`setUiWords`). */
+export interface UiWords {
+  on: string;
+  off: string;
+  previous(label: string): string;
+  next(label: string): string;
+  /** What the tab strip's scroll arrows move: `previous(tabs)`. */
+  tabs: string;
+  back: string;
+  dismiss: string;
+  close: string;
+  /** A progress bar whose length is not known yet. */
+  busy: string;
+}
+
+let words: UiWords = {
+  on: 'On',
+  off: 'Off',
+  previous: (label) => `Previous ${label}`,
+  next: (label) => `Next ${label}`,
+  tabs: 'tabs',
+  back: 'Back',
+  dismiss: 'Dismiss',
+  close: 'Close',
+  busy: 'Busy',
+};
+
+/** Sets the components' own words (English until called). */
+export function setUiWords(w: UiWords): void {
+  words = w;
+}
+
 let ids = 0;
 /** A unique id for aria references. */
 export const uid = (prefix = 'os') => `${prefix}-${++ids}`;
@@ -60,7 +92,7 @@ export function iconButton(name: IconName, label: string, o: { tooltip?: string;
 
 /** On/off that applies at once; the value is written next to it. */
 export function toggle(on: boolean, o: { label?: string; labelledBy?: string; describedBy?: string; disabled?: boolean; words?: [string, string]; onChange?(on: boolean): void } = {}): HTMLButtonElement {
-  const [yes, no] = o.words ?? ['On', 'Off'];
+  const [yes, no] = o.words ?? [words.on, words.off];
   const b = h('button', 'os-tgl', h('span', 'tr', h('span', 'kn')), h('span', 'tv', on ? yes : no));
   b.type = 'button';
   b.setAttribute('role', 'switch');
@@ -101,7 +133,7 @@ export function cycle(values: string[], index: number, o: { label: string; disab
   const arrow = (d: 1 | -1) => {
     const a = h('button', `arr ${d < 0 ? 'prev' : 'next'}`, icon(d < 0 ? 'left' : 'right'));
     a.type = 'button';
-    a.setAttribute('aria-label', `${d < 0 ? 'Previous' : 'Next'} ${o.label}`);
+    a.setAttribute('aria-label', (d < 0 ? words.previous : words.next)(o.label));
     if (o.onStep) a.addEventListener('click', () => !o.disabled && o.onStep!(d));
     return a;
   };
@@ -325,7 +357,7 @@ export function tabs(items: { id: string; label: string; icon?: IconName }[], se
   const arrow = (dir: -1 | 1) => {
     const b = h('button', `os-tab-scroll ${dir < 0 ? 'prev' : 'next'}`, icon(dir < 0 ? 'left' : 'right'));
     b.type = 'button';
-    b.setAttribute('aria-label', `${dir < 0 ? 'Previous' : 'Next'} tabs`);
+    b.setAttribute('aria-label', (dir < 0 ? words.previous : words.next)(words.tabs));
     b.title = b.getAttribute('aria-label')!;
     b.setAttribute('aria-controls', list.id);
     // Scrolling is a pointer convenience; keyboard and pad focus reveal the chosen tab directly.
@@ -467,7 +499,7 @@ export function titleTab(title: string, o: { tone?: Tone; icon?: IconName; id?: 
 }
 
 /** The big Back. */
-export function backButton(onClick?: () => void, text = 'Back'): HTMLButtonElement {
+export function backButton(onClick?: () => void, text = words.back): HTMLButtonElement {
   return button(text, { icon: 'back', big: true, ...(onClick ? { onClick } : {}) });
 }
 
@@ -539,7 +571,7 @@ export function banner(title: string, text: string | (Node | string)[], o: { act
   if (o.onDismiss) {
     const dismiss = h('button', 'os-btn icon', icon('close'));
     dismiss.type = 'button';
-    dismiss.setAttribute('aria-label', 'Dismiss');
+    dismiss.setAttribute('aria-label', words.dismiss);
     dismiss.addEventListener('click', () => o.onDismiss!());
     b.append(dismiss);
   }
@@ -568,7 +600,7 @@ export function sheet(title: string, body: Node[], actions: HTMLElement[], o: { 
   const id = uid('sh');
   const close = h('button', 'os-btn icon', icon('close'));
   close.type = 'button';
-  close.setAttribute('aria-label', 'Close');
+  close.setAttribute('aria-label', words.close);
   if (o.onClose) close.addEventListener('click', () => o.onClose!());
   const s = h('section', 'os-sheet', titleTab(title, { tone: 'system', ...(o.icon ? { icon: o.icon } : {}), id, end: [close], bar: true }), h('div', 'sb', ...body), h('div', 'sa', ...actions));
   s.setAttribute('role', 'dialog');
@@ -580,7 +612,7 @@ export function sheet(title: string, body: Node[], actions: HTMLElement[], o: { 
 /** Progress in cells with a percentage, or a stepping block when the length is unknown (`value` null). Always in words. */
 export function progress(label: string, value: number | null): HTMLElement {
   const cells = h('div', 'cells', ...Array.from({ length: 16 }, (_, i) => h('i', value !== null && i < Math.round((value / 100) * 16) ? 'on' : '')));
-  const p = h('div', `os-prog${value === null ? ' busy' : ''}`, h('div', 'lt', h('b', '', label), h('span', '', value === null ? 'Busy' : `${Math.round(value)}%`)), cells);
+  const p = h('div', `os-prog${value === null ? ' busy' : ''}`, h('div', 'lt', h('b', '', label), h('span', '', value === null ? words.busy : `${Math.round(value)}%`)), cells);
   p.setAttribute('role', 'progressbar');
   p.setAttribute('aria-label', label);
   if (value === null) p.setAttribute('aria-busy', 'true');

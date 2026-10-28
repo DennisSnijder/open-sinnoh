@@ -8,14 +8,16 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect as baseExpect, test, type BrowserContext, type Page } from '@playwright/test';
-import type { ReplayLine } from '@opensinnoh/core';
+import type { Id, ReplayLine } from '@opensinnoh/core';
 import type { Registries } from '@opensinnoh/contracts';
 import { loadGamePacks, runReplay } from '@opensinnoh/game';
 import { romSlice } from '../rom.ts';
 import { narrowRowHits } from './row-hits.ts';
 import { seedRomImport } from './seed.ts';
 import { settle } from './settle.ts';
+import { appStrings } from './words.ts';
 import { pageDriver } from '../../packages/cli/src/browser.ts';
+import { plainText } from '../../packages/app/src/ui/strings.ts';
 
 // ROM image decoding competes with software GL on the shared browser-test machine.
 const expect = baseExpect.configure({ timeout: 30_000 });
@@ -136,7 +138,9 @@ test('svc-dex: the list, entries, area map, height check and search drawn with R
         await expect(page.locator('.dex-row')).toHaveCount(name === 'dex-list' ? 5 : 3);
         await expect.poll(async () => (await canvasPixels('.dex-row-art canvas'))?.opaque ?? 0, { timeout: 30_000 }).toBeGreaterThan(500);
         if (name === 'dex-results') await expect.poll(async () => (await canvasPixels('.dex-row .dex-ball canvas'))?.opaque ?? 0).toBeGreaterThan(40);
-        await expect(page.locator('.dex-list-head')).toContainText(name === 'dex-list' ? /SEEN.*3.*OBTAINED.*1/ : /RESULTS.*3/);
+        // The head's counts beside the ROM's labels (pokedex.ts DexText).
+        const label = (key: string) => plainText(registries.texts.get(`platinum:pl_msg_pokedex_${key}` as Id)!.text).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        await expect(page.locator('.dex-list-head')).toContainText(new RegExp(name === 'dex-list' ? `${label('seen')}.*3.*${label('obtained')}.*1` : `${label('results')}.*3`));
       }
       if (name === 'dex-scrolled') await expect(page.locator('.dex-row.is-cursor')).toBeInViewport();
       if (name === 'dex-entry-caught' || name === 'dex-entry-seen') {
@@ -256,7 +260,7 @@ async function holdDown(n: number, phone: boolean): Promise<void> {
     await page.keyboard.up('ArrowDown');
     return;
   }
-  const down = (await page.getByRole('button', { name: 'Down', exact: true }).boundingBox())!;
+  const down = (await page.getByRole('button', { name: appStrings().page.down, exact: true }).boundingBox())!;
   const cdp = await context.newCDPSession(page);
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: down.x + down.width / 2, y: down.y + down.height / 2 }] });
   await ticks(n);

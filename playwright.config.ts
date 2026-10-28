@@ -26,7 +26,8 @@ export default defineConfig({
   timeout: 60_000,
   reporter: [['list'], ['json', { outputFile: `${ARTIFACTS}/playwright.json` }], ['blob', { outputDir: `${ARTIFACTS}/blob-report` }], ...(process.env.OPENSINNOH_TIMING_DIR ? [['./tools/timing-playwright.ts'] as [string]] : [])],
   outputDir: `${ARTIFACTS}/playwright`,
-  use: { baseURL: `http://127.0.0.1:${PORT}`, browserName: 'chromium', launchOptions: { executablePath: browserExecutable(), args: process.env.OPENSINNOH_TEST_HARDWARE_GPU === '1' ? [] : ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] } },
+  // English whatever the machine's language: without an imported game the app speaks the browser's (packages/app/src/strings).
+  use: { baseURL: `http://127.0.0.1:${PORT}`, browserName: 'chromium', locale: 'en-US', launchOptions: { executablePath: browserExecutable(), args: process.env.OPENSINNOH_TEST_HARDWARE_GPU === '1' ? [] : ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] } },
   projects: [
     { name: 'desktop', use: { viewport: { width: 1280, height: 720 } } },
     { name: 'phone', testIgnore: SITE_SPEC, use: { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, deviceScaleFactor: 3 } },

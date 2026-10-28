@@ -7,6 +7,7 @@
  */
 import { asId, type Id } from '@opensinnoh/core';
 import type { ObjectiveCheck, ObjectiveTables } from '@opensinnoh/contracts';
+import type { RomLanguage } from '@opensinnoh/nds';
 
 type Check = `FLAG_${string}` | `VAR_${string} ${number}` | `BADGE_${string}`;
 
@@ -86,14 +87,98 @@ const STEPS: [string, string, Check[], string?][] = [
 
 const textId = (name: string) => `OpenSinnoh_Objective_${name}`;
 
-/** Our texts for the table and its option (text id → words), added to the pack's texts. */
-export const OBJECTIVE_TEXTS: Record<string, string> = {
-  OpenSinnoh_Options_Objective: 'OBJECTIVE',
-  OpenSinnoh_Options_ObjectiveDescription: 'The START menu shows what to\ndo next in the story.',
-  [textId('Title')]: 'OBJECTIVE',
-  [textId('Explore')]: 'Explore Sinnoh.',
-  ...Object.fromEntries(STEPS.map(([name, words]) => [textId(name), words])),
+/** The steps' words in German (our words; the names of places, people and items as the German game has them). */
+const GERMAN_STEPS: Record<string, string> = {
+  VisitBarry: 'Besuche Barry im Haus nebenan.',
+  Route201: 'Folge Barry zur Route 201.',
+  HomeToMom: 'Geh nach Hause und erzähl deiner Mutter, was passiert ist.',
+  LakeVerity: 'Geh mit Barry zum See der Wahrheit.',
+  RowanLab: 'Besuche Professor Eibes Labor in Sandgemme.',
+  MomParcel: 'Geh zurück nach Zweiblattdorf zu deiner Mutter.',
+  Parcel: 'Bring Barry das Paket nach Jubelstadt.',
+  Poketch: 'Hol dir in Jubelstadt einen Pokétch.',
+  Oreburgh: 'Reise nach Osten bis Erzelingen.',
+  RoarkMine: 'Suche Veit in der Erzelingen-Mine.',
+  Roark: 'Besiege Veit in der Arena Erzelingen.',
+  Floaroma: 'Finde heraus, was Team Galaktik in Flori vorhat.',
+  Windworks: 'Befreie das Windkraftwerk von Team Galaktik.',
+  Eterna: 'Geh durch den Ewigwald nach Ewigenau.',
+  Gardenia: 'Besiege Silvana in der Arena Ewigenau.',
+  EternaBuilding: 'Halte Team Galaktik im Galaktik-Gebäude in Ewigenau auf.',
+  Bicycle: 'Hol dir im Fahrradladen in Ewigenau ein Fahrrad.',
+  Hearthome: 'Reise nach Süden bis Herzhofen.',
+  Fantina: 'Besiege Lamina in der Arena Herzhofen.',
+  Veilstone: 'Reise über Trostu nach Osten bis Schleiede.',
+  Maylene: 'Besiege Hilda in der Arena Schleiede.',
+  Warehouse: 'Halte Team Galaktik in seinem Lagerhaus in Schleiede auf.',
+  Pastoria: 'Reise nach Süden bis Weideburg.',
+  Wake: 'Besiege Wellenbrecher Marinus in der Arena Weideburg.',
+  GruntChase: 'Folge dem Rüpel von Team Galaktik zum Kühnheitsufer.',
+  Psyduck: 'Gib den Enton auf Route 210 den Geheimtrank.',
+  OldCharm: 'Bring den Talisman nach Elyses.',
+  Celestic: 'Halte Team Galaktik in Elyses auf.',
+  Canalave: 'Surfe von Jubelstadt nach Westen bis Fleetburg.',
+  Byron: 'Besiege Adam in der Arena Fleetburg.',
+  Library: 'Triff Professor Eibe in der Bibliothek von Fleetburg.',
+  LakeValor: 'Halte Team Galaktik am See der Kühnheit auf.',
+  VerityRescue: 'Eile zum See der Wahrheit.',
+  Snowpoint: 'Reise über den Kraterberg bis Blizzach.',
+  Candice: 'Besiege Frida in der Arena Blizzach.',
+  LakeAcuity: 'Geh zum See der Stärke.',
+  GalacticHq: 'Dring in die Galakti-Zentrale in Schleiede ein.',
+  SpearPillar: 'Erklimm den Kraterberg bis zur Speersäule und halte Zyrus auf.',
+  DistortionWorld: 'Halte Zyrus in der Zerrwelt auf.',
+  RowanReturn: 'Besuche Professor Eibes Labor in Sandgemme.',
+  Sunyshore: 'Reise nach Osten bis Sonnewik.',
+  Lighthouse: 'Suche Volkner im Leuchtturm von Sonnewik.',
+  Volkner: 'Besiege Volkner in der Arena Sonnewik.',
+  VictoryRoad: 'Reise von Sonnewik nach Norden zur Siegesstraße.',
+  League: 'Durchquere die Siegesstraße bis zur Pokémon Liga.',
+  Aaron: 'Fordere die Top Vier heraus, zuerst Herbaro.',
+  Bertha: 'Besiege Teresa von den Top Vier.',
+  Flint: 'Besiege Ignaz von den Top Vier.',
+  Lucian: 'Besiege Lucian von den Top Vier.',
+  Cynthia: 'Besiege den Champ, Cynthia.',
+  BattleZone: 'Nimm in Blizzach das Schiff zur Kampfzone.',
+  FightArea: 'Triff Barry im Kampfareal.',
+  NationalDex: 'Sieh alle Pokémon des Sinnoh-Pokédex und besuche dann Professor Eibe.',
+  StarkMountain: 'Reise vom Kampfareal nach Norden zum Kahlberg.',
+  Buck: 'Finde Buck im Duellareal im Überlebensareal.',
+  StarkDepths: 'Kehre in die Tiefen des Kahlbergs zurück.',
 };
+
+const OWN_TEXTS: Record<RomLanguage, { title: string; explore: string; option: string; optionDescription: string; step(name: string, english: string): string }> = {
+  en: {
+    title: 'OBJECTIVE',
+    explore: 'Explore Sinnoh.',
+    option: 'OBJECTIVE',
+    optionDescription: 'The START menu shows what to\ndo next in the story.',
+    step: (_, english) => english,
+  },
+  de: {
+    title: 'ZIEL',
+    explore: 'Erkunde Sinnoh.',
+    option: 'ZIEL',
+    optionDescription: 'Das START-Menü zeigt, was in der\nGeschichte als Nächstes kommt.',
+    step: (name) => {
+      const words = GERMAN_STEPS[name];
+      if (words === undefined) throw new Error(`objectives: no German words for step ${name}`);
+      return words;
+    },
+  },
+};
+
+/** Our texts for the table and its option (text id → words) in the game's language, added to the pack's texts. */
+export function objectiveTexts(language: RomLanguage): Record<string, string> {
+  const own = OWN_TEXTS[language];
+  return {
+    OpenSinnoh_Options_Objective: own.option,
+    OpenSinnoh_Options_ObjectiveDescription: own.optionDescription,
+    [textId('Title')]: own.title,
+    [textId('Explore')]: own.explore,
+    ...Object.fromEntries(STEPS.map(([name, words]) => [textId(name), own.step(name, words)])),
+  };
+}
 
 /**
  * The table, with every flag and var resolved through the names (an unknown name fails the import); a destination must

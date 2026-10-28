@@ -28,6 +28,7 @@ until menu 600
 +1 release down
 +8 press a
 +1 release a
+advance text 600
 until yesno 600
 +4 press a
 +1 release a
@@ -54,6 +55,7 @@ until menu 600
 +1 release down
 +8 press a
 +1 release a
+advance text 600
 until yesno 600
 +4 press a
 +1 release a

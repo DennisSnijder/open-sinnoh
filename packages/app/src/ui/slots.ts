@@ -20,6 +20,7 @@ import type { Art } from './art.ts';
 import { el } from './core.ts';
 import { place, sceneContext } from './evolution.ts';
 import './slots.css';
+import { S } from '../strings/index.ts';
 
 type Img = HTMLImageElement;
 const W = 256;
@@ -31,9 +32,9 @@ const REEL_X = [68, 128, 188];
 /** The touch targets, in composition px: the reel columns and the help bar's three parts. */
 const COLUMNS = REEL_X.map((x) => ({ x: x - 28, y: MACHINE_Y + 24, w: 56, h: 136 }));
 const HELP = [
-  { id: 'bet', label: 'Insert coins', x: 0, w: 92 },
-  { id: 'spin', label: 'Spin', x: 92, w: 84 },
-  { id: 'quit', label: 'Exit', x: 176, w: 80 },
+  { id: 'bet', label: () => S.aria.insertCoins, x: 0, w: 92 },
+  { id: 'spin', label: () => S.aria.spin, x: 92, w: 84 },
+  { id: 'quit', label: () => S.aria.exit, x: 176, w: 80 },
 ];
 const HELP_Y = MACHINE_Y - 28;
 const HELP_H = 40;
@@ -69,7 +70,7 @@ class SlotsScene {
     this.g = this.canvas.getContext('2d')!;
     this.stage.append(this.canvas, this.boxes);
     this.root.append(this.stage);
-    this.root.setAttribute('aria-label', 'Slot machine');
+    this.root.setAttribute('aria-label', S.aria.slots);
   }
 
   private image(ref: Id): Img | null {
@@ -251,13 +252,13 @@ class SlotsScene {
     const parts: HTMLElement[] = [];
     COLUMNS.forEach((c, r) => {
       const b = stop(d, `stop:${r}`, [], 'slots-target slots-stop', false);
-      b.setAttribute('aria-label', `Stop the ${['left', 'middle', 'right'][r]} reel`);
+      b.setAttribute('aria-label', S.aria.stopReel(r));
       place(b, c);
       parts.push(b);
     });
     for (const h of HELP) {
       const b = stop(d, h.id, [], `slots-target slots-help slots-${h.id}`, false);
-      b.setAttribute('aria-label', h.label);
+      b.setAttribute('aria-label', h.label());
       place(b, { x: h.x, y: HELP_Y, w: h.w, h: HELP_H });
       parts.push(b);
     }

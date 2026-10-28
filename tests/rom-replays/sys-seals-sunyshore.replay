@@ -42,7 +42,7 @@ until app mart 300
 +1 tap qty:+1
 +1 tap qty:+1
 +1 tap qty:+1
-+1 assert state app.quantity.count "x96"
++1 assert state sealCase.counts[0] 3
 +1 tap ok
 +1 tap yes
 +1 tap next
