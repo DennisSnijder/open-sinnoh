@@ -21,6 +21,7 @@ import '../ui/apps.css';
 import '../ui/apps-m3a.css';
 import '../ui/naming.css';
 import { MAX_SCALE } from '../ui/rowan-intro.ts';
+import { S } from '../strings/index.ts';
 
 export interface FlowDeps {
   registries: Registries;
@@ -155,7 +156,7 @@ export function newGameFlow(deps: IntroDeps): Sheet {
   };
   if (!deps.offerSkip) return introFlow(deps, false, finish);
   const ask = new SetupFlow({ questions: ['introSkip'], textSpeed: () => 0, textDelay: () => 0, answer: (_q, c) => void (skip = c === 0), pickAddon: () => {} });
-  const screen = new SetupScreen(ask, deps.tap, { tab: 'New game', lead: 'A choice for this new game.' });
+  const screen = new SetupScreen(ask, deps.tap, S.title.newGameHeading);
   let skip = false;
   let intro: TitleFlow | null = null;
   const root = document.createElement('div');

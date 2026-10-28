@@ -83,9 +83,16 @@ export function m5Handlers(r: Runner): Record<string, Handler> {
     /**
      * Decomp ScrCmd_WaitABPadPress (ScriptContext_CheckABPadPress): waits for A, B or any d-pad press. Unlike
      * wait_button the d-pad does not turn the player and X does nothing (the Distortion World and Spear Pillar
-     * acknowledgements).
+     * acknowledgements). No arrow shows (ScriptView.waitsForAB).
      */
-    wait_ab_pad_press: (_t, c) => r.pause(c, (input) => input.pressed.some((b) => b === 'a' || b === 'b' || b === 'up' || b === 'down' || b === 'left' || b === 'right')),
+    wait_ab_pad_press: (_t, c) => {
+      r.ui.abWait = true;
+      return r.pause(c, (input) => {
+        const done = input.pressed.some((b) => b === 'a' || b === 'b' || b === 'up' || b === 'down' || b === 'left' || b === 'right');
+        if (done) r.ui.abWait = false;
+        return done;
+      });
+    },
 
     /**
      * Decomp ScrCmd_CheckDistributionEvent (SystemVars_CheckDistributionEvent): TRUE when the event's var holds

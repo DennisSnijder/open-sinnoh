@@ -8,7 +8,7 @@
  */
 import type { Button, Id } from '@opensinnoh/core';
 import type { EasyChatView, GameState, Registries } from '@opensinnoh/contracts';
-import { easyChatWord, WORD_NONE, type EasyChatBank } from '@opensinnoh/services';
+import { easyChatWord, gameLanguage, wordOrder, WORD_NONE, type EasyChatBank } from '@opensinnoh/services';
 import { Dialog } from './dialog.ts';
 import { moveCursor, tapIndex, type Screen, type Step } from './stack.ts';
 import { MenuText } from './strings.ts';
@@ -35,7 +35,10 @@ const GROUPS: readonly { label: string; banks: readonly EasyChatBank[] }[] = [
 const CANCEL = 'EasyChatGroups_Text_Cancel';
 export const EASY_CHAT_MESSAGES = [...Object.values(TEXT), ...GROUPS.map((g) => g.label), CANCEL];
 
-/** A group's words: each bank's named entries, the duplicates the decomp keeps (sDummy*) once, sorted. */
+/**
+ * A group's words: each bank's named entries, the duplicates the decomp keeps (sDummy*) once, in the game language's
+ * order (services `wordOrder`; the German one is the German ROM's own word lists' order).
+ */
 function groupWords(registries: Registries, text: MenuText, state: GameState, banks: readonly EasyChatBank[]): { word: number; text: string }[] {
   const seen = new Set(state.pokedex.seen);
   const speciesAt = new Map([...registries.species.values()].map((x) => [x.sourceIndex, x.id]));
@@ -50,11 +53,12 @@ function groupWords(registries: Registries, text: MenuText, state: GameState, ba
       }
       const s = text.text(id);
       // Entry 0 of the name banks ("-----") and the empty ones are not words.
-      if (!/[A-Za-z0-9]/.test(s) || words.has(s)) return;
+      if (!/[\p{L}\p{N}]/u.test(s) || words.has(s)) return;
       words.set(s, easyChatWord(registries, bank, entry));
     });
   }
-  return [...words].map(([t, word]) => ({ word, text: t })).sort((a, b) => a.text.localeCompare(b.text));
+  const order = wordOrder(gameLanguage(registries));
+  return [...words].map(([t, word]) => ({ word, text: t })).sort((a, b) => order(a.text, b.text));
 }
 
 export function easyChatScreen(registries: Registries, state: GameState, count: 1 | 2, done: (words: number[] | null) => Step): Screen {
@@ -129,6 +133,13 @@ export function easyChatScreen(registries: Registries, state: GameState, count: 
         if (g !== null && mode === 'groups' && g >= 0 && g <= groups.length) return openGroup(g);
         const w = tapIndex(i.tap, 'word');
         if (w !== null && mode === 'words') return pick(w);
+        // `word:<text id>`: the listed word with that text, wherever the game language sorts it (replays).
+        const named = /^word:([a-z0-9-]+:\S+)$/.exec(i.tap)?.[1];
+        if (named && mode === 'words') {
+          const at = groupList(group).findIndex((x) => x.text === t.text(named as Id));
+          if (at < 0) throw new Error(`easy chat: ${named} is not a word of the open group`);
+          return pick(at);
+        }
         if (mode === 'words' && (i.tap === 'up' || i.tap === 'down')) {
           const rows = Math.ceil(groupList(group).length / COLUMNS);
           top = Math.max(0, Math.min(rows - EASY_CHAT_ROWS, top + (i.tap === 'up' ? -EASY_CHAT_ROWS : EASY_CHAT_ROWS)));

@@ -11,6 +11,8 @@ import { TitleScreens } from './intro.ts';
 import { expectNamingGrid } from './naming-grid.ts';
 import { settle } from './settle.ts';
 import { selectBall, starterReady } from './starter.ts';
+import { plainText } from '../../packages/app/src/ui/strings.ts';
+import { appStrings, fixedPart } from './words.ts';
 
 const SHOTS = 'test-artifacts/safe-area-scenes';
 const PORTRAIT = { top: 47, right: 0, bottom: 34, left: 0 };
@@ -88,7 +90,7 @@ test('title, all setup questions, Rowan and both naming keyboards clear the notc
   await shot('title');
   await page.locator('#title').tap();
   await page.waitForFunction(() => window.openSinnohTitle?.phase === 'setup', undefined, { timeout: 30_000 });
-  const screens = new TitleScreens(page, true);
+  const screens = new TitleScreens(page, true, appStrings());
   const setup = screens.flow('Setup');
   for (const [question, answer] of [['reports', 1], ['addon', 1], ['textSpeed', 2], ['visualStyle', 0]] as const) {
     await expect(setup.locator('.setup-panel')).toHaveAttribute('data-question', question);
@@ -155,15 +157,16 @@ test('evolution and its message stay inside the safe room', async () => {
   expect(result.error).toBeUndefined();
   expect(result.ok).toBe(true);
   await dsStage('[data-screen="evolution"] .ds-scene-stage');
-  await page.evaluate(() => {
+  const congratulations = fixedPart((...slots) => plainText(registries.texts.get('platinum:BattleStrings_Text_CongratulationsYourPokemonEvolvedIntoPokemon' as Id)!.text, slots));
+  await page.evaluate((done) => {
     const g = window.openSinnohGame!;
     for (let n = 0; n < 1200; n++) {
       const v = g.snapshot().app;
-      if (v?.app === 'evolution' && v.message?.waiting && v.message.text.includes('Congratulations')) return;
+      if (v?.app === 'evolution' && v.message?.waiting && v.message.text.includes(done)) return;
       g.advance(1);
     }
     throw new Error('evolution did not reach Congratulations');
-  });
+  }, congratulations);
   await safe('[data-screen="evolution"] .msg-box');
   await shot('evolution');
 });

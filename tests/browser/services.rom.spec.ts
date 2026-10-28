@@ -16,6 +16,7 @@ import { narrowRowHits } from './row-hits.ts';
 import { seedRomImport } from './seed.ts';
 import { settle } from './settle.ts';
 import { pageDriver, waitForScene } from '../../packages/cli/src/browser.ts';
+import { plainText } from '../../packages/app/src/ui/strings.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 const SHOTS = 'test-artifacts/services-rom';
@@ -142,6 +143,17 @@ test('svc-pokecenter: the nurse heals; the machine shows one ball per non-egg Po
     repeat: false,
     async beforeLine(line: ReplayLine) {
       if (line.action.type === 'screenshot') {
+        // The beat is 5 ticks after the second ball (its +140 on the US ROM). A nurse whose words take longer to print
+        // (the German build's) starts the machine later: tick on to the same moment of the machine.
+        await page.evaluate(() => {
+          const g = window.openSinnohGame!;
+          const heard = (window as unknown as { healHeard: { tick: number; seq: string }[] }).healHeard;
+          const second = () => heard.filter((h) => h.seq === 'platinum:SEQ_SE_DP_BOWA')[1]?.tick;
+          for (let i = 0; i < 300 && second() === undefined; i++) g.advance(1);
+          const at = second();
+          if (at === undefined) throw new Error('the machine never placed the second ball');
+          while (g.snapshot().state.tick < at + 5) g.advance(1);
+        });
         atBeat = await redPixels();
         flash = await healFlash();
       }
@@ -273,7 +285,9 @@ test('svc-dept-store(-2f, -3f, -b1f): the Veilstone Department Store floors with
     expect(result.ok, name).toBe(true);
   }
   expect(checks).toEqual(['dept-medicine', 'dept-2f-up', 'dept-2f-mid', 'dept-3f-up', 'dept-3f-down', 'dept-b1f']);
-  expect(money).toEqual(['$ 19980', '$ 19780', 'closed']);
+  // The amount in the ROM's template (bank 543 message 19), padded to 6 digits with spaces (vm m3a-ops.ts).
+  const amount = (n: number) => plainText(registries.texts.get('platinum:pl_msg_00000543_00019' as Id)!.text, [String(n).padStart(6, ' ')]);
+  expect(money).toEqual([amount(19980), amount(19780), 'closed']);
   expect(errors).toEqual([]);
 });
 

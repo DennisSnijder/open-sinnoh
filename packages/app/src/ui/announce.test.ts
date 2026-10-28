@@ -69,8 +69,8 @@ describe('the game', () => {
   it('reads the field message, the YES/NO cursor and a scripted menu row with its place', () => {
     const { a, said } = make();
     announceFrame(a, field({ message: { text: 'Will you go?', waitingForInput: true } }), null, 0);
-    announceFrame(a, field({ message: { text: 'Will you go?', waitingForInput: true }, yesNo: { cursor: 0 } }), null, 1);
-    announceFrame(a, field({ yesNo: { cursor: 1 } }), null, 2);
+    announceFrame(a, field({ message: { text: 'Will you go?', waitingForInput: true }, yesNo: { yes: 'YES', no: 'NO', cursor: 0 } }), null, 1);
+    announceFrame(a, field({ yesNo: { yes: 'YES', no: 'NO', cursor: 1 } }), null, 2);
     announceFrame(a, field({ menu: { entries: ['Bag', 'Party'], cursor: 1 } }), null, 3);
     expect(said).toEqual(['Will you go?', 'YES', 'NO', 'Party, 2 of 2']);
   });

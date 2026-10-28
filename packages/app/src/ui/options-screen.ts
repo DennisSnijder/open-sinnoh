@@ -22,6 +22,7 @@ import { backButton, button, cycle, dialog, footer, h, pick as osPick, row as os
 import { controls } from '../input.ts';
 import type { DrawContext } from './apps.ts';
 import { pages, stepSetting, type AppSettings, type Setting, type SettingsEnv, type SectionId } from './settings.ts';
+import { language, S } from '../strings/index.ts';
 import './options.css';
 
 const SECTION_ICONS: Record<SectionId, IconName> = { game: 'pad', device: 'screen', controls: 'dpad', data: 'disk', privacy: 'shield' };
@@ -229,13 +230,13 @@ export class OptionsScreen {
     const panel = h('section', 'os-win os-panel');
     root.append(panel);
 
-    panel.append(titleTab('Options', { icon: 'gear', tone: 'system' }));
+    panel.append(titleTab(S.options.tab, { icon: 'gear', tone: 'system' }));
 
     // The sections; on the tab row the cursor is on the open page's tab.
     const strip = tabs(
-      all.map((p) => ({ id: p.section.id, label: title(p.section.label), icon: SECTION_ICONS[p.section.id] })),
+      all.map((p) => ({ id: p.section.id, label: labelCase(p.section.label), icon: SECTION_ICONS[p.section.id] })),
       page.section.id,
-      { label: 'Options sections', keyboard: false },
+      { label: S.options.sections, keyboard: false },
     );
     strip.classList.add('options-tabs');
     for (const [i, t] of [...strip.querySelectorAll<HTMLButtonElement>('[role="tab"]')].entries()) {
@@ -248,7 +249,7 @@ export class OptionsScreen {
 
     const list = h('div', 'os-list options-rows');
     list.setAttribute('role', 'tabpanel');
-    list.setAttribute('aria-label', title(page.section.label));
+    list.setAttribute('aria-label', labelCase(page.section.label));
     list.dataset.scrolls = '';
     slots.forEach((slot, i) => {
       if (slot.kind === 'setting') list.append(settingRow(d, env, slot.setting, i, this.cursor === i));
@@ -288,7 +289,7 @@ export class OptionsScreen {
         }
         return b;
       };
-      const layer = dialog(oneLine(q.question), '', [answer(1, 'No'), answer(0, 'Yes')]);
+      const layer = dialog(oneLine(q.question), '', [answer(1, S.options.no), answer(0, S.options.yes)]);
       layer.classList.add('options-question');
       // It opens once; later draws (the cursor moving) do not open it again.
       if (this.drawnQuestion !== q) layer.firstElementChild!.classList.add('os-enter');
@@ -299,8 +300,23 @@ export class OptionsScreen {
   }
 }
 
-/** Our own labels in sentence case ("GAME" → "Game"). */
-const title = (s: string) => s === s.toUpperCase() ? (s.charAt(0) + s.slice(1).toLowerCase()).replace(/\b(rom|hgss)\b/gi, (word) => word.toUpperCase()) : s;
+/** German words a label in capitals keeps in lower case (all others are nouns, as in the ROM's KAMPFSTIL or TEXT-TEMPO). */
+const GERMAN_LOWER = new Set(['der', 'die', 'das', 'des', 'dem', 'den', 'und', 'oder', 'im', 'in', 'am', 'an', 'auf', 'aus', 'bei', 'mit', 'von', 'vom', 'zu', 'zum', 'zur', 'für']);
+
+/**
+ * A label in capitals (ours, or the ROM's) in the game's casing; any other label is shown as written. English is
+ * sentence case ("BATTLE STYLE" → "Battle style"); German capitalises each word and each part after a hyphen, as
+ * its nouns are ("TEXT-TEMPO" → "Text-Tempo"), except the small words. ROM and HGSS stay in capitals.
+ */
+export const labelCase = (s: string): string => {
+  if (s !== s.toUpperCase()) return s;
+  const lower = s.toLowerCase();
+  const cased =
+    language() === 'de'
+      ? lower.replace(/(^|[\s-])([^\s-]+)/g, (_, sep: string, word: string) => sep + (sep !== '' && GERMAN_LOWER.has(word) ? word : word.charAt(0).toUpperCase() + word.slice(1)))
+      : lower.charAt(0).toUpperCase() + lower.slice(1);
+  return cased.replace(/\b(rom|hgss)\b/gi, (word) => word.toUpperCase());
+};
 
 /** The DS descriptions break lines for its window; ours wrap. */
 const oneLine = (s: string) => s.replace(/\s*\n\s*/g, ' ');
@@ -317,7 +333,7 @@ function tapOn(d: DrawContext, e: HTMLElement, id: string): void {
 /** One setting's row: its label, description and its control by kind. A tap on the row moves the cursor there. */
 function settingRow(d: DrawContext, env: SettingsEnv, s: Setting, slot: number, cursor: boolean): HTMLElement {
   const off = s.disabled?.(env) ?? null;
-  const label = title(s.label(env));
+  const label = labelCase(s.label(env));
   const v = s.get(env);
   const values = s.values(env);
   const id = s.id;

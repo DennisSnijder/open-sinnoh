@@ -21,7 +21,7 @@ export const NATIONAL_DEX_COUNT = 493;
 const ENC_STRIDE = 495;
 /** pokedex_enc_data.h PokedexEncFileCatgegory: dungeon lists 0–4, field lists 5–9. */
 const ENC_LISTS: DexAreaList[] = ['morning', 'day', 'night', 'special', 'specialNational'];
-/** Text banks (generated/text_banks.txt): entries (English), weight, weight (Altered Giratina), height, height (Altered Giratina), category. */
+/** Text banks (generated/text_banks.txt): entries (the game's own language: the US build's English, the German build's German; 706 is named _EN), weight, weight (Altered Giratina), height, height (Altered Giratina), category. */
 const BANKS = { description: 706, weight: 707, weightGira: 708, height: 709, heightGira: 710, category: 711 };
 const GIRATINA = 487;
 /** ov21_021DC9BC.c: a 30×30 grid of 5 px cells; fields drawn from (89, 30), dungeon markers at (92, 32) + 5·(x, y). */

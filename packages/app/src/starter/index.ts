@@ -13,7 +13,7 @@
  */
 import type { Id } from '@opensinnoh/core';
 import { choiceRects, type AssetSource, type LoadedFont, type PanelView, type Registries, type Ui2dSheet } from '@opensinnoh/contracts';
-import { drawText, YES_NO_LABELS } from '@opensinnoh/text';
+import { drawText } from '@opensinnoh/text';
 import type { InputState } from '../input.ts';
 import { starterLayout, type Rect, type StarterLayout } from './layout.ts';
 import { BALL_POSITIONS, StarterScene3d } from './scene3d.ts';
@@ -150,7 +150,7 @@ export class StarterScene {
   private readonly live: HTMLParagraphElement;
   private readonly buttons: HTMLButtonElement[];
   private scene3d: StarterScene3d | null = null;
-  private art: { cursor: { img: ImageBitmap; sheet: Ui2dSheet }; disc: ImageBitmap; colors: number[][]; fonts: Map<number, LoadedFont>; options: Option[]; prompt: Run[][] } | null = null;
+  private art: { cursor: { img: ImageBitmap; sheet: Ui2dSheet }; disc: ImageBitmap; colors: number[][]; fonts: Map<number, LoadedFont>; options: Option[]; prompt: Run[][]; yes: string } | null = null;
   private layout: StarterLayout = starterLayout(1, 1, 1);
   private box: Rect = { x: 0, y: 0, width: 1, height: 1 };
   private phase: Phase = 'loading';
@@ -246,6 +246,9 @@ export class StarterScene {
       return text;
     };
     const asks = ASKS.map(message);
+    // The YES button's label: the field YES/NO box's (MenuEntries_Text_Yes).
+    const yes = registries.texts.get(`${ns}:MenuEntries_Text_Yes` as Id)?.text;
+    if (yes === undefined) throw new Error(`starter scene: no text ${ns}:MenuEntries_Text_Yes`);
     const cursorSheet = sheet('cursor');
     const [cursorImg, disc, colorsImg, scene3d, options] = await Promise.all([
       image(assets, cursorSheet.atlas),
@@ -285,7 +288,7 @@ export class StarterScene {
       scene3d.dispose();
       return;
     }
-    this.art = { cursor: { img: cursorImg, sheet: cursorSheet }, disc, colors, fonts, options, prompt: colourLines(message(PROMPT)) };
+    this.art = { cursor: { img: cursorImg, sheet: cursorSheet }, disc, colors, fonts, options, prompt: colourLines(message(PROMPT)), yes: plain(yes) };
     this.scene3d = scene3d;
     this.el.prepend(scene3d.canvas);
     this.el.style.background = scene3d.floorEdge;
@@ -471,7 +474,7 @@ export class StarterScene {
       ctx.drawImage(option.frames[frame]!, dev(at.x) - (40 + option.centre.x) * ks, dev(at.y) - (40 + option.centre.y) * ks, 80 * ks, 80 * ks);
       if (pop >= 1) this.drawNameplate(ctx, option, preview, dpr);
       this.drawWindow(ctx, message, option.ask, dpr, s);
-      this.drawWindow(ctx, yes, [[{ text: YES_NO_LABELS[0], color: 0 }]], dpr, s, true);
+      this.drawWindow(ctx, yes, [[{ text: art.yes, color: 0 }]], dpr, s, true);
       this.announce(`${plain(option.ask.map((l) => l.map((r) => r.text).join('')).join('\n'))}`);
     } else {
       this.drawWindow(ctx, message, art.prompt, dpr, s);

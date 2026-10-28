@@ -12,6 +12,9 @@ set state party[0].status "poison"
 set state party[1].stats.hp 20
 set state party[1].hp 0
 set state party[2].isEgg true
+# 08:00, the morning greeting (CommonStrings message 120 on every ROM). Which message the day and the night
+# greet with differs by ROM language (the scripts route them differently), so the replay does not use them.
+time 08:00
 warp platinum:MAP_HEADER_JUBILIFE_CITY_POKECENTER_1F 8 6
 until idle
 +0 assert facing player up
@@ -20,10 +23,10 @@ until idle
 +1 release a
 # the normal greeting branch (no gold trainer card: get_trainer_card_level is 0), then its question
 until message
-+0 assert text platinum:CommonStrings_Text_PokecenterGreeting_Day 0
++0 assert text platinum:CommonStrings_Text_PokecenterGreeting_Morning 0
 advance text
 +0 assert message open
-+0 assert text platinum:CommonStrings_Text_PokecenterGreeting_Day 2
++0 assert text platinum:CommonStrings_Text_PokecenterGreeting_Morning 2
 +0 assert flag platinum:FLAG_POKECENTER_GOLD_TRAINER_CARD_SEEN false
 +1 press a
 +1 release a

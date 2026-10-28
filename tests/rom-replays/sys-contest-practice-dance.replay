@@ -31,7 +31,9 @@ until app contest 6000
 +0 assert state contest.competition 5
 until state app.round.message.waiting true 60
 +2 screenshot dance-intro
-# The MC's five pages, then the song (120 BPM: a beat is 15 ticks, a measure 240)
+# The MC's pages: A on each, eight presses for however many pages the build's language has (a spare press lands
+# before the step buttons are up, so it takes no step). Then the song (120 BPM: a beat is 15 ticks, a measure 240),
+# timed from the step buttons first coming up, 254 ticks after the MC's last page
 +2 press a
 +1 release a
 +4 press a
@@ -42,7 +44,14 @@ until state app.round.message.waiting true 60
 +1 release a
 +4 press a
 +1 release a
-+400 screenshot dance-backup
++4 press a
++1 release a
++4 press a
++1 release a
++4 press a
++1 release a
+until state app.round.buttons.dim false 600
++146 screenshot dance-backup
 +1564 press down
 +1 release down
 +29 press left

@@ -13,6 +13,7 @@ import { el } from './core.ts';
 import { sprite, textColor } from './party.ts';
 import type { Palette } from './pixel-font.ts';
 import './move-reminder.css';
+import { S } from '../strings/index.ts';
 
 /** Window rects in tiles (sWindowTemplates). */
 const W = {
@@ -83,7 +84,7 @@ export function moveReminder(wide: DrawContext, v: MoveReminderView): HTMLElemen
       const b = el('button', `mr-arrow-tap ${dir}`, ...(s ? [s] : []));
       b.type = 'button';
       b.dataset.tap = dir;
-      b.setAttribute('aria-label', dir === 'up' ? 'Scroll up' : 'Scroll down');
+      b.setAttribute('aria-label', S.aria.scroll(dir === 'up'));
       b.addEventListener('click', () => d.tap(dir));
       root.append(at(b, ARROWS.x - 16, (dir === 'up' ? ARROWS.up : ARROWS.down) - 8, 32, 16));
     };

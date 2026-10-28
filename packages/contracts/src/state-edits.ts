@@ -3,7 +3,7 @@
  * model's `Dex`, and the deterministic Pokémon of replay setup lines and save migrations. The VM, the
  * game and the app use these, so they agree on the rules.
  */
-import { addItem, bagCount, canAddItem, createPokemon, dayPeriod, Dex, heal, isNight, monGender, PARTY_SIZE, Prng, randomIvs, randomPid, removeItem, type BagPocket, type ClockTime, type EvolutionTrigger, type Id, type Pokemon, type Stats } from '@opensinnoh/core';
+import { addItem, bagCount, canAddItem, createPokemon, dayPeriod, Dex, ENGLISH, GERMAN, heal, isNight, monGender, PARTY_SIZE, Prng, randomIvs, randomPid, removeItem, type BagPocket, type ClockTime, type EvolutionTrigger, type Id, type Pokemon, type Stats } from '@opensinnoh/core';
 import type { NewGame } from './records.ts';
 import type { Registries } from './runtime.ts';
 import { HALL_OF_FAME_ENTRIES, HALL_OF_FAME_TOTAL_MAX, ROAMING_SLOTS, SIGNATURE_HEIGHT, SIGNATURE_WIDTH, type GameState, type HallOfFameMon, type MysteryGiftId, type RoamerState, type SeenForm } from './state.ts';
@@ -267,15 +267,36 @@ export function grantDevEvent(state: GameState, registries: Registries, event: D
  * 0.30.0. The built-in Mystery Gifts (docs/decisions.md "Event legendaries through Mystery Gift with gift codes"):
  * our own definitions, received with a gift code and picked up from the Poké Mart deliveryman. `type` is the decomp
  * MysteryGiftType the deliveryman's script reads (MYST_GIFT_MEMBER_CARD 8, OAKS_LETTER 9, AZURE_FLUTE 10, SECRET_KEY
- * 12, POKEMON 1); `title` and `description` are the Wonder Card's text (our own words; the card shows three lines of text);
- * `species` the Pokémon the card pictures (a species sourceIndex).
+ * 12, POKEMON 1); `species` the Pokémon the card pictures (a species sourceIndex). The Wonder Card's text is
+ * `MYSTERY_GIFT_TEXT`.
  */
-export const MYSTERY_GIFTS: Readonly<Record<MysteryGiftId, { type: number; title: string; description: string; species: number }>> = {
-  darkrai: { type: 8, title: 'Member Card', description: 'A Member Card for the Harbor Inn in Canalave City. Spend a night there, and you may dream of a faraway island.', species: 491 },
-  shaymin: { type: 9, title: 'Oak’s Letter', description: 'A letter from Professor Oak. Bring it to Route 224 once the National Pokédex is yours.', species: 492 },
-  arceus: { type: 10, title: 'Azure Flute', description: 'A flute with an otherworldly melody. Play it at Spear Pillar, atop Mt. Coronet, and see what answers.', species: 493 },
-  rotom: { type: 12, title: 'Secret Key', description: 'The key to a hidden room in the Galactic Eterna Building, full of appliances a Pokémon may like.', species: 479 },
-  regigigas: { type: 1, title: 'Regigigas', description: 'A Regigigas met in a fateful encounter. Take it to Sinnoh’s ancient ruins, and the titans may stir.', species: 486 },
+export const MYSTERY_GIFTS: Readonly<Record<MysteryGiftId, { type: number; species: number }>> = {
+  darkrai: { type: 8, species: 491 },
+  shaymin: { type: 9, species: 492 },
+  arceus: { type: 10, species: 493 },
+  rotom: { type: 12, species: 479 },
+  regigigas: { type: 1, species: 486 },
+};
+
+/**
+ * The built-in Mystery Gifts' Wonder Card text per game language (core ENGLISH, GERMAN; our own words, the card shows
+ * three lines of text): the title and the description.
+ */
+export const MYSTERY_GIFT_TEXT: Readonly<Record<number, Readonly<Record<MysteryGiftId, { title: string; description: string }>>>> = {
+  [ENGLISH]: {
+    darkrai: { title: 'Member Card', description: 'A Member Card for the Harbor Inn in Canalave City. Spend a night there, and you may dream of a faraway island.' },
+    shaymin: { title: 'Oak’s Letter', description: 'A letter from Professor Oak. Bring it to Route 224 once the National Pokédex is yours.' },
+    arceus: { title: 'Azure Flute', description: 'A flute with an otherworldly melody. Play it at Spear Pillar, atop Mt. Coronet, and see what answers.' },
+    rotom: { title: 'Secret Key', description: 'The key to a hidden room in the Galactic Eterna Building, full of appliances a Pokémon may like.' },
+    regigigas: { title: 'Regigigas', description: 'A Regigigas met in a fateful encounter. Take it to Sinnoh’s ancient ruins, and the titans may stir.' },
+  },
+  [GERMAN]: {
+    darkrai: { title: 'Mitgliedskarte', description: 'Eine Mitgliedskarte für das Hotel am Hafen von Fleetburg. Wer dort übernachtet, träumt vielleicht von einer fernen Insel.' },
+    shaymin: { title: 'Eichs Brief', description: 'Ein Brief von Professor Eich. Bring ihn zur Route 224, sobald du den Nationalen Pokédex besitzt.' },
+    arceus: { title: 'Azurflöte', description: 'Eine Flöte mit einer überirdischen Melodie. Spiele sie auf der Speersäule am Kraterberg und sieh, was antwortet.' },
+    rotom: { title: '?-Öffner', description: 'Der Schlüssel zu einem verborgenen Raum im Galaktik-Gebäude in Ewigenau, voller Geräte, die einem Pokémon gefallen könnten.' },
+    regigigas: { title: 'Regigigas', description: 'Ein Regigigas aus einer schicksalhaften Begegnung. Bring es zu Sinnohs uralten Ruinen, und die Titanen erwachen vielleicht.' },
+  },
 };
 
 /** Decomp CanReceiveMemberCard and the other key items (Bag_CanFitItem), CanReceivePokemon (a free party slot). */

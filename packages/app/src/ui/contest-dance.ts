@@ -19,6 +19,7 @@ import { el } from './core.ts';
 import { MESSAGE, place, sceneContext } from './evolution.ts';
 import './evolution.css';
 import './contest-dance.css';
+import { S } from '../strings/index.ts';
 
 type Img = HTMLImageElement;
 const W = DS_WIDTH;
@@ -84,7 +85,7 @@ class DanceScene {
     this.stage.append(this.canvas, this.boxes);
     this.room.append(this.stage, this.pad);
     this.root.append(this.room);
-    this.root.setAttribute('aria-label', 'Dance Competition');
+    this.root.setAttribute('aria-label', S.aria.dance);
   }
 
   private image(ref: Id): Img | null {

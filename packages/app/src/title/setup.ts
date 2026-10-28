@@ -11,6 +11,7 @@
 import type { InputFrame } from '@opensinnoh/contracts';
 import { choices, h, snapPixels, titleTab, wordmark } from '@opensinnoh/ui';
 import { ASK, type SetupQuestion } from './setup-questions.ts';
+import { S } from '../strings/index.ts';
 import './setup.css';
 
 export { readAnswered, SETUP_KEY, storeAnswered, type SetupQuestion } from './setup-questions.ts';
@@ -33,7 +34,6 @@ export interface SetupHeading {
   tab: string;
   lead: string;
 }
-const SETUP_HEADING: SetupHeading = { tab: 'Welcome to OpenSinnoh', lead: 'A few quick choices for this device. You can change them anytime in Options.' };
 /** The fade to black before the main menu fades in (frames). */
 const FADE = 6;
 
@@ -106,11 +106,11 @@ export class SetupScreen {
   constructor(
     private readonly setup: SetupFlow,
     private readonly tap: (id: string) => void,
-    private readonly heading: SetupHeading = SETUP_HEADING,
+    private readonly heading: SetupHeading = S.title.setupHeading,
   ) {
     this.root = h('div', 'os os-screen os-field tm-flow tm-setup');
     this.root.setAttribute('role', 'dialog');
-    this.root.setAttribute('aria-label', 'Setup');
+    this.root.setAttribute('aria-label', S.title.setup);
     this.root.dataset.screen = 'setup';
     this.shade = h('div', 'setup-shade');
     this.col = h('div', 'setup-col', h('div', 'setup-brand', wordmark(5, { animate: true })));
@@ -142,7 +142,7 @@ export class SetupScreen {
     list.removeAttribute('aria-label');
     list.querySelectorAll<HTMLElement>('.os-choice').forEach((b, i) => (b.dataset.tap = `menu:${i}`));
     panel.append(
-      titleTab(this.heading.tab, { icon: 'gear', tone: 'system', end: [h('span', 'os-sr', `Question ${v.step} of ${v.steps}`), counter] }),
+      titleTab(this.heading.tab, { icon: 'gear', tone: 'system', end: [h('span', 'os-sr', S.title.question(v.step, v.steps)), counter] }),
       h(
         'div',
         'setup-body',

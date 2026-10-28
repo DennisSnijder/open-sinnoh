@@ -19,7 +19,7 @@ until message
 advance text 6000
 +12 screenshot jubilife-tag-battle-lucas
 battle auto 9000
-advance text 4400
+advance text 9000
 +0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_JUBILIFE_CITY_1 won ai-partner
 +0 assert battle trainer platinum:TRAINER_GALACTIC_GRUNT_JUBILIFE_CITY_2 won ai-partner
 +0 assert var platinum:VAR_JUBILIFE_CITY_STATE 4

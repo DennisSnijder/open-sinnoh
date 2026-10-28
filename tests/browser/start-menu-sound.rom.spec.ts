@@ -10,6 +10,7 @@ import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import { press } from './intro.ts';
 import { saveSlot } from './save.ts';
 import { seedRomImport } from './seed.ts';
+import { appStrings } from './words.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 
@@ -137,10 +138,11 @@ test('the title: the first START starts the audio and plays the cry; the main me
 
   // A on OPTIONS confirms and opens the DS options screen; B there closes it.
   await press(page, 'Enter');
-  await expect(page.getByRole('dialog', { name: 'Options' })).toBeVisible();
+  const options = page.getByRole('dialog', { name: appStrings().title.options });
+  await expect(options).toBeVisible();
   expect((await heard())[0]).toEqual({ source: SE_CONFIRM, cry: false });
   await press(page, 'KeyX');
-  await expect(page.getByRole('dialog', { name: 'Options' })).toHaveCount(0);
+  await expect(options).toHaveCount(0);
   await heard();
 
   // B: SE_CONFIRM, then the title's theme.
@@ -161,7 +163,7 @@ test('MYSTERY GIFT: its music, list moves, choices and cancel', async () => {
   expect(await focused()).toBe('mystery-gift');
   await record();
   await press(page, 'Enter');
-  const screen = page.getByRole('dialog', { name: 'Mystery Gift' }).locator('.mystery-gift-screen');
+  const screen = page.getByRole('dialog', { name: appStrings().title.mysteryGift }).locator('.mystery-gift-screen');
   await expect(screen).toBeVisible();
   await expect(screen.locator('[data-tap="menu:0"]')).toBeVisible();
   expect(await heard()).toEqual([{ source: SE_CONFIRM, cry: false }, { source: SEQ_PRESENT, cry: false }]);

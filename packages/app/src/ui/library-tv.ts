@@ -11,6 +11,7 @@ import type { DrawContext } from './apps.ts';
 import type { Art } from './art.ts';
 import { el } from './core.ts';
 import { layoutScene } from './evolution.ts';
+import { S } from '../strings/index.ts';
 
 const W = 256;
 const H = 192;
@@ -39,7 +40,7 @@ export function libraryTv(d: DrawContext, v: LibraryTvView): HTMLElement {
     canvas.setAttribute('aria-hidden', 'true');
     const stage = el('div', 'ds-scene-stage', canvas);
     const root = el('section', 'ds-scene library-tv-scene', stage);
-    root.setAttribute('aria-label', 'Television');
+    root.setAttribute('aria-label', S.aria.television);
     scenes.set(d.art, (s = { root, stage, canvas }));
   }
   layoutScene(d, s.root, s.stage);

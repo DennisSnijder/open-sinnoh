@@ -19,7 +19,7 @@ until position 104 853
 until position 104 852
 +0 release up
 +0 press right
-until position 128 852
+until position 128 852 3600  # a wild battle on the way (seed 2) takes longer with longer battle texts
 +0 release right
 +0 press up
 until position 128 848

@@ -70,7 +70,8 @@ export interface HashedRom extends RomSource {
 
 /**
  * NitroFS: maps paths ("/a/b.narc") to file ids and byte ranges. On a Uint8Array, files are views of the ROM
- * buffer (no copies); on a RomSource, each read is the source's own bytes.
+ * buffer (no copies); on a RomSource, each read is the source's own bytes. `paths` maps a path the caller asks for
+ * to the one this ROM has it at (a localized build keeps some files elsewhere; the importer asks by the US paths).
  */
 export class NitroFs {
   readonly header: NdsHeader;
@@ -78,8 +79,10 @@ export class NitroFs {
   private readonly fat: Reader;
   private readonly fnt: Reader;
   private readonly paths = new Map<string, number>();
+  private readonly aliases: Readonly<Record<string, string>>;
 
-  constructor(rom: Uint8Array | RomSource) {
+  constructor(rom: Uint8Array | RomSource, options: { paths?: Readonly<Record<string, string>> } = {}) {
+    this.aliases = options.paths ?? {};
     this.source = rom instanceof Uint8Array ? { size: rom.length, read: (start, end) => rom.subarray(start, end) } : rom;
     this.header = readHeader(this.read(0, Math.min(0x200, this.source.size)));
     this.fat = new Reader(this.read(this.header.fatOffset, this.header.fatOffset + this.header.fatSize));
@@ -101,8 +104,9 @@ export class NitroFs {
   }
 
   fileId(path: string): number {
-    const id = this.paths.get(path);
-    if (id === undefined) throw new Error(`NitroFS: no file at ${path}`);
+    const at = this.aliases[path] ?? path;
+    const id = this.paths.get(at);
+    if (id === undefined) throw new Error(`NitroFS: no file at ${at}${at === path ? '' : ` (for ${path})`}`);
     return id;
   }
 

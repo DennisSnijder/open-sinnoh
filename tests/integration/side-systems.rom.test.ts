@@ -30,12 +30,16 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('side systems (OPENSINNOH_NDS_R
     expect(t.moves).toHaveLength(38);
     expect(t.moves[0]).toEqual({ move: 'platinum:MOVE_DIVE', cost: [2, 4, 2, 0], location: 0 });
     expect(t.moves.filter((m) => m.location === 0)).toHaveLength(13);
+    // TEXT_BANK_NPC_TRADE_NAMES: nickname n, then the OT names from MAX_NPC_TRADES.
+    const names = new Map((pack.registries.texts as { id: string; text: string }[]).map((x) => [x.id, x.text]));
+    const name = (n: number) => names.get(`platinum:text/370/${n}`);
     expect(ng.npcTrades!.map((x) => [x.species, x.requested, x.nickname, x.otName])).toEqual([
-      ['platinum:SPECIES_ABRA', 'platinum:SPECIES_MACHOP', 'Kazza', 'Hilary'],
-      ['platinum:SPECIES_CHATOT', 'platinum:SPECIES_BUIZEL', 'Charap', 'Norton'],
-      ['platinum:SPECIES_HAUNTER', 'platinum:SPECIES_MEDICHAM', 'Gaspar', 'Mindy'],
-      ['platinum:SPECIES_MAGIKARP', 'platinum:SPECIES_FINNEON', 'Foppa', 'Meister'],
+      ['platinum:SPECIES_ABRA', 'platinum:SPECIES_MACHOP', name(0), name(4)],
+      ['platinum:SPECIES_CHATOT', 'platinum:SPECIES_BUIZEL', name(1), name(5)],
+      ['platinum:SPECIES_HAUNTER', 'platinum:SPECIES_MEDICHAM', name(2), name(6)],
+      ['platinum:SPECIES_MAGIKARP', 'platinum:SPECIES_FINNEON', name(3), name(7)],
     ]);
+    for (const t of ng.npcTrades!) expect(t.nickname).toMatch(/\S/);
     // Haunter holds an Everstone: the trade does not evolve it (the DS checks no evolution after an NPC trade either).
     expect(ng.npcTrades![2]!.heldItem).toBe('platinum:ITEM_EVERSTONE');
     const species = new Map((pack.registries.species as { id: string; tutorMoves?: string[]; forms?: { form: number; tutorMoves?: string[] }[] }[]).map((s) => [s.id, s]));

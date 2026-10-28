@@ -8,23 +8,7 @@ until idle 6000
 until state player.z 76 400
 +0 release up
 +8 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
-+78 press a
-+1 release a
-+133 press a
-+1 release a
-+124 press a
-+1 release a
-+112 press a
-+1 release a
-+147 press a
-+1 release a
-+152 press a
-+1 release a
-+122 press a
-+1 release a
-+110 press a
-+1 release a
-until idle 6000
+advance text 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
 +0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_B7F","x":85,"z":76,"y":1040,"facing":"up"}
 +0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 9
@@ -42,71 +26,10 @@ until idle 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
 +0 press a
 +1 release a
-+41 press a
-+1 release a
-+112 press a
-+1 release a
-+2 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
+advance text 12000
++0 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
 battle auto 30000
-+134 press a
-+1 release a
-+116 press a
-+1 release a
-+120 press a
-+1 release a
-+56 press a
-+1 release a
-+134 press a
-+1 release a
-+58 press a
-+1 release a
-+180 press a
-+1 release a
-+124 press a
-+1 release a
-+106 press a
-+1 release a
-+92 press a
-+1 release a
-+150 press a
-+1 release a
-+44 press a
-+1 release a
-+148 press a
-+1 release a
-+72 press a
-+1 release a
-+46 press a
-+1 release a
-+136 press a
-+1 release a
-+77 press a
-+1 release a
-+30 press a
-+1 release a
-+30 press a
-+1 release a
-+30 press a
-+1 release a
-+71 press a
-+1 release a
-+240 press a
-+1 release a
-+138 press a
-+1 release a
-+92 press a
-+1 release a
-+56 press a
-+1 release a
-+152 press a
-+1 release a
-+112 press a
-+1 release a
-+114 press a
-+1 release a
-+88 press a
-+1 release a
-until idle 6000
+advance text 30000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B7F"
 +0 assert state player {"zone":"platinum:MAP_HEADER_DISTORTION_WORLD_B7F","x":89,"z":68,"y":1040,"facing":"down"}
 +0 assert var platinum:VAR_DISTORTION_WORLD_PROGRESS 10

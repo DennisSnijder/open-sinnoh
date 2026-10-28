@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { NitroFs } from '@opensinnoh/nds';
+import { romBuildOfHeader } from '../layout.ts';
 import { importTitle } from './index.ts';
 
 const romPath = process.env.OPENSINNOH_NDS_ROM;
@@ -9,7 +10,8 @@ const romPath = process.env.OPENSINNOH_NDS_ROM;
 describe.skipIf(!romPath)('title import (OPENSINNOH_NDS_ROM)', () => {
   let title: ReturnType<typeof importTitle>;
   beforeAll(() => {
-    title = importTitle(new NitroFs(new Uint8Array(readFileSync(romPath!))));
+    const bytes = new Uint8Array(readFileSync(romPath!));
+    title = importTitle(new NitroFs(bytes, { paths: romBuildOfHeader(bytes).paths }));
   });
 
   it('writes the 3D only: no DS logo, glow or credit layers', () => {

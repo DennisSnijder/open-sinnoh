@@ -9,8 +9,8 @@
  * - the feeding: the Pokémon and the Poffin on the cutscene's screen.
  * Packs without the art (the fixture) get plain shapes in the same places.
  */
-import type { PoffinCaseView, PoffinCookingView, PoffinFeedView, Ui2dSheet } from '@opensinnoh/contracts';
-import type { Id } from '@opensinnoh/core';
+import { dexOf, type PoffinCaseView, type PoffinCookingView, type PoffinFeedView, type Ui2dSheet } from '@opensinnoh/contracts';
+import { ENGLISH, forLanguage, GERMAN, type Id } from '@opensinnoh/core';
 import { framed, messageBox, stop, type DrawContext } from './apps.ts';
 import type { Art } from './art.ts';
 import { at, atTiles, board, boardContext, DS_HEIGHT, DS_WIDTH, dsPair } from './board.ts';
@@ -261,9 +261,13 @@ const CASE = {
   buttons: [[128, 48], [192, 96], [168, 162], [88, 164], [64, 96], [128, 116]] as const,
 };
 
+/** A list row's level before its number, per game language (English as before; German as the German ROM's PoffinCase_Text_ListItem). */
+const POFFIN_LEVEL: Readonly<Record<number, string>> = { [ENGLISH]: 'Lv. ', [GERMAN]: 'Lv.' };
+
 /** The Poffin Case: the list (top screen) and the flavour buttons (touch screen) as a DS pair. */
 export function poffinCase(wide: DrawContext, v: PoffinCaseView): HTMLElement {
   const d = boardContext(wide);
+  const levelLabel = forLanguage(dexOf(d.registries).language, POFFIN_LEVEL);
   const top = board('poffin-case-main');
   const bg = bgPicture(d, 'poffin_case/main', 0, 0);
   top.append(bg ?? at(el('span', 'poffin-css-screen'), 0, 0, W, H));
@@ -271,7 +275,7 @@ export function poffinCase(wide: DrawContext, v: PoffinCaseView): HTMLElement {
   const shown = [...v.rows.map((r, i) => ({ ...r, i })), { name: v.close, level: '', type: -1, i: v.rows.length }].slice(v.top, v.top + v.visible);
   const list = atTiles(el('div', 'poffin-case-list'), ...CASE.list);
   shown.forEach((r, k) => {
-    const row = stop(d, r.type < 0 ? 'close' : `row:${r.i}`, [el('span', 'poffin-row-name', d.text(r.name, 'ink')), ...(r.level ? [el('span', 'poffin-row-level', d.text(`Lv. ${r.level}`, 'ink'))] : [])], 'poffin-row', v.cursor === r.i);
+    const row = stop(d, r.type < 0 ? 'close' : `row:${r.i}`, [el('span', 'poffin-row-name', d.text(r.name, 'ink')), ...(r.level ? [el('span', 'poffin-row-level', d.text(`${levelLabel}${r.level}`, 'ink'))] : [])], 'poffin-row', v.cursor === r.i);
     at(row, 8, k * CASE.row, CASE.list[2] * 8 - 8, CASE.row);
     list.append(row);
   });

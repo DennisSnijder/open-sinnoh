@@ -1,10 +1,12 @@
 /** Browser platform bits: storage persistence and estimate, service worker and updates, install prompt, iOS install hint. */
 import { standalone } from './phone.ts';
+import { S } from './strings/index.ts';
 
 export function formatBytes(n: number): string {
+  const fixed = (x: number, digits: number) => x.toFixed(digits).replace('.', S.decimal);
   if (n < 1024 * 1024) return `${Math.round(n / 1024)} KB`;
-  if (n < 1024 * 1024 * 1024) return `${(n / 1048576).toFixed(1)} MB`;
-  return `${(n / 1073741824).toFixed(2)} GB`;
+  if (n < 1024 * 1024 * 1024) return `${fixed(n / 1048576, 1)} MB`;
+  return `${fixed(n / 1073741824, 2)} GB`;
 }
 
 /** An import refuses to start with less free space than this (the base pack is about 120 MB, and the browser needs room to work). */
@@ -20,7 +22,7 @@ export async function importSpaceProblem(reclaimable = 0): Promise<string | null
   const { usage = 0, quota = 0 } = await navigator.storage.estimate();
   const free = quota - usage + reclaimable;
   if (free >= MIN_FREE_BYTES) return null;
-  return `There is not enough free storage to set up the game. It needs about ${MIN_FREE_BYTES / 1048576} MB free and this browser has ${formatBytes(Math.max(0, free))}. Free some space on your device (or close other tabs and private windows), then choose the file again.`;
+  return S.storage.notEnough(MIN_FREE_BYTES / 1048576, formatBytes(Math.max(0, free)));
 }
 
 /** Asks the browser to keep this site's data (the import and the saves) when space runs low. True when it does. */
@@ -45,16 +47,15 @@ export async function storageStatus(): Promise<StorageStatus> {
 
 /** Two lines (the Options description window): whether the browser keeps the data, and how much is used. */
 export function storageLine({ persistent, usage, quota }: StorageStatus): string {
-  const used = quota > 0 ? `${formatBytes(usage)} of ${formatBytes(quota)} used.` : `${formatBytes(usage)} used.`;
-  if (persistent === null) return `This browser cannot promise to keep\nyour data. Export your save. ${used}`;
-  return persistent ? `The browser keeps your game.\n${used}` : `The browser may clear this when space\nis low. KEEP DATA asks it not to. ${used}`;
+  const used = quota > 0 ? S.storage.usedOf(formatBytes(usage), formatBytes(quota)) : S.storage.used(formatBytes(usage));
+  if (persistent === null) return S.storage.cannotPromise(used);
+  return persistent ? S.storage.kept(used) : S.storage.mayClear(used);
 }
 
 export async function storageSummary(): Promise<string> {
-  if (!navigator.storage?.estimate) return 'Storage estimate is not available in this browser.';
+  if (!navigator.storage?.estimate) return S.storage.noEstimate;
   const { persistent, usage, quota } = await storageStatus();
-  const kept = persistent ? 'Storage is persistent.' : 'Storage is not persistent: the browser may clear it when space is low.';
-  return `${formatBytes(Math.max(0, quota - usage))} free; setup needs ${MIN_FREE_BYTES / 1048576} MB. ${kept}`;
+  return S.storage.summary(formatBytes(Math.max(0, quota - usage)), MIN_FREE_BYTES / 1048576, persistent ? S.storage.persistent : S.storage.notPersistent);
 }
 
 /**
@@ -151,7 +152,7 @@ export async function promptInstall(): Promise<string> {
   installEvent = null;
   for (const cb of installListeners) cb();
   await e.prompt();
-  return (await e.userChoice).outcome === 'accepted' ? 'Installed. Open OpenSinnoh from your home screen or apps.' : 'Not installed.';
+  return (await e.userChoice).outcome === 'accepted' ? S.storage.installed : S.storage.notInstalled;
 }
 
 declare global {

@@ -15,17 +15,15 @@ declare global {
   }
 }
 
+import { S } from './strings/index.ts';
+
 export type SplashPhase = 'data' | 'game' | 'graphics';
 
-/** Each phase: its label and the hint after its time (a slow phone at 4x CPU takes up to a third of it). */
-const PHASES: Record<SplashPhase, [label: string, slow: string, ms: number]> = {
-  data: ['Reading your game data…', 'Reading your game data is taking longer than usual. If OpenSinnoh is open in another tab, close it, then reload.', 20_000],
-  game: ['Loading game…', 'Loading is taking longer than usual. Check your connection, then reload.', 30_000],
-  graphics: ['Preparing graphics…', 'Preparing graphics is taking longer than usual. Reload to try again.', 30_000],
-};
+/** Each phase's time before its hint shows (a slow phone at 4x CPU takes up to a third of it); its label and hint are `S.splash`'s. */
+const PHASE_MS: Record<SplashPhase, number> = { data: 20_000, game: 30_000, graphics: 30_000 };
 
 export function splashPhase(phase: SplashPhase): void {
-  window.openSinnohSplash.phase(...PHASES[phase]);
+  window.openSinnohSplash.phase(...S.splash[phase], PHASE_MS[phase]);
 }
 
 /**

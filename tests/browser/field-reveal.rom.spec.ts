@@ -10,6 +10,7 @@ import { writeFileSync } from 'node:fs';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import { romContext, resetRomDevice } from './rom-context.ts';
 import { openOptionsData, saveSlot } from './save.ts';
+import { appStrings } from './words.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 
@@ -250,7 +251,7 @@ test('a save file imported in the field: the same reveal', async () => {
   await chooser.setFiles(file);
   await startSampling();
   await page.locator('[data-tap="settings:answer:yes"]').click();
-  await expect(page.locator('.ui-notice')).toContainText('Loaded the save file');
+  await expect(page.locator('.ui-notice')).toContainText(appStrings().game.loadedSave);
   checkReveal('import', await settle(), CITY, true);
   expect(errors).toEqual([]);
 });
