@@ -43,8 +43,9 @@ import { readInitScripts } from './formats/init-scripts.ts';
 import { readAreaLight, templateAt, type RawLightTemplate } from './formats/area-light.ts';
 import { readAreaData, readLandData, readMapMatrix } from './formats/map.ts';
 import { decodeText } from './formats/text.ts';
-import { readWeatherBgs, readWeatherTasks, readYearlyWeather, WEATHER_BG_COUNT, weatherBgPng, weatherParts, weatherSpriteSet, WEATHER_TASK_COUNT, WEATHER_TASK_SIZE } from './formats/weather.ts';
+import { readWeatherBgs, readWeatherTasks, usWeatherTasks, readYearlyWeather, WEATHER_BG_COUNT, weatherBgPng, weatherParts, weatherSpriteSet, WEATHER_TASK_COUNT, WEATHER_TASK_SIZE } from './formats/weather.ts';
 import { readZoneHeaders, type ZoneHeader } from './formats/zone-headers.ts';
+import { placeTables, romBuild } from './layout.ts';
 import { charTable, Names, type CharmapFile, type NamesFile } from './names.ts';
 import { convertBaseCursor, readUndergroundTables } from './underground.ts';
 import { readContestTables } from './contests.ts';
@@ -355,6 +356,8 @@ const TABLES = {
   journalBuildings: { where: 'arm9', offset: 0xe5b90, count: 27, size: 8, sha1: '9d43b00d536d0cbac0567ea6da46c9f2cf57250c' },
   journalPageTurn: { where: 81, offset: 0x2668, count: 9, size: 32, sha1: '0a3da3dd9b74045457514423963c1a0415a08196' },
 } as const;
+/** The US layout of these tables (tools/relocate.ts finds them in other builds). */
+export { TABLES as PLATINUM_TABLES };
 
 /** Overlay 9 offsets of the Distortion World tables, inside `TABLES.distortionWorld`. */
 const DW_TABLES: Overlay9Layout = {
@@ -416,6 +419,11 @@ const MODERN_OPTION_TEXTS = {
   Lantern_Contest_Acting: 'ACTING',
   Lantern_Contest_Total: 'TOTAL',
 };
+
+/** Offsets inside a pinned region, moved with it (the region matched whole, so its insides kept their places). */
+function shiftLayout<L extends { [K in keyof L]: number }>(offsets: L, by: number): L {
+  return Object.fromEntries((Object.entries(offsets) as [string, number][]).map(([k, o]) => [k, o + by])) as L;
+}
 
 /** Map header map types (decomp MAP_TYPE_*), measured on the ROM: 1 town/city, 2 outdoors, 3 cave, 4 indoors. */
 /** The zone header's battle backdrop (decomp MapHeader_GetBattleBG → BACKGROUND_*). */
@@ -560,14 +568,16 @@ export async function importPlatinum(
     const known = Object.entries(SUPPORTED_ROMS).map(([h, r]) => `${r.name} (SHA1 ${h})`);
     throw new ImportError(`Unsupported ROM: SHA1 ${sha1}. OpenSinnoh needs an untrimmed dump of ${known.join(' or ')}.`);
   }
-  const fs = new NitroFs(rom);
+  const build = romBuild(supported);
+  const T = placeTables(TABLES, build.layout, 'platinum');
+  const fs = new NitroFs(rom, { paths: build.paths });
   const names = new Names(namesFile as NamesFile);
   const chars = charTable(charmapFile as CharmapFile);
   const unknowns: Record<string, string[]> = {};
   const unknown = (kind: string, what: string) => (unknowns[kind] ??= []).push(what);
 
-  const table = async (key: keyof typeof TABLES): Promise<Uint8Array> => {
-    const t = TABLES[key];
+  const table = async (key: keyof typeof T): Promise<Uint8Array> => {
+    const t = T[key];
     const src = t.where === 'arm9' ? fs.arm9() : fs.overlay(t.where);
     const bytes = src.subarray(t.offset, t.offset + t.count * t.size);
     const got = await sha1Hex(bytes);
@@ -585,17 +595,17 @@ export async function importPlatinum(
       }),
     };
   };
-  const headers = readZoneHeaders(await table('zoneHeaders'), TABLES.zoneHeaders.count);
+  const headers = readZoneHeaders(await table('zoneHeaders'), T.zoneHeaders.count);
   /** Decomp Script_GetHiddenItemFlag / Script_GetHiddenItemRange: a hidden item's bg script is 8000 + n, its flag HIDDEN_ITEM_FLAGS_START + n. */
   const hiddenItems = new Map<number, NonNullable<BgEvent['hiddenItem']>>();
   {
     const r = new Reader(await table('hiddenItems'));
-    for (let i = 0; i < TABLES.hiddenItems.count; i++) {
+    for (let i = 0; i < T.hiddenItems.count; i++) {
       const n = r.u16(i * 8 + 6);
       hiddenItems.set(SCRIPT_ID_OFFSET_HIDDEN_ITEMS + n, { flag: names.flag(HIDDEN_ITEM_FLAGS_START + n), range: r.u8(i * 8 + 3), item: names.item(r.u16(i * 8)), quantity: r.u8(i * 8 + 2) });
     }
   }
-  const cameras = readCameraTable(await table('cameras'), TABLES.cameras.count);
+  const cameras = readCameraTable(await table('cameras'), T.cameras.count);
   const gfxToMmodel = readObjectGfxTable(await table('objectGfx'));
   const ov5 = fs.overlays().find((o) => o.id === 5)!;
   const objectGfx = {
@@ -695,8 +705,8 @@ export async function importPlatinum(
   // Blackout spawns (decomp sSpawnLocations rows with isWarpPos; GetMapBlackOutWarpId takes the first match).
   const spawnBytes = new Reader(await table('spawnLocations'));
   const blackOuts = new Map<number, { spawn: number; x: number; z: number; label: Id }>();
-  for (let i = 0; i < TABLES.spawnLocations.count; i++) {
-    const o = i * TABLES.spawnLocations.size;
+  for (let i = 0; i < T.spawnLocations.count; i++) {
+    const o = i * T.spawnLocations.size;
     const zone = spawnBytes.u16(o);
     const label = asId(`platinum:CommonScript_${i === 0 ? 'PlayerHouse' : 'Pokecenter'}BlackOutRecover`);
     if (spawnBytes.u8(o + 12) && !blackOuts.has(zone)) blackOuts.set(zone, { spawn: i + 1, x: spawnBytes.u16(o + 2), z: spawnBytes.u16(o + 4), label });
@@ -706,8 +716,8 @@ export async function importPlatinum(
   const firstArrivalBase = [...names.flagNames].find(([, n]) => n === 'FLAG_FIRST_ARRIVAL_TWINLEAF_TOWN')?.[0];
   if (firstArrivalBase === undefined) throw new ImportError('no FLAG_FIRST_ARRIVAL_TWINLEAF_TOWN flag name');
   const firstArrivals = new Map<number, Id>();
-  for (let i = 0; i < TABLES.spawnLocations.count; i++) {
-    const o = i * TABLES.spawnLocations.size;
+  for (let i = 0; i < T.spawnLocations.count; i++) {
+    const o = i * T.spawnLocations.size;
     const zone = spawnBytes.u16(o + 6);
     if (spawnBytes.u8(o + 13) && !firstArrivals.has(zone)) firstArrivals.set(zone, names.flag(firstArrivalBase + spawnBytes.u16(o + 14)));
   }
@@ -715,7 +725,7 @@ export async function importPlatinum(
   const MAP_EVOLUTION_METHODS: Record<number, NonNullable<Zone['mapEvolution']>> = { 24: 'LEVEL_MAGNETIC_FIELD', 25: 'LEVEL_MOSS_ROCK', 26: 'LEVEL_ICE_ROCK' };
   const mapEvolutionBytes = new Reader(await table('mapEvolutions'));
   const mapEvolutions = new Map<number, NonNullable<Zone['mapEvolution']>>();
-  for (let i = 0; i < TABLES.mapEvolutions.count; i++) {
+  for (let i = 0; i < T.mapEvolutions.count; i++) {
     const method = MAP_EVOLUTION_METHODS[mapEvolutionBytes.u16(i * 4 + 2)];
     if (!method) throw new ImportError(`mapEvolutions row ${i}: method ${mapEvolutionBytes.u16(i * 4 + 2)} is not a map evolution`);
     mapEvolutions.set(mapEvolutionBytes.u16(i * 4), method);
@@ -834,7 +844,7 @@ export async function importPlatinum(
   onProgress('zones', zones.length, zones.length);
 
   // --- the Distortion World (distortion/index.ts): rooms, supports, cameras, ghosts, overlay 9 tables ---
-  const distortion = importDistortionWorld(fs, await table('distortionWorld'), TABLES.distortionWorld.offset, DW_TABLES, {
+  const distortion = importDistortionWorld(fs, await table('distortionWorld'), T.distortionWorld.offset, shiftLayout(DW_TABLES, T.distortionWorld.offset - TABLES.distortionWorld.offset), {
     mapCount: headers.length,
     zone: (h) => names.zone(h),
     label: (h, script, where) => labelFor(script, headers[h]!, where),
@@ -982,7 +992,7 @@ export async function importPlatinum(
   // The eyes-meet music by class (decomp FieldBGM_GetEyesMeetForTrainer: SEQ_EYE_KID when the class has no row).
   const eyes = new Reader(await table('trainerEncounterBgms'));
   const eyesByClass = new Map<string, number>();
-  for (let i = 0; i < TABLES.trainerEncounterBgms.count; i++) eyesByClass.set(names.trainerClass(eyes.u16(i * 4)), eyes.u16(i * 4 + 2));
+  for (let i = 0; i < T.trainerEncounterBgms.count; i++) eyesByClass.set(names.trainerClass(eyes.u16(i * 4)), eyes.u16(i * 4 + 2));
   const trainers: import('@opensinnoh/contracts').Trainer[] = mon.trainers.map((t) => ({ ...t, encounterBgm: sound.music(eyesByClass.get(t.class) ?? SEQ_EYE_KID, `${t.id} eyes-meet music`)! }));
 
   // --- wild encounters (pl_enc_data), tile behaviours ---
@@ -1039,9 +1049,9 @@ export async function importPlatinum(
   for (const b of Object.keys(TILE_FIELD_MOVES)) if (!behaviorNames.has(b)) throw new ImportError(`field-move tile behaviour ${b} is not in names.json`);
   // Weathers: every named field weather and every value a zone uses. Values 0–30 are decoded from the
   // weather task table (formats/weather.ts); 32–36 resolve per day from the yearly table.
-  const weatherTasks = readWeatherTasks(await table('weatherTasks'));
+  const weatherTasks = usWeatherTasks(readWeatherTasks(await table('weatherTasks')));
   const fogDensities = [...(await table('weatherFogDensities'))];
-  const yearly = readYearlyWeather(await table('yearlyWeather'), TABLES.yearlyWeather.size);
+  const yearly = readYearlyWeather(await table('yearlyWeather'), T.yearlyWeather.size);
   const weatherBgs = readWeatherBgs(await table('weatherBgs'));
   const weatherSys = readNarc(fs.file('/data/weather_sys.narc'));
   /** Weather BG PNGs by pack path, rendered once per BG resource a layer uses. */
@@ -1095,7 +1105,7 @@ export async function importPlatinum(
     return label;
   };
   const rematchBytes = new Reader(await table('rematches'));
-  for (let row = 0; row < TABLES.rematches.count; row++) {
+  for (let row = 0; row < T.rematches.count; row++) {
     const tiers: (Id | null)[] = [];
     for (let tier = 0; tier < 6; tier++) {
       const n = rematchBytes.u16(row * 12 + tier * 2);
@@ -1243,7 +1253,7 @@ export async function importPlatinum(
   // --- models, textures, sprite atlases, message font ---
   onProgress('assets', 0, 1);
   const doorTable = new Reader(await table('doorModels'));
-  const doorModels = new Set(Array.from({ length: TABLES.doorModels.count }, (_, i) => doorTable.i32(i * 4)));
+  const doorModels = new Set(Array.from({ length: T.doorModels.count }, (_, i) => doorTable.i32(i * 4)));
   const converted = importAssets(fs, { slice: options.slice ?? false, objectGfx, doorModels, sliceModels: new Set([...Object.values(HEAL_MACHINE), ...Object.values(PLATFORM_LIFT_PROPS), ...Object.values(PASTORIA_PROPS), ...CANALAVE_PROPS, 458, 459, 460, 461, 462, 463, 464, 496, ...VILLA_FURNITURE_MODELS, BOAT_PROPS.ship, BOAT_PROPS.snowpointShip, ...BOAT_PROPS.bridges, SPECIAL_ENCOUNTERS.honeyTreeProp]) });
   for (const w of converted.warnings) unknown('asset', w);
   const assets = new Map(converted.assets);
@@ -1261,6 +1271,7 @@ export async function importPlatinum(
   onProgress('assets', 1, 1);
   const art = await importUi2d(
     fs,
+    build,
     names.file.species.map((_, i) => names.species(i)),
     names.file.trainerClasses.map((_, i) => names.trainerClass(i)),
     (done, total) => onProgress('2d art', done, total),
@@ -1270,7 +1281,7 @@ export async function importPlatinum(
   for (const [path, bytes] of sound.assets) assets.set(path, bytes);
   // Battle animations: the scripts, the particle files (textures as ui2d sheets) and the VM's tables.
   const animSheets = new Sheets();
-  const anims = await importBattleAnims(fs, new Map(mon.moves.map((m) => [m.sourceIndex!, m.id])), animSheets);
+  const anims = await importBattleAnims(fs, build.layout, new Map(mon.moves.map((m) => [m.sourceIndex!, m.id])), animSheets);
   for (const [path, bytes] of animSheets.assets) assets.set(path, bytes);
   const starterSheets = new Sheets();
   const undergroundSheets = new Sheets();
@@ -1289,7 +1300,7 @@ export async function importPlatinum(
   for (const [path, bytes] of frontierSheets.assets) assets.set(path, bytes);
   newGame.frontier = frontier.tables;
   const judge = new Reader(await table('judgeStatsMessages'));
-  newGame.frontier.judgeMessages = Array.from({ length: TABLES.judgeStatsMessages.count }, (_, i) => names.text(bankIndex('TEXT_BANK_BATTLE_TOWER'), judge.u16(i * 2)));
+  newGame.frontier.judgeMessages = Array.from({ length: T.judgeStatsMessages.count }, (_, i) => names.text(bankIndex('TEXT_BANK_BATTLE_TOWER'), judge.u16(i * 2)));
   // The Pokédex: entries on the species, the area map on the new-game record, footprints as assets.
   const dex = importPokedex(fs, (bank, msg) => names.text(bank, msg));
   for (const [path, bytes] of dex.assets) assets.set(path, bytes);
@@ -1299,7 +1310,7 @@ export async function importPlatinum(
   }
   const footprints = new Reader(await table('footprintTypes'));
   for (const s of species) {
-    if (s.sourceIndex === undefined || s.sourceIndex >= TABLES.footprintTypes.count) continue;
+    if (s.sourceIndex === undefined || s.sourceIndex >= T.footprintTypes.count) continue;
     const hasPrint = footprints.u16(s.sourceIndex * 4 + 2);
     if (hasPrint > 1) throw new ImportError(`footprint type ${s.sourceIndex}: hasPrint ${hasPrint}`);
     s.footprintType = { type: footprints.u16(s.sourceIndex * 4), hasPrint: hasPrint === 1 };
@@ -1324,7 +1335,7 @@ export async function importPlatinum(
   {
     const creditsBank = bankIndex('TEXT_BANK_END_CREDITS');
     const rows = new Reader(await table('credits'));
-    newGame.credits = Array.from({ length: TABLES.credits.count }, (_, i) => {
+    newGame.credits = Array.from({ length: T.credits.count }, (_, i) => {
       const message = rows.u16(i * 6);
       const centered = rows.u16(i * 6 + 4);
       if (message >= bankTexts[creditsBank]!.length || centered > 1) throw new ImportError(`credits row ${i}: message ${message}, centred ${centered}`);
@@ -1503,7 +1514,7 @@ export async function importPlatinum(
     };
     const zones = async (key: 'honeyTreeZones' | 'swarmZones') => {
       const r = new Reader(await table(key));
-      return Array.from({ length: TABLES[key].count }, (_, i) => names.zone(r.u32(i * 4)));
+      return Array.from({ length: T[key].count }, (_, i) => names.zone(r.u32(i * 4)));
     };
     const label = (name: string) => {
       const id = asId(`platinum:${name}`);
@@ -1566,7 +1577,7 @@ export async function importPlatinum(
     newGame.underground = readUndergroundTables(
       {
         miningObjects: await table('miningObjects'),
-        shapes: { bytes: await table('miningShapes'), ram: ov23.ramAddress + TABLES.miningShapes.offset },
+        shapes: { bytes: await table('miningShapes'), ram: ov23.ramAddress + T.miningShapes.offset },
         treasureItems: await table('treasureItems'),
         fossils: await table('fossils'),
         trapPrices: await table('trapPrices'),
@@ -1663,7 +1674,7 @@ export async function importPlatinum(
     gymEffects,
     light.tables,
   );
-  newGame.gyms.sunyshore = readSunyshoreTables(await table('sunyshore'), m => names.prop(m));
+  newGame.gyms.sunyshore = readSunyshoreTables(await table('sunyshore'), fs.overlays().find((o) => o.id === T.sunyshore.where)!.ramAddress + T.sunyshore.offset, (m) => names.prop(m));
   const containmentLookup = new Reader(readNarc(fs.file('/arc/bm_anime_list.narc'))[496]!);
   const containmentAnimations = readNarc(fs.file('/arc/bm_anime.narc'));
   {

@@ -8,7 +8,7 @@ import type { AppResult, AudioCommand, InputFrame } from '@opensinnoh/contracts'
 import type { Button, Id, PackData } from '@opensinnoh/core';
 import { CountingStubLog, createGame } from '@opensinnoh/game';
 import { createBattle } from '@opensinnoh/battle';
-import { createRowanIntro } from '@opensinnoh/menus';
+import { createRowanIntro, plainPages, plainText } from '@opensinnoh/menus';
 import { createScriptRunner } from '@opensinnoh/vm';
 import { createWorld } from '@opensinnoh/world';
 import { romSlice } from '../rom.ts';
@@ -47,10 +47,15 @@ describe.skipIf(!romPath)("Rowan's intro (OPENSINNOH_NDS_ROM)", () => {
       const v = app.view();
       return v.app === 'rowan-intro' ? v : null;
     };
+    /** The intro's own ROM text (RowanIntro_Text_<name>) as a label shows it. */
+    const label = (name: string) => plainText(game.registries.texts.get(`platinum:RowanIntro_Text_${name}` as Id)!.text);
+    const rival = label('RivalChoiceBarry');
     until(() => !!intro()?.menu);
-    expect(intro()!.menu!.entries).toEqual(['ADVENTURE INFO', 'NO INFO NEEDED']);
+    expect(intro()!.menu!.entries).toEqual([label('ChoiceAdventureInfo'), label('ChoiceNoInfo')]);
     step([], 'menu:1');
-    until(() => intro()?.screen === 'touch' && intro()!.message !== null && !intro()!.message!.waiting && intro()!.message!.text.includes('Poké Ball, if'));
+    // "You have a Poké Ball": its last page printed in full.
+    const ballPage = plainPages(game.registries.texts.get('platinum:RowanIntro_Text_HavePokeBall' as Id)!.text).at(-1);
+    until(() => intro()?.screen === 'touch' && intro()!.message !== null && !intro()!.message!.waiting && intro()!.message!.text === ballPage);
     for (let i = 0; i < 3; i++) step();
     step([], 'ball');
     until(() => intro()?.gender !== null && intro()?.gender !== undefined);
@@ -64,12 +69,12 @@ describe.skipIf(!romPath)("Rowan's intro (OPENSINNOH_NDS_ROM)", () => {
     until(() => !!intro()?.menu);
     step([], 'menu:0');
     until(() => !!intro()?.menu);
-    expect(intro()!.menu!.entries).toEqual(['New name!', 'Barry', 'Nolan', 'Roy', 'Gavin']);
+    expect(intro()!.menu!.entries).toEqual(['RivalChoiceNew', 'RivalChoiceBarry', 'RivalChoiceNolan', 'RivalChoiceRoy', 'RivalChoiceGavin'].map(label));
     step([], 'menu:1');
     until(() => !!intro()?.menu);
     step([], 'menu:0');
     until(() => result !== null);
-    expect(result).toEqual({ app: 'rowan-intro', names: { player: 'Lucas', rival: 'Barry' }, gender: 'male' });
+    expect(result).toEqual({ app: 'rowan-intro', names: { player: 'Lucas', rival }, gender: 'male' });
     /** One page of a ROM text by id (split at {clear}), its {var n} filled in. */
     const page = (id: Id, n: number, vars: string[] = []) =>
       game.registries.texts.get(id)!.text.split('{clear}')[n]!.replace(/\{var (\d+)\}/g, (_, i) => vars[Number(i)]!);
@@ -77,7 +82,7 @@ describe.skipIf(!romPath)("Rowan's intro (OPENSINNOH_NDS_ROM)", () => {
     expect(pages.map((p) => seen.indexOf(p))).toEqual([...pages.map((p) => seen.indexOf(p))].sort((a, b) => a - b));
     for (const p of pages) expect(seen).toContain(p);
     expect(seen).toContain(page('platinum:RowanIntro_Text_ConfirmNameMale', 0, ['Lucas']));
-    expect(seen).toContain(page('platinum:RowanIntro_Text_ConfirmRivalName', 0, ['', 'Barry']));
+    expect(seen).toContain(page('platinum:RowanIntro_Text_ConfirmRivalName', 0, ['', rival]));
     const starts = sent.flatMap((c) => (c.op === 'start' ? [c.seq] : []));
     expect(starts).toContain('platinum:SEQ_OPENING');
     expect(starts.some((s) => /PV/.test(s) || s.includes('cry'))).toBe(true);

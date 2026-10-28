@@ -59,7 +59,7 @@ describe.skipIf(!ROM)('ROM battle data in the sim (OPENSINNOH_NDS_ROM)', () => {
         expect(s.species.id, where).toBe(data.species(m.species, m.form));
         expect(s.level, where).toBe(m.level);
         // Forms battle as the sim's formes, with their own types (Wormadam's cloaks, Rotom).
-        const types = dex.form(m.species, m.form).types.map((x) => reg.types.get(x)!.name.toLowerCase());
+        const types = dex.form(m.species, m.form).types.map((x) => reg.types.get(x)!.id.replace('platinum:TYPE_', '').toLowerCase());
         expect(s.species.types.map((x) => x.toLowerCase()), where).toEqual([...new Set(types)]);
         expect(s.baseMoveSlots.map((x) => x.id), where).toEqual(m.moves.map((x) => data.move(x)));
         expect(s.baseAbility, where).toBe(sim.dex.abilities.get(data.ability(m.ability)).id);

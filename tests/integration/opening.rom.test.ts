@@ -51,8 +51,8 @@ describe.skipIf(!romPath)('Platinum opening (OPENSINNOH_NDS_ROM)', () => {
   // Route 201 lists the Sandgem signboard clone with local id 5, Rowan's: the renderer once keyed its
   // drawables by local id alone, so Rowan never showed. The replay's screenshot lines are the checks.
   it.each([
-    { gender: 'male', counterpart: 'platinum:OBJ_EVENT_GFX_PLAYER_F', says: /^Dawn: Professor Rowan\./ },
-    { gender: 'female', counterpart: 'platinum:OBJ_EVENT_GFX_PLAYER_M', says: /^Lucas: Professor Rowan!/ },
+    { gender: 'male', counterpart: 'platinum:OBJ_EVENT_GFX_PLAYER_F', says: 'platinum:Route201_Text_DawnYouLeftYourBriefcase' },
+    { gender: 'female', counterpart: 'platinum:OBJ_EVENT_GFX_PLAYER_M', says: 'platinum:Route201_Text_LucasYouLeftYourBriefcase' },
   ] as const)('Route 201 starter scene ($gender): Rowan and the counterpart are drawn, the counterpart speaks', async ({ gender, counterpart, says }) => {
     const { pack } = romSlice();
     const game = createGame({ packs: [pack], createWorld, createScriptRunner, seed: 1, log: new CountingStubLog(() => {}), now: () => '2026-01-01T00:00:00.000Z' });
@@ -85,7 +85,8 @@ describe.skipIf(!romPath)('Platinum opening (OPENSINNOH_NDS_ROM)', () => {
                 { sprite: gender === 'male' ? 'platinum:OBJ_EVENT_GFX_PLAYER_M' : 'platinum:OBJ_EVENT_GFX_PLAYER_F', x: 114, z: 854 },
               ]),
             );
-            expect(game.scripts.view().message?.text).toMatch(says);
+            // The first page of the counterpart's line, printed.
+            expect(game.scripts.view().message?.text).toBe(game.registries.texts.get(says)!.text.split('{clear}')[0]);
           }
           seen.push(name);
           return name;

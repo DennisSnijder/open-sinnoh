@@ -15,6 +15,7 @@ until idle
 # The Nanab Berries the new game grew.
 +0 press a
 +1 release a
+advance text
 until yesno
 +0 press a
 +1 release a
@@ -87,6 +88,7 @@ until idle
 +0 assert facing player up
 +0 press a
 +1 release a
+advance text
 until yesno
 +0 press a
 +1 release a

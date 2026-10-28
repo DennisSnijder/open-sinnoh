@@ -12,7 +12,7 @@ import { join } from 'node:path';
 import { expect, test, type BrowserContext, type BrowserContextOptions, type Page } from '@playwright/test';
 import type { GameSnapshot, GameState, Registries } from '@opensinnoh/contracts';
 import { loadGamePacks, runReplay, type ReplayDriver } from '@opensinnoh/game';
-import { romSlice } from '../rom.ts';
+import { romSha1, romSlice } from '../rom.ts';
 import { anchoredDriver, chainAnchor } from '../integration/checkpoints-anchors.ts';
 import { fromChainAnchor } from './replay-anchor.ts';
 import { settle } from './settle.ts';
@@ -319,7 +319,7 @@ test('pick the ROM: SHA-1 check, progress, import into IndexedDB, new game in th
       }),
   );
   expect(imports).toHaveLength(1);
-  expect(imports[0]!.romSha1).toBe('ce81046eda7d232513069519cb2085349896dec7');
+  expect(imports[0]!.romSha1).toBe(romSha1());
   expect(imports[0]!.files).toBeGreaterThan(1000);
   // A returning player with a valid import goes straight to the title: no ROM page, no setup.
   await page.goto('/');

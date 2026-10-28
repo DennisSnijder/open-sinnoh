@@ -31,14 +31,20 @@ import { isId, type Id } from './ids.ts';
  *                                     draws a pen stroke on the trainer card's signature; `spoon:<x>,<y>` puts
  *                                     the stylus on the Poffin pot until `spoon-up`; `seal:<x>,<y>` the capsule
  *                                     editor's stylus until `seal-up`; `dress:<x>,<y>` the dress-up's stylus
- *                                     until `dress-up`)
+ *                                     until `dress-up`; `word:<text id>` the Easy Chat word with that text,
+ *                                     wherever the game language sorts it)
  *   until app <name>|none [max]       … until that menu app is open (`mart`, `start-menu`, `bag`, …) or none
  *   assert app <name>|none            the open menu app
+ *   assert state <path> <json>|<id>   the GameState value (as `until state` reads it) equals the JSON, or the name
+ *                                     or text of that record in the game's language (a trade's nickname
+ *                                     as its text id)
  *   assert text <json string>         the message box's text as drawn now (the current page, in full; the
  *                                     script's, else the open menu app's)
  *   assert text <text id> <page> [<n>=<value>…]
  *                                     … page <page> (0-based, split at {clear}) of that text record, its
- *                                     {var n} as the given values (no spaces), others any line text, its
+ *                                     {var n} as the given values (no spaces; a record id such as
+ *                                     platinum:SPECIES_BIDOOF is that record's name in the game's
+ *                                     language, a text id that text), others any line text, its
  *                                     {color n} codes ignored: ROM
  *                                     replays name texts by id, never by their words
  *   <tick> <action>                   absolute tick, counted from the start of this replay
@@ -65,6 +71,11 @@ import { isId, type Id } from './ids.ts';
  *   advance text [max]                press A (one tick down, one up) on every message waiting for input,
  *                                     until a yes/no, menu or choice is up, a battle waits for a choice
  *                                     (not a wild one under `wild auto`), or the game is idle
+ *   advance message [max]             press A on every page of the open message box until it closes (or a
+ *                                     yes/no, menu, choice or menu app is up, or a battle waits): one
+ *                                     conversation, however many pages its text has in the ROM's language;
+ *                                     timed as `+0 press a` / `+1 release a` / `until message` per page;
+ *                                     with a menu app open, the app's own box (its view's `message`)
  *   <tick> field move <slot> <move>   use a party Pokémon's field move as from the party menu (game
  *                                     `useFieldMove`; fails when it is not usable)
  *   until battle [max]                … until a battle waits for a choice (the command card or a prompt)
@@ -173,7 +184,8 @@ export type ReplayAction =
    * `{path}` or `{path|k=v,…}` argument): what the player reads on screen, such as the Hearthome Gym clue's door.
    */
   | { type: 'until'; until: UntilCondition; max: number; read?: { x?: StateArg; z?: StateArg } }
-  | { type: 'advance-text'; max: number }
+  /** `advance text`, or with `close` `advance message` (until the message box closes). */
+  | { type: 'advance-text'; max: number; close?: true }
   | { type: 'field-move'; slot: number; move: Id }
   | { type: 'battle'; choice: ReplayBattleChoice }
   /** `battle auto [move <1-4>] [max]`: `move` (0-based) fights with that slot every turn instead of the policy's pick. */
@@ -201,8 +213,11 @@ export type ReplayAction =
   | { type: 'assert'; what: 'text-id'; id: Id; page: number; vars: Record<number, string> }
   /** `assert facing player <dir>` or `assert facing <localId> <dir>` (an object in the current zone). */
   | { type: 'assert'; what: 'facing'; target: 'player' | number; facing: ReplayFacing }
-  /** `assert state <path> <json>`: the GameState value (or the battle log for `battles…`, the open app's view for `app…`) equals the JSON. */
-  | { type: 'assert'; what: 'state'; path: StatePath; source: string; value: unknown }
+  /**
+   * `assert state <path> <json>`: the GameState value (or the battle log for `battles…`, the open app's view for `app…`)
+   * equals the JSON. `assert state <path> <record id>`: equals that record's name or text in the game's language (`name`).
+   */
+  | { type: 'assert'; what: 'state'; path: StatePath; source: string; value: unknown; name?: Id }
   /** `assert battle <kind> <id|*> <result> [topology]`: `match` is a trainer or species id, null for `*`. */
   | { type: 'assert'; what: 'battle'; kind: LogBattleKind; match: Id | null; result: LogBattleResult; topology?: LogBattleTopology }
   | { type: 'assert'; what: 'battles'; kind: LogBattleKind; count: number }
@@ -340,7 +355,7 @@ function parseAction(verb: string | undefined, rest: string[], tail: string, err
   if (verb === 'reset' && rest.length === 0) return { type: 'reset' };
   if (verb === 'open' && rest.length === 1 && rest[0] === 'mystery-gift') return { type: 'open', app: 'mystery-gift' };
   if (verb === 'date' || verb === 'time') return parseClock(verb, rest, err);
-  if (verb === 'tap' && rest.length === 1 && (/^[a-z-]+(:[a-z0-9+-]+)*$/.test(rest[0]!) || /^type:\S+$/.test(rest[0]!) || /^pen:-?\d+,-?\d+(;-?\d+,-?\d+)*$/.test(rest[0]!) || /^(spoon|hit|tile|rub|seal|dress):-?\d+,-?\d+$/.test(rest[0]!))) return { type: 'tap', id: rest[0]! };
+  if (verb === 'tap' && rest.length === 1 && (/^[a-z-]+(:[a-z0-9+-]+)*$/.test(rest[0]!) || /^type:\S+$/.test(rest[0]!) || /^pen:-?\d+,-?\d+(;-?\d+,-?\d+)*$/.test(rest[0]!) || /^(spoon|hit|tile|rub|seal|dress):-?\d+,-?\d+$/.test(rest[0]!) || /^word:[a-z0-9-]+:\S+$/.test(rest[0]!))) return { type: 'tap', id: rest[0]! };
   if (verb === 'screenshot' && rest.length === 1 && /^[A-Za-z0-9_-]+$/.test(rest[0]!)) return { type: 'screenshot', name: rest[0]! };
   if (verb === 'viewport' && rest.length === 1) {
     const m = /^(\d+)x(\d+)$/.exec(rest[0]!) ?? err();
@@ -392,6 +407,7 @@ function parseAction(verb: string | undefined, rest: string[], tail: string, err
     err();
   }
   if (verb === 'advance' && rest[0] === 'text' && rest.length <= 2) return { type: 'advance-text', max: maxOf(rest[1]) };
+  if (verb === 'advance' && rest[0] === 'message' && rest.length <= 2) return { type: 'advance-text', max: maxOf(rest[1]), close: true };
   if (verb === 'field' && rest[0] === 'move' && rest.length === 3) {
     const slot = int(rest[1], err);
     if (slot < 0 || slot > 5) err();
@@ -481,6 +497,7 @@ function parseAction(verb: string | undefined, rest: string[], tail: string, err
     const path = parseStatePath(a) ?? err();
     // The JSON is the rest of the line after the path (it may contain spaces).
     const json = /^assert\s+state\s+\S+\s+(.*)$/.exec(tail)?.[1] ?? err();
+    if (/^[a-z0-9-]+:\S+$/.test(json)) return { type: 'assert', what, path, source: a, value: null, name: id(json, err) };
     return { type: 'assert', what, path, source: a, value: (parseJson(json) ?? err()).value };
   }
   if (what === 'battle' && (rest.length === 4 || (rest.length === 5 && BATTLE_TOPOLOGIES.includes(rest[4] as LogBattleTopology))) && BATTLE_KINDS.includes(a as LogBattleKind) && BATTLE_RESULTS.includes(rest[3] as LogBattleResult)) {

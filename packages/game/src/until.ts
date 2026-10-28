@@ -51,7 +51,7 @@ function holds(t: UntilTarget, until: UntilCondition): boolean {
       throw new Error('until idle is counted in runUntil');
     case 'message': {
       const view = t.view();
-      return (view.message?.waitingForInput === true || view.frontier?.waitsForAB === true) && !choosing(view);
+      return (view.message?.waitingForInput === true || view.waitsForAB === true || view.frontier?.waitsForAB === true) && !choosing(view);
     }
     case 'yesno':
       return t.view().yesNo !== null;
@@ -129,7 +129,7 @@ export function advanceText(t: UntilTarget, max: number): number | null {
       down = false;
     } else if (!playsEvolution(t)) {
       const view = t.view();
-      if (((view.message?.waitingForInput || view.frontier?.waitsForAB) && !choosing(view)) || t.blackOutWaiting()) {
+      if (((view.message?.waitingForInput || view.waitsForAB || view.frontier?.waitsForAB) && !choosing(view)) || t.blackOutWaiting()) {
         t.press('a');
         down = true;
       }
@@ -139,6 +139,61 @@ export function advanceText(t: UntilTarget, max: number): number | null {
     if (!down && !evolving && (idle >= IDLE_TICKS || choosing(t.view()) || (t.app() !== null && !playsEvolution(t)) || battleWaits(t))) return n;
   }
   if (down) t.release('a');
+  return null;
+}
+
+/**
+ * `advance message`: A on every page of the message box until the box closes, however many pages the ROM's
+ * language splits the text into. Timed like a replay's `+0 press a` / `+1 release a` / `until message` chain: A goes
+ * down on the tick the page waits and up on the next, and when that press closed the box the wait ends there (A
+ * released, that tick not yet advanced, as after `+1 release a`). It also ends, after at least one tick, when a
+ * yes/no, menu, panel choice or menu app is up or a battle waits for the player's choice. Before the first page it
+ * waits for one. Returns the ticks advanced, or null after `max`.
+ */
+export function advanceMessage(t: UntilTarget, max: number): number | null {
+  if (t.app() !== null) return advanceAppMessage(t, max);
+  let pressed = false;
+  for (let n = 0; n < max; ) {
+    const view = t.view();
+    if (n > 0 && (choosing(view) || t.app() !== null || battleWaits(t))) return n;
+    if (pressed && view.message === null) return n;
+    if ((view.message?.waitingForInput || view.waitsForAB) && !choosing(view)) {
+      t.press('a');
+      t.tick();
+      n++;
+      t.release('a');
+      pressed = true;
+      if (t.view().message === null) return n;
+    }
+    wildAuto(t);
+    t.tick();
+    n++;
+  }
+  return null;
+}
+
+/** The open menu app's message box (the views' `message`), or null. */
+const appMessage = (t: UntilTarget) => (t.appView() as { message?: { waiting: boolean } | null } | null)?.message ?? null;
+
+/**
+ * `advance message` over an open menu app: A on every page of the app's own message box (its view's `message`, waiting)
+ * until the box closes or the app does, timed as over the script's box. Before the first page it waits for one.
+ */
+function advanceAppMessage(t: UntilTarget, max: number): number | null {
+  let pressed = false;
+  for (let n = 0; n < max; ) {
+    if (t.app() === null || (pressed && appMessage(t) === null)) return n;
+    if (appMessage(t)?.waiting) {
+      t.press('a');
+      t.tick();
+      n++;
+      t.release('a');
+      pressed = true;
+      if (t.app() === null || appMessage(t) === null) return n;
+    }
+    t.tick();
+    n++;
+  }
   return null;
 }
 
