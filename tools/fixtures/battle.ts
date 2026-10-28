@@ -115,6 +115,9 @@ const PLAIN: Record<string, string> = {
   PokemonForgotHowToUseMove: '{var 0} let go of\n{var 1}.{clear}',
   EvolutionAndDotDotDot: 'Then...{clear}',
   EvolvedPokemonLearnedMove: '{var 0} now knows\n{var 1}!{wait 5}{wait 2}{clear}',
+  PokemonCantUseTheSameMoveTwiceInARowDueToTheTorment: "{var 0} won't repeat\na move under torment!",
+  TheItemAllowsTheUseOfOnlyMove: 'The {var 0} holds it\nto {var 1} alone!',
+  TheresNoPPLeftForThisMove: 'That move has\nrun dry!',
 };
 
 /**
@@ -162,6 +165,8 @@ const SIDED: Record<string, string> = {
   PokemonIsParalyzedItCantMove: '{who} is stiff!\nIt cannot move!',
   PokemonIsFastAsleep: '{who} is\nsound asleep.',
   PokemonIsFrozenSolid: '{who} is\nfrozen stiff!',
+  PokemonCantUseMoveBecauseOfGravity: "{who} can't manage\n{var 1} in this gravity!",
+  PokemonCantUseMoveBecauseOfMove: '{who} is kept from\n{var 2} by {var 1}!',
 };
 
 const MISSED = sided('{var 0} missed!', 'The wild {var 0} missed!', 'Rival {var 0} missed!');

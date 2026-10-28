@@ -401,6 +401,12 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   (wild after its slide-in, a send-out after the flash and any capsule seals), before the healthbox slides in. The DS
   runs it beside the healthbox and plays a doubles pair's at once; we play them in turn. Like the DS
   (BattleDisplay_PlayMoveAnimation), it plays with the battle scene off.
+- **A move that can't be used now is refused, not hidden:** every move button can be pressed (keys or card). As on the
+  DS (BattleSystem_CanUseMove), the list closes, the reason's message prints (from the sim's `disabledSource`: Disable
+  or Encore, Torment, Taunt, Imprison, Gravity, Heal Block, a Choice item, then no PP), and after 40 ticks the list
+  comes back on that move. `choose` from the command prompt (replays) still throws for such a move. A prompt answered
+  once (the card answers between ticks) ignores the keys until the script takes the answer, and the card's buttons
+  answer once per card shown.
 - **Layout:** a framed window over the dimmed field on big landscape views, full screen on phones; scene
   and card composed at the largest whole-pixel scale.
 - **Items the sim lacks** are known inert (their effect acts outside the battle), not stubs.

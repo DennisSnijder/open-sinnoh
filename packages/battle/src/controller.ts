@@ -109,6 +109,8 @@ import { TextPrinter, toPrintOps } from '@opensinnoh/text';
  * "X used Y!"; per-message waits are not ported.
  */
 const MESSAGE_HOLD = 20;
+/** Ticks a refused move's message stays before the move list comes back (decomp Task_WaitForAlertMessagePrint: 40 frames, no button ends it). */
+const ALERT_HOLD = 40;
 /**
  * The wild encounter cut-in (decomp EncounterEffect_Grass_*), one DS frame per tick (its tasks are main-loop
  * SysTasks): two master-brightness flashes (EncounterEffect_FlashTask: a 4-call LinearInterpolationTaskS32
@@ -717,7 +719,9 @@ class BattleController implements Battle {
   step(input: InputFrame): void {
     if (this.result) throw new Error('battle: step after the battle ended');
     this.input = input;
-    if (this.prompt) this.navigate(input);
+    // An answer already given (the card answers between ticks) waits for the script: a key press for the same
+    // prompt in this tick is not a second answer.
+    if (this.prompt && !this.answer) this.navigate(input);
     this.script.next();
     for (const [battler, fx] of this.sendOuts) {
       fx.tick();
@@ -810,9 +814,18 @@ class BattleController implements Battle {
     const moves = this.moveViews(this.acting.mon, this.acting);
     const m = moves[choice.slot];
     if (!Number.isInteger(choice.slot) || !m) throw new Error(`battle: ${this.acting.view.name} has no move in slot ${choice.slot + 1}`);
-    // With no PP left in any move, FIGHT uses Struggle (decomp: "X has no moves left!").
-    if (m.pp === 0 && moves.some((x) => x.pp > 0)) throw new Error(`battle: ${m.name} has no PP left`);
-    if (this.moveDisabled(choice.slot)) throw new Error(`battle: ${m.name} can't be used now (disabled, encored, taunted, tormented, sealed or choice-locked)`);
+    // A move picked in the move list that can't be used now: its message, then the list again (`command`). From the
+    // command prompt (replays) it is an error. With no PP left in any move, FIGHT uses Struggle.
+    const refusal = this.refusal(choice.slot, moves);
+    if (refusal !== null) {
+      if (p.kind !== 'fight') throw new Error(`battle: ${m.name} can't be used now: ${plainText(refusal).replace(/\s+/g, ' ')}`);
+      this.moveCursor.set(this.acting.mon, choice.slot);
+      // The list closes at once (the card hides) while the message prints.
+      this.refused = { slot: choice.slot, message: refusal };
+      this.answer = choice;
+      this.prompt = null;
+      return;
+    }
     // A move picked from the move list in a double: the DS target screen next (its cursor on the first battler in
     // the 3, 1, 0, 2 order). A move answered with its target, or from the command prompt (replays), goes at once.
     if (p.kind === 'fight' && choice.target === undefined && m.aim?.targets.length) {
@@ -1313,6 +1326,63 @@ class BattleController implements Battle {
   /** The command card may go back to the first battler's (CANCEL; see `doublesTurn`). */
   private canRewind = false;
 
+  /** A move the move list refused (`choose`): its slot and message, until `command` shows it. */
+  private refused: { slot: number; message: string } | null = null;
+
+  /**
+   * Decomp BattleSystem_CanUseMove: the message for the acting battler's move in `slot` when it can't be picked now
+   * (disabled or encored, tormented, taunted, sealed, gravity, Heal Block, a Choice item, then no PP), or null.
+   * The reason is the sim's (the move slot's `disabledSource`).
+   */
+  private refusal(slot: number, moves: BattleMoveView[]): string | null {
+    const name = this.acting.view.name;
+    const move = moves[slot]!.name;
+    if (this.moveDisabled(slot)) {
+      const sim = this.activeSim(this.teams[this.actor]!);
+      const source = sim.moveSlots[slot]!.disabledSource;
+      const who = this.who(this.acting);
+      if (source === 'Disable' || source === 'Encore') return this.text.get('PokemonsMoveIsDisabled', [name, move], who);
+      if (source === 'Torment') return this.text.get('PokemonCantUseTheSameMoveTwiceInARowDueToTheTorment', [name]);
+      if (source === 'Taunt') return this.text.get('PokemonCantUseMoveAfterTheTaunt', [name, move], who);
+      if (source === 'Imprison') return this.text.get('PokemonCantUseTheSealedMove', [name, move], who);
+      if (source === 'Gravity') return this.text.get('PokemonCantUseMoveBecauseOfGravity', [name, move], who);
+      if (source === 'Heal Block') return this.text.get('PokemonCantUseMoveBecauseOfMove', [name, this.moveName('Heal Block'), move], who);
+      const lock = sim.volatiles['choicelock'] as { move?: string } | undefined;
+      if (lock?.move && source === sim.getItem().name) return this.text.get('TheItemAllowsTheUseOfOnlyMove', [this.itemName(source), this.moveName(lock.move)]);
+      throw new Error(`battle: ${move} is disabled by ${source || 'nothing the sim names'}, which has no message`);
+    }
+    if (moves[slot]!.pp === 0 && moves.some((x) => x.pp > 0)) return this.text.get('TheresNoPPLeftForThisMove');
+    return null;
+  }
+
+  /**
+   * After the move list refused a move (`refused`): its message (40 ticks once printed), then the move list again
+   * on that move (decomp COMMAND_SELECTION_ALERT_MESSAGE_WAIT, back to MOVE_SELECT_INIT). The next answer, or null
+   * when B went back to the commands.
+   */
+  private *refusals(choice: BattleChoice): Generator<void, BattleChoice | null, void> {
+    while (this.refused) {
+      const { slot, message } = this.refused;
+      this.refused = null;
+      this.startMessage(message);
+      while (!this.printer!.done) {
+        this.printStep();
+        yield;
+      }
+      for (let t = 0; t < ALERT_HOLD; t++) yield;
+      this.answer = null;
+      this.prompt = { kind: 'fight', cursor: slot, moves: this.moveViews(this.acting.mon, this.acting), actor: this.actor };
+      // B (the keys, the card's back button) opens the command prompt instead.
+      while (!this.answer && (this.prompt as BattlePrompt | null)?.kind !== 'command') yield;
+      const answer = this.answer as BattleChoice | null;
+      this.answer = null;
+      this.prompt = null;
+      if (!answer) return null;
+      choice = answer;
+    }
+    return choice;
+  }
+
   /**
    * The command card for the acting battler; BAG and POKéMON open their sheet, whose pick is the turn's choice
    * (cancel: back to the card). Run in a trainer battle is refused at once and the card comes back (decomp: no turn
@@ -1321,7 +1391,8 @@ class BattleController implements Battle {
   private *command(canRewind = false): Generator<void, BattleChoice, void> {
     this.canRewind = canRewind;
     for (;;) {
-      const choice = yield* this.ask(this.commandPrompt(), this.text.get('WhatWillPokemonDo', [this.acting.view.name]));
+      const choice = yield* this.refusals(yield* this.ask(this.commandPrompt(), this.text.get('WhatWillPokemonDo', [this.acting.view.name])));
+      if (!choice) continue;
       if (choice.kind === 'run' && this.frontier) {
         // Decomp COMMAND_SELECTION_RUN_SELECT_INIT with BATTLE_TYPE_FRONTIER: "Would you like to forfeit the match and
         // quit now?" (YES ends the battle, NO back to the commands).
@@ -3630,7 +3701,8 @@ class BattleController implements Battle {
       if (press('up') && c >= 2) c -= 2;
       if (press('down') && c < 2) c += 2;
       if (c < n) p.cursor = c;
-      if (press('a') && (p.moves[p.cursor]!.pp > 0 || p.moves.every((m) => m.pp === 0)) && !this.moveDisabled(p.cursor)) this.choose({ kind: 'move', slot: p.cursor });
+      // A move that can't be used now is refused with its message (`choose`).
+      if (press('a')) this.choose({ kind: 'move', slot: p.cursor });
       return;
     }
     // The known moves form the same 2×2 grid as Fight. The new move is beside the grid on

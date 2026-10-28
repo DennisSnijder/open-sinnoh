@@ -158,7 +158,8 @@ export class ReplayRecorder {
   /** A choice the battle card made directly (`Game.battleChoose`), with the battle's prompt before and after it. */
   battleChoice(c: BattleChoice, before: string | undefined, after: string | undefined, game: Watched): void {
     if (this.stopped) return;
-    if (c.kind === 'fight' || (c.kind === 'cancel' && before === 'target') || (c.kind === 'move' && before === 'fight' && after === 'target')) {
+    // A move the list refused closes it while its message prints (no prompt after): navigation too.
+    if (c.kind === 'fight' || (c.kind === 'cancel' && before === 'target') || (c.kind === 'move' && before === 'fight' && (after === 'target' || after === undefined))) {
       this.navigating = true;
       this.lines.push(`# tick ${this.ticks}: battle card ${c.kind}`);
       return;

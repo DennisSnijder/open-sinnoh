@@ -27,6 +27,12 @@ export const BATTLE_STRINGS: Record<string, boolean> = {
   GoPokemon: false,
   WhatWillPokemonDo: false,
   GotAwaySafely: false,
+  // A move the move list refuses (decomp BattleSystem_CanUseMove; disabled, taunted and sealed are protocol strings).
+  PokemonCantUseTheSameMoveTwiceInARowDueToTheTorment: false,
+  PokemonCantUseMoveBecauseOfGravity: true,
+  PokemonCantUseMoveBecauseOfMove: true,
+  TheItemAllowsTheUseOfOnlyMove: false,
+  TheresNoPPLeftForThisMove: false,
   // A frontier battle's RUN.
   WouldYouLikeToForfeitTheMatchAndQuitNowYesNo: false,
   PlayerForfeitedTheMatch: false,

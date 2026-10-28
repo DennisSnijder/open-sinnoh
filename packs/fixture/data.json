@@ -16694,6 +16694,18 @@
    "text": "{var 0} now knows\n{var 1}!{wait 5}{wait 2}{clear}"
   },
   {
+   "id": "fixture:BattleStrings_Text_PokemonCantUseTheSameMoveTwiceInARowDueToTheTorment",
+   "text": "{var 0} won't repeat\na move under torment!"
+  },
+  {
+   "id": "fixture:BattleStrings_Text_TheItemAllowsTheUseOfOnlyMove",
+   "text": "The {var 0} holds it\nto {var 1} alone!"
+  },
+  {
+   "id": "fixture:BattleStrings_Text_TheresNoPPLeftForThisMove",
+   "text": "That move has\nrun dry!"
+  },
+  {
    "id": "fixture:BattleStrings_Text_PokemonBlewAwayTheDeepFogWithMove_Ally",
    "text": "{var 0} clears the mist\nwith {var 1}!"
   },
@@ -16944,6 +16956,30 @@
   {
    "id": "fixture:BattleStrings_Text_PokemonIsFrozenSolid_Foe",
    "text": "Rival {var 0} is\nfrozen stiff!"
+  },
+  {
+   "id": "fixture:BattleStrings_Text_PokemonCantUseMoveBecauseOfGravity_Ally",
+   "text": "{var 0} can't manage\n{var 1} in this gravity!"
+  },
+  {
+   "id": "fixture:BattleStrings_Text_PokemonCantUseMoveBecauseOfGravity_Wild",
+   "text": "The wild {var 0} can't manage\n{var 1} in this gravity!"
+  },
+  {
+   "id": "fixture:BattleStrings_Text_PokemonCantUseMoveBecauseOfGravity_Foe",
+   "text": "Rival {var 0} can't manage\n{var 1} in this gravity!"
+  },
+  {
+   "id": "fixture:BattleStrings_Text_PokemonCantUseMoveBecauseOfMove_Ally",
+   "text": "{var 0} is kept from\n{var 2} by {var 1}!"
+  },
+  {
+   "id": "fixture:BattleStrings_Text_PokemonCantUseMoveBecauseOfMove_Wild",
+   "text": "The wild {var 0} is kept from\n{var 2} by {var 1}!"
+  },
+  {
+   "id": "fixture:BattleStrings_Text_PokemonCantUseMoveBecauseOfMove_Foe",
+   "text": "Rival {var 0} is kept from\n{var 2} by {var 1}!"
   },
   {
    "id": "fixture:BattleStrings_Text_PokemonsAttackMissed_Ally",
