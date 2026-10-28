@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto';
 import { describe, expect, it, vi } from 'vitest';
-import { batchedReader, checkImport, deleteImport, ImportIncompleteError, importKey, listImports, openDb, PACK_DATA_PATH, putFiles, putMeta, type ImportMeta } from './store.ts';
+import { batchedReader, checkImport, deleteImport, ImportIncompleteError, importKey, listImports, openDb, PACK_DATA_PATH, putFiles, putMeta, StorageAbortedError, type ImportMeta } from './store.ts';
 
 const bytes = (n: number) => new Uint8Array(n).fill(7);
 const metaFor = (key: string, files: number, size: number): ImportMeta => ({ key, romSha1: 'abc', romName: 'Test ROM', importerVersion: 'v', files, bytes: size, importedAt: 'now' });
@@ -82,6 +82,24 @@ describe('import integrity', () => {
     const meta = await importPack(db, importKey('e', 'v'), [['models/1.gltf', bytes(100)]]);
     await putMeta(db, { ...meta, bytes: meta.bytes + 1 });
     await expect(checkImport(db, { ...meta, bytes: meta.bytes + 1 })).rejects.toThrow(`${meta.bytes} of ${meta.bytes + 1} bytes`);
+    expect((await listImports(db)).find((m) => m.key === meta.key)!.checked).toBeUndefined();
+    db.close();
+  });
+
+  it('a write the browser aborts is a StorageAbortedError; failing to store the mark does not stop the start', async () => {
+    const db = await openDb();
+    const meta = await importPack(db, importKey('f', 'v'), [['models/1.gltf', bytes(100)]]);
+    // Safari suspending the page: the transaction aborts with no failed request.
+    const put = vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(function (this: IDBObjectStore) {
+      this.transaction.abort();
+      return {} as IDBRequest<IDBValidKey>;
+    });
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    await expect(putMeta(db, meta)).rejects.toThrow(StorageAbortedError);
+    expect(await checkImport(db, meta)).toEqual({ ...meta, checked: true });
+    expect(warn).toHaveBeenCalledWith(expect.stringMatching(/could not store the import's check: .*aborted by the browser/));
+    put.mockRestore();
+    warn.mockRestore();
     expect((await listImports(db)).find((m) => m.key === meta.key)!.checked).toBeUndefined();
     db.close();
   });

@@ -49,7 +49,14 @@ export function importIntroArt(fs: NitroFs, sheets: Sheets): void {
   // Main BG3: Graphics_LoadPalette(…, 3, MAIN_BG, 0, 3 palettes).
   const bg3 = new PaletteRam().load(readNclr(member(3)), 0, 32 * 3);
   const bgChars = readNcgr(member(0));
-  sheets.add('intro/backdrops', [4, 8].map((s) => ({ ...render(readNscr(member(s)), bgChars, bg3), originX: 0, originY: 0 })), { names: ['plain', 'adventure'] });
+  const backdrops = [4, 8].map((s) => render(readNscr(member(s)), bgChars, bg3));
+  // The app runs each row's edge colour on past the screen's sides (app ui/rowan-intro.ts): both edges must agree.
+  for (const [i, img] of backdrops.entries())
+    for (let y = 0; y < H; y++) {
+      const [l, r] = [y * W * 4, (y * W + W - 1) * 4];
+      for (let k = 0; k < 4; k++) if (img.rgba[l + k] !== img.rgba[r + k] || img.rgba[l + 3] !== 255) throw new Error(`${INTRO.path}: backdrop ${i}'s row ${y} has two edge colours`);
+    }
+  sheets.add('intro/backdrops', backdrops.map((img) => ({ ...img, originX: 0, originY: 0 })), { names: ['plain', 'adventure'] });
 
   const layout = onPalette(readNscr(member(23)), 7);
   const people = PICTURES.map(([name, chr, pal]) => cropped(render(layout, readNcgr(member(chr)), new PaletteRam().load(readNclr(member(pal)), 7 * 32, 32)), name));
