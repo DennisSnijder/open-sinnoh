@@ -101,14 +101,18 @@ export function onUpdateWaiting(cb: () => void): void {
   if (updateWaiting()) cb();
 }
 
-/** Lets the waiting version take over, then reloads into it. */
+/**
+ * Lets the waiting version take over, then reloads into it. With none waiting any more, it has taken over already
+ * (an earlier click whose activation is under way, or a restart in another tab): the reload is all that is left.
+ */
 export async function applyUpdate(): Promise<void> {
   const next = registration?.waiting;
-  if (!next) throw new Error('there is no update waiting');
-  await new Promise<void>((resolve) => {
-    next.addEventListener('statechange', () => next.state === 'activated' && resolve());
-    next.postMessage('skip-waiting');
-  });
+  if (next)
+    await new Promise<void>((resolve) => {
+      // Redundant: a newer version replaced it while it waited; the reload starts the one that is active.
+      next.addEventListener('statechange', () => (next.state === 'activated' || next.state === 'redundant') && resolve());
+      next.postMessage('skip-waiting');
+    });
   location.reload();
 }
 

@@ -20,6 +20,17 @@ export class ImportIncompleteError extends Error {
   }
 }
 
+/**
+ * The browser aborted a write with no failed request to blame: Safari does this when the page is suspended (sent to the
+ * background, the phone locked) or closed, and a full device can show this way too.
+ */
+export class StorageAbortedError extends Error {
+  override readonly name = 'StorageAbortedError';
+  constructor() {
+    super('IndexedDB transaction aborted by the browser (the page was suspended or closed, or storage is full)');
+  }
+}
+
 export interface ImportMeta {
   key: string;
   romSha1: string;
@@ -53,7 +64,7 @@ function committed(tx: IDBTransaction): Promise<void> {
   return new Promise((resolve, reject) => {
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error ?? new Error('IndexedDB transaction failed'));
-    tx.onabort = () => reject(tx.error ?? new Error('IndexedDB transaction aborted (storage full?)'));
+    tx.onabort = () => reject(tx.error ?? new StorageAbortedError());
   });
 }
 
@@ -175,6 +186,7 @@ export async function checkImport(db: IDBDatabase, meta: ImportMeta): Promise<Im
   for (const b of blobs) bytes += b.size;
   if (bytes !== meta.bytes) throw new ImportIncompleteError(`${bytes} of ${meta.bytes} bytes`);
   const checked: ImportMeta = { ...meta, checked: true };
-  await putMeta(db, checked);
+  // Only a shortcut for later starts: a device too full to store the mark still plays (the next start checks again).
+  await putMeta(db, checked).catch((e: Error) => console.warn(`could not store the import's check: ${e.message}`));
   return checked;
 }

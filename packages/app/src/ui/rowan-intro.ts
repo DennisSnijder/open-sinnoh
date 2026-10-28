@@ -34,27 +34,23 @@ export function introScale(width: number, height: number, dpr: number): number {
 }
 
 /**
- * The backdrop's rows: each row of the imported picture is one colour (read at runtime, so nothing of the ROM is
- * stored); a row of more than one colour fails loudly, as the backdrop could then not run on past the screen.
+ * The backdrop's edge colour per row (read at runtime, so nothing of the ROM is stored): the colour the screen's
+ * backdrop runs on with past its sides. The picture itself is drawn on the stage (ADVENTURE INFO's backdrop has a
+ * box in its middle); a row whose two edge pixels differ fails loudly, as it could not run on past the screen.
  */
 function bandRows(img: HTMLImageElement, c: Ui2dSheet['cells'][number]): string[] {
   const canvas = document.createElement('canvas');
-  canvas.width = c.w;
+  canvas.width = 2;
   canvas.height = c.h;
   const g = canvas.getContext('2d', { willReadFrequently: true })!;
-  g.drawImage(img, c.x, c.y, c.w, c.h, 0, 0, c.w, c.h);
-  const px = g.getImageData(0, 0, c.w, c.h).data;
+  g.drawImage(img, c.x, c.y, 1, c.h, 0, 0, 1, c.h);
+  g.drawImage(img, c.x + c.w - 1, c.y, 1, c.h, 1, 0, 1, c.h);
+  const px = g.getImageData(0, 0, 2, c.h).data;
   const rows: string[] = [];
   for (let y = 0; y < c.h; y++) {
-    const counts = new Map<string, number>();
-    for (let x = 0; x < c.w; x++) {
-      const i = (y * c.w + x) * 4;
-      if (px[i + 3]! < 255) continue;
-      const k = `rgb(${px[i]} ${px[i + 1]} ${px[i + 2]})`;
-      counts.set(k, (counts.get(k) ?? 0) + 1);
-    }
-    if (counts.size !== 1) throw new Error(`ui: the intro backdrop's row ${y} has ${counts.size} opaque colours, not one`);
-    rows.push([...counts.keys()][0]!);
+    const [l, r] = [y * 8, y * 8 + 4].map((i) => `rgb(${px[i]} ${px[i + 1]} ${px[i + 2]})`);
+    if (px[y * 8 + 3] !== 255 || px[y * 8 + 7] !== 255 || l !== r) throw new Error(`ui: the intro backdrop's row ${y} has edges ${l} and ${r}, not one opaque colour`);
+    rows.push(l!);
   }
   return rows;
 }
@@ -169,10 +165,7 @@ class IntroScene {
       if (!this.drawCell('intro/ball', 'screen', 0, 0)) this.standInBall();
       if (v.ball && this.art.sheet('intro/ball')) this.drawCell('intro/ball', v.ball, 0, 0);
     } else {
-      if (v.backdrop && !bands && !this.drawCell('intro/backdrops', v.backdrop, 0, 0)) {
-        g.fillStyle = v.backdrop === 'plain' ? '#e8e0a8' : '#9cc8f0';
-        g.fillRect(0, 0, W, H);
-      }
+      if (v.backdrop && !standIn) this.drawCell('intro/backdrops', v.backdrop, 0, 0);
       for (const l of v.layers) {
         g.globalAlpha = l.alpha / 16;
         if (!this.drawCell('intro/people', l.cell, l.x, l.y)) {
@@ -184,7 +177,7 @@ class IntroScene {
       }
       g.globalAlpha = 1;
     }
-    // The flash whitens the backdrop (the page-wide bands) and the people (the canvas), not the Pokémon.
+    // The flash whitens the backdrop (the page-wide bands and the canvas) and the people (the canvas), not the Pokémon.
     this.flash.style.opacity = bands ? String(capFlash(v.flash / 16)) : '0';
     if (v.flash) {
       g.globalAlpha = capFlash(v.flash / 16);

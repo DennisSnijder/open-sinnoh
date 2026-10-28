@@ -10,7 +10,7 @@ import { HGSS_ROMS, type HashedRom } from '@opensinnoh/nds';
 import { ADDON_VERSION, IMPORTER_VERSION, runAddonImporter, runImporter } from './importer.ts';
 import { jsonBytes } from './json-bytes.ts';
 import { verifyRom } from './rom-check.ts';
-import { checkImport, deleteImport, importKey, openDb, PACK_DATA_PATH, putFiles, putMeta, type ImportMeta } from './store.ts';
+import { checkImport, deleteImport, importKey, openDb, PACK_DATA_PATH, putFiles, putMeta, StorageAbortedError, type ImportMeta } from './store.ts';
 
 /** `addon`: the file was given as the optional HeartGold/SoulSilver ROM (anything else is refused then). */
 export type ImportRequest = { rom: File; addon?: boolean };
@@ -72,6 +72,11 @@ self.onmessage = async (e: MessageEvent<ImportRequest>) => {
     if (db && key) await deleteImport(db, key).catch((e: Error) => console.error(`could not remove the partial import: ${e.message}`));
     db?.close();
     if ((err as Error).name === 'QuotaExceededError') return post({ type: 'error', message: 'The browser ran out of storage space during the import. Free some space on your device, then choose the file again.', ...(sha1 ? { sha1 } : {}) });
-    post({ type: 'error', message: `Import failed: ${(err as Error).message}`, thrown: (err as Error).stack ?? '', ...(sha1 ? { sha1 } : {}) });
+    // Still reported: the cause (the page suspended, or a full device) is not known for sure.
+    const message =
+      err instanceof StorageAbortedError
+        ? 'The browser stopped saving the import. This happens when the page goes to the background (another app, a locked screen) or the device is nearly full. Keep OpenSinnoh open in front until the import is done, free some space if needed, then choose the file again.'
+        : `Import failed: ${(err as Error).message}`;
+    post({ type: 'error', message, thrown: (err as Error).stack ?? '', ...(sha1 ? { sha1 } : {}) });
   }
 };

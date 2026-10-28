@@ -111,6 +111,12 @@ test('title, all setup questions, Rowan and both naming keyboards clear the notc
   await dsStage('.intro-scene .ds-scene-stage');
   await safe('.intro-menu, .intro-scene .msg-box');
   await shot('rowan');
+  // ADVENTURE INFO: its backdrop has a box in the middle, so the bands run on from the rows' edges.
+  await screens.choose(intro, 0);
+  await screens.advance(intro, () => intro.locator('.intro-block').isVisible());
+  await safe('.intro-block');
+  await shot('adventure-info');
+  await screens.menu(intro);
   await screens.choose(intro, 1); // NO INFO NEEDED
   await screens.advance(intro, () => intro.locator('.intro-ball').isVisible());
   await dsStage('.intro-scene .ds-scene-stage');
