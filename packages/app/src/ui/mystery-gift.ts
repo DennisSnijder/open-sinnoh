@@ -12,6 +12,7 @@ import { ICON_ANIM } from './art.ts';
 import { at, atTiles, board, boardContext } from './board.ts';
 import { el } from './core.ts';
 import './mystery-gift.css';
+import { S } from '../strings/index.ts';
 
 const MESSAGE = [0, 18, 32, 6] as const;
 /** Two 16-px rows inside the ROM frame. */
@@ -57,7 +58,7 @@ export function mysteryGift(wide: DrawContext, v: MysteryGiftView): HTMLElement 
   if (v.message) root.append(atTiles(messageBox(d, v.message.text, v.message.waiting), ...MESSAGE));
   if (v.yesNo) root.append(yesNo(d, v.yesNo));
   root.toggleAttribute('data-busy', v.busy);
-  root.setAttribute('aria-label', v.message?.text ?? 'Mystery Gift');
+  root.setAttribute('aria-label', v.message?.text ?? S.aria.mysteryGift);
   return root;
 }
 

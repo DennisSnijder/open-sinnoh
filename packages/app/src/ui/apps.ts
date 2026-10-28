@@ -38,6 +38,7 @@ import { at, atTiles, board, boardContext } from './board.ts';
 import { bgPicture } from './sprites.ts';
 import type { Palette } from './pixel-font.ts';
 import type { OptionsScreen } from './options-screen.ts';
+import { S } from '../strings/index.ts';
 
 export interface DrawContext {
   /** A label in the game font; `scale` (CSS px per font px) defaults to the UI's. */
@@ -347,7 +348,7 @@ function mart(wide: DrawContext, v: MartView): HTMLElement {
       const b = el('button', `pocket-arrow ${dir}`);
       b.type = 'button';
       b.dataset.tap = id;
-      b.setAttribute('aria-label', dir === 'prev' ? 'Previous pocket' : 'Next pocket');
+      b.setAttribute('aria-label', S.aria.pocket(dir === 'prev'));
       b.addEventListener('click', () => d.tap(id));
       return b;
     };

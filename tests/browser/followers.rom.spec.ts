@@ -14,6 +14,7 @@ import { mainCanvasStats, pageDriver, waitForScene } from '../../packages/cli/sr
 import { romSlice } from '../rom.ts';
 import { seedRomImport } from './seed.ts';
 import { readReplay, resolveReplay } from '../rom-replays/sys-replays.ts';
+import { appStrings, fixedPart } from './words.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 const HGSS = process.env.OPENSINNOH_HGSS_ROM;
@@ -171,13 +172,15 @@ test('the optional HeartGold/SoulSilver add-on: picked in the first-run setup wh
   await page.locator('#rom-input').setInputFiles(ROM!);
   await expect(page.locator('#importing')).toBeVisible();
   await expect(page.locator('#wizard .fr-choices')).toHaveAttribute('data-question', 'addon');
-  await expect(page.locator('#wizard')).toContainText('later in Options');
+  // The stored game's language (main.ts, a re-import).
+  const words = appStrings();
+  await expect(page.locator('#wizard')).toContainText(words.ask.addon.entries[1]!.description);
   await page.locator('#addon-input').setInputFiles(HGSS!);
-  await expect(page.locator('#wizard')).toContainText('All set');
+  await expect(page.locator('#wizard')).toContainText(words.title.allSet);
   await expect(page.locator('#addon-job')).toBeVisible();
   // Platinum, then the add-on; Start playing waits for both, then goes home: the game opens with the add-on.
   await expect(page.locator('#start-playing')).not.toHaveAttribute('aria-disabled', { timeout: 420_000 });
-  await expect(page.locator('#addon-job')).toContainText('Every Pokémon can follow you');
+  await expect(page.locator('#addon-job')).toContainText(fixedPart((name) => words.rom.addonDone(name)));
   await page.locator('#start-playing').click();
   await page.waitForURL((url) => !url.search.includes('reimport'), { timeout: 60_000 });
   const meta = await page.evaluate(async () => {

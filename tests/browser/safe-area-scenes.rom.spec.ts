@@ -12,7 +12,7 @@ import { expectNamingGrid } from './naming-grid.ts';
 import { settle } from './settle.ts';
 import { selectBall, starterReady } from './starter.ts';
 import { plainText } from '../../packages/app/src/ui/strings.ts';
-import { fixedPart } from './words.ts';
+import { appStrings, fixedPart } from './words.ts';
 
 const SHOTS = 'test-artifacts/safe-area-scenes';
 const PORTRAIT = { top: 47, right: 0, bottom: 34, left: 0 };
@@ -90,7 +90,7 @@ test('title, all setup questions, Rowan and both naming keyboards clear the notc
   await shot('title');
   await page.locator('#title').tap();
   await page.waitForFunction(() => window.openSinnohTitle?.phase === 'setup', undefined, { timeout: 30_000 });
-  const screens = new TitleScreens(page, true);
+  const screens = new TitleScreens(page, true, appStrings());
   const setup = screens.flow('Setup');
   for (const [question, answer] of [['reports', 1], ['addon', 1], ['textSpeed', 2], ['visualStyle', 0]] as const) {
     await expect(setup.locator('.setup-panel')).toHaveAttribute('data-question', question);

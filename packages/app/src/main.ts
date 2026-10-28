@@ -12,7 +12,7 @@
  */
 import './style.css';
 import { CONTRACTS_VERSION } from '@opensinnoh/contracts';
-import { installUi } from '@opensinnoh/ui';
+import { installUi, setUiWords } from '@opensinnoh/ui';
 import { clockOverride, deviceClock } from './clock.ts';
 import { startFlashing } from './flashing.ts';
 import { ADDON_VERSION, IMPORTER_VERSION } from './importer.ts';
@@ -31,6 +31,8 @@ import { splashDone, splashPhase } from './splash.ts';
 import { installTouchGuards } from './touch.ts';
 import { watchForUpdate } from './update-toast.ts';
 import { addContextSource, breadcrumb, captureError, initTelemetry, installGlobalHandlers, setTag } from './telemetry/index.ts';
+import { chooseLanguage, language, S, setLanguage, type Language } from './strings/index.ts';
+import { readKeyboardLayout } from './controls.ts';
 
 // Error reports (telemetry/): only with a DSN in the build (Vercel's VITE_SENTRY_DSN) and the player's setting on.
 initTelemetry({
@@ -41,6 +43,27 @@ initTelemetry({
 });
 // OpenSinnoh UI (Options and our own screens): tokens, the theme override, fonts and the input density.
 installUi();
+
+/** OpenSinnoh's own words in `lang` (strings/): the tables, the components' words and index.html's static parts. */
+function applyLanguage(lang: Language): void {
+  setLanguage(lang);
+  setUiWords(S.ui);
+  document.documentElement.lang = lang;
+  const label = (selector: string, text: string) => document.querySelector(selector)!.setAttribute('aria-label', text);
+  label('#main-canvas', S.page.fieldView);
+  label('#battle-canvas', S.page.battle);
+  label('#panel-canvas', S.page.touchPanel);
+  for (const d of ['up', 'down', 'left', 'right'] as const) label(`#dpad [data-button="${d}"]`, S.page[d]);
+  label('#ios-hint-close', S.page.dismiss);
+  document.querySelector('#ios-hint span')!.textContent = S.page.iosHint;
+  // The splash is gone once the first screen is up (a later call finds no Reload).
+  const reload = document.querySelector('#splash-hint button');
+  if (reload) reload.textContent = S.page.reload;
+}
+// The browser's language until the stored game's is known (`start`).
+applyLanguage(chooseLanguage(undefined, navigator.languages));
+// Key names in Options › Controls by the keyboard's layout, where the browser tells it (controls.ts).
+readKeyboardLayout();
 startFlashing();
 // The browser's install prompt can come before anything asks for it: keep it (platform.ts). Test builds get the safe-area hook.
 captureInstallPrompt();
@@ -101,7 +124,7 @@ async function preflight(file: File, addon: boolean): Promise<ImportFailure | nu
   await staleRemoved;
   // Room first: a full disk should not be found out 100 MB into the import. An import this one replaces gives its space back.
   const space = await importSpaceProblem(await replacedBytes(addon));
-  return space ? new ImportFailure(space, undefined, 'Not enough storage') : null;
+  return space ? new ImportFailure(space, undefined, S.rom.notEnoughStorage) : null;
 }
 
 /**
@@ -112,13 +135,13 @@ async function preflight(file: File, addon: boolean): Promise<ImportFailure | nu
 function runImport(file: File, addon: boolean, onProgress: (stage: string, value: number | null) => void): Promise<ImportMeta> {
   breadcrumb('import', 'start');
   track('rom_import_start', { addon });
-  onProgress('Reading file…', null);
+  onProgress(S.rom.readingFile, null);
   const worker = new Worker(new URL('./import-worker.ts', import.meta.url), { type: 'module' });
   return new Promise<ImportMeta>((resolve, reject) => {
     worker.onerror = (e) => {
       worker.terminate();
       captureError(new Error(`import worker: ${e.message || 'crashed'}`), 'import');
-      reject(new ImportFailure(e.message || 'The import worker crashed (out of memory?).', undefined, 'The import failed'));
+      reject(new ImportFailure(e.message || S.rom.workerCrashed, undefined, S.rom.importFailedHeading));
     };
     worker.onmessage = (e: MessageEvent<ImportMessage>) => {
       const m = e.data;
@@ -132,7 +155,7 @@ function runImport(file: File, addon: boolean, onProgress: (stage: string, value
       resolve(finishImport(m.meta, m.ms));
     };
     // The File, not its bytes: the worker reads it (once whole for the SHA-1, then a range at a time).
-    worker.postMessage({ rom: file, addon } satisfies ImportRequest);
+    worker.postMessage({ rom: file, addon, language: language() } satisfies ImportRequest);
   });
 }
 
@@ -197,7 +220,7 @@ const session = {
 
 /** Start playing's state, from the session's; the keyboard goes to it once nothing is left to answer. */
 function updateStart(): void {
-  const why = session.baseRunning || !session.baseReady ? 'Your game is still importing.' : session.addonRunning || session.addonQueued ? 'HeartGold or SoulSilver is still importing.' : null;
+  const why = session.baseRunning || !session.baseReady ? S.rom.stillImporting : session.addonRunning || session.addonQueued ? S.rom.addonStillImporting : null;
   setStart(why, !why && (!session.wizard || session.wizard.finished));
 }
 
@@ -217,7 +240,7 @@ async function pickBase(file: File): Promise<void> {
     if (meta.addon) {
       // A HeartGold/SoulSilver ROM on the Platinum picker: kept as the add-on; the game still needs Platinum.
       show('picker');
-      showRomNote(`Added ${meta.romName}: every Pokémon can follow you. Now choose your Pokémon Platinum ROM.`);
+      showRomNote(S.rom.addedNeedPlatinum(meta.romName));
       return;
     }
     session.baseReady = true;
@@ -236,7 +259,7 @@ async function pickBase(file: File): Promise<void> {
 function pickAddon(file: File): void {
   if (session.baseReady) return void importAddon(file);
   session.addonQueued = file;
-  setAddonJob({ stage: 'Waiting for Pokémon Platinum to finish.', value: 0 });
+  setAddonJob({ stage: S.rom.waitingForPlatinum, value: 0 });
   updateStart();
 }
 
@@ -248,9 +271,9 @@ async function importAddon(file: File): Promise<void> {
   try {
     const problem = await preflight(file, true);
     if (problem) return failed(problem);
-    setAddonJob({ stage: 'Reading file…', value: null });
+    setAddonJob({ stage: S.rom.readingFile, value: null });
     const meta = await runImport(file, true, (stage, value) => setAddonJob({ stage, value }));
-    setAddonJob({ stage: `${meta.romName} is added. Every Pokémon can follow you.`, value: 1, done: true });
+    setAddonJob({ stage: S.rom.addonDone(meta.romName), value: 1, done: true });
   } catch (e) {
     if (!(e instanceof ImportFailure)) throw e;
     failed(e);
@@ -302,16 +325,15 @@ function showPicker(o: { note?: string; notice?: { title: string; text: string }
     drop.classList.remove('over');
     if ($('picker').hidden) return;
     const files = e.dataTransfer?.files;
-    if (!files || files.length !== 1) return fail('Drop exactly one ROM file.');
+    if (!files || files.length !== 1) return fail(S.rom.dropOne);
     void pickBase(files[0]!);
   });
   void storageSummary().then((s) => ($('picker-storage').textContent = s));
 }
 
 /** The re-import notice. Saves live in their own database (`lantern-nds-saves`, game-view.ts), which an import never touches. */
-const SAVE_SAFE = "Don't worry, your save is safe.";
-const UPDATED_NOTICE = { title: 'We need to re-import your ROM for the updated engine.', text: SAVE_SAFE };
-const incompleteNotice = (e: ImportIncompleteError) => ({ title: 'We need to re-import your ROM.', text: `Part of the imported game is missing (${e.detail}). ${SAVE_SAFE}` });
+const updatedNotice = () => ({ title: S.rom.reimportUpdated, text: S.rom.saveSafe });
+const incompleteNotice = (e: ImportIncompleteError) => ({ title: S.rom.reimport, text: `${S.rom.partMissing(e.detail)} ${S.rom.saveSafe}` });
 
 /** OPTIONS > DATA and the title's setup: the game gives way to the session (no setup), which imports and then offers Start playing. */
 function importFromGame(file: File, addon: boolean): void {
@@ -347,6 +369,8 @@ async function start(): Promise<void> {
   const stale = imports.filter((m) => m.importerVersion !== (m.addon ? ADDON_VERSION : IMPORTER_VERSION));
   let current: ImportMeta | undefined = imports.find((m) => !m.addon && m.importerVersion === IMPORTER_VERSION);
   let addon: ImportMeta | undefined = imports.find((m) => m.addon && m.importerVersion === ADDON_VERSION);
+  // The stored game's language (an older import's too: its re-import notice speaks it), else the browser's.
+  applyLanguage(chooseLanguage(imports.find((m) => !m.addon)?.romSha1, navigator.languages));
   // A stored game: its chunk (three.js and the engine, its own chunk so the ROM page never loads it) downloads while
   // the import is checked and read. Handled here too, so a failure seen only by a start that went to the picker is quiet.
   let viewLoaded = false;
@@ -381,9 +405,9 @@ async function start(): Promise<void> {
     wizardQuestions = pendingSteps({ addon: !!addon });
     const reimport = !current && (stale.some((m) => !m.addon) || broken);
     showPicker({
-      ...(reimport ? { notice: broken ?? UPDATED_NOTICE } : {}),
-      ...(stale.some((m) => m.addon) ? { note: 'The follower add-on was updated. Add your HeartGold or SoulSilver ROM again in Options to use it.' } : {}),
-      ...(addon ? { note: `${addon.romName} is added: every Pokémon can follow you.` } : {}),
+      ...(reimport ? { notice: broken ?? updatedNotice() } : {}),
+      ...(stale.some((m) => m.addon) ? { note: S.rom.addonUpdated } : {}),
+      ...(addon ? { note: S.rom.addonPresent(addon.romName) } : {}),
     });
     return removeStale(db, stale);
   }
@@ -432,5 +456,5 @@ start().catch((e: Error) => {
     return;
   }
   captureError(e, 'start', { fatal: true });
-  fail(e.message, undefined, 'OpenSinnoh could not start');
+  fail(e.message, undefined, S.rom.couldNotStart);
 });

@@ -11,6 +11,7 @@ import { plainText } from '../../packages/app/src/ui/strings.ts';
 import { romSlice } from '../rom.ts';
 import { settle } from './settle.ts';
 import { openChunk } from './story-seed.ts';
+import { appStrings } from './words.ts';
 
 const SHOTS = 'test-artifacts/objective';
 const ROM = process.env.OPENSINNOH_NDS_ROM;
@@ -136,7 +137,7 @@ test('on the real game: the objective after the Coal Badge (OPENSINNOH_NDS_ROM)'
   await driver.reset(1);
   await untilIdle(page, false);
   const menu = page.locator('[data-screen="start-menu"]');
-  if (touch) await press(page, page.getByRole('button', { name: 'Start menu' }), true);
+  if (touch) await press(page, page.getByRole('button', { name: appStrings().aria.hud.menu }), true);
   else await key(page, 'Enter');
   await expect(menu).toBeVisible();
   await setObjective(page, 0, touch);

@@ -14,6 +14,7 @@ import { setReportsEnabled } from './telemetry/index.ts';
 import { ASK, readAnswered, storeAnswered, type SetupQuestion } from './title/setup-questions.ts';
 import { OPTIONS_KEY, parseOptions, storeOption } from './ui/options-store.ts';
 import { readVisuals, storeVisuals, VISUAL_STYLES, visualStyleChosen } from './visuals.ts';
+import { S } from './strings/index.ts';
 
 export interface FirstRunDeps {
   /** The add-on's file was picked: import it (now, or once the base import is done). */
@@ -124,7 +125,7 @@ export class FirstRun {
     // The add-on's file input: outside the redrawn step, so a pick that lands after a redraw still arrives.
     this.input = h('input');
     Object.assign(this.input, { type: 'file', accept: '.nds,application/octet-stream', id: 'addon-input', hidden: true });
-    this.input.setAttribute('aria-label', 'Choose HeartGold or SoulSilver');
+    this.input.setAttribute('aria-label', S.title.chooseAddon);
     this.input.addEventListener('change', () => {
       const file = this.input.files?.[0];
       this.input.value = '';
@@ -157,7 +158,7 @@ export class FirstRun {
     const n = this.steps.length;
     const body = h('div', 'fr-step os-enter');
     if (!step) {
-      const done = h('div', 'fr-done', icon('check'), h('div', '', h('h2', 'fr-q', 'All set'), h('p', 'fr-text', 'You can change these anytime in Options.')));
+      const done = h('div', 'fr-done', icon('check'), h('div', '', h('h2', 'fr-q', S.title.allSet), h('p', 'fr-text', S.title.changeLater)));
       done.querySelector('h2')!.id = 'fr-q';
       done.querySelector('h2')!.tabIndex = -1;
       body.append(done);
@@ -170,7 +171,7 @@ export class FirstRun {
     // The count, as numbers and as dots (done, this one, to come).
     const dots = h('span', 'fr-dots', ...this.steps.map((_, i) => h('i', i < this.index ? 'done' : i === this.index ? 'now' : '')));
     dots.setAttribute('aria-hidden', 'true');
-    const count = h('p', 'fr-count', h('span', 'os-num', `Question ${this.index + 1} of ${n}`), dots);
+    const count = h('p', 'fr-count', h('span', 'os-num', S.title.question(this.index + 1, n)), dots);
     const title = h('h2', 'fr-q', ask.title);
     title.id = 'fr-q';
     const cursor = step.cursor();

@@ -11,7 +11,9 @@ import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import { loadGamePacks, runReplay } from '@opensinnoh/game';
 import type { Registries } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
-import { romSlice } from '../rom.ts';
+import { SUPPORTED_ROMS } from '@opensinnoh/nds';
+import { strings } from '../../packages/app/src/strings/index.ts';
+import { romSha1, romSlice } from '../rom.ts';
 import { seedRomImport } from './seed.ts';
 import { settle } from './settle.ts';
 import { pageDriver } from '../../packages/cli/src/browser.ts';
@@ -200,7 +202,7 @@ test('the keyboard changes a value on every page; the device settings survive a 
   await expect(chosen('textSpeed')).not.toHaveText(before);
   await key('KeyE');
   await expect(chosen('zoom')).toHaveText(`${zoom}x`);
-  await expect(chosen('renderScale')).toHaveText('FULL');
+  await expect(chosen('renderScale')).toHaveText(strings(SUPPORTED_ROMS[romSha1()]!.language).options.full);
   await expect(chosen('speed')).toHaveText('3x');
   await expect(chosen('volume')).toHaveAttribute('aria-valuenow', '90');
   await expect(setting('mute').getByRole('switch')).toHaveAttribute('aria-checked', 'true');
@@ -235,7 +237,8 @@ test('the DS options apply in the game: text speed, FRAME, battle style, BUTTON 
   await expect(chosen('frame')).toHaveText(/2$/);
   await shot('frame-2');
   // Taps: the FRAME arrows step it back.
-  await setting('frame').getByRole('button', { name: /^Previous/ }).click();
+  const frameLabel = await setting('frame').locator('.options-label').innerText();
+  await setting('frame').getByRole('button', { name: strings(SUPPORTED_ROMS[romSha1()]!.language).ui.previous(frameLabel), exact: true }).click();
   await advance(2);
   expect((await state()).frame).toBe(0);
   // BUTTON MODE (row 5) L=A: L is A (it steps the focused row), R is gone (no page turn).

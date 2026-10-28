@@ -4,6 +4,7 @@
  * the avatars, the naming keyboard). Real time: the title runs its own 30 Hz loop.
  */
 import { expect, type Locator, type Page } from '@playwright/test';
+import { strings, type Strings } from '../../packages/app/src/strings/index.ts';
 
 /** Waits until the title has run `n` more ticks (or changed phase, which restarts its frame count). */
 export async function ticks(page: Page, n: number): Promise<void> {
@@ -30,11 +31,13 @@ export class TitleScreens {
   constructor(
     readonly page: Page,
     readonly touch: boolean,
+    /** The app's words: the browser's (English, playwright.config.ts) until a game is stored. */
+    readonly words: Strings = strings('en'),
   ) {}
 
-  /** The open DS screen (setup or the intro). */
+  /** The open DS screen (setup or the intro; the intro's dialog is named in English in every language, new-game-flow.ts). */
   flow(name: 'Setup' | 'New game'): Locator {
-    return this.page.getByRole('dialog', { name });
+    return this.page.getByRole('dialog', { name: name === 'Setup' ? this.words.title.setup : name });
   }
 
   /** A on the waiting message box or text block (a tap on the phone), else a tick, until `done`. */

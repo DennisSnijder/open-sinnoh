@@ -11,6 +11,7 @@
  */
 import { banner, button, filePicker, h, icon, progress, snapPixels, titleTab, wordmark as brandWordmark } from '@opensinnoh/ui';
 import { canInstall, onInstallChange, promptInstall } from './platform.ts';
+import { S } from './strings/index.ts';
 import './rom-screen.css';
 
 const $ = (id: string) => document.getElementById(id)!;
@@ -22,16 +23,13 @@ export interface RomScreenDeps {
   onStart(): void;
 }
 
-/** The first run's three stages, as the landing page's "How it works" names them. */
-const RAIL = ['Your ROM', 'Setup', 'Play'] as const;
-
 /** Builds the screen into `#rom` (once). */
 export function buildRomScreen(deps: RomScreenDeps): void {
   const root = $('rom');
   if (root.firstChild) return;
 
   // The brand, as on the landing page's hero.
-  const kick = h('p', 'rom-kick', h('span', 'os-bdg', 'Beta'), 'Playable in your browser');
+  const kick = h('p', 'rom-kick', h('span', 'os-bdg', S.rom.beta), S.rom.kicker);
   const mark = h('h1', 'rom-wordmark', brandWordmark(5, { label: 'OpenSinnoh', animate: true }));
   mark.id = 'rom-wordmark';
   const brand = h(
@@ -39,20 +37,20 @@ export function buildRomScreen(deps: RomScreenDeps): void {
     'rom-brand',
     kick,
     mark,
-    h('p', 'rom-pitch', 'Pokémon Platinum, rebuilt from the ground up.'),
-    h('p', 'rom-runs', 'Runs right in your browser. No emulator, no download.'),
-    h('p', 'rom-tagline', 'Your ROM stays yours: it is read on this device. Nothing is uploaded.'),
+    h('p', 'rom-pitch', S.rom.pitch),
+    h('p', 'rom-runs', S.rom.runs),
+    h('p', 'rom-tagline', S.rom.tagline),
   );
 
-  // The rail: where the first run is (the picker, the setup, play).
-  const rail = h('ol', 'rom-rail', ...RAIL.map((name, i) => h('li', '', h('span', 'os-num', `0${i + 1}`), h('span', 'rn', name), icon('check'))));
+  // The rail: where the first run is (the picker, the setup, play), as the landing page's "How it works" names them.
+  const rail = h('ol', 'rom-rail', ...S.rom.rail.map((name, i) => h('li', '', h('span', 'os-num', `0${i + 1}`), h('span', 'rn', name), icon('check'))));
   rail.id = 'rom-rail';
-  rail.setAttribute('aria-label', 'Getting started');
+  rail.setAttribute('aria-label', S.rom.railLabel);
 
   // The picker.
-  const need = h('p', 'rom-need', 'You need ', h('strong', '', 'Pokémon Platinum (US)'), ' as an ', h('code', '', '.nds'), ' file, made from your own cartridge.');
+  const need = h('p', 'rom-need', ...S.rom.need((t) => h('strong', '', t), (t) => h('code', '', t)));
   need.id = 'rom-need';
-  const drop = filePicker('Choose your Platinum ROM', { hint: 'or drop it anywhere on this page', accept: '.nds,application/octet-stream', id: 'rom-input', describedBy: 'rom-need', icon: 'file', onFile: (f) => deps.onFile(f) });
+  const drop = filePicker(S.rom.choose, { hint: S.rom.dropHint, accept: '.nds,application/octet-stream', id: 'rom-input', describedBy: 'rom-need', icon: 'file', onFile: (f) => deps.onFile(f) });
   drop.id = 'drop';
   const error = h('div', 'rom-error');
   error.id = 'picker-error';
@@ -64,31 +62,31 @@ export function buildRomScreen(deps: RomScreenDeps): void {
   // Where the browser offers it (Chromium, Android): the app installs before the import, and keeps the game on the device.
   const installNote = h('p', 'rom-status');
   installNote.setAttribute('role', 'status');
-  const install = button('Install the app', {
+  const install = button(S.rom.install, {
     icon: 'import',
     onClick: () => void promptInstall().then((line) => (installNote.textContent = line), (e: Error) => (installNote.textContent = e.message)),
   });
-  const installRow = h('div', 'rom-install', h('p', 'rom-need', 'Install OpenSinnoh to play full screen and offline.'), install, installNote);
+  const installRow = h('div', 'rom-install', h('p', 'rom-need', S.rom.installWhy), install, installNote);
   installRow.id = 'install-row';
   installRow.hidden = !canInstall();
   onInstallChange(() => (installRow.hidden = !canInstall()));
   const picker = h('section', 'rom-step', h('div', 'rom-body', error, note, drop, need), installRow);
   picker.id = 'picker';
-  picker.setAttribute('aria-label', 'Choose your ROM');
+  picker.setAttribute('aria-label', S.rom.pickerLabel);
   picker.hidden = true;
 
   // The session: the imports, the setup, Start playing.
-  const stage = h('p', 'rom-stage', 'Reading file…');
+  const stage = h('p', 'rom-stage', S.rom.readingFile);
   stage.id = 'import-stage';
   stage.setAttribute('role', 'status');
-  const bar = progress('Importing', null);
+  const bar = progress(S.rom.importing, null);
   bar.id = 'import-progress';
   const baseJob = h('div', 'rom-job', bar, stage);
   baseJob.id = 'base-job';
   const addonStage = h('p', 'rom-stage');
   addonStage.id = 'addon-stage';
   addonStage.setAttribute('role', 'status');
-  const addonBar = progress('HeartGold or SoulSilver', null);
+  const addonBar = progress(S.rom.addonGames, null);
   addonBar.id = 'addon-progress';
   const addonJob = h('div', 'rom-job', addonBar, addonStage);
   addonJob.id = 'addon-job';
@@ -101,7 +99,7 @@ export function buildRomScreen(deps: RomScreenDeps): void {
   const startWhy = h('p', 'rom-why');
   startWhy.id = 'start-why';
   startWhy.setAttribute('aria-live', 'polite');
-  const start = h('div', 'rom-start', startButton('Your game is still importing.', deps.onStart), startWhy);
+  const start = h('div', 'rom-start', startButton(S.rom.stillImporting, deps.onStart), startWhy);
   start.id = 'start-row';
   const importing = h(
     'section',
@@ -110,7 +108,7 @@ export function buildRomScreen(deps: RomScreenDeps): void {
     start,
   );
   importing.id = 'importing';
-  importing.setAttribute('aria-label', 'Setting up your game');
+  importing.setAttribute('aria-label', S.rom.settingUp);
   importing.hidden = true;
 
   const notice = h('div', 'rom-notice');
@@ -124,7 +122,7 @@ export function buildRomScreen(deps: RomScreenDeps): void {
       'rom-panel',
       brand,
       h('div', 'rom-main', notice, h('div', 'os-win rom-win', tab('picker'), rail, picker, importing)),
-      h('footer', 'rom-foot', h('p', '', 'Unofficial fan project, not affiliated with Nintendo, Game Freak or The Pokémon Company.'), h('p', '', 'Error reports are off until you allow them.'), storage),
+      h('footer', 'rom-foot', h('p', '', S.rom.legal), h('p', '', S.rom.reportsOff), storage),
     ),
   );
   startHandler = deps.onStart;
@@ -134,7 +132,7 @@ export function buildRomScreen(deps: RomScreenDeps): void {
 let startHandler: () => void;
 
 function startButton(why: string | null, onStart: () => void): HTMLButtonElement {
-  const b = button('Start playing', { variant: 'primary', big: true, disabled: why, onClick: onStart });
+  const b = button(S.rom.startPlaying, { variant: 'primary', big: true, disabled: why, onClick: onStart });
   b.append(icon('right'));
   b.id = 'start-playing';
   return b;
@@ -142,7 +140,7 @@ function startButton(why: string | null, onStart: () => void): HTMLButtonElement
 
 /** The window's title tab: what the window is about now. */
 function tab(step: 'picker' | 'importing'): HTMLElement {
-  const t = step === 'picker' ? titleTab('Your game', { icon: 'file', tone: 'system' }) : titleTab('Setting up your game', { icon: 'disk', tone: 'system' });
+  const t = step === 'picker' ? titleTab(S.rom.yourGame, { icon: 'file', tone: 'system' }) : titleTab(S.rom.settingUp, { icon: 'disk', tone: 'system' });
   t.id = 'rom-tab';
   return t;
 }
@@ -180,11 +178,11 @@ export function showRomNotice(title: string, text: string): void {
 /** An error at the top of the picker's window: a file's (its SHA-1, and a way to pick another) unless `heading` names another failure. */
 export function showRomError(message: string, sha1?: string, heading?: string): void {
   const text: (Node | string)[] = [message];
-  if (sha1) text.push(' SHA-1 of your file: ', h('code', '', sha1), '.');
-  if (!heading) text.push(' Choose another file to try again.');
+  if (sha1) text.push(S.rom.sha1, h('code', '', sha1), '.');
+  if (!heading) text.push(S.rom.tryAgain);
   const input = $('rom-input');
   const box = $('picker-error');
-  box.replaceChildren(banner(heading ?? 'That file could not be used.', text, heading ? {} : { action: button('Choose another file', { icon: 'import', onClick: () => input.click() }) }));
+  box.replaceChildren(banner(heading ?? S.rom.fileUnusable, text, heading ? {} : { action: button(S.rom.chooseAnother, { icon: 'import', onClick: () => input.click() }) }));
   box.hidden = false;
   input.focus();
 }
@@ -213,18 +211,18 @@ export function hideBaseJob(): void {
 /** The base import's stage and progress (0 to 1, or null while its length is unknown). */
 export function setImportProgress(stage: string, value: number | null): void {
   $('import-stage').textContent = stage;
-  const bar = progress('Importing', value === null ? null : value * 100);
+  const bar = progress(S.rom.importing, value === null ? null : value * 100);
   bar.id = 'import-progress';
   $('import-progress').replaceWith(bar);
 }
 
 /** The base import is done. */
 export function setImportDone(): void {
-  const bar = progress('Ready', 100);
+  const bar = progress(S.rom.ready, 100);
   bar.id = 'import-progress';
   $('import-progress').replaceWith(bar);
   $('base-job').classList.add('done');
-  $('import-stage').replaceChildren(icon('check'), 'Pokémon Platinum is imported.');
+  $('import-stage').replaceChildren(icon('check'), S.rom.imported);
 }
 
 /** The add-on's row: waiting for the base import, importing (stage, progress), or added. */
@@ -232,7 +230,7 @@ export function setAddonJob(state: { stage: string; value: number | null; done?:
   const job = $('addon-job');
   job.hidden = false;
   job.classList.toggle('done', !!state.done);
-  const bar = progress(state.done ? 'Added' : 'HeartGold or SoulSilver', state.done ? 100 : state.value === null ? null : state.value * 100);
+  const bar = progress(state.done ? S.rom.added : S.rom.addonGames, state.done ? 100 : state.value === null ? null : state.value * 100);
   bar.id = 'addon-progress';
   $('addon-progress').replaceWith(bar);
   $('addon-stage').replaceChildren(...(state.done ? [icon('check')] : []), state.stage);
@@ -243,10 +241,10 @@ export function setAddonJob(state: { stage: string; value: number | null; done?:
 export function showAddonError(message: string, sha1: string | undefined, pickAgain: () => void): void {
   $('addon-job').hidden = true;
   const text: (Node | string)[] = [message];
-  if (sha1) text.push(' SHA-1 of your file: ', h('code', '', sha1), '.');
-  text.push(' You can still play, and add it later in Options.');
+  if (sha1) text.push(S.rom.sha1, h('code', '', sha1), '.');
+  text.push(S.rom.addLater);
   const box = $('addon-error');
-  box.replaceChildren(banner('That HeartGold or SoulSilver file could not be used.', text, { action: button('Choose another file', { icon: 'import', onClick: pickAgain }) }));
+  box.replaceChildren(banner(S.rom.addonUnusable, text, { action: button(S.rom.chooseAnother, { icon: 'import', onClick: pickAgain }) }));
   box.hidden = false;
 }
 
@@ -259,7 +257,7 @@ export function setStart(why: string | null, focus: boolean): void {
   const had = document.activeElement === old;
   const b = startButton(why, startHandler);
   old.replaceWith(b);
-  $('start-why').textContent = why ?? 'Your game is ready.';
+  $('start-why').textContent = why ?? S.rom.gameReady;
   if (!why) rail(2);
   if (had || focus) b.focus({ preventScroll: !focus });
   snapPixels($('start-row'));

@@ -14,6 +14,7 @@ import { gameLanguage } from '@opensinnoh/services';
 import { romSlice } from '../rom.ts';
 import { saveSlot } from './save.ts';
 import { seedRomImport } from './seed.ts';
+import { appStrings } from './words.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 
@@ -121,7 +122,7 @@ test('MYSTERY GIFT: a wrong code refused, a gift code received into the save', a
   const entry = page.locator('.tm-mystery-gift');
   await expect(entry).toBeVisible();
   await entry.click();
-  const dialog = page.getByRole('dialog', { name: 'Mystery Gift' });
+  const dialog = page.getByRole('dialog', { name: appStrings().title.mysteryGift });
   const screen = dialog.locator('.mystery-gift-screen');
   await expect(screen).toBeVisible();
   await fits(screen);

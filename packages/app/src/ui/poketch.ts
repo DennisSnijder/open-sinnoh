@@ -16,6 +16,7 @@ import type { Art } from './art.ts';
 import { el } from './core.ts';
 import type { PixelFont } from './pixel-font.ts';
 import type { UiStrings } from './strings.ts';
+import { S } from '../strings/index.ts';
 
 const W = POKETCH_SCREEN.width;
 const H = POKETCH_SCREEN.height;
@@ -108,11 +109,11 @@ export class PoketchCard {
     };
     const close = el('button', 'poketch-close');
     close.type = 'button';
-    close.setAttribute('aria-label', 'Close watch');
+    close.setAttribute('aria-label', S.aria.closeWatch);
     close.addEventListener('click', () => this.deps.close());
     this.el = el('aside', 'poketch', this.canvas, side('up', 'Previous app'), side('down', 'Next app'), close);
     this.el.hidden = true;
-    this.el.setAttribute('aria-label', 'Watch');
+    this.el.setAttribute('aria-label', S.aria.watch);
   }
 
   show(on: boolean): void {

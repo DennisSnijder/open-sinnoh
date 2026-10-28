@@ -23,6 +23,8 @@ import { openData, pressData, saveSlot } from './save.ts';
 import { seedRomImport } from './seed.ts';
 import { freshRomPage } from './rom-context.ts';
 import { selectBall, starterReady, starterSprite, tapBall } from './starter.ts';
+import { appStrings } from './words.ts';
+import { strings } from '../../packages/app/src/strings/index.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 const SHOTS = 'test-artifacts/platinum';
@@ -272,13 +274,15 @@ async function importThroughPicker(project: string): Promise<void> {
   const start = page.locator('#start-playing');
   await expect(wizard.locator('.fr-choices')).toHaveAttribute('data-question', 'addon');
   await expect(start).toHaveAttribute('aria-disabled', 'true');
-  await wizard.locator('.os-choice', { hasText: 'Skip' }).click();
-  await wizard.locator('.os-choice', { hasText: "Don't allow" }).click();
-  await wizard.locator('.os-choice', { hasText: 'Mid' }).click();
-  await wizard.locator('.os-choice', { hasText: 'The original look' }).click();
-  await expect(wizard).toContainText('All set');
+  // No game is stored yet: the page speaks the browser's language (English: playwright.config.ts) until the import reloads it.
+  const words = strings('en');
+  await wizard.locator('.os-choice', { hasText: words.ask.addon.entries[1]!.label }).click();
+  await wizard.locator('.os-choice', { hasText: words.ask.reports.entries[1]!.label }).click();
+  await wizard.locator('.os-choice', { hasText: words.ask.textSpeed.entries[1]!.label }).click();
+  await wizard.locator('.os-choice', { hasText: words.ask.visualStyle.entries[0]!.description }).click();
+  await expect(wizard).toContainText(words.title.allSet);
   await expect(start).not.toHaveAttribute('aria-disabled', { timeout: 240_000 });
-  await expect(page.locator('#base-job')).toContainText('Pokémon Platinum is imported');
+  await expect(page.locator('#base-job')).toContainText(words.rom.imported);
   await expect(page.locator('#importing')).toBeVisible();
   // Start playing → the title (the replay flag is dropped on the way).
   await start.click();
@@ -569,7 +573,7 @@ test('save → export file → reload → import file restores the state', async
   await page.evaluate(() => window.openSinnohGame!.advance(2));
   await page.locator('[data-tap="settings:answer:yes"]').click();
   await page.evaluate(() => window.openSinnohGame!.advance(2));
-  await expect(page.locator('.ui-notice')).toContainText('Loaded the save file');
+  await expect(page.locator('.ui-notice')).toContainText(appStrings().game.loadedSave);
   await page.keyboard.press('Escape');
   expect((await snapshot()).state).toEqual(before);
   await page.evaluate(() => window.openSinnohGame!.advance(30));

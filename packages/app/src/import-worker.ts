@@ -10,10 +10,11 @@ import { HGSS_ROMS, type HashedRom } from '@opensinnoh/nds';
 import { ADDON_VERSION, IMPORTER_VERSION, runAddonImporter, runImporter } from './importer.ts';
 import { jsonBytes } from './json-bytes.ts';
 import { verifyRom } from './rom-check.ts';
+import { S, setLanguage, type Language } from './strings/index.ts';
 import { checkImport, deleteImport, importKey, openDb, PACK_DATA_PATH, putFiles, putMeta, StorageAbortedError, type ImportMeta } from './store.ts';
 
-/** `addon`: the file was given as the optional HeartGold/SoulSilver ROM (anything else is refused then). */
-export type ImportRequest = { rom: File; addon?: boolean };
+/** `addon`: the file was given as the optional HeartGold/SoulSilver ROM (anything else is refused then); `language`: the page's, for the messages. */
+export type ImportRequest = { rom: File; addon?: boolean; language: Language };
 export type ImportMessage =
   | { type: 'progress'; stage: string; done: number; total: number }
   /** `thrown`: the stack of an error the importer threw (a bug, reported); absent for a rejected file. */
@@ -36,13 +37,14 @@ self.onmessage = async (e: MessageEvent<ImportRequest>) => {
   let sha1: string | undefined;
   let db: IDBDatabase | undefined;
   let key: string | undefined;
+  setLanguage(e.data.language);
   try {
-    post({ type: 'progress', stage: 'Verifying ROM (SHA-1)', done: 0, total: 1 });
+    post({ type: 'progress', stage: S.rom.verifying, done: 0, total: 1 });
     const check = await verifyRom(new Uint8Array(await e.data.rom.arrayBuffer()));
     sha1 = check.sha1;
     // The optional HeartGold/SoulSilver ROM is told apart by its SHA-1 (dropped anywhere, or on its own picker).
     const addon = !!HGSS_ROMS[sha1];
-    if (e.data.addon && !addon) return post({ type: 'error', message: `This is not a supported HeartGold or SoulSilver ROM. The follower add-on needs ${Object.values(HGSS_ROMS).map((r) => r.name).join(' or ')}, an unmodified dump with a matching SHA-1.`, sha1 });
+    if (e.data.addon && !addon) return post({ type: 'error', message: S.rom.notHgss(Object.values(HGSS_ROMS).map((r) => r.name).join(S.rom.or)), sha1 });
     if (!check.ok && !addon) return post({ type: 'error', message: check.message, sha1 });
     const progress = (p: { stage: string; done: number; total: number }) => post({ type: 'progress', ...p });
     const rom = romFile(e.data.rom, sha1);
@@ -55,7 +57,7 @@ self.onmessage = async (e: MessageEvent<ImportRequest>) => {
         yield entry;
       }
     }
-    post({ type: 'progress', stage: 'Saving to browser storage', done: 0, total: 1 });
+    post({ type: 'progress', stage: S.rom.saving, done: 0, total: 1 });
     db = await openDb();
     const version = addon ? ADDON_VERSION : IMPORTER_VERSION;
     key = importKey(sha1, version);
@@ -71,12 +73,9 @@ self.onmessage = async (e: MessageEvent<ImportRequest>) => {
     // A half-written pack has no meta row, so it is never offered, but it still takes room: remove it.
     if (db && key) await deleteImport(db, key).catch((e: Error) => console.error(`could not remove the partial import: ${e.message}`));
     db?.close();
-    if ((err as Error).name === 'QuotaExceededError') return post({ type: 'error', message: 'The browser ran out of storage space during the import. Free some space on your device, then choose the file again.', ...(sha1 ? { sha1 } : {}) });
+    if ((err as Error).name === 'QuotaExceededError') return post({ type: 'error', message: S.rom.quota, ...(sha1 ? { sha1 } : {}) });
     // Still reported: the cause (the page suspended, or a full device) is not known for sure.
-    const message =
-      err instanceof StorageAbortedError
-        ? 'The browser stopped saving the import. This happens when the page goes to the background (another app, a locked screen) or the device is nearly full. Keep OpenSinnoh open in front until the import is done, free some space if needed, then choose the file again.'
-        : `Import failed: ${(err as Error).message}`;
+    const message = err instanceof StorageAbortedError ? S.rom.storageAborted : S.rom.importFailed((err as Error).message);
     post({ type: 'error', message, thrown: (err as Error).stack ?? '', ...(sha1 ? { sha1 } : {}) });
   }
 };

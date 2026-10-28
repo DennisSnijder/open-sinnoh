@@ -458,6 +458,10 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
 
 ## OpenSinnoh UI and brand
 
+- **The shell's language** (`packages/app/src/strings/`): OpenSinnoh's own words in one table per language. The
+  imported game's language decides it; before an import, the browser's where there is a table for it, else English.
+  No setting: the shell speaks the game's language. Key names follow the keyboard layout where the browser reports it
+  (`navigator.keyboard.getLayoutMap()`).
 - **Design system** in `packages/ui`: `tokens.json` is the only source (CSS custom properties for dark and
   light, frames and skins generated from it), original 16-px icons, DOM components. Spec:
   `docs/design-system.md`; gallery at `?ui-gallery` in dev builds.
@@ -702,7 +706,8 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   own way. So a conversation is one `advance message` (or `advance text`), not a counted chain of A presses; a wait
   that a timed press covered becomes a wait on the game; words are named by text or record id (`assert text`,
   `assert state <path> <id>`, `tap word:<id>`), and a ROM test compares with `texts.get(id)`. Browser specs do
-  the same: the game's words come from its records.
+  the same: OpenSinnoh's own words follow the game's language, so they come from the app's string tables
+  (`tests/browser/words.ts`), the game's from its records.
 - **Story checkpoints** chain from a new game to the post-game, each run twice on seeds 1–3 with save
   round trips and late starts. Chunk replays start from cached anchors keyed by every replay text, the
   import and the engine's sources; an anchor proof replays the chain from a new game. Chain replays carry
