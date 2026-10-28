@@ -18,9 +18,10 @@ until message 600
 +1 press a
 +1 release a
 until message 600
-+0 assert text platinum:RecordChatotCry_Text_ChatotFailedToLearnSaying 0 0=CHATOT
++0 assert text platinum:RecordChatotCry_Text_ChatotFailedToLearnSaying 0 0=platinum:SPECIES_CHATOT
 +1 press a
 +1 release a
+advance text 600
 until yesno 600
 +0 assert text platinum:RecordChatotCry_Text_WantToTryAgain 0
 +1 press b

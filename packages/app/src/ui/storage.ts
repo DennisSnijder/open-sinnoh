@@ -14,6 +14,7 @@ import { at, atTiles, board, boardContext, DS_HEIGHT, DS_WIDTH, dsPair } from '.
 import { el } from './core.ts';
 import { animCell, bgPicture, sprite, tapButton } from './sprites.ts';
 import './storage.css';
+import { S } from '../strings/index.ts';
 
 /** Compare mode moves the box 44 px left (ov19_021D7820). */
 const COMPARE_SHIFT = -44;
@@ -163,7 +164,7 @@ function preview(d: DrawContext, v: StorageView): HTMLElement[] {
   const marks = d.art.cells('box/preview_marks', MARK_NAMES.map((_, i) => markCell(p.markings, i)), d.unit);
   if (marks) {
     const row = at(el('div', 'box-marks', marks), PREVIEW.marks[0], PREVIEW.marks[1], 48, 8);
-    row.setAttribute('aria-label', MARK_NAMES.filter((_, i) => (p.markings >> i) & 1).join(', ') || 'no marks');
+    row.setAttribute('aria-label', MARK_NAMES.filter((_, i) => (p.markings >> i) & 1).join(', ') || S.aria.noMarks);
     out.push(row);
   }
   return out;

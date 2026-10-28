@@ -13,8 +13,8 @@ warp platinum:MAP_HEADER_BATTLE_TOWER 15 6 up
 until message 2000
 +2 press a
 +1 release a
-+300 press a
-+1 release a
+# The save, then "show you to the battle room" (wait_ab_press)
+advance message 1200
 until state player.zone "platinum:MAP_HEADER_BATTLE_TOWER_ELEVATOR" 1200
 advance text 4000
 +10 press a

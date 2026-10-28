@@ -4,6 +4,8 @@
  * page loads this before the game chunk. `lantern-nds:setup` lists the answered questions; each answer itself is a
  * device option (`lantern-nds:error-reports`, `lantern-nds:options`, `lantern-nds:visual-style`, the add-on import).
  */
+import { S } from '../strings/index.ts';
+
 /** `introSkip` is NEW GAME's question on a device that has finished Rowan's intro (intro-skip.ts), not the setup's. */
 export type SetupQuestion = 'reports' | 'addon' | 'textSpeed' | 'visualStyle' | 'introSkip';
 export const SETUP_KEY = 'lantern-nds:setup'; // pre-rename name, kept: players' stored data uses it
@@ -36,42 +38,23 @@ export interface Ask {
 }
 
 /**
- * Each question's words; an answer's index is the stored choice (`reports` 0 allow; `addon` 0 add, 1 skip; `textSpeed`
- * the speed; `visualStyle` the style in VISUAL_STYLES' order).
+ * Each question's words (strings/: the app's language); an answer's index is the stored choice (`reports` 0 allow;
+ * `addon` 0 add, 1 skip; `textSpeed` the speed; `visualStyle` the style in VISUAL_STYLES' order).
  */
-export const ASK: Record<SetupQuestion, Ask> = {
-  reports: {
-    title: 'Send error reports?',
-    text: 'If something breaks, OpenSinnoh can send a report so it gets fixed. Visits are counted anonymously, without cookies.',
-    entries: [
-      { label: 'Allow', description: 'Sends errors and a speed summary, never names or saves.' },
-      { label: "Don't allow", description: 'Nothing is sent.' },
-    ],
+export const ASK: Readonly<Record<SetupQuestion, Ask>> = {
+  get reports() {
+    return S.ask.reports;
   },
-  addon: {
-    title: 'Add HeartGold or SoulSilver?',
-    text: 'Optional. With your own HeartGold or SoulSilver (US) ROM, every Pokémon can follow you, not only the 24 that Platinum draws walking.',
-    entries: [
-      { label: 'Add now', description: 'Choose the .nds file. Nothing is uploaded.' },
-      { label: 'Skip', description: 'You can add it later in Options.' },
-    ],
+  get addon() {
+    return S.ask.addon;
   },
-  textSpeed: { title: 'Text speed', text: 'How fast should messages appear?', entries: [{ label: 'Slow' }, { label: 'Mid' }, { label: 'Fast' }] },
-  visualStyle: {
-    title: 'Visual style',
-    text: 'Optional effects the DS never drew. The game plays the same either way.',
-    entries: [
-      { label: 'DS', description: 'The original look, as the DS draws it.' },
-      { label: 'Subtle', description: 'Soft bloom, colour by the time of day, lamps that glow at night.' },
-      { label: 'Cinematic', description: 'Adds depth of field, ambient shadows and sunlight. Heavier on phones.' },
-    ],
+  get textSpeed() {
+    return S.ask.textSpeed;
   },
-  introSkip: {
-    title: 'Skip the introduction?',
-    text: "You have seen Professor Rowan's introduction on this device before.",
-    entries: [
-      { label: 'Skip', description: 'Choose boy or girl and the names, then play.' },
-      { label: 'Watch', description: 'The whole introduction, as on the DS.' },
-    ],
+  get visualStyle() {
+    return S.ask.visualStyle;
+  },
+  get introSkip() {
+    return S.ask.introSkip;
   },
 };

@@ -10,7 +10,10 @@ import { mkdirSync } from 'node:fs';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import { loadGamePacks, runReplay } from '@opensinnoh/game';
 import type { Registries } from '@opensinnoh/contracts';
-import { romSlice } from '../rom.ts';
+import type { Id } from '@opensinnoh/core';
+import { SUPPORTED_ROMS } from '@opensinnoh/nds';
+import { strings } from '../../packages/app/src/strings/index.ts';
+import { romSha1, romSlice } from '../rom.ts';
 import { seedRomImport } from './seed.ts';
 import { settle } from './settle.ts';
 import { pageDriver } from '../../packages/cli/src/browser.ts';
@@ -22,6 +25,8 @@ test.describe.configure({ mode: 'serial' });
 test.skip(!ROM, 'OPENSINNOH_NDS_ROM is not set');
 
 let registries: Registries;
+/** A text record's words in the game's language. */
+const words = (name: string) => registries.texts.get(`platinum:${name}` as Id)!.text;
 let context: BrowserContext;
 let page: Page;
 const errors: string[] = [];
@@ -197,7 +202,7 @@ test('the keyboard changes a value on every page; the device settings survive a 
   await expect(chosen('textSpeed')).not.toHaveText(before);
   await key('KeyE');
   await expect(chosen('zoom')).toHaveText(`${zoom}x`);
-  await expect(chosen('renderScale')).toHaveText('FULL');
+  await expect(chosen('renderScale')).toHaveText(strings(SUPPORTED_ROMS[romSha1()]!.language).options.full);
   await expect(chosen('speed')).toHaveText('3x');
   await expect(chosen('volume')).toHaveAttribute('aria-valuenow', '90');
   await expect(setting('mute').getByRole('switch')).toHaveAttribute('aria-checked', 'true');
@@ -232,7 +237,8 @@ test('the DS options apply in the game: text speed, FRAME, battle style, BUTTON 
   await expect(chosen('frame')).toHaveText(/2$/);
   await shot('frame-2');
   // Taps: the FRAME arrows step it back.
-  await setting('frame').getByRole('button', { name: /^Previous/ }).click();
+  const frameLabel = await setting('frame').locator('.options-label').innerText();
+  await setting('frame').getByRole('button', { name: strings(SUPPORTED_ROMS[romSha1()]!.language).ui.previous(frameLabel), exact: true }).click();
   await advance(2);
   expect((await state()).frame).toBe(0);
   // BUTTON MODE (row 5) L=A: L is A (it steps the focused row), R is gone (no page turn).
@@ -267,10 +273,10 @@ test('FOLLOWER STYLE defaults to Still and keeps Walk in place on this device af
     await advance(2);
   };
   await play();
-  await expect(chosen('followerStyle')).toHaveText('Still');
+  await expect(chosen('followerStyle')).toHaveText(words('Lantern_Options_FollowerStill'));
   await setting('followerStyle').locator('.options-value').nth(1).click();
   await advance(2);
-  await expect(chosen('followerStyle')).toHaveText('Walk in place');
+  await expect(chosen('followerStyle')).toHaveText(words('Lantern_Options_FollowerWalk'));
   await fits();
   await shot('follower-style');
   const stored = () => page.evaluate(() => JSON.parse(localStorage.getItem('lantern-nds:options')!).followerStyle);
@@ -279,7 +285,7 @@ test('FOLLOWER STYLE defaults to Still and keeps Walk in place on this device af
   await boot();
   await openOptions();
   await play();
-  await expect(chosen('followerStyle')).toHaveText('Walk in place');
+  await expect(chosen('followerStyle')).toHaveText(words('Lantern_Options_FollowerWalk'));
   expect(await stored()).toBe(1);
   expect(errors).toEqual([]);
 });

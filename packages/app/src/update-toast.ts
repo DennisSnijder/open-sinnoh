@@ -5,6 +5,7 @@
  */
 import { button, h, icon, snapPixels } from '@opensinnoh/ui';
 import { applyUpdate, onUpdateWaiting } from './platform.ts';
+import { S } from './strings/index.ts';
 import { captureError } from './telemetry/index.ts';
 
 let waiting = false;
@@ -13,18 +14,18 @@ let toast: HTMLElement | null = null;
 
 function show(): void {
   if (toast) return;
-  const restart = button('Restart to update', {
+  const restart = button(S.update.restart, {
     variant: 'primary',
     onClick: () => {
       restart.setAttribute('aria-disabled', 'true');
       applyUpdate().catch((e: Error) => {
         captureError(e, 'update');
         restart.removeAttribute('aria-disabled');
-        message.textContent = `The update could not start: ${e.message}`;
+        message.textContent = S.update.failed(e.message);
       });
     },
   });
-  const message = h('span', '', 'A new version of OpenSinnoh is ready.');
+  const message = h('span', '', S.update.ready);
   const slot = h('div', 'update-slot os', h('div', 'os-win os-toast update-toast in', icon('reset'), message, restart));
   slot.id = 'update-toast';
   slot.setAttribute('role', 'status');

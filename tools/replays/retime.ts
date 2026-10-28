@@ -23,7 +23,7 @@
 import { readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { parseReplay, type ReplayLine, type UntilCondition } from '@opensinnoh/core';
-import { CountingStubLog, createGame, gameDriver, runReplay, runUntil, untilTarget, advanceText, type Game, type ReplayDriver } from '@opensinnoh/game';
+import { CountingStubLog, createGame, gameDriver, runReplay, runUntil, untilTarget, advanceMessage, advanceText, type Game, type ReplayDriver } from '@opensinnoh/game';
 import { importPlatinum } from '@opensinnoh/importer';
 import { createScriptRunner } from '@opensinnoh/vm';
 import { createWorld } from '@opensinnoh/world';
@@ -85,7 +85,7 @@ const driver: ReplayDriver = {
     for (let i = 0; i < n; i++) tick();
   },
   until: (u: UntilCondition, max) => runUntil(target, u, max),
-  advanceText: (max) => advanceText(target, max),
+  advanceText: (max, close) => (close ? advanceMessage : advanceText)(target, max),
 };
 
 const chainTicks = replay.from ? (await runReplay(gameDriver(game), read(replay.from.file), { registries: game.registries, name: replay.from.file, resolve, repeat: false })).ticks : 0;

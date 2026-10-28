@@ -45,6 +45,8 @@ Rules:
 - Any change to what the importer writes bumps `IMPORTER_VERSION` in `packages/app/src/importer.ts`, or browsers keep
   a stale cached import.
 - Look at screenshots. A test can pass on a black screen.
+- ROM tests and specs hold on every supported ROM: name the words they expect by text or record id, or take them
+  from the app's string tables for the game's language (`tests/browser/words.ts`), never as English literals.
 
 Browser runner details (workers, sharding, changed-spec selection) are in `docs/browser-tests.md`. Measured suite
 timings are in `docs/test-speed.md`. Performance budgets are in `docs/performance.md`.
@@ -61,7 +63,11 @@ The grammar is documented at the top of `packages/core/src/replay.ts`. Ticks are
 - Setup lines (`set flag`, `give item`, `party`, `warp`, `date`, …) run only before the first timed line and are
   echoed in the output.
 - `assert state <path> <json>` checks any `GameState` value and the battle log. ROM replays name texts by id, never
-  by their words.
+  by their words: `assert text <text id> <page>`, `assert state <path> <record id>` (a nickname from a text bank),
+  `tap word:<text id>` (an Easy Chat word, wherever the language sorts it).
+- A conversation is answered with `advance message` (one box, however many pages) or `advance text` (until a choice
+  or idle), never with a counted chain of A presses: each language splits the same text into its own pages. ROM
+  tests compare with the text records (`texts.get(id)`), not with English words.
 - Randomness that only some paths use (encounters, wandering NPCs, daily rolls) has its own saved PRNG stream, so
   adding an NPC or an encounter check moves no other roll.
 - `battle auto` picks the highest-damage legal move. Story replays use it for grinding, and explicit moves elsewhere.

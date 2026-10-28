@@ -15,6 +15,7 @@ import { romSlice } from '../rom.ts';
 import { readReplay, resolveReplay } from '../rom-replays/sys-replays.ts';
 import { seedRomImport } from './seed.ts';
 import { battleSceneStats } from './canvas.ts';
+import { CardStrings } from '../../packages/app/src/battle/strings.ts';
 
 test.skip(!process.env.OPENSINNOH_NDS_ROM, 'OPENSINNOH_NDS_ROM is not set');
 
@@ -65,7 +66,8 @@ test('a Safari battle: the Safari healthbox and BALL / BAIT / MUD / RUN on the c
     };
   });
   expect(card.hidden).toBe(false);
-  expect(card.labels).toEqual(['BALL', 'BAIT', 'RUN', 'MUD']);
+  const words = new CardStrings(game.registries);
+  expect(card.labels).toEqual([words.t('battleBall'), words.t('battleBait'), words.t('battleRun'), words.t('battleMud')]);
   expect(card.art).toEqual([]);
   expect(card.overflow).toEqual([]);
   const pixels = await battleSceneStats(page);

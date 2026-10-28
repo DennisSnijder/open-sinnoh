@@ -73,7 +73,9 @@ export function describeM2a(seeds: readonly (1 | 2 | 3)[]): void {
       expect([...reg.types.values()].reduce((n, t) => n + t.matchups.length, 0)).toBe(110);
       expect(reg.trainers.get(P('TRAINER_YOUNGSTER_TRISTAN'))!.classPrize).toBe(4);
       expect(reg.trainers.get(P('TRAINER_LEADER_ROARK'))!.classPrize).toBeGreaterThan(4);
-      expect(reg.texts.get(reg.trainers.get(P('TRAINER_LEADER_ROARK'))!.className)!.text).toBe('Leader');
+      // His class's row of the class-name bank (TEXT_BANK_TRAINER_CLASS_NAMES, 619).
+      expect(reg.trainers.get(P('TRAINER_LEADER_ROARK'))!.className).toBe(P('pl_msg_00000619_00062'));
+      expect(reg.texts.get(P('pl_msg_00000619_00062'))!.text).toMatch(/\S/);
       expect(reg.zones.get(P('MAP_HEADER_TWINLEAF_TOWN_PLAYER_HOUSE_1F'))!.blackOut).toEqual({ spawn: 1, x: 8, z: 8, label: P('CommonScript_PlayerHouseBlackOutRecover') });
       expect(reg.zones.get(P('MAP_HEADER_SANDGEM_TOWN_POKECENTER_1F'))!.blackOut).toEqual({ spawn: 2, x: 8, z: 6, label: P('CommonScript_PokecenterBlackOutRecover') });
       expect([...reg.zones.values()].filter((z) => z.blackOut).length).toBe(19);

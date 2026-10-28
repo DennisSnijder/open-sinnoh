@@ -12,6 +12,7 @@
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import { loadGamePacks, runReplay } from '@opensinnoh/game';
 import type { Registries } from '@opensinnoh/contracts';
+import type { Id } from '@opensinnoh/core';
 import { mainCanvasStats, pageDriver, waitForScene } from '../../packages/cli/src/browser.ts';
 import { romSlice } from '../rom.ts';
 import { readReplay, resolveReplay } from '../rom-replays/sys-replays.ts';
@@ -76,7 +77,7 @@ test('the item wheel: Y held opens it over the field, an item toward each direct
   const wheel = page.locator('[data-screen="item-wheel"]');
   await expect(wheel).toBeVisible();
   await expect(wheel.locator('.wheel-slot')).toHaveCount(2);
-  await expect(wheel.locator('.wheel-up .wheel-item')).toContainText('Bicycle');
+  await expect(wheel.locator('.wheel-up .wheel-item')).toContainText(registries.items.get('platinum:ITEM_BICYCLE' as Id)!.name);
   // The ROM's frame and item icons (art, not stand-ins).
   await expect(wheel.locator('.wheel-slot.rom-frame')).toHaveCount(2);
   await expect.poll(() => wheel.locator('.item-icon').evaluateAll((e) => e.map((x) => getComputedStyle(x).backgroundImage).every((b) => b.startsWith('url(')))).toBe(true);
@@ -101,8 +102,8 @@ test('the repeat-Repel prompt: "Use another …?" with YES/NO after the ROM\'s w
   await setOption('repelPrompt', 0);
   await play('repel', 'svc-repel-repeat.replay', '+1 press a\n+1 release a\nuntil message 60');
   const v = await page.evaluate(() => window.openSinnohGame!.snapshot().view);
-  expect(v.yesNo).toEqual({ cursor: 0 });
-  expect(v.message?.text).toContain('Repel');
+  expect(v.yesNo).toMatchObject({ cursor: 0 });
+  expect(v.message?.text).toContain(registries.items.get('platinum:ITEM_REPEL' as Id)!.name);
   await shot('repel-prompt');
   expect((await mainCanvasStats(page)).colours).toBeGreaterThan(8);
   expect(errors).toEqual([]);
@@ -119,13 +120,14 @@ test('the summary: the EV/IV label on SKILLS, RENAME on INFO', async () => {
   await tap('menu:0');
   const summary = page.locator('[data-screen="summary"]');
   await expect(summary).toBeVisible();
-  await expect(summary.locator('.sum-extra')).toContainText('RENAME');
+  const words = (name: string) => registries.texts.get(`platinum:${name}` as Id)!.text;
+  await expect(summary.locator('.sum-extra')).toContainText(words('Lantern_Summary_Rename'));
   await shot('summary-rename');
   await tap('page:skills');
-  await expect(summary.locator('.sum-extra')).toContainText('STATS');
+  await expect(summary.locator('.sum-extra')).toContainText(words('Lantern_Summary_Stats'));
   await summary.locator('.sum-extra').click();
   await page.evaluate(() => window.openSinnohGame!.advance(2));
-  await expect(summary.locator('.sum-extra')).toContainText('EV');
+  await expect(summary.locator('.sum-extra')).toContainText(words('Lantern_Summary_Evs'));
   await shot('summary-ev');
   await tap('page:info');
   await summary.locator('.sum-extra').click();

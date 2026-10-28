@@ -10,6 +10,10 @@
 .os-options .options-rows::-webkit-scrollbar { display: none; }
 /* The cursor moves with the game's keys, so the cursor row marks it even without browser focus. */
 .os-options .options-rows .os-row { scroll-margin: 8px; }
+/* An action's value can be data (a binding's keys and button, in the game's language): it wraps in its cell, never
+ * wider than the row. */
+.os-options .options-row .ctl { min-width: 0; max-width: 100%; }
+.os-options .options-value.action { white-space: normal; overflow-wrap: anywhere; max-width: 100%; text-align: center; }
 /* Phone: full bleed; the title bar takes the safe area, the box and Back keep off the edges. */
 @container os-screen (max-width: 480px) {
   .os-options .os-tab { padding-top: calc(8px + var(--sat)); }

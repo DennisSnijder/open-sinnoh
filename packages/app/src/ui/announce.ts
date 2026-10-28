@@ -4,7 +4,6 @@
  * is the game's own decoded text (never read from pixels). A message page is announced once it has finished
  * typing, never letter by letter. The DOM menu apps need none of this: their cursor is the browser's focus.
  */
-import { YES_NO_LABELS } from '@opensinnoh/text';
 import type { Game } from '@opensinnoh/game';
 import { el } from './core.ts';
 
@@ -92,7 +91,7 @@ export function announceFrame(a: Announcer, game: Game, battleCursor: string | n
   }
   const view = game.scripts.view();
   a.message(view.message?.text ?? null, view.message?.waitingForInput ?? false, now);
-  if (view.yesNo) a.choice('yesno', YES_NO_LABELS[view.yesNo.cursor]);
+  if (view.yesNo) a.choice('yesno', view.yesNo.cursor === 0 ? view.yesNo.yes : view.yesNo.no);
   else if (view.menu) a.choice('menu', `${view.menu.entries[view.menu.cursor]}, ${view.menu.cursor + 1} of ${view.menu.entries.length}`);
   else a.choice('', null);
 }

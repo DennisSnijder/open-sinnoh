@@ -5,8 +5,13 @@
  * Screenshots go to test-artifacts/objective (gitignored).
  */
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import type { Id } from '@opensinnoh/core';
+import { loadGamePacks } from '@opensinnoh/game';
+import { plainText } from '../../packages/app/src/ui/strings.ts';
+import { romSlice } from '../rom.ts';
 import { settle } from './settle.ts';
 import { openChunk } from './story-seed.ts';
+import { appStrings } from './words.ts';
 
 const SHOTS = 'test-artifacts/objective';
 const ROM = process.env.OPENSINNOH_NDS_ROM;
@@ -132,12 +137,15 @@ test('on the real game: the objective after the Coal Badge (OPENSINNOH_NDS_ROM)'
   await driver.reset(1);
   await untilIdle(page, false);
   const menu = page.locator('[data-screen="start-menu"]');
-  if (touch) await press(page, page.getByRole('button', { name: 'Start menu' }), true);
+  if (touch) await press(page, page.getByRole('button', { name: appStrings().aria.hud.menu }), true);
   else await key(page, 'Enter');
   await expect(menu).toBeVisible();
   await setObjective(page, 0, touch);
   const objective = menu.locator('.start-objective');
-  await expect(objective).toHaveText('OBJECTIVEFind out what Team Galactic is up to in Floaroma Town.');
+  // The imported table's heading and its Floaroma step (packages/importer/src/objectives.ts), in the game's language.
+  const { registries } = loadGamePacks([romSlice().pack]);
+  const words = (name: string) => plainText(registries.texts.get(`platinum:OpenSinnoh_Objective_${name}` as Id)!.text);
+  await expect(objective).toHaveText(words('Title') + words('Floaroma'));
   await placed(page);
   await settle(page);
   await page.screenshot({ path: `${SHOTS}/${info.project.name}-rom-start-menu.png` });

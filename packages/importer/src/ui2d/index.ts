@@ -3,6 +3,7 @@
  * compositor, the Platinum picture descrambling, and the 2D art import (Pokémon, trainers, battle,
  * windows, map-name signboards, the Pokédex) used by battles and menus.
  */
+import { placeTables, type RomBuild } from '../layout.ts';
 import type { BattleBackground, BattleTerrain, PokemonSprites, TrainerSprite, Ui2dSheet } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
 import { sha1Hex, type NitroFs } from '@opensinnoh/nds';
@@ -67,6 +68,8 @@ const TABLES = {
   danceTimeline: { where: 17, offset: 0x19758, size: DANCE_TIMELINE_TILES * 2, sha1: '624dd31f936eb7f30b500241a03835bd14d4d5f2' },
   dancePress: { where: 17, offset: 0x194f0, size: DANCE_PRESS_STEPS * 4 * 12, sha1: '160299e6981f1d57359c421a84d5668b50dccba7' },
 } as const;
+/** The US layout of these tables (tools/relocate.ts finds them in other builds). */
+export { TABLES as UI2D_TABLES };
 
 export interface Ui2dImport {
   ui2d: Ui2dSheet[];
@@ -85,9 +88,10 @@ export interface Ui2dImport {
 }
 
 /** `speciesIds`/`classIds`: species and trainer class ids by index (names.json order). */
-export async function importUi2d(fs: NitroFs, speciesIds: Id[], classIds: Id[], onProgress: (done: number, total: number) => void = () => {}): Promise<Ui2dImport> {
+export async function importUi2d(fs: NitroFs, build: RomBuild, speciesIds: Id[], classIds: Id[], onProgress: (done: number, total: number) => void = () => {}): Promise<Ui2dImport> {
+  const tables = placeTables(TABLES, build.layout, 'ui2d');
   const table = async (key: keyof typeof TABLES): Promise<Uint8Array> => {
-    const t = TABLES[key];
+    const t = tables[key];
     const src = t.where === 'arm9' ? fs.arm9() : fs.overlay(t.where);
     const bytes = src.subarray(t.offset, t.offset + t.size);
     const got = await sha1Hex(bytes);

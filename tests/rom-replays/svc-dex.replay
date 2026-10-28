@@ -96,10 +96,13 @@ until message 600
 +0 assert text platinum:PokedexRatings_Text_PokemonSpottedInSinnoh 1 0=3
 +1 press a
 +1 release a
-+90 assert text platinum:PokedexRatings_Text_RowanPokemonSeenUpTo15 0
+until message 600
++0 assert text platinum:PokedexRatings_Text_RowanPokemonSeenUpTo15 0
 +1 press a
 +1 release a
-+90 assert text platinum:PokedexRatings_Text_RowanPokemonSeenUpTo15 1
+# the last page waits in wait_ab_press (no arrow)
+until message 600
++0 assert text platinum:PokedexRatings_Text_RowanPokemonSeenUpTo15 1
 +1 press a
 +1 release a
 # back on the PC menu: B closes it

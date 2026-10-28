@@ -432,7 +432,7 @@ export const createFakeScriptRunner: CreateScriptRunner = ({ registries, labels,
           wait('movement');
           break;
         case 'show_yes_no_menu':
-          view.yesNo = { cursor: 0 };
+          view.yesNo = { yes: 'YES', no: 'NO', cursor: 0 };
           wait('yesno');
           break;
         case 'start_choose_starter_scene':
