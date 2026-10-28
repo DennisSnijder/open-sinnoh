@@ -19,8 +19,9 @@
  * The sprites animate on the canvas between views. Packs without the art (the fixture) get flat colours in the same
  * places.
  */
-import { newGameRecord, type ArcadeView, type CastleMonView, type CastleView, type FactoryView, type FrontierRecordsView, type HallBoardView, type Ui2dSheet } from '@opensinnoh/contracts';
+import { dexOf, newGameRecord, type ArcadeView, type CastleMonView, type CastleView, type FactoryView, type FrontierRecordsView, type HallBoardView, type Ui2dSheet } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
+import { levelMark } from '@opensinnoh/text';
 import { framed, messageBox, stop, type DrawContext } from './apps.ts';
 import type { Art } from './art.ts';
 import { hpColor, ICON_ANIM } from './art.ts';
@@ -563,9 +564,10 @@ class CastleScene extends FrontierScene<CastleView> {
     return { ...v, sparkle: undefined };
   }
 
-  /** The level mark and number at x, the gender symbol at `gender` (decomp PrintMonLevelAndGender). */
+  /** The level mark (the game language's) and number at x, the gender symbol at `gender` (decomp PrintMonLevelAndGender). */
   private level(d: DrawContext, m: CastleMonView, x: number, gender: number, y: number): HTMLElement[] {
-    const parts = [line(d, 'Lv', x, y), line(d, String(m.level), x + 16, y)];
+    const mark = levelMark(dexOf(d.registries).language);
+    const parts = [line(d, mark, x, y), line(d, String(m.level), x + 16, y)];
     if (m.gender !== 'none') parts.push(line(d, m.gender === 'male' ? '♂' : '♀', gender, y, m.gender));
     return parts;
   }

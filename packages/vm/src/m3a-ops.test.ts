@@ -124,7 +124,7 @@ describe('apps opened by scripts', () => {
     d.until(() => d.vm.view().yesNo !== null);
     expect(d.vm.view()).toMatchObject({ message: { text: 'Ari, this is not\nthe time for that.' }, yesNo: { cursor: 0 } });
     d.press('down');
-    expect(d.vm.view().yesNo).toEqual({ cursor: 1 });
+    expect(d.vm.view().yesNo).toEqual({ yes: 'YES', no: 'NO', cursor: 1 });
     d.press('a');
     expect(answers).toEqual([false]);
     expect([d.vm.running(), d.vm.view().message, d.vm.view().yesNo]).toEqual([false, null, null]);

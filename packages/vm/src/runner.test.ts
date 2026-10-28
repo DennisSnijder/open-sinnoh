@@ -30,7 +30,7 @@ describe('VM on the fixture scripts', () => {
     d.until(() => d.vm.view().yesNo !== null);
     expect(d.vm.view().message?.text).toBe('Is this the one you want?');
     d.press('down');
-    expect(d.vm.view().yesNo).toEqual({ cursor: 1 });
+    expect(d.vm.view().yesNo).toEqual({ yes: 'YES', no: 'NO', cursor: 1 });
     d.press('a');
     d.until(() => d.vm.view().panel.kind === 'choice');
 

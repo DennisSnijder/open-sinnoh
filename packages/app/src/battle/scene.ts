@@ -16,9 +16,9 @@
  * as the DS loads during the encounter flash), and until it is in the scene stays black.
  */
 import type { Id } from '@opensinnoh/core';
-import type { AnimBattlerView, AnimBgMonView, AnimPicture, AnimSpriteView, AssetRef, AssetSource, BattlerView, BattleView, LoadedFont, PokemonFace, PokemonSpriteForm, Registries, Ui2dSheet } from '@opensinnoh/contracts';
+import { dexOf, type AnimBattlerView, type AnimBgMonView, type AnimPicture, type AnimSpriteView, type AssetRef, type AssetSource, type BattlerView, type BattleView, type LoadedFont, type PokemonFace, type PokemonSpriteForm, type Registries, type Ui2dSheet } from '@opensinnoh/contracts';
 import { barColor, gaugeCells } from '@opensinnoh/battle/formulas';
-import { drawText } from '@opensinnoh/text';
+import { drawText, levelMark } from '@opensinnoh/text';
 import { plainText } from '@opensinnoh/menus';
 import { capFlash, reduceFlashing } from '@opensinnoh/render/flash';
 import { applyBattlerTransform, battlerTransform, css555, drawBgMon, fadeImage, mosaicImage, ParticleTextures } from './anim/draw.ts';
@@ -963,7 +963,7 @@ export class BattleScene {
     this.fill('#384050', x, y, w, b.side === 'player' ? 40 : 30);
     this.fill('#e8e8d8', x + 2, y + 2, w - 4, (b.side === 'player' ? 40 : 30) - 4);
     this.text(b.name, x + 6, y + 2, ['#383838', '#c8c8c0']);
-    this.text(`Lv${b.level}`, x + w - 34, y + 2, ['#383838', '#c8c8c0']);
+    this.text(`${levelMark(dexOf(this.deps.registries()).language)}${b.level}`, x + w - 34, y + 2, ['#383838', '#c8c8c0']);
     const hp = gaugeCells(b.maxHp, b.hp, 6);
     const doublesBox = this.doubles && b.side === 'player';
     if (!doublesBox || !b.healthbox.numbers) {

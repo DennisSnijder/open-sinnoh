@@ -7,6 +7,7 @@
  */
 import { asId, type Id } from '@opensinnoh/core';
 import type { ObjectiveCheck, ObjectiveTables } from '@opensinnoh/contracts';
+import type { RomLanguage } from '@opensinnoh/nds';
 
 type Check = `FLAG_${string}` | `VAR_${string} ${number}` | `BADGE_${string}`;
 
@@ -86,14 +87,27 @@ const STEPS: [string, string, Check[], string?][] = [
 
 const textId = (name: string) => `OpenSinnoh_Objective_${name}`;
 
-/** Our texts for the table and its option (text id → words), added to the pack's texts. */
-export const OBJECTIVE_TEXTS: Record<string, string> = {
-  OpenSinnoh_Options_Objective: 'OBJECTIVE',
-  OpenSinnoh_Options_ObjectiveDescription: 'The START menu shows what to\ndo next in the story.',
-  [textId('Title')]: 'OBJECTIVE',
-  [textId('Explore')]: 'Explore Sinnoh.',
-  ...Object.fromEntries(STEPS.map(([name, words]) => [textId(name), words])),
+const OWN_TEXTS: Record<RomLanguage, { title: string; explore: string; option: string; optionDescription: string; step(name: string, english: string): string }> = {
+  en: {
+    title: 'OBJECTIVE',
+    explore: 'Explore Sinnoh.',
+    option: 'OBJECTIVE',
+    optionDescription: 'The START menu shows what to\ndo next in the story.',
+    step: (_, english) => english,
+  },
 };
+
+/** Our texts for the table and its option (text id → words) in the game's language, added to the pack's texts. */
+export function objectiveTexts(language: RomLanguage): Record<string, string> {
+  const own = OWN_TEXTS[language];
+  return {
+    OpenSinnoh_Options_Objective: own.option,
+    OpenSinnoh_Options_ObjectiveDescription: own.optionDescription,
+    [textId('Title')]: own.title,
+    [textId('Explore')]: own.explore,
+    ...Object.fromEntries(STEPS.map(([name, words]) => [textId(name), own.step(name, words)])),
+  };
+}
 
 /**
  * The table, with every flag and var resolved through the names (an unknown name fails the import); a destination must
