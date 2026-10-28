@@ -11,6 +11,7 @@ import { M1B_BANKS } from './m1b-ops.ts';
 import { appearanceTrainerClass, calculateAppearance, newGameAppearance } from './appearance-ops.ts';
 import { FRONTIER_LINK_OPS, frontierHandlers } from './frontier/ops.ts';
 import { classifyFrontierOps } from './frontier/coverage.ts';
+import { EASY_CHAT_BANKS } from '@opensinnoh/services';
 import type { FrontierContext, FrontierRunner } from './frontier/runner.ts';
 
 const fixture = loadFixture();
@@ -27,6 +28,12 @@ const registries = (() => {
   const parts: Recs[] = [
     bank(M1B_BANKS.trainerClassNames, 'CLASSES', classes),
     bank(M1B_BANKS.trainerClassNamesWithArticles, 'CLASSES_ARTICLE', classes.map((c) => `a ${c}`)),
+    // The Easy Chat banks (one word each), the tough words three.
+    ...EASY_CHAT_BANKS.map((b): Recs => {
+      const words = b === 'TEXT_BANK_TOUGH_WORDS' ? ['ALPHA', 'BETA', 'GAMMA'] : [b];
+      const ids = words.map((_, i) => `fixture:${b}_${i}` as Id);
+      return { textBanks: [{ id: `fixture:${b}` as Id, messages: ids }], texts: words.map((text, i) => ({ id: ids[i]!, text })) };
+    }),
     {
       texts: [
         { id: 'test:Out' as Id, text: '{var 0}|{var 1}|{var 2}|{var 3}' },
@@ -154,6 +161,42 @@ describe('trainer appearance (decomp appearance.c)', () => {
     expect(() => calculateAppearance(s, 4)).toThrow('variant 4');
     const d = run('buffer_trainer_class_from_appearance 0\nmessage text(test:Out1)\nwait_button', (d) => Object.assign(d.state, { gender: 'female', trainerId: 3 }));
     d.readMessage('a Class 25');
+  });
+});
+
+describe('tough words (decomp easy_chat_words.c)', () => {
+  const script = 'check_all_tough_words_unlocked var(test:VAR_OUT_0)\ntry_buffer_and_unlock_random_tough_word var(test:VAR_OUT_1), 0\nmessage text(test:Out1)\nwait_button';
+
+  it('a locked word is drawn among the locked ones, unlocked and buffered; its bank entry is the result', () => {
+    const d = run(script, (d) => (d.state.unlockedToughWords = 0b010));
+    d.readMessage(/^(ALPHA|GAMMA)$/);
+    d.until(() => !d.vm.running());
+    expect(v(d, 'OUT_0')).toBe(0);
+    const entry = v(d, 'OUT_1');
+    expect([0, 2]).toContain(entry);
+    expect(d.state.unlockedToughWords).toBe(0b010 | (1 << entry));
+  });
+
+  it('with every word unlocked the check is TRUE and the draw gives -1 without buffering', () => {
+    const d = run('check_all_tough_words_unlocked var(test:VAR_OUT_0)\ntry_buffer_and_unlock_random_tough_word var(test:VAR_OUT_1), 0', (d) => (d.state.unlockedToughWords = 0b111));
+    d.until(() => !d.vm.running());
+    expect([v(d, 'OUT_0'), v(d, 'OUT_1')]).toEqual([1, 0xffff]);
+    expect(d.state.unlockedToughWords).toBe(0b111);
+  });
+});
+
+describe('group connection (no record-mixing group)', () => {
+  // VAR_OUT_0 is var 0x4100 (16640): the action's extra operands are raw numbers.
+  it('no entry is valid, the names buffer empty and the naming screen reads as left empty', () => {
+    const d = run('set_var_from_value var(test:VAR_OUT_0), 9\ndo_group_connection_action 0, 1, 16640\nset_var_from_value var(test:VAR_OUT_1), 9\ndo_group_connection_action 4, 16641\ndo_group_connection_action 2, 1, 0\ndo_group_connection_action 3, 1, 1\nmessage text(test:Out2)\nwait_button');
+    d.readMessage('|');
+    d.until(() => !d.vm.running());
+    expect([v(d, 'OUT_0'), v(d, 'OUT_1')]).toEqual([0, 1]);
+    expect(d.log.keys.has('stub:do_group_connection_action')).toBe(true);
+  });
+
+  it('joining or making a group, which need one, fail loudly', () => {
+    expect(() => run('do_group_connection_action 6').until(() => false)).toThrow(/action 6 needs a group/);
   });
 });
 

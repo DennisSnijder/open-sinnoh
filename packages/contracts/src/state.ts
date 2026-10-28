@@ -220,7 +220,7 @@ export interface GameState {
   fieldRng?: PrngState;
   /** FieldOverworldState exit location (not the elevator special location). Absent until an entrance is recorded. */
   escapeLocation?: { zone: Id; x: number; z: number; facing: Facing };
-  schemaVersion: 23;
+  schemaVersion: 24;
   packs: { id: string; version: string }[];
   names: { player: string; rival: string };
   gender: 'male' | 'female';
@@ -423,6 +423,11 @@ export interface GameState {
    * is the player's own (the gallery's dress-up writes it); the others come only from record mixing, so stay null offline.
    */
   dressUpPhotos: (import('./contests.ts').DressUpPhoto | null)[];
+  /**
+   * 0.49.0. The unlocked tough words (schema v24; decomp UnlockedEasyChatWords unlockedToughWordBits): bit `i` is
+   * TEXT_BANK_TOUGH_WORDS entry `i`. None at a new game; the Snowpoint expert unlocks one a day.
+   */
+  unlockedToughWords: number;
 }
 
 /** Decomp MAX_POFFINS. */

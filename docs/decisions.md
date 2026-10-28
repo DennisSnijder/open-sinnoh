@@ -180,6 +180,10 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   Wi-Fi commands (each script reaches them only on its link branch) are logged stand-ins that write 0. Clearing the
   linked players' received data (`clear_received_temp_data_all_players`, its frontier twin) is real: offline nothing is
   received, so there is nothing to clear. Our Pokémon carry no checksum, so `check_party_has_bad_egg` is always no.
+- **A stub never leaves a template slot a message reads.** An unset slot makes the printer throw, so a command whose
+  script prints what it buffers is implemented, or is a stand-in that buffers what the DS would for the state we keep
+  (the Jubilife groups man: no record-mixing group exists, its names are empty and the group naming screen reads as
+  left empty). Audited once over the ROM's decoded scripts (0.49.0: a definite-assignment pass from every root).
 
 ## World and field
 

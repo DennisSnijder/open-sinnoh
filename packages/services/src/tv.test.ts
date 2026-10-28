@@ -62,6 +62,7 @@ function state(slot = 0): GameState {
     pokedex: { obtained: false, national: false, seen: [PIKACHU], caught: [], forms: {} },
     poketch: { enabled: true, current: null },
     dressUpPhotos: Array.from({ length: 11 }, () => null),
+    unlockedToughWords: 0,
     gameTime: { now: { date: '2009-03-23', hour: h % 24, minute: (slot % 4) * 15, second: 0 }, penaltyMinutes: 0 },
   } as unknown as GameState;
 }
