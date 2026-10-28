@@ -8,7 +8,7 @@
  * Twinleaf pictures (crossfades shown as cuts), the final screen (A, Start or frame 10080). Then the OpenSinnoh
  * card (engine text). On a repeat clear Start skips to the final screen.
  */
-import { ENGLISH, forLanguage } from '@opensinnoh/core';
+import { ENGLISH, forLanguage, GERMAN } from '@opensinnoh/core';
 import { newGameRecord, type CreditsView, type SceneLine } from '@opensinnoh/contracts';
 import { gameLanguage } from '@opensinnoh/services';
 import type { InputFrame } from '@opensinnoh/contracts';
@@ -20,6 +20,10 @@ export const OPENSINNOH_CARD: Readonly<Record<number, { title: string; lines: re
   [ENGLISH]: {
     title: 'OpenSinnoh',
     lines: ['OpenSinnoh — an unofficial fan engine. Not affiliated with Nintendo, Game Freak or The Pokémon Company.', 'Made by the OpenSinnoh contributors.'],
+  },
+  [GERMAN]: {
+    title: 'OpenSinnoh',
+    lines: ['OpenSinnoh — eine inoffizielle Fan-Engine. Nicht verbunden mit Nintendo, Game Freak oder The Pokémon Company.', 'Gemacht von den Mitwirkenden an OpenSinnoh.'],
   },
 };
 /** The card fades in and out over 15 ticks and waits for A or Start (at least 60 ticks, at most 300). */

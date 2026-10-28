@@ -1,7 +1,7 @@
 /**
  * OpenSinnoh's own words in English: the app shell's screens (the ROM page, the setup, Options, the crash and update
  * screens, notices and toasts) and the aria labels of the screens that recreate the DS. Never the game's text, which
- * comes from the ROM. `index.ts` holds the tables by language.
+ * comes from the ROM. `de.ts` has the same keys (a missing one is a type error); `index.ts` picks one.
  * Labels in capitals follow the DS's Options style (options-screen.ts shows them in sentence case).
  */
 export const EN = {

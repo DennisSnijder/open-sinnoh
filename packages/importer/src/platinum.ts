@@ -420,9 +420,54 @@ const MODERN_OPTION_TEXTS_EN = {
   Lantern_Contest_Total: 'TOTAL',
 };
 
-/** The same by ROM language. */
+/** The same in German (our words; labels in capitals and terms as the German game has them). */
 const MODERN_OPTION_TEXTS: Record<RomLanguage, Record<keyof typeof MODERN_OPTION_TEXTS_EN, string>> = {
   en: MODERN_OPTION_TEXTS_EN,
+  de: {
+    Lantern_Options_TradeEvolution: 'TAUSCH-ENTW.',
+    Lantern_Options_TradeEvolutionDescription: 'Tausch-Entwicklungen geschehen\nstattdessen durch Level-Aufstieg.',
+    Lantern_Options_FollowerStyle: 'BEGLEITSTIL',
+    Lantern_Options_FollowerStyleDescription: 'Wenn du stehst, steht dein Begleiter\nstill oder läuft auf der Stelle.',
+    Lantern_Options_FollowerStill: 'Stehen',
+    Lantern_Options_FollowerWalk: 'Auf der Stelle',
+    Lantern_Options_Followers: 'BEGLEITER',
+    Lantern_Options_AutoLowercase: 'KLEINSCHREIBUNG',
+    Lantern_Options_AutoLowercaseDescription: 'Nach dem ersten Buchstaben schreibt\ndie Tastatur klein weiter.',
+    Lantern_Options_FollowersDescription: 'Das erste Pokémon in deinem Team\nläuft hinter dir her.',
+    Lantern_Options_AutoRun: 'AUTO-RENNEN',
+    Lantern_Options_AutoRunDescription: 'Mit Turbotretern rennst du, ohne B\nzu halten. Halte B, um zu gehen.',
+    Lantern_Options_RepelPrompt: 'SCHUTZ-FRAGE',
+    Lantern_Options_RepelPromptDescription: 'Wirkt Schutz nicht mehr, kannst du\ngleich einen neuen einsetzen.',
+    Lantern_Options_ItemWheel: 'ITEM-RAD',
+    Lantern_Options_ItemWheelDescription: 'Registriere bis zu vier Items. Halte\nY zum Wählen, tippe für das letzte.',
+    Lantern_Options_FollowerTalk: 'ANSPRECHEN',
+    Lantern_Options_FollowerTalkDescription: 'Sprich dein folgendes Pokémon an.\nBraucht das HGSS-Add-on.',
+    Lantern_Options_StatView: 'EV/IV-ANSICHT',
+    Lantern_Options_StatViewDescription: 'A auf der Seite POKéMON-FÄHIG. zeigt\nFleißpunkte und Individualwerte.',
+    Lantern_Options_Rename: 'UMBENENNEN',
+    Lantern_Options_RenameDescription: 'Benenne deine eigenen Pokémon auf\nder Seite POKéMON-INFO um.',
+    Lantern_Options_DexNameSearch: 'NAMENSSUCHE',
+    Lantern_Options_DexNameSearchDescription: 'Die Pokédex-Suche findet auch\neinen Namen, den du eingibst.',
+    Lantern_Options_Character: 'FIGUR',
+    Lantern_Options_CharacterDescription: 'Dein Aussehen im Feld. HGSS nutzt\ndie Figuren aus dem Add-on.',
+    Lantern_Options_CharacterPlatinum: 'PLATIN',
+    Lantern_Options_CharacterHgss: 'HGSS',
+    Lantern_Repel_UseAnother: 'Noch einmal {var 0} einsetzen?',
+    Lantern_Pokedex_ByName: 'NAME EINGEBEN',
+    Lantern_Naming_DexSearch: 'Nach welchem Namen suchen?',
+    Lantern_Summary_Rename: 'UMBENENNEN',
+    Lantern_Summary_CantRename: '{var 0} stammt von einem anderen\nTrainer und behält seinen Namen.',
+    Lantern_Summary_Stats: 'WERTE',
+    Lantern_Summary_Evs: 'EV',
+    Lantern_Summary_Ivs: 'IV',
+    Lantern_Options_SpiritombVendors: 'KRYPPUK',
+    Lantern_Options_SpiritombVendorsDescription: 'Händler im Untergrund, die du\nansprichst, zählen für Kryppuk.',
+    Lantern_Contest_Placeholder: '{var 0}\nPlatzhalter: nach Zustand bewertet.',
+    Lantern_Contest_Visual: 'MODEL',
+    Lantern_Contest_Dance: 'TANZ',
+    Lantern_Contest_Acting: 'AKTION',
+    Lantern_Contest_Total: 'GESAMT',
+  },
 };
 
 /** Offsets inside a pinned region, moved with it (the region matched whole, so its insides kept their places). */
@@ -547,8 +592,8 @@ const SPECIAL_ENCOUNTERS = {
   sounds: { radar: 'SEQ_KUSAGASA', sweetScent: 'SEQ_SE_DP_FW230' },
 };
 const DEFAULT_NAMES = { player: 'Lucas', rival: 'Barry' };
-/** Decomp LANGUAGE_ENGLISH: the game's language id by ROM language. */
-const GAME_LANGUAGES: Record<RomLanguage, number> = { en: 2 };
+/** Decomp LANGUAGE_ENGLISH, LANGUAGE_GERMAN: the game's language id by ROM language. */
+const GAME_LANGUAGES: Record<RomLanguage, number> = { en: 2, de: 5 };
 /** decomp SEQ_EYE_KID: FieldBGM_GetEyesMeetForTrainer's default. */
 const SEQ_EYE_KID = 1101;
 /** pl_font.narc member of the message font (decomp FONT_MESSAGE). */

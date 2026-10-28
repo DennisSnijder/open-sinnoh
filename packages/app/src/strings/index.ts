@@ -1,18 +1,18 @@
 /**
  * The app shell's language (OpenSinnoh's own words; the game's text is the ROM's). The imported game's language when
- * there is one (its SHA-1 in SUPPORTED_ROMS), else the browser's first choice when there is a table for it, else
- * English. Chosen once at boot (main.ts; a new import reloads the page) and, in the import worker, from the page's
- * request.
+ * there is one (its SHA-1 in SUPPORTED_ROMS), else the browser's first choice, else English. Chosen once at boot
+ * (main.ts; a new import reloads the page) and, in the import worker, from the page's request.
  *
  * `S` is the live table: read it where a string is shown, never into a module-level constant.
  */
 import { SUPPORTED_ROMS, type RomLanguage } from '@opensinnoh/nds';
+import { DE } from './de.ts';
 import { EN, type Strings } from './en.ts';
 
 export type { Strings };
 export type Language = RomLanguage;
 
-const TABLES: Record<Language, Strings> = { en: EN };
+const TABLES: Record<Language, Strings> = { en: EN, de: DE };
 
 export let S: Strings = EN;
 let current: Language = 'en';
@@ -28,8 +28,7 @@ export const language = (): Language => current;
 export function chooseLanguage(romSha1: string | undefined, browser: readonly string[]): Language {
   const rom = romSha1 === undefined ? undefined : SUPPORTED_ROMS[romSha1];
   if (rom) return rom.language;
-  const asked = browser[0]?.toLowerCase().split('-')[0];
-  return asked !== undefined && asked in TABLES ? (asked as Language) : 'en';
+  return browser[0]?.toLowerCase().startsWith('de') ? 'de' : 'en';
 }
 
 /** A table by language (tests). */

@@ -4,8 +4,10 @@
  * the objective the player has next.
  */
 import { describe, expect, it } from 'vitest';
-import type { Id } from '@opensinnoh/core';
+import { GERMAN, type Id } from '@opensinnoh/core';
+import { objectiveTexts } from '@opensinnoh/importer';
 import { currentObjective } from '@opensinnoh/menus';
+import { gameLanguage } from '@opensinnoh/services';
 import { ROM } from '../rom.ts';
 import { chainAnchor, storyGame } from './checkpoints-anchors.ts';
 
@@ -46,8 +48,12 @@ describe.skipIf(!ROM)('the objective through the story (OPENSINNOH_NDS_ROM)', ()
     const game = storyGame(1);
     const o = currentObjective(game.state, game.registries)!;
     expect(o.text).toBe(objective('VisitBarry'));
-    expect(game.registries.texts.get(o.title)?.text).toBe('OBJECTIVE');
-    expect(game.registries.texts.get(o.text)?.text).toBe('Visit Barry in the house next door.');
+    // The importer's words in the ROM's language.
+    const own = objectiveTexts(gameLanguage(game.registries) === GERMAN ? 'de' : 'en');
+    const words = (id: Id) => own[id.replace(/^platinum:/, '')];
+    expect(game.registries.texts.get(o.title)?.text).toBe(words(o.title));
+    expect(game.registries.texts.get(o.text)?.text).toBe(words(o.text));
+    expect(words(o.text)).toMatch(/\S/);
     // The Town Map marks its destination.
     expect(o.to).toBe('platinum:MAP_HEADER_TWINLEAF_TOWN');
   });

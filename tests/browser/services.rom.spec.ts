@@ -144,7 +144,7 @@ test('svc-pokecenter: the nurse heals; the machine shows one ball per non-egg Po
     async beforeLine(line: ReplayLine) {
       if (line.action.type === 'screenshot') {
         // The beat is 5 ticks after the second ball (its +140 on the US ROM). A nurse whose words take longer to print
-        // (in another build) starts the machine later: tick on to the same moment of the machine.
+        // (the German build's) starts the machine later: tick on to the same moment of the machine.
         await page.evaluate(() => {
           const g = window.openSinnohGame!;
           const heard = (window as unknown as { healHeard: { tick: number; seq: string }[] }).healHeard;

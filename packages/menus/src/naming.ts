@@ -8,7 +8,7 @@
  * SEQ_SE_DP_BOX02 when a character is entered; SEQ_SE_DP_SYU03 on a page change; SEQ_SE_DP_PIRORIRO on OK.
  * The DS also plays SEQ_SE_DP_NAMEIN_01 when its page slide ends; the page changes here at once, without it.
  */
-import { ENGLISH, forLanguage, type Button } from '@opensinnoh/core';
+import { ENGLISH, forLanguage, GERMAN, type Button } from '@opensinnoh/core';
 import type { AppHost, NamingRequest, NamingView } from '@opensinnoh/contracts';
 import { finishName, gameLanguage, keyboardPages, typedChars } from '@opensinnoh/services';
 import { menuSe, type MenuContext } from './context.ts';
@@ -34,7 +34,7 @@ const OK = 4;
 const HOME_OF_COL = [0, 0, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4];
 const PROMPTS: Record<Exclude<NamingRequest['kind'], 'gift-code'>, MenuKey> = { player: 'namePlayer', rival: 'nameRival', pokemon: 'namePokemon', box: 'nameBox', tablet: 'nameTablet', 'dex-search': 'nameDexSearch' };
 /** Mystery Gift's gift code prompt, per game language (our addition: the ROM has no such prompt). */
-export const GIFT_CODE_PROMPT: Readonly<Record<number, string>> = { [ENGLISH]: 'Gift code?' };
+export const GIFT_CODE_PROMPT: Readonly<Record<number, string>> = { [ENGLISH]: 'Gift code?', [GERMAN]: 'Geschenkcode?' };
 
 /**
  * `autoLowercase` is the OpenSinnoh option (not Platinum's): the first character of an empty name typed on the

@@ -22,7 +22,7 @@ import { backButton, button, cycle, dialog, footer, h, pick as osPick, row as os
 import { controls } from '../input.ts';
 import type { DrawContext } from './apps.ts';
 import { pages, stepSetting, type AppSettings, type Setting, type SettingsEnv, type SectionId } from './settings.ts';
-import { S } from '../strings/index.ts';
+import { language, S } from '../strings/index.ts';
 import './options.css';
 
 const SECTION_ICONS: Record<SectionId, IconName> = { game: 'pad', device: 'screen', controls: 'dpad', data: 'disk', privacy: 'shield' };
@@ -300,14 +300,21 @@ export class OptionsScreen {
   }
 }
 
+/** German words a label in capitals keeps in lower case (all others are nouns, as in the ROM's KAMPFSTIL or TEXT-TEMPO). */
+const GERMAN_LOWER = new Set(['der', 'die', 'das', 'des', 'dem', 'den', 'und', 'oder', 'im', 'in', 'am', 'an', 'auf', 'aus', 'bei', 'mit', 'von', 'vom', 'zu', 'zum', 'zur', 'für']);
+
 /**
- * A label in capitals (ours, or the ROM's) in sentence case ("BATTLE STYLE" → "Battle style"); any other label is shown
- * as written. ROM and HGSS stay in capitals.
+ * A label in capitals (ours, or the ROM's) in the game's casing; any other label is shown as written. English is
+ * sentence case ("BATTLE STYLE" → "Battle style"); German capitalises each word and each part after a hyphen, as
+ * its nouns are ("TEXT-TEMPO" → "Text-Tempo"), except the small words. ROM and HGSS stay in capitals.
  */
 export const labelCase = (s: string): string => {
   if (s !== s.toUpperCase()) return s;
   const lower = s.toLowerCase();
-  const cased = lower.charAt(0).toUpperCase() + lower.slice(1);
+  const cased =
+    language() === 'de'
+      ? lower.replace(/(^|[\s-])([^\s-]+)/g, (_, sep: string, word: string) => sep + (sep !== '' && GERMAN_LOWER.has(word) ? word : word.charAt(0).toUpperCase() + word.slice(1)))
+      : lower.charAt(0).toUpperCase() + lower.slice(1);
   return cased.replace(/\b(rom|hgss)\b/gi, (word) => word.toUpperCase());
 };
 

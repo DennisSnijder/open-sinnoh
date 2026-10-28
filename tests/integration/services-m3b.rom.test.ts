@@ -9,8 +9,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { createBattle } from '@opensinnoh/battle';
-import type { Id, PackData } from '@opensinnoh/core';
-import type { HatchView, SummaryView } from '@opensinnoh/contracts';
+import { ENGLISH, type Id, type PackData } from '@opensinnoh/core';
+import { dexOf, type HatchView, type SummaryView } from '@opensinnoh/contracts';
 import { CountingStubLog, createGame, gameDriver, runReplay, type Game, type ReplayResolver } from '@opensinnoh/game';
 import { createApp, MenuText } from '@opensinnoh/menus';
 import { createScriptRunner } from '@opensinnoh/vm';
@@ -50,7 +50,7 @@ const BEATS: Record<string, (game: Game) => void> = {
     const watch = new MenuText(game.registries).message('pl_msg_00000455_00106').split('\n');
     expect(v.memo.join('\n')).toContain(game.registries.zones.get('platinum:MAP_HEADER_SOLACEON_TOWN' as Id)!.name);
     expect(v.memo.slice(-watch.length)).toEqual(watch);
-    expect(v.memo.join(' ')).toMatch(/Egg received from.*Solaceon Town.*The Egg Watch.*It appears to move/s);
+    if (dexOf(game.registries).language === ENGLISH) expect(v.memo.join(' ')).toMatch(/Egg received from.*Solaceon Town.*The Egg Watch.*It appears to move/s);
   },
   'hatch-shake': (game) => expect((game.app() as HatchView).egg).toMatchObject({ frame: 2 }),
   'hatch-mon': (game) => expect(game.app()).toMatchObject({ egg: null, bars: null, showMon: true, message: { text: romText(game, 'platinum:EggHatch_Text_MonHatched').replace('{var 0}', 'PICHU') } }),

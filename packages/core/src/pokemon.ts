@@ -127,6 +127,8 @@ export interface MonRegistries {
 
 /** Decomp LANGUAGE_ENGLISH: a pack's language when its new game names none. */
 export const ENGLISH = 2;
+/** Decomp LANGUAGE_GERMAN. */
+export const GERMAN = 5;
 
 /** The game language's entry of a per-language table; throws for a language the table lacks. */
 export function forLanguage<T>(language: number, table: Readonly<Record<number, T>>): T {
@@ -163,7 +165,7 @@ export interface Pokemon {
   otId: number;
   otName: string;
   otGender: 'male' | 'female';
-  /** Gen 4 language id; absent in older saves means English (2), the supported US game. */
+  /** Gen 4 language id; absent in older saves means English (2): those saves predate the German game. */
   language?: number;
   level: number;
   exp: number;

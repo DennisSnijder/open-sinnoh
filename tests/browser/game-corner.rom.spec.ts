@@ -22,7 +22,7 @@ test.describe.configure({ mode: 'serial' });
 test.skip(!ROM, 'OPENSINNOH_NDS_ROM is not set');
 
 let registries: Registries;
-/** Whether this build's scripts open the slot machine (ScrCmd_267; a build's scripts may never open it). */
+/** Whether this build's scripts open the slot machine (ScrCmd_267; the European builds have no slots, docs/research/german-rom.md). */
 let slotMachines: boolean;
 let context: BrowserContext;
 let page: Page;

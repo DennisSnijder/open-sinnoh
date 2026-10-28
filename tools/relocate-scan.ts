@@ -1,6 +1,6 @@
 /**
  * Finds the US build's pinned binary regions (a table at an arm9/overlay offset, checked by SHA-1) in another
- * build of the same game, such as a localized Platinum. Used by tools/relocate.ts; pure functions, no ROM I/O.
+ * build of the same game, such as the German Platinum (CPUD). Used by tools/relocate.ts; pure functions, no ROM I/O.
  *
  * Three ways to find a pin, tried in order:
  * - `same`: the target has the same bytes at the same offset.

@@ -1,7 +1,7 @@
 from sys-hall-single.replay
 # sys-frontier-records (scripts_battle_frontier_records.s, frontier/records/main.c): after the Hall singles challenge
 # (Garchomp's record 1, moved to Lucario: the letter groups go by the names in the game's language, and LUCARIO is under
-# JKL in every Western build), the Hall's record machine: "Which record?", SINGLE, no streak on, so "Which
+# JKL in English and German alike), the Hall's record machine: "Which record?", SINGLE, no streak on, so "Which
 # Pokémon's record?", the letter groups (JKL), the record list (ShowBattleHallRecordMonSelectionMenu: the species with a
 # singles record, then EXIT), Lucario: the records app (FACILITY_HALL) with its record, B back to the list, which keeps
 # its place; EXIT, the letters' EXIT, CANCEL.
