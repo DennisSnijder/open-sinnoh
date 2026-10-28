@@ -3,7 +3,9 @@ export type RomLanguage = 'en' | 'de';
 
 /**
  * Supported ROMs, keyed by whole-file SHA-1: US rev 0 from pret/pokeplatinum platinum.us/rom_rev0.sha1; German rev 0
- * measured on a dump (docs/research/german-rom.md). Each id has a table layout in the importer (importer/src/layout.ts).
+ * and the European English build (game code CPUE like the US one, header revision 10) measured on dumps
+ * (docs/research/german-rom.md, docs/research/european-rom.md). Each id has a table layout in the importer
+ * (importer/src/layout.ts).
  */
 export interface SupportedRom {
   id: string;
@@ -15,6 +17,7 @@ export interface SupportedRom {
 
 export const SUPPORTED_ROMS: Readonly<Record<string, SupportedRom>> = {
   ce81046eda7d232513069519cb2085349896dec7: { id: 'platinum-us-rev0', name: 'Platinum (US, rev 0)', gameCode: 'CPUE', revision: 0, language: 'en' },
+  '6b1bd310a0f7293b0d6b260cc6684183146270cc': { id: 'platinum-eu-rev10', name: 'Platinum (Europe, rev 10)', gameCode: 'CPUE', revision: 10, language: 'en' },
   '5d009a175c77d4387cde26d34efb71aee825a938': { id: 'platinum-de-rev0', name: 'Platin-Edition (German, rev 0)', gameCode: 'CPUD', revision: 0, language: 'de' },
 };
 
