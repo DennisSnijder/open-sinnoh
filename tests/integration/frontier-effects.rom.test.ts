@@ -14,8 +14,10 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('Frontier Brain cut-ins (OPENSI
     const effects = (pack.registries.newGame as unknown as NewGame[])[0]!.frontier!.effects!;
     const sheets = new Map((pack.registries.ui2d as unknown as Ui2dSheet[]).map((s) => [s.id, s]));
     const texts = new Map((pack.registries.texts as unknown as { id: Id; text: string }[]).map((t) => [t.id, t.text]));
-    const names = Object.fromEntries(Object.entries(effects.brains).map(([f, b]) => [f, texts.get(b.name)]));
-    expect(names).toEqual({ tower: 'Palmer', factory: 'Thorton', castle: 'Darach', hall: 'Argenta', arcade: 'Dahlia' });
+    // The Brains' rows of the trainer-name bank (TEXT_BANK_NPC_TRAINER_NAMES, 618).
+    const names = Object.fromEntries(Object.entries(effects.brains).map(([f, b]) => [f, b.name]));
+    expect(names).toEqual({ tower: 'platinum:text/618/826', factory: 'platinum:text/618/903', castle: 'platinum:text/618/905', hall: 'platinum:text/618/902', arcade: 'platinum:text/618/904' });
+    for (const b of Object.values(effects.brains)) expect(texts.get(b.name)).toMatch(/\S/);
     for (const b of Object.values(effects.brains)) {
       expect(b.banner).toHaveLength(8);
       expect(new Set(b.banner).size).toBe(8);
@@ -37,7 +39,8 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('Frontier Brain cut-ins (OPENSI
     const last = cut.at(-1)!;
     expect(last.mugshot).toMatchObject({ x: 208, y: 80, dark: false });
     expect(last.vs).toHaveLength(4);
-    expect(last.name?.text).toBe('Palmer');
+    const tower = newGameRecord(game.registries).frontier!.effects!.brains.tower;
+    expect(last.name?.text).toBe((game.registries as Registries).texts.get(tower.name)!.text);
     expect(last.roomDark).toBe(true);
     expect(cut.some((c) => c.mugshot?.dark)).toBe(true);
     // Sound_SetSceneAndPlayBGM: the Frontier Brain music from the cut-in on.

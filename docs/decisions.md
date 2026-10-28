@@ -169,6 +169,9 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   When needed they will be generator-based labels stepped by the VM.
 - **The frontier VM runs inside the field VM,** as the DS's frontier app runs over the waiting field
   script. It shares the field's message box and menus; its battles run on copies (nothing written back).
+- **A/B waits without an arrow are in the view.** `wait_ab_press` and `wait_ab_pad_press` draw no "more" arrow on the DS,
+  so `ScriptView.waitsForAB` (not `message.waitingForInput`, which draws one) says the script waits; `until message`
+  and `advance text` treat it as a waiting message, as `FrontierView.waitsForAB` in the frontier.
 - **The field map starts again after an app** as FieldMap_Init does on the DS: the zone's on-load script, its dynamic
   features, then its on-resume script, run to completion. It happens at `return_to_field` (ScrCmd_ReturnToField: every
   script that opens an app), when the start menu's Pokédex, party, bag, trainer card or options close back to it
@@ -683,6 +686,12 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   `advance text`, asserts by content. Step arguments may read state the player can see (a clue's door).
   Setup lines apply through snapshot → edit → load. A replay's grammar is the only input it has; the dev
   recorder writes only what the grammar spells and stops otherwise.
+- **Replays and ROM tests hold in every language.** The script bytecode is the same in every language's game, but
+  the text is not: each language splits it into its own pages, prints it in other ticks and sorts its word lists its
+  own way. So a conversation is one `advance message` (or `advance text`), not a counted chain of A presses; a wait
+  that a timed press covered becomes a wait on the game; words are named by text or record id (`assert text`,
+  `assert state <path> <id>`, `tap word:<id>`), and a ROM test compares with `texts.get(id)`. Browser specs do
+  the same: the game's words come from its records.
 - **Story checkpoints** chain from a new game to the post-game, each run twice on seeds 1–3 with save
   round trips and late starts. Chunk replays start from cached anchors keyed by every replay text, the
   import and the engine's sources; an anchor proof replays the chain from a new game. Chain replays carry

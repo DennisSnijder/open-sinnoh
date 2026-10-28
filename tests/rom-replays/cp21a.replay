@@ -26,6 +26,7 @@ until idle
 until idle
 +1 press a
 +1 release a
+advance text 3000
 until yesno 3000
 +0 press a
 +1 release a

@@ -61,6 +61,7 @@ until idle 20000
 +0 assert facing player down
 +0 press a
 +1 release a
+advance text
 until yesno
 +0 press a
 +1 release a
@@ -176,6 +177,7 @@ until idle 3000
 +0 assert facing player left
 +0 press a
 +1 release a
+advance text
 until yesno
 +0 press a
 +1 release a
@@ -1221,6 +1223,7 @@ until idle 3000
 until idle 3000
 +1 press a
 +1 release a
+advance text 3000
 until yesno 3000
 +0 press a
 +1 release a

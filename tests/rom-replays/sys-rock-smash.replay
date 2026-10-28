@@ -11,6 +11,7 @@ until idle
 +0 screenshot smash-before
 +0 press a
 +1 release a
+advance text
 until yesno
 +0 press a
 +1 release a

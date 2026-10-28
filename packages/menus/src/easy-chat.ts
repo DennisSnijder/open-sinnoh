@@ -129,6 +129,13 @@ export function easyChatScreen(registries: Registries, state: GameState, count: 
         if (g !== null && mode === 'groups' && g >= 0 && g <= groups.length) return openGroup(g);
         const w = tapIndex(i.tap, 'word');
         if (w !== null && mode === 'words') return pick(w);
+        // `word:<text id>`: the listed word with that text, wherever the game language sorts it (replays).
+        const named = /^word:([a-z0-9-]+:\S+)$/.exec(i.tap)?.[1];
+        if (named && mode === 'words') {
+          const at = groupList(group).findIndex((x) => x.text === t.text(named as Id));
+          if (at < 0) throw new Error(`easy chat: ${named} is not a word of the open group`);
+          return pick(at);
+        }
         if (mode === 'words' && (i.tap === 'up' || i.tap === 'down')) {
           const rows = Math.ceil(groupList(group).length / COLUMNS);
           top = Math.max(0, Math.min(rows - EASY_CHAT_ROWS, top + (i.tap === 'up' ? -EASY_CHAT_ROWS : EASY_CHAT_ROWS)));

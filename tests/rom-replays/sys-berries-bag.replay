@@ -12,6 +12,7 @@ until idle
 # The Razz Berries first, so the soil is empty.
 +0 press a
 +1 release a
+advance text
 until yesno
 +0 press a
 +1 release a
@@ -54,6 +55,7 @@ until idle
 until idle
 +0 press a
 +1 release a
+advance text
 until yesno
 +0 press a
 +1 release a
