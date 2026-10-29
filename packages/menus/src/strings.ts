@@ -64,6 +64,7 @@ export const MENU_TEXT = {
   battlePartyFainted: 'BattleParty_Text_CantSwitchWithFaintedPokemon',
   battlePartySelected: 'BattleParty_Text_CantSwitchWithAlreadySelectedPokemon',
   battlePartyEgg: 'BattleParty_Text_CantSwitchWithEgg',
+  battlePartyTrapped: 'BattleParty_Text_CantSwitchPokemon',
   battlePartyNoEffect: 'BattleParty_Text_ItemWontHaveAnyEffect',
 
   partyChoose: 'PartyMenu_Text_ChooseAPokemon',

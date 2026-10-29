@@ -154,11 +154,13 @@ export function battlePartyScreen(ctx: MenuContext, req: PartyRequest, medicine?
       return { close: { app: 'bag-select', item: medicine.id, target: slot } };
     }
     // In a double the player commands alone, the other battler's Pokémon is in battle too and the first command's
-    // pick is taken (decomp CheckCanSwitchPokemon: partnerPokemonPartySlot, doubleBattleFirstSelectedPartySlot).
+    // pick is taken (decomp CheckCanSwitchPokemon: partnerPokemonPartySlot, doubleBattleFirstSelectedPartySlot); a
+    // trapped Pokémon can't be switched out at all (its last check).
     if (mon.isEgg) message = ctx.text.t('battlePartyEgg');
     else if (slot === req.active || slot === req.inBattle) message = ctx.text.t('battlePartyInBattle', name);
     else if (mon.hp === 0) message = ctx.text.t('battlePartyFainted', name);
     else if (slot === req.selected) message = ctx.text.t('battlePartySelected', name);
+    else if (req.trapped) message = ctx.text.t('battlePartyTrapped', monName(ctx, req.party[req.active]!));
     else return { close: { app: 'party-select', slot } };
     return;
   };

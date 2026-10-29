@@ -177,6 +177,17 @@ describe('battle party (party-select)', () => {
     expect(tap(forced, 'slot:3')).toEqual({ app: 'party-select', slot: 3 });
   });
 
+  it('a trapped Pokémon can\'t be switched out: any healthy pick is refused naming it, the others keep their own message', () => {
+    const app = createApp({ app: 'party-select', mode: 'battle', party: party(), active: 0, forced: false, trapped: true }, { registries, state, log: { stub: () => {} }, host });
+    expect(tap(app, 'slot:1')).toBeNull();
+    expect((app.view() as PartyView).message?.text).toBe('Mosslet is stuck\nwhere it is!');
+    press(app, 'a');
+    expect(tap(app, 'slot:2')).toBeNull();
+    expect((app.view() as PartyView).message?.text).toBe('Dripling is too\nworn out to go!');
+    press(app, 'a');
+    expect(tap(app, 'cancel')).toEqual({ app: 'party-select', slot: null });
+  });
+
   it('after a faint it cannot be cancelled', () => {
     const app = open(true);
     expect((app.view() as PartyView).cancel).toBe('');

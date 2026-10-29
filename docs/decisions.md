@@ -418,6 +418,18 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   commands go to MOVE_END, past UpdateMoveBuffers), no status check runs and the last move stays the one used before
   (Spite, Encore, Disable, Copycat, the AI's previous move); Truant's turn parity still flips.
 - **Items the sim lacks** are known inert (their effect acts outside the battle), not stubs.
+- **A turn outside the sim is no move:** a bag item, a trainer's item or a failed run gives the battler the hidden pass
+  move, whose before-turn callback takes it out of the sim's queue, so no move-time effect sees it (Taunt, a Choice
+  lock, sleep, paralysis, confusion, Encore) and it never becomes a last move (Mimic, Sketch, Copycat).
+- **No usable move is not a lock:** when no move can be used (no PP, or every move refused, a foe's unrevealed Imprison
+  included: read from the sim's own move list, not the request), the battler still chooses its command, as the DS's
+  STRUGGLING_ALL does: the bag, the party, run; FIGHT struggles. Only a move the battler is locked into (Outrage,
+  Uproar, Bide, a recharge, a charged turn) skips the command.
+- **The move list is the battler's moves, not the party Pokémon's:** after Transform the target's (5 PP, the maximum
+  from the user's own PP Ups by slot), and Mimic's copy in its slot, from the sim's move slots. Their targets are as
+  they act now: a non-Ghost's Curse aims at its user (decomp RANGE_USER), whatever the slot says.
+- **A trapped Pokémon can't be switched out from the command card** (decomp Battler_IsTrapped, read from the sim's trap
+  state); the party sheet refuses the pick with the ROM's message. A replacement after a faint is never trapped.
 
 ## Menus and UI
 
@@ -717,6 +729,11 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   Vitest runs with `isolate: false`, so test files must not rely on fresh module state.
 - **Long ROM work is spread over files;** vitest runs files in parallel and tests in a file in order.
 - **`pnpm flaky`** repeats a test in fresh processes, without retries, to measure a pass rate.
+- **The battle soak** (`tests/battle-soak.ts`) plays whole battles through the real controller and trainer AI: the
+  Frontier facilities' own party generation on many seeds and late-game trainers, against a seeded player policy that
+  answers every prompt the card can (the trainer AI's pick for the player's battler, refused moves, switches, sheets,
+  items, run). Two ROM test files play a few fixed seeds; `tools/battle-soak.ts` runs thousands over worker processes
+  and groups the findings (errors and hangs) by message with their seeds.
 - **Specs hold under a full-suite load** (ten workers on software GL, where a frame can take seconds): waits count drawn
   frames or wait for the state or event itself, never wall time; speed checks measure the ticks the loop asks for (run
   and dropped), and perf checks compare with the same machine's 1x; heap checks count live objects in a snapshot, not

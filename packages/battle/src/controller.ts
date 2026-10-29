@@ -808,6 +808,9 @@ class BattleController implements Battle {
     }
     if (choice.kind === 'switch') {
       this.checkSwitch(choice.slot);
+      // The command card's switch (the card's party, or a switch answered at the command prompt): a trapped Pokémon
+      // stays (decomp COMMAND_SELECTION_PARTY_SELECT_INIT passes Battler_IsTrapped to the party menu as canSwitch).
+      if ((p.kind === 'command' || this.commandSheet) && this.trapped()) throw new Error(`battle: ${this.acting.view.name} can't be switched out`);
       this.answer = choice;
       return;
     }
@@ -850,8 +853,8 @@ class BattleController implements Battle {
    * only battlers standing in the field count. The target type is the move slot's, which the sim validates the
    * choice against (a move copied by Mimic has none: the sim picks).
    */
-  private targets(user: Side, slot: { target?: string } | undefined): number[] | null {
-    const target = slot?.target;
+  private targets(user: Side, slot: { id?: string; target?: string } | undefined): number[] | null {
+    const target = this.liveTarget(user, slot);
     if (!this.doubles || !target || !CHOSEN_TARGETS.has(target)) return null;
     const here = (b: number) => b === user.id || (b < this.battlers.length && this.activeSim(this.teams[b]!).hp > 0);
     const ok = (b: number) => {
@@ -870,8 +873,8 @@ class BattleController implements Battle {
    * a self, random or special-target move the user alone (decomp RANGE_USER, _RANDOM_OPPONENT, _SINGLE_TARGET_SPECIAL:
    * the user-shaped confirmation), as a group. Null outside doubles or without a target type (a Mimic copy).
    */
-  private aim(user: Side, slot: { target?: string } | undefined): NonNullable<BattleMoveView['aim']> | null {
-    const target = slot?.target;
+  private aim(user: Side, slot: { id?: string; target?: string } | undefined): NonNullable<BattleMoveView['aim']> | null {
+    const target = this.liveTarget(user, slot);
     if (!this.doubles || !target) return null;
     const chosen = this.targets(user, slot);
     if (chosen) return { targets: chosen, group: false };
@@ -890,6 +893,15 @@ class BattleController implements Battle {
     return { targets: TARGET_CURSOR_ORDER.filter((b) => here(b) && ok(b)), group: true };
   }
 
+  /**
+   * A move slot's target as it acts now: Curse aims at its user unless the user is a Ghost type (decomp
+   * BattleControllerPlayer_MustSelectTarget: RANGE_USER; the sim's getMoves does the same), whatever the slot says.
+   */
+  private liveTarget(user: Side, slot: { id?: string; target?: string } | undefined): string | undefined {
+    if (slot?.id === 'curse' && !this.activeSim(this.teams[user.id]!).hasType('Ghost')) return 'self';
+    return slot?.target;
+  }
+
   /** The sim's target location of battler `target` for battler `user`: + the other half's position, - its own half's (multi: p3 and p4 are position 2). */
   private simTarget(user: number, target: number): number {
     const position = (target >> 1) + 1;
@@ -901,7 +913,7 @@ class BattleController implements Battle {
     const sim = this.activeSim(this.teams[user.id]!);
     // Curse's executable target changes with live typing; the static move slot still says normal.
     const slot = sim.getMoves()[simSlot - 1];
-    const selectable = slot && !this.locked(user.id) && !this.struggling(sim) ? this.targets(user, slot) : null;
+    const selectable = slot && !this.locked(user.id) && !this.struggling(user.id) ? this.targets(user, slot) : null;
     if (!selectable) return `move ${simSlot}`;
     const aim = target !== undefined && selectable.includes(target) ? target : (selectable[0] ?? user.id ^ 2);
     if (target !== undefined && aim !== target) this.deps.log.stub('battle:ai-target', 'the trainer AI aimed at a battler its move cannot reach; the DS target screen default goes instead');
@@ -968,6 +980,7 @@ class BattleController implements Battle {
         party,
         active,
         forced: p.forced,
+        ...(this.commandSheet && this.trapped() ? { trapped: true as const } : {}),
         ...(other !== undefined && this.teams[other]!.active >= 0 ? { inBattle: this.teams[other]!.active } : {}),
         ...(selected !== undefined ? { selected } : {}),
       };
@@ -1327,6 +1340,18 @@ class BattleController implements Battle {
   /** The command card may go back to the first battler's (CANCEL; see `doublesTurn`). */
   private canRewind = false;
 
+  /** The party sheet open is the command card's (POKéMON), where a trapped Pokémon can't be switched out. */
+  private commandSheet = false;
+
+  /**
+   * Decomp Battler_IsTrapped for the acting battler: Mean Look, Block, Spider Web, a binding move, Ingrain, a foe's
+   * Shadow Tag, Arena Trap or Magnet Pull (Shed Shell frees it). The sim's own trap state, which it keeps by the same
+   * rules (true, or 'hidden' while the foe's trapping ability is not revealed: the DS checks the ability itself).
+   */
+  private trapped(): boolean {
+    return !!this.activeSim(this.teams[this.actor]!).trapped;
+  }
+
   /** A move the move list refused (`choose`): its slot and message, until `command` shows it. */
   private refused: { slot: number; message: string } | null = null;
 
@@ -1336,6 +1361,8 @@ class BattleController implements Battle {
    * The reason is the sim's (the move slot's `disabledSource`).
    */
   private refusal(slot: number, moves: BattleMoveView[]): string | null {
+    // No move can be used: any pick struggles (decomp: FIGHT goes to "has no moves left!" without the list).
+    if (this.struggling(this.actor)) return null;
     const name = this.acting.view.name;
     const move = moves[slot]!.name;
     if (this.moveDisabled(slot)) {
@@ -1406,7 +1433,9 @@ class BattleController implements Battle {
         continue;
       }
       if (choice.kind !== 'bag' && choice.kind !== 'party') return choice;
+      this.commandSheet = choice.kind === 'party';
       const picked = yield* this.sheet(choice.kind === 'bag' ? { kind: 'bag' } : { kind: 'party', forced: false });
+      this.commandSheet = false;
       if (picked) return picked;
     }
   }
@@ -1746,7 +1775,7 @@ class BattleController implements Battle {
       if (!a) continue;
       const sim = this.activeSim(this.teams[b]!);
       let choice: string;
-      if (a.kind === 'move') choice = this.struggling(sim) || this.locked(b) ? 'move 1' : this.moveChoice(this.battlers[b]!, a.slot + 1, a.target);
+      if (a.kind === 'move') choice = this.struggling(b) ? this.struggleChoice(b) : this.locked(b) ? 'move 1' : this.moveChoice(this.battlers[b]!, a.slot + 1, a.target);
       else if (a.kind === 'switch') choice = `switch ${this.simIndex(b, a.slot)}`;
       else {
         this.addPass(sim, a.kind === 'escape');
@@ -1772,26 +1801,50 @@ class BattleController implements Battle {
     return at + 1;
   }
 
-  /** No move has PP: the sim offers Struggle alone, as its move 1. */
-  private struggling(sim: SimMon): boolean {
-    return sim.moveSlots.every((m) => m.id === PASS_MOVE || m.pp === 0);
+  /** The moves the sim's request offers battler `b` this turn (its active request; absent while none waits). */
+  private offered(b: number): { id: string }[] | undefined {
+    const request = this.sim[this.simSideOf(b)]!.activeRequest as { active?: ({ moves: { id: string }[] } | null)[] } | null;
+    return request?.active?.[this.simPos(b)]?.moves;
+  }
+
+  /**
+   * No move can be used (decomp BattleSystem_CheckInvalidMoves STRUGGLING_ALL: none with PP, or every one with PP
+   * refused by Disable, Encore, Taunt, Torment, Imprison, Gravity, Heal Block or a Choice item): any move choice
+   * struggles. The battler still gets its command (the bag, the party, run); FIGHT struggles. From the sim's own move
+   * list, not the request's: the request hides a foe's Imprison until its move is revealed (the DS knows it).
+   */
+  private struggling(b: number): boolean {
+    return this.activeSim(this.teams[b]!).getMoves().length === 0;
+  }
+
+  /**
+   * A battler that must struggle answers the request's move 1, which the sim turns into Struggle. The request may still
+   * offer its moves (a hidden Imprison): in doubles the sim then checks that move's target first, so it gets one.
+   */
+  private struggleChoice(b: number): string {
+    const first = this.offered(b)?.[0] as { id: string; target?: string } | undefined;
+    if (!first) throw new Error(`battle: battler ${b} has no move request`);
+    const targets = first.id === 'struggle' ? null : this.targets(this.battlers[b]!, first);
+    return targets ? `move 1 ${this.simTarget(b, targets[0] ?? b ^ 2)}` : 'move 1';
   }
 
   /** The sim refuses the acting battler's move in `slot` this turn (Disable, Encore, Taunt, Torment, Imprison, a Choice item). */
   private moveDisabled(slot: number): boolean {
     const sim = this.activeSim(this.teams[this.actor]!);
-    if (this.locked(this.actor) || this.struggling(sim)) return false;
+    if (this.locked(this.actor) || this.struggling(this.actor)) return false;
     // The move slot's own flag: the request hides some (Imprison by a foe whose move is not revealed: 'hidden').
     return !!sim.moveSlots[slot]?.disabled;
   }
 
-  /** The battler's Pokémon must use one move (the sim's request offers only it, as move 1), while it knows more. */
+  /**
+   * The battler's Pokémon must use one move (the sim's request offers only it, as move 1, while it knows more): a
+   * move it is locked into (Outrage, Uproar, Bide, a recharge, a charged second turn). Struggle is not one: a battler
+   * with no usable move still chooses its command.
+   */
   private locked(b: number): boolean {
-    const request = this.sim[this.simSideOf(b)]!.activeRequest as { active?: ({ moves: { id: string }[] } | null)[] } | null;
-    const offered = request?.active?.[this.simPos(b)]?.moves;
-    const team = this.teams[b]!;
-    const known = this.activeSim(team).moveSlots.filter((m) => m.id !== PASS_MOVE);
-    return !!offered && offered.length === 1 && known.length > 1 && !this.struggling(this.activeSim(team));
+    const offered = this.offered(b);
+    const known = this.activeSim(this.teams[b]!).moveSlots.filter((m) => m.id !== PASS_MOVE);
+    return !!offered && offered.length === 1 && offered[0]!.id !== 'struggle' && known.length > 1;
   }
 
   /** The sim side of battler `b`: one per battler, or in doubles p1 for 0 and 2, p2 for 1 and 3. */
@@ -2178,6 +2231,13 @@ class BattleController implements Battle {
         bs.forEach((b, i) => (this.memory.switchedSlot[b] = saved[i]!));
       }
       this.sim.choose(side, picks.join(', '));
+      // The sim went on (every side it asked has answered: a mid-turn switch for U-turn or Baton Pass, then the rest of
+      // the turn): its new lines first, then any new request (a faint replacement after that turn, where a Pokémon
+      // dragged in by Roar is already out). The other side's request state read before is stale.
+      if (this.sim.log.length > this.logPos) {
+        yield* this.play();
+        return;
+      }
     }
     if (this.sim.log.length > this.logPos) yield* this.play();
   }
@@ -3871,16 +3931,25 @@ class BattleController implements Battle {
     return { kind: 'command', cursor: 0, enabled: [true, all && !this.frontier, all, all], moves: this.safari ? [] : this.moveViews(this.acting.mon, this.acting), actor: this.actor, ...(this.canRewind ? { canRewind: true } : {}) };
   }
 
-  /** The lead's moves with their PP as the sim has them now; in doubles, for the acting battler, each move's `aim`. */
+  /**
+   * The lead's moves with their PP as the sim has them now; in doubles, for the acting battler, each move's `aim`. In
+   * battle they are the battler's own (decomp battleMons[].moves): after Transform the target's, at 5 PP each, and a
+   * move Mimic copied in Mimic's slot, until it leaves the field.
+   */
   private moveViews(mon: Pokemon, user?: Side): BattleMoveView[] {
     const index = this.own.party.indexOf(mon);
     const sim = index >= 0 ? this.own.sims[index] : null;
-    return mon.moves.map((id, i) => {
-      const m = this.move(id);
-      const view = this.moveView(m, sim?.baseMoveSlots[i]?.pp ?? mon.pp[i]!, maxPp(m.pp, mon.ppUps[i] ?? 0));
-      const aim = user && this.aim(user, sim?.moveSlots[i]);
-      return aim ? { ...view, aim } : view;
-    });
+    if (!sim) return mon.moves.map((id, i) => this.moveView(this.move(id), mon.pp[i]!, maxPp(this.move(id).pp, mon.ppUps[i] ?? 0)));
+    return sim.moveSlots
+      .filter((slot) => slot.id !== PASS_MOVE && slot.id !== ESCAPE_MOVE)
+      .map((slot, i) => {
+        // A base slot is the party move's (its PP Ups count); a copied one (Transform, Mimic) is the sim's own.
+        const base = slot === sim.baseMoveSlots[i];
+        const m = base ? this.move(mon.moves[i]!) : this.data.packMove(slot.id);
+        const view = this.moveView(m, slot.pp, base ? maxPp(m.pp, mon.ppUps[i] ?? 0) : slot.maxpp);
+        const aim = user && this.aim(user, slot);
+        return aim ? { ...view, aim } : view;
+      });
   }
 
   private parseHp(s: string): number {
@@ -3924,6 +3993,8 @@ class BattleController implements Battle {
       return { move: m.name, id: m.id, pp: mon.pp[i]!, maxpp: maxPp(this.move(id).pp, mon.ppUps[i] ?? 0), target: m.target, disabled: false, disabledSource: '', used: false } as never;
     });
     if (start || !sim.transformed) sim.moveSlots = sim.baseMoveSlots.slice();
+    // Transform's copies take their maximum PP from these, by slot (decomp: BattleMon.ppUps is not copied).
+    sim.ppUps = mon.moves.map((_, i) => mon.ppUps[i] ?? 0);
   }
 
   /** The player's side as the bag code reads it. */
