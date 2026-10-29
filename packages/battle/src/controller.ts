@@ -609,7 +609,6 @@ class BattleController implements Battle {
     // fainted is not, or the side never runs out and a lost battle asks the fainted Pokémon for a command.
     for (const side of this.sim.sides) side.pokemonLeft = (side.pokemon as SimMon[]).filter((m) => !m.fainted).length;
     if (this.format === 'multi') this.storyResult();
-    this.passTurns();
     if (this.battleType === BATTLE_TYPE_ROAMER) this.roamerEscape();
     // The sim ran the battle's start inside setPlayer: both send-outs, then the switch-in effects (Intimidate,
     // Pressure, weather abilities, a berry eaten at once). The intro draws the send-outs; the effects play
@@ -1893,28 +1892,6 @@ class BattleController implements Battle {
     sim.moveSlots = sim.moveSlots.filter((m) => m.id !== PASS_MOVE && m.id !== ESCAPE_MOVE);
   }
 
-  /**
-   * The pass move is a turn spent outside the sim (an item, a ball, a failed run): the DS runs no move for it
-   * (decomp BattleControllerPlayer_ItemCommand and FleeCommand go to MOVE_END), so no status check runs (sleep,
-   * paralysis, confusion, flinch), nothing overrides it (Encore) and BattleControllerPlayer_UpdateMoveBuffers does
-   * not run: movePrevByBattler, movePrev, the Choice lock and the Sketch move keep the move used before. The sim
-   * skips the action, so its lastMove fields stay too (Spite, Encore, Disable, Mimic, Sketch, Mirror Move, Copycat,
-   * the AI's previous move), and the slot goes at once (Transform later this turn copies no pass slot). Truant
-   * follows the turn number on the DS (Battler_CheckTruant), so a passed turn flips the sim's loafing turn.
-   */
-  private passTurns(): void {
-    type Action = { choice: string; move?: { id: string }; pokemon?: SimMon };
-    const sim = this.sim as unknown as { runAction(a: Action): unknown };
-    const run = sim.runAction.bind(this.sim);
-    sim.runAction = (action) => {
-      const mon = action.pokemon;
-      if (action.choice !== 'move' || action.move?.id !== PASS_MOVE || !mon) return run(action);
-      this.removePass(mon);
-      if (mon.hasAbility('truant') && !mon.removeVolatile('truant')) mon.addVolatile('truant');
-      return undefined;
-    };
-  }
-
   /** A roamer with its saved PID, IVs, HP and status, holding nothing (decomp AddRoamerToEnemyParty). */
   private roamerMon(spec: BattleSetup['wild'][number], ball: Id): Pokemon {
     const r = spec.roamer!;
@@ -2008,6 +1985,7 @@ class BattleController implements Battle {
           yield* this.flush(afterHit);
           afterHit = [];
           this.abilityStat = null;
+          if (b === 'OpenSinnoh Pass') break;
           this.updatePowerMul(a, b);
           const user = this.sideOf(a);
           yield* this.say(this.text.moveUsed(this.data.packMove(b), this.who(user), user.view.name));

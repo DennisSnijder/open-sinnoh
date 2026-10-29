@@ -2,7 +2,8 @@
  * A turn spent outside the sim (an item, a ball, a failed run: the hidden pass move) on the real ROM
  * (OPENSINNOH_NDS_ROM). The DS runs no move for it (decomp BattleControllerPlayer_ItemCommand goes to MOVE_END,
  * past UpdateMoveBuffers), so the moves that read the target's last move see the move used before: Spite, Encore
- * and Disable after an X Attack turn hit Swords Dance, and an item turn runs no status check (sleep).
+ * and Disable after an X Attack turn hit Swords Dance, an item turn runs no status check (sleep), and Truant still
+ * loafs by the turn number.
  */
 import { describe, expect, it } from 'vitest';
 import { createTrainerPokemon, type Id, type PackData } from '@opensinnoh/core';
@@ -20,9 +21,9 @@ describe.skipIf(!ROM)('a pass turn leaves the last move as the DS does (OPENSINN
   let reg: Registries;
   const load = () => (reg ??= loadGamePacks([(romSlice() as { pack: PackData }).pack]).registries);
   /** Lucario (Swords Dance first) against a wild Gengar that knows only `foeMove`; X Attacks in the bag. */
-  const battle = (foeMove: string): Harness => {
+  const battle = (foeMove: string, species = 'LUCARIO'): Harness => {
     load();
-    const lead = createTrainerPokemon(dexOf(reg), { species: P('SPECIES_LUCARIO'), level: 100, ivs: 31, pid: 0x10, otId: 1, moves: ['SWORDS_DANCE', 'RECOVER', 'TACKLE', 'BOUNCE'].map((m) => P(`MOVE_${m}`)) }, 'Lucas', P('ITEM_POKE_BALL'));
+    const lead = createTrainerPokemon(dexOf(reg), { species: P(`SPECIES_${species}`), level: 100, ivs: 31, pid: 0x10, otId: 1, moves: ['SWORDS_DANCE', 'RECOVER', 'TACKLE', 'BOUNCE'].map((m) => P(`MOVE_${m}`)) }, 'Lucas', P('ITEM_POKE_BALL'));
     const b = createBattle(
       { kind: 'wild', trainers: [], wild: [{ species: P('SPECIES_GENGAR'), level: 100 }], background: null, terrain: null, time: 'day' },
       { registries: reg, party: [lead], bag: { battleItems: [{ item: P('ITEM_X_ATTACK'), count: 5 }] }, pc: { current: { box: 0, name: 'BOX 1' }, free: { box: 0, name: 'BOX 1' }, metBebe: false }, met: { zone: null, date: null }, player: { name: 'Lucas', gender: 'male', trainerId: 1, rival: 'Barry' }, money: 0, badges: 8, caught: [], seed: 3, textSpeed: 1, log: new CountingStubLog(() => {}) },
@@ -95,6 +96,16 @@ describe.skipIf(!ROM)('a pass turn leaves the last move as the DS does (OPENSINN
     swordsDance(b);
     xAttack(b);
     expect(me(b).volatiles['disable']?.['move']).toBe('swordsdance');
+  }, 120_000);
+
+  it('Truant loafs by the turn number: the turn after an item turn does as the turn before it (decomp Battler_CheckTruant)', () => {
+    const b = battle('splash', 'SLAKING');
+    expect(me(b).hasAbility('truant')).toBe(true);
+    swordsDance(b);
+    expect(ppUsed(b)).toBe(1);
+    xAttack(b);
+    expect(swordsDance(b).join('|')).not.toMatch(/loafing/);
+    expect(ppUsed(b)).toBe(2);
   }, 120_000);
 
   it('Copycat after an item turn copies the last move used before it (decomp movePrev)', () => {

@@ -413,14 +413,11 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   answer once per card shown.
 - **Layout:** a framed window over the dimmed field on big landscape views, full screen on phones; scene
   and card composed at the largest whole-pixel scale.
-- **A turn spent outside the sim is no move:** an item, a ball or a failed run takes the battler's turn in the sim as a
-  hidden pass move slot, and the controller drops that action before the sim runs it. As on the DS (the item and run
-  commands go to MOVE_END, past UpdateMoveBuffers), no status check runs and the last move stays the one used before
-  (Spite, Encore, Disable, Copycat, the AI's previous move); Truant's turn parity still flips.
 - **Items the sim lacks** are known inert (their effect acts outside the battle), not stubs.
 - **A turn outside the sim is no move:** a bag item, a trainer's item or a failed run gives the battler the hidden pass
   move, whose before-turn callback takes it out of the sim's queue, so no move-time effect sees it (Taunt, a Choice
-  lock, sleep, paralysis, confusion, Encore) and it never becomes a last move (Mimic, Sketch, Copycat).
+  lock, sleep, paralysis, confusion, Encore) and it never becomes a last move (Spite, Encore, Disable, Mimic, Sketch,
+  Copycat; decomp: the item and run commands skip UpdateMoveBuffers). Truant's loafing turn still flips (the DS counts turns).
 - **No usable move is not a lock:** when no move can be used (no PP, or every move refused, a foe's unrevealed Imprison
   included: read from the sim's own move list, not the request), the battler still chooses its command, as the DS's
   STRUGGLING_ALL does: the bag, the party, run; FIGHT struggles. Only a move the battler is locked into (Outrage,
