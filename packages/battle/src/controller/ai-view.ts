@@ -79,9 +79,13 @@ const bare = (id: Id | null, prefix: string) => {
 };
 
 /** The registries indexed by decomp number, once per set of registries. */
+/** The move fields the view's battle_lib.c routines read. */
+type ViewMove = Pick<Move, 'id' | 'type' | 'power' | 'effect' | 'category' | 'target'>;
+
 interface Tables {
   dex: Dex;
-  moves: Map<number, Move>;
+  /** By decomp number, with MOVE_NONE (0) as the DS move table's all-zero entry. */
+  moves: Map<number, ViewMove>;
   items: Map<number, Item>;
   abilityNames: Map<number, string>;
   abilityNumbers: Map<string, number>;
@@ -108,6 +112,10 @@ function tablesOf(reg: Registries): Tables {
     return n;
   };
   const typeNumber = (id: Id) => number('types' as never, id);
+  const ns = [...reg.types.keys()][0]!.split(':')[0];
+  // A battler that has not moved yet has previous move MOVE_NONE, and the DS reads its table entry like any
+  // other: class physical, type Normal, power 0, effect HIT, single target.
+  const none: ViewMove = { id: `${ns}:MOVE_NONE` as Id, type: `${ns}:TYPE_NORMAL` as Id, power: 0, effect: `${ns}:BATTLE_EFFECT_HIT` as Id, category: 'physical', target: 'SINGLE_TARGET' };
   const rows: Tables['chart'] = [];
   for (const t of reg.types.values()) for (const m of t.matchups) rows.push([typeNumber(t.id), typeNumber(m.type), m.multiplier, m.foresight]);
   // Table order: non-Foresight rows first, by attacking type in record order, then the Foresight rows.
@@ -115,7 +123,7 @@ function tablesOf(reg: Registries): Tables {
   const abilityNames = new Map([...reg.abilities.values()].flatMap((a) => (a.sourceIndex === undefined ? [] : [[a.sourceIndex, bare(a.id, 'ABILITY_')] as const])));
   const t: Tables = {
     dex: dexOf(reg),
-    moves: bySource(reg.moves),
+    moves: new Map<number, ViewMove>([[0, none], ...bySource(reg.moves)]),
     items: bySource(reg.items),
     abilityNames,
     abilityNumbers: new Map([...abilityNames].map(([n, name]) => [name, n])),
@@ -123,7 +131,7 @@ function tablesOf(reg: Registries): Tables {
     typeName: new Map([...reg.types.values()].flatMap((x) => (x.sourceIndex === undefined ? [] : [[x.sourceIndex, bare(x.id, 'TYPE_')] as const]))),
     chart,
     number,
-    normal: typeNumber(`${[...reg.types.keys()][0]!.split(':')[0]}:TYPE_NORMAL` as Id),
+    normal: typeNumber(none.type),
     speciesNames: new Map([...reg.species.values()].flatMap((x) => (x.sourceIndex === undefined ? [] : [[x.sourceIndex, bare(x.id, 'SPECIES_')] as const]))),
   };
   tablesCache.set(reg, t);
@@ -141,7 +149,7 @@ export function createAiView(reg: Registries, src: AiSource): AiBattleView {
   const exists = (battler: number) => battler < src.sides.length;
   const all = src.sides.map((_, b) => b);
   const activeSim = (battler: number): SimPokemon | null => (exists(battler) ? (sideOf(battler).sims[sideOf(battler).active] ?? null) : null);
-  const move = (n: number): Move => {
+  const move = (n: number): ViewMove => {
     const m = T.moves.get(n);
     if (!m) throw new Error(`battle AI view: no move ${n}`);
     return m;

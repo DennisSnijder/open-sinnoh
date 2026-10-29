@@ -160,6 +160,26 @@ describe('AI view: histories and absent positions', () => {
     expect(createAiView({ ...registries, moves }, src).battler(0).lastResortCount).toBe(1);
   });
 
+  it('MOVE_NONE (a battler that has not moved yet) is the DS move table\'s all-zero entry: power 0, Normal, physical', () => {
+    const v = view(a, b);
+    // Power 0 leaves 0 before the final +2; Normal on Grass is neutral; no STAB for the Water attacker.
+    expect(v.calcMoveDamage(0, 1, 0, 0, num('types', 'TYPE_NORMAL'))).toBe(2);
+    expect(v.applyTypeChart(0, num('types', 'TYPE_NORMAL'), 1, 0, 2, false)).toEqual({ damage: 2, flags: 0 });
+    expect(v.calcEffectiveness(0, 0, 0, 0, 0, num('types', 'TYPE_GRASS'), num('types', 'TYPE_GRASS'))).toBe(0);
+    // IfBattlerDealsMoreDamage on the defender's previous move before it has moved: 2 beats only a moveset with no damage.
+    const more = (moves: string[]) => {
+      const attacker = mon('SPECIES_MOSSLET', 20, moves);
+      const script = new Asm().flag(0, 'start').label('start')
+        .op('IfBattlerDealsMoreDamage', AI_BATTLER.DEFENDER, 0, 'bonus').op('PopOrEnd')
+        .label('bonus').op('AddToMoveScore', 1).op('PopOrEnd').build();
+      const power = (m: string) => ({ power: registries.moves.get(f(m))!.power });
+      const moveData = Object.fromEntries(['MOVE_LEAF_TAP', 'MOVE_BOP', 'MOVE_STARE'].map((m) => [num('moves', m), power(m)]));
+      return trainerAiOf(fakeDex(script, moveData)).chooseMove(createAiView(registries, source(attacker, b)), { battler: 0, ai: 1 }, scriptedRng([0, 0, 0, 0, 0, 0, 0, 0, 1, 1])).scores[0]!.scores;
+    };
+    expect(more(['MOVE_LEAF_TAP', 'MOVE_BOP'])).toEqual([100, 100, 0, 0]);
+    expect(more(['MOVE_STARE', 'MOVE_STARE'])).toEqual([101, 101, 0, 0]);
+  });
+
   it('Recycle reads the consumed item, rather than the original held item, and changes the score', () => {
     const item = registries.items.get(f('ITEM_TONIC'))!.sourceIndex!;
     const score = (lastItem: string) => decision(source(a, b, [], [{ lastItem }, {}]),
