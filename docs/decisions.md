@@ -413,6 +413,10 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   answer once per card shown.
 - **Layout:** a framed window over the dimmed field on big landscape views, full screen on phones; scene
   and card composed at the largest whole-pixel scale.
+- **A turn spent outside the sim is no move:** an item, a ball or a failed run takes the battler's turn in the sim as a
+  hidden pass move slot, and the controller drops that action before the sim runs it. As on the DS (the item and run
+  commands go to MOVE_END, past UpdateMoveBuffers), no status check runs and the last move stays the one used before
+  (Spite, Encore, Disable, Copycat, the AI's previous move); Truant's turn parity still flips.
 - **Items the sim lacks** are known inert (their effect acts outside the battle), not stubs.
 
 ## Menus and UI
