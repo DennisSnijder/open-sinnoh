@@ -167,9 +167,11 @@ export type AppRequest =
    * 0.27.6, doubles the player commands alone (types 3 and 19): `inBattle`, the other battler's party slot (refused
    * as in battle; decomp partnerPokemonPartySlot), and `selected`, the slot the first command already picked to come
    * in (refused, decomp BattleParty_Text_CantSwitchWithAlreadySelectedPokemon). For a forced replacement `active` is
-   * the fainted battler's slot.
+   * the fainted battler's slot. 0.49.1: `trapped`, the command card's party for a Pokémon that can't leave (Mean Look,
+   * a binding move, Ingrain, Shadow Tag…): every pick is refused with BattleParty_Text_CantSwitchPokemon naming it
+   * (decomp CheckCanSwitchPokemon's last check, after the others).
    */
-  | { app: 'party-select'; mode: 'battle'; party: Pokemon[]; active: number; forced: boolean; inBattle?: number; selected?: number }
+  | { app: 'party-select'; mode: 'battle'; party: Pokemon[]; active: number; forced: boolean; inBattle?: number; selected?: number; trapped?: true }
   /**
    * 0.20.0. A script picks a party Pokémon (decomp FieldSystem_OpenPartyMenu_SelectPokemon,
    * PARTY_MENU_MODE_SELECT_NO_PROMPT: `select_move_tutor_pokemon`, read back by `get_selected_party_slot`):
