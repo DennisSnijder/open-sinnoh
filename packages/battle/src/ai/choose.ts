@@ -171,7 +171,9 @@ export function trainerAiOf(dex: AiDex): TrainerAi {
       const c: Calc = { dex, view, rng };
       let slot = view.memory.switchedSlot[battler]!;
       if (slot === NO_SLOT) slot = postKOSwitchIn(c, battler);
-      return slot === NO_SLOT ? firstAlive(c, battler, false) : slot;
+      // The fallback skips the partner's pick: by the second slot's choice the DS has the first slot's Pokémon in
+      // the field (ReplaceFainted replaces them one after the other); the controller holds that pick in switchedSlot.
+      return slot === NO_SLOT ? firstAlive(c, battler, true) : slot;
     },
   };
 }

@@ -9,7 +9,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { createPokemon, expGain, expShares, readPackFolder, type Id, type Pokemon } from '@opensinnoh/core';
-import { dexOf, type Battle, type BattleChoice, type BattleSetup, type BattleView, type InputFrame } from '@opensinnoh/contracts';
+import { dexOf, type Battle, type BattleChoice, type BattleSetup, type BattleView, type InputFrame, type Trainer } from '@opensinnoh/contracts';
 import { CountingStubLog, loadGamePacks } from '@opensinnoh/game';
 import { createBattle, prizeMoney } from '../index.ts';
 
@@ -231,6 +231,28 @@ describe('one double trainer (type 3, fixture pack)', () => {
     const last = views.filter((v) => v.prompt?.kind === 'command').at(-1)!;
     expect(last.prompt).toMatchObject({ actor: 0 });
   });
+
+  // Both enemy battlers fall to one spread move. The DS replaces the first slot first (ReplaceFainted), so the
+  // second slot's choice already sees the first's Pokémon out: it never picks the same one, and with no other
+  // Pokémon left its slot stays empty. The reserves' only move cannot touch the player's Flying types, so the
+  // post-KO choice scores none and both picks come from the party-order fallback.
+  for (const reserves of [1, 2]) {
+    it(`both enemy battlers down on one turn with ${reserves} reserve(s): each Pokémon comes in once${reserves === 1 ? ', the second slot stays empty' : ''}`, () => {
+      const twins = registries.trainers.get(f('TRAINER_TWINS'))!;
+      const id = f(`TRAINER_TWINS_RESERVES_${reserves}`);
+      const reserve = { ...twins.party[0]!, species: f('SPECIES_MOSSLET'), moves: [f('MOVE_DIG_PAW')] };
+      (registries.trainers as Map<Id, Trainer>).set(id, { ...twins, id, party: [...twins.party, ...Array.from({ length: reserves }, () => reserve)] });
+      const { b } = battle([mon('SPECIES_SKYLET', 40, ['MOVE_ROCK_SLIDE']), mon('SPECIES_SKYLET', 30, ['MOVE_GUST_PECK'])], 3, { trainers: [id], topology: 'double' });
+      const { views } = play(b, (v) => {
+        const p = v.prompt as Extract<BattleView['prompt'], { kind: 'command' }>;
+        return p.actor === 2 ? { kind: 'move', slot: 0, target: [1, 3].find((t) => v.battlers.find((x) => x.battler === t)?.visible)! } : { kind: 'move', slot: 0 };
+      });
+      expect(b.done()!.outcome).toBe('won');
+      const both = views.filter((v) => [1, 3].every((t) => v.battlers.find((x) => x.battler === t)?.name === 'Mosslet' && v.battlers.find((x) => x.battler === t)?.visible));
+      expect(both.length > 0).toBe(reserves === 2);
+      expect([...shown(views, 1), ...shown(views, 3)].filter((n) => n === 'Mosslet')).toHaveLength(reserves);
+    });
+  }
 
   it('is deterministic', () => {
     const run = () => {

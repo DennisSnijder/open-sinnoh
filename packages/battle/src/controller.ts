@@ -2130,23 +2130,27 @@ class BattleController implements Battle {
         this.actor = 0;
         this.reserved.clear();
       } else {
-        // The AI's picks; the first one's is kept off the second's (decomp aiSwitchedPartySlot; a shared party in 3).
+        // The AI's picks. The DS replaces the first slot first and the second after it (ReplaceFainted), so the
+        // second's choice sees the first's Pokémon in the field: here the first's pick is kept off the second's
+        // through aiSwitchedPartySlot, and with nothing else left the second slot stays empty (a shared party in 3).
         const saved = bs.map((b) => this.memory.switchedSlot[b]!);
+        const picked: SimMon[] = [];
         // A fainted battler's switch chosen at the command phase is gone by now: the DS clears it after every action
         // (BattleContext_Init), so a commanded switch that ran, or never ran because its battler fainted first,
         // does not stand in for the post-KO choice.
         for (const b of bs) if (flagged(b)) this.memory.switchedSlot[b] = NO_SLOT;
         for (const b of bs) {
-          if (!flagged(b)) {
+          const team = this.teams[b]!;
+          if (!flagged(b) || !team.sims.some((m) => !!m && m.hp > 0 && !m.isActive && !picked.includes(m))) {
             picks.push('pass');
             continue;
           }
-          const team = this.teams[b]!;
           const slot = this.ai!.chooseSwitchIn(this.aiView(), b, this.aiRng);
           const next = team.sims[slot];
-          if (!next || next.hp <= 0 || next.isActive) throw new Error(`battle: the trainer AI sent out battler ${b}'s party slot ${slot}, which cannot come in`);
+          if (!next || next.hp <= 0 || next.isActive || picked.includes(next)) throw new Error(`battle: the trainer AI sent out battler ${b}'s party slot ${slot}, which cannot come in`);
           if (b === 1 && this.sim.p1.requestState !== 'switch') yield* this.shiftOffer(team.party[slot]!);
           this.memory.switchedSlot[b] = slot;
+          picked.push(next);
           picks.push(`switch ${this.simIndex(b, slot)}`);
         }
         bs.forEach((b, i) => (this.memory.switchedSlot[b] = saved[i]!));
