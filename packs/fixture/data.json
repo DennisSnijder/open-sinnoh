@@ -11234,6 +11234,10 @@
    "text": "An Egg stays put!"
   },
   {
+   "id": "fixture:BattleParty_Text_CantSwitchPokemon",
+   "text": "{var 0} is stuck\nwhere it is!"
+  },
+  {
    "id": "fixture:BattleParty_Text_CantSwitchWithAlreadySelectedPokemon",
    "text": "{var 0} is picked\nalready!"
   },

@@ -5,8 +5,11 @@
  * mod additions) become custom entries; a custom move's behaviour comes from its decomp battle effect where
  * we map it, otherwise it is a plain hit and the effect is logged as a stub.
  *
- * Also the hidden "pass" move: a priority-6 move that does nothing, which the controller gives the player
- * for turns spent outside the sim (a failed run, later bag items), so the foe still acts.
+ * Also the hidden "pass" move, which the controller gives a battler for a turn spent outside the sim (a failed run, a
+ * bag item, a trainer's item), so the others still act. It never runs: its before-turn callback takes it out of the
+ * queue, so no move-time effect sees it (Taunt, a Choice lock, sleep, paralysis or confusion would stop or hurt it,
+ * Encore would replace it, and it would become the battler's last move for Mimic, Sketch and Copycat; on the DS an
+ * item turn is no move).
  */
 import { Battle, Dex, toID } from '@pkmn/sim';
 import { monGender, type Dex as MonDex, type Id, type Pokemon } from '@opensinnoh/core';
@@ -187,7 +190,26 @@ export function simData(reg: Registries, log: StubLog): SimData {
   }
 
   const Moves: Record<string, unknown> = {
-    [PASS_MOVE]: { num: -1000, name: 'OpenSinnoh Pass', type: 'Normal', category: 'Status', basePower: 0, accuracy: true, pp: 1, noPPBoosts: true, priority: 6, target: 'self', flags: {}, onTryMove: () => null },
+    [PASS_MOVE]: {
+      num: -1000,
+      name: 'OpenSinnoh Pass',
+      type: 'Normal',
+      category: 'Status',
+      basePower: 0,
+      accuracy: true,
+      pp: 1,
+      noPPBoosts: true,
+      priority: 6,
+      target: 'self',
+      // Not one Assist may call from an ally's slots while the slot is there.
+      flags: { noassist: 1 },
+      beforeTurnCallback(this: Battle, pokemon: unknown) {
+        if (!this.queue.cancelMove(pokemon as never)) throw new Error('battle: the pass move is not in the queue');
+      },
+      onTryMove: () => {
+        throw new Error('battle: the pass move ran (its before-turn callback cancels it)');
+      },
+    },
     [ESCAPE_MOVE]: { num: -1001, name: 'OpenSinnoh Escape', type: 'Normal', category: 'Status', basePower: 0, accuracy: true, pp: 1, noPPBoosts: true, priority: -8, target: 'self', flags: {}, onTryMove: () => null },
   };
   const moveIds = new Map<Id, string>();

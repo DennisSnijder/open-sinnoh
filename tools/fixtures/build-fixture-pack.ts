@@ -575,6 +575,7 @@ const uiTexts = Object.entries({
   BattleParty_Text_CantSwitchWithPokemonAlreadyInBattle: '{var 0} is out\nalready!',
   BattleParty_Text_CantSwitchWithFaintedPokemon: '{var 0} is too\nworn out to go!',
   BattleParty_Text_CantSwitchWithEgg: 'An Egg stays put!',
+  BattleParty_Text_CantSwitchPokemon: '{var 0} is stuck\nwhere it is!',
   BattleParty_Text_CantSwitchWithAlreadySelectedPokemon: '{var 0} is picked\nalready!',
   BattleParty_Text_ItemWontHaveAnyEffect: 'That would do nothing.',
   BattleBag_Text_PocketNameHPPP: 'TONICS',
