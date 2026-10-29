@@ -238,8 +238,9 @@ export function postKOSwitchIn(c: Calc, battler: number): number {
 
 /**
  * The first Pokémon with HP that is not in the field: the DS's fallback when the post-KO choice finds none.
- * TrainerAI_PickCommand also skips the slots already picked this turn (`skipPicked`); the party menu
- * after a KO does not. Returns the party size when there is none.
+ * TrainerAI_PickCommand skips the slots already picked this turn (`skipPicked`); the party menu after a KO
+ * skips the partner's Pokémon, which the controller holds as its pick while the DS has it in the field.
+ * Returns the party size when there is none.
  */
 export function firstAlive(c: Calc, battler: number, skipPicked: boolean): number {
   const v = c.view;
