@@ -11,7 +11,7 @@
  * Encore would replace it, and it would become the battler's last move for Mimic, Sketch and Copycat; on the DS an
  * item turn is no move).
  */
-import { Battle, Dex, toID } from '@pkmn/sim';
+import { Battle, Dex, toID, type Pokemon as SimPokemon } from '@pkmn/sim';
 import { monGender, type Dex as MonDex, type Id, type Pokemon } from '@opensinnoh/core';
 import { dexOf, type BattleKind, type BattleWeather, type Move, type Registries, type StubLog } from '@opensinnoh/contracts';
 import { accuracyAbilities, accuracyItems, accuracyMoves, accuracyScripts } from './accuracy.ts';
@@ -203,8 +203,11 @@ export function simData(reg: Registries, log: StubLog): SimData {
       target: 'self',
       // Not one Assist may call from an ally's slots while the slot is there.
       flags: { noassist: 1 },
-      beforeTurnCallback(this: Battle, pokemon: unknown) {
-        if (!this.queue.cancelMove(pokemon as never)) throw new Error('battle: the pass move is not in the queue');
+      beforeTurnCallback(this: Battle, pokemon: SimPokemon) {
+        if (!this.queue.cancelMove(pokemon)) throw new Error('battle: the pass move is not in the queue');
+        // Truant loafs by the turn number on the DS (Battler_CheckTruant), item turns included; the sim's loafing turn
+        // follows the moves used, so a passed turn flips it.
+        if (pokemon.hasAbility('truant') && !pokemon.removeVolatile('truant')) pokemon.addVolatile('truant');
       },
       onTryMove: () => {
         throw new Error('battle: the pass move ran (its before-turn callback cancels it)');
