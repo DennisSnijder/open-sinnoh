@@ -3,7 +3,7 @@ import { expect, it } from 'vitest';
 import type { Id } from '@opensinnoh/core';
 import type { ActorView, BillboardSprite as Sprite, Camera, Vec3 } from '@opensinnoh/contracts';
 import { AssetCache, resolvePackPath, splitRef } from './assets.ts';
-import { billboardDepth } from './billboard.ts';
+import { billboardDepth, slopeDepthLift } from './billboard.ts';
 import { Materials, patternAt, patternBlend, withTranslucentParts } from './materials.ts';
 import { dsPixelAlpha, type FieldOutput } from './composite.ts';
 import { billboardLight, dsVertexLight, lightAt, SHADOW_BY_PERIOD, type LightTemplate } from './lighting.ts';
@@ -528,4 +528,28 @@ it('clones the lit shadow model sharing its geometry, without a JSON copy of its
   expect(copied.geometry).toBe(geometry);
   expect(copied.userData.lit).toBeUndefined();
   expect((mesh.userData.lit as { normals: Float32Array }).normals).toBe(normals);
+});
+
+it('moves a billboard depth anchor past a stair that rises toward a camera looking down less steeply than it', () => {
+  // A stair rising 1:1 to the south from z = 0 to z = 48 (y 0 → 48), a landing past it, and a wall at z = 80.
+  const stair = (_x: number, z: number) => [z < 0 ? 0 : z < 48 ? z : z < 80 ? 48 : 80];
+  const toward = (pitchDeg: number) => new THREE.Vector3(0, Math.sin((pitchDeg * Math.PI) / 180), Math.cos((pitchDeg * Math.PI) / 180));
+  // The object stands on the stair's foot at z = 2; its anchor is 6 units south, under the stair's surface.
+  const anchor = new THREE.Vector3(0, 2, 8);
+  // A 35° camera: the stair and its landing hide the anchor; the depth moves past the stair's top, short of the wall
+  // (a step, where the walk stops).
+  const at = anchor.clone().add(slopeDepthLift(anchor, toward(35), 2, stair));
+  expect(at.z).toBeGreaterThan(48);
+  expect(at.z).toBeLessThan(80);
+  expect(at.y).toBeGreaterThan(48);
+  // A stair model on flat terrain (Pastoria City's gate): its 4-unit steps rise over the floor the terrain keeps.
+  const model = (_x: number, z: number) => (z < 64 ? [0, 4 * Math.floor(z / 4) + 4] : []);
+  expect(new THREE.Vector3(0, 0, 6).add(slopeDepthLift(new THREE.Vector3(0, 0, 6), toward(35), 0, model)).z).toBeGreaterThan(40);
+  // Flat ground, a stair rising away from the camera, and a camera straight above: no lift.
+  expect(slopeDepthLift(new THREE.Vector3(0, 0, 6), toward(35), 0, () => [0]).length()).toBe(0);
+  expect(slopeDepthLift(new THREE.Vector3(0, -2, 8), toward(35), -2, (_x, z) => [-z]).length()).toBe(0);
+  expect(slopeDepthLift(anchor, new THREE.Vector3(0, 1, 0), 2, stair).length()).toBe(0);
+  // A cliff or a bridge deck right in front still hides the character.
+  expect(slopeDepthLift(new THREE.Vector3(0, 0, 6), toward(35), 0, (_x, z) => (z > 10 ? [64] : [0])).length()).toBe(0);
+  expect(slopeDepthLift(new THREE.Vector3(0, 0, 6), toward(35), 0, (_x, z) => (z > 10 ? [0, 40] : [0])).length()).toBe(0);
 });

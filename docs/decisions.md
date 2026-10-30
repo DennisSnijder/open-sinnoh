@@ -315,6 +315,12 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   the void past their rooms. Under it the fog reads linear view depth, shifted so the camera target sits at the DS
   camera's distance, and maps it back through the DS camera's planes to the density table; the rear plane takes the
   fog colour. Fog turns the sun off and lifts the bloom threshold over the fog's pale colour.
+- **Characters stand over stairs under the angled camera too.** It looks down less steeply than a stair rises, so the
+  steps of a stair down to the north (a terrain slope, or a stair model on flat terrain like Pastoria City's east
+  gate) lay in front of a character on it and hid its legs or all of it. The billboard's depth anchor moves along
+  the view ray past the walkable ground that hides it (`slopeDepthLift`: terrain and map-model heights, followed
+  while they run on without a step, so walls, cliffs, trees and bridges still hide it). The DS camera keeps the
+  plain billboard depth.
 - **Night glows come from the map's own light sources:** materials the models name as lights (`light`, `lamp`,
   `_light`, `_lamp`) or windows (`mado`, `window`) are drawn again, additively, with only their bright texels, so a
   glow has its texture's shape and colour (red beacons stay red and blink with their animation) and the bloom spreads

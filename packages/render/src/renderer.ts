@@ -10,7 +10,7 @@ import type { Area, AssetRef, Camera as CameraRecord, DoorView, FieldRenderer, G
 import { CHUNK_SIZE, MapGrid, gridOffset, type ActorView, type FieldView, type OpenSinnohWorld, type Vec3 } from '@opensinnoh/world';
 import { AssetCache, disposeTree } from './assets.ts';
 import { cardFoot, restCards } from './cards.ts';
-import { billboardMaterial, billboardMatrix, faceCameraNodes, nodeBillboard, reflectionMaterial } from './billboard.ts';
+import { billboardMaterial, billboardMatrix, slopeDepthLift, faceCameraNodes, nodeBillboard, reflectionMaterial } from './billboard.ts';
 import { Composite, fieldOutputs } from './composite.ts';
 import { cameraAllowed, enhancedVisuals, needsPost, type EnhancedConfig } from './enhanced/config.ts';
 import { glowKind, type GlowKind } from './enhanced/light-sources.ts';
@@ -362,6 +362,8 @@ interface BillboardActor {
   texture: THREE.Texture;
   /** World z of the anchor (billboard.ts billboardDepth). */
   anchorZ: { value: number };
+  /** Where the depth plane's anchor moves on a slope under the angled camera (billboard.ts slopeDepthLift). */
+  depthLift: { value: THREE.Vector3 };
   /** 1: the quad's own depth (a turned sprite on a Distortion World wall or ceiling; billboard.ts). */
   plain: { value: number };
   paletteDarkness: { value: number };
@@ -1252,7 +1254,7 @@ class Field implements FieldRenderer {
       void this.assets.texture(record.atlas).then((atlas) => {
         const texture = atlas.clone();
         texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
-        const { material, anchorZ, plain, paletteDarkness, ceilingY, ceilingMin, ceilingMax } = billboardMaterial(texture);
+        const { material, anchorZ, depthLift, plain, paletteDarkness, ceilingY, ceilingMin, ceilingMax } = billboardMaterial(texture);
         const object = new THREE.Sprite(fieldOutputs(material, { polygonId: 0, fog: true }));
         object.center.set(0.5, 0);
         const shadow = new THREE.Group();
@@ -1265,7 +1267,7 @@ class Field implements FieldRenderer {
         // Before the translucent map polygons (water drawn over it).
         reflection.renderOrder = -1;
         this.scene.add(object, shadow, reflection);
-        done({ kind: 'billboard', sprite: v.sprite, record, object, texture, anchorZ, plain, paletteDarkness, ceilingY, ceilingMin, ceilingMax, shadow, reflection });
+        done({ kind: 'billboard', sprite: v.sprite, record, object, texture, anchorZ, depthLift, plain, paletteDarkness, ceilingY, ceilingMin, ceilingMax, shadow, reflection });
       }, this.failed(`sprite ${v.sprite}`));
     } else {
       void this.modelObject(record.model!).then((object) => {
@@ -1447,6 +1449,21 @@ class Field implements FieldRenderer {
     // The sprite sinks into mud and deep snow (ActorView.sink); its shadow and reflection stay on the ground.
     this.placeBillboard(a.object, p.clone().setZ(p.z + BILLBOARD_ANCHOR_Z).setY(p.y - (v.sink ?? 0)), a.record.frameSize);
     a.anchorZ.value = p.z + BILLBOARD_ANCHOR_Z;
+    // The angled camera looks down less steeply than a stair rises: the steps above a character on a stair down to
+    // the north hide its lower half (or all of it), where the DS camera shows it whole.
+    if (this.enhancedCamera) {
+      const anchor = new THREE.Vector3(p.x, p.y, a.anchorZ.value);
+      const toCamera = this.camera.position.clone().sub(anchor).normalize();
+      const heights: number[] = [];
+      const heightsAt = (x: number, z: number, y: number) => {
+        heights.length = 0;
+        if (this.grid!.blocked(Math.floor(x / TILE), Math.floor(z / TILE))) return heights;
+        heights.push(this.grid!.heightAt(x, z, y));
+        for (const chunk of this.chunks.values()) if (chunk.group) ceilingsFor(chunk.group).heightsAt(x, z, heights);
+        return heights;
+      };
+      a.depthLift.value.copy(slopeDepthLift(anchor, toCamera, p.y, heightsAt));
+    } else a.depthLift.value.set(0, 0, 0);
     let ceiling: Ceiling | null = null;
     // Include the sprite's width: a hat can extend under a deck before the feet reach it. The frame's outer
     // half tile on each side is margin, not the character: sampled there, the raised floor in the Hearthome

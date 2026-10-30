@@ -106,6 +106,18 @@ export class Ceilings {
     return found ? this.ceiling(found, ground) : null;
   }
 
+  /** Pushes the heights of the level and sloped faces at x/z (floors, steps, decks) to `out`. */
+  heightsAt(x: number, z: number, out: number[]): void {
+    const cell = this.cells.get(cellKey(Math.floor(x / CELL), Math.floor(z / CELL)));
+    if (!cell) return;
+    for (const { a, b, c, denominator } of cell) {
+      const u = ((b.z - c.z) * (x - c.x) + (c.x - b.x) * (z - c.z)) / denominator;
+      const v = ((c.z - a.z) * (x - c.x) + (a.x - c.x) * (z - c.z)) / denominator;
+      if (u < -1e-6 || v < -1e-6 || u + v > 1 + 1e-6) continue;
+      out.push(u * a.y + v * b.y + (1 - u - v) * c.y);
+    }
+  }
+
   /** The connected faces of `surface` above `ground`, built once per floor level. */
   private ceiling(surface: Surface, ground: number): Ceiling {
     surface.ceilings ??= new Map();
