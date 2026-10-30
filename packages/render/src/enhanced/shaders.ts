@@ -63,17 +63,17 @@ void main() {
 };
 
 /**
- * Golden-hour light: shafts from the sun's side (a radial scatter of the frame's bright pixels toward the sun, the
- * GPU Gems 3 volumetric light scattering), a glare on that side and lens flare ghosts along the axis through the
- * frame's middle. The sun is kept at the frame's edge (pipeline.ts). `LOW` (phones) takes half the steps.
+ * Golden-hour light: soft shafts fanning from the sun's side, a glare on that side and lens flare ghosts along the axis
+ * through the frame's middle. The sun is kept at the frame's edge (pipeline.ts). The shafts are a function of the angle
+ * and distance from the sun alone: a radial scatter of the frame's bright pixels (GPU Gems 3) dragged every lit window,
+ * lamp and white roof into a streak toward the sun, as this top-down view has no sky to scatter from.
  */
 export const SUN_SHADER = {
   name: 'EnhancedSun',
-  uniforms: { tDiffuse: { value: null }, tDepth: { value: null }, uSun: { value: new THREE.Vector2(0.5, 1.2) }, uIntensity: { value: 0 }, uColor: { value: new THREE.Color(1, 0.8, 0.5) }, uAspect: { value: 1 }, uFlare: { value: 0 } },
+  uniforms: { tDiffuse: { value: null }, uSun: { value: new THREE.Vector2(0.5, 1.2) }, uIntensity: { value: 0 }, uColor: { value: new THREE.Color(1, 0.8, 0.5) }, uAspect: { value: 1 }, uFlare: { value: 0 } },
   vertexShader: VERTEX,
   fragmentShader: /* glsl */ `
 uniform sampler2D tDiffuse;
-uniform sampler2D tDepth;
 uniform vec2 uSun;
 uniform float uIntensity;
 uniform vec3 uColor;
@@ -82,31 +82,12 @@ uniform float uFlare;
 varying vec2 vUv;
 void main() {
   vec4 base = texture2D(tDiffuse, vUv);
-#ifdef LOW
-  const int STEPS = 12;
-  const float DECAY = 0.85;
-#else
-  const int STEPS = 24;
-  const float DECAY = 0.92;
-#endif
-  vec2 delta = (vUv - uSun) * (0.6 / float(STEPS));
-  vec2 uv = vUv;
-  float decay = 1.0;
-  vec3 acc = vec3(0.0);
-  for (int i = 0; i < STEPS; i++) {
-    uv -= delta;
-    vec2 cuv = clamp(uv, 0.001, 0.999);
-    vec3 s = texture2D(tDiffuse, cuv).rgb;
-    float l = max(dot(s, vec3(0.299, 0.587, 0.114)) - 0.68, 0.0);
-    acc += s * l * decay;
-    decay *= DECAY;
-  }
-  vec3 rays = acc * uIntensity * uColor * 0.5;
-#ifdef LOW
-  // The shorter decay sums to 5.8 against 10.2: the same strength.
-  rays *= 1.76;
-#endif
-  float dist = length((vUv - uSun) * vec2(uAspect, 1.0));
+  vec2 d = (vUv - uSun) * vec2(uAspect, 1.0);
+  float dist = length(d);
+  float a = atan(d.y, d.x);
+  // Uneven beams: two incommensurate fans, squared so the gaps stay dark.
+  float beams = (0.5 + 0.5 * sin(a * 29.0)) * (0.55 + 0.45 * sin(a * 11.0 + 1.7));
+  vec3 rays = uColor * uIntensity * 0.16 * beams * beams * exp(-dist * 1.3);
   vec3 glare = uColor * uIntensity * 0.28 * exp(-dist * 1.8);
   vec2 axis = vec2(0.5) - uSun;
   vec3 flare = vec3(0.0);

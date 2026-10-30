@@ -692,7 +692,7 @@ class Field implements FieldRenderer {
     const chunk = need(this.reg.chunks, chunkId, 'chunk');
     const template = this.lightTemplate;
     const lightKey = this.lightKey;
-    const parts: { geometry: THREE.BufferGeometry; material: THREE.Material; lit: Lit | null }[] = [];
+    const parts: { geometry: THREE.BufferGeometry; material: THREE.Material; lit: Lit | null; glow: GlowKind | null }[] = [];
     // Texture cards (cards.ts) slide over the ground only under a perspective camera.
     const cards: { geometry: THREE.BufferGeometry; foot: THREE.Vector3 }[] = [];
     const camera = this.cameraRecord!;
@@ -702,9 +702,10 @@ class Field implements FieldRenderer {
     const loops: LoopingProp[] = [];
     const healBalls: HealPart[] = [];
     const elevators: ElevatorLights[] = [];
-    // Enhanced visuals' night glows (enhanced/): the light-source materials, found only with a config on, so the DS
-    // path does no work.
-    const glowing: Map<THREE.Material, GlowKind> | null = enhancedVisuals() ? new Map() : null;
+    // Enhanced visuals' night glows (enhanced/): the light-source parts, found only with a config on, so the DS path
+    // does no work. By the source material's name: one converted material can serve a light and a roof that share a
+    // texture (Materials.convert keys by texture), and only the light glows.
+    const glowing = !!enhancedVisuals();
     const machine = [...this.reg.newGame.values()][0]?.healMachine;
     const lifts = [...this.reg.newGame.values()][0]?.platformLiftProps;
     const boat = [...this.reg.newGame.values()][0]?.boat;
@@ -731,13 +732,12 @@ class Field implements FieldRenderer {
         const geometry = mesh.geometry.index ? mesh.geometry.toNonIndexed() : mesh.geometry.clone();
         const material = await this.materials.convert(singleMaterial(mesh, modelId), set, 'color' in geometry.attributes, this.modelAnimations.get(modelId), ownSet);
         geometry.applyMatrix4(new THREE.Matrix4().multiplyMatrices(placement, mesh.matrixWorld));
-        const glow = glowing && glowKind(singleMaterial(mesh, modelId).name);
-        if (glow) glowing!.set(material, glow);
+        const glow = glowing ? glowKind(singleMaterial(mesh, modelId).name) : null;
         // A card is a whole prop model; one quad of a larger model belongs to that model's shape.
         const foot = camera.projection === 'perspective' && meshes.length === 1 ? cardFoot(geometry, material) : null;
         if (foot) cards.push({ geometry, foot });
         const l = lit(mesh, geometry, null, ownColours);
-        parts.push({ geometry, material, lit: l });
+        parts.push({ geometry, material, lit: l, glow });
       }
       if (once) this.assets.copied(ref);
     };
@@ -923,21 +923,20 @@ class Field implements FieldRenderer {
     const { rested, unrested } = restCards(cards, parts.map((p) => p.geometry).filter((g) => !cardGeometries.has(g)), viewDirection);
     for (const foot of unrested) this.reportOnce(`card:${chunkId}`, 'render:card', `chunk ${chunkId}: a texture card at ${foot.toArray().map(Math.round).join(',')} has no map surface beyond it (drawn as placed)`);
     out.userData.cardFeet = rested;
-    // One mesh per material, attribute set and light mask; a lit mesh keeps its parts' normals in order.
-    const groups = new Map<string, { material: THREE.Material; geometries: THREE.BufferGeometry[]; lits: Lit[] }>();
-    for (const { geometry, material, lit: l } of parts) {
-      const key = `${material.uuid}|${Object.keys(geometry.attributes).sort().join(',')}|${l ? `${l.mask}|${JSON.stringify(l.own ?? null)}` : '-'}`;
+    // One mesh per material, attribute set, light mask and glow; a lit mesh keeps its parts' normals in order.
+    const groups = new Map<string, { material: THREE.Material; geometries: THREE.BufferGeometry[]; lits: Lit[]; glow: GlowKind | null }>();
+    for (const { geometry, material, lit: l, glow } of parts) {
+      const key = `${material.uuid}|${Object.keys(geometry.attributes).sort().join(',')}|${l ? `${l.mask}|${JSON.stringify(l.own ?? null)}` : '-'}|${glow ?? '-'}`;
       let g = groups.get(key);
-      if (!g) groups.set(key, (g = { material, geometries: [], lits: [] }));
+      if (!g) groups.set(key, (g = { material, geometries: [], lits: [], glow }));
       g.geometries.push(geometry);
       if (l) g.lits.push(l);
     }
-    for (const { material, geometries, lits } of groups.values()) {
+    for (const { material, geometries, lits, glow } of groups.values()) {
       const merged = geometries.length === 1 ? geometries[0]! : mergeGeometries(geometries);
       if (!merged) throw new Error(`render: could not merge chunk ${chunkId} geometry for ${material.name}`);
       for (const g of geometries) if (g !== merged) g.dispose();
       const mesh = new THREE.Mesh(merged, material);
-      const glow = glowing?.get(material);
       if (glow) mesh.userData.glow = glow;
       if (lits.length) {
         const normals = new Float32Array(lits.reduce((n, l) => n + l.normals.length, 0));

@@ -135,6 +135,86 @@ test('lamps and lit windows glow at night in SUBTLE and CINEMATIC', async () => 
   expect(errors).toEqual([]);
 });
 
+/** The main canvas's luma (0..255) on a 96×96 grid, read in the frame it is drawn. */
+const lumaGrid = () =>
+  page.evaluate(async () => {
+    await new Promise(requestAnimationFrame);
+    const src = document.getElementById('main-canvas') as HTMLCanvasElement;
+    const c = document.createElement('canvas');
+    c.width = c.height = 96;
+    const g = c.getContext('2d')!;
+    g.drawImage(src, 0, 0, 96, 96);
+    const px = g.getImageData(0, 0, 96, 96).data;
+    return Array.from({ length: 96 * 96 }, (_, i) => 0.299 * px[i * 4]! + 0.587 * px[i * 4 + 1]! + 0.114 * px[i * 4 + 2]!);
+  });
+
+/**
+ * The glows stay on their lamps and windows, with the DS and the angled camera, at dusk (sun and glows both on) and at
+ * night; particles off, so two frames of a look match. What turning the glows on adds covers a small part of the frame
+ * (a roof that shares a light's texture stays dark: it lit whole roofs, a fifth to a third of this frame), and the
+ * golden-hour sun adds as much with the glows on as off (its shafts scattered the frame's bright pixels toward the
+ * sun, doubling what the glows added at dusk, 2.5 to 3 luma per texel over the frame, in streaks across the roofs).
+ */
+test('the night glows stay on their lamps and windows, with no streaks', async () => {
+  test.setTimeout(300_000);
+  const report: Record<string, unknown> = {};
+  for (const time of ['18:45', '19:30', '22:00']) {
+    await arrive('SANDGEM_TOWN', 177, 843, 'up', time);
+    for (const camera of ['', 'follow']) {
+      const shot = async (switches: string) => {
+        await look(['dof,bloom,grade,ao', switches, camera].filter(Boolean).join(','), camera !== '');
+        return lumaGrid();
+      };
+      const [off, on, sunOff, sunOn] = [await shot(''), await shot('lamps'), await shot('sun'), await shot('sun,lamps')];
+      const tag = `${time} ${camera || 'ds'}`;
+      await page.screenshot({ path: `${SHOTS}/${project}-sandgem-glows-${tag.replace(/[: ]/g, '-')}.png` });
+      const added = (a: number[], b: number[]) => a.map((v, i) => Math.abs(v - b[i]!));
+      const sum = (a: number[]) => a.reduce((s, v) => s + v, 0);
+      const glow = added(on, off);
+      const lit = glow.filter((v) => v > 20).length / glow.length;
+      // What the sun adds to the glows, in luma per texel over the frame.
+      const streak = (sum(added(sunOn, sunOff)) - sum(glow)) / glow.length;
+      report[tag] = { lit: Math.round(lit * 1000) / 1000, streak: Math.round(streak * 100) / 100 };
+      expect(lit, `${tag}: the glows light a small part of the frame`).toBeLessThan(0.2);
+      expect(streak, `${tag}: the sun does not streak the glows`).toBeLessThan(1);
+    }
+  }
+  console.log(`glows (${project}): ${JSON.stringify(report)}`);
+  expect(errors).toEqual([]);
+});
+
+/**
+ * Bright ground stays readable by day: on Route 213's beach (near-white sand) in SUBTLE and CINEMATIC with both
+ * cameras, at noon and in the golden hour, little more of the frame clips to white than in the DS look (whose sand
+ * is near white already) and the player (the frame's middle) keeps its dark outline. The bloom took the sand for a light and the sun's shafts scattered it, washing the beach
+ * and everyone on it out to white.
+ */
+test('bright sand stays readable by day', async () => {
+  test.setTimeout(300_000);
+  const report: Record<string, unknown> = {};
+  for (const time of ['12:00', '17:00']) {
+    await arrive('ROUTE_213', 703, 829, 'down', time);
+    let dsWhite = 0;
+    for (const [config, angled] of [[null, false], ['subtle', false], ['subtle,follow', true], ['cinematic', false], ['cinematic,follow', true]] as const) {
+      await look(config, angled);
+      const grid = await lumaGrid();
+      const tag = `${time} ${config ?? 'ds'}`;
+      await page.screenshot({ path: `${SHOTS}/${project}-route-213-sand-${tag.replace(/[:, ]/g, '-')}.png` });
+      const white = grid.filter((v) => v > 250).length / grid.length;
+      // The player stands at the frame's middle: the darkest texel of a box around it is the sprite's outline.
+      const player: number[] = [];
+      for (let y = 38; y < 52; y++) for (let x = 44; x < 52; x++) player.push(grid[y * 96 + x]!);
+      const outline = Math.min(...player);
+      report[tag] = { white: Math.round(white * 1000) / 1000, outline: Math.round(outline) };
+      if (!config) dsWhite = white;
+      expect(white, `${tag}: little more of the frame clips to white than in the DS look`).toBeLessThan(dsWhite + 0.15);
+      expect(outline, `${tag}: the player keeps a dark outline`).toBeLessThan(110);
+    }
+  }
+  console.log(`sand (${project}): ${JSON.stringify(report)}`);
+  expect(errors).toEqual([]);
+});
+
 /**
  * The field's frame time by look, measured with the frame synced (`syncTiming`: render milliseconds include the GPU's
  * work; GPU milliseconds where the browser has a timer query). `@full` forces the full-quality chain on this device
@@ -169,3 +249,5 @@ test('CINEMATIC frame time', async () => {
   test.info().annotations.push({ type: 'frame time', description: `${project} ${buffer} ${JSON.stringify(out)}` });
   expect(errors).toEqual([]);
 });
+
+
