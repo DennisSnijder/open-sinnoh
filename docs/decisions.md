@@ -324,9 +324,15 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
 - **Night glows come from the map's own light sources:** materials the models name as lights (`light`, `lamp`,
   `_light`, `_lamp`) or windows (`mado`, `window`) are drawn again, additively, with only their bright texels, so a
   glow has its texture's shape and colour (red beacons stay red and blink with their animation) and the bloom spreads
-  it. No hand-placed points. Lamps the map draws as plain land texture (Jubilife's plaza) have no glow.
+  it. No hand-placed points. Lamps the map draws as plain land texture (Jubilife's plaza) have no glow. A glow is
+  decided by the source material's name, per part: converted materials are shared by texture, and a roof that shares
+  a light's texture must not glow with it.
+- **Nothing the field draws is a light source by day, and the sun reads no pixels:** the field's colours are albedo,
+  so the day's bloom threshold sits at white (only the glows and particles pass it) and the golden-hour shafts are a
+  fan from the sun's side, not a radial scatter of the frame's bright pixels. A top-down view has no sky to scatter
+  from: the scatter washed beaches out to white and dragged lit windows and white roofs into streaks.
 - **Phones take a cheaper post chain** (`lowPower`, a coarse pointer): the bloom at a quarter of the pixels, half the
-  AO and sun samples, and depth of field as one 8-tap disc pass instead of two 13-tap passes. A fixed tier, not an
+  AO samples, and depth of field as one 8-tap disc pass instead of two 13-tap passes. A fixed tier, not an
   auto-scale: the same device draws the same frame.
 - The 2D layers (weather, darkness, tints, fades) draw on the screen over the post chain's output, never into its
   buffers.

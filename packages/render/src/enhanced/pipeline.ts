@@ -92,8 +92,8 @@ export class EnhancedPipeline {
     const resize = config.lowPower !== this.config.lowPower;
     this.config = config;
     if (resize) this.setSize(this.size.x, this.size.y);
-    // Phones: the cheaper AO, sun and depth of field (shaders.ts `LOW`).
-    for (const pass of [this.ao, this.sun, this.dofH, this.dofV]) {
+    // Phones: the cheaper AO and depth of field (shaders.ts `LOW`).
+    for (const pass of [this.ao, this.dofH, this.dofV]) {
       const low = 'LOW' in pass.material.defines;
       if (low === config.lowPower) continue;
       if (config.lowPower) pass.material.defines.LOW = '';
@@ -205,7 +205,7 @@ export class EnhancedPipeline {
     const outdoors = OUTDOORS.has(frame.zone.mapType);
     const hour = outdoors ? frame.seconds / 3600 : 12;
     const night = nightAt(frame.seconds / 3600);
-    // No sun at night (the flare and the shafts would streak the lamps and fireflies).
+    // No sun at night.
     const sunOn = this.config.sun && outdoors && night < 0.9 && !frame.fog;
     const golden = goldenAt(hour);
     const [w, h] = [this.size.x, this.size.y];
@@ -245,7 +245,6 @@ export class EnhancedPipeline {
       const edge = Math.max(Math.abs(c.x), Math.abs(c.y));
       if (edge > 0.75) c.multiplyScalar(0.75 / edge);
       const u = uniforms(this.sun);
-      u.tDepth!.value = depth;
       (u.uSun!.value as THREE.Vector2).set(c.x + 0.5, c.y + 0.5);
       u.uIntensity!.value = (0.15 + golden * 0.85) * (1 - night);
       u.uAspect!.value = w / h;
