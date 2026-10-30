@@ -210,6 +210,8 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   // chunk away before the first battle (its failure shows at that battle).
   else void session.game.loadBattleEngine().then(() => warmBattleEngine(session.game), () => {});
   let ticks = 0;
+  /** The last tick did not step the field (a menu or app over it): it is drawn at its last tick. */
+  let fieldStill = false;
   let lastInput: InputFrame | null = null;
   let panelTouch: { x: number; y: number } | null = null;
   let panelShown = true;
@@ -409,7 +411,10 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     lastInput = ui!.input(input.frame());
     // Dev builds only: production folds these away.
     if (import.meta.env.DEV && recorder) recorder.frame(lastInput, session.game);
+    const world = session.game.world;
+    const steps = world.steps();
     session.tick(lastInput);
+    fieldStill = session.game.world === world && world.steps() === steps;
     if (!opts.replay) suspend.tick();
     if (import.meta.env.DEV && recorder) recorder.observe(session.game);
     ticks++;
@@ -609,7 +614,8 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     if ((devicePixelRatio || 1) !== layoutDpr) relayout();
     // Once the battle scene covers the field, the field is not drawn (nor loaded) under it. While a battle
     // runs the world does not tick: the field is drawn at its last tick, not interpolated toward it (an
-    // alpha between two stale ticks jittered the camera, the encounter "shake").
+    // alpha between two stale ticks jittered the camera, the encounter "shake"). The same holds for any tick
+    // that left the field still (the start menu or an app over it): a walking NPC flickered between two tiles.
     // The DS STEREO/MONO option (saved with the game; decomp Sound_SetPlaybackMode).
     audio.setMono(session.game.state.options.sound === 1);
     // The synth's sequencer follows the game: the speed asked for, or what the machine manages when behind.
@@ -618,7 +624,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     if (speedIndicator.hidden !== (speed === 1)) speedIndicator.hidden = speed === 1;
     if (speed !== 1 && speedIndicator.textContent !== `>> ${speed}x`) speedIndicator.textContent = `>> ${speed}x`;
     battleCovers = battle.covers();
-    if (!battleCovers) session.renderer.render(session.game.inBattle() ? 1 : alpha);
+    if (!battleCovers) session.renderer.render(session.game.inBattle() || fieldStill ? 1 : alpha);
     // The count matters only under the full black (`revealing`); elsewhere the scene's loading is not asked for (it
     // builds the world's view again) and the field counts as complete.
     const black = (session.game.world.fadeState()?.alpha ?? 0) >= 1;

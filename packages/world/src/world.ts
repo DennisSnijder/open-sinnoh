@@ -219,6 +219,8 @@ export class FieldWorld implements OpenSinnohWorld {
   private lockedObjects = new Set<number>();
   /** Player completed a step this tick (read by the next checkTriggers). */
   private stepCompleted = false;
+  /** Steps that moved the actors' previous positions on (`steps()`). */
+  private stepCount = 0;
   /** DS "moving" state: a held direction keeps walking without a turn-in-place. */
   private moving = false;
   private storyScene: FieldView['storyScene'] | null = null;
@@ -1654,6 +1656,7 @@ export class FieldWorld implements OpenSinnohWorld {
       return;
     }
     this.stepCompleted = false;
+    this.stepCount++;
     for (const a of this.allActors()) a.prev = [...a.cur];
     this.cameraPrev = [...this.cameraCur];
 
@@ -2052,6 +2055,10 @@ export class FieldWorld implements OpenSinnohWorld {
     this.updateCamera();
     this.cameraPrev = [...this.cameraCur];
     this.syncState();
+  }
+
+  steps(): number {
+    return this.stepCount;
   }
 
   fadeState(): { color: 'black' | 'white'; alpha: number } | null {

@@ -290,6 +290,7 @@ export const createFakeWorld: CreateWorld = ({ registries, state, scripts }) => 
       }
     },
     idle: () => !step && !warp && movers.size === 0,
+    steps: () => 0,
     fadeState: () => null,
     fishingCheck: () => null,
     fish: () => {},

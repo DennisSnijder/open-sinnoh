@@ -6,7 +6,8 @@
  * - the summary: the EV/IV label on SKILLS (A steps the numbers), RENAME on INFO opening the naming keyboard;
  * - follower talk with the HGSS add-on (sys-follower-talk): the talk's bubble or message over the field;
  * - the HGSS look with the add-on: Ethan's sprite in the field;
- * - the suspend point (normal play): the page hides, reloads, and CONTINUE puts the player where they stood.
+ * - the suspend point (normal play): the page hides, reloads, and CONTINUE puts the player where they stood;
+ * - the start menu opened mid-step (normal play, 120 Hz): the characters hold still where they stopped.
  * Screenshots go to test-artifacts/qol (gitignored: ROM content, never commit).
  */
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
@@ -61,6 +62,16 @@ async function play(name: string, file: string, stop?: string): Promise<void> {
   const r = await runReplay(pageDriver(page, SHOTS, `${test.info().project.name}-${name}`), upTo < 0 ? text : text.slice(0, upTo), { registries, seed: 1, name, resolve: resolveReplay, repeat: false });
   expect(r.error).toBeUndefined();
 }
+
+/** Normal play from the title: CONTINUE. */
+const continueGame = async () => {
+  await page.waitForFunction(() => window.openSinnohTitle?.phase === 'title' && !window.openSinnohTitle.inputBlocked, undefined, { timeout: 60_000 });
+  await expect(page.locator('.title-fade')).toHaveCSS('opacity', '0', { timeout: 30_000 });
+  await page.locator('#title').click();
+  await page.waitForFunction(() => window.openSinnohTitle?.phase === 'menu');
+  await page.locator('[data-option="continue"]').click();
+  await page.waitForFunction(() => !window.openSinnohTitle && !!window.openSinnohApp?.game, undefined, { timeout: 60_000 });
+};
 
 const shot = async (name: string) => {
   await waitForScene(page);
@@ -190,14 +201,6 @@ test('the suspend point: hidden, reloaded, CONTINUE puts the player where they s
   });
   await saveSlot(page);
   await page.goto('/');
-  const continueGame = async () => {
-    await page.waitForFunction(() => window.openSinnohTitle?.phase === 'title' && !window.openSinnohTitle.inputBlocked, undefined, { timeout: 60_000 });
-    await expect(page.locator('.title-fade')).toHaveCSS('opacity', '0', { timeout: 30_000 });
-    await page.locator('#title').click();
-    await page.waitForFunction(() => window.openSinnohTitle?.phase === 'menu');
-    await page.locator('[data-option="continue"]').click();
-    await page.waitForFunction(() => !window.openSinnohTitle && !!window.openSinnohApp?.game, undefined, { timeout: 60_000 });
-  };
   await continueGame();
   // Walk two tiles east (wall-clock play), then hide the page.
   await page.keyboard.down('ArrowRight');
@@ -232,5 +235,70 @@ test('the suspend point: hidden, reloaded, CONTINUE puts the player where they s
   // Loaded once: cleared.
   await expect.poll(stored).toBeUndefined();
   await page.screenshot({ path: `${SHOTS}/${test.info().project.name}-suspend.png` });
+  expect(errors).toEqual([]);
+});
+
+test('the start menu opened mid-step: the characters hold still where they stopped', async () => {
+  test.setTimeout(300_000);
+  // A save in Jubilife City's plaza, then normal play from the title.
+  await replayPage();
+  await play('crowd', 'svc-repel.replay', '+1 wild flee');
+  const state = await page.evaluate(() => window.openSinnohGame!.snapshot().state);
+  state.player = { ...state.player, zone: 'platinum:MAP_HEADER_JUBILIFE_CITY' as never, x: 174, z: 738, y: 0, facing: 'down' };
+  state.objects = [];
+  await page.evaluate((json) => window.openSinnohGame!.load(json, 'arrival'), JSON.stringify({ format: 'lantern-nds-save', version: 1, savedAt: '1970-01-01T00:00:00.000Z', state }));
+  await page.evaluate(() => {
+    for (let i = 0; i < 120 && !window.openSinnohApp!.game.canSave(); i++) window.openSinnohGame!.advance(1);
+  });
+  await saveSlot(page);
+  // A 120 Hz display: two frames per tick, each drawn at its share of the tick (at 60 Hz the share hardly changes).
+  await page.addInitScript(() => {
+    window.requestAnimationFrame = (cb) => setTimeout(() => cb(performance.now()), 1000 / 120) as unknown as number;
+    window.cancelAnimationFrame = (id) => clearTimeout(id);
+  });
+  await page.goto('/');
+  await continueGame();
+  await waitForScene(page);
+  // The menu asked for while walking: it opens as the step ends, the field stopped with the player and the follower between
+  // their last two ticks.
+  const between = () => page.evaluate(() => window.openSinnohApp!.game.world.view().actors.some((a) => a.localId === 255 && a.prev.some((v, i) => v !== a.cur[i])));
+  // The click can land as the player stops (a wall ahead): close the menu and walk the other way.
+  for (let tries = 0; ; tries++) {
+    expect(tries).toBeLessThan(6);
+    const key = tries % 2 ? 'ArrowLeft' : 'ArrowRight';
+    await page.keyboard.down(key);
+    await expect.poll(between).toBe(true);
+    await page.getByRole('button', { name: 'Start menu', exact: true }).click();
+    await page.keyboard.up(key);
+    await expect(page.locator('[data-screen="start-menu"]')).toBeVisible();
+    if (await between()) break;
+    await page.keyboard.press('Escape');
+    await expect(page.locator('[data-screen]')).toHaveCount(0);
+  }
+  // The characters under the menu are drawn the same in every frame (one drawn between its last two ticks moved
+  // with each frame's share of the tick).
+  const frames = await page.evaluate(async () => {
+    const src = document.getElementById('main-canvas') as HTMLCanvasElement;
+    const c = document.createElement('canvas');
+    c.width = src.width;
+    c.height = src.height;
+    const g = c.getContext('2d', { willReadFrequently: true })!;
+    const out: number[] = [];
+    // The characters alone: the map's own animations run on under the menu.
+    (globalThis as unknown as { openSinnohRenderDebug: { spritesOnly: boolean } }).openSinnohRenderDebug.spritesOnly = true;
+    await new Promise((r) => setTimeout(r, 300));
+    for (let f = 0; f < 20; f++) {
+      await new Promise(requestAnimationFrame);
+      g.drawImage(src, 0, 0);
+      const px = g.getImageData(0, 0, c.width, c.height).data;
+      let h = 0;
+      for (let i = 0; i < px.length; i++) h = (Math.imul(h, 31) + px[i]!) | 0;
+      out.push(h);
+    }
+    (globalThis as unknown as { openSinnohRenderDebug: { spritesOnly: boolean } }).openSinnohRenderDebug.spritesOnly = false;
+    return out;
+  });
+  expect(new Set(frames).size).toBe(1);
+  await page.keyboard.press('Escape');
   expect(errors).toEqual([]);
 });

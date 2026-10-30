@@ -260,6 +260,12 @@ export interface World extends FieldHost {
    * movement (ice, bike slopes and ramps; decomp PLAYER_MOVE_STATE_MOVING). Gates the start menu and saving.
    */
   idle(): boolean;
+  /**
+   * 0.49.2. A count of the steps that moved the field on (each sets the actors' and camera's previous positions).
+   * A game tick that leaves it unchanged (a menu or app over the field, fishing) left the field still: the view
+   * draws it at its last tick, not between two stale ticks.
+   */
+  steps(): number;
   fadeState(): { color: 'black' | 'white'; alpha: number } | null;
   /**
    * Decomp CanUseBicycle (0.20.0; the registered Bicycle on Select): null when the player can get on or
