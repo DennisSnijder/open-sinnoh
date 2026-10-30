@@ -42,17 +42,55 @@ export function billboardDepth(view: THREE.Vector3, anchor: THREE.Vector3, viewM
   return (clip.z / clip.w) * 0.5 + 0.5;
 }
 
+/** How far toward the camera (world units, along the ground) `slopeDepthLift` follows the ground. */
+const SLOPE_REACH = 96;
+/** The ground's sample spacing for `slopeDepthLift`, and the most a sample may rise or fall past the last one. */
+const SLOPE_STEP = 4;
+const SLOPE_RISE = 8;
+
+/**
+ * Where a billboard's depth anchor moves on ground that rises toward the camera (a stair down to the north under the
+ * angled camera): the offset along `toCamera` (unit, from `anchor` toward the eye) to the point past the last stretch
+ * of ground that hides the anchor, or zero. `heightsAt` gives the surface heights at a point (the terrain's and the
+ * map model's floors and steps; none where actors cannot walk). The ground is followed from the actor's own height
+ * `startY` while it runs on without a step: at each sample, the highest surface within `SLOPE_RISE` of the last one
+ * (a terrain stair, a stair model on flat terrain, the landing past it; not a wall, a cliff or a bridge overhead), so
+ * walls and cliffs still hide the sprite. The DS camera looks down steeper than any stair rises, and on the DS the
+ * sprite stands over the stair it is on: the lifted depth keeps it in front of the steps under the angled camera too
+ * (the renderer lifts only there).
+ */
+export function slopeDepthLift(anchor: THREE.Vector3, toCamera: THREE.Vector3, startY: number, heightsAt: (x: number, z: number, current: number) => readonly number[]): THREE.Vector3 {
+  const lift = new THREE.Vector3();
+  const flat = Math.hypot(toCamera.x, toCamera.z);
+  if (flat < 1e-6) return lift;
+  const rise = toCamera.y / flat;
+  let ground = startY;
+  let last = -1;
+  for (let s = 0; s <= SLOPE_REACH; s += SLOPE_STEP) {
+    // The first sample lies a few units off the actor's own position (the anchor stands south of it).
+    const reach = s === 0 ? 1.5 * SLOPE_RISE : SLOPE_RISE;
+    let next = -Infinity;
+    for (const y of heightsAt(anchor.x + (toCamera.x / flat) * s, anchor.z + (toCamera.z / flat) * s, ground)) if (Math.abs(y - ground) <= reach && y > next) next = y;
+    if (next === -Infinity) break;
+    ground = next;
+    if (ground > anchor.y + rise * s + 0.5) last = s;
+  }
+  if (last < 0) return lift;
+  return lift.copy(toCamera).multiplyScalar((last + SLOPE_STEP) / flat);
+}
+
 /**
  * A sprite material whose fragments take the billboard depth (`billboardDepth`: the sprite's position is the anchor,
- * `anchorZ.value` its z), or, with `plain.value` 1, the quad's own depth (a character on a Distortion World wall or
+ * `anchorZ.value` its z, `depthLift.value` a world offset of the lean plane's anchor: `slopeDepthLift`), or, with `plain.value` 1, the quad's own depth (a character on a Distortion World wall or
  * ceiling, where no upright plane stands behind it).
  * The material colour is the billboard's lit colour (lighting.ts billboardLight), modulating the texture.
  * It is opaque (alpha-tested, not blended), like the DS quad (alpha 31): its pixels write their own
  * polygon ID to the field target, so edge marking outlines the sprite and never draws the edges of
  * the geometry behind it across the sprite.
  */
-export function billboardMaterial(map: THREE.Texture): { material: THREE.SpriteMaterial; anchorZ: { value: number }; plain: { value: number }; paletteDarkness: { value: number }; ceilingY: { value: number }; ceilingMin: { value: THREE.Vector3 }; ceilingMax: { value: THREE.Vector3 } } {
+export function billboardMaterial(map: THREE.Texture): { material: THREE.SpriteMaterial; anchorZ: { value: number }; depthLift: { value: THREE.Vector3 }; plain: { value: number }; paletteDarkness: { value: number }; ceilingY: { value: number }; ceilingMin: { value: THREE.Vector3 }; ceilingMax: { value: THREE.Vector3 } } {
   const anchorZ = { value: 0 };
+  const depthLift = { value: new THREE.Vector3() };
   const plain = { value: 0 };
   const paletteDarkness = { value: 0 };
   const ceilingY = { value: 1e9 };
@@ -61,14 +99,15 @@ export function billboardMaterial(map: THREE.Texture): { material: THREE.SpriteM
   const material = new THREE.SpriteMaterial({ map, alphaTest: 0.5, transparent: false });
   material.onBeforeCompile = (shader) => {
     shader.uniforms.uAnchorZ = anchorZ;
+    shader.uniforms.uDepthLift = depthLift;
     shader.uniforms.uPlain = plain;
     shader.uniforms.uPaletteDarkness = paletteDarkness;
     shader.uniforms.uCeilingY = ceilingY;
     shader.uniforms.uCeilingMin = ceilingMin;
     shader.uniforms.uCeilingMax = ceilingMax;
     shader.vertexShader = shader.vertexShader
-      .replace('void main() {', 'varying vec3 vBillboardView;\nvarying vec3 vAnchorView;\nvoid main() {')
-      .replace('gl_Position = projectionMatrix * mvPosition;', 'gl_Position = projectionMatrix * mvPosition;\n\tvBillboardView = mvPosition.xyz;\n\tvAnchorView = ( modelViewMatrix * vec4( 0.0, 0.0, 0.0, 1.0 ) ).xyz;');
+      .replace('void main() {', 'uniform vec3 uDepthLift;\nvarying vec3 vBillboardView;\nvarying vec3 vAnchorView;\nvoid main() {')
+      .replace('gl_Position = projectionMatrix * mvPosition;', 'gl_Position = projectionMatrix * mvPosition;\n\tvBillboardView = mvPosition.xyz;\n\tvAnchorView = ( modelViewMatrix * vec4( 0.0, 0.0, 0.0, 1.0 ) ).xyz + ( viewMatrix * vec4( uDepthLift, 0.0 ) ).xyz;');
     // The palette darkens before the texel modulates the billboard's lit colour (the material colour).
     shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `
       vec4 sampledDiffuseColor = texture2D( map, vMapUv );
@@ -106,7 +145,7 @@ export function billboardMaterial(map: THREE.Texture): { material: THREE.SpriteM
 	gl_FragDepth = uPlain > 0.5 ? gl_FragCoord.z : ( hitClip.z / hitClip.w ) * 0.5 + 0.5;`,
     );
   };
-  return { material, anchorZ, plain, paletteDarkness, ceilingY, ceilingMin, ceilingMax };
+  return { material, anchorZ, depthLift, plain, paletteDarkness, ceilingY, ceilingMin, ceilingMax };
 }
 
 /**
