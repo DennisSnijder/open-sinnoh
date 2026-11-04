@@ -454,6 +454,7 @@ export const MENU_TEXT = {
   optCharacterHgss: 'Lantern_Options_CharacterHgss',
   /** The QoL additions inside the game's screens (OpenSinnoh, not Platinum). {var 0} = the item. */
   repelUseAnother: 'Lantern_Repel_UseAnother',
+  startQuitAsk: 'Lantern_StartMenu_QuitAsk',
   dexByName: 'Lantern_Pokedex_ByName',
   nameDexSearch: 'Lantern_Naming_DexSearch',
   sumRename: 'Lantern_Summary_Rename',

@@ -3,6 +3,8 @@
  * party, bag, trainer card, save, options and the Pokédex. Entries follow the DS order and
  * conditions: POKéDEX once obtained, POKéMON once the party is not empty, BAG, the player's name
  * (trainer card), SAVE, OPTIONS, EXIT. The cursor is remembered between openings, as on the DS.
+ * EXIT is OpenSinnoh's way back to the title screen (the DS's only closes the menu, as B does here): it asks first,
+ * then offers the DS's save question, and either answer goes to the title.
  */
 import type { Button } from '@opensinnoh/core';
 import { newGameRecord, type DeviceOptions, type OptionsView, type SaveView, type StartMenuView } from '@opensinnoh/contracts';
@@ -30,6 +32,7 @@ const ENTRIES: { id: EntryId; label: MenuKey }[] = [
 ];
 
 const CLOSE = { close: { app: 'start-menu' as const } };
+const QUIT = { close: { app: 'start-menu' as const, quit: true as const } };
 
 /** SystemFlag_CheckSafariGameActive (FLAG_SAFARI_GAME_ACTIVE; never in packs without a Great Marsh). */
 function safariGame(ctx: MenuContext): boolean {
@@ -69,7 +72,7 @@ export function startMenu(ctx: MenuContext): Screen {
       case 'options':
         return { push: optionsScreen(ctx) };
       case 'exit':
-        return CLOSE;
+        return { push: quitScreen(ctx) };
     }
   };
   return {
@@ -120,14 +123,42 @@ function objective(ctx: MenuContext): Pick<StartMenuView, 'objective'> {
   return o ? { objective: { title: ctx.text.text(o.title), text: ctx.text.text(o.text) } } : {};
 }
 
-/** SAVE: the save-info window and the DS question, YES/NO, then "saved" (closes the menu on A/B). */
-export function saveScreen(ctx: MenuContext): Screen {
+/**
+ * EXIT: the save-info window asks whether to go back to the title screen; YES goes on to the save question
+ * (`saveScreen` quitting), NO and B go back to the menu.
+ */
+function quitScreen(ctx: MenuContext): Screen {
+  const save = saveScreen(ctx, true);
+  let cursor: 0 | 1 = 0;
+  const answer = (yes: boolean): Step => {
+    menuSe(ctx, 1500);
+    return yes ? { push: save } : 'pop';
+  };
+  return {
+    view: () => ({ ...(save.view() as SaveView), message: ctx.text.t('startQuitAsk'), cursor }),
+    input(i: Input): Step {
+      if ('tap' in i) return i.tap === 'yes' ? answer(true) : i.tap === 'no' || i.tap === 'back' ? answer(false) : undefined;
+      if (i.button === 'up' || i.button === 'down') { menuSe(ctx, 1500); cursor = cursor === 0 ? 1 : 0; }
+      else if (i.button === 'a') return answer(cursor === 0);
+      else if (i.button === 'b') return answer(false);
+      return;
+    },
+    // A save that failed came back here: the menu again, the game not left.
+    resume: () => 'pop',
+  };
+}
+
+/**
+ * SAVE: the save-info window and the DS question, YES/NO, then "saved" (closes the menu on A/B). `quit` (EXIT): both
+ * answers go to the title, YES after the save; a save that fails goes back.
+ */
+export function saveScreen(ctx: MenuContext, quit = false): Screen {
   let phase: SaveView['phase'] = 'ask';
   let message = ctx.text.t('saveAsk');
   let cursor: 0 | 1 = 0;
   const answer = (yes: boolean): Step => {
     menuSe(ctx, 1500);
-    if (!yes) return 'pop';
+    if (!yes) return quit ? QUIT : 'pop';
     try {
       ctx.host.save();
       phase = 'done';
@@ -139,7 +170,7 @@ export function saveScreen(ctx: MenuContext): Screen {
     }
     return;
   };
-  const finish = (): Step => (phase === 'done' ? CLOSE : 'pop');
+  const finish = (): Step => (phase === 'done' ? (quit ? QUIT : CLOSE) : 'pop');
   return {
     view(): SaveView {
       const s = ctx.state;

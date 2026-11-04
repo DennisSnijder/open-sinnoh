@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { setupPokemon, type CreateScriptRunner, type CreateWorld, type InputFrame, type ScriptView } from '@opensinnoh/contracts';
+import { setupPokemon, type CreateApp, type CreateScriptRunner, type CreateWorld, type InputFrame, type ScriptView } from '@opensinnoh/contracts';
 import type { Id, PackData } from '@opensinnoh/core';
 import { applyButtonMode, BUTTON_MODE, computePressed, InputState } from './input.ts';
 import { createGame, reloadGame, type GameOptions } from './game.ts';
@@ -117,6 +117,33 @@ describe('createGame', () => {
     game.tick();
     expect(order).toEqual(['triggers a', 'vm a', 'world a', 'vm ', 'world a']);
     expect(game.state.tick).toBe(2);
+  });
+
+  it("hands over the start menu's EXIT once", () => {
+    let close = false;
+    const createApp: CreateApp = () => ({
+      view: () => ({ app: 'start-menu' }) as never,
+      step: () => (close ? { app: 'start-menu', quit: true } : null),
+    });
+    const game = createGame(options({ createApp }));
+    // The room intro message first.
+    game.advance(2);
+    game.press('a');
+    game.advance(2);
+    game.release('a');
+    game.advance(2);
+    expect(game.canSave()).toBe(true);
+    game.press('x');
+    game.tick();
+    game.release('x');
+    expect(game.app()).not.toBeNull();
+    expect(game.takeQuitRequest()).toBe(false);
+    close = true;
+    game.tick();
+    expect(game.app()).toBeNull();
+    // EXIT's quit is taken once by the app.
+    expect(game.takeQuitRequest()).toBe(true);
+    expect(game.takeQuitRequest()).toBe(false);
   });
 
   it('owns the PRNG in state', () => {

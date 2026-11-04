@@ -445,8 +445,21 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
       resetting = true;
       void saves.put(SAVE_SLOT, cleared).then(() => location.reload());
     }
+    // The start menu's EXIT (after its save question): back to the title by a reload, as above, without `?continue`
+    // (the installed app's shortcut would skip the title again). The suspend point goes first and none is written as the
+    // page unloads, so CONTINUE loads the save, not the progress the player left unsaved.
+    if (session.game.takeQuitRequest() && !opts.replay && !quitting) {
+      quitting = true;
+      const url = new URL(location.href);
+      url.searchParams.delete('continue');
+      void suspend
+        .loaded()
+        .catch((e: Error) => console.error(`suspend: not cleared (${e.message})`))
+        .then(() => location.replace(url));
+    }
   };
   let resetting = false;
+  let quitting = false;
 
   // Layout. On-screen controls show on touch devices until a keyboard or gamepad is used.
   let physicalInput = false;
@@ -788,7 +801,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     if (document.visibilityState === 'hidden') {
       audio.suspend();
       awake.hide();
-      if (!titleActive) void suspend.hide().catch((e: Error) => console.error(`suspend: not kept (${e.message})`));
+      if (!titleActive && !quitting) void suspend.hide().catch((e: Error) => console.error(`suspend: not kept (${e.message})`));
     } else {
       audio.resume();
       awake.show();

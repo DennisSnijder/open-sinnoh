@@ -12194,6 +12194,10 @@
    "text": "SUM"
   },
   {
+   "id": "fixture:Lantern_StartMenu_QuitAsk",
+   "text": "Head back to the title?"
+  },
+  {
    "id": "fixture:PartyMenu_Text_AbleToLearn",
    "text": "CAN!"
   },

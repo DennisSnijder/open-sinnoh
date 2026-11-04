@@ -36,6 +36,7 @@ a reviewed step: bump `CONTRACTS_VERSION` and add a line below.
   replays, stepped by `date`/`time` lines. Periods are core `dayPeriod(hour)` (decomp TimeOfDayForHour).
 
 ## Changelog
+- 0.49.6 (back to the title, on 0.49.5; importer platinum-112): the start menu's result `quit?` (EXIT asked to go back to the title screen; OpenSinnoh, not the DS).
 - 0.49.5 (the one-pocket bag, on 0.49.4): `BagView.pocketTypes` (the DS pocket type each listed pocket is drawn as), so the `pick` and `poffin` bags, which list one pocket, draw it instead of failing.
 - 0.49.4 (on 0.49.3): `PartySlotView.shiny?` (the front picture of the Modern party; a view field, not state).
 - 0.49.3 (on 0.49.2): `FieldRenderer.render`'s `repeat?`, set on a frame no tick came before: the renderer may leave the last picture up.

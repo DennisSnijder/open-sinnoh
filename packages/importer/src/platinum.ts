@@ -415,6 +415,7 @@ const MODERN_OPTION_TEXTS = {
   Lantern_Contest_Dance: 'DANCE',
   Lantern_Contest_Acting: 'ACTING',
   Lantern_Contest_Total: 'TOTAL',
+  Lantern_StartMenu_QuitAsk: 'Return to the title screen?',
 };
 
 /** Map header map types (decomp MAP_TYPE_*), measured on the ROM: 1 town/city, 2 outdoors, 3 cave, 4 indoors. */
