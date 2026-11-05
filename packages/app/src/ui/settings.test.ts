@@ -4,7 +4,7 @@ import type { RenderScale } from '../layout.ts';
 import type { Visuals } from '../visuals.ts';
 import type { Zoom } from '../zoom.ts';
 import { DEFAULT_OPTIONS, OPENSINNOH_OPTIONS, playerDefaults } from './options.ts';
-import { allSettings, pages, SECTIONS, SETTINGS, stepSetting, type DataActions, type SettingsEnv } from './settings.ts';
+import { allSettings, grouped, pages, SECTIONS, SETTINGS, stepSetting, type DataActions, type SettingsEnv } from './settings.ts';
 
 /** An env over a fake OPTIONS view (rows in the app's order) and in-memory app settings; taps and data calls are recorded. */
 function fakeEnv(opts: { app?: boolean; where?: 'title' | 'game'; rom?: boolean } = {}) {
@@ -85,13 +85,22 @@ describe('the settings registry', () => {
     });
   });
 
+  it('grouped: each page in page order under its headings; a row without a group stays under the row before it', () => {
+    const { env } = fakeEnv();
+    const p = pages(env);
+    expect(p.map((x) => grouped(x.settings).map((g) => g.label))).toEqual([['Platinum', 'Additions'], ['Display', 'Sound', 'Play', 'Appearance', 'Touch'], ['Play', 'D-pad', 'Face buttons', 'Other buttons', 'Setup'], ['Saves', 'Game data', 'Mods'], ['']]);
+    for (const x of p) expect(grouped(x.settings).flatMap((g) => g.settings)).toEqual(x.settings);
+    const rows = pages(env)[2]!.settings;
+    expect(grouped(rows).find((g) => g.label === 'Other buttons')!.settings.map((s) => s.id)).toEqual(['l', 'r', 'start', 'select', 'fast', 'poketch'].map((a) => `bind/${a}`));
+  });
+
   it('pages: the four sections in order; DEVICE is the one list longer than the DS window', () => {
     const { env } = fakeEnv();
     const p = pages(env);
     expect(p.map((x) => x.section.id)).toEqual(['game', 'device', 'controls', 'data', 'privacy']);
     expect(p.map((x) => x.settings.map((s) => s.id))).toEqual([
       ['textSpeed', 'sound', 'battleScene', 'battleStyle', 'buttonMode', 'frame', 'repelPrompt', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'spiritombVendors', 'objective', 'introSkip'],
-      ['zoom', 'renderScale', 'speed', 'followers', 'followerStyle', 'character', 'autoLowercase', 'volume', 'mute', 'tradeEvolution', 'theme', 'uiFrame', 'reduceFlashing', 'visualStyle', 'angledCamera', 'controlSize', 'controlOpacity', 'haptics', 'keepAwake'],
+      ['zoom', 'renderScale', 'visualStyle', 'angledCamera', 'reduceFlashing', 'volume', 'mute', 'speed', 'followers', 'followerStyle', 'character', 'autoLowercase', 'tradeEvolution', 'theme', 'uiFrame', 'controlSize', 'controlOpacity', 'haptics', 'keepAwake'],
       ['autoRun', 'itemWheel', ...['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'l', 'r', 'start', 'select', 'fast', 'poketch'].map((a) => `bind/${a}`), 'deadZone', 'resetControls'],
       ['exportSave', 'importSave', 'suspend', 'storage', 'reimport', 'addon', 'deleteRom', 'mod/demo'],
       ['reports'],
@@ -99,7 +108,7 @@ describe('the settings registry', () => {
     // Without the app's hooks and the imported ROM only what does not need them is left, and the sections stay.
     expect(pages(fakeEnv({ app: false, rom: false }).env).map((x) => [x.section.id, x.settings.map((s) => s.id)])).toEqual([
       ['game', ['textSpeed', 'sound', 'battleScene', 'battleStyle', 'buttonMode', 'frame', 'repelPrompt', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'spiritombVendors', 'objective', 'introSkip']],
-      ['device', ['followers', 'followerStyle', 'character', 'autoLowercase', 'tradeEvolution', 'theme', 'uiFrame', 'reduceFlashing']],
+      ['device', ['reduceFlashing', 'followers', 'followerStyle', 'character', 'autoLowercase', 'tradeEvolution', 'theme', 'uiFrame']],
       ['controls', ['autoRun', 'itemWheel', ...['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'l', 'r', 'start', 'select', 'fast', 'poketch'].map((a) => `bind/${a}`), 'deadZone', 'resetControls']],
       ['data', ['exportSave', 'importSave', 'suspend', 'mod/demo']],
     ]);

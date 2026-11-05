@@ -4,10 +4,30 @@
  * Nothing here restyles a ROM window.
  */
 .ui-screen.os-options { position: absolute; inset: 0; background: none; box-shadow: none; clip-path: none; pointer-events: none; }
-.os-options .os-panel { pointer-events: auto; --cap-w: 640px; --cap-h: 480px; }
-.os-options .options-rows { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; touch-action: pan-y; padding: 8px 0; min-height: 0; }
+.os-options .os-panel { pointer-events: auto; --cap-w: 720px; --cap-h: 720px; grid-template-columns: minmax(0, 1fr) auto; }
+.os-options .os-panel > * { grid-column: 1 / -1; }
+.os-options .options-rows { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; touch-action: pan-y; padding: 8px 0; min-height: 0; scroll-padding-block: 36px; }
+/* A group stays whole in its column; the columns balance (a wide window, below). */
+.os-options .options-group { break-inside: avoid; padding-bottom: 12px; }
+.os-options .options-group:last-child { padding-bottom: 0; }
+/* A heading lines up with the rows' labels; 2-px dividers, never nested frames. */
+.os-options .options-heading { margin: 0 0 4px; padding: 4px 12px 2px 36px; font: 500 20px/24px var(--os-font-px); color: var(--os-muted); box-shadow: inset 0 -2px 0 var(--os-line); }
 .os-options .options-desc { margin-top: 8px; }
 .os-options .options-rows::-webkit-scrollbar { display: none; }
+/* A button row stands as tall as the other rows, so a page of bindings shows as many. */
+:root:not([data-density="touch"]) .os-options .options-rows .kind-action { padding-block: 2px; }
+/* A wide window: two columns of rows, and the description box beside Back. */
+@container os-screen (min-width: 1120px) {
+  .os-options .os-panel { --cap-w: 1240px; --cap-h: 760px; }
+  .os-options .options-flow { columns: 2; column-gap: 32px; }
+  .os-options .options-desc { grid-column: 1; min-height: 40px; }
+  .os-options .os-foot { grid-column: 2; align-self: end; padding-left: 8px; }
+}
+/* A large screen: the window takes more of it, and the rows more air. */
+@container os-screen (min-width: 1800px) {
+  .os-options .os-panel { --cap-w: max(1440px, 60%); --cap-h: max(840px, 60%); }
+  .os-options .options-rows .os-row { min-height: 48px; }
+}
 /* The cursor moves with the game's keys, so the cursor row marks it even without browser focus. */
 .os-options .options-rows .os-row { scroll-margin: 8px; }
 /* Phone: full bleed; the title bar takes the safe area, the box and Back keep off the edges. */
