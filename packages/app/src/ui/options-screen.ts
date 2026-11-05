@@ -1,15 +1,19 @@
 /**
  * OPTIONS, one page per section (settings.ts), on the OpenSinnoh UI design system (@opensinnoh/ui,
  * docs/design-system.md): OpenSinnoh's own screen, so it is not drawn with ROM art or the ROM font. One
- * window (the picked frame) over the field, capped and centred on whole pixels, full bleed on a phone: the
- * system-toned title tab, underline tabs for the sections, the rows (the ▶, label, description and one control:
- * every value of a choice inline, ◀ value ▶ for a stepper, a switch for a toggle, cells for a slider, a
- * button for an action), the description box (typed at the Text speed) and the footer with Back.
+ * window (the picked frame) over the field, sized by the room and centred on whole pixels, full bleed on a phone:
+ * the system-toned title tab, underline tabs for the sections, the rows under their group headings, in two columns
+ * in a wide window (options.css) (the ▶, label, description and one control: every value of a choice inline,
+ * ◀ value ▶ for a stepper, a switch for a toggle, cells for a slider, a button for an action), the description box
+ * (typed at the Text speed) and the footer with Back.
  *
  * The screen keeps its own page and cursor (the OPTIONS app's cursor covers only the DS options): while the
  * app is open it takes the d-pad, A, L and R from the input frame and the `settings:` taps of its DOM; a DS
  * option changes through the app's tap (next frame), B and Back go to the app. The cursor is a slot: the tab
- * row, a setting, or Back (the last), drawn as the cursor row (`is-cursor`). The title opens the same screen
+ * row, a setting, or Back (the last), drawn as the cursor row (`is-cursor`). Up and down walk the slots in reading
+ * order, so down from the end of a column is the top of the next; left and right change the row's value, and on a
+ * row with no value to change (a button, a muted row) a press moves to the row beside it in the other column. The
+ * columns are the layout's: that move reads what is drawn. The title opens the same screen
  * over `createOptions` (title/options-flow.ts). A setting that does not work where it is open (`where`) is
  * drawn muted and says why; a DATA action's result (or error) replaces the description until the cursor
  * moves. A destructive action asks first in a dialog that opens on NO (up/down/left/right and A, B is NO, or
@@ -22,7 +26,8 @@ import type { Button } from '@opensinnoh/core';
 import { backButton, button, cycle, dialog, footer, h, pick as osPick, row as osRow, slider, tabs, titleTab, toggle, typeText, type IconName } from '@opensinnoh/ui';
 import { controls } from '../input.ts';
 import type { DrawContext } from './apps.ts';
-import { pages, stepSetting, type AppSettings, type Setting, type SettingsEnv, type SectionId } from './settings.ts';
+import { nearest } from '../pad-nav.ts';
+import { grouped, pages, stepSetting, type AppSettings, type Setting, type SettingsEnv, type SectionId } from './settings.ts';
 import './options.css';
 
 const SECTION_ICONS: Record<SectionId, IconName> = { game: 'pad', device: 'screen', controls: 'dpad', data: 'disk', privacy: 'shield' };
@@ -54,6 +59,8 @@ export class OptionsScreen {
   /** The held d-pad direction and its ticks (the screen takes the d-pad, so the app stack's repeat never sees it). */
   private held: Button | null = null;
   private heldFor = 0;
+  /** The screen last drawn (a press across columns reads where its rows are). */
+  private drawn: HTMLElement | null = null;
 
   constructor(
     private readonly deps: {
@@ -167,7 +174,7 @@ export class OptionsScreen {
     if (dir !== this.held) {
       this.held = dir;
       this.heldFor = 0;
-    } else if (dir && ++this.heldFor >= REPEAT_DELAY && (this.heldFor - REPEAT_DELAY) % REPEAT_EVERY === 0) this.button(env, dir);
+    } else if (dir && ++this.heldFor >= REPEAT_DELAY && (this.heldFor - REPEAT_DELAY) % REPEAT_EVERY === 0) this.button(env, dir, true);
     // The frame without what the screen took (B, and the app's own taps, go on).
     const keep = (list: Button[]) => list.filter((b) => !TAKEN.includes(b));
     const out: InputFrame = { held: keep(frame.held), pressed: keep(frame.pressed), touch: frame.touch };
@@ -175,20 +182,34 @@ export class OptionsScreen {
     return out;
   }
 
-  private button(env: SettingsEnv, b: Button): void {
+  /** `repeat`: a held direction's repeat, which steps and walks but never jumps a column (it would step the row it lands on). */
+  private button(env: SettingsEnv, b: Button, repeat = false): void {
     const slots = this.slots(env);
     const slot = slots[this.cursor]!;
     if (b === 'up' || b === 'down') this.moveTo((this.cursor + (b === 'up' ? slots.length - 1 : 1)) % slots.length);
     else if (b === 'l' || b === 'r') this.turn(env, b === 'l' ? -1 : 1);
     else if (b === 'left' || b === 'right') {
       if (slot.kind === 'tabs') this.turn(env, b === 'left' ? -1 : 1);
-      else if (slot.kind === 'setting') stepSetting(env, slot.setting, b === 'left' ? -1 : 1);
+      else if (slot.kind === 'setting') {
+        if (slot.setting.kind !== 'action' && !slot.setting.disabled?.(env)) stepSetting(env, slot.setting, b === 'left' ? -1 : 1);
+        else if (!repeat) this.across(b);
+      }
     } else if (b === 'a') {
       if (slot.kind === 'close') env.tap('close');
       else if (slot.kind === 'tabs') this.turn(env, 1);
       else if (slot.setting.kind === 'action') this.activate(env, slot.setting);
       else stepSetting(env, slot.setting, 1);
     }
+  }
+
+  /** To the row beside the cursor in the column that way, if there is one. */
+  private across(dir: 'left' | 'right'): void {
+    const rows = [...(this.drawn?.querySelectorAll<HTMLElement>('.options-row') ?? [])];
+    const from = rows.find((r) => r.classList.contains('is-cursor'));
+    if (!from) return;
+    const others = rows.filter((r) => r !== from);
+    const to = nearest(from.getBoundingClientRect(), others.map((r) => r.getBoundingClientRect()), dir);
+    if (to >= 0) this.moveTo(Number(others[to]!.dataset.slot));
   }
 
   /** The next or previous page (wrapping); the cursor stays on the tabs, else goes to the first setting. */
@@ -256,13 +277,28 @@ export class OptionsScreen {
     }
     panel.append(strip);
 
-    const list = h('div', 'os-list options-rows');
+    const list = h('div', 'options-rows');
     list.setAttribute('role', 'tabpanel');
     list.setAttribute('aria-label', title(page.section.label));
     list.dataset.scrolls = '';
-    slots.forEach((slot, i) => {
-      if (slot.kind === 'setting') list.append(settingRow(d, env, slot.setting, i, this.cursor === i));
+    // Slots count the tab strip first, so the page's first setting is slot 1.
+    let at = 1;
+    const flow = h('div', 'options-flow');
+    grouped(page.settings).forEach((group, i) => {
+      const box = h('section', 'os-list options-group');
+      if (group.label) {
+        const heading = h('h3', 'options-heading', group.label);
+        heading.id = `options-group-${i}`;
+        box.setAttribute('aria-labelledby', heading.id);
+        box.append(heading);
+      }
+      for (const setting of group.settings) {
+        box.append(settingRow(d, env, setting, at, this.cursor === at));
+        at++;
+      }
+      flow.append(box);
     });
+    list.append(flow);
     panel.append(list);
 
     // The description box: an action's result, a muted row's reason, or the row's help, typed at the Text speed.
@@ -305,6 +341,7 @@ export class OptionsScreen {
       this.drawnQuestion = q;
       panel.append(layer);
     }
+    this.drawn = root;
     return root;
   }
 }
@@ -367,6 +404,7 @@ function settingRow(d: DrawContext, env: SettingsEnv, s: Setting, slot: number, 
   r.dataset.setting = id;
   r.dataset.storage = s.storage;
   r.dataset.tap = `settings:row:${slot}`;
+  r.dataset.slot = String(slot);
   r.setAttribute('role', 'group');
   r.setAttribute('aria-label', label);
   if (cursor) r.setAttribute('aria-current', 'true');

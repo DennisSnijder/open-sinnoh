@@ -151,6 +151,12 @@ Always beside a label; an icon-only button has an accessible name and a tooltip.
   moves always shows that ring (`:root[data-pad-focus]`, set by the app's `pad-nav.ts`), even after a click, when a
   browser would not count it as focus-visible.
 - **Phone:** the breakpoint is a 480-px container, not the viewport. Dots stay 2 px (no fractional dots).
+- **Window size:** a window of a few controls stays capped near 600 × 424 (`.os-panel`). A list window sizes by the
+  room: Options is 720 × 720 at most up to a 1120-px container; from there 1240 × 760 with two columns of rows and the
+  description box beside Back; from 1800 px 1440 × 840 or 60 % of the room, whichever is larger, with 48-px rows.
+  Rows stand under group headings (the muted pixel label over a 2-px divider, in line with the row labels). A group
+  stays whole in its column and the columns balance. The cursor reads down the first column, then the second; left
+  and right keep changing the value, and move across only where a row has no value to change.
 - **Motion** steps on the game's 30 Hz frame (`--os-f`, 33.3 ms): windows open in 4 frames (`.os-enter`), sheets
   in 6, toasts 6 in, 80 held, 4 out; a press drops a button one dot. Hover and cursor moves are instant. Reduced
   motion makes everything instant and nothing loops.

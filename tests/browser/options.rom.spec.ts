@@ -161,7 +161,7 @@ test('the keyboard changes a value on every page; the device settings survive a 
   await key('ArrowRight');
   expect((await opts()).textSpeed).toBe(2);
   await expect(chosen('textSpeed')).not.toHaveText(before);
-  // DEVICE: ZOOM Auto → the first whole scale, RENDER SCALE Auto → Full, FAST-FORWARD 2x → 3x, VOLUME 80 → 90, MUTE off → on, TRADE EVOS on → off.
+  // DEVICE: ZOOM Auto → the first whole scale, RENDER SCALE Auto → Full, VOLUME 80 → 90, MUTE off → on, FAST-FORWARD 2x → 3x, TRADE EVOS on → off.
   await key('KeyE');
   await key('ArrowRight');
   const zoom = await page.evaluate(() => localStorage.getItem('lantern-nds:zoom'));
@@ -169,18 +169,21 @@ test('the keyboard changes a value on every page; the device settings survive a 
   await key('ArrowDown');
   await key('ArrowRight');
   expect(await page.evaluate(() => localStorage.getItem('lantern-nds:render-scale'))).toBe('full');
-  await key('ArrowDown');
-  await key('ArrowRight');
-  expect(await page.evaluate(() => localStorage.getItem('lantern-nds:speed'))).toBe('3');
-  // The rows between FAST-FORWARD and VOLUME depend on what this device offers (followers, the HGSS look, QoL rows): walk by the page.
+  // The rows between depend on what this device offers (followers, the HGSS look, QoL rows): walk by the page.
   const rows = await board().locator('[data-setting]').evaluateAll((els) => els.map((e) => e.getAttribute('data-setting')));
-  for (let i = rows.indexOf('speed'); i < rows.indexOf('volume'); i++) await key('ArrowDown');
+  const walk = async (from: string, to: string) => {
+    for (let i = rows.indexOf(from); i < rows.indexOf(to); i++) await key('ArrowDown');
+  };
+  await walk('renderScale', 'volume');
   await key('ArrowRight');
   await expect(chosen('volume')).toHaveAttribute('aria-valuenow', '90');
   await key('ArrowDown');
   await key('ArrowRight');
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('lantern-nds:audio')!))).toEqual({ volume: 90, muted: true });
-  await key('ArrowDown');
+  await walk('mute', 'speed');
+  await key('ArrowRight');
+  expect(await page.evaluate(() => localStorage.getItem('lantern-nds:speed'))).toBe('3');
+  await walk('speed', 'tradeEvolution');
   await key('ArrowRight');
   expect((await opts()).tradeEvolution).toBe(1);
   await shot('keys-device');

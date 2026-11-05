@@ -494,6 +494,9 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   OPTIONS. NEW GAME is Rowan's intro from the ROM, after a one-time setup.
 - **One Options screen** from the title and in game: Game, Device, Controls, Data, Privacy. What does not
   work where it is open stays listed, muted, with a reason. Destructive actions confirm, defaulting to No.
+  It takes the room: two columns of grouped rows in a wide window, so the longest page shows whole from about
+  800 px tall. Up and down walk the columns in reading order, because left and right must keep changing values
+  as on the DS; they move across only on a row with no value to change.
 - **First run** on the ROM page: one picker, the setup (add-on, error reports, text speed) answered while
   the import runs, and Start playing once the game is ready, never an auto-start.
 
