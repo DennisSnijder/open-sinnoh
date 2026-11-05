@@ -68,7 +68,7 @@ describe('OpenSinnoh UI tokens', () => {
 
   it('has original 16 × 16 icons, each with a meaning', () => {
     const names = Object.keys(ICONS) as IconName[];
-    expect(names.length).toBe(47);
+    expect(names.length).toBe(53);
     for (const n of names) {
       const d = ICONS[n] as { m: string; p: number[][]; c?: number[][] };
       expect(d.m.length).toBeGreaterThan(0);

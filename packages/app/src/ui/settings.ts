@@ -22,6 +22,7 @@ import { CONTROL_SIZES, OPACITY_MIN, OPACITY_RANGE, type PhoneSettings } from '.
 import { RENDER_SCALES, type RenderScale } from '../layout.ts';
 import { zoomLabel, type Zoom } from '../zoom.ts';
 import { VISUAL_STYLES, type Visuals } from '../visuals.ts';
+import { MENU_STYLES, readMenuStyle, storeMenuStyle } from '../menu-style.ts';
 
 export type SectionId = 'game' | 'device' | 'controls' | 'data' | 'privacy';
 
@@ -405,6 +406,22 @@ export const SETTINGS: readonly Setting[] = [
     values: () => ['DS', 'SUBTLE', 'CINEMATIC'],
     get: (env) => VISUAL_STYLES.indexOf(env.visuals!.get().style),
     set: (env, v) => env.visuals!.set({ ...env.visuals!.get(), style: VISUAL_STYLES[v]! }),
+  },
+  // The menu style (`lantern-nds:menu-style`, menu-style.ts): the same menus in OpenSinnoh's own style. Presentation only.
+  {
+    id: 'menuStyle',
+    section: 'device',
+    kind: 'choice',
+    storage: 'device',
+    available: () => true,
+    label: () => 'MENUS',
+    description: () => (readMenuStyle() === 'modern' ? "OpenSinnoh's own style for the Pokémon and\nBag screens. The game is unchanged." : 'As the DS drew them, from your ROM.\nThe game is the same either way.'),
+    values: () => ['ORIGINAL', 'MODERN'],
+    get: () => MENU_STYLES.indexOf(readMenuStyle()),
+    set: (_env, v) => {
+      const err = storeMenuStyle(MENU_STYLES[v]!);
+      if (err) console.warn(`menus: the setting is kept for this visit only: ${err}`);
+    },
   },
   // The angled camera (`lantern-nds:angled-camera`): outdoors only, the DS camera in caves, buildings and fog.
   {

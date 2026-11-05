@@ -96,8 +96,14 @@ test('setup once per device, then the intro from NEW GAME to the field', async (
   await page.screenshot({ path: `${SHOTS}/${project}-setup-visual-style.png` });
   await chooseSetup(page, setup, touch, 0);
   await expect.poll(() => page.evaluate(() => localStorage.getItem('lantern-nds:visual-style'))).toBe('ds');
+  // The menu style: the cursor on Original.
+  await expect.poll(() => page.evaluate(() => window.openSinnohTitle!.question)).toBe('menuStyle');
+  expect(await setupAnswers(setup)).toEqual(['Original', 'Modern']);
+  await expect(setup.locator('[data-tap="menu:0"]')).toHaveAttribute('aria-current', 'true');
+  await chooseSetup(page, setup, touch, 0);
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('lantern-nds:menu-style'))).toBe('original');
   await expect.poll(() => page.evaluate(() => window.openSinnohTitle!.phase)).toBe('menu');
-  await expect.poll(() => page.evaluate(() => localStorage.getItem('lantern-nds:setup'))).toBe('["reports","textSpeed","visualStyle"]');
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('lantern-nds:setup'))).toBe('["reports","textSpeed","visualStyle","menuStyle"]');
   // DS draws the DS look.
   await expect.poll(() => page.evaluate(() => (globalThis as unknown as { openSinnohRenderStats?: { enhanced: unknown } }).openSinnohRenderStats?.enhanced ?? null)).toBeNull();
 
@@ -189,6 +195,7 @@ test('answered on the ROM page while the ROM imported: the title asks nothing', 
   await wizard.locator('.os-choice', { hasText: "Don't allow" }).click();
   await wizard.locator('.os-choice', { hasText: 'Slow' }).click();
   await wizard.locator('.os-choice', { hasText: 'The original look' }).click();
+  await wizard.locator('.os-choice', { hasText: 'Original' }).click();
   await expect(wizard).toContainText('All set');
   await page.goto('/?packs=fixture&title');
   await page.waitForFunction(() => window.openSinnohTitle?.phase === 'title' && !window.openSinnohTitle.inputBlocked);

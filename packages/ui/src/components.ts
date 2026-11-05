@@ -388,11 +388,57 @@ export function tabs(items: { id: string; label: string; icon?: IconName }[], se
 }
 
 /** The ▶ that marks the cursor row (shown by the row's `is-cursor` or focus). */
-const cursorMark = () => {
+export const cursorMark = () => {
   const c = h('span', 'cur', icon('cursor'));
   c.setAttribute('aria-hidden', 'true');
   return c;
 };
+
+export type HpBand = 'high' | 'mid' | 'low';
+/** An HP bar with its numbers (the band's colour comes with words: the numbers). */
+export function hpBar(now: number, max: number, band: HpBand): HTMLElement {
+  const fill = h('i');
+  fill.style.width = `${now <= 0 ? 0 : Math.ceil((now / max) * 50) * 2}%`;
+  const bar = h('span', `os-hp ${band}`, fill);
+  bar.setAttribute('role', 'img');
+  bar.setAttribute('aria-label', `HP ${now} of ${max}`);
+  return h('span', 'os-hpl', bar, h('span', 'os-num', `${now}/${max}`));
+}
+
+export type StatusName = 'psn' | 'brn' | 'par' | 'slp' | 'frz' | 'fnt';
+/** A status chip: its colour, always with its word. */
+export function statusChip(status: StatusName, label: string): HTMLElement {
+  const c = h('span', 'os-chip', label);
+  c.style.setProperty('--c', `var(--os-status-${status})`);
+  c.style.setProperty('--t', 'var(--os-on-status)');
+  return c;
+}
+
+/** ♂ or ♀ as an icon, beside a name. */
+export function genderMark(gender: 'male' | 'female'): HTMLElement {
+  return h('span', 'os-gender', icon(gender, 16, gender));
+}
+
+/**
+ * A rail: more than five choices of one kind, all in reach (the bag's pockets), upright beside a list; a strip of
+ * icons with the chosen label below a 480-px screen. The chosen one is gold, as a tab.
+ */
+export function rail(items: { label: string; icon: IconName }[], index: number, o: { label: string; onPick?(i: number): void }): HTMLElement {
+  const r = h('div', 'os-rail');
+  r.setAttribute('role', 'tablist');
+  r.setAttribute('aria-label', o.label);
+  items.forEach((it, i) => {
+    const b = h('button', '', icon(it.icon), h('span', 'rl', it.label));
+    b.type = 'button';
+    b.setAttribute('role', 'tab');
+    b.setAttribute('aria-selected', String(i === index));
+    b.setAttribute('aria-label', it.label);
+    b.tabIndex = i === index ? 0 : -1;
+    if (o.onPick) b.addEventListener('click', () => o.onPick!(i));
+    r.append(b);
+  });
+  return r;
+}
 
 /** A list row: the ▶, label, description and one control; the cursor row has the sel fill, a 1-dot line and the ▶. */
 export function row(label: string, description: string, control: Node, o: { disabled?: boolean; cursor?: boolean } = {}): HTMLElement {

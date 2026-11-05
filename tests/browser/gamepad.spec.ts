@@ -96,7 +96,7 @@ test('first page load to the title by pad: the setup, every answer, Start playin
   await expect(answer.nth(1)).toBeFocused();
   await expect(answer.nth(1)).toHaveClass(/is-cursor/);
   await press(page, PAD.a);
-  for (const q of ['reports', 'textSpeed', 'visualStyle']) {
+  for (const q of ['reports', 'textSpeed', 'visualStyle', 'menuStyle']) {
     await expect.poll(question).toBe(q);
     await expect(page.locator('.fr-choices .os-choice:focus')).toHaveCount(1);
     await press(page, PAD.a);

@@ -449,6 +449,12 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
 - **Who owns the screen picks its style.** Whatever the game draws (message boxes, YES/NO, the start menu,
   battle, bag, party, summary, PC, Pokédex, naming, the intro) stays DS-faithful with the ROM's art, font
   and frames. OpenSinnoh's own screens use the OpenSinnoh UI design system, even when opened mid-game.
+- **The player may pick.** MENUS (Options › Device, a setup question on a new device, `lantern-nds:menu-style`, Original
+  by default) swaps a recreated screen for a second drawing of the same app view in the design system: one window, a
+  list and a detail that follows the cursor (the Inspector direction). Party and bag so far; the rest stay original, so
+  a modern game mixes both. Same model, taps and sounds, no new state; not in the save, and replays keep the original
+  drawing. The party and bag a battle opens follow it (`MODERN_IN_BATTLE` in `ui/modern.ts`, one switch). The party list
+  is one column over the game's 2-column cursor: the app turns up and down into the presses that reach the next stop.
 - **Every menu app is a DS screen** laid out in DS pixels at a whole unit (`ui/board.ts`), windows at the
   decomp's rects. Menus never scroll internally or clip; only lists the DS scrolls do. On phones a DS
   screen sits on a backdrop of its art's edge colours over the whole view.

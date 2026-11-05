@@ -5,6 +5,11 @@
  */
 import {
   ICONS,
+  cursorMark,
+  genderMark,
+  hpBar,
+  rail,
+  statusChip,
   WINDOW_FRAMES,
   backButton,
   banner,
@@ -53,6 +58,7 @@ html:has(body.os-gallery), body.os-gallery { overflow: auto; height: auto; }
 /* The 64-px wordmark steps down to 40 px on a phone, as on the ROM page. */
 @container os-screen (max-width: 480px) { .gal .os-title.d64 { font-size: 40px; line-height: 48px; } }
 .gal-narrow { width: 100%; max-width: 240px; }
+.gal-item { grid-template-columns: 24px minmax(0, 1fr); }
 .gal-icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; }
 .gal-icons figure { margin: 0; display: grid; justify-items: center; gap: 8px; padding: 8px 4px; box-shadow: inset 0 0 0 2px var(--os-line); font-size: 12px; line-height: 16px; color: var(--os-muted); }
 .gal-icons .os-ico { color: var(--os-ink); }
@@ -80,6 +86,16 @@ function themeColumn(theme: 'dark' | 'light'): HTMLElement {
       h('div', 'gal-brand', logo(16, { label: 'OpenSinnoh mark, 16 px' }), logo(32, { label: 'OpenSinnoh mark, 32 px' }), logo(64, { label: 'OpenSinnoh mark, 64 px', animate: true })),
       h('div', 'gal-brand', wordmark(2, { label: 'OpenSinnoh' }), wordmark(4, { label: 'OpenSinnoh' })),
       wordmark(5, { label: 'OpenSinnoh', animate: true }),
+    ),
+  );
+
+  col.append(
+    card(
+      'Game lists: rows, HP, status, gender, rail (the Modern menus)',
+      demo(hpBar(88, 96, 'high'), hpBar(41, 102, 'mid'), hpBar(9, 88, 'low')),
+      demo(statusChip('psn', 'PSN'), statusChip('brn', 'BRN'), statusChip('par', 'PAR'), statusChip('slp', 'SLP'), statusChip('frz', 'FRZ'), statusChip('fnt', 'FNT'), genderMark('male'), genderMark('female')),
+      h('div', 'os-list', h('button', 'os-item is-cursor gal-item', cursorMark(), h('span', '', 'Cursor row')), h('button', 'os-item gal-item', cursorMark(), h('span', '', 'Row'))),
+      rail([{ label: 'ITEMS', icon: 'bag' }, { label: 'MEDICINE', icon: 'heart' }, { label: 'BALLS', icon: 'ball' }, { label: 'TMs & HMs', icon: 'disc' }, { label: 'BERRIES', icon: 'berry' }, { label: 'MAIL', icon: 'mail' }, { label: 'BATTLE ITEMS', icon: 'spark' }, { label: 'KEY ITEMS', icon: 'key' }], 1, { label: 'Pockets' }),
     ),
   );
 

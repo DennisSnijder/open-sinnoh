@@ -1,6 +1,6 @@
 ---
 name: opensinnoh-ui
-description: The OpenSinnoh UI design system (v0.7, the Distortion look). Use when building or changing any OpenSinnoh-owned screen or UI (Options, the onboarding setup, data and mods, crash screens, mod tooling, any new DOM screen or control in packages/app) or doing website and brand work for opensinnoh.com. Not for screens that recreate the DS (battle, bag, party, summary, Pokédex, PC, naming, the intro) or anything the ROM draws.
+description: The OpenSinnoh UI design system (v0.7, the Distortion look). Use when building or changing any OpenSinnoh-owned screen or UI (Options, the onboarding setup, data and mods, crash screens, mod tooling, any new DOM screen or control in packages/app) or doing website and brand work for opensinnoh.com. Also for the Modern menus, the player's opt-in second drawing of the party and bag (`packages/app/src/ui/modern*.ts`). Not for the Original drawing of screens that recreate the DS (battle, bag, party, summary, Pokédex, PC, naming, the intro) or anything else the ROM draws.
 ---
 
 # OpenSinnoh UI
@@ -22,9 +22,9 @@ Spec: `docs/design-system.md`. Code: `packages/ui` (`@opensinnoh/ui`).
   there is no room); whole scales, 16-px cut below 32, clear space (mark 4 mark px, wordmark 2 glyph px), never
   inside a game-drawn screen.
 - Components: `packages/ui/src/components.ts` (button, iconButton, toggle, pick, cycle, slider, textInput,
-  select, tabs, row, choices, filePicker, titleTab, pixelTitle, typeText, footer, backButton, toast, banner,
+  select, tabs, rail, row, hpBar, statusChip, genderMark, choices, filePicker, titleTab, pixelTitle, typeText, footer, backButton, toast, banner,
   dialog, sheet, progress).
-- Users: Options (`packages/app/src/ui/options-screen.ts`, `options.css`; its in-layer frame `.ui-os` is in
+- Users: the Modern menus (`packages/app/src/ui/modern.ts`, `modern-party.ts`, `modern-bag.ts`, `modern.css`), Options (`packages/app/src/ui/options-screen.ts`, `options.css`; its in-layer frame `.ui-os` is in
   `ui/ui.css`), the setup (`title/setup.ts`), the crash and update screens (`telemetry/crash.ts`) and the ROM page
   (`rom-screen.ts`; no ROM art there, it shows before any import). Gallery: `?ui-gallery`
   (`packages/app/src/ui-gallery.ts`, spec `tests/browser/ui-gallery.spec.ts`). Add a new component to the
@@ -32,8 +32,10 @@ Spec: `docs/design-system.md`. Code: `packages/ui` (`@opensinnoh/ui`).
 
 ## Rules
 
-- **The screen's owner picks the style.** Never restyle a ROM-drawn window, the title main menu or the game's
-  text; gameplay text uses the ROM font, never a web font (Pokemon DP Pro included). Pixelify Sans, Silkscreen,
+- **The screen's owner picks the style, and the player may pick.** Never restyle a ROM-drawn window, the title main
+  menu or the game's text; gameplay text uses the ROM font, never a web font (Pokemon DP Pro included). The one
+  exception is the Modern menus (Options › Device › Menus): a second drawing of the same app view, with the ROM's
+  sprites and icons, that leaves the Original drawing untouched. Battle, the field and message boxes stay ROM-drawn. Pixelify Sans, Silkscreen,
   Figtree and JetBrains Mono are for OpenSinnoh's own screens and the website only.
 - **Colour by meaning only**, always through `--os-*` tokens, never a literal. Tones (world, team, items,
   system, danger) only on a title tab; gold (`accent`) for the ▶, the chosen value, focus and the active tab;

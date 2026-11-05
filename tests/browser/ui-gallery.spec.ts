@@ -37,7 +37,7 @@ for (const [name, viewport, touch] of [
       // Both themes are shown, with every icon.
       await expect(page.locator('.gal-theme[data-theme="dark"]')).toHaveCount(1);
       await expect(page.locator('.gal-theme[data-theme="light"]')).toHaveCount(1);
-      await expect(page.locator('.gal-theme[data-theme="dark"] .gal-icons figure')).toHaveCount(47);
+      await expect(page.locator('.gal-theme[data-theme="dark"] .gal-icons figure')).toHaveCount(53);
       expect(await page.evaluate(() => document.documentElement.dataset.density)).toBe(touch ? 'touch' : 'dpad');
 
       // No horizontal overflow: neither the page nor any box inside it.
