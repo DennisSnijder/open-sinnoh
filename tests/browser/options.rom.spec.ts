@@ -73,10 +73,14 @@ async function openOptions(): Promise<void> {
   await expect(board()).toBeVisible();
 }
 
-/** A key press, then the ticks for the screen to take it and the OPTIONS app to apply a DS option's tap. */
+/**
+ * A key press, then the ticks for the screen to take it and the OPTIONS app to apply a DS option's tap, and the display
+ * frames that draw the moved cursor: the next press starts from the drawn one.
+ */
 async function key(code: string): Promise<void> {
   await page.keyboard.press(code);
   await advance(2);
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
 
 /** The window fits the viewport on whole pixels, nothing scrolls the page; every shown row's control is inside it. */
