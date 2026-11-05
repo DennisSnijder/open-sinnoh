@@ -446,7 +446,11 @@ export interface ScriptSaves {
 
 /** Renderer for the main surface. `alpha` interpolates between the last two ticks. */
 export interface FieldRenderer {
-  render(alpha: number): void;
+  /**
+   * 0.49.3. `repeat`: no tick has run since the last call and the canvas was not resized, so the renderer may leave the
+   * last picture up when this one would be the same. Rendering still never moves simulation time.
+   */
+  render(alpha: number, repeat?: boolean): void;
   /**
    * 0.37.0. The map tile under a point of the canvas (CSS px from its top-left; ov5_GetPositionFromTouchCoordinates: the
    * ground plane under the camera), or null off the map or before the map has loaded.

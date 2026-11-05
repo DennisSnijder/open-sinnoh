@@ -141,6 +141,20 @@ test('the overlay shows the signboard from the ticks that bring it and is empty 
   expect(errors).toEqual([]);
 });
 
+test('a still field is drawn once a tick, a walking one every display frame', async () => {
+  test.setTimeout(120_000);
+  // Stood still since the last test's popup. Software GL may draw under 30 fps: then every frame has its tick.
+  await page.waitForTimeout(500);
+  const [a, b] = await afterFrames(60);
+  expect(b.field - a.field, 'no more drawn than ticks ran').toBeLessThanOrEqual(b.ticks - a.ticks + 2);
+  await page.keyboard.down('ArrowLeft');
+  await page.waitForTimeout(300);
+  const [c, d] = await afterFrames(20);
+  await page.keyboard.up('ArrowLeft');
+  expect(d.field - c.field, 'every frame of the walk').toBeGreaterThanOrEqual(d.shown - c.shown - 2);
+  expect(errors).toEqual([]);
+});
+
 test('the windowed battle draws its field once, and again after a resize and when it ends', async () => {
   test.setTimeout(300_000);
   await launch(async () => {

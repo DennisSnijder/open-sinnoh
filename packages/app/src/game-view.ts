@@ -638,7 +638,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     battleCovers = battle.covers();
     // A windowed battle's field stands until the battle ends: drawn once (and after a layout, which clears the canvas).
     const frozen = !opts.replay && battle.fieldFrozen();
-    if (!battleCovers && (!frozen || !frozenDrawn || redraw)) session.renderer.render(session.game.inBattle() || fieldStill ? 1 : alpha);
+    if (!battleCovers && (!frozen || !frozenDrawn || redraw)) session.renderer.render(session.game.inBattle() || fieldStill ? 1 : alpha, !fresh);
     frozenDrawn = frozen;
     // The count matters only under the full black (`revealing`); elsewhere the scene's loading is not asked for (it
     // builds the world's view again) and the field counts as complete.

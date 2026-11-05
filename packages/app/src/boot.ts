@@ -145,7 +145,7 @@ export async function createSession(
 
   /** Stable handle over the current renderer. */
   const current: FieldRenderer = {
-    render: (alpha) => renderer.render(alpha),
+    render: (alpha, repeat) => renderer.render(alpha, repeat),
     tileAt: (x, y) => renderer.tileAt?.(x, y) ?? null,
     screenOf: (x, z) => renderer.screenOf?.(x, z) ?? null,
     loading: () => renderer.loading(),
