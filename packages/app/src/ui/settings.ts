@@ -70,6 +70,8 @@ export interface AppSettings {
   renderScale: { get(): RenderScale; set(scale: RenderScale): void } | null;
   /** The visual style and angled camera (visuals.ts); `phone`: a touch screen (Cinematic says it is heavier there). */
   visuals: { get(): Visuals; set(v: Visuals): void; phone: boolean } | null;
+  /** Page fullscreen, where the browser has it and the app is not installed (the HUD's button; a pad reaches this row). */
+  fullscreen: { run(): Promise<void>; active(): boolean } | null;
   /** The fast-forward speed. */
   speed: { get(): number; choices(): readonly number[]; set(speed: number): void } | null;
   /** The DATA section's actions. */
@@ -198,10 +200,10 @@ let binding: Action | null = null;
 function bindCaptured(action: Action, got: Captured): string {
   const { result, error } = controls.edit((b) => (got.kind === 'key' ? bindKey(b, action, got.code) : bindPad(b, got.raw, action, got.token)));
   const b = controls.bindings;
-  const what = got.kind === 'key' ? keyLabel(got.code) : padLabel(got.token, got.raw);
+  const what = got.kind === 'key' ? keyLabel(got.code) : padLabel(got.token, got.raw, controls.face);
   let text = `${actionLabel(action)} is now ${what}.`;
   if (result.holder) {
-    const now = got.kind === 'key' ? b.keys[result.holder].map(keyLabel).join(', ') : padLabel((got.raw ? b.raw : b.pad)[result.holder], got.raw);
+    const now = got.kind === 'key' ? b.keys[result.holder].map(keyLabel).join(', ') : padLabel((got.raw ? b.raw : b.pad)[result.holder], got.raw, controls.face);
     text += ` Swapped with ${actionLabel(result.holder)}: it now uses ${now || 'no key'}.`;
   }
   return error ? `${text} Kept for this visit only: ${error}` : text;
@@ -216,8 +218,8 @@ function bindRow(a: (typeof ACTIONS)[number]): Setting {
     storage: 'device',
     available: () => true,
     label: () => a.label,
-    description: () => (binding === a.id ? 'Press the key or gamepad button to use.\nEscape cancels.' : 'Choose it, then press a key or a gamepad\nbutton to use for this.'),
-    values: () => [binding === a.id ? 'PRESS A KEY OR BUTTON' : bindingText(controls.bindings, a.id, controls.padRaw)],
+    description: () => (binding === a.id ? 'Press the key or gamepad button to use.\nEscape, or its own button, keeps it.' : 'Choose it, then press a key or a gamepad\nbutton to use for this.'),
+    values: () => [binding === a.id ? 'PRESS A KEY OR BUTTON' : bindingText(controls.bindings, a.id, controls.padRaw, controls.face)],
     get: () => 0,
     set: () => {},
     run: async () => {
@@ -462,6 +464,7 @@ export const SETTINGS: readonly Setting[] = [
     get: (env) => (env.phone!.get().keepAwake ? 0 : 1),
     set: (env, v) => env.phone!.set({ ...env.phone!.get(), keepAwake: v === 0 }),
   },
+  action('fullscreen', 'FULLSCREEN', (env) => (env.fullscreen!.active() ? 'ON' : 'OFF'), () => 'Fills the screen with the game.', async (env) => (await env.fullscreen!.run(), ''), { section: 'device', available: (env) => !!env.fullscreen }),
   // CONTROLS: running without B and the item wheel on a held Y (OpenSinnoh), then this device's keyboard and gamepad bindings (`lantern-nds:controls`, controls.ts).
   dsOption('autoRun', 'controls', 'choice'),
   dsOption('itemWheel', 'controls', 'choice'),

@@ -6,9 +6,11 @@
  * setup (title/setup.ts) keeps it, so a question answered here is never asked there, and one left open (the player
  * pressed Start playing first) is asked there.
  *
- * Keys: Tab and the arrows move between the answers (the cursor follows focus), Enter or Space picks.
+ * Keys: Tab and the arrows move between the answers (the cursor follows focus), Enter or Space picks. The pad drives
+ * the same buttons (pad-nav.ts).
  */
 import { choices, h, icon, snapPixels } from '@opensinnoh/ui';
+import { FILE_DIALOG_REFUSED, openFileDialog } from './file-dialog.ts';
 import { readReports, reportsAnswered } from './telemetry/settings.ts';
 import { setReportsEnabled } from './telemetry/index.ts';
 import { ASK, readAnswered, storeAnswered, type SetupQuestion } from './title/setup-questions.ts';
@@ -29,7 +31,7 @@ interface Step {
   /** The answer the cursor starts on (-1: none, for a question with no default answer). */
   cursor(): number;
   /** Stores answer `i`; false when the step stays (the add-on's file dialog is open). */
-  answer(i: number, deps: FirstRunDeps, input: HTMLInputElement): boolean;
+  answer(i: number, deps: FirstRunDeps, pick: () => void): boolean;
 }
 
 const stored = (q: SetupQuestion) => {
@@ -51,10 +53,10 @@ const STEPS: readonly Step[] = [
     id: 'addon',
     ask: (o) => !o.addon,
     cursor: () => -1,
-    answer(i, _deps, input) {
+    answer(i, _deps, pick) {
       if (i === 0) {
         // The system's file dialog; the step moves on once a file is picked (the input's change), not on a cancel.
-        input.click();
+        pick();
         return false;
       }
       stored('addon');
@@ -145,6 +147,13 @@ export class FirstRun {
     return this.index >= this.steps.length;
   }
 
+  /** The add-on's file dialog, or why the browser refused it (the question stays, focus on its answer). */
+  private pick(note: HTMLElement): void {
+    if (openFileDialog(this.input)) return;
+    note.textContent = FILE_DIALOG_REFUSED;
+    note.hidden = false;
+  }
+
   private next(focus: boolean): void {
     this.index++;
     this.draw(focus);
@@ -174,7 +183,10 @@ export class FirstRun {
     const title = h('h2', 'fr-q', ask.title);
     title.id = 'fr-q';
     const cursor = step.cursor();
-    const list = choices(ask.entries, cursor, { label: ask.title, onPick: (i) => step.answer(i, this.deps, this.input) && this.next(true) });
+    const note = h('p', 'fr-text fr-note');
+    note.setAttribute('role', 'status');
+    note.hidden = true;
+    const list = choices(ask.entries, cursor, { label: ask.title, onPick: (i) => step.answer(i, this.deps, () => this.pick(note)) && this.next(true) });
     list.classList.add('fr-choices');
     list.setAttribute('aria-labelledby', title.id);
     list.removeAttribute('aria-label');
@@ -193,7 +205,7 @@ export class FirstRun {
       e.preventDefault();
       buttons[to]!.focus();
     });
-    body.append(count, h('div', 'fr-ask', title, h('p', 'fr-text', ask.text)), list);
+    body.append(count, h('div', 'fr-ask', title, h('p', 'fr-text', ask.text)), list, note);
     this.root.append(body);
     if (focus) (buttons[cursor] ?? buttons[0])!.focus({ preventScroll: true });
     snapPixels(this.root);

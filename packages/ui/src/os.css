@@ -39,6 +39,8 @@
 .os :focus-visible { outline: 2px solid var(--os-accent); outline-offset: 2px; }
 /* Focus that follows the screen's cursor is already marked by the cursor (the ▶ row, the tab): no second ring. */
 .os .is-cursor:focus-visible, .os .os-row.is-cursor :focus-visible, .os .os-choice:focus-visible { outline: none; }
+/* Focus moved by a gamepad (the app's pad-nav.ts), which browsers may not count as focus-visible after a click. */
+:root[data-pad-focus] .os :focus:not(.is-cursor, .os-choice, input) { outline: 2px solid var(--os-accent); outline-offset: 2px; }
 .os [hidden] { display: none !important; }
 
 /* A screen: the container the phone rule (480 px) reads. */
@@ -308,7 +310,7 @@
 @media (hover: hover) { .os-file.drop:hover { background-color: var(--os-face-alt); } }
 .os-file.quiet { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 12px; font: 500 20px/24px var(--os-font-px); border-style: solid; border-color: transparent; border-width: 4px; border-image: var(--os-ctl) 2 fill / 4px / 0 stretch; }
 @media (hover: hover) { .os-file.quiet:hover { border-image-source: var(--os-ctl-hover); } }
-.os-file:has(input:focus-visible) { outline: 2px solid var(--os-accent); outline-offset: 2px; }
+:root[data-pad-focus] .os-file:has(input:focus), .os-file:has(input:focus-visible) { outline: 2px solid var(--os-accent); outline-offset: 2px; }
 [data-density="touch"] .os-file.quiet { min-height: 44px; padding: 0 16px; }
 
 /* ---------- The mark and the wordmark (components.ts: logo, wordmark; brand.ts) ---------- */

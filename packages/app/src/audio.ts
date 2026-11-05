@@ -43,6 +43,8 @@ export interface WebAudio extends AudioOutput {
   setSettings(s: AudioSettings): void;
   /** The DS STEREO (0) / MONO (1) option. */
   setMono(mono: boolean): void;
+  /** A gesture the page's events do not show (a gamepad press): starts the context if it waits for one. */
+  unlock(): void;
   /** Rebinds to a new game's registries (mods change the records): stops everything and forgets loads. */
   bind(registries: Registries, log: StubLog): void;
   /** The page is hidden: stops the audio clock (the music holds its place). */
@@ -171,6 +173,7 @@ export function createWebAudio(assets: AssetSource): WebAudio {
           log?.stub('audio:output-error', e.message);
         });
     },
+    unlock,
     settings: () => ({ ...settings }),
     setSettings(s) {
       settings = { ...s };

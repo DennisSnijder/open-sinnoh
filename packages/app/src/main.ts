@@ -24,8 +24,10 @@ import { checkImport, deleteImport, ImportIncompleteError, listImports, openDb, 
 import { crash } from './telemetry/crash.ts';
 import { IMPORT_SECONDS_KEY } from './telemetry/perf.ts';
 import { durationBucket, initAnalytics, track } from './telemetry/analytics.ts';
-import { buildRomScreen, clearRomError, hideBaseJob, mountWizard, setAddonJob, setImportDone, setImportProgress, setStart, showAddonError, showRomError, showRomNote, showRomNotice, showRomStep } from './rom-screen.ts';
+import { buildRomScreen, chooseRomFile, clearRomError, hideBaseJob, mountWizard, setAddonJob, setImportDone, setImportProgress, setStart, showAddonError, showDialogRefused, showPadNote, showRomError, showRomNote, showRomNotice, showRomStep } from './rom-screen.ts';
+import { openFileDialog } from './file-dialog.ts';
 import { FirstRun, pendingSteps } from './first-run.ts';
+import { startPadNav } from './pad-nav.ts';
 import type { SetupQuestion } from './title/setup-questions.ts';
 import { splashDone, splashPhase } from './splash.ts';
 import { installTouchGuards } from './touch.ts';
@@ -51,6 +53,8 @@ addContextSource(() => ({ viewport: `${innerWidth}x${innerHeight}`, dpr: deviceP
 installGlobalHandlers();
 // iPhone: no loupe, callout or page zoom on the game's surfaces (touch.ts).
 installTouchGuards();
+// The pad on the DOM screens that have no game behind them (the ROM page, the crash screen).
+startPadNav({ openFile: chooseRomFile, used: () => document.getElementById('picker-pad-note') && showPadNote() });
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const params = new URLSearchParams(location.search);
@@ -266,7 +270,10 @@ function pickFile(): Promise<File | null> {
   return new Promise((resolve) => {
     input.addEventListener('change', () => resolve(input.files?.[0] ?? null));
     input.addEventListener('cancel', () => resolve(null));
-    input.click();
+    if (!openFileDialog(input)) {
+      showDialogRefused();
+      resolve(null);
+    }
   });
 }
 
