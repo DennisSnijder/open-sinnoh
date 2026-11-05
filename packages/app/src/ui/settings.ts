@@ -68,8 +68,11 @@ export interface AppSettings {
   zoom: { get(): Zoom; choices(): Zoom[]; set(zoom: Zoom): void } | null;
   /** The field's 3D resolution (layout.ts `RenderScale`). */
   renderScale: { get(): RenderScale; set(scale: RenderScale): void } | null;
-  /** The visual style and angled camera (visuals.ts); `phone`: a touch screen (Cinematic says it is heavier there). */
-  visuals: { get(): Visuals; set(v: Visuals): void; phone: boolean } | null;
+  /**
+   * The visual style and angled camera (visuals.ts); `phone`: a touch screen (Cinematic says it is heavier there);
+   * `eased`: the automatic quality step is on (auto-quality.ts), which the style's row says.
+   */
+  visuals: { get(): Visuals; set(v: Visuals): void; phone: boolean; eased(): boolean } | null;
   /** The fast-forward speed. */
   speed: { get(): number; choices(): readonly number[]; set(speed: number): void } | null;
   /** The DATA section's actions. */
@@ -392,9 +395,11 @@ export const SETTINGS: readonly Setting[] = [
     available: (env) => !!env.visuals,
     label: () => 'VISUAL STYLE',
     description: (env) =>
-      env.visuals!.get().style === 'cinematic' && env.visuals!.phone
-        ? 'Depth of field and light shafts too.\nHeavier: it may run slower on a phone.'
-        : 'DS draws the field as the DS did. SUBTLE\nadds glow, colour and particles.',
+      env.visuals!.eased()
+        ? 'Eased on this device to keep it smooth.\nPick a style for its full look.'
+        : env.visuals!.get().style === 'cinematic' && env.visuals!.phone
+          ? 'Depth of field and light shafts too.\nHeavier: it may run slower on a phone.'
+          : 'DS draws the field as the DS did. SUBTLE\nadds glow, colour and particles.',
     values: () => ['DS', 'SUBTLE', 'CINEMATIC'],
     get: (env) => VISUAL_STYLES.indexOf(env.visuals!.get().style),
     set: (env, v) => env.visuals!.set({ ...env.visuals!.get(), style: VISUAL_STYLES[v]! }),

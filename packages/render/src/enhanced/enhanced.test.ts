@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Zone } from '@opensinnoh/contracts';
-import { cameraAllowed, ENHANCED_PRESETS, enhancedVisuals, parseEnhanced, setEnhancedVisuals, visualStyleConfig } from './config.ts';
+import { cameraAllowed, ENHANCED_OFF, ENHANCED_PRESETS, enhancedVisuals, parseEnhanced, setEnhancedVisuals, visualStyleConfig } from './config.ts';
 import { glowKind } from './light-sources.ts';
 import { goldenAt, gradeAt, nightAt, sunDirection } from './time.ts';
 
@@ -35,6 +35,9 @@ describe('the Options visual style', () => {
     expect(visualStyleConfig('ds', true, false)).toMatchObject({ camera: 'follow', bloom: false });
     expect(visualStyleConfig('subtle', false, true)).toMatchObject({ camera: 'off', bloom: true, dof: false, lowPower: true });
     expect(visualStyleConfig('cinematic', false, false)).toMatchObject({ camera: 'off', dof: true, sun: true });
+    expect(visualStyleConfig('cinematic', true, false, true)).toEqual({ ...ENHANCED_OFF, camera: 'follow', particles: true, grade: true, lowPower: true });
+    expect(visualStyleConfig('subtle', false, true, true)).toEqual({ ...ENHANCED_OFF, particles: true, grade: true, lowPower: true });
+    expect(visualStyleConfig('ds', false, false, true)).toBeNull();
   });
 
   it('keeps the DS camera in caves and buildings', () => {

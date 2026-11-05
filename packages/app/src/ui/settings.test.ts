@@ -48,7 +48,7 @@ function fakeEnv(opts: { app?: boolean; where?: 'title' | 'game'; rom?: boolean 
     audio: withApp ? { get: () => ({ volume: app.audio.volume, muted: app.audio.muted }), set: (s) => (app.audio = s) } : null,
     zoom: withApp ? { get: () => app.zoom, choices: () => ['auto', 3, 4, 5], set: (z) => (app.zoom = z) } : null,
     renderScale: withApp ? { get: () => app.renderScale, set: (s) => (app.renderScale = s) } : null,
-    visuals: withApp ? { get: () => app.visuals, set: (v) => (app.visuals = v), phone: true } : null,
+    visuals: withApp ? { get: () => app.visuals, set: (v) => (app.visuals = v), phone: true, eased: () => false } : null,
     speed: withApp ? { get: () => app.speed, choices: () => [2, 3, 4, 8], set: (n) => (app.speed = n) } : null,
     data,
     reports: withApp ? { get: () => app.reports, set: (on) => (app.reports = on) } : null,

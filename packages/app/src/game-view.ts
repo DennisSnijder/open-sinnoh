@@ -21,6 +21,7 @@ import { setPlaying } from './update-toast.ts';
 import { splashDone, splashPhase } from './splash.ts';
 import { FAST_SPEEDS, FastForward, readFastSpeed, storeFastSpeed, type FastSpeed } from './speed.ts';
 import { toggleMod, type PackSource } from './pack-source.ts';
+import { AutoQuality, readStoredQuality, storeQuality } from './auto-quality.ts';
 import { clearsWhenWritten } from './canvas-writes.ts';
 import { bottomFrame, drawPanel, toOverlayPoint, toPanelPoint, type DsFrame } from './panel.ts';
 import { frontierFrame } from './frontier-scene.ts';
@@ -49,7 +50,7 @@ declare global {
   interface Window {
     openSinnohGame?: AppBridge;
     /** Debug/test handle (always present once the game is mounted). */
-    openSinnohApp?: { lastInput: InputFrame | null; ticks: number; layout: Layout; overlayFrame(): DsFrame; game: Game; sceneLoading(): boolean; ui: InGameUi; battleScene(): BattleSceneInfo; audio: WebAudio; zoom(): { setting: Zoom; scale: number }; renderScale(): { setting: RenderScale; pixelRatio: number }; loop: LoopStats; hold(): { holding: boolean; ms: number; reason: string }; speed(): { fast: number; latched: boolean; active: boolean; speed: number }; tileAt(x: number, y: number): { x: number; z: number } | null };
+    openSinnohApp?: { lastInput: InputFrame | null; ticks: number; layout: Layout; overlayFrame(): DsFrame; game: Game; sceneLoading(): boolean; ui: InGameUi; battleScene(): BattleSceneInfo; audio: WebAudio; zoom(): { setting: Zoom; scale: number }; renderScale(): { setting: RenderScale; pixelRatio: number }; loop: LoopStats; hold(): { holding: boolean; ms: number; reason: string }; speed(): { fast: number; latched: boolean; active: boolean; speed: number }; tileAt(x: number, y: number): { x: number; z: number } | null; qualityFrame(ms: number): void };
   }
 }
 
@@ -194,7 +195,11 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   // live; replays keep the DS look whatever is stored. Dev and test builds also get a hook to set a config directly.
   let visuals: Visuals = readVisuals();
   const lowPower = () => matchMedia('(pointer: coarse)').matches;
-  const applyVisuals = () => setEnhancedVisuals(opts.replay ? null : visualStyleConfig(visuals.style, visuals.angledCamera, lowPower()));
+  const storedQuality = readStoredQuality();
+  /** The automatic quality step is on (auto-quality.ts): the player's style stays stored and shown. */
+  let eased = storedQuality === 'eased';
+  const autoQuality = new AutoQuality(opts.replay ? 'off' : storedQuality);
+  const applyVisuals = () => setEnhancedVisuals(opts.replay ? null : visualStyleConfig(visuals.style, visuals.angledCamera, lowPower(), eased));
   applyVisuals();
   // A preset or switch list takes this device's power, as the Options' style does.
   if (import.meta.env.DEV)
@@ -299,12 +304,19 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     visuals: {
       get: () => visuals,
       set: (v) => {
+        // A style picked by hand is the player's answer to the step: the full look, not watched again.
+        if (v.style !== visuals.style) {
+          autoQuality.stop();
+          if (eased) storeQuality('off');
+          eased = false;
+        }
         visuals = v;
         const err = storeVisuals(v);
         if (err) session.game.log.stub('ui:visuals-storage', `the visual style is kept for this visit only: ${err}`);
         applyVisuals();
       },
       phone: coarse.matches,
+      eased: () => eased,
     },
     data: dataActions,
     reports: {
@@ -613,6 +625,18 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   // No long-press menu (iOS callout, Android/desktop context menu) anywhere on the game screen.
   root.addEventListener('contextmenu', (e) => e.preventDefault());
 
+  /** One display frame's interval, on the automatic quality step's watch (auto-quality.ts). */
+  const qualityFrame = (ms: number) => {
+    const step = autoQuality.frame(ms);
+    if (step === 'keep') {
+      storeQuality('eased');
+      ui!.toast('Visuals eased to keep the game smooth', 6000);
+    } else if (step) {
+      eased = step === 'ease';
+      applyVisuals();
+    }
+  };
+  let frameAt: number | null = null;
   /** `ticks` at the last drawn frame, and whether the windowed battle's frozen field has been drawn since it froze. */
   let drawnTicks = -1;
   let frozenDrawn = false;
@@ -691,6 +715,11 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     }
     ui.frame();
     redraw = false;
+    // Watched: the enhanced field at normal speed, with nothing over it that has a cost of its own.
+    const now = performance.now();
+    if (visuals.style === 'ds' || battleCovers || game.inBattle() || game.app() || loopStats.speed !== 1 || game.world.fadeState()) autoQuality.skip();
+    else if (frameAt !== null) qualityFrame(now - frameAt);
+    frameAt = now;
   };
 
   window.openSinnohApp = {
@@ -715,6 +744,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     hold: () => (battle.holding() ? { holding: true, ms: held, reason: battle.holdReason() } : { holding: revealing(), ms: held, reason: revealing() ? 'the field scene' : '' }),
     speed: () => ({ fast: fastForward.fast, latched: fastForward.latched, active: fastForward.active, speed: fastForward.speed() }),
     tileAt: (x, y) => session.renderer.tileAt?.(x, y) ?? null,
+    qualityFrame,
   };
   // The title screen runs first (its own loop); the field shows and its loop starts once it is left.
   const titleRecord = opts.title ? [...session.game.registries.titleScreens.values()][0] : undefined;

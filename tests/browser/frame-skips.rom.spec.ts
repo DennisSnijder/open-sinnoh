@@ -155,6 +155,47 @@ test('a still field is drawn once a tick, a walking one every display frame', as
   expect(errors).toEqual([]);
 });
 
+test('the automatic quality step eases a slow Cinematic, says so, keeps the choice stored and yields to a hand pick', async () => {
+  test.setTimeout(240_000);
+  const enhanced = () => page.evaluate(() => (globalThis as unknown as { openSinnohRenderStats: { enhanced: { ao: boolean; bloom: boolean; grade: boolean } | null } }).openSinnohRenderStats.enhanced);
+  const stored = () => page.evaluate(() => [localStorage.getItem('lantern-nds:visual-style'), localStorage.getItem('lantern-nds:auto-quality')]);
+  const frames = (ms: number, n: number) =>
+    page.evaluate(
+      ([ms, n]) => {
+        for (let i = 0; i < n!; i++) window.openSinnohApp!.qualityFrame(ms!);
+      },
+      [ms, n],
+    );
+  await page.evaluate(() => {
+    localStorage.setItem('lantern-nds:visual-style', 'cinematic');
+    localStorage.removeItem('lantern-nds:auto-quality');
+  });
+  await launch(() => moveTo('platinum:MAP_HEADER_ROUTE_201', 118, 853));
+  await expect.poll(enhanced, { timeout: 30_000 }).toMatchObject({ ao: true, bloom: true });
+
+  await frames(40, 240);
+  await expect.poll(enhanced, { message: 'the step is tried', timeout: 10_000 }).toMatchObject({ ao: false, bloom: false, grade: true });
+  expect(await stored(), 'not stored during its trial').toEqual(['cinematic', null]);
+  await page.locator('.ui-toast').waitFor({ state: 'hidden' });
+  await frames(30, 150);
+  await expect(page.locator('.ui-toast')).toContainText('Visuals eased');
+  expect(await stored(), 'the style stays the player\'s').toEqual(['cinematic', 'eased']);
+
+  await page.reload();
+  await page.waitForFunction(() => window.openSinnohTitle?.phase === 'title' && !window.openSinnohTitle.inputBlocked, undefined, { timeout: 60_000 });
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => window.openSinnohTitle?.focused === 'continue', undefined, { timeout: 60_000 });
+  await page.waitForTimeout(600);
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#title')).toHaveCount(0, { timeout: 30_000 });
+  await expect.poll(enhanced, { message: 'a new session starts eased', timeout: 30_000 }).toMatchObject({ ao: false, grade: true });
+  await page.evaluate(() => {
+    localStorage.setItem('lantern-nds:auto-quality', 'off');
+    localStorage.setItem('lantern-nds:visual-style', 'ds');
+  });
+  expect(errors).toEqual([]);
+});
+
 test('the windowed battle draws its field once, and again after a resize and when it ends', async () => {
   test.setTimeout(300_000);
   await launch(async () => {

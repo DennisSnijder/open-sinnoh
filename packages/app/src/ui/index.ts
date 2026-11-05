@@ -66,8 +66,8 @@ export interface InGameUi {
   togglePoketch(): boolean;
   /** Shows a short player-facing notice (a failed save write). */
   notice(message: string): void;
-  /** Shows a brief neutral note (the zoom after a shortcut); a newer one replaces it. */
-  toast(message: string): void;
+  /** Shows a brief neutral note (the zoom after a shortcut), for `ms`; a newer one replaces it. */
+  toast(message: string, ms?: number): void;
   /**
    * `fractionalFits`: views drawn at a fractional scale because no whole-device-pixel scale fitted (each logged
    * once per app). It stays 0 in every supported viewport; the fit spec checks it.
@@ -402,11 +402,11 @@ export function mountUi(deps: UiDeps): InGameUi {
       notices.append(n);
       setTimeout(() => n.remove(), 8000);
     },
-    toast(message) {
+    toast(message, ms = 1200) {
       toast.textContent = message;
       toast.hidden = false;
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => (toast.hidden = true), 1200);
+      toastTimer = setTimeout(() => (toast.hidden = true), ms);
     },
     layout(l) {
       layer.style.left = `${l.main.x}px`;
