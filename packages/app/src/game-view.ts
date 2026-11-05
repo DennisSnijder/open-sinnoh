@@ -640,7 +640,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     // builds the world's view again) and the field counts as complete.
     const black = (session.game.world.fadeState()?.alpha ?? 0) >= 1;
     completeFrames = battleCovers || (black && session.renderer.loading()) ? 0 : black ? Math.min(completeFrames + 1, 2) : 2;
-    battle.frame();
+    battle.frame(fresh);
     // The overlay draws what the ticks left, but for the Underground radar, whose blips follow the drawn camera.
     if (fresh || session.game.world.undergroundView()) {
       clearOverlay();

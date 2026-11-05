@@ -26,8 +26,11 @@ const RETURN_TICKS = 8;
 export interface BattleUi {
   /** True while the battle scene covers the whole field (skip the field render). Asked before the field renders. */
   covers(): boolean;
-  /** Per rendered frame, after the field rendered (when it was not covered). */
-  frame(): void;
+  /**
+   * Per rendered frame, after the field rendered (when it was not covered). `fresh`: a tick ran or the layout changed
+   * since the last call. A battle's picture follows its view and its art alone, so a stale frame keeps the canvas.
+   */
+  frame(fresh: boolean): void;
   layout(layout: Layout): void;
   /** Images of the battle on screen still loading. */
   loading(): boolean;
@@ -131,9 +134,12 @@ export function mountBattle(deps: {
       const v = view();
       return v !== null && v.transition === null && !scene.windowed;
     },
-    frame() {
+    frame(fresh) {
       const game = deps.game();
       const v = view();
+      // Art that comes in while the game holds (no ticks) is drawn as it arrives; the transition cuts up the field's
+      // canvas, which holds a picture only in a frame that drew it.
+      if (!fresh && v && shown && (v.transition || (!scene.loading() && !card.loading()))) return;
       if (v) scene.setDoubles(v.topology !== 'single');
       // The card is placed first: it fits its text to its box.
       placeCard();
