@@ -2,12 +2,12 @@
  * The first-run questions and where their answers are kept, shared by the ROM page's setup (first-run.ts, while the
  * ROM imports) and the title's setup (setup.ts, for anyone who left one unanswered). No DOM and no engine: the ROM
  * page loads this before the game chunk. `lantern-nds:setup` lists the answered questions; each answer itself is a
- * device option (`lantern-nds:error-reports`, `lantern-nds:options`, `lantern-nds:visual-style`, the add-on import).
+ * device option (`lantern-nds:error-reports`, `lantern-nds:options`, `lantern-nds:visual-style`, `lantern-nds:menu-style`, the add-on import).
  */
 /** `introSkip` is NEW GAME's question on a device that has finished Rowan's intro (intro-skip.ts), not the setup's. */
-export type SetupQuestion = 'reports' | 'addon' | 'textSpeed' | 'visualStyle' | 'introSkip';
+export type SetupQuestion = 'reports' | 'addon' | 'textSpeed' | 'visualStyle' | 'menuStyle' | 'introSkip';
 export const SETUP_KEY = 'lantern-nds:setup'; // pre-rename name, kept: players' stored data uses it
-const QUESTIONS: readonly SetupQuestion[] = ['reports', 'addon', 'textSpeed', 'visualStyle'];
+const QUESTIONS: readonly SetupQuestion[] = ['reports', 'addon', 'textSpeed', 'visualStyle', 'menuStyle'];
 
 /** The questions answered on this device (device data: anything unreadable counts as none). */
 export function readAnswered(): SetupQuestion[] {
@@ -37,7 +37,7 @@ export interface Ask {
 
 /**
  * Each question's words; an answer's index is the stored choice (`reports` 0 allow; `addon` 0 add, 1 skip; `textSpeed`
- * the speed; `visualStyle` the style in VISUAL_STYLES' order).
+ * the speed; `visualStyle` the style in VISUAL_STYLES' order; `menuStyle` the style in MENU_STYLES' order).
  */
 export const ASK: Record<SetupQuestion, Ask> = {
   reports: {
@@ -64,6 +64,14 @@ export const ASK: Record<SetupQuestion, Ask> = {
       { label: 'DS', description: 'The original look, as the DS draws it.' },
       { label: 'Subtle', description: 'Soft bloom, colour by the time of day, lamps that glow at night.' },
       { label: 'Cinematic', description: 'Adds depth of field, ambient shadows and sunlight. Heavier on phones.' },
+    ],
+  },
+  menuStyle: {
+    title: 'Menu style',
+    text: 'How should the Pokémon and Bag screens look? The game plays the same either way.',
+    entries: [
+      { label: 'Original', description: 'As the DS draws them, from your ROM.' },
+      { label: 'Modern', description: "OpenSinnoh's own style: bigger text and touch targets." },
     ],
   },
   introSkip: {

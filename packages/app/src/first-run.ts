@@ -16,6 +16,7 @@ import { setReportsEnabled } from './telemetry/index.ts';
 import { ASK, readAnswered, storeAnswered, type SetupQuestion } from './title/setup-questions.ts';
 import { OPTIONS_KEY, parseOptions, storeOption } from './ui/options-store.ts';
 import { readVisuals, storeVisuals, VISUAL_STYLES, visualStyleChosen } from './visuals.ts';
+import { MENU_STYLES, menuStyleChosen, readMenuStyle, storeMenuStyle } from './menu-style.ts';
 
 export interface FirstRunDeps {
   /** The add-on's file was picked: import it (now, or once the base import is done). */
@@ -94,6 +95,19 @@ const STEPS: readonly Step[] = [
       const err = storeVisuals({ ...readVisuals(), style: VISUAL_STYLES[i]! });
       if (err) console.warn(`the visual style is kept for this visit only: ${err}`);
       stored('visualStyle');
+      return true;
+    },
+  },
+  {
+    id: 'menuStyle',
+    // A new device only: a player past the setup finds it in Options.
+    ask: () => !readAnswered().includes('visualStyle') && !visualStyleChosen() && !menuStyleChosen(),
+    // Original until chosen.
+    cursor: () => MENU_STYLES.indexOf(readMenuStyle()),
+    answer(i) {
+      const err = storeMenuStyle(MENU_STYLES[i]!);
+      if (err) console.warn(`the menu style is kept for this visit only: ${err}`);
+      stored('menuStyle');
       return true;
     },
   },

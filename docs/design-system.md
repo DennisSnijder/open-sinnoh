@@ -12,8 +12,12 @@ time (`site/prerender.ts`) and adds only its layout and the device bezels.
 
 - **Whatever the game draws stays the game's.** The field message box, battle text, the game's menus, the title
   main menu and every screen that recreates the DS (battle, bag, party, summary, Pokédex, PC, naming, the intro)
-  are drawn by the engine from the ROM's art and font. This system never targets them: no `os-` class, no token,
-  no web font there (Pokemon DP Pro or otherwise).
+  are drawn by the engine from the ROM's art and font. In that drawing this system has no place: no `os-` class, no
+  token, no web font there (Pokemon DP Pro or otherwise).
+- **The player may pick.** Options › Device › Menus (Original by default, `lantern-nds:menu-style`, also a setup
+  question) offers a second drawing of a recreated screen in this system: the Modern menus, today the party and the
+  bag. It reads the same app view, adds no state and keeps the ROM's sprites and icons; replays and saves never read
+  it. Original stays exactly as it is. Battle, the field and message boxes outside these screens stay ROM-drawn.
 - **OpenSinnoh's own screens** (Options, the setup, the crash and update screens, the ROM page) use this system
   throughout, their dialogs included, even when opened mid-game.
 
@@ -107,7 +111,7 @@ inline SVG.
 
 ## Icons
 
-47 original 16 × 16 icons in `packages/ui/src/icons.ts`, each with its meaning (`m`): solid silhouettes with
+53 original 16 × 16 icons in `packages/ui/src/icons.ts`, each with its meaning (`m`): solid silhouettes with
 1-pixel cut-outs, `currentColor`, ×1 or ×2. Ink or muted only, never a tone; the ▶ `cursor` is the accent.
 The clock has an open face and hands, the coin an edge-on rim and inset stamp, and Normal a hollow diamond, so their silhouettes differ at 16 px.
 Always beside a label; an icon-only button has an accessible name and a tooltip. Use an icon only for its meaning.
@@ -124,8 +128,13 @@ Always beside a label; an icon-only button has an accessible name and a tooltip.
 | `slider` | levels of 10 steps or fewer, as cells, number shown | fine-grained values |
 | `textInput` | label above, help or error below; validate on blur and submit | placeholder as label |
 | `select` | long or unknown-length lists, ≤ 6 rows visible; a modal bottom sheet below a 480-px container, a popover above it | fewer than 3 options |
+| `rail` | more than five choices of one kind (the bag's pockets), upright beside a list; a strip with the chosen label on a phone; focus reveals its tab | up to five choices (use `tabs`) |
 | `tabs` | underline tabs on our screens, ≤ 5; edge fades and 44-px scroll arrows when they overflow; focus reveals its tab | nested tabs |
 | `row` | the ▶, label, description, one control; the cursor row (`is-cursor` or focus) | several focus stops in a row |
+| `.os-item` | a selectable row with parts of its own (a game list), the same selection model; its columns are the screen's | settings (use `row`) |
+| `hpBar` | HP as a bar in its band's colour with the numbers | anything but HP |
+| `statusChip` | a status colour with its word | status by colour alone |
+| `genderMark` | ♂ or ♀ as an icon beside a name (no web font here has them) | the characters themselves |
 | `choices` | the answers to one question, all visible, each with a line under it (the setup) | more than 4 answers; settings that stay (use a row) |
 | `filePicker` | a file from the device: `drop` the big target with a dotted border (`.over` while a file is dragged over the page), `quiet` a secondary pick | a hidden input with a fake button |
 | `titleTab` | one per window: its name on the top edge in the tone, an on-tone icon, an optional end (a step count); `bar` across the top (a sheet) | tone on icons, frames or text |

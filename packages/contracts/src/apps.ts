@@ -706,6 +706,8 @@ export interface PartySlotView {
   /** Core StatusCondition; `fainted` at 0 HP (decomp SUMMARY_CONDITION_FAINTED). */
   status: 'none' | 'sleep' | 'poison' | 'toxic' | 'burn' | 'freeze' | 'paralysis' | 'fainted';
   heldItem: Id | null;
+  /** 0.49.4. A shiny Pokémon (the front picture of the modern party). */
+  shiny?: true;
   /** The Ball Capsule marker (decomp PartyMenu_DrawMemberBallSeal, `party/held` cell 2 at the item marker + 8 px). */
   capsule?: true;
 }

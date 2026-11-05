@@ -1,0 +1,107 @@
+/*
+ * The Modern menus (modern.ts): OpenSinnoh UI windows over the field, in a `.ui-frame.ui-os`. The root fills the room;
+ * the field also covers what is outside it (the scrim), so the screen is one full-bleed composition.
+ */
+.ui-screen.mm { position: absolute; inset: 0; container: os-screen / size; background-color: var(--os-field); box-shadow: none; clip-path: none; pointer-events: auto; overflow: hidden; }
+.ui-scrim:has(+ .ui-os > .mm) { background: var(--os-field); }
+.ui-os.ui-enter .mm-win { animation: os-win-in calc(var(--os-f) * 4) steps(4) both; }
+
+/* The game layer's cursor band and hover are not ours. */
+.mm [data-nav].is-cursor { background: none; box-shadow: none; }
+.mm [data-nav].is-cursor::before { display: none; }
+.mm [data-nav]:hover:not(.is-cursor) { background: none; }
+.mm .os-item.is-cursor, .mm .os-item.is-selected { background: var(--os-sel); box-shadow: inset 0 0 0 2px var(--os-sel-line); }
+.mm .os-item.is-selected > .cur { visibility: visible; }
+
+.mm-win { --w: min(1120px, calc(100% - 24px)); --h: min(720px, calc(100% - 40px)); grid-template-rows: auto minmax(0, 1fr) auto; }
+.mm-body { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 6fr); min-height: 0; }
+.mm-left { display: grid; min-height: 0; min-width: 0; padding-right: 8px; }
+.mm-right { display: flex; flex-direction: column; gap: 12px; min-height: 0; min-width: 0; padding: 8px 4px 8px 12px; border-left: 2px solid var(--os-line); overflow: auto; scrollbar-width: none; }
+.mm-list { overflow: auto; overscroll-behavior: contain; scrollbar-width: none; touch-action: pan-y; min-height: 0; padding: 4px 0; }
+.mm-list::-webkit-scrollbar, .mm-right::-webkit-scrollbar { display: none; }
+.mm .os-foot { padding-top: 4px; }
+
+.mm .lab { font: 500 20px/24px var(--os-font-px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-flex; align-items: center; gap: 2px; min-width: 0; }
+.mm-win .lab { text-shadow: var(--os-tsd); }
+.mm-nl { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.mm-wrap { flex-wrap: wrap; }
+.mm-st { display: grid; gap: 4px; min-width: 0; }
+.mm-lv { color: var(--os-muted); white-space: nowrap; }
+.mm-held, .mm-reg { color: var(--os-muted); display: inline-flex; }
+.mm-note { color: var(--os-accent); font: 500 20px/24px var(--os-font-px); }
+.mm-prompt-line, .mm-empty { color: var(--os-muted); }
+.mm-empty { padding: 12px 16px; }
+.mm-desc { color: var(--os-ink); }
+.mm-heldname { display: inline-flex; align-items: center; gap: 4px; color: var(--os-muted); font-size: 12px; line-height: 16px; white-space: nowrap; }
+.mm-heldname .item-icon { width: 32px; height: 32px; background-size: 32px 32px; margin: -8px -4px; }
+
+/* The ROM's icons at whole scales: a party icon (32 × 32, two frames) at 2, an item icon at 1 and 2. */
+.mm .mon-icon-box { width: 64px; height: 64px; margin: -8px -4px; }
+.mm .mon-icon-sprite { width: 64px; height: 64px; background-size: 64px 128px; }
+.mm .os-item .item-icon { width: 32px; height: 32px; background-size: 32px 32px; }
+.mm .mm-itemhero .item-icon { width: 64px; height: 64px; background-size: 64px 64px; }
+
+.mm-slot { grid-template-columns: 24px 56px minmax(0, 1fr); min-height: 56px; }
+.mm-slot-empty { min-height: 56px; margin: 4px 0 4px 32px; box-shadow: inset 0 0 0 2px var(--os-line); opacity: .5; }
+.mm-party-list { align-content: start; }
+.is-moving { outline: 2px dashed var(--os-accent); outline-offset: -4px; }
+.mm-bagrow { grid-template-columns: 24px 32px minmax(0, 1fr) auto auto; min-height: 40px; padding-block: 2px; }
+.mm-action { grid-template-columns: 24px minmax(0, 1fr) auto; min-height: 36px; padding-block: 0; }
+
+.mm-hero { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; min-width: 0; }
+.mm-pic { display: block; flex: none; }
+.mm-pic canvas { display: block; }
+.mm-id { display: grid; gap: 8px; min-width: 0; flex: 1 1 140px; }
+.mm-actions { padding-top: 8px; border-top: 2px solid var(--os-line); overflow: auto; flex: none; }
+.mm-right:has(.mm-actions) .mm-pic canvas { width: 80px !important; height: 80px !important; }
+
+.mm-bag .mm-left { grid-template-columns: 152px minmax(0, 1fr); gap: 8px; }
+.mm-bag .mm-body { grid-template-columns: minmax(0, 11fr) minmax(0, 5fr); }
+
+.mm-msglayer { place-items: end center; }
+.mm-msg { width: min(100%, 520px); min-height: 64px; display: flex; justify-content: space-between; align-items: center; gap: 8px; text-align: left; padding: 4px 8px; font: 500 20px/24px var(--os-font-px); }
+.mm .mm-msg.is-cursor { outline: none; }
+.mm-msgtext { display: inline-block; }
+.mm-next { color: var(--os-accent); flex: none; }
+.mm-sheet { display: grid; grid-template-rows: none; padding: 8px 8px calc(12px + var(--sab)); overflow: auto; }
+.mm-qty { display: flex; justify-content: center; gap: 4px; padding: 4px 8px 8px; }
+
+@container os-screen (min-width: 1000px) {
+  .mm-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .mm-bag .mm-left { grid-template-columns: 216px minmax(0, 1fr); }
+}
+/* Phone: full bleed (the kit drops the frame), a list over a docked detail. */
+@container os-screen (max-width: 480px) {
+  .mm-win { --w: 100%; --h: 100%; }
+  .mm-body, .mm-bag .mm-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  .mm-left { padding: 0 8px; }
+  .mm-right { border-left: 0; border-top: 2px solid var(--os-line); padding: 8px 12px; min-height: 96px; max-height: 148px; gap: 4px; }
+  .mm-slot { min-height: 72px; }
+  .mm-bagrow { min-height: 52px; }
+  .mm-hero .os-hpl { display: none; }
+  .mm-bag .mm-left { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .mm-itemhero { flex-wrap: nowrap; }
+  .mm .mm-itemhero .item-icon { width: 32px; height: 32px; background-size: 32px 32px; }
+  .mm .os-foot { padding: 8px 12px calc(12px + var(--sab)); }
+  .mm .os-tab { padding-top: calc(8px + var(--sat)); }
+  .mm-action { min-height: 52px; }
+}
+/* A phone on its side: Back on the title line, no room to lose. */
+@container os-screen (max-height: 400px) {
+  .mm-win { --h: calc(100% - 36px); --w: calc(100% - 16px); top: 30px; }
+  .mm .os-foot { position: absolute; right: 8px; top: -40px; padding: 0; z-index: 3; }
+  .mm .os-foot .fill { display: none; }
+  .mm .os-foot .os-btn { min-height: 44px; padding: 0 12px; }
+  .mm-right { padding-top: 16px; }
+  .mm-party-list { padding-top: 12px; }
+  .mm-slot { grid-template-columns: 24px 32px minmax(0, 1fr); min-height: 44px; }
+  .mm .mm-slot .mon-icon-box { width: 32px; height: 32px; margin: 0; }
+  .mm .mm-slot .mon-icon-sprite { width: 32px; height: 32px; background-size: 32px 64px; }
+  .mm-st { gap: 0; }
+  .mm-slot .mm-lv { display: none; }
+  .mm-bagrow { min-height: 44px; }
+  .mm-bag .mm-left { grid-template-columns: 44px minmax(0, 1fr); }
+  .mm .os-rail [role="tab"] { justify-content: center; padding: 0; }
+  .mm .os-rail [role="tab"] .rl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .mm-right .mm-pic canvas { width: 80px !important; height: 80px !important; }
+}

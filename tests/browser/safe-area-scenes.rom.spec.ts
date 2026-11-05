@@ -90,7 +90,7 @@ test('title, all setup questions, Rowan and both naming keyboards clear the notc
   await page.waitForFunction(() => window.openSinnohTitle?.phase === 'setup', undefined, { timeout: 30_000 });
   const screens = new TitleScreens(page, true);
   const setup = screens.flow('Setup');
-  for (const [question, answer] of [['reports', 1], ['addon', 1], ['textSpeed', 2], ['visualStyle', 0]] as const) {
+  for (const [question, answer] of [['reports', 1], ['addon', 1], ['textSpeed', 2], ['visualStyle', 0], ['menuStyle', 0]] as const) {
     await expect(setup.locator('.setup-panel')).toHaveAttribute('data-question', question);
     await safe('.setup-lead, .setup-ask');
     // Landscape may scroll: each answer must be reachable above the home indicator, including the last.

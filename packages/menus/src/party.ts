@@ -18,7 +18,7 @@
  * Every panel shows the Ball Capsule marker of a Pokémon with one.
  * The battle's party (`party-select`) and the battle bag's target are battle.ts.
  */
-import { evolutionTarget, maxPp, monGender, movesAtLevel, setMoveSlot, type Button, type Id, type Pokemon, type Stats } from '@opensinnoh/core';
+import { evolutionTarget, isShiny, maxPp, monGender, movesAtLevel, setMoveSlot, type Button, type Id, type Pokemon, type Stats } from '@opensinnoh/core';
 import { dexOf, itemCount, levelEvolutionTrigger, markCaught, newGameRecord, saveTvSegment, takeItem as takeBagItem, type AppMenu, type AppResult, type PartyView } from '@opensinnoh/contracts';
 import { bySource, canShayminSky, contestEligible, detachCapsule, setCapsule, frontierBanned, HALL, canUseItemOn, giveHeldItem, ITEM_GRACIDEA, itemPicksMove, itemRecord, setShayminForm, SHAYMIN_SKY, takeHeldItem, teachTm, tmCompatibility, useItemOnMon, type ItemUsedMessage } from '@opensinnoh/services';
 import { menuSe, type MenuContext } from './context.ts';
@@ -89,6 +89,7 @@ export function slotView(ctx: MenuContext, m: Pokemon): NonNullable<PartyView['s
     gender: m.isEgg ? 'none' : monGender(dexOf(ctx.registries), m),
     status: m.hp === 0 ? 'fainted' : m.status,
     heldItem: m.heldItem,
+    ...(isShiny(m.otId, m.pid) ? { shiny: true as const } : {}),
     ...(m.capsule ? { capsule: true as const } : {}),
   };
 }

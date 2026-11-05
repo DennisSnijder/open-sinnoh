@@ -33,6 +33,9 @@ import { arcadeApp, frontierRecords, castleApp, factoryApp, hallBoard } from './
 import { credits, hallOfFame } from './hall-of-fame.ts';
 import { icon, type IconName } from './icons.ts';
 import { party } from './party.ts';
+import { modernBag } from './modern-bag.ts';
+import { modernMenu } from './modern.ts';
+import { modernParty } from './modern-party.ts';
 import { summary } from './summary.ts';
 import { at, atTiles, board, boardContext } from './board.ts';
 import { bgPicture } from './sprites.ts';
@@ -65,6 +68,8 @@ export interface DrawContext {
   compact: boolean;
   /** The UI layer's size in CSS px (the evolution scene picks its whole-pixel scale from it). */
   size?: { width: number; height: number };
+  /** The MENUS setting is Modern (not in replays). `modernMenu` says which screens follow it. */
+  modern?: boolean;
   /** The player's gender (the bag picture); absent outside a game (the title's naming screen). */
   gender?: 'male' | 'female';
   /** The game's tick and the game ticks its cry has played (null: none plays); absent outside a game. The Pokédex cry page. */
@@ -123,9 +128,9 @@ export function drawApp(d: DrawContext, v: AppView): Drawn {
     case 'save':
       return { kind: 'window', root: save(d, v) };
     case 'party':
-      return { kind: 'sheet', root: party(d, v) };
+      return modernMenu(d, v) ? { kind: 'os', root: modernParty(d, v) } : { kind: 'sheet', root: party(d, v) };
     case 'bag':
-      return { kind: 'sheet', root: bag(d, v) };
+      return modernMenu(d, v) ? { kind: 'os', root: modernBag(d, v) } : { kind: 'sheet', root: bag(d, v) };
     case 'summary':
       return { kind: 'sheet', root: summary(d, v) };
     case 'trainer-card':

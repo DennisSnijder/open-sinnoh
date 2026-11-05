@@ -9,6 +9,7 @@ import { checkNewGame, readNewGame, storeNewGame } from './new-game.ts';
 import { createSession, warmBattleEngine, type Session } from './boot.ts';
 import { parseEnhanced, setEnhancedVisuals, visualStyleConfig, type EnhancedConfig } from '@opensinnoh/render';
 import { readVisuals, storeVisuals, VISUAL_STYLES, visualStyleChosen, type Visuals } from './visuals.ts';
+import { MENU_STYLES, menuStyleChosen, storeMenuStyle } from './menu-style.ts';
 import { createBridge, type AppBridge } from './bridge.ts';
 import type { ReplayRecorder } from './recorder.ts';
 import { FILE_DIALOG_REFUSED, openFileDialog } from './file-dialog.ts';
@@ -986,7 +987,11 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     if (!answered.includes('reports') && !reportsAnswered()) questions.push('reports');
     if (opts.imported && !opts.imported.addon && !answered.includes('addon')) questions.push('addon');
     if (!answered.includes('textSpeed')) questions.push('textSpeed');
-    if (!answered.includes('visualStyle') && !visualStyleChosen()) questions.push('visualStyle');
+    if (!answered.includes('visualStyle') && !visualStyleChosen()) {
+      questions.push('visualStyle');
+      // A new device only: a player past the setup finds it in Options.
+      if (!menuStyleChosen()) questions.push('menuStyle');
+    }
     const stored = (q: SetupQuestion) => {
       const err = storeAnswered(q);
       if (err) session.game.log.stub('ui:setup-storage', `the setup's answers are kept for this visit only: ${err}`);
@@ -1007,6 +1012,9 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
           const err = storeVisuals(visuals);
           if (err) session.game.log.stub('ui:visuals-storage', `the visual style is kept for this visit only: ${err}`);
           applyVisuals();
+        } else if (q === 'menuStyle') {
+          const err = storeMenuStyle(MENU_STYLES[choice]!);
+          if (err) session.game.log.stub('ui:menu-style-storage', `the menu style is kept for this visit only: ${err}`);
         }
         stored(q);
       },

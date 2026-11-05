@@ -229,6 +229,39 @@
 [data-density="touch"] .os-row { min-height: 64px; padding-top: 8px; padding-bottom: 8px; }
 @container os-screen (max-width: 480px) { .os-row { grid-template-columns: 24px minmax(0, 1fr); } .os-row .ctl { grid-column: 2; justify-self: start; margin-left: -8px; } }
 
+/* A selectable row that holds parts of its own (a game list): the same selection model. Columns are the screen's. */
+.os-item { display: grid; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 4px 12px 4px 4px; text-align: left; position: relative; cursor: pointer; border: 0; background: none; color: var(--os-ink); }
+.os-item > .cur { visibility: hidden; color: var(--os-accent); justify-self: center; }
+.os-item:is(.is-cursor, :focus-visible) { background: var(--os-sel); box-shadow: inset 0 0 0 2px var(--os-sel-line); }
+.os-item:is(.is-cursor, :focus-visible) > .cur { visibility: visible; }
+@media (hover: hover) { .os-item:hover:not(.is-cursor) { background: var(--os-face-alt); } }
+
+/* ---------- HP bar, chips, gender ---------- */
+.os-hpl { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.os-hpl .os-num { white-space: nowrap; }
+.os-hp { display: inline-block; flex: 1 1 64px; min-width: 40px; max-width: 200px; height: 8px; margin: 2px; background: var(--os-bg); box-shadow: 0 0 0 2px var(--os-edge); position: relative; }
+.os-hp i { position: absolute; left: 0; top: 0; bottom: 0; }
+.os-hp.high i { background: var(--os-hp-high); }
+.os-hp.mid i { background: var(--os-hp-mid); }
+.os-hp.low i { background: var(--os-hp-low); }
+.os-chip { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 4px; font: 400 16px/20px var(--os-font-num); color: var(--t); background: var(--c); white-space: nowrap; }
+.os-gender { color: var(--os-muted); display: inline-flex; }
+
+/* ---------- Rail: more than five choices, upright beside a list; a strip on a phone ---------- */
+.os-rail { display: grid; align-content: start; overflow: auto; scrollbar-width: none; padding: 4px 4px 4px 0; border-right: 2px solid var(--os-line); min-height: 0; }
+.os-rail::-webkit-scrollbar { display: none; }
+.os-rail [role="tab"] { display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 4px; border: 0; background: none; color: var(--os-muted); cursor: pointer; text-align: left; font: 600 12px/16px var(--os-font-body); white-space: nowrap; }
+.os-rail [role="tab"][aria-selected="true"] { color: var(--os-accent); box-shadow: inset 4px 0 0 var(--os-accent); padding-left: 8px; }
+[data-density="touch"] .os-rail [role="tab"] { min-height: 44px; }
+@container os-screen (min-width: 1000px) { .os-rail [role="tab"] { min-height: 44px; font: 500 20px/24px var(--os-font-px); } }
+@container os-screen (max-width: 480px) {
+  .os-rail { grid-auto-flow: column; grid-auto-columns: max-content; gap: 4px; padding: 0; border-right: 0; border-bottom: 2px solid var(--os-line); overflow-x: auto; }
+  .os-rail [role="tab"] { min-height: 44px; }
+  .os-rail [role="tab"][aria-selected="true"] { box-shadow: inset 0 -4px 0 var(--os-accent); padding-left: 4px; }
+  .os-rail [role="tab"]:not([aria-selected="true"]) { width: 44px; justify-content: center; }
+  .os-rail [role="tab"]:not([aria-selected="true"]) .rl { display: none; }
+}
+
 /* ---------- Description box: message-style text in a Slim window, typed at the Text speed (typeText) ---------- */
 .os-desc { min-height: 64px; padding: 4px 8px; font: 500 20px/24px var(--os-font-px); color: var(--os-ink); }
 /* Touch shows each row's description inline: the box keeps only a result (`is-status`), never the description twice. */
