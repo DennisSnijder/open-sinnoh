@@ -147,7 +147,9 @@ Always beside a label; an icon-only button has an accessible name and a tooltip.
 - **No key hints.** Screens show no key caps or key lists: the cursor and real controls say what to do.
 - **Focus.** One mark per place. A screen's cursor (the ▶ row, the tab fill and underline, an outlined button) is
   the mark; focus that follows the cursor draws no second ring. Any other control gets the 2-px gold ring with a
-  2-px offset, never clipped; on a sheet's title bar, an on-tone backing keeps the ring at 3:1.
+  2-px offset, never clipped; on a sheet's title bar, an on-tone backing keeps the ring at 3:1. Focus a gamepad
+  moves always shows that ring (`:root[data-pad-focus]`, set by the app's `pad-nav.ts`), even after a click, when a
+  browser would not count it as focus-visible.
 - **Phone:** the breakpoint is a 480-px container, not the viewport. Dots stay 2 px (no fractional dots).
 - **Motion** steps on the game's 30 Hz frame (`--os-f`, 33.3 ms): windows open in 4 frames (`.os-enter`), sheets
   in 6, toasts 6 in, 80 held, 4 out; a press drops a button one dot. Hover and cursor moves are instant. Reduced
