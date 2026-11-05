@@ -10,6 +10,7 @@
  * main.ts runs the imports; this module builds the DOM (into `#rom`) and updates it. Ids are the page's test hooks.
  */
 import { banner, button, filePicker, h, icon, progress, snapPixels, titleTab, wordmark as brandWordmark } from '@opensinnoh/ui';
+import { openFileDialog } from './file-dialog.ts';
 import { canInstall, onInstallChange, promptInstall } from './platform.ts';
 import './rom-screen.css';
 
@@ -61,6 +62,9 @@ export function buildRomScreen(deps: RomScreenDeps): void {
   note.id = 'picker-note';
   note.setAttribute('role', 'status');
   note.hidden = true;
+  const padNote = h('p', 'rom-need', 'The file dialog is your system\'s, so it can need a mouse, keyboard or touch screen. Your controller works for everything after it.');
+  padNote.id = 'picker-pad-note';
+  padNote.hidden = true;
   // Where the browser offers it (Chromium, Android): the app installs before the import, and keeps the game on the device.
   const installNote = h('p', 'rom-status');
   installNote.setAttribute('role', 'status');
@@ -72,7 +76,7 @@ export function buildRomScreen(deps: RomScreenDeps): void {
   installRow.id = 'install-row';
   installRow.hidden = !canInstall();
   onInstallChange(() => (installRow.hidden = !canInstall()));
-  const picker = h('section', 'rom-step', h('div', 'rom-body', error, note, drop, need), installRow);
+  const picker = h('section', 'rom-step', h('div', 'rom-body', error, note, drop, need, padNote), installRow);
   picker.id = 'picker';
   picker.setAttribute('aria-label', 'Choose your ROM');
   picker.hidden = true;
@@ -184,9 +188,32 @@ export function showRomError(message: string, sha1?: string, heading?: string): 
   if (!heading) text.push(' Choose another file to try again.');
   const input = $('rom-input');
   const box = $('picker-error');
-  box.replaceChildren(banner(heading ?? 'That file could not be used.', text, heading ? {} : { action: button('Choose another file', { icon: 'import', onClick: () => input.click() }) }));
+  box.replaceChildren(banner(heading ?? 'That file could not be used.', text, heading ? {} : { action: button('Choose another file', { icon: 'import', onClick: () => chooseRomFile() }) }));
   box.hidden = false;
   input.focus();
+}
+
+/** The Platinum picker's file dialog (a press that is not a click on its box), or why the browser refused it. */
+export function chooseRomFile(): void {
+  if (!openFileDialog($('rom-input') as HTMLInputElement)) showDialogRefused();
+}
+
+/**
+ * The browser would not open the file dialog for the pad's press. Not a dead end: focus stays on the control, so a key
+ * press takes it from there, and the page takes a drop.
+ */
+export function showDialogRefused(): void {
+  if (document.getElementById('rom-refused')) return;
+  const b = banner('Your controller cannot open the file dialog here.', 'This browser opens it only for a key press, click or tap. Press Enter or Space, click the box, or drop your ROM anywhere on this page. Your controller works for everything after it.', { tone: 'info' });
+  b.id = 'rom-refused';
+  const slot = $('rom-notice');
+  slot.append(b);
+  slot.hidden = false;
+}
+
+/** The pad was used: on the picker, what it cannot do is said before it is tried. */
+export function showPadNote(): void {
+  $('picker-pad-note').hidden = false;
 }
 
 export function clearRomError(): void {

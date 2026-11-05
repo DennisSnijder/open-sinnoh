@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ActivePad, gamepadButtons } from './input.ts';
-import { bindKey, bindPad, bindingText, Controls, CONTROLS_KEY, defaultBindings, keyLabel, keyMapOf, KEY_MAP, padLabel, parseBindings } from './controls.ts';
+import { bindKey, bindPad, bindingText, Controls, CONTROLS_KEY, defaultBindings, keyLabel, keyMapOf, KEY_MAP, padKind, padLabel, parseBindings, type PadKind } from './controls.ts';
 
 const pad = (mapping: string, down: number[] = [], axes: number[] = []) => ({ mapping, buttons: Array.from({ length: 17 }, (_, i) => ({ pressed: down.includes(i) })), axes });
 
@@ -24,7 +24,7 @@ describe('bindings', () => {
 
   it('keys the game uses cannot be bound', () => {
     const b = defaultBindings();
-    for (const code of ['Escape', 'KeyP', 'Backquote', 'ControlLeft', 'MetaRight']) expect(() => bindKey(b, 'a', code)).toThrow(/cannot be bound/);
+    for (const code of ['Escape', 'Backquote', 'ControlLeft', 'MetaRight']) expect(() => bindKey(b, 'a', code)).toThrow(/cannot be bound/);
     expect(b).toEqual(defaultBindings());
   });
 
@@ -33,8 +33,8 @@ describe('bindings', () => {
     expect(bindPad(b, false, 'a', 'b0')).toEqual({ holder: 'b' });
     expect(b.pad.a).toBe('b0');
     expect(b.pad.b).toBe('b1');
-    expect(bindPad(b, true, 'a', 'b3')).toEqual({ holder: null });
-    expect(b.raw.a).toBe('b3');
+    expect(bindPad(b, true, 'a', 'b13')).toEqual({ holder: null });
+    expect(b.raw.a).toBe('b13');
   });
 
   it('names keys and pad buttons', () => {
@@ -87,13 +87,32 @@ describe('gamepads', () => {
     expect(gamepadButtons(pad('standard', [1, 9], [-0.9, 0.2]))).toEqual(['left', 'a', 'start']);
   });
 
-  it('a pad with another mapping has nothing until it is bound, then reads raw indices and axes', () => {
-    expect(gamepadButtons(pad('', [0, 1], [-1, 0]))).toEqual([]);
+  it('a pad with another mapping runs on a guess until it is bound, then reads raw indices and axes', () => {
+    expect(gamepadButtons(pad('', [0, 1], [-1, 0]))).toEqual(['left', 'a', 'b']);
     const b = defaultBindings();
     bindPad(b, true, 'a', 'b5');
-    bindPad(b, true, 'left', 'a0-');
+    expect(b.raw.up).toBe('a1-');
     expect(gamepadButtons(pad('', [5], [-1, 0]), b)).toEqual(['left', 'a']);
     expect(gamepadButtons(pad('', [], [-0.3, 0]), b)).toEqual([]);
+  });
+
+  it('the stick is one direction at a time, its dead zone round', () => {
+    expect(gamepadButtons(pad('standard', [], [0.8, 0.6]))).toEqual(['right']);
+    expect(gamepadButtons(pad('standard', [], [0.6, -0.8]))).toEqual(['up']);
+    // Neither axis reaches the dead zone alone; together they do.
+    expect(gamepadButtons(pad('standard', [], [0.4, 0.4]))).toEqual(['down']);
+    expect(gamepadButtons(pad('standard', [], [0.3, 0.3]))).toEqual([]);
+  });
+
+  it('names buttons as the connected pad prints them', () => {
+    expect(padKind('Xbox Wireless Controller (STANDARD GAMEPAD Vendor: 045e Product: 0b13)')).toBe('xbox');
+    expect(padKind('054c-09cc-Wireless Controller')).toBe('playstation');
+    expect(padKind('Pro Controller (STANDARD GAMEPAD Vendor: 057e Product: 2009)')).toBe('nintendo');
+    expect(padKind('Some pad')).toBe('generic');
+    expect(['xbox', 'playstation', 'nintendo', 'generic'].map((k) => padLabel('b1', false, k as PadKind))).toEqual(['B', 'Circle', 'A', 'Right button']);
+    expect(padLabel('b12', false, 'xbox')).toBe('D-pad up');
+    expect(padLabel('b6', false, 'playstation')).toBe('L2');
+    expect(padLabel('b1', true, 'xbox')).toBe('Button 1');
   });
 
   it('the dead zone applies to the stick', () => {

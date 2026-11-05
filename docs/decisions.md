@@ -465,6 +465,17 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   polite live region.
 - **Input:** physical key codes (arrows/WASD, Z/J/Space = A, X/K = B, …); gamepads map positionally.
   Options › Controls rebinds keys and pad buttons; replays use logical buttons only.
+- **A controller reaches everything but, sometimes, the file dialog.** The DOM screens with no game behind them (the
+  ROM page, the crash screen) run on `pad-nav.ts`: focus by position, clicks, and they own the pad while they show. A
+  browser opens a file dialog only with user activation, which HTML gives to keys, clicks and taps; Chromium also
+  activates a page when `getGamepads()` sees a press (w3c/gamepad #230, unmerged) and Gecko and WebKit have not shipped
+  it. So the press tries `showPicker()`, which reports a refusal where `click()` fails silently, and a refusal says
+  what to do instead (a key, a click, a drop). The dialog itself is the system's and no pad drives it.
+- **Pad defaults stay positional** (right face = DS A), so Xbox's B confirms; the Controls page names buttons as the
+  connected pad prints them. A pad with no standard mapping runs on a guess until something is bound on it: unbound, a
+  pad-only player could never reach the page that binds it. The Pokétch is a bindable action (left trigger), since the
+  DS shows it always and a pad cannot press the HUD's watch. Inputs the DS gives only to the stylus become taps in the
+  app, not the models (the signature pen, the Underground's radar on R), so headless games and replays are unchanged.
 - **Touch controls** are one layout (`computeLayout`) for the title, menus, intro and field: d-pad and
   face buttons mirrored, Select and Start centred, sizes S/M/L, an opacity floor, safe-area insets. They
   fade (not hide) during cut-scenes.

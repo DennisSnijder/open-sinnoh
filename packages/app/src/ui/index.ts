@@ -20,6 +20,7 @@ import { icon } from './icons.ts';
 import { PixelFont } from './pixel-font.ts';
 import { OptionsScreen } from './options-screen.ts';
 import { PoketchCard } from './poketch.ts';
+import { SignaturePen } from './signature-pen.ts';
 import type { AppSettings } from './settings.ts';
 import { UiStrings } from './strings.ts';
 import { Announcer, announceFrame, liveRegion } from './announce.ts';
@@ -147,6 +148,7 @@ export function mountUi(deps: UiDeps): InGameUi {
   const art = new Art(deps.assets, () => deps.game().registries);
   const options = new OptionsScreen({ where: 'game', settings: deps.settings, tap: deps.tap, buttonMode: () => deps.game().state.options.buttonMode });
   const poketch = new PoketchCard({ game: deps.game, strings, font, art, close: () => poketch.show(false) });
+  const pen = new SignaturePen(deps.tap);
   /** Screen readers: the canvas-drawn message pages and cursor rows, as text (announce.ts). */
   const live = liveRegion();
   const announcer = new Announcer(live.say);
@@ -192,7 +194,7 @@ export function mountUi(deps: UiDeps): InGameUi {
     }
   });
 
-  // P toggles the Pokétch; Escape is B in menus (web habit), also from a focused range or button.
+  // The Pokétch's key toggles it; Escape is B in menus (web habit), also from a focused range or button.
   // Text fields keep Escape (an IME cancels its composition with it) and P.
   addEventListener('keydown', (e) => {
     if (e.metaKey || e.ctrlKey || e.altKey || e.repeat || e.isComposing) return;
@@ -203,7 +205,7 @@ export function mountUi(deps: UiDeps): InGameUi {
       return;
     }
     if (e.target instanceof HTMLElement && e.target.closest('input, textarea, select, dialog')) return;
-    if (e.code === 'KeyP') {
+    if (controls.bindings.keys.poketch.includes(e.code)) {
       e.preventDefault();
       api.togglePoketch();
     }
@@ -379,6 +381,9 @@ export function mountUi(deps: UiDeps): InGameUi {
       const game = deps.game();
       if (poketch.shown && (scriptBusy(game) || game.app() || !game.poketch())) poketch.show(false);
       const view = game.app();
+      if (view?.app === 'trainer-card') pen.input(frame, view);
+      // The Underground's touch radar has no button on the DS: R pings around the player, as a touch on the field does.
+      if (!view && !poketch.shown && frame.pressed.includes('r') && game.world.undergroundView()) deps.tap(`tile:${game.state.player.x},${game.state.player.z}`);
       // OPTIONS keeps its own page and cursor (options-screen.ts): it takes the d-pad, A, L/R and its taps.
       const taken = options.input(dexInput(frame, view?.app === 'pokedex' && view.screen === 'list'), view?.app === 'options' ? view : null);
       return poketch.shown ? poketch.input(taken) : taken;
@@ -448,6 +453,7 @@ export function mountUi(deps: UiDeps): InGameUi {
       }
       if (poketch.shown && (busy || view)) poketch.show(false);
       poketch.frame();
+      if (view?.app === 'trainer-card') pen.frame();
     },
   };
   return api;

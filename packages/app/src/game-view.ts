@@ -11,7 +11,8 @@ import { parseEnhanced, setEnhancedVisuals, visualStyleConfig, type EnhancedConf
 import { readVisuals, storeVisuals, VISUAL_STYLES, visualStyleChosen, type Visuals } from './visuals.ts';
 import { createBridge, type AppBridge } from './bridge.ts';
 import type { ReplayRecorder } from './recorder.ts';
-import { attachGamepadEvents, attachKeyboard, controls, FAST_FORWARD_TOGGLE, gamepadFastForward, InputState, pollGamepads } from './input.ts';
+import { FILE_DIALOG_REFUSED, openFileDialog } from './file-dialog.ts';
+import { attachGamepadEvents, attachKeyboard, controls, FAST_FORWARD_TOGGLE, gamepadFastForward, gamepadPoketch, InputState, onPadGesture, pollGamepads } from './input.ts';
 import { computeLayout, readRenderScale, renderPixelRatio, storeRenderScale, type Insets, type Layout, type Rect, type RenderScale } from './layout.ts';
 import { newLoopStats, startLoop, type LoopStats } from './loop.ts';
 import { CONTROL_SIZES, fullscreenSupported, HAPTIC_MS, hapticsSupported, readPhone, ScreenAwake, standalone, storePhone, wakeLockSupported, type PhoneSettings } from './phone.ts';
@@ -111,9 +112,9 @@ function randomSeed(): number {
   return crypto.getRandomValues(new Uint32Array(1))[0]!;
 }
 
-/** The browser's file dialog: the chosen file, or null when it is cancelled. */
+/** The browser's file dialog: the chosen file, or null when it is cancelled. Rejects, with words for the player, when the browser refuses to open it. */
 function pickFile(accept: string): Promise<File | null> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const input = Object.assign(document.createElement('input'), { type: 'file', accept, hidden: true });
     const done = (file: File | null) => {
       input.remove();
@@ -122,7 +123,10 @@ function pickFile(accept: string): Promise<File | null> {
     input.addEventListener('change', () => done(input.files?.[0] ?? null));
     input.addEventListener('cancel', () => done(null));
     document.body.append(input);
-    input.click();
+    if (!openFileDialog(input)) {
+      input.remove();
+      reject(new Error(FILE_DIALOG_REFUSED));
+    }
   });
 }
 
@@ -280,8 +284,15 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   speedIndicator.hidden = true;
   root.append(speedIndicator);
 
+  // The HUD's button and the OPTIONS row (a pad has no pointer for the HUD).
+  const fullscreen =
+    fullscreenSupported() && !standalone()
+      ? { run: () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen({ navigationUI: 'hide' })), active: () => document.fullscreenElement !== null }
+      : null;
+
   // The OPTIONS screen's settings, in the game and from the title (ui/settings.ts).
   const appSettings = (): AppSettings => ({
+    fullscreen,
     audio: { get: () => audio.settings(), set: (s) => audio.setSettings(s) },
     zoom: { get: () => zoom, choices: () => zoomChoices(layout.main.width, layout.main.height), set: (z) => setZoom(z, false) },
     renderScale: {
@@ -338,16 +349,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     settings: appSettings,
     fastForward: opts.replay ? null : { toggle: toggleFast, active: () => fastForward.active },
     // Where the browser has page fullscreen (not iPhone Safari: the installed app is its fullscreen) and the app is not installed already.
-    fullscreen:
-      fullscreenSupported() && !standalone()
-        ? {
-            toggle: () => {
-              const change = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen({ navigationUI: 'hide' });
-              change.catch((e: Error) => ui!.notice(`Fullscreen did not start: ${e.message}`));
-            },
-            active: () => document.fullscreenElement !== null,
-          }
-        : null,
+    fullscreen: fullscreen && { toggle: () => void fullscreen.run().catch((e: Error) => ui!.notice(`Fullscreen did not start: ${e.message}`)), active: fullscreen.active },
     replay: opts.replay,
   });
   if (device.problem) {
@@ -406,7 +408,10 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
 
   const recorderModule = import.meta.env.DEV ? await import('./recorder.ts') : null;
   const tick = () => {
-    if (!opts.replay) pollGamepads(input);
+    if (!opts.replay) {
+      pollGamepads(input);
+      if (gamepadPoketch()) ui!.togglePoketch();
+    }
     // The Pokétch card adds its touches (and L/R, touch mode) to the frame; the recorder records what the game gets.
     lastInput = ui!.input(input.frame());
     // Dev builds only: production folds these away.
@@ -503,7 +508,11 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     if (e.target instanceof HTMLElement && (e.target.closest('input, textarea, select, dialog') || ((e.code === 'Space' || e.code === 'Enter') && e.target.closest('button:not([data-button])')))) return;
     sawPhysical();
   });
-  addEventListener('gamepadconnected', sawPhysical);
+  addEventListener('gamepadconnected', () => {
+    sawPhysical();
+    ui!.toast('Gamepad connected');
+  });
+  onPadGesture(() => audio.unlock());
 
   // Input sources.
   attachKeyboard(window, input);
@@ -949,7 +958,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
         }
         stored(q);
       },
-      pickAddon() {
+      pickAddon(): boolean {
         // The add-on import path (main.ts): the ROM page's session, then Start playing; the setup goes on after it.
         const input = Object.assign(document.createElement('input'), { type: 'file', accept: '.nds' });
         input.addEventListener('change', () => {
@@ -958,7 +967,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
           stored('addon');
           opts.imported!.addAddon(file);
         });
-        input.click();
+        return openFileDialog(input);
       },
     };
   };

@@ -17,6 +17,7 @@
  */
 import type { InputFrame, OptionsView } from '@opensinnoh/contracts';
 import { applyButtonMode } from '@opensinnoh/game';
+import { REPEAT_DELAY, REPEAT_EVERY } from '@opensinnoh/menus';
 import type { Button } from '@opensinnoh/core';
 import { backButton, button, cycle, dialog, footer, h, pick as osPick, row as osRow, slider, tabs, titleTab, toggle, typeText, type IconName } from '@opensinnoh/ui';
 import { controls } from '../input.ts';
@@ -31,6 +32,7 @@ type Slot = { kind: 'tabs' } | { kind: 'setting'; setting: Setting } | { kind: '
 
 /** The buttons the screen takes while open; the others (B) go to the OPTIONS app. */
 const TAKEN: readonly Button[] = ['up', 'down', 'left', 'right', 'a', 'l', 'r'];
+const DIRS: readonly Button[] = ['up', 'down', 'left', 'right'];
 
 export class OptionsScreen {
   private page = 0;
@@ -49,6 +51,9 @@ export class OptionsScreen {
   private danger = false;
   /** The description last typed (a redraw with the same text shows it whole). */
   private typed = '';
+  /** The held d-pad direction and its ticks (the screen takes the d-pad, so the app stack's repeat never sees it). */
+  private held: Button | null = null;
+  private heldFor = 0;
 
   constructor(
     private readonly deps: {
@@ -156,8 +161,13 @@ export class OptionsScreen {
       this.tap(env, tap.slice('settings:'.length));
       tap = undefined;
     }
-    const pressed = applyButtonMode(frame, this.deps.buttonMode()).pressed;
-    for (const b of pressed) if (TAKEN.includes(b)) this.button(env, b);
+    const mode = applyButtonMode(frame, this.deps.buttonMode());
+    for (const b of mode.pressed) if (TAKEN.includes(b)) this.button(env, b);
+    const dir = DIRS.find((d) => mode.held.includes(d)) ?? null;
+    if (dir !== this.held) {
+      this.held = dir;
+      this.heldFor = 0;
+    } else if (dir && ++this.heldFor >= REPEAT_DELAY && (this.heldFor - REPEAT_DELAY) % REPEAT_EVERY === 0) this.button(env, dir);
     // The frame without what the screen took (B, and the app's own taps, go on).
     const keep = (list: Button[]) => list.filter((b) => !TAKEN.includes(b));
     const out: InputFrame = { held: keep(frame.held), pressed: keep(frame.pressed), touch: frame.touch };

@@ -37,6 +37,8 @@
 .card-sign:focus-visible, .card-flip:focus-visible, .case-button:focus-visible { outline: var(--unit) solid var(--cursor); }
 .signature-pad { touch-action: none; cursor: crosshair; box-shadow: 0 0 0 var(--unit) var(--cursor); }
 .signature-art { display: block; }
+/* The pen for buttons (signature-pen.ts): a small cross, the Pokétch pointer's shape. */
+.signature-pen { position: absolute; width: calc(var(--unit) * 5); height: calc(var(--unit) * 5); margin: calc(var(--unit) * -2) 0 0 calc(var(--unit) * -2); background: linear-gradient(var(--cursor), var(--cursor)) center / 100% var(--unit) no-repeat, linear-gradient(var(--cursor), var(--cursor)) center / var(--unit) 100% no-repeat; pointer-events: none; }
 .badge-slot.css { background: linear-gradient(135deg, #f5f7fb, #aeb7c8 55%, #e9edf4); }
 .card-done { display: grid; place-items: center; background: var(--paper-2); box-shadow: inset 0 0 0 var(--unit) var(--frame-hi); }
 .card-done.is-cursor::before { display: none; }

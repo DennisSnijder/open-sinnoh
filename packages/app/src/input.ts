@@ -6,15 +6,17 @@
  *   Keyboard (physical keys, `KeyboardEvent.code`, so it works on any layout): D-pad Arrow keys and W A S D;
  *   A Z, J, Space; B X, K; X C; Y V; L Q, Page Up; R E, Page Down; Start Enter; Select Backspace, Right Shift.
  *   Gamepad (W3C "standard" mapping), positional like the DS: right face button = A, bottom = B, top = X,
- *   left = Y; shoulders = L/R; Back/View = Select; Start/Menu = Start; D-pad and the left stick = D-pad.
- *   A pad with another mapping has no defaults: its raw buttons and axes are bound by pressing them.
+ *   left = Y; shoulders = L/R; Back/View = Select; Start/Menu = Start; D-pad and the left stick = D-pad; left
+ *   trigger = the Pokétch. A pad with another mapping runs on a guess until the player binds it (controls.ts).
+ *   The stick is one direction at a time: past the dead zone (measured round, so diagonals are not further), its
+ *   stronger axis. The game walks in four directions and a menu moves one way.
  *
  * Fast-forward (not a DS button; game-view.ts and speed.ts): the bound key or the right trigger held, backtick toggles.
  * One gamepad is active: the one pressed last.
  */
 import { BUTTONS, type Button } from '@opensinnoh/core';
 import type { InputFrame } from '@opensinnoh/contracts';
-import { Controls, defaultBindings, padHolds, type Bindings, type PadLike } from './controls.ts';
+import { Controls, defaultBindings, padHolds, padTable, type Bindings, type PadLike } from './controls.ts';
 
 export { KEY_MAP, FAST_FORWARD_HOLD, FAST_FORWARD_TOGGLE, type PadLike } from './controls.ts';
 
@@ -24,16 +26,12 @@ export const controls = new Controls(typeof localStorage === 'undefined' ? null 
 /** Held DS buttons for one gamepad under the given bindings (default: the factory ones). */
 export function gamepadButtons(pad: PadLike, bindings: Bindings = defaultBindings()): Button[] {
   const standard = pad.mapping === 'standard';
-  const t = standard ? bindings.pad : bindings.raw;
+  const t = padTable(bindings, !standard);
   const out = new Set<Button>();
   for (const b of BUTTONS) if (padHolds(pad, t[b], bindings.deadZone)) out.add(b);
   if (standard) {
     const [x = 0, y = 0] = pad.axes;
-    const dz = bindings.deadZone / 100;
-    if (x <= -dz) out.add('left');
-    if (x >= dz) out.add('right');
-    if (y <= -dz) out.add('up');
-    if (y >= dz) out.add('down');
+    if (Math.hypot(x, y) >= bindings.deadZone / 100) out.add(Math.abs(x) > Math.abs(y) ? (x < 0 ? 'left' : 'right') : y < 0 ? 'up' : 'down');
   }
   return BUTTONS.filter((b) => out.has(b));
 }
@@ -182,10 +180,10 @@ function connectedPads(): readonly (PadLike | null)[] {
 }
 
 /** The gamepad in use (the one pressed last), or null. */
-function currentPad(): PadLike | null {
+export function currentPad(): PadLike | null {
   const pads = connectedPads();
   const pad = activePad.pick(pads, controls.bindings);
-  controls.padMapping = pad?.mapping ?? pads.find((p) => p)?.mapping ?? null;
+  controls.pad = pad ?? pads.find((p) => p) ?? null;
   return pad;
 }
 
@@ -193,8 +191,7 @@ function currentPad(): PadLike | null {
 export function gamepadFastForward(): boolean {
   const pad = currentPad();
   if (!pad) return false;
-  const t = pad.mapping === 'standard' ? controls.bindings.pad : controls.bindings.raw;
-  return padHolds(pad, t.fast, controls.bindings.deadZone);
+  return padHolds(pad, padTable(controls.bindings, pad.mapping !== 'standard').fast, controls.bindings.deadZone);
 }
 
 /** An unplugged gamepad is dropped at once (its held buttons let go). */
@@ -206,13 +203,37 @@ export function attachGamepadEvents(target: Window, input: InputState, gone: () 
   });
 }
 
-/** Polls the active gamepad into the 'gamepad' source; call once per tick. A waiting binding takes the press instead. */
+/** Called on a pad button's press, with the pads just read: Chromium counts that as a user gesture, so what waits for one may try. */
+let padGesture: () => void = () => {};
+export function onPadGesture(run: () => void): void {
+  padGesture = run;
+}
+let padDown = false;
+let poketchHeld = false;
+let poketchPress = false;
+
+/** Whether the Pokétch's button went down since the last call. */
+export function gamepadPoketch(): boolean {
+  const press = poketchPress;
+  poketchPress = false;
+  return press;
+}
+
+/** Polls the active gamepad into the 'gamepad' source; call once per tick. A waiting binding or a DOM screen takes the press instead. */
 export function pollGamepads(input: InputState): void {
-  if (controls.capturing || controls.padHeldOff(connectedPads())) {
-    controls.pollCapture(connectedPads());
+  const pads = connectedPads();
+  const down = pads.some((p) => p?.buttons.some((b) => b.pressed));
+  if (down && !padDown) padGesture();
+  padDown = down;
+  if (controls.capturing || controls.padTaken || controls.padHeldOff(pads)) {
+    controls.pollCapture(pads);
     input.setAll('gamepad', []);
+    poketchHeld = false;
     return;
   }
   const pad = currentPad();
   input.setAll('gamepad', pad ? gamepadButtons(pad, controls.bindings) : []);
+  const poketch = !!pad && padHolds(pad, padTable(controls.bindings, pad.mapping !== 'standard').poketch, controls.bindings.deadZone);
+  if (poketch && !poketchHeld) poketchPress = true;
+  poketchHeld = poketch;
 }

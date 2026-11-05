@@ -117,7 +117,7 @@ test('the title and the game open the same Options screen: five sections, the sa
   expect(Object.fromEntries(Object.entries(game.rows).map(([k, v]) => [k, v.map(([id]) => id)]))).toEqual(Object.fromEntries(Object.entries(title.rows).map(([k, v]) => [k, v.map(([id]) => id)])));
   expect(muted(game)).toEqual([]);
   // The phone rows are listed where the device has the feature: haptics and keep-screen-on in Chromium, the touch controls' size and opacity on a touch screen.
-  expect(title.rows.device!.map(([id]) => id)).toEqual(['zoom', 'renderScale', 'speed', 'followers', 'followerStyle', 'character', 'autoLowercase', 'volume', 'mute', 'tradeEvolution', 'theme', 'uiFrame', 'reduceFlashing', 'visualStyle', 'angledCamera', ...(info.project.name === 'phone' ? ['controlSize', 'controlOpacity'] : []), 'haptics', 'keepAwake']);
+  expect(title.rows.device!.map(([id]) => id)).toEqual(['zoom', 'renderScale', 'speed', 'followers', 'followerStyle', 'character', 'autoLowercase', 'volume', 'mute', 'tradeEvolution', 'theme', 'uiFrame', 'reduceFlashing', 'visualStyle', 'angledCamera', ...(info.project.name === 'phone' ? ['controlSize', 'controlOpacity'] : []), 'haptics', 'keepAwake', 'fullscreen']);
   expect(title.rows.data!.map(([id]) => id)).toEqual(['exportSave', 'importSave', 'suspend', 'mod/demo-mod']);
   // The QoL additions (OpenSinnoh): GAME after the DS's six, CONTROLS before the bindings.
   expect(title.rows.game!.map(([id]) => id)).toEqual(['textSpeed', 'sound', 'battleScene', 'battleStyle', 'buttonMode', 'frame', 'repelPrompt', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'spiritombVendors', 'objective', 'introSkip']);
@@ -197,19 +197,19 @@ test('Controls: keys are bound by pressing them, a taken key swaps, it persists 
   // A, then the key: the key is A's only key.
   await arm(page, 'a');
   await expect(bindButton(page, 'a')).toHaveText('PRESS A KEY OR BUTTON');
-  await expect(board(page).locator('.options-desc')).toContainText('Escape cancels');
+  await expect(board(page).locator('.options-desc')).toContainText('Escape, or its own button, keeps it');
   await page.screenshot({ path: `test-artifacts/a11y/controls-binding-${info.project.name}.png` });
   await page.keyboard.press('KeyG');
   await expect(bindButton(page, 'a')).toHaveText('G · Right button');
   await expect(board(page).locator('.options-desc')).toContainText('A is now G.');
   expect((await stored(page))!.keys.a).toEqual(['KeyG']);
 
-  // Escape cancels and binds nothing; a key the game uses (P) is refused with the reason.
+  // Escape cancels and binds nothing; a key the game uses (the fast-forward toggle) is refused with the reason.
   await arm(page, 'b');
   await page.keyboard.press('Escape');
   await expect(bindButton(page, 'b')).toHaveText('X, K · Bottom button');
   await arm(page, 'b');
-  await page.keyboard.press('KeyP');
+  await page.keyboard.press('Backquote');
   await expect(board(page).locator('.options-desc')).toContainText('cannot be bound');
   await expect(bindButton(page, 'b')).toHaveText('X, K · Bottom button');
 
@@ -267,32 +267,32 @@ test('Controls: a pad without a standard layout is bound by its raw buttons, and
   await fakePad(page);
   await fromTitle(page);
   await board(page).locator('[role="tab"][data-section="controls"]').click();
-  // Nothing is guessed for such a pad: its column starts unbound.
-  await expect(bindButton(page, 'a')).toHaveText('Z, J, Space · Unbound');
+  // Such a pad runs on a guess, shown as its raw buttons, so a player with only the pad gets this far.
+  await expect(bindButton(page, 'a')).toHaveText('Z, J, Space · Button 1');
   await arm(page, 'a');
-  await padButton(page, 6, true);
-  await expect(bindButton(page, 'a')).toHaveText('Z, J, Space · Button 6');
-  await padButton(page, 6, false);
+  await padButton(page, 10, true);
+  await expect(bindButton(page, 'a')).toHaveText('Z, J, Space · Button 10');
+  await padButton(page, 10, false);
   // A taken button swaps, also by index.
   await arm(page, 'b');
-  await padButton(page, 6, true);
-  await expect(board(page).locator('.options-desc')).toContainText('Swapped with A: it now uses Unbound');
-  await padButton(page, 6, false);
+  await padButton(page, 10, true);
+  await expect(board(page).locator('.options-desc')).toContainText('Swapped with A: it now uses Button 0');
+  await padButton(page, 10, false);
   const s = (await stored(page))!;
-  expect([s.raw.a, s.raw.b]).toEqual([null, 'b6']);
+  expect([s.raw.a, s.raw.b, s.raw.up]).toEqual(['b0', 'b10', 'a1-']);
   // The standard table is untouched.
   expect(s.pad.a).toBe('b1');
 
-  // Bind A to raw button 2, then in the game that button advances the message (Z does too).
+  // Bind A to raw button 11, then in the game that button advances the message (Z does too).
   await arm(page, 'a');
-  await padButton(page, 2, true);
-  await expect(bindButton(page, 'a')).toHaveText('Z, J, Space · Button 2');
-  await padButton(page, 2, false);
+  await padButton(page, 11, true);
+  await expect(bindButton(page, 'a')).toHaveText('Z, J, Space · Button 11');
+  await padButton(page, 11, false);
   await page.goto('/?packs=fixture');
   await page.waitForFunction(() => window.openSinnohApp?.game.scripts.view().message?.waitingForInput === true, undefined, { timeout: 20_000 });
-  await padButton(page, 2, true);
+  await padButton(page, 11, true);
   await page.waitForFunction(() => window.openSinnohApp!.game.canSave() && !window.openSinnohApp!.game.scripts.running());
-  await padButton(page, 2, false);
+  await padButton(page, 11, false);
 });
 
 test('Controls: a pad with a layout binds by standard index, and the stick dead zone is a setting', async ({ page }) => {

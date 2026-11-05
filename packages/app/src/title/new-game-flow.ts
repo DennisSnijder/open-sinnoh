@@ -154,7 +154,7 @@ export function newGameFlow(deps: IntroDeps): Sheet {
     deps.done(form);
   };
   if (!deps.offerSkip) return introFlow(deps, false, finish);
-  const ask = new SetupFlow({ questions: ['introSkip'], textSpeed: () => 0, textDelay: () => 0, answer: (_q, c) => void (skip = c === 0), pickAddon: () => {} });
+  const ask = new SetupFlow({ questions: ['introSkip'], textSpeed: () => 0, textDelay: () => 0, answer: (_q, c) => void (skip = c === 0), pickAddon: () => true });
   const screen = new SetupScreen(ask, deps.tap, { tab: 'New game', lead: 'A choice for this new game.' });
   let skip = false;
   let intro: TitleFlow | null = null;

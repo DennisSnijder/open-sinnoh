@@ -6,7 +6,8 @@
  *
  * Input is the DS's: touches on the card are panel touches (DS px) that the game hands the Pokétch. L/R
  * press the side button's halves. Y enters touch mode: the d-pad moves a pointer over the app's targets
- * (or freely), A touches, B or Y leaves; the field gets no buttons meanwhile.
+ * (or freely), A touches, B or Y leaves; the field gets no buttons meanwhile. Outside touch mode B closes the card,
+ * unless a direction is held (the field keeps running under it, and B is the running shoes).
  */
 import { POKETCH_SCREEN, type PoketchSprite, type PoketchView, type Registries, type Ui2dSheet } from '@opensinnoh/contracts';
 import type { Button, Id } from '@opensinnoh/core';
@@ -149,6 +150,7 @@ export class PoketchCard {
     const strip: Button[] = ['l', 'r'];
     if (pressed.has('y')) this.cursor = this.cursor ? null : { x: 112, y: 96 };
     else if (this.cursor && pressed.has('b')) this.cursor = null;
+    else if (pressed.has('b') && !(['up', 'down', 'left', 'right'] as const).some((d) => held.has(d))) this.deps.close();
     let touch: { x: number; y: number } | null = this.pointer;
     if (this.cursor) {
       this.moveCursor(held);

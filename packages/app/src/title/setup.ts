@@ -6,10 +6,11 @@
  * HeartGold/SoulSilver ROM (following Pokémon for every species; only where the add-on can be imported), and the
  * text speed and the visual style (DS by default; asked only until the device has chosen one). Each answer is stored at once as a device option, changeable in Options; a question already
  * answered on this device is not asked again (picking the add-on opens the ROM page's import, whose Start playing comes back here for the rest).
- * Keys and the pad move the cursor (up/down) and choose (A); a tap on an answer sends `menu:<i>`.
+ * Keys and the pad move the cursor (up/down), choose (A) and go back a question (B); a tap on an answer sends `menu:<i>`.
  */
 import type { InputFrame } from '@opensinnoh/contracts';
 import { choices, h, snapPixels, titleTab, wordmark } from '@opensinnoh/ui';
+import { FILE_DIALOG_REFUSED } from '../file-dialog.ts';
 import { ASK, type SetupQuestion } from './setup-questions.ts';
 import './setup.css';
 
@@ -24,8 +25,8 @@ export interface SetupDeps {
   textDelay(speed: number): number;
   /** Stores an answer: `reports` 0 allow, 1 don't; `addon` 1 skip; `textSpeed` the speed. */
   answer(q: SetupQuestion, choice: number): void;
-  /** ADD NOW: the file picker for the add-on ROM (picking one imports it on the ROM page, then Start playing). */
-  pickAddon(): void;
+  /** ADD NOW: the file picker for the add-on ROM (picking one imports it on the ROM page, then Start playing); false when the browser refused to open it. */
+  pickAddon(): boolean;
 }
 
 /** The screen's heading: the setup's, or another flow's that asks on the same screen. */
@@ -41,6 +42,8 @@ export class SetupFlow {
   private index = 0;
   private cursor: number;
   private fadeOut: number | null = null;
+  /** The browser refused the file dialog: said under the answers until the cursor moves. */
+  private note = '';
 
   constructor(private readonly deps: SetupDeps) {
     this.cursor = this.start();
@@ -69,14 +72,22 @@ export class SetupFlow {
     const tap = f.tap?.startsWith('menu:') ? Number(f.tap.slice(5)) : null;
     let chosen: number | null = null;
     // Moves first: a move and A in the same frame choose where the move went.
+    if (pressed('up') || pressed('down')) this.note = '';
     if (pressed('up')) this.cursor = Math.max(0, this.cursor - 1);
     else if (pressed('down')) this.cursor = Math.min(n - 1, this.cursor + 1);
+    if (pressed('b') && this.index > 0) {
+      // Each answer is stored at once; going back only asks it again.
+      this.index--;
+      this.note = '';
+      this.cursor = this.start();
+      return false;
+    }
     if (tap !== null && tap >= 0 && tap < n) chosen = this.cursor = tap;
     else if (pressed('a')) chosen = this.cursor;
     if (chosen === null) return false;
     if (q === 'addon' && chosen === 0) {
       // The picker; the ROM page imports it and offers Start playing. Cancelled: the question stays.
-      this.deps.pickAddon();
+      if (!this.deps.pickAddon()) this.note = FILE_DIALOG_REFUSED;
       return false;
     }
     this.deps.answer(q, chosen);
@@ -87,8 +98,8 @@ export class SetupFlow {
   }
 
   /** What the screen shows: the question, its answers and the cursor, and the fade (0 to 1). */
-  view(): { question: SetupQuestion | null; step: number; steps: number; cursor: number; fade: number } {
-    return { question: this.question, step: this.index + 1, steps: this.deps.questions.length, cursor: this.cursor, fade: this.fadeOut === null ? 0 : this.fadeOut / FADE };
+  view(): { question: SetupQuestion | null; step: number; steps: number; cursor: number; fade: number; note: string } {
+    return { question: this.question, step: this.index + 1, steps: this.deps.questions.length, cursor: this.cursor, fade: this.fadeOut === null ? 0 : this.fadeOut / FADE, note: this.note };
   }
 }
 
@@ -121,7 +132,7 @@ export class SetupScreen {
   draw(): void {
     const v = this.setup.view();
     this.shade.style.opacity = String(v.fade);
-    const key = JSON.stringify([v.question, v.step, v.cursor]);
+    const key = JSON.stringify([v.question, v.step, v.cursor, v.note]);
     if (key === this.drawn) return;
     const first = this.drawn === '';
     this.drawn = key;
@@ -141,6 +152,8 @@ export class SetupScreen {
     list.setAttribute('aria-labelledby', title.id);
     list.removeAttribute('aria-label');
     list.querySelectorAll<HTMLElement>('.os-choice').forEach((b, i) => (b.dataset.tap = `menu:${i}`));
+    const note = v.note ? h('p', 'setup-text setup-note', v.note) : null;
+    note?.setAttribute('role', 'status');
     panel.append(
       titleTab(this.heading.tab, { icon: 'gear', tone: 'system', end: [h('span', 'os-sr', `Question ${v.step} of ${v.steps}`), counter] }),
       h(
@@ -149,6 +162,7 @@ export class SetupScreen {
         h('p', 'setup-lead', this.heading.lead),
         h('div', 'setup-ask', title, h('p', 'setup-text', ask.text)),
         list,
+        note,
       ),
     );
     if (this.panel) this.panel.replaceWith(panel);

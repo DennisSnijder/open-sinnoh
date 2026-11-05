@@ -196,14 +196,14 @@ describe('input', () => {
     expect(s.frame().pressed).toEqual([]);
   });
 
-  it('maps a standard gamepad positionally and ignores unknown mappings', () => {
+  it('maps a standard gamepad positionally and a pad with another mapping on the guess', () => {
     const buttons = Array.from({ length: 17 }, () => ({ pressed: false }));
     buttons[1] = { pressed: true };
     buttons[0] = { pressed: true };
     buttons[9] = { pressed: true };
     expect(gamepadButtons({ mapping: 'standard', buttons, axes: [-0.9, 0.2] })).toEqual(['left', 'a', 'b', 'start']);
     expect(gamepadButtons({ mapping: 'standard', buttons: [], axes: [0.4, 0.6] })).toEqual(['down']);
-    expect(gamepadButtons({ mapping: '', buttons, axes: [-1, 0] })).toEqual([]);
+    expect(gamepadButtons({ mapping: '', buttons, axes: [-1, 0] })).toEqual(['left', 'a', 'b', 'start']);
   });
 });
 
