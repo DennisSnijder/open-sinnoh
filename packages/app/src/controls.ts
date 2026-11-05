@@ -5,10 +5,14 @@
  *
  * - Keyboard: `KeyboardEvent.code`s, any number per action (the defaults keep their aliases); binding a key
  *   to an action makes it that action's only key.
- * - Gamepad: one token per action and pad kind. A "standard"-mapping pad has the positional DS layout by
- *   default (`pad`). Any other pad has no known layout (`raw`): until the player binds something on one it runs on
- *   a guess (`RAW_GUESS`, so a pad-only player can reach Options › Controls at all); pressing a raw button
- *   (`b<index>`) or moving an axis (`a<index>+` / `a<index>-`) on the Controls page binds it.
+ * - Gamepad: one token per action and mapping. Until the player binds something (`pad` and `raw` all null), a pad
+ *   runs on the table of its face: the forced `layout`, or with `auto` the kind its `Gamepad.id` says. Each pad is
+ *   read by its own face, so an Xbox and a Nintendo pad at once both confirm with their printed A: bottom face on
+ *   Xbox, PlayStation and unknown pads, right face on Nintendo pads. A "standard"-mapping pad reads `pad`. Any other
+ *   pad has no known layout (`raw`): it runs on a guess (the same table with the first stick as the D-pad, so a
+ *   pad-only player can reach Options › Controls at all); pressing a raw button (`b<index>`) or moving an axis
+ *   (`a<index>+` / `a<index>-`) on the Controls page binds it. The first binding copies the table in use, and from
+ *   then on that table is the player's, on every pad of that mapping.
  * - A binding already used by another action swaps: the other action takes the one this action had.
  */
 import { BUTTONS, type Button } from '@opensinnoh/core';
@@ -38,12 +42,18 @@ export const ACTIONS: readonly { id: Action; label: string }[] = [
 /** A pad binding: a button (`b12`) or an axis direction (`a2-`), or none. */
 export type PadToken = string | null;
 
+/** The choices of Options › Controls' CONTROLLER row. */
+export const PAD_LAYOUTS = ['auto', 'xbox', 'playstation', 'nintendo'] as const;
+export type PadLayout = (typeof PAD_LAYOUTS)[number];
+
 export interface Bindings {
   keys: Record<Action, string[]>;
-  /** The "standard"-mapping pad's buttons. */
+  /** The "standard"-mapping pads' buttons once the player has bound one; all null until then. */
   pad: Record<Action, PadToken>;
-  /** Any other pad's raw buttons and axes. */
+  /** Any other pad's raw buttons and axes once the player has bound one; all null until then. */
   raw: Record<Action, PadToken>;
+  /** Whose buttons a pad has: `auto` asks the pad. */
+  layout: PadLayout;
   /** The stick's and an axis binding's dead zone in percent, 10 to 90. */
   deadZone: number;
 }
@@ -79,12 +89,8 @@ export const FAST_FORWARD_HOLD = 'Tab';
 export const FAST_FORWARD_TOGGLE = 'Backquote';
 const POKETCH_KEY = 'KeyP';
 
-/** Standard-mapping pad, positional like the DS: right face = A, bottom = B, top = X, left = Y; left trigger = Pokétch, right trigger = fast-forward. */
-const STANDARD_PAD: Readonly<Partial<Record<Action, string>>> = {
-  b: 'b0',
-  a: 'b1',
-  y: 'b2',
-  x: 'b3',
+/** A standard-mapping pad's defaults for all but the face buttons: left trigger = Pokétch, right trigger = fast-forward. */
+const PAD_REST: Readonly<Partial<Record<Action, string>>> = {
   l: 'b4',
   r: 'b5',
   poketch: 'b6',
@@ -97,8 +103,14 @@ const STANDARD_PAD: Readonly<Partial<Record<Action, string>>> = {
   right: 'b15',
 };
 
+/** Nintendo's print on the standard indices: right face = A, bottom = B, top = X, left = Y. Also every pad's table before layouts existed (parseBindings). */
+const NINTENDO_PAD: Readonly<Partial<Record<Action, string>>> = { ...PAD_REST, b: 'b0', a: 'b1', y: 'b2', x: 'b3' };
+
+/** Xbox's print, also what PlayStation pads confirm with (Cross) and what XInput-style unknown pads number: bottom face = A, right = B, left = X, top = Y. */
+const XBOX_PAD: Readonly<Partial<Record<Action, string>>> = { ...PAD_REST, a: 'b0', b: 'b1', x: 'b2', y: 'b3' };
+
 /** A pad without a layout, before anything is bound on it: most HID pads number their buttons as the standard does, the first stick is axes 0 and 1. */
-const RAW_GUESS: Readonly<Partial<Record<Action, string>>> = { ...STANDARD_PAD, up: 'a1-', down: 'a1+', left: 'a0-', right: 'a0+' };
+const RAW_STICK: Readonly<Partial<Record<Action, string>>> = { up: 'a1-', down: 'a1+', left: 'a0-', right: 'a0+' };
 
 const actionIds = ACTIONS.map((a) => a.id);
 const table = <T>(of: (a: Action) => T): Record<Action, T> => Object.fromEntries(actionIds.map((a) => [a, of(a)])) as Record<Action, T>;
@@ -109,8 +121,9 @@ export const DEAD_ZONE_RANGE = { min: 10, max: 90 } as const;
 export function defaultBindings(): Bindings {
   return {
     keys: table((a) => (a === 'fast' ? [FAST_FORWARD_HOLD] : a === 'poketch' ? [POKETCH_KEY] : Object.entries(KEY_MAP).filter(([, b]) => b === a).map(([code]) => code))),
-    pad: table((a) => STANDARD_PAD[a] ?? null),
+    pad: table(() => null),
     raw: table(() => null),
+    layout: 'auto',
     deadZone: DEFAULT_DEAD_ZONE,
   };
 }
@@ -164,8 +177,11 @@ export function parseBindings(raw: string | null): { bindings: Bindings; problem
     if (Array.isArray(k) && k.length > 0 && k.length <= 4 && k.every((c) => typeof c === 'string' && c.length > 0 && c.length < 24 && !reservedKey(c))) bindings.keys[a] = k as string[];
     else problems.push(`keys.${a} is ${JSON.stringify(k)}`);
   }
+  const storedPad = rec('pad');
+  // A table from before an action existed, or with a bad entry, has that action's old default.
+  if (Object.values(storedPad).some((p) => p !== null)) bindings.pad = table((a) => NINTENDO_PAD[a] ?? null);
   for (const name of ['pad', 'raw'] as const) {
-    const t = rec(name);
+    const t = name === 'pad' ? storedPad : rec(name);
     for (const a of actionIds) {
       const p = t[a];
       if (p === undefined) continue;
@@ -178,7 +194,15 @@ export function parseBindings(raw: string | null): { bindings: Bindings; problem
     if (Number.isInteger(z) && (z as number) >= DEAD_ZONE_RANGE.min && (z as number) <= DEAD_ZONE_RANGE.max) bindings.deadZone = z as number;
     else problems.push(`deadZone is ${JSON.stringify(z)}`);
   }
-  const extra = Object.keys(v).filter((k) => !['keys', 'pad', 'raw', 'deadZone'].includes(k));
+  const l = v.layout;
+  if (l !== undefined) {
+    if (PAD_LAYOUTS.includes(l as PadLayout)) bindings.layout = l as PadLayout;
+    else problems.push(`layout is ${JSON.stringify(l)}`);
+  }
+  // Before layouts every save wrote the whole positional table, so that table says nothing about the player. A table
+  // stored next to a layout was bound on purpose, even when it matches.
+  if (l === undefined && actionIds.every((a) => bindings.pad[a] === (NINTENDO_PAD[a] ?? null))) bindings.pad = table(() => null);
+  const extra = Object.keys(v).filter((k) => !['keys', 'pad', 'raw', 'layout', 'deadZone'].includes(k));
   if (extra.length) problems.push(`unknown keys ${extra.join(', ')}`);
   return { bindings, problems };
 }
@@ -214,17 +238,24 @@ export function bindKey(b: Bindings, action: Action, code: string): BindResult {
   return { holder };
 }
 
-/** The table a pad runs on: the standard one, the raw one, or the guess while nothing raw is bound. */
-export function padTable(b: Bindings, raw: boolean): Record<Action, PadToken> {
-  if (!raw) return b.pad;
-  return actionIds.some((a) => b.raw[a] !== null) ? b.raw : table((a) => RAW_GUESS[a] ?? null);
+/** The table a pad runs on: the player's for its mapping, else its face's (with the stick as the D-pad on a pad without a layout). */
+export function padTable(b: Bindings, raw: boolean, kind: PadKind): Record<Action, PadToken> {
+  const own = raw ? b.raw : b.pad;
+  if (actionIds.some((a) => own[a] !== null)) return own;
+  const face = kind === 'nintendo' ? NINTENDO_PAD : XBOX_PAD;
+  return table((a) => (raw ? RAW_STICK[a] : undefined) ?? face[a] ?? null);
 }
 
-/** Binds a pad button or axis to an action for one pad kind; a token another action uses is swapped. */
-export function bindPad(b: Bindings, raw: boolean, action: Action, token: string): BindResult {
-  // The first raw binding keeps the guess for the rest.
-  if (raw) b.raw = { ...padTable(b, true) };
-  const t = raw ? b.raw : b.pad;
+/** The table this pad runs on. */
+export function padTableOf(b: Bindings, pad: PadLike): Record<Action, PadToken> {
+  return padTable(b, pad.mapping !== 'standard', padFace(b, pad.id));
+}
+
+/** Binds a pad button or axis to an action, from the table of the pad that pressed it; a token another action uses is swapped. */
+export function bindPad(b: Bindings, raw: boolean, kind: PadKind, action: Action, token: string): BindResult {
+  // The first binding keeps the table in use for the rest.
+  const t = { ...padTable(b, raw, kind) };
+  b[raw ? 'raw' : 'pad'] = t;
   const old = t[action];
   const holder = actionIds.find((a) => a !== action && t[a] === token) ?? null;
   t[action] = token;
@@ -280,6 +311,11 @@ export function padKind(id: string): PadKind {
   return 'generic';
 }
 
+/** The face a pad has here: the forced layout, or what its `Gamepad.id` says. */
+export function padFace(b: Bindings, id: string | undefined): PadKind {
+  return b.layout === 'auto' ? padKind(id ?? '') : b.layout;
+}
+
 const STANDARD_NAMES: Readonly<Record<number, string>> = {
   10: 'Left stick press',
   11: 'Right stick press',
@@ -307,11 +343,11 @@ export function padLabel(token: PadToken, raw: boolean, kind: PadKind = 'generic
 
 /** A row's binding for the player: the keys, then the pad's button (`raw`: the pad in use has no standard layout). */
 export function bindingText(b: Bindings, a: Action, raw: boolean, kind: PadKind = 'generic'): string {
-  return `${b.keys[a].map(keyLabel).join(', ') || 'Unbound'} · ${padLabel(padTable(b, raw)[a], raw, kind)}`;
+  return `${b.keys[a].map(keyLabel).join(', ') || 'Unbound'} · ${padLabel(padTable(b, raw, kind)[a], raw, kind)}`;
 }
 
 /** Something the player pressed while binding. */
-export type Captured = { kind: 'key'; code: string } | { kind: 'pad'; token: string; raw: boolean };
+export type Captured = { kind: 'key'; code: string } | { kind: 'pad'; token: string; raw: boolean; face: PadKind };
 
 /** The edge between the pads and the bindings: what a pad holds, what it newly pressed. */
 export interface PadLike {
@@ -338,7 +374,7 @@ export class Controls {
   private pending: { done(c: Captured | null): void; down: Set<string>; axes: number[][] } | null = null;
   private keyCache: Record<string, Button> | null = null;
   private mapping: string | null = null;
-  private kind: PadKind = 'generic';
+  private padId = '';
   /** Pad buttons (`<pad>:<button>`) held when one was bound, until they are let go. */
   private holdOff = new Set<string>();
   /** A DOM screen drives the pad itself (pad-nav.ts): the game reads nothing. */
@@ -395,6 +431,11 @@ export class Controls {
     return this.save();
   }
 
+  setLayout(layout: PadLayout): string | null {
+    this.current.layout = layout;
+    return this.save();
+  }
+
   setDeadZone(percent: number): string | null {
     this.current.deadZone = Math.min(DEAD_ZONE_RANGE.max, Math.max(DEAD_ZONE_RANGE.min, percent));
     return this.save();
@@ -403,12 +444,22 @@ export class Controls {
   /** The pad in use (poll sets it), or null with none. */
   set pad(p: PadLike | null) {
     this.mapping = p?.mapping ?? null;
-    this.kind = padKind(p?.id ?? '');
+    this.padId = p?.id ?? '';
   }
 
-  /** The face of the pad in use: what the Controls page calls its buttons. */
+  /** The face of the pad in use: its default table and what the Controls page calls its buttons. */
   get face(): PadKind {
-    return this.kind;
+    return padFace(this.current, this.padId);
+  }
+
+  /** What the pad in use says it is, or null with none (the CONTROLLER row's AUTO). */
+  get detected(): PadKind | null {
+    return this.mapping === null ? null : padKind(this.padId);
+  }
+
+  /** The name of the button that confirms on the pad in use. */
+  get confirmLabel(): string {
+    return padLabel(padTable(this.current, this.padRaw, this.face).a, this.padRaw, this.face);
   }
 
   /** Whether the Controls page shows the raw (non-standard) pad bindings: a pad is connected and has no standard layout. */
@@ -469,14 +520,14 @@ export class Controls {
         else if (!c.down.has(key)) {
           // The pad is not read again until the buttons held now are let go: the new binding must not fire from this very press.
           this.holdPads(pads);
-          c.done({ kind: 'pad', token: `b${n}`, raw });
+          c.done({ kind: 'pad', token: `b${n}`, raw, face: padFace(this.current, pad.id) });
         }
       });
       // Axes bind only on pads without a layout (a standard pad's stick is the D-pad already), by how far they moved from rest.
       if (raw && this.pending) {
         pad.axes.forEach((v, n) => {
           const rest = c.axes[i]?.[n] ?? 0;
-          if (this.pending && Math.abs(v - rest) >= 0.8) c.done({ kind: 'pad', token: `a${n}${v > rest ? '+' : '-'}`, raw });
+          if (this.pending && Math.abs(v - rest) >= 0.8) c.done({ kind: 'pad', token: `a${n}${v > rest ? '+' : '-'}`, raw, face: padFace(this.current, pad.id) });
         });
       }
     });

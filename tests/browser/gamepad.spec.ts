@@ -6,7 +6,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { fakeImportWorker, fakeRom, importDone } from './fake-import.ts';
 import { skipSetup } from './intro.ts';
-import { hold, installPads, PAD, press, refuseFileDialog, run, stick } from './pad.ts';
+import { hold, installPads, NINTENDO, NINTENDO_ID, PAD, PLAYSTATION_ID, press, refuseFileDialog, run, stick, XBOX_ID } from './pad.ts';
 
 test.skip(({ isMobile }) => isMobile, 'pad input does not depend on the viewport');
 
@@ -26,6 +26,19 @@ async function toMenu(page: Page): Promise<void> {
     await press(page, PAD.a);
     await page.waitForFunction(() => window.openSinnohTitle?.phase === 'menu', undefined, { timeout: 2000 });
   }).toPass({ timeout: 30_000 });
+}
+
+/**
+ * Presses until `read()` is `target`, one step at a time: on a busy machine three slow frames stretch a `press` into
+ * the held repeat, and a loop of presses can then jump over its target for ever. `button` picks the way from where it is.
+ */
+async function stepTo(page: Page, read: () => Promise<string | null>, target: string, button: (now: string | null) => number): Promise<void> {
+  for (let now = await read(); now !== target; now = await read()) {
+    await hold(page, button(now), true);
+    await expect.poll(read, { intervals: [20] }).not.toBe(now);
+    await hold(page, button(now), false);
+    await run(page, 50);
+  }
 }
 
 async function optionsFromTitle(page: Page, down: () => Promise<void> = () => press(page, PAD.down)): Promise<void> {
@@ -48,6 +61,21 @@ test('the ROM page: a press opens the file dialog where the browser lets it', as
   expect(dialog.isMultiple()).toBe(false);
   await expect(page.locator('#rom-refused')).toHaveCount(0);
 });
+
+for (const [name, id, confirm, cancel, label] of [['an Xbox', XBOX_ID, PAD.a, PAD.b, 'A'], ['a PlayStation', PLAYSTATION_ID, PAD.a, PAD.b, 'Cross'], ['a Nintendo', NINTENDO_ID, NINTENDO.a, NINTENDO.b, 'A']] as const) {
+  test(`the ROM page: ${name} pad confirms with its printed button, and the note names it`, async ({ page }) => {
+    await installPads(page, { id });
+    await page.goto('/');
+    await onRomPage(page);
+    await press(page, confirm);
+    await expect(page.locator('#rom-input')).toBeFocused();
+    await expect(page.locator('#picker-pad-note')).toContainText(`Confirm with ${label}.`);
+    // The other face button does not open the dialog: the next filechooser is the confirm press's.
+    await press(page, cancel);
+    const [dialog] = await Promise.all([page.waitForEvent('filechooser'), press(page, confirm)]);
+    expect(dialog.isMultiple()).toBe(false);
+  });
+}
 
 test('the ROM page: focus lands on a press, and a refused file dialog says what to do', async ({ page }) => {
   await installPads(page);
@@ -179,7 +207,7 @@ test('the crash screen: the pad moves between its actions, opens the details and
 
 test('Options by pad: pages, rows, held repeat, rebinding, a refused file, B backs out without acting on the menu', async ({ page }) => {
   test.setTimeout(180_000);
-  await installPads(page, { id: 'DualSense Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 0ce6)' });
+  await installPads(page, { id: PLAYSTATION_ID });
   await refuseFileDialog(page);
   await optionsFromTitle(page);
   const tab = (s: string) => board(page).locator(`[role="tab"][data-section="${s}"]`);
@@ -192,7 +220,7 @@ test('Options by pad: pages, rows, held repeat, rebinding, a refused file, B bac
 
   // The labels are the connected pad's own.
   const bind = (a: string) => board(page).locator(`[data-setting="bind/${a}"] .options-value`);
-  await expect(bind('a')).toContainText('Circle');
+  await expect(bind('a')).toContainText('Cross');
   await expect(bind('poketch')).toContainText('L2');
 
   // Held down repeats (the DS's 8 and 4 ticks).
@@ -206,7 +234,7 @@ test('Options by pad: pages, rows, held repeat, rebinding, a refused file, B bac
   expect(rows.indexOf((await at())!)).toBeGreaterThan(rows.indexOf(before) + 2);
 
   // Rebind START by pad: A arms it; the press that armed it does not bind; the next button does, and swaps.
-  while ((await at()) !== 'bind/start') await press(page, rows.indexOf((await at()) ?? '') > rows.indexOf('bind/start') ? PAD.up : PAD.down);
+  await stepTo(page, at, 'bind/start', (now) => (rows.indexOf(now ?? '') > rows.indexOf('bind/start') ? PAD.up : PAD.down));
   await press(page, PAD.a);
   await expect(bind('start')).toHaveText('PRESS A KEY OR BUTTON');
   await press(page, PAD.select);
@@ -216,7 +244,7 @@ test('Options by pad: pages, rows, held repeat, rebinding, a refused file, B bac
   // A file action here is refused for a stand-in pad and says so in the description, not nothing.
   await press(page, PAD.r);
   await expect(tab('data')).toHaveAttribute('aria-selected', 'true');
-  while ((await at()) !== 'importSave') await press(page, PAD.down);
+  await stepTo(page, at, 'importSave', () => PAD.down);
   await press(page, PAD.a);
   await expect(board(page).locator('.options-desc')).toContainText('only for a key press');
 
@@ -224,6 +252,24 @@ test('Options by pad: pages, rows, held repeat, rebinding, a refused file, B bac
   await press(page, PAD.b);
   await expect(board(page)).toBeHidden();
   expect(await page.evaluate(() => window.openSinnohTitle?.phase)).toBe('menu');
+});
+
+test('Options by pad: the CONTROLLER row says what it found and forces another face', async ({ page }) => {
+  test.setTimeout(120_000);
+  await installPads(page, { id: XBOX_ID });
+  await optionsFromTitle(page);
+  await press(page, PAD.r);
+  await press(page, PAD.r);
+  const at = () => page.evaluate(() => document.querySelector('[data-screen="options"] .options-row.is-cursor')?.getAttribute('data-setting') ?? null);
+  await stepTo(page, at, 'padLayout', () => PAD.down);
+  await expect(board(page).locator('.options-desc')).toContainText('AUTO found: XBOX.');
+  const value = board(page).locator('[data-setting="padLayout"] .options-value');
+  await expect(value).toHaveText('AUTO');
+  await stepTo(page, () => value.textContent(), 'NINTENDO', () => PAD.right);
+
+  // This Xbox pad now reads as a Nintendo pad: its bottom button is DS B, which closes Options.
+  await press(page, NINTENDO.b);
+  await expect(board(page)).toBeHidden();
 });
 
 test('a pad without a standard layout reaches Options on the guess, and binding keeps the guess for the rest', async ({ page }) => {
@@ -237,7 +283,7 @@ test('a pad without a standard layout reaches Options on the guess, and binding 
   await press(page, PAD.r);
   await press(page, PAD.r);
   const bind = (a: string) => board(page).locator(`[data-setting="bind/${a}"] .options-value`);
-  await expect(bind('a')).toContainText('Button 1');
+  await expect(bind('a')).toContainText('Button 0');
   await expect(bind('up')).toContainText('Axis 1 -');
 });
 

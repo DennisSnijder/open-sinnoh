@@ -13,7 +13,7 @@
  */
 import { isSavedOption, type DeviceOptions, type OptionsView } from '@opensinnoh/contracts';
 import { frameMode, setFrameMode, setThemeMode, themeMode, WINDOW_FRAMES, type ThemeMode } from '@opensinnoh/ui';
-import { actionLabel, ACTIONS, bindKey, bindingText, bindPad, keyLabel, padLabel, type Action, type Captured } from '../controls.ts';
+import { actionLabel, ACTIONS, bindKey, bindingText, bindPad, keyLabel, PAD_LAYOUTS, padLabel, type Action, type Captured } from '../controls.ts';
 import { chooseFlashing, flashingOn } from '../flashing.ts';
 import { setSuspendOn, suspendOn } from '../suspend.ts';
 import { introSkipOn, setIntroSkip } from '../title/intro-skip.ts';
@@ -201,12 +201,12 @@ let binding: Action | null = null;
 
 /** Binds what the player pressed to an action; the result line names a swap with the action that had it. */
 function bindCaptured(action: Action, got: Captured): string {
-  const { result, error } = controls.edit((b) => (got.kind === 'key' ? bindKey(b, action, got.code) : bindPad(b, got.raw, action, got.token)));
+  const { result, error } = controls.edit((b) => (got.kind === 'key' ? bindKey(b, action, got.code) : bindPad(b, got.raw, got.face, action, got.token)));
   const b = controls.bindings;
-  const what = got.kind === 'key' ? keyLabel(got.code) : padLabel(got.token, got.raw, controls.face);
+  const what = got.kind === 'key' ? keyLabel(got.code) : padLabel(got.token, got.raw, got.face);
   let text = `${actionLabel(action)} is now ${what}.`;
   if (result.holder) {
-    const now = got.kind === 'key' ? b.keys[result.holder].map(keyLabel).join(', ') : padLabel((got.raw ? b.raw : b.pad)[result.holder], got.raw, controls.face);
+    const now = got.kind === 'key' ? b.keys[result.holder].map(keyLabel).join(', ') : padLabel((got.raw ? b.raw : b.pad)[result.holder], got.raw, got.face);
     text += ` Swapped with ${actionLabel(result.holder)}: it now uses ${now || 'no key'}.`;
   }
   return error ? `${text} Kept for this visit only: ${error}` : text;
@@ -235,6 +235,13 @@ function bindRow(a: (typeof ACTIONS)[number]): Setting {
       }
     },
   };
+}
+
+/** The second line of the CONTROLLER row's description: what AUTO found. */
+function autoLine(): string {
+  const found = controls.detected;
+  if (found === null) return 'AUTO follows the controller you use.';
+  return found === 'generic' ? 'AUTO has no name for this one.' : `AUTO found: ${found.toUpperCase()}.`;
 }
 
 /** Rows that need the imported ROM (not in dev-pack runs). */
@@ -473,6 +480,18 @@ export const SETTINGS: readonly Setting[] = [
   // CONTROLS: running without B and the item wheel on a held Y (OpenSinnoh), then this device's keyboard and gamepad bindings (`lantern-nds:controls`, controls.ts).
   dsOption('autoRun', 'controls', 'choice'),
   dsOption('itemWheel', 'controls', 'choice'),
+  {
+    id: 'padLayout',
+    section: 'controls',
+    kind: 'stepper',
+    storage: 'device',
+    available: () => true,
+    label: () => 'CONTROLLER',
+    description: () => `Sets the confirm button and button names.\n${autoLine()}`,
+    values: () => PAD_LAYOUTS.map((l) => l.toUpperCase()),
+    get: () => PAD_LAYOUTS.indexOf(controls.bindings.layout),
+    set: (_env, v) => void controls.setLayout(PAD_LAYOUTS[v]!),
+  },
   ...ACTIONS.map(bindRow),
   {
     id: 'deadZone',
