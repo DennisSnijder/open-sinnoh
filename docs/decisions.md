@@ -791,6 +791,35 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   Jubilife frame p50/p95 6.0/8.8 → 4.2/5.8 ms, Route 205 4.9/6.8 → 3.8/4.8 ms, CONTINUE to the field 1.3 → 0.95 s, the
   first warp into Jubilife holds the black 835 → 335 ms. Desktop frames stay about 1 ms. What is left of the frame is
   mostly three.js's own per-draw work (about 100 draws in Jubilife).
+- **What a tick did not change is not drawn again.** The game changes 30 times a second, a display shows 60 to 120
+  frames. On a wall-clock frame no tick came before: the overlay and the battle scene keep their canvases, and the DS
+  look's field keeps its picture when nothing in the view moves between ticks (`stillBetweenTicks`) or the field is
+  held at its last tick (a menu, an app). The enhanced styles always draw: their particles and follow camera run on wall
+  time. A miss can only cost smoothness, never freshness: every tick redraws. Replays and bridge pages draw every frame:
+  they step the game by hand and read the canvases at any time. `redraw` (a layout, showing a hidden page) forces a full
+  frame; art that arrives during a hold is drawn as it comes. `tests/browser/frame-skips.rom.spec.ts` plays them on the
+  wall clock.
+- **An empty canvas is not cleared.** A `clearRect` a frame on the empty overlay handed the compositor a new canvas frame
+  each time. `clearsWhenWritten` sees every call that puts pixels on it, so no drawer has to say whether it drew.
+- **A windowed battle draws the field around it once** (and after a layout). The world does not tick in a battle, so
+  the field is a still picture under the dim; before, it was drawn every frame, the enhanced post chain included. The
+  enhanced particles stop behind the window.
+- **The automatic quality step** (`auto-quality.ts`, `lantern-nds:auto-quality`) watches the enhanced field only. Two
+  windows of 120 frames with a median over 26 ms (under about 38 fps) ease the visuals: colour and particles stay, the
+  passes that fill the screen go. The step is a trial: if the median does not fall by 15 % it is taken back, silently and
+  unstored (a browser capped at 30 fps in low power mode, a busy main thread), and the session stops watching. If it
+  helps it is stored and a toast says so. It lives in its own key, so the stored style stays the player's and Options
+  keeps showing it, with a line that says it is eased; picking a style by hand stores `off`: the full look, not watched
+  again. One step only: nothing yet shows a second one is needed.
+- **Measured, `pnpm perf --lab`** (M1 Max at about 100 Hz, medians of three runs, Jubilife with its people and a wild
+  battle on Route 201; base → after). Calls per display frame, DS look: standing 105 → 64 GL, the start menu 105 → 26, a
+  windowed battle 42 → 0 GL and 69 → 17 2D; Cinematic's windowed battle 65 → 0 GL. The browser's CPU ms per second
+  (renderer + GPU process, desktop): standing 427 → 293, the start menu 492 → 260, a battle's prompt 494 → 188. phone-4×
+  frame work p50: the start menu 3.6 → 0.1 ms, a battle's prompt 1.7 → 0.1 ms; p95 stays (a tick's frame does the same
+  work), so these save battery and heat, not worst-case frames. Walking and enhanced fields draw every frame, as before.
+  Frame work percentiles now mix the empty frames in: compare them with care across this change.
+- **Left out because it did not pay:** taking a chunk's merged meshes out of three.js's matrix walk: its self time
+  stayed (277 → 280 ms over the same 8 s walk at phone-4×); the walk is doors, props and characters.
 
 ## Privacy and telemetry
 

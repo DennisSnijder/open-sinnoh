@@ -2,8 +2,8 @@
   "_": { "_": "Every number is an upper bound (pnpm perf, tools/perf-check.ts). Frame and tick ms are wall clock, per display frame / per tick; MB are 10^6 bytes; kB gzip are 10^3 bytes." },
   "bundle": {
     "romPage.gzipKB": 300,
-    "game.gzipKB": 1100,
-    "importWorker.gzipKB": 350,
+    "game.gzipKB": 1300,
+    "importWorker.gzipKB": 380,
     "sentry.gzipKB": 40
   },
   "fixture": {

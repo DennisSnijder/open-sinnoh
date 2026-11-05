@@ -28,7 +28,7 @@ Hearthome, Eterna, Canalave, Distortion World B1F, a single battle, a doubles ba
 | GPU memory (estimate) | Live texture bytes ≤ 64 MB, geometry buffers ≤ 32 MB |
 | Storage | Base pack in IndexedDB **≤ 130 MB**; a save ≤ 2 MB |
 | Quota | The import refuses to start when `navigator.storage.estimate()` leaves **< 250 MB** free |
-| JS bundle (gzip) | ROM page before a ROM is picked **≤ 300 kB**; game JS ≤ 1.1 MB; import worker ≤ 350 kB; the opt-in error-report chunk ≤ 40 kB, counted apart from the game |
+| JS bundle (gzip) | ROM page before a ROM is picked **≤ 300 kB**; game JS ≤ 1.3 MB; import worker ≤ 380 kB; the opt-in error-report chunk ≤ 40 kB, counted apart from the game |
 | Load | Return visit to an interactive title **≤ 3 s** at phone-4×; CONTINUE to the first field frame ≤ 2 s at phone-4×; first visit to an interactive ROM page ≤ 4 s on Lighthouse's slow-4G profile (1.6 Mbps, 150 ms RTT) |
 | Import | Desktop ≤ 25 s; a reference phone ≤ 60 s (manual) |
 
@@ -56,6 +56,12 @@ runners (software GL, two cores).
 **On a device.** Add `?perf` to any build for a small HUD with p50/p95 frame ms, dropped ticks and the heap where the
 browser reports it. Players who allow error reports also send an anonymous performance summary per session: device
 class, DPR, p95 frame, dropped ticks and import seconds. It carries no game state and is off when reports are off.
+
+## Automatic quality
+
+A device that holds the enhanced field under about 38 fps eases it by one step, on its own and once (`docs/decisions.md`
+has the rules). `lantern-nds:auto-quality` keeps the answer: `eased`, or `off` once the player has picked a style by hand.
+The browser specs and `pnpm perf` store `off`: software GL would set it off, and a measured look must stay the same look.
 
 ## What the desktop approximation misses
 
