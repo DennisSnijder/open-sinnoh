@@ -72,7 +72,7 @@ test.describe('options', () => {
       await settled(page);
       await expectClean(page, '[data-screen="options"]', `options ${id}`);
     }
-    // Focus order: the tabs, then the rows from the top, then Back; never back up the page.
+    // Focus order: the tabs, then the rows from the top, then Back; never back up the page except into the next column.
     await board(page).locator('[role="tab"][data-section="game"]').click();
     await expect(board(page).locator('[role="tab"][data-section="game"]')).toHaveAttribute('aria-selected', 'true');
     await settled(page);
@@ -80,8 +80,10 @@ test.describe('options', () => {
     const all = await tabOrder(page, '[data-screen="options"]', 14);
     const stops = all.slice(0, all.findIndex((s, i) => i > 0 && (s.label === 'outside' || s.label === all[0]!.label)));
     expect(stops.length, JSON.stringify(all)).toBeGreaterThan(5);
-    const ys = stops.map((s) => s.y);
-    for (let i = 1; i < ys.length; i++) expect(ys[i]!, `${stops[i - 1]!.label} then ${stops[i]!.label}`).toBeGreaterThanOrEqual(ys[i - 1]! - 4);
+    for (let i = 1; i < stops.length; i++) {
+      const [from, to] = [stops[i - 1]!, stops[i]!];
+      expect(to.y >= from.y - 4 || to.x > from.x, `${from.label} then ${to.label}`).toBe(true);
+    }
   });
 
   test('Options with a binding waiting and a question open are clean too', async ({ page }) => {
