@@ -324,9 +324,13 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
 - **Night glows come from the map's own light sources:** materials the models name as lights (`light`, `lamp`,
   `_light`, `_lamp`) or windows (`mado`, `window`) are drawn again, additively, with only their bright texels, so a
   glow has its texture's shape and colour (red beacons stay red and blink with their animation) and the bloom spreads
-  it. No hand-placed points. Lamps the map draws as plain land texture (Jubilife's plaza) have no glow. A glow is
-  decided by the source material's name, per part: converted materials are shared by texture, and a roof that shares
-  a light's texture must not glow with it.
+  it. No hand-placed points. A glow is decided by the source material, per part: converted materials are shared by
+  texture, and a roof that shares a light's texture must not glow with it.
+- **The street lamps drawn as land are a small table of material and texture names.** Jubilife's plaza lamps
+  (`c1_o02`, `c1_o02b`) and Route 206's lamp heads (`lambert14` with `r206_cy6`) are land parts whose names don't say
+  light, and nothing else in the data does: white texels also make up snow, sand and the cycling road's dashes (the
+  dashes share `r206_cy6`, so a name alone isn't enough there). The three pairs came from a look through every outdoor
+  land texture; they name no positions and hold no ROM data, and the importer's output stays as it was.
 - **Nothing the field draws is a light source by day, and the sun reads no pixels:** the field's colours are albedo,
   so the day's bloom threshold sits at white (only the glows and particles pass it) and the golden-hour shafts are a
   fan from the sun's side, not a radial scatter of the frame's bright pixels. A top-down view has no sky to scatter

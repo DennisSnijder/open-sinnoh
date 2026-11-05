@@ -1,8 +1,8 @@
 /**
  * Enhanced visuals on the real ROM (OPENSINNOH_NDS_ROM; skipped without it), on desktop and phone: the angled camera
  * on a fogged route (Route 210 North) draws its fog from linear depth, so the field fades into the DS's fog colour
- * rather than into black; the night glows on a town's lamps and lit windows in SUBTLE and CINEMATIC; and CINEMATIC's
- * frame time on the phone (logged, with the quality the renderer picked). Screenshots go to
+ * rather than into black; the night glows on a town's lamps and lit windows in SUBTLE and CINEMATIC, and on the street
+ * lamps the map draws as land; and CINEMATIC's frame time on the phone (logged, with the quality the renderer picked). Screenshots go to
  * test-artifacts/enhanced-visuals (gitignored: ROM content, never commit).
  */
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
@@ -180,6 +180,38 @@ test('the night glows stay on their lamps and windows, with no streaks', async (
     }
   }
   console.log(`glows (${project}): ${JSON.stringify(report)}`);
+  expect(errors).toEqual([]);
+});
+
+/**
+ * The street lamps the map draws as land, which only their material and texture together name (light-sources.ts), glow
+ * at night and only then: Jubilife's plaza lamps (this frame's left half, which has no other light source) and the lamp
+ * heads over Route 206's cycling road, whose centre dashes share their texture and stay dark.
+ */
+test('the street lamps drawn as land glow at night', async () => {
+  test.setTimeout(240_000);
+  const glow = async (zone: string, x: number, z: number, time: string) => {
+    await arrive(zone, x, z, 'up', time);
+    await look('dof,bloom,grade,ao');
+    const off = await lumaGrid();
+    await look('dof,bloom,grade,ao,lamps');
+    const on = await lumaGrid();
+    await page.screenshot({ path: `${SHOTS}/${project}-${zone.toLowerCase().replace(/_/g, '-')}-land-lamps-${time.replace(':', '-')}.png` });
+    return on.map((v, i) => v - off[i]!);
+  };
+  /** The share of the texels whose column is in `[from, to)` that the glows lit (the frame's own motion, water and the fountain, stays under this step). */
+  const lit = (added: number[], from: number, to: number) => added.filter((v, i) => i % 96 >= from && i % 96 < to && v > 60).length / ((to - from) * 96);
+  const plaza = lit(await glow('JUBILIFE_CITY', 175, 758, '22:00'), 0, 48);
+  const cycling = await glow('ROUTE_206', 303, 620, '22:00');
+  const lamps = lit(cycling, 0, 96);
+  const dashes = lit(cycling, 44, 52);
+  const noon = lit(await glow('JUBILIFE_CITY', 175, 758, '12:00'), 0, 96);
+  console.log(`land lamps (${project}): ${JSON.stringify({ plaza, lamps, dashes, noon })}`);
+  expect(plaza, "Jubilife's plaza lamps glow").toBeGreaterThan(0.002);
+  expect(lamps, "Route 206's lamp heads glow").toBeGreaterThan(0.003);
+  expect(lamps, 'only the lamp heads glow').toBeLessThan(0.05);
+  expect(dashes, 'the road dashes stay dark').toBe(0);
+  expect(noon, 'no glow by day').toBeLessThan(0.001);
   expect(errors).toEqual([]);
 });
 

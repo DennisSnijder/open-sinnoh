@@ -71,8 +71,17 @@ describe('enhanced visuals by the hour', () => {
 
 describe('light sources', () => {
   it('finds lamps, signs and windows by their material names', () => {
-    for (const name of ['light', 'light_a', 'light2', 'Light', 'c1_lamp01_lm1', 'lamp03', 'c2_light_a_lm4', 'bf_light_lm5']) expect(glowKind(name), name).toBe('lamp');
-    for (const name of ['h_mado', 'h_mado_lm5', 'gingamado', 'window01_mat', 'c4_mado']) expect(glowKind(name), name).toBe('window');
-    for (const name of ['c1_b01_1', 'pc_door', 'pc_1', 'h_kage_lm3', 'tshadow_lm5', 'allpeak_lm34']) expect(glowKind(name), name).toBeNull();
+    for (const name of ['light', 'light_a', 'light2', 'Light', 'c1_lamp01_lm1', 'lamp03', 'c2_light_a_lm4', 'bf_light_lm5']) expect(glowKind(name, ''), name).toBe('lamp');
+    for (const name of ['h_mado', 'h_mado_lm5', 'gingamado', 'window01_mat', 'c4_mado']) expect(glowKind(name, ''), name).toBe('window');
+    for (const name of ['c1_b01_1', 'pc_door', 'pc_1', 'h_kage_lm3', 'tshadow_lm5', 'allpeak_lm34']) expect(glowKind(name, ''), name).toBeNull();
+  });
+
+  it('finds the land lamps with unspoken names by material and texture together', () => {
+    expect(glowKind('c1_o02_lm5', 'c1_o02')).toBe('lamp');
+    expect(glowKind('c1_o02b_lm6', 'c1_o02b')).toBe('lamp');
+    expect(glowKind('lambert14', 'r206_cy6')).toBe('lamp');
+    // The cycling road's centre dashes share the lamp heads' texture; another `lambert14` is not a lamp.
+    expect(glowKind('r206_cy6_lm8', 'r206_cy6')).toBeNull();
+    expect(glowKind('lambert14_lm3', 'c5_base_a')).toBeNull();
   });
 });

@@ -705,8 +705,8 @@ class Field implements FieldRenderer {
     const healBalls: HealPart[] = [];
     const elevators: ElevatorLights[] = [];
     // Enhanced visuals' night glows (enhanced/): the light-source parts, found only with a config on, so the DS path
-    // does no work. By the source material's name: one converted material can serve a light and a roof that share a
-    // texture (Materials.convert keys by texture), and only the light glows.
+    // does no work. By the source material: one converted material can serve a light and a roof that share a texture
+    // (Materials.convert keys by texture), and only the light glows.
     const glowing = !!enhancedVisuals();
     const machine = [...this.reg.newGame.values()][0]?.healMachine;
     const lifts = [...this.reg.newGame.values()][0]?.platformLiftProps;
@@ -734,7 +734,8 @@ class Field implements FieldRenderer {
         const geometry = mesh.geometry.index ? mesh.geometry.toNonIndexed() : mesh.geometry.clone();
         const material = await this.materials.convert(singleMaterial(mesh, modelId), set, 'color' in geometry.attributes, this.modelAnimations.get(modelId), ownSet);
         geometry.applyMatrix4(new THREE.Matrix4().multiplyMatrices(placement, mesh.matrixWorld));
-        const glow = glowing ? glowKind(singleMaterial(mesh, modelId).name) : null;
+        const src = singleMaterial(mesh, modelId);
+        const glow = glowing ? glowKind(src.name, Materials.textureName(src)) : null;
         // A card is a whole prop model; one quad of a larger model belongs to that model's shape.
         const foot = camera.projection === 'perspective' && meshes.length === 1 ? cardFoot(geometry, material) : null;
         if (foot) cards.push({ geometry, foot });
