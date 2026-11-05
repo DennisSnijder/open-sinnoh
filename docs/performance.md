@@ -40,6 +40,11 @@ Renderer memory is the private footprint, not RSS: RSS counts shared mappings an
   `--profiles=` and `--scenes=` narrow it.
 - `pnpm perf --bundle`: the built app's JS sizes. Run `pnpm build` first. It needs no ROM or browser.
 - `pnpm perf --fixture`: heap growth over zone round trips on `packs/fixture`. It needs no ROM.
+- `pnpm perf --lab --label=x`: the same steps on any build, to compare two: Jubilife (walking, standing, the start menu)
+  and a wild battle (intro, command prompt, turn), per profile and visual style, three runs. It prints frame work, the
+  display interval, 2D and GL calls per frame and the browser's CPU ms per second, and judges no budget. Call counts do
+  not depend on the machine's load; frame work and CPU do, so compare them only between runs on an equally quiet machine.
+  `--cpu` writes self time by function instead (one run; its frames are slower).
 
 The ROM run writes `test-artifacts/perf/<section>.json`, prints each budget row and exits 1 on any miss, naming the
 number and the budget. It is not part of `pnpm check`: frame numbers need a quiet machine and the real GPU.
