@@ -613,8 +613,9 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   // No long-press menu (iOS callout, Android/desktop context menu) anywhere on the game screen.
   root.addEventListener('contextmenu', (e) => e.preventDefault());
 
-  /** `ticks` at the last drawn frame. */
+  /** `ticks` at the last drawn frame, and whether the windowed battle's frozen field has been drawn since it froze. */
   let drawnTicks = -1;
+  let frozenDrawn = false;
   const render = (alpha: number) => {
     // A pixel ratio change alone (another monitor, device emulation) fires no resize, and the canvases would keep
     // the old ratio (the battle scene drawn at the wrong scale): lay out again.
@@ -635,7 +636,10 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     if (speedIndicator.hidden !== (speed === 1)) speedIndicator.hidden = speed === 1;
     if (speed !== 1 && speedIndicator.textContent !== `>> ${speed}x`) speedIndicator.textContent = `>> ${speed}x`;
     battleCovers = battle.covers();
-    if (!battleCovers) session.renderer.render(session.game.inBattle() || fieldStill ? 1 : alpha);
+    // A windowed battle's field stands until the battle ends: drawn once (and after a layout, which clears the canvas).
+    const frozen = !opts.replay && battle.fieldFrozen();
+    if (!battleCovers && (!frozen || !frozenDrawn || redraw)) session.renderer.render(session.game.inBattle() || fieldStill ? 1 : alpha);
+    frozenDrawn = frozen;
     // The count matters only under the full black (`revealing`); elsewhere the scene's loading is not asked for (it
     // builds the world's view again) and the field counts as complete.
     const black = (session.game.world.fadeState()?.alpha ?? 0) >= 1;

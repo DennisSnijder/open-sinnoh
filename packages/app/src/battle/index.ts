@@ -31,6 +31,8 @@ export interface BattleUi {
    * since the last call. A battle's picture follows its view and its art alone, so a stale frame keeps the canvas.
    */
   frame(fresh: boolean): void;
+  /** The battle runs in its window and the transition is over: the field around it does not change. */
+  fieldFrozen(): boolean;
   layout(layout: Layout): void;
   /** Images of the battle on screen still loading. */
   loading(): boolean;
@@ -133,6 +135,10 @@ export function mountBattle(deps: {
     covers() {
       const v = view();
       return v !== null && v.transition === null && !scene.windowed;
+    },
+    fieldFrozen() {
+      const v = view();
+      return v !== null && v.transition === null && scene.windowed;
     },
     frame(fresh) {
       const game = deps.game();
