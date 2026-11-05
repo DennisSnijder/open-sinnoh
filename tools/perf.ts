@@ -70,7 +70,7 @@ const WALK_MS = 10_000;
 const BATTLE_MS = 15_000;
 const ROUND_TRIPS = 20;
 
-const SETUP_DONE = { 'lantern-nds:setup': '["reports","addon","textSpeed","visualStyle"]', 'lantern-nds:error-reports': 'false', 'lantern-nds:visual-style': 'ds' };
+const SETUP_DONE = { 'lantern-nds:setup': '["reports","addon","textSpeed","visualStyle"]', 'lantern-nds:error-reports': 'false', 'lantern-nds:visual-style': 'ds', 'lantern-nds:auto-quality': 'off' };
 
 /**
  * Counts live WebGL texture, buffer and renderbuffer bytes per canvas (by its id): w×h×4 per texel level (a
@@ -284,6 +284,17 @@ async function battleSave(page: Page, party: [string, number][], zone: string, x
   const idle = await page.evaluate(() => window.openSinnohGame!.until({ kind: 'idle' }, 3000));
   if (idle === null) throw new Error(`${zone}: not idle after the warp`);
   return moved(await bridgeSave(page), zone, x, z, facing);
+}
+
+/** A save at the zone with its people: the warp spawns them (`moved` leaves a zone empty). Continues `battleSave`'s page. */
+async function warpedSave(page: Page, zone: string, x: number, z: number): Promise<string> {
+  await page.getByLabel('Map', { exact: true }).fill(zone);
+  await page.getByLabel('Tile X', { exact: true }).fill(String(x));
+  await page.getByLabel('Tile Z', { exact: true }).fill(String(z));
+  await page.getByRole('button', { name: 'Warp' }).click();
+  await page.locator('#dev-debug output').filter({ hasText: 'Done.' }).waitFor();
+  if ((await page.evaluate(() => window.openSinnohGame!.until({ kind: 'idle' }, 3000))) === null) throw new Error(`${zone}: not idle after the warp`);
+  return bridgeSave(page);
 }
 
 /** Title → CONTINUE → the field drawn. Returns the seconds to an interactive title and from CONTINUE to the field. */
@@ -548,7 +559,8 @@ async function labProfile(cdp: CDPSession, play: () => Promise<void>): Promise<{
  * times. Windows: walking, standing, the start menu over the field, a wild battle's intro, its command prompt and its
  * turn. Writes test-artifacts/perf/lab-<label>.json and prints the medians of the runs. The saves and the browser
  * profile stay in .opensinnoh-cache/perf/lab, so the import runs once. `--cpu`: one run with CPU profiles of the same
- * windows instead (the profiler slows the page, so its numbers compare only with another `--cpu` run).
+ * windows instead (the profiler slows the page, so its numbers compare only with another `--cpu` run). `--looks=a/b`:
+ * also the synced render time of each enhanced config (`parseEnhanced` lists, `ds`), standing in Jubilife.
  */
 async function labRun(): Promise<void> {
   const label = option('label');
@@ -571,11 +583,8 @@ async function labRun(): Promise<void> {
       await page.getByRole('button', { name: 'Start playing' }).click({ timeout: 900_000 });
       await page.waitForFunction(() => window.openSinnohTitle?.phase === 'title', undefined, { timeout: 120_000 });
     }
-    await openReplay(page);
-    await page.evaluate(() => window.openSinnohGame!.reset(1));
-    const base = await bridgeSave(page);
     const single = await battleSave(page, [['platinum:SPECIES_MONFERNO', 25]], 'platinum:MAP_HEADER_ROUTE_201', 118, 853, 'right');
-    writeFileSync(savesFile, JSON.stringify({ jubilife: moved(base, 'platinum:MAP_HEADER_JUBILIFE_CITY', 174, 770), battle: single }));
+    writeFileSync(savesFile, JSON.stringify({ jubilife: await warpedSave(page, 'platinum:MAP_HEADER_JUBILIFE_CITY', 174, 770), battle: single }));
     await context.close();
   }
   const saves = JSON.parse(readFileSync(savesFile, 'utf8')) as { jubilife: string; battle: string };
@@ -612,10 +621,20 @@ async function labRun(): Promise<void> {
           await page.waitForTimeout(500);
           await take('stand', () => page.waitForTimeout(6000));
           if (!cpu) result.synced = await syncedRender(page);
-          await page.keyboard.press('KeyX');
+          if (option('looks')) {
+            const looks: Record<string, unknown> = {};
+            for (const look of option('looks')!.split('/')) {
+              await page.evaluate((look) => (window as unknown as { openSinnohEnhanced(c: string | null): void }).openSinnohEnhanced(look === 'ds' ? null : look), look);
+              await page.waitForTimeout(1500);
+              looks[look] = await syncedRender(page);
+              console.log(`  ${key} ${look}: ${JSON.stringify(looks[look])}`);
+            }
+            result.looks = looks;
+          }
+          await page.keyboard.press('KeyC');
           await page.waitForTimeout(800);
           await take('menu', () => page.waitForTimeout(4000));
-          await page.keyboard.press('KeyX');
+          await page.keyboard.press('KeyC');
           if (!cpu) {
             await throttle(cdp, 1);
             result.heapMB = await heapAfterGc(cdp);
