@@ -42,7 +42,8 @@ Versions: contracts 0.48.0, importer `platinum-111`, HeartGold follower add-on `
 - **App:** the ROM import in the browser, saves with file export and import, the setup, Options, following
   Pokémon and the optional HeartGold sprites, quality-of-life options (the start menu's objective among them, its destination marked on the Town Map), remappable controls, zoom,
   fast-forward, accessibility options, touch controls and an installable, offline-capable app; optional enhanced
-  visuals (a visual style and an angled camera, asked once in the setup, DS by default).
+  visuals (a visual style and an angled camera, asked once in the setup, DS by default); Modern menus for the party and
+  bag, opt-in beside the original screens.
 
 ## Not yet
 

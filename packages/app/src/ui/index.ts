@@ -18,6 +18,9 @@ import { widenRowHits } from './hits.ts';
 import { snapPixels } from '@opensinnoh/ui';
 import { icon } from './icons.ts';
 import { PixelFont } from './pixel-font.ts';
+import { readMenuStyle } from '../menu-style.ts';
+import { modernMenu } from './modern.ts';
+import { partyListInput } from './modern-party.ts';
 import { OptionsScreen } from './options-screen.ts';
 import { PoketchCard } from './poketch.ts';
 import { SignaturePen } from './signature-pen.ts';
@@ -131,6 +134,8 @@ export function mountUi(deps: UiDeps): InGameUi {
   /** The part of the view menu screens use (Layout.room): the view less the landscape controls' columns and the portrait HUD row. */
   let roomInsets = { top: 0, right: 0, bottom: 0, left: 0 };
 
+  /** The MENUS setting; replays keep the original drawing. */
+  const modern = () => !deps.replay && readMenuStyle() === 'modern';
   const stringsCache = new WeakMap<Game, UiStrings>();
   const fontCache = new WeakMap<LoadedFont, PixelFont>();
   const strings = () => {
@@ -238,7 +243,7 @@ export function mountUi(deps: UiDeps): InGameUi {
   /** Phones (portrait, or landscape with the side controls) show a DS screen full screen. */
   const phone = () => layer.dataset.mode === 'compact' || layer.dataset.controls === 'side';
   const build = (view: AppView, dot: number, u: number, entering: boolean) => {
-    const ctx: DrawContext = { text: (s, palette = 'ink', className, k = dot) => font().label(s, palette, k, className), flow: (s, lines, palette = 'ink', k = dot) => font().flow(s, palette, k, lines), measure: (s) => font().measure(s), paint: (g, s, palette, x, y) => font().draw(g, s, palette, x, y), tap: deps.tap, ...(deps.fieldTile ? { fieldTile: deps.fieldTile } : {}), art, registries: deps.game().registries, frame: deps.frame(), scale: dot, unit: u, compact: layer.dataset.mode === 'compact', options, size: roomSize(), gender: deps.game().state.gender, sound: () => ({ tick: deps.game().state.tick, cryTicks: deps.game().sound.cryTicks() }) };
+    const ctx: DrawContext = { text: (s, palette = 'ink', className, k = dot) => font().label(s, palette, k, className), flow: (s, lines, palette = 'ink', k = dot) => font().flow(s, palette, k, lines), measure: (s) => font().measure(s), paint: (g, s, palette, x, y) => font().draw(g, s, palette, x, y), tap: deps.tap, ...(deps.fieldTile ? { fieldTile: deps.fieldTile } : {}), art, registries: deps.game().registries, frame: deps.frame(), scale: dot, unit: u, modern: modern(), compact: layer.dataset.mode === 'compact', options, size: roomSize(), gender: deps.game().state.gender, sound: () => ({ tick: deps.game().state.tick, cryTicks: deps.game().sound.cryTicks() }) };
     const { kind, root } = drawApp(ctx, view);
     // A view that patches itself in place (the Pokédex list keeps its rows and scroll position).
     if (root.isConnected) return null;
@@ -382,6 +387,7 @@ export function mountUi(deps: UiDeps): InGameUi {
       if (poketch.shown && (scriptBusy(game) || game.app() || !game.poketch())) poketch.show(false);
       const view = game.app();
       if (view?.app === 'trainer-card') pen.input(frame, view);
+      if (view?.app === 'party' && modernMenu({ modern: modern() }, view)) frame = partyListInput(frame, view);
       // The Underground's touch radar has no button on the DS: R pings around the player, as a touch on the field does.
       if (!view && !poketch.shown && frame.pressed.includes('r') && game.world.undergroundView()) deps.tap(`tile:${game.state.player.x},${game.state.player.z}`);
       // OPTIONS keeps its own page and cursor (options-screen.ts): it takes the d-pad, A, L/R and its taps.

@@ -18,7 +18,7 @@ export function scrollToCursor(root: HTMLElement): void {
 
 /** Covered menu rows cannot receive browser focus while a question, action menu or message waits. */
 export function isolatePrompt(root: HTMLElement): void {
-  const prompt = root.querySelector<HTMLElement>('.yes-no, .app-menu, .party-menu, .msg-box.waiting, .os-layer');
+  const prompt = root.querySelector<HTMLElement>('.yes-no, .app-menu, .party-menu, .msg-box.waiting, .os-layer, .mm-prompt');
   if (prompt) for (const e of root.querySelectorAll<HTMLElement>(CONTROLS)) if (!prompt.contains(e)) e.inert = true;
 }
 
