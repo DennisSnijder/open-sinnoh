@@ -62,18 +62,16 @@ async function openOptions(page: Page): Promise<void> {
   await expect(board(page)).toBeVisible();
 }
 
-/** Every row is the system's row size (40 px d-pad, 64 px touch) and spans the list. */
+/** Every row is the system's row size (40 px d-pad, 64 px touch) and spans its group (a column in a wide window). */
 async function rowsFitTheList(page: Page): Promise<void> {
   // The window's opening animation moves it: measure once it has run.
   await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== 'running' || a.effect?.getComputedTiming().iterations === Infinity));
   const r = await board(page).evaluate((root) => {
-    const list = root.querySelector('.options-rows')!;
-    const pad = parseFloat(getComputedStyle(list).paddingLeft);
-    const l = list.getBoundingClientRect();
     const min = document.documentElement.dataset.density === 'touch' ? 64 : 40;
     return [...root.querySelectorAll('.options-row')].map((e) => {
       const b = e.getBoundingClientRect();
-      return { size: b.height >= min - 0.5, full: Math.abs(b.left - (l.left + pad)) < 1 && Math.abs(b.right - (l.right - pad)) < 1 };
+      const g = e.closest('.options-group')!.getBoundingClientRect();
+      return { size: b.height >= min - 0.5, full: Math.abs(b.left - g.left) < 1 && Math.abs(b.right - g.right) < 1 };
     });
   });
   expect(r.length).toBeGreaterThan(0);
@@ -117,7 +115,7 @@ test('the title and the game open the same Options screen: five sections, the sa
   expect(Object.fromEntries(Object.entries(game.rows).map(([k, v]) => [k, v.map(([id]) => id)]))).toEqual(Object.fromEntries(Object.entries(title.rows).map(([k, v]) => [k, v.map(([id]) => id)])));
   expect(muted(game)).toEqual([]);
   // The phone rows are listed where the device has the feature: haptics and keep-screen-on in Chromium, the touch controls' size and opacity on a touch screen.
-  expect(title.rows.device!.map(([id]) => id)).toEqual(['zoom', 'renderScale', 'speed', 'followers', 'followerStyle', 'character', 'autoLowercase', 'volume', 'mute', 'tradeEvolution', 'theme', 'uiFrame', 'reduceFlashing', 'visualStyle', 'angledCamera', ...(info.project.name === 'phone' ? ['controlSize', 'controlOpacity'] : []), 'haptics', 'keepAwake', 'fullscreen']);
+  expect(title.rows.device!.map(([id]) => id)).toEqual(['zoom', 'renderScale', 'visualStyle', 'angledCamera', 'reduceFlashing', 'fullscreen', 'volume', 'mute', 'speed', 'followers', 'followerStyle', 'character', 'autoLowercase', 'tradeEvolution', 'theme', 'uiFrame', ...(info.project.name === 'phone' ? ['controlSize', 'controlOpacity'] : []), 'haptics', 'keepAwake']);
   expect(title.rows.data!.map(([id]) => id)).toEqual(['exportSave', 'importSave', 'suspend', 'mod/demo-mod']);
   // The QoL additions (OpenSinnoh): GAME after the DS's six, CONTROLS before the bindings.
   expect(title.rows.game!.map(([id]) => id)).toEqual(['textSpeed', 'sound', 'battleScene', 'battleStyle', 'buttonMode', 'frame', 'repelPrompt', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'spiritombVendors', 'objective', 'introSkip']);
