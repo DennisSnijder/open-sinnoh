@@ -21,6 +21,7 @@ import { setPlaying } from './update-toast.ts';
 import { splashDone, splashPhase } from './splash.ts';
 import { FAST_SPEEDS, FastForward, readFastSpeed, storeFastSpeed, type FastSpeed } from './speed.ts';
 import { toggleMod, type PackSource } from './pack-source.ts';
+import { clearsWhenWritten } from './canvas-writes.ts';
 import { bottomFrame, drawPanel, toOverlayPoint, toPanelPoint, type DsFrame } from './panel.ts';
 import { frontierFrame } from './frontier-scene.ts';
 import { mountUi, type InGameUi } from './ui/index.ts';
@@ -140,6 +141,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   const controlBoxes = [dpad, buttons, selectPill, startPill];
   const insetProbe = $('safe-area-probe');
   const overlayCtx = overlay.getContext('2d')!;
+  const clearOverlay = clearsWhenWritten(overlayCtx);
   const panelCtx = panel.getContext('2d')!;
 
   const input = new InputState();
@@ -441,7 +443,10 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   let popupScale = 1;
   /** The pixel ratio of the last layout (see `render`). */
   let layoutDpr = 1;
+  /** The next frame draws everything, ticked or not: the canvases were cleared or moved. */
+  let redraw = true;
   const relayout = () => {
+    redraw = true;
     const dpr = devicePixelRatio || 1;
     layoutDpr = dpr;
     const controlScale = CONTROL_SIZES[phone.size]!.scale;
@@ -608,10 +613,16 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   // No long-press menu (iOS callout, Android/desktop context menu) anywhere on the game screen.
   root.addEventListener('contextmenu', (e) => e.preventDefault());
 
+  /** `ticks` at the last drawn frame. */
+  let drawnTicks = -1;
   const render = (alpha: number) => {
     // A pixel ratio change alone (another monitor, device emulation) fires no resize, and the canvases would keep
     // the old ratio (the battle scene drawn at the wrong scale): lay out again.
     if ((devicePixelRatio || 1) !== layoutDpr) relayout();
+    // What a tick did not change is not drawn again. Only the wall clock's frames: replays and tests step the game by
+    // hand, read the canvases at any frame, and must see art the moment it arrives.
+    const fresh = opts.replay || redraw || ticks !== drawnTicks;
+    drawnTicks = ticks;
     // Once the battle scene covers the field, the field is not drawn (nor loaded) under it. While a battle
     // runs the world does not tick: the field is drawn at its last tick, not interpolated toward it (an
     // alpha between two stale ticks jittered the camera, the encounter "shake"). The same holds for any tick
@@ -630,13 +641,17 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     const black = (session.game.world.fadeState()?.alpha ?? 0) >= 1;
     completeFrames = battleCovers || (black && session.renderer.loading()) ? 0 : black ? Math.min(completeFrames + 1, 2) : 2;
     battle.frame();
-    session.drawOverlay(overlayCtx, overlayFrame(), zoomScale * (devicePixelRatio || 1));
-    if (!battleCovers) {
-      // The landscape HUD sits above the d-pad; start the signboard inside the available room.
-      overlayCtx.save();
-      overlayCtx.translate(Math.round(layout.room.left * (devicePixelRatio || 1)), 0);
-      popupLayer().draw(overlayCtx, session.game.mapPopup(), popupScale);
-      overlayCtx.restore();
+    // The overlay draws what the ticks left, but for the Underground radar, whose blips follow the drawn camera.
+    if (fresh || session.game.world.undergroundView()) {
+      clearOverlay();
+      session.drawOverlay(overlayCtx, overlayFrame(), zoomScale * (devicePixelRatio || 1));
+      if (!battleCovers) {
+        // The landscape HUD sits above the d-pad; start the signboard inside the available room.
+        overlayCtx.save();
+        overlayCtx.translate(Math.round(layout.room.left * (devicePixelRatio || 1)), 0);
+        popupLayer().draw(overlayCtx, session.game.mapPopup(), popupScale);
+        overlayCtx.restore();
+      }
     }
     // The touch panel is a card over the field, shown only while it has something to offer.
     const panelView = session.game.scripts.view().panel;
@@ -671,6 +686,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
       for (const box of controlBoxes) box.classList.toggle('quiet', quiet);
     }
     ui.frame();
+    redraw = false;
   };
 
   window.openSinnohApp = {
@@ -732,6 +748,8 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     } else {
       audio.resume();
       awake.show();
+      // A browser may drop a hidden page's canvases.
+      redraw = true;
     }
   });
   // Leaving for good (not into the back/forward cache): close the save database's connection.
