@@ -8,7 +8,7 @@ import { fakeImportWorker, fakeRom, importDone } from './fake-import.ts';
 import { skipSetup } from './intro.ts';
 import { hold, installPads, PAD, press, refuseFileDialog, run, stick } from './pad.ts';
 
-test.beforeEach((_fixtures, info) => test.skip(info.project.name !== 'desktop', 'pad input does not depend on the viewport'));
+test.skip(({ isMobile }) => isMobile, 'pad input does not depend on the viewport');
 
 const board = (page: Page) => page.locator('[data-screen="options"]');
 
