@@ -211,9 +211,11 @@ export function showDialogRefused(): void {
   slot.hidden = false;
 }
 
-/** The pad was used: on the picker, what it cannot do is said before it is tried. */
-export function showPadNote(): void {
-  $('picker-pad-note').hidden = false;
+/** The pad was used: on the picker, its confirm button is named, and what it cannot do is said before it is tried. */
+export function showPadNote(confirm: string): void {
+  const note = $('picker-pad-note');
+  note.textContent = `Confirm with ${confirm}. ${note.textContent}`;
+  note.hidden = false;
 }
 
 export function clearRomError(): void {

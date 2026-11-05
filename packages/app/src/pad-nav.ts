@@ -2,7 +2,7 @@
  * The gamepad on the page's plain DOM screens: the ROM page (the picker, the import session and its first-run setup,
  * the update toast), the crash screen and the iOS hint. These run before or after the game, so no game input reaches
  * them. While one shows it owns the pad (`controls.padTaken`: the game reads nothing): the d-pad and stick move focus
- * by position, wrapping up and down, repeating while held; A presses; B dismisses what can be dismissed. The screens
+ * by position, wrapping up and down, repeating while held; DS A presses; DS B dismisses what can be dismissed (each pad's own, controls.ts). The screens
  * themselves stay plain buttons: this module only knows focus and clicks.
  *
  * A press acts in the same task as the `getGamepads()` that saw it, which is what lets Chromium's activation reach
@@ -25,8 +25,8 @@ const DIRS: readonly Dir[] = ['up', 'down', 'left', 'right'];
 export interface PadNavDeps {
   /** A on a file input: a click would fail without a word when the browser refuses the dialog. */
   openFile(input: HTMLInputElement): void;
-  /** The pad was used on the ROM page. */
-  used(): void;
+  /** The pad was used on the ROM page; `confirm` names the button that presses. */
+  used(confirm: string): void;
 }
 
 /** The screen that owns the pad now, topmost first, and the parts it spans. */
@@ -135,7 +135,7 @@ export function startPadNav(deps: PadNavDeps): void {
     seeded = true;
     if (fresh.length && !used) {
       used = true;
-      deps.used();
+      deps.used(controls.confirmLabel);
     }
     // Focus is on no stop (the first press, a redrawn step, a heading, a button gone): it lands on the first one, and
     // the press that brought it there acts on nothing unseen.

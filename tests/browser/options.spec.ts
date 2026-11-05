@@ -173,15 +173,15 @@ async function arm(page: Page, action: string): Promise<void> {
   await bindButton(page, action).click();
   await expect(bindButton(page, action)).toHaveText('PRESS A KEY OR BUTTON');
 }
-const stored = (page: Page) => page.evaluate(() => JSON.parse(localStorage.getItem('lantern-nds:controls') ?? 'null') as { keys: Record<string, string[]>; pad: Record<string, string | null>; raw: Record<string, string | null>; deadZone: number } | null);
+const stored = (page: Page) => page.evaluate(() => JSON.parse(localStorage.getItem('lantern-nds:controls') ?? 'null') as { keys: Record<string, string[]>; pad: Record<string, string | null>; raw: Record<string, string | null>; layout: string; deadZone: number } | null);
 
 /** A gamepad the page can press: `window.__pad`. Without a mapping it is a pad with no standard layout; 'standard' has one. */
-async function fakePad(page: Page, mapping = ''): Promise<void> {
-  await page.addInitScript((m) => {
-    const pad = { id: 'Test pad', index: 0, connected: true, mapping: m, buttons: Array.from({ length: 17 }, () => ({ pressed: false, touched: false, value: 0 })), axes: [0, 0, 0, 0] };
+async function fakePad(page: Page, mapping = '', id = 'Test pad'): Promise<void> {
+  await page.addInitScript(({ m, id }) => {
+    const pad = { id, index: 0, connected: true, mapping: m, buttons: Array.from({ length: 17 }, () => ({ pressed: false, touched: false, value: 0 })), axes: [0, 0, 0, 0] };
     (window as unknown as { __pad: unknown }).__pad = pad;
     navigator.getGamepads = () => [(window as unknown as { __pad: Gamepad | null }).__pad] as unknown as Gamepad[];
-  }, mapping);
+  }, { m: mapping, id });
 }
 const padButton = (page: Page, button: number, down: boolean) => page.evaluate(({ b, d }) => void ((window as unknown as { __pad: { buttons: { pressed: boolean }[] } }).__pad.buttons[b]!.pressed = d), { b: button, d: down });
 
@@ -191,7 +191,7 @@ test('Controls: keys are bound by pressing them, a taken key swaps, it persists 
   page.on('pageerror', (e) => errors.push(e.message));
   await fromTitle(page);
   await board(page).locator('[role="tab"][data-section="controls"]').click();
-  await expect(bindButton(page, 'a')).toHaveText('Z, J, Space · Right button');
+  await expect(bindButton(page, 'a')).toHaveText('Z, J, Space · Bottom button');
   await expect(bindButton(page, 'fast')).toHaveText('Tab · Right trigger');
 
   // A, then the key: the key is A's only key.
@@ -200,25 +200,25 @@ test('Controls: keys are bound by pressing them, a taken key swaps, it persists 
   await expect(board(page).locator('.options-desc')).toContainText('Escape, or its own button, keeps it');
   await page.screenshot({ path: `test-artifacts/a11y/controls-binding-${info.project.name}.png` });
   await page.keyboard.press('KeyG');
-  await expect(bindButton(page, 'a')).toHaveText('G · Right button');
+  await expect(bindButton(page, 'a')).toHaveText('G · Bottom button');
   await expect(board(page).locator('.options-desc')).toContainText('A is now G.');
   expect((await stored(page))!.keys.a).toEqual(['KeyG']);
 
   // Escape cancels and binds nothing; a key the game uses (the fast-forward toggle) is refused with the reason.
   await arm(page, 'b');
   await page.keyboard.press('Escape');
-  await expect(bindButton(page, 'b')).toHaveText('X, K · Bottom button');
+  await expect(bindButton(page, 'b')).toHaveText('X, K · Right button');
   await arm(page, 'b');
   await page.keyboard.press('Backquote');
   await expect(board(page).locator('.options-desc')).toContainText('cannot be bound');
-  await expect(bindButton(page, 'b')).toHaveText('X, K · Bottom button');
+  await expect(bindButton(page, 'b')).toHaveText('X, K · Right button');
 
   // START takes G, which A has: they swap, and the strip says so.
   await arm(page, 'start');
   await page.keyboard.press('KeyG');
   await expect(board(page).locator('.options-desc')).toContainText('Swapped with A: it now uses Enter');
   await expect(bindButton(page, 'start')).toHaveText('G · Start');
-  await expect(bindButton(page, 'a')).toHaveText('Enter · Right button');
+  await expect(bindButton(page, 'a')).toHaveText('Enter · Bottom button');
 
   // Kept on this device across a reload, and reset to the defaults.
   await page.reload();
@@ -228,7 +228,7 @@ test('Controls: keys are bound by pressing them, a taken key swaps, it persists 
   await expect(bindButton(page, 'start')).toHaveText('G · Start');
   await board(page).locator('[data-setting="resetControls"] .options-value').click();
   await expect(bindButton(page, 'start')).toHaveText('Enter · Start');
-  await expect(bindButton(page, 'a')).toHaveText('Z, J, Space · Right button');
+  await expect(bindButton(page, 'a')).toHaveText('Z, J, Space · Bottom button');
   expect((await stored(page))!.keys.start).toEqual(['Enter']);
   expect(errors).toEqual([]);
 });
@@ -257,9 +257,43 @@ test('Controls: a bad stored entry falls back to its default with a warning', as
   await page.addInitScript(() => localStorage.setItem('lantern-nds:controls', JSON.stringify({ keys: { a: ['KeyG'], b: 'nope' }, deadZone: 3 })));
   await fromTitle(page);
   await board(page).locator('[role="tab"][data-section="controls"]').click();
-  await expect(bindButton(page, 'a')).toHaveText('G · Right button');
-  await expect(bindButton(page, 'b')).toHaveText('X, K · Bottom button');
+  await expect(bindButton(page, 'a')).toHaveText('G · Bottom button');
+  await expect(bindButton(page, 'b')).toHaveText('X, K · Right button');
   expect(warnings.filter((w) => w.startsWith('controls:')).length).toBe(2);
+});
+
+test('Controls: the CONTROLLER row forces a layout, and it persists until DEFAULT CONTROLS', async ({ page }) => {
+  test.setTimeout(120_000);
+  await fakePad(page, 'standard', 'Xbox Wireless Controller (STANDARD GAMEPAD Vendor: 045e Product: 0b13)');
+  await fromTitle(page);
+  await board(page).locator('[role="tab"][data-section="controls"]').click();
+  await expect(bindButton(page, 'a')).toHaveText('Z, J, Space · A');
+  const row = board(page).locator('[data-setting="padLayout"]');
+  await expect(row.locator('.options-value')).toHaveText('AUTO');
+  await row.locator('.options-step').last().click(); // XBOX
+  await row.locator('.options-step').last().click(); // PLAYSTATION
+  await expect(row.locator('.options-value')).toHaveText('PLAYSTATION');
+  await expect(bindButton(page, 'a')).toHaveText('Z, J, Space · Cross');
+  await row.locator('.options-step').last().click(); // NINTENDO
+  await expect(row.locator('.options-value')).toHaveText('NINTENDO');
+  await expect(bindButton(page, 'b')).toHaveText('X, K · B');
+  await expect.poll(async () => (await stored(page))?.layout).toBe('nintendo');
+  expect((await stored(page))!.pad.a).toBeNull();
+
+  await page.reload();
+  await fromTitle(page);
+  await board(page).locator('[role="tab"][data-section="controls"]').click();
+  await expect(board(page).locator('[data-setting="padLayout"] .options-value')).toHaveText('NINTENDO');
+  await board(page).locator('[data-setting="resetControls"] .options-value').click();
+  await expect(board(page).locator('[data-setting="padLayout"] .options-value')).toHaveText('AUTO');
+});
+
+test('Controls: a stored positional table from before layouts is the pad\'s own defaults', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('lantern-nds:controls', JSON.stringify({ pad: { up: 'b12', down: 'b13', left: 'b14', right: 'b15', a: 'b1', b: 'b0', x: 'b3', y: 'b2', l: 'b4', r: 'b5', start: 'b9', select: 'b8', fast: 'b7', poketch: 'b6' } })));
+  await fakePad(page, 'standard');
+  await fromTitle(page);
+  await board(page).locator('[role="tab"][data-section="controls"]').click();
+  await expect(bindButton(page, 'a')).toHaveText('Z, J, Space · Bottom button');
 });
 
 test('Controls: a pad without a standard layout is bound by its raw buttons, and the game reads them', async ({ page }) => {
@@ -268,7 +302,7 @@ test('Controls: a pad without a standard layout is bound by its raw buttons, and
   await fromTitle(page);
   await board(page).locator('[role="tab"][data-section="controls"]').click();
   // Such a pad runs on a guess, shown as its raw buttons, so a player with only the pad gets this far.
-  await expect(bindButton(page, 'a')).toHaveText('Z, J, Space · Button 1');
+  await expect(bindButton(page, 'a')).toHaveText('Z, J, Space · Button 0');
   await arm(page, 'a');
   await padButton(page, 10, true);
   await expect(bindButton(page, 'a')).toHaveText('Z, J, Space · Button 10');
@@ -276,12 +310,12 @@ test('Controls: a pad without a standard layout is bound by its raw buttons, and
   // A taken button swaps, also by index.
   await arm(page, 'b');
   await padButton(page, 10, true);
-  await expect(board(page).locator('.options-desc')).toContainText('Swapped with A: it now uses Button 0');
+  await expect(board(page).locator('.options-desc')).toContainText('Swapped with A: it now uses Button 1');
   await padButton(page, 10, false);
   const s = (await stored(page))!;
-  expect([s.raw.a, s.raw.b, s.raw.up]).toEqual(['b0', 'b10', 'a1-']);
+  expect([s.raw.a, s.raw.b, s.raw.up]).toEqual(['b1', 'b10', 'a1-']);
   // The standard table is untouched.
-  expect(s.pad.a).toBe('b1');
+  expect(s.pad.a).toBeNull();
 
   // Bind A to raw button 11, then in the game that button advances the message (Z does too).
   await arm(page, 'a');
@@ -303,8 +337,8 @@ test('Controls: a pad with a layout binds by standard index, and the stick dead 
   await padButton(page, 3, true);
   await expect(bindButton(page, 'a')).toHaveText('Z, J, Space · Top button');
   await padButton(page, 3, false);
-  // X had the top button: they swapped.
-  await expect(bindButton(page, 'x')).toHaveText('C · Right button');
+  // Y had the top button: they swapped.
+  await expect(bindButton(page, 'y')).toHaveText('V · Bottom button');
   expect((await stored(page))!.pad.a).toBe('b3');
   await board(page).locator('[data-setting="deadZone"] .os-sld .cell').nth(7).click();
   await expect.poll(async () => (await stored(page))?.deadZone).toBe(80);

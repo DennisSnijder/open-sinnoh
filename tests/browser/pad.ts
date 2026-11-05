@@ -5,8 +5,8 @@
  */
 import type { Page } from '@playwright/test';
 
-/** Standard-mapping buttons, positional like the DS (controls.ts). */
-export const PAD = { b: 0, a: 1, y: 2, x: 3, l: 4, r: 5, lt: 6, fast: 7, select: 8, start: 9, up: 12, down: 13, left: 14, right: 15 } as const;
+/** Standard-mapping buttons of the default fake pad, which detects as no known kind: Xbox-style (controls.ts). */
+export const PAD = { a: 0, b: 1, x: 2, y: 3, l: 4, r: 5, lt: 6, fast: 7, select: 8, start: 9, up: 12, down: 13, left: 14, right: 15 } as const;
 
 interface FakePad {
   id: string;
@@ -26,6 +26,13 @@ export async function installPads(page: Page, o: { mapping?: string; id?: string
     navigator.getGamepads = () => w.__pads as unknown as Gamepad[];
   }, { mapping: o.mapping ?? 'standard', id: o.id ?? 'Test pad', count: o.count ?? 1 });
 }
+
+/** A Nintendo pad's standard-mapping buttons: its A is on the right. */
+export const NINTENDO = { ...PAD, b: 0, a: 1, y: 2, x: 3 } as const;
+
+export const XBOX_ID = 'Xbox Wireless Controller (STANDARD GAMEPAD Vendor: 045e Product: 0b13)';
+export const PLAYSTATION_ID = 'DualSense Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 0ce6)';
+export const NINTENDO_ID = 'Pro Controller (STANDARD GAMEPAD Vendor: 057e Product: 2009)';
 
 export const hold = (page: Page, button: number, down: boolean, pad = 0): Promise<void> =>
   page.evaluate(({ b, d, p }) => {

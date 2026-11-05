@@ -76,7 +76,7 @@ describe('the settings registry', () => {
     const storage = Object.fromEntries(SETTINGS.map((s) => [s.id, s.storage]));
     expect(storage).toEqual({
       textSpeed: 'device', sound: 'save', battleScene: 'save', battleStyle: 'save', buttonMode: 'save', frame: 'save',
-      introSkip: 'device', suspend: 'device', repelPrompt: 'device', followerTalk: 'device', statView: 'device', summaryRename: 'device', dexNameSearch: 'device', spiritombVendors: 'device', objective: 'device', character: 'device', autoRun: 'device', itemWheel: 'device',
+      introSkip: 'device', suspend: 'device', repelPrompt: 'device', followerTalk: 'device', statView: 'device', summaryRename: 'device', dexNameSearch: 'device', spiritombVendors: 'device', objective: 'device', character: 'device', autoRun: 'device', itemWheel: 'device', padLayout: 'device',
       zoom: 'device', renderScale: 'device', visualStyle: 'device', angledCamera: 'device', speed: 'device', followers: 'device', followerStyle: 'device', autoLowercase: 'device', volume: 'device', mute: 'device', tradeEvolution: 'device', theme: 'device', uiFrame: 'device', reduceFlashing: 'device',
       controlSize: 'device', controlOpacity: 'device', haptics: 'device', keepAwake: 'device', fullscreen: 'none',
       ...Object.fromEntries(['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'l', 'r', 'start', 'select', 'fast', 'poketch'].map((a) => [`bind/${a}`, 'device'])), deadZone: 'device', resetControls: 'none',
@@ -101,7 +101,7 @@ describe('the settings registry', () => {
     expect(p.map((x) => x.settings.map((s) => s.id))).toEqual([
       ['textSpeed', 'sound', 'battleScene', 'battleStyle', 'buttonMode', 'frame', 'repelPrompt', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'spiritombVendors', 'objective', 'introSkip'],
       ['zoom', 'renderScale', 'visualStyle', 'angledCamera', 'reduceFlashing', 'volume', 'mute', 'speed', 'followers', 'followerStyle', 'character', 'autoLowercase', 'tradeEvolution', 'theme', 'uiFrame', 'controlSize', 'controlOpacity', 'haptics', 'keepAwake'],
-      ['autoRun', 'itemWheel', ...['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'l', 'r', 'start', 'select', 'fast', 'poketch'].map((a) => `bind/${a}`), 'deadZone', 'resetControls'],
+      ['autoRun', 'itemWheel', ...['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'l', 'r', 'start', 'select', 'fast', 'poketch'].map((a) => `bind/${a}`), 'padLayout', 'deadZone', 'resetControls'],
       ['exportSave', 'importSave', 'suspend', 'storage', 'reimport', 'addon', 'deleteRom', 'mod/demo'],
       ['reports'],
     ]);
@@ -109,7 +109,7 @@ describe('the settings registry', () => {
     expect(pages(fakeEnv({ app: false, rom: false }).env).map((x) => [x.section.id, x.settings.map((s) => s.id)])).toEqual([
       ['game', ['textSpeed', 'sound', 'battleScene', 'battleStyle', 'buttonMode', 'frame', 'repelPrompt', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'spiritombVendors', 'objective', 'introSkip']],
       ['device', ['reduceFlashing', 'followers', 'followerStyle', 'character', 'autoLowercase', 'tradeEvolution', 'theme', 'uiFrame']],
-      ['controls', ['autoRun', 'itemWheel', ...['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'l', 'r', 'start', 'select', 'fast', 'poketch'].map((a) => `bind/${a}`), 'deadZone', 'resetControls']],
+      ['controls', ['autoRun', 'itemWheel', ...['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'l', 'r', 'start', 'select', 'fast', 'poketch'].map((a) => `bind/${a}`), 'padLayout', 'deadZone', 'resetControls']],
       ['data', ['exportSave', 'importSave', 'suspend', 'mod/demo']],
     ]);
   });

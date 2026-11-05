@@ -54,7 +54,7 @@ installGlobalHandlers();
 // iPhone: no loupe, callout or page zoom on the game's surfaces (touch.ts).
 installTouchGuards();
 // The pad on the DOM screens that have no game behind them (the ROM page, the crash screen).
-startPadNav({ openFile: chooseRomFile, used: () => document.getElementById('picker-pad-note') && showPadNote() });
+startPadNav({ openFile: chooseRomFile, used: (confirm) => document.getElementById('picker-pad-note') && showPadNote(confirm) });
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const params = new URLSearchParams(location.search);

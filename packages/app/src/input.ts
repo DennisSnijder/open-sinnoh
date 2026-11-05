@@ -5,9 +5,10 @@
  * Keyboard and gamepad bindings are the player's (`controls`, controls.ts; Options › Controls). The defaults:
  *   Keyboard (physical keys, `KeyboardEvent.code`, so it works on any layout): D-pad Arrow keys and W A S D;
  *   A Z, J, Space; B X, K; X C; Y V; L Q, Page Up; R E, Page Down; Start Enter; Select Backspace, Right Shift.
- *   Gamepad (W3C "standard" mapping), positional like the DS: right face button = A, bottom = B, top = X,
- *   left = Y; shoulders = L/R; Back/View = Select; Start/Menu = Start; D-pad and the left stick = D-pad; left
- *   trigger = the Pokétch. A pad with another mapping runs on a guess until the player binds it (controls.ts).
+ *   Gamepad (W3C "standard" mapping), as each pad prints its face: bottom face button = A, right = B, left = X,
+ *   top = Y, and on Nintendo pads right = A, bottom = B, top = X, left = Y; shoulders = L/R; Back/View = Select;
+ *   Start/Menu = Start; D-pad and the left stick = D-pad; left trigger = the Pokétch. Options › Controls can force
+ *   the face. A pad with another mapping runs on a guess until the player binds it (controls.ts).
  *   The stick is one direction at a time: past the dead zone (measured round, so diagonals are not further), its
  *   stronger axis. The game walks in four directions and a menu moves one way.
  *
@@ -16,7 +17,7 @@
  */
 import { BUTTONS, type Button } from '@opensinnoh/core';
 import type { InputFrame } from '@opensinnoh/contracts';
-import { Controls, defaultBindings, padHolds, padTable, type Bindings, type PadLike } from './controls.ts';
+import { Controls, defaultBindings, padHolds, padTableOf, type Bindings, type PadLike } from './controls.ts';
 
 export { KEY_MAP, FAST_FORWARD_HOLD, FAST_FORWARD_TOGGLE, type PadLike } from './controls.ts';
 
@@ -25,11 +26,10 @@ export const controls = new Controls(typeof localStorage === 'undefined' ? null 
 
 /** Held DS buttons for one gamepad under the given bindings (default: the factory ones). */
 export function gamepadButtons(pad: PadLike, bindings: Bindings = defaultBindings()): Button[] {
-  const standard = pad.mapping === 'standard';
-  const t = padTable(bindings, !standard);
+  const t = padTableOf(bindings, pad);
   const out = new Set<Button>();
   for (const b of BUTTONS) if (padHolds(pad, t[b], bindings.deadZone)) out.add(b);
-  if (standard) {
+  if (pad.mapping === 'standard') {
     const [x = 0, y = 0] = pad.axes;
     if (Math.hypot(x, y) >= bindings.deadZone / 100) out.add(Math.abs(x) > Math.abs(y) ? (x < 0 ? 'left' : 'right') : y < 0 ? 'up' : 'down');
   }
@@ -191,7 +191,7 @@ export function currentPad(): PadLike | null {
 export function gamepadFastForward(): boolean {
   const pad = currentPad();
   if (!pad) return false;
-  return padHolds(pad, padTable(controls.bindings, pad.mapping !== 'standard').fast, controls.bindings.deadZone);
+  return padHolds(pad, padTableOf(controls.bindings, pad).fast, controls.bindings.deadZone);
 }
 
 /** An unplugged gamepad is dropped at once (its held buttons let go). */
@@ -233,7 +233,7 @@ export function pollGamepads(input: InputState): void {
   }
   const pad = currentPad();
   input.setAll('gamepad', pad ? gamepadButtons(pad, controls.bindings) : []);
-  const poketch = !!pad && padHolds(pad, padTable(controls.bindings, pad.mapping !== 'standard').poketch, controls.bindings.deadZone);
+  const poketch = !!pad && padHolds(pad, padTableOf(controls.bindings, pad).poketch, controls.bindings.deadZone);
   if (poketch && !poketchHeld) poketchPress = true;
   poketchHeld = poketch;
 }

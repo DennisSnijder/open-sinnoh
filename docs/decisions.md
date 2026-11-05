@@ -467,7 +467,7 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
 - **Keyboard and accessibility:** menus trap Tab, follow the game cursor with focus and restore focus on
   close; Escape is B outside text fields. Canvas-drawn messages are read once per finished page into a
   polite live region.
-- **Input:** physical key codes (arrows/WASD, Z/J/Space = A, X/K = B, …); gamepads map positionally.
+- **Input:** physical key codes (arrows/WASD, Z/J/Space = A, X/K = B, …); gamepads follow their print (below).
   Options › Controls rebinds keys and pad buttons; replays use logical buttons only.
 - **A controller reaches everything but, sometimes, the file dialog.** The DOM screens with no game behind them (the
   ROM page, the crash screen) run on `pad-nav.ts`: focus by position, clicks, and they own the pad while they show. A
@@ -475,8 +475,13 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   activates a page when `getGamepads()` sees a press (w3c/gamepad #230, unmerged) and Gecko and WebKit have not shipped
   it. So the press tries `showPicker()`, which reports a refusal where `click()` fails silently, and a refusal says
   what to do instead (a key, a click, a drop). The dialog itself is the system's and no pad drives it.
-- **Pad defaults stay positional** (right face = DS A), so Xbox's B confirms; the Controls page names buttons as the
-  connected pad prints them. A pad with no standard mapping runs on a guess until something is bound on it: unbound, a
+- **The confirm button follows the controller.** The printed A confirms: bottom face on Xbox and on unknown pads
+  (mostly XInput-style), Cross on PlayStation, right face on Nintendo pads, each pad by its own `Gamepad.id`, so two
+  kinds at once both work. A misdetected pad is rescued by Options › Controls' CONTROLLER row, which forces the table
+  and the names. Rebinding wins: `pad` stays all null until the first binding copies the table in use, and that table
+  then applies to every standard pad. Before this every save wrote the positional table, so a stored table equal to
+  it with no `layout` next to it means untouched; next to a `layout`, it was bound on purpose. Replays never see any
+  of this, they hold logical buttons. The Controls page names buttons as the connected pad prints them. A pad with no standard mapping runs on a guess until something is bound on it: unbound, a
   pad-only player could never reach the page that binds it. The Pokétch is a bindable action (left trigger), since the
   DS shows it always and a pad cannot press the HUD's watch. Inputs the DS gives only to the stylus become taps in the
   app, not the models (the signature pen, the Underground's radar on R), so headless games and replays are unchanged.
