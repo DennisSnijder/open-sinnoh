@@ -92,7 +92,7 @@ describe('the settings registry', () => {
     expect(p.map((x) => x.settings.map((s) => s.id))).toEqual([
       ['textSpeed', 'sound', 'battleScene', 'battleStyle', 'buttonMode', 'frame', 'repelPrompt', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'spiritombVendors', 'objective', 'introSkip'],
       ['zoom', 'renderScale', 'speed', 'followers', 'followerStyle', 'character', 'autoLowercase', 'volume', 'mute', 'tradeEvolution', 'theme', 'uiFrame', 'reduceFlashing', 'visualStyle', 'angledCamera', 'controlSize', 'controlOpacity', 'haptics', 'keepAwake'],
-      ['autoRun', 'itemWheel', 'padLayout', ...['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'l', 'r', 'start', 'select', 'fast', 'poketch'].map((a) => `bind/${a}`), 'deadZone', 'resetControls'],
+      ['autoRun', 'itemWheel', ...['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'l', 'r', 'start', 'select', 'fast', 'poketch'].map((a) => `bind/${a}`), 'padLayout', 'deadZone', 'resetControls'],
       ['exportSave', 'importSave', 'suspend', 'storage', 'reimport', 'addon', 'deleteRom', 'mod/demo'],
       ['reports'],
     ]);
@@ -100,7 +100,7 @@ describe('the settings registry', () => {
     expect(pages(fakeEnv({ app: false, rom: false }).env).map((x) => [x.section.id, x.settings.map((s) => s.id)])).toEqual([
       ['game', ['textSpeed', 'sound', 'battleScene', 'battleStyle', 'buttonMode', 'frame', 'repelPrompt', 'followerTalk', 'statView', 'summaryRename', 'dexNameSearch', 'spiritombVendors', 'objective', 'introSkip']],
       ['device', ['followers', 'followerStyle', 'character', 'autoLowercase', 'tradeEvolution', 'theme', 'uiFrame', 'reduceFlashing']],
-      ['controls', ['autoRun', 'itemWheel', 'padLayout', ...['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'l', 'r', 'start', 'select', 'fast', 'poketch'].map((a) => `bind/${a}`), 'deadZone', 'resetControls']],
+      ['controls', ['autoRun', 'itemWheel', ...['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'l', 'r', 'start', 'select', 'fast', 'poketch'].map((a) => `bind/${a}`), 'padLayout', 'deadZone', 'resetControls']],
       ['data', ['exportSave', 'importSave', 'suspend', 'mod/demo']],
     ]);
   });

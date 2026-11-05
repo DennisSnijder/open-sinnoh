@@ -480,6 +480,7 @@ export const SETTINGS: readonly Setting[] = [
   // CONTROLS: running without B and the item wheel on a held Y (OpenSinnoh), then this device's keyboard and gamepad bindings (`lantern-nds:controls`, controls.ts).
   dsOption('autoRun', 'controls', 'choice'),
   dsOption('itemWheel', 'controls', 'choice'),
+  ...ACTIONS.map(bindRow),
   {
     id: 'padLayout',
     section: 'controls',
@@ -492,7 +493,6 @@ export const SETTINGS: readonly Setting[] = [
     get: () => PAD_LAYOUTS.indexOf(controls.bindings.layout),
     set: (_env, v) => void controls.setLayout(PAD_LAYOUTS[v]!),
   },
-  ...ACTIONS.map(bindRow),
   {
     id: 'deadZone',
     section: 'controls',
