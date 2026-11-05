@@ -45,7 +45,7 @@ export interface Session {
   /** One 30 Hz tick with the app's input frame. */
   tick(input: InputFrame): void;
   /**
-   * Clears the overlay canvas and draws the message/yes-no boxes in `frame` (`bottomFrame` on the field, the scene's
+   * Draws the message/yes-no boxes on the overlay canvas, which the caller has cleared, in `frame` (`bottomFrame` on the field, the scene's
    * frame while a frontier scene runs; its scale is device px per DS px, an integer).
    * `fieldScale`: device px per DS px of the field (Fly's cut-in stands over the player).
    */
@@ -145,7 +145,7 @@ export async function createSession(
 
   /** Stable handle over the current renderer. */
   const current: FieldRenderer = {
-    render: (alpha) => renderer.render(alpha),
+    render: (alpha, repeat) => renderer.render(alpha, repeat),
     tileAt: (x, y) => renderer.tileAt?.(x, y) ?? null,
     screenOf: (x, z) => renderer.screenOf?.(x, z) ?? null,
     loading: () => renderer.loading(),
@@ -163,7 +163,6 @@ export async function createSession(
     font,
     tick: (input) => game.step(input),
     drawOverlay(ctx, frame, fieldScale) {
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       drawFly(ctx, game.world.flyScene(), game.world.fadeState(), fieldScale);
       drawUgTransition(ctx, game.world.undergroundTransition(), game.world.fadeState(), fieldScale);
       drawRadar(ctx, game.world.undergroundView(), font, fieldScale, game.state.tick, (x, z) => renderer.screenOf?.(x, z) ?? null);

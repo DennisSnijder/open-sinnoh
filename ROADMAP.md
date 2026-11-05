@@ -82,6 +82,8 @@ cries, battle music by encounter, the title and app music.
 - Storage checks and save export and import.
 - WCAG 2.2 AA on OpenSinnoh's own screens, announcements for canvas text, a reduce-flashing option.
 - Performance, memory, storage and bundle budgets ([docs/performance.md](docs/performance.md)).
+- Frames a tick did not change are not drawn again, and an automatic quality step eases the enhanced visuals on a slow
+  device.
 
 **Quality-of-life options.** Each defaults to DS behaviour in replays and tests:
 - fast-forward and field zoom;
@@ -108,7 +110,6 @@ Pokémon, follower talk and the HGSS look.
   Battle Frontier, with its own checkpoint suite.
 - **Beyond the original (opt-in):** higher resolution, widescreen camera options, texture filtering, replacement
   model and texture packs.
-- **Enhanced visuals:** an auto quality step on slow phones.
 - **An original demo pack** that needs no ROM.
 - **Later:** the one-way cartridge `.sav` import, Diamond and Pearl, other ROM regions.
 

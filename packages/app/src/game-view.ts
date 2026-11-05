@@ -22,6 +22,8 @@ import { setPlaying } from './update-toast.ts';
 import { splashDone, splashPhase } from './splash.ts';
 import { FAST_SPEEDS, FastForward, readFastSpeed, storeFastSpeed, type FastSpeed } from './speed.ts';
 import { toggleMod, type PackSource } from './pack-source.ts';
+import { AutoQuality, readStoredQuality, storeQuality } from './auto-quality.ts';
+import { clearsWhenWritten } from './canvas-writes.ts';
 import { bottomFrame, drawPanel, toOverlayPoint, toPanelPoint, type DsFrame } from './panel.ts';
 import { frontierFrame } from './frontier-scene.ts';
 import { mountUi, type InGameUi } from './ui/index.ts';
@@ -49,7 +51,7 @@ declare global {
   interface Window {
     openSinnohGame?: AppBridge;
     /** Debug/test handle (always present once the game is mounted). */
-    openSinnohApp?: { lastInput: InputFrame | null; ticks: number; layout: Layout; overlayFrame(): DsFrame; game: Game; sceneLoading(): boolean; ui: InGameUi; battleScene(): BattleSceneInfo; audio: WebAudio; zoom(): { setting: Zoom; scale: number }; renderScale(): { setting: RenderScale; pixelRatio: number }; loop: LoopStats; hold(): { holding: boolean; ms: number; reason: string }; speed(): { fast: number; latched: boolean; active: boolean; speed: number }; tileAt(x: number, y: number): { x: number; z: number } | null };
+    openSinnohApp?: { lastInput: InputFrame | null; ticks: number; layout: Layout; overlayFrame(): DsFrame; game: Game; sceneLoading(): boolean; ui: InGameUi; battleScene(): BattleSceneInfo; audio: WebAudio; zoom(): { setting: Zoom; scale: number }; renderScale(): { setting: RenderScale; pixelRatio: number }; loop: LoopStats; hold(): { holding: boolean; ms: number; reason: string }; speed(): { fast: number; latched: boolean; active: boolean; speed: number }; tileAt(x: number, y: number): { x: number; z: number } | null; qualityFrame(ms: number): void };
   }
 }
 
@@ -144,6 +146,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   const controlBoxes = [dpad, buttons, selectPill, startPill];
   const insetProbe = $('safe-area-probe');
   const overlayCtx = overlay.getContext('2d')!;
+  const clearOverlay = clearsWhenWritten(overlayCtx);
   const panelCtx = panel.getContext('2d')!;
 
   const input = new InputState();
@@ -196,7 +199,11 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   // live; replays keep the DS look whatever is stored. Dev and test builds also get a hook to set a config directly.
   let visuals: Visuals = readVisuals();
   const lowPower = () => matchMedia('(pointer: coarse)').matches;
-  const applyVisuals = () => setEnhancedVisuals(opts.replay ? null : visualStyleConfig(visuals.style, visuals.angledCamera, lowPower()));
+  const storedQuality = readStoredQuality();
+  /** The automatic quality step is on (auto-quality.ts): the player's style stays stored and shown. */
+  let eased = storedQuality === 'eased';
+  const autoQuality = new AutoQuality(opts.replay ? 'off' : storedQuality);
+  const applyVisuals = () => setEnhancedVisuals(opts.replay ? null : visualStyleConfig(visuals.style, visuals.angledCamera, lowPower(), eased));
   applyVisuals();
   // A preset or switch list takes this device's power, as the Options' style does.
   if (import.meta.env.DEV)
@@ -308,12 +315,19 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     visuals: {
       get: () => visuals,
       set: (v) => {
+        // A style picked by hand is the player's answer to the step: the full look, not watched again.
+        if (v.style !== visuals.style) {
+          autoQuality.stop();
+          if (eased) storeQuality('off');
+          eased = false;
+        }
         visuals = v;
         const err = storeVisuals(v);
         if (err) session.game.log.stub('ui:visuals-storage', `the visual style is kept for this visit only: ${err}`);
         applyVisuals();
       },
       phone: coarse.matches,
+      eased: () => eased,
     },
     data: dataActions,
     reports: {
@@ -446,7 +460,10 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   let popupScale = 1;
   /** The pixel ratio of the last layout (see `render`). */
   let layoutDpr = 1;
+  /** The next frame draws everything, ticked or not: the canvases were cleared or moved. */
+  let redraw = true;
   const relayout = () => {
+    redraw = true;
     const dpr = devicePixelRatio || 1;
     layoutDpr = dpr;
     const controlScale = CONTROL_SIZES[phone.size]!.scale;
@@ -617,10 +634,29 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   // No long-press menu (iOS callout, Android/desktop context menu) anywhere on the game screen.
   root.addEventListener('contextmenu', (e) => e.preventDefault());
 
+  /** One display frame's interval, on the automatic quality step's watch (auto-quality.ts). */
+  const qualityFrame = (ms: number) => {
+    const step = autoQuality.frame(ms);
+    if (step === 'keep') {
+      storeQuality('eased');
+      ui!.toast('Visuals eased to keep the game smooth', 6000);
+    } else if (step) {
+      eased = step === 'ease';
+      applyVisuals();
+    }
+  };
+  let frameAt: number | null = null;
+  /** `ticks` at the last drawn frame, and whether the windowed battle's frozen field has been drawn since it froze. */
+  let drawnTicks = -1;
+  let frozenDrawn = false;
   const render = (alpha: number) => {
     // A pixel ratio change alone (another monitor, device emulation) fires no resize, and the canvases would keep
     // the old ratio (the battle scene drawn at the wrong scale): lay out again.
     if ((devicePixelRatio || 1) !== layoutDpr) relayout();
+    // What a tick did not change is not drawn again. Only the wall clock's frames: replays and tests step the game by
+    // hand, read the canvases at any frame, and must see art the moment it arrives.
+    const fresh = opts.replay || redraw || ticks !== drawnTicks;
+    drawnTicks = ticks;
     // Once the battle scene covers the field, the field is not drawn (nor loaded) under it. While a battle
     // runs the world does not tick: the field is drawn at its last tick, not interpolated toward it (an
     // alpha between two stale ticks jittered the camera, the encounter "shake"). The same holds for any tick
@@ -633,19 +669,26 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     if (speedIndicator.hidden !== (speed === 1)) speedIndicator.hidden = speed === 1;
     if (speed !== 1 && speedIndicator.textContent !== `>> ${speed}x`) speedIndicator.textContent = `>> ${speed}x`;
     battleCovers = battle.covers();
-    if (!battleCovers) session.renderer.render(session.game.inBattle() || fieldStill ? 1 : alpha);
+    // A windowed battle's field stands until the battle ends: drawn once (and after a layout, which clears the canvas).
+    const frozen = !opts.replay && battle.fieldFrozen();
+    if (!battleCovers && (!frozen || !frozenDrawn || redraw)) session.renderer.render(session.game.inBattle() || fieldStill ? 1 : alpha, !fresh);
+    frozenDrawn = frozen;
     // The count matters only under the full black (`revealing`); elsewhere the scene's loading is not asked for (it
     // builds the world's view again) and the field counts as complete.
     const black = (session.game.world.fadeState()?.alpha ?? 0) >= 1;
     completeFrames = battleCovers || (black && session.renderer.loading()) ? 0 : black ? Math.min(completeFrames + 1, 2) : 2;
-    battle.frame();
-    session.drawOverlay(overlayCtx, overlayFrame(), zoomScale * (devicePixelRatio || 1));
-    if (!battleCovers) {
-      // The landscape HUD sits above the d-pad; start the signboard inside the available room.
-      overlayCtx.save();
-      overlayCtx.translate(Math.round(layout.room.left * (devicePixelRatio || 1)), 0);
-      popupLayer().draw(overlayCtx, session.game.mapPopup(), popupScale);
-      overlayCtx.restore();
+    battle.frame(fresh);
+    // The overlay draws what the ticks left, but for the Underground radar, whose blips follow the drawn camera.
+    if (fresh || session.game.world.undergroundView()) {
+      clearOverlay();
+      session.drawOverlay(overlayCtx, overlayFrame(), zoomScale * (devicePixelRatio || 1));
+      if (!battleCovers) {
+        // The landscape HUD sits above the d-pad; start the signboard inside the available room.
+        overlayCtx.save();
+        overlayCtx.translate(Math.round(layout.room.left * (devicePixelRatio || 1)), 0);
+        popupLayer().draw(overlayCtx, session.game.mapPopup(), popupScale);
+        overlayCtx.restore();
+      }
     }
     // The touch panel is a card over the field, shown only while it has something to offer.
     const panelView = session.game.scripts.view().panel;
@@ -680,6 +723,12 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
       for (const box of controlBoxes) box.classList.toggle('quiet', quiet);
     }
     ui.frame();
+    redraw = false;
+    // Watched: the enhanced field at normal speed, with nothing over it that has a cost of its own.
+    const now = performance.now();
+    if (visuals.style === 'ds' || battleCovers || game.inBattle() || game.app() || loopStats.speed !== 1 || game.world.fadeState()) autoQuality.skip();
+    else if (frameAt !== null) qualityFrame(now - frameAt);
+    frameAt = now;
   };
 
   window.openSinnohApp = {
@@ -704,6 +753,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     hold: () => (battle.holding() ? { holding: true, ms: held, reason: battle.holdReason() } : { holding: revealing(), ms: held, reason: revealing() ? 'the field scene' : '' }),
     speed: () => ({ fast: fastForward.fast, latched: fastForward.latched, active: fastForward.active, speed: fastForward.speed() }),
     tileAt: (x, y) => session.renderer.tileAt?.(x, y) ?? null,
+    qualityFrame,
   };
   // The title screen runs first (its own loop); the field shows and its loop starts once it is left.
   const titleRecord = opts.title ? [...session.game.registries.titleScreens.values()][0] : undefined;
@@ -741,6 +791,8 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     } else {
       audio.resume();
       awake.show();
+      // A browser may drop a hidden page's canvases.
+      redraw = true;
     }
   });
   // Leaving for good (not into the back/forward cache): close the save database's connection.

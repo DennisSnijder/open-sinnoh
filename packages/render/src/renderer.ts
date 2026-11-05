@@ -420,6 +420,18 @@ export interface RenderDebug {
   syncTiming: boolean;
 }
 
+const sameVec = (a: Vec3, b: Vec3) => a[0] === b[0] && a[1] === b[1] && a[2] === b[2];
+
+/** Nothing in the view is drawn between its last two ticks: `render`'s alpha changes no part of the picture. */
+export function stillBetweenTicks(view: FieldView): boolean {
+  if (view.distortion || view.viewCamera || view.doors?.length || view.effects.length) return false;
+  if (!sameVec(view.camera.prev, view.camera.cur)) return false;
+  for (const m of [...(view.features?.models ?? []), ...(view.props ?? [])]) if (m.prev && !sameVec(m.prev, m.position)) return false;
+  for (const a of view.actors) if (!sameVec(a.prev, a.cur)) return false;
+  for (const a of view.previews) if (!sameVec(a.prev, a.cur)) return false;
+  return true;
+}
+
 /** Frame timings and scene sizes, for perf runs (`window.openSinnohRenderStats`). */
 export interface RenderStats {
   frames: number;
@@ -553,6 +565,8 @@ class Field implements FieldRenderer {
    * and the config it draws with. Null: the DS look, untouched.
    */
   private enhanced: EnhancedPipeline | null = null;
+  /** The last frame's view (`render`). */
+  private lastView: FieldView | null = null;
   private enhancedConfig: EnhancedConfig | null = null;
   private enhancedLoading = false;
   /** The enhanced camera replaced the DS camera's projection last frame. */
@@ -1750,12 +1764,15 @@ class Field implements FieldRenderer {
     return { x: ((p.x + 1) / 2) * el.clientWidth, y: ((1 - p.y) / 2) * el.clientHeight };
   }
 
-  render(alpha: number): void {
+  render(alpha: number, repeat = false): void {
     // A chunk, sprite or model that failed to load stops rendering loudly instead of leaving holes.
     if (this.failure) throw this.failure;
     const t0 = performance.now();
     this.syncEnhanced();
-    const view = this.world.view();
+    // The world moves only in a tick: a frame without one sees the same view, and may not need to draw it at all.
+    const view = (repeat && this.lastView) || this.world.view();
+    this.lastView = view;
+    if (repeat && this.repeatsPicture(view, alpha)) return;
     if (view.matrix !== this.matrix) {
       this.clearChunks();
       this.matrix = view.matrix;
@@ -1973,6 +1990,18 @@ class Field implements FieldRenderer {
     s.cachedModels = this.assets.sizes().models;
     s.enhanced = this.enhanced ? this.enhancedConfig : null;
     s.enhancedFrame = enhanced ? { angled: this.enhancedCamera, lamps: this.enhancedConfig!.lamps ? this.glowList().length : 0, quality: enhanced.quality } : null;
+  }
+
+  /**
+   * A frame without a tick draws what the last one drew: the look has no effect of its own (the enhanced visuals run on
+   * wall time, a fade may ease by the frame) and the field is drawn at its last tick (`alpha` 1) or holds nothing that
+   * moves between two ticks. Whatever this misses at worst moves at the DS's 30 Hz until the next tick redraws it.
+   */
+  private repeatsPicture(view: FieldView, alpha: number): boolean {
+    if (this.enhancedConfig || view.storyScene || view.shipScene || view.tint || this.world.fadeState()) return false;
+    if (alpha === 1) return true;
+    for (const c of this.chunks.values()) if (c.loops.length) return false;
+    return stillBetweenTicks(view);
   }
 
   loading(): boolean {

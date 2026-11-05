@@ -41,10 +41,14 @@ export const ENHANCED_PRESETS = {
 export type VisualStyle = 'ds' | keyof typeof ENHANCED_PRESETS;
 export const VISUAL_STYLES: readonly VisualStyle[] = ['ds', 'subtle', 'cinematic'];
 
-/** The config for the Options' visual style and angled camera (the follow camera); null is the DS look. */
-export function visualStyleConfig(style: VisualStyle, angledCamera: boolean, lowPower: boolean): EnhancedConfig | null {
+/**
+ * The config for the Options' visual style and angled camera (the follow camera); null is the DS look. `eased`: the
+ * automatic quality step (app auto-quality.ts): the colour and the particles stay, the passes that fill the screen go.
+ */
+export function visualStyleConfig(style: VisualStyle, angledCamera: boolean, lowPower: boolean, eased = false): EnhancedConfig | null {
   const base: EnhancedConfig = style === 'ds' ? { ...ENHANCED_OFF } : { ...ENHANCED_PRESETS[style] };
   const config: EnhancedConfig = { ...base, camera: angledCamera ? 'follow' : 'off', lowPower };
+  if (eased && style !== 'ds') Object.assign(config, { lowPower: true, dof: false, ao: false, sun: false, bloom: false, lamps: false });
   return enhancedActive(config) ? config : null;
 }
 

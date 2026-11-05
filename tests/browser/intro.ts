@@ -18,7 +18,8 @@ export async function press(page: Page, code: string): Promise<void> {
 }
 
 /** The setup's answers stored as given, so the title goes straight to the main menu (specs that test something else). */
-export const SETUP_DONE = { 'lantern-nds:setup': '["reports","addon","textSpeed","visualStyle"]', 'lantern-nds:error-reports': 'false' };
+// Auto quality off: software GL is slow enough to set it off in any spec that picks an enhanced style.
+export const SETUP_DONE = { 'lantern-nds:setup': '["reports","addon","textSpeed","visualStyle"]', 'lantern-nds:error-reports': 'false', 'lantern-nds:auto-quality': 'off' };
 
 export async function skipSetup(page: Page): Promise<void> {
   await page.addInitScript((entries) => {

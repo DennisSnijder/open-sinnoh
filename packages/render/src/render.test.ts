@@ -1,19 +1,40 @@
 import * as THREE from 'three';
 import { expect, it } from 'vitest';
 import type { Id } from '@opensinnoh/core';
-import type { ActorView, BillboardSprite as Sprite, Camera, Vec3 } from '@opensinnoh/contracts';
+import type { ActorView, BillboardSprite as Sprite, Camera, FieldView, Vec3 } from '@opensinnoh/contracts';
 import { AssetCache, resolvePackPath, splitRef } from './assets.ts';
 import { billboardDepth, slopeDepthLift } from './billboard.ts';
 import { Materials, patternAt, patternBlend, withTranslucentParts } from './materials.ts';
 import { dsPixelAlpha, type FieldOutput } from './composite.ts';
 import { billboardLight, dsVertexLight, lightAt, SHADOW_BY_PERIOD, type LightTemplate } from './lighting.ts';
-import { actorKeys, emoteBounce, sharedLightClone, spriteFrame, viewToWorld } from './renderer.ts';
+import { actorKeys, emoteBounce, sharedLightClone, spriteFrame, stillBetweenTicks, viewToWorld } from './renderer.ts';
 
 it('resolves glTF-relative asset paths inside the pack', () => {
   expect(resolvePackPath('models/town.gltf', '../textures/grass.png')).toBe('textures/grass.png');
   expect(resolvePackPath('models/a/b.gltf', './c.bin')).toBe('models/a/c.bin');
   expect(() => resolvePackPath('a.gltf', '../../x.png')).toThrow(/escapes/);
   expect(splitRef('fixture:models/room.gltf')).toEqual({ pack: 'fixture', path: 'models/room.gltf' });
+});
+
+it('a view is still between ticks only while nothing it draws moves', () => {
+  const at: Vec3 = [8, 0, 8];
+  const moved: Vec3 = [9, 0, 8];
+  const actor = { prev: at, cur: at } as ActorView;
+  const view = { camera: { prev: at, cur: at }, actors: [actor], previews: [actor], effects: [], doors: [], props: [{ key: 'a', position: at, rotation: at }] } as unknown as FieldView;
+  expect(stillBetweenTicks(view)).toBe(true);
+  const walker = { prev: at, cur: moved } as ActorView;
+  for (const change of [
+    { camera: { prev: at, cur: moved } },
+    { actors: [actor, walker] },
+    { previews: [walker] },
+    { effects: [{}] },
+    { doors: [{}] },
+    { props: [{ key: 'a', position: moved, rotation: at, prev: at }] },
+    { features: { models: [{ key: 'a', position: moved, rotation: at, prev: at }] } },
+    { distortion: {} },
+    { viewCamera: {} },
+  ])
+    expect(stillBetweenTicks({ ...view, ...change } as unknown as FieldView), JSON.stringify(change)).toBe(false);
 });
 
 it('picks sprite frames by animation, facing and tick; run falls back to walk', () => {

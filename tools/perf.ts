@@ -7,6 +7,8 @@
  *   pnpm perf [--profiles=a,b]         the ROM run (OPENSINNOH_NDS_ROM; skipped without it): desktop, phone-4x, phone-6x
  *            [--scenes=a,b]           only these scenes (bedroom, route201, …, battle-single, battle-doubles): for
  *                                     a quick look; budgets that need the others then fail as not measured
+ *   pnpm perf --lab --label=x [--profiles=a,b] [--styles=ds,cinematic] [--runs=3] [--cpu]
+ *                                     the same frames per look, to compare two builds; no budgets (see `labRun`)
  *
  * Flags combine. The ROM run, per profile (viewport, DPR and CPU throttle as §2 says):
  *   - desktop imports the ROM into a fresh browser profile (import seconds, IndexedDB size, the renderer's memory peak);
@@ -68,7 +70,7 @@ const WALK_MS = 10_000;
 const BATTLE_MS = 15_000;
 const ROUND_TRIPS = 20;
 
-const SETUP_DONE = { 'lantern-nds:setup': '["reports","addon","textSpeed"]', 'lantern-nds:error-reports': 'false' };
+const SETUP_DONE = { 'lantern-nds:setup': '["reports","addon","textSpeed","visualStyle"]', 'lantern-nds:error-reports': 'false', 'lantern-nds:visual-style': 'ds', 'lantern-nds:auto-quality': 'off' };
 
 /**
  * Counts live WebGL texture, buffer and renderbuffer bytes per canvas (by its id): w×h×4 per texel level (a
@@ -144,7 +146,7 @@ async function startServer(): Promise<void> {
   }
 }
 
-async function launch(profile: Profile, dir: string): Promise<{ context: BrowserContext; page: Page; cdp: CDPSession }> {
+async function launch(profile: Profile, dir: string, storage: Record<string, string> = {}, hook = ''): Promise<{ context: BrowserContext; page: Page; cdp: CDPSession }> {
   const context = await chromium.launchPersistentContext(dir, {
     executablePath: browserExecutable(),
     args: GL_ARGS,
@@ -157,9 +159,10 @@ async function launch(profile: Profile, dir: string): Promise<{ context: Browser
   // esbuild's keepNames helper, for functions passed to page.evaluate from tsx.
   await context.addInitScript('globalThis.__name = (f) => f');
   await context.addInitScript(GPU_HOOK);
+  if (hook) await context.addInitScript(hook);
   await context.addInitScript((entries) => {
     for (const [k, v] of Object.entries(entries)) localStorage.setItem(k, v);
-  }, SETUP_DONE);
+  }, { ...SETUP_DONE, ...storage });
   const page = context.pages()[0] ?? (await context.newPage());
   page.on('pageerror', (e) => console.log(`  pageerror: ${e.message}`));
   const cdp = await context.newCDPSession(page);
@@ -281,6 +284,17 @@ async function battleSave(page: Page, party: [string, number][], zone: string, x
   const idle = await page.evaluate(() => window.openSinnohGame!.until({ kind: 'idle' }, 3000));
   if (idle === null) throw new Error(`${zone}: not idle after the warp`);
   return moved(await bridgeSave(page), zone, x, z, facing);
+}
+
+/** A save at the zone with its people: the warp spawns them (`moved` leaves a zone empty). Continues `battleSave`'s page. */
+async function warpedSave(page: Page, zone: string, x: number, z: number): Promise<string> {
+  await page.getByLabel('Map', { exact: true }).fill(zone);
+  await page.getByLabel('Tile X', { exact: true }).fill(String(x));
+  await page.getByLabel('Tile Z', { exact: true }).fill(String(z));
+  await page.getByRole('button', { name: 'Warp' }).click();
+  await page.locator('#dev-debug output').filter({ hasText: 'Done.' }).waitFor();
+  if ((await page.evaluate(() => window.openSinnohGame!.until({ kind: 'idle' }, 3000))) === null) throw new Error(`${zone}: not idle after the warp`);
+  return bridgeSave(page);
 }
 
 /** Title → CONTINUE → the field drawn. Returns the seconds to an interactive title and from CONTINUE to the field. */
@@ -427,9 +441,265 @@ if (flag('fixture')) {
   }
 }
 
+// ---- lab -------------------------------------------------------------------------------------------------------
+
+/**
+ * Counts per display frame, with the same steps on any build, so two builds compare. Counts of 2D and GL calls do not
+ * depend on the machine's load; frame work does, and a phone profile's throttle only slows the main thread.
+ */
+const COUNT_HOOK = `(() => {
+  const counts = globalThis.__labCounts = { gl: 0, overlay: 0, battle: 0, other2d: 0, frames: [] };
+  for (const n of ['drawArrays', 'drawElements', 'drawArraysInstanced', 'drawElementsInstanced']) {
+    const o = WebGL2RenderingContext.prototype[n];
+    WebGL2RenderingContext.prototype[n] = function (...a) { counts.gl++; return o.apply(this, a); };
+  }
+  const P = CanvasRenderingContext2D.prototype;
+  for (const n of ['clearRect', 'fillRect', 'drawImage', 'putImageData', 'fillText', 'fill', 'stroke']) {
+    const o = P[n];
+    P[n] = function (...a) {
+      const id = this.canvas.id;
+      if (id === 'overlay-canvas') counts.overlay++; else if (id === 'battle-canvas') counts.battle++; else counts.other2d++;
+      return o.apply(this, a);
+    };
+  }
+  const tick = (t) => { counts.frames.push(t); requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+})();`;
+
+interface LabCounts { gl: number; overlay: number; battle: number; other2d: number; frames: number[] }
+/** `interval`: display frame to display frame. `cpu`: the renderer's and GPU process's CPU ms per wall second, the only number here that sees a canvas's cost after the script (raster, compositing). */
+interface LabWindow { frames: number; frame: ReturnType<typeof summary>; render: ReturnType<typeof summary>; tick: ReturnType<typeof summary>; interval: ReturnType<typeof summary>; dropped: number; glPerFrame: number; overlayPerFrame: number; battlePerFrame: number; other2dPerFrame: number; cpu: { renderer: number; gpu: number } }
+
+/** CPU seconds of this run's renderer and GPU processes (`ps`), found as `processMemory` finds them. */
+function processCpu(dir: string): { renderer: number; gpu: number } {
+  const seconds = (t: string) => t.split(':').reduce((sum, part) => sum * 60 + Number(part), 0);
+  const procs = execSync('ps -axo pid=,ppid=,time=,command=', { maxBuffer: 64 * 1024 * 1024 }).toString().split('\n').map((l) => /^\s*(\d+)\s+(\d+)\s+(\S+)\s+(.*)$/.exec(l)).filter((m): m is RegExpExecArray => !!m).map((m) => ({ pid: +m[1]!, ppid: +m[2]!, time: seconds(m[3]!), cmd: m[4]! }));
+  const root = procs.find((p) => p.cmd.includes(`--user-data-dir=${dir}`) && !p.cmd.includes('--type='));
+  if (!root) throw new Error(`no Chromium process with --user-data-dir=${dir}`);
+  const mine = procs.filter((p) => p.ppid === root.pid);
+  const sum = (kind: string) => mine.filter((p) => p.cmd.includes(`--type=${kind}`)).reduce((n, p) => n + p.time, 0);
+  return { renderer: sum('renderer'), gpu: sum('gpu-process') };
+}
+
+/** Runs `play` and reads the window it took. */
+async function labWindow(page: Page, dir: string, play: () => Promise<void>): Promise<LabWindow> {
+  await resetLoop(page);
+  await page.evaluate(() => {
+    const c = (globalThis as unknown as { __labCounts: LabCounts }).__labCounts;
+    c.gl = c.overlay = c.battle = c.other2d = 0;
+    c.frames.length = 0;
+    const s = (globalThis as unknown as { openSinnohRenderStats?: { renderMs: number[] } }).openSinnohRenderStats;
+    if (s) s.renderMs.length = 0;
+  });
+  const cpu0 = processCpu(dir);
+  const t0 = Date.now();
+  await play();
+  const wall = (Date.now() - t0) / 1000;
+  const cpu1 = processCpu(dir);
+  const loop = await readLoop(page);
+  const c = await page.evaluate(() => {
+    const s = (globalThis as unknown as { openSinnohRenderStats?: { renderMs: number[] } }).openSinnohRenderStats;
+    return { ...(globalThis as unknown as { __labCounts: LabCounts }).__labCounts, renderMs: s ? [...s.renderMs] : [] };
+  });
+  const per = (n: number) => Math.round((n / Math.max(1, c.frames.length)) * 10) / 10;
+  return {
+    frames: c.frames.length,
+    frame: summary(loop.frameMs),
+    render: summary(c.renderMs),
+    tick: summary(loop.tickMs),
+    interval: summary(c.frames.slice(1).map((t, i) => t - c.frames[i]!)),
+    dropped: loop.dropped,
+    glPerFrame: per(c.gl),
+    overlayPerFrame: per(c.overlay),
+    battlePerFrame: per(c.battle),
+    other2dPerFrame: per(c.other2d),
+    cpu: { renderer: Math.round(((cpu1.renderer - cpu0.renderer) / wall) * 1000), gpu: Math.round(((cpu1.gpu - cpu0.gpu) / wall) * 1000) },
+  };
+}
+
+/** Render milliseconds with the frame synced (`syncTiming`), so they include the GPU's. */
+async function syncedRender(page: Page): Promise<ReturnType<typeof summary>> {
+  type Debug = { openSinnohRenderDebug: { syncTiming: boolean }; openSinnohRenderStats: { renderMs: number[] } };
+  await page.evaluate(() => {
+    const g = globalThis as unknown as Debug;
+    g.openSinnohRenderDebug.syncTiming = true;
+    g.openSinnohRenderStats.renderMs.length = 0;
+  });
+  await page.waitForTimeout(3000);
+  return summary(
+    await page.evaluate(() => {
+      const g = globalThis as unknown as Debug;
+      g.openSinnohRenderDebug.syncTiming = false;
+      return [...g.openSinnohRenderStats.renderMs];
+    }),
+  );
+}
+
+/** A CPU profile of `play`: self milliseconds by function, the top ones. */
+async function labProfile(cdp: CDPSession, play: () => Promise<void>): Promise<{ fn: string; ms: number; pct: number }[]> {
+  await cdp.send('Profiler.enable');
+  await cdp.send('Profiler.setSamplingInterval', { interval: 250 });
+  await cdp.send('Profiler.start');
+  await play();
+  const { profile } = await cdp.send('Profiler.stop');
+  const self = new Map<string, number>();
+  const byId = new Map(profile.nodes.map((n) => [n.id, n]));
+  const deltas = profile.timeDeltas ?? [];
+  (profile.samples ?? []).forEach((id, i) => {
+    const f = byId.get(id)!.callFrame;
+    const key = `${f.functionName || '(anonymous)'} ${f.url.split('/').pop()}:${f.lineNumber + 1}:${f.columnNumber + 1}`;
+    self.set(key, (self.get(key) ?? 0) + (deltas[i] ?? 0) / 1000);
+  });
+  const total = [...self.entries()].filter(([k]) => !k.startsWith('(idle)')).reduce((n, [, v]) => n + v, 0);
+  return [...self.entries()].sort((a, b) => b[1] - a[1]).slice(0, 40).map(([fn, ms]) => ({ fn, ms: Math.round(ms), pct: Math.round((ms / total) * 1000) / 10 }));
+}
+
+/**
+ * `pnpm perf --lab --label=x`: CONTINUE in Jubilife, then on Route 201's grass, per profile and visual style, `--runs`
+ * times. Windows: walking, standing, the start menu over the field, a wild battle's intro, its command prompt and its
+ * turn. Writes test-artifacts/perf/lab-<label>.json and prints the medians of the runs. The saves and the browser
+ * profile stay in .opensinnoh-cache/perf/lab, so the import runs once. `--cpu`: one run with CPU profiles of the same
+ * windows instead (the profiler slows the page, so its numbers compare only with another `--cpu` run). `--looks=a/b`:
+ * also the synced render time of each enhanced config (`parseEnhanced` lists, `ds`), standing in Jubilife.
+ */
+async function labRun(): Promise<void> {
+  const label = option('label');
+  if (!label) throw new Error('pnpm perf --lab needs --label=');
+  if (!ROM) throw new Error('pnpm perf --lab needs OPENSINNOH_NDS_ROM');
+  const profiles = (option('profiles') ?? 'desktop,phone-4x').split(',').map((n) => PROFILES.find((p) => p.name === n) ?? (() => { throw new Error(`unknown profile ${n}`); })());
+  const styles = (option('styles') ?? 'ds,cinematic').split(',');
+  const runs = Number(option('runs') ?? 3);
+  const cpu = flag('cpu');
+  await startServer();
+  const dir = join(ROOT, '.opensinnoh-cache/perf/lab');
+  mkdirSync(dir, { recursive: true });
+  const savesFile = join(ROOT, '.opensinnoh-cache/perf/lab-saves.json');
+  if (!existsSync(savesFile)) {
+    const { context, page } = await launch(PROFILES[0]!, dir);
+    await page.goto(`${BASE}/`);
+    await page.waitForFunction(() => !!window.openSinnohTitle || document.getElementById('picker')?.hidden === false, undefined, { timeout: 300_000 });
+    if (!(await page.evaluate(() => !!window.openSinnohTitle))) {
+      await page.locator('#rom-input').setInputFiles(ROM);
+      await page.getByRole('button', { name: 'Start playing' }).click({ timeout: 900_000 });
+      await page.waitForFunction(() => window.openSinnohTitle?.phase === 'title', undefined, { timeout: 120_000 });
+    }
+    const single = await battleSave(page, [['platinum:SPECIES_MONFERNO', 25]], 'platinum:MAP_HEADER_ROUTE_201', 118, 853, 'right');
+    writeFileSync(savesFile, JSON.stringify({ jubilife: await warpedSave(page, 'platinum:MAP_HEADER_JUBILIFE_CITY', 174, 770), battle: single }));
+    await context.close();
+  }
+  const saves = JSON.parse(readFileSync(savesFile, 'utf8')) as { jubilife: string; battle: string };
+  const out: Record<string, Record<string, unknown>[]> = {};
+  const cpuOut: Record<string, { fn: string; ms: number; pct: number }[]> = {};
+  for (const profile of profiles) {
+    for (const style of styles) {
+      const key = `${profile.name}/${style}`;
+      out[key] = [];
+      for (let run = 0; run < (cpu ? 1 : runs); run++) {
+        console.log(`${key} run ${run + 1}, load ${execSync('sysctl -n vm.loadavg').toString().trim()}`);
+        const { context, page, cdp } = await launch(profile, dir, { 'lantern-nds:visual-style': style }, COUNT_HOOK);
+        const result: Record<string, unknown> = {};
+        const take = async (name: string, play: () => Promise<void>) => {
+          if (cpu) cpuOut[`${key} ${name}`] = await labProfile(cdp, play);
+          else result[name] = await labWindow(page, dir, play);
+        };
+        try {
+          await page.goto(`${BASE}/__opensinnoh/packs.json`);
+          await writeSave(page, saves.jubilife);
+          await throttle(cdp, profile.rate);
+          if (cpu) cpuOut[`${key} start`] = await labProfile(cdp, () => continueGame(page).then(() => {}));
+          else result.load = await continueGame(page);
+          await page.waitForTimeout(1500);
+          await take('walk', async () => {
+            for (let i = 0; i < 4; i++) {
+              for (const k of ['ArrowRight', 'ArrowLeft']) {
+                await page.keyboard.down(k);
+                await page.waitForTimeout(1000);
+                await page.keyboard.up(k);
+              }
+            }
+          });
+          await page.waitForTimeout(500);
+          await take('stand', () => page.waitForTimeout(6000));
+          if (!cpu) result.synced = await syncedRender(page);
+          if (option('looks')) {
+            const looks: Record<string, unknown> = {};
+            for (const look of option('looks')!.split('/')) {
+              await page.evaluate((look) => (window as unknown as { openSinnohEnhanced(c: string | null): void }).openSinnohEnhanced(look === 'ds' ? null : look), look);
+              await page.waitForTimeout(1500);
+              looks[look] = await syncedRender(page);
+              console.log(`  ${key} ${look}: ${JSON.stringify(looks[look])}`);
+            }
+            result.looks = looks;
+          }
+          await page.keyboard.press('KeyC');
+          await page.waitForTimeout(800);
+          await take('menu', () => page.waitForTimeout(4000));
+          await page.keyboard.press('KeyC');
+          if (!cpu) {
+            await throttle(cdp, 1);
+            result.heapMB = await heapAfterGc(cdp);
+            result.memoryMB = processMemory(dir);
+          }
+          await throttle(cdp, 1);
+          await page.goto(`${BASE}/__opensinnoh/packs.json`);
+          await writeSave(page, saves.battle);
+          await throttle(cdp, profile.rate);
+          await continueGame(page);
+          await page.waitForTimeout(500);
+          const inBattle = () => page.evaluate(() => window.openSinnohApp!.game.inBattle());
+          const prompt = () => page.evaluate(() => !!window.openSinnohApp!.game.battle?.view()?.prompt);
+          for (let k = 0, until = Date.now() + 120_000; !(await inBattle()); k++) {
+            if (Date.now() > until) throw new Error('no battle started within 120 s');
+            const dir = k % 2 ? 'ArrowLeft' : 'ArrowRight';
+            await page.keyboard.down(dir);
+            await page.waitForTimeout(700);
+            await page.keyboard.up(dir);
+          }
+          await take('battle-intro', async () => {
+            for (const until = Date.now() + 40_000; !(await prompt()) && Date.now() < until; ) {
+              await page.keyboard.press('KeyZ');
+              await page.waitForTimeout(300);
+            }
+          });
+          if (!(await prompt())) throw new Error('no command prompt within 40 s');
+          await page.waitForTimeout(500);
+          await take('battle-prompt', () => page.waitForTimeout(5000));
+          await take('battle-turn', async () => {
+            for (const until = Date.now() + 8000; (await inBattle()) && Date.now() < until; ) {
+              await page.keyboard.press('KeyZ');
+              await page.waitForTimeout(300);
+            }
+          });
+        } finally {
+          await context.close();
+        }
+        out[key].push(result);
+      }
+    }
+  }
+  mkdirSync(OUT, { recursive: true });
+  writeFileSync(join(OUT, `lab-${label}${cpu ? '-cpu' : ''}.json`), JSON.stringify(cpu ? cpuOut : out, null, 1) + '\n');
+  if (cpu) {
+    for (const [k, rows] of Object.entries(cpuOut)) console.log(`\n${k}\n${rows.slice(0, 18).map((r) => `  ${String(r.ms).padStart(6)} ms ${String(r.pct).padStart(5)} %  ${r.fn}`).join('\n')}`);
+    return;
+  }
+  const median = (xs: number[]) => [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)]!;
+  for (const [key, list] of Object.entries(out)) {
+    console.log(`\n${key}`);
+    for (const name of Object.keys(list[0]!).filter((n) => (list[0]![n] as LabWindow).frame)) {
+      const w = list.map((r) => r[name] as LabWindow);
+      const m = (f: (w: LabWindow) => number) => median(w.map(f));
+      console.log(`  ${name.padEnd(14)} frames ${m((x) => x.frames)}  work p50 ${m((x) => x.frame.p50)} p95 ${m((x) => x.frame.p95)}  interval p95 ${m((x) => x.interval.p95)}  gl ${m((x) => x.glPerFrame)}  2d ${m((x) => x.overlayPerFrame)} + ${m((x) => x.battlePerFrame)} + ${m((x) => x.other2dPerFrame)}  cpu ${m((x) => x.cpu.renderer)} + ${m((x) => x.cpu.gpu)}`);
+    }
+    console.log(`  synced render p50 ${median(list.map((r) => (r.synced as { p50: number }).p50))}  continue ${median(list.map((r) => (r.load as { continueS: number }).continueS))} s  footprint ${median(list.map((r) => (r.memoryMB as { renderer: number }).renderer))} MB`);
+  }
+}
+
+if (flag('lab')) await labRun();
+
 // ---- ROM -------------------------------------------------------------------------------------------------------
 
-const romRun = !flag('bundle') && !flag('fixture');
+const romRun = !flag('bundle') && !flag('fixture') && !flag('lab');
 if (romRun && !ROM) console.log('pnpm perf: OPENSINNOH_NDS_ROM is not set; the ROM run is skipped.');
 if (romRun && ROM) {
   const names = (option('profiles') ?? PROFILES.map((p) => p.name).join(',')).split(',');
@@ -456,7 +726,8 @@ if (romRun && ROM) {
         if (!(await page.evaluate(() => !!window.openSinnohTitle))) {
           const t0 = Date.now();
           await page.locator('#rom-input').setInputFiles(ROM);
-          await page.waitForFunction(() => window.openSinnohTitle?.phase === 'title', undefined, { timeout: 900_000 });
+          await page.getByRole('button', { name: 'Start playing' }).click({ timeout: 900_000 });
+          await page.waitForFunction(() => window.openSinnohTitle?.phase === 'title', undefined, { timeout: 120_000 });
           // The import worker ran in the page's renderer, which the reload to the title keeps (same site).
           const peak = processMemory(dir).rendererPeak;
           if (fresh) {
