@@ -4,6 +4,11 @@ OpenSinnoh stands on a lot of other people's work. This page lists the projects,
 learned from or builds on, and what each was used for. The licences of the code and fonts we ship are
 in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
+## Contributors
+
+- **[matkhl](https://github.com/matkhl)**: support for the German and European builds of Platinum, the language
+  work behind them, and fixes to the start menu and the Mart.
+
 ## Reverse engineering
 
 - **[pret/pokeplatinum](https://github.com/pret/pokeplatinum)**, the Pokémon Platinum decompilation. The main
