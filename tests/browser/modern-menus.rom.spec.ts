@@ -6,6 +6,7 @@
  */
 import { expect, test, type BrowserContext, type Locator, type Page } from '@playwright/test';
 import type { Registries } from '@opensinnoh/contracts';
+import type { Id } from '@opensinnoh/core';
 import { loadGamePacks, runReplay } from '@opensinnoh/game';
 import { pageDriver } from '../../packages/cli/src/browser.ts';
 import { romSlice } from '../rom.ts';
@@ -44,6 +45,7 @@ let registries: Registries;
 let context: BrowserContext;
 let page: Page;
 const errors: string[] = [];
+const itemName = (item: string) => registries.items.get(`platinum:${item}` as Id)!.name;
 const tap = (target: Locator) => (test.info().project.name === 'phone' ? target.tap() : target.click());
 const shot = async (name: string) => {
   await settle(page);
@@ -97,10 +99,10 @@ test('the party: ROM icons and the front picture, status, HP, held item, ♂ as 
   await expect(root.locator('.mm-slot')).toHaveCount(5);
   await expect.poll(() => root.locator('.mm-slot .mon-icon-sprite').evaluateAll((e) => e.filter((n) => (n as HTMLElement).style.backgroundImage.startsWith('url(')).length)).toBe(5);
   await expect(root.locator('.mm-slot').nth(1).locator('.lab .os-ico[data-icon="male"]')).toHaveCount(1);
-  await expect(root.locator('.mm-slot').nth(1).locator('.os-chip')).toHaveText('PSN');
-  await expect(root.locator('.mm-slot').nth(2).locator('.os-chip')).toHaveText('FNT');
+  await expect(root.locator('.mm-slot').nth(1).locator('.os-chip')).toHaveText(appStrings().modern.status.poison);
+  await expect(root.locator('.mm-slot').nth(2).locator('.os-chip')).toHaveText(appStrings().modern.status.fainted);
   await expect(root.locator('.mm-slot').first().locator('.mm-held')).toHaveCount(1);
-  await expect(root.locator('.mm-right')).toContainText('Oran Berry');
+  await expect(root.locator('.mm-right')).toContainText(itemName('ITEM_ORAN_BERRY'));
   // Phones in portrait dock the detail without the picture.
   if (await root.locator('.mm-pic').count()) {
     const painted = () => root.locator('.mm-pic canvas').evaluate((c: HTMLCanvasElement) => c.getContext('2d')!.getImageData(0, 0, c.width, c.height).data.some((v) => v > 0));
@@ -120,9 +122,9 @@ test('the bag: ROM item icons, pockets, the description', async () => {
   await expect(root.locator('.os-rail [role="tab"]')).toHaveCount(8);
   await tap(root.locator('.os-rail [role="tab"]').nth(1));
   await expect(root.locator('.mm-bagrow')).toHaveCount(2);
-  await expect(root.locator('.mm-bagrow').first()).toContainText('Potion');
+  await expect(root.locator('.mm-bagrow').first()).toContainText(itemName('ITEM_POTION'));
   await expect(root.locator('.mm-right .item-icon')).toHaveCSS('background-image', /url\(/);
-  await expect(root.locator('.mm-desc')).toContainText('HP');
+  await expect(root.locator('.mm-desc')).toContainText(/HP|KP/);
   await shot('bag');
   await closeAll();
   expect(errors).toEqual([]);
@@ -141,11 +143,11 @@ test('a battle opens the Modern bag and party; the battle itself stays the origi
     expect(await page.evaluate(() => window.openSinnohApp!.game.battle?.view().prompt?.kind)).toBe('command');
   }).toPass({ timeout: 180_000, intervals: [100] });
   await expect(page.locator('.battle-card .bc-button.is-cursor')).toBeVisible();
-  await tap(page.locator('.battle-card .bc-button', { hasText: 'BAG' }));
+  await tap(page.locator('.battle-card .bc-button', { hasText: registries.texts.get('platinum:BattleStrings_Text_Bag' as Id)!.text }));
   const bag = page.locator('[data-screen="bag"]');
   await expect(bag).toHaveClass(/mm-battle/);
   await expect(bag.locator('.os-rail [role="tab"]')).toHaveCount(4);
-  await expect(bag.locator('.mm-bagrow').first()).toContainText('Potion');
+  await expect(bag.locator('.mm-bagrow').first()).toContainText(itemName('ITEM_POTION'));
   await shot('battle-bag');
   await tap(bag.locator('.mm-bagrow').first());
   const party = page.locator('[data-screen="party"]');
