@@ -19,6 +19,7 @@ import { el } from './core.ts';
 import { MESSAGE, place, sceneContext } from './evolution.ts';
 import './evolution.css';
 import './contest-dance.css';
+import { S } from '../strings/index.ts';
 
 type Img = HTMLImageElement;
 const W = DS_WIDTH;
@@ -37,7 +38,6 @@ const LABELS: [number, number][] = [
 /** ov22_0225B198's grey (0x254a) as a multiplier, and the touch screen's dim (ov17_0224A0E0: 6/16 toward black). */
 const GREY = [10 / 31, 10 / 31, 9 / 31];
 const DIM = 6 / 16;
-const DIRECTIONS = ['Up', 'Front', 'Left', 'Right'];
 /** A dancer's composition canvas, its centre in the middle: room for the photo's accessories around the Pokémon. */
 const OUTFIT = 256;
 
@@ -84,7 +84,7 @@ class DanceScene {
     this.stage.append(this.canvas, this.boxes);
     this.room.append(this.stage, this.pad);
     this.root.append(this.room);
-    this.root.setAttribute('aria-label', 'Dance Competition');
+    this.root.setAttribute('aria-label', S.aria.dance);
   }
 
   private image(ref: Id): Img | null {
@@ -303,7 +303,7 @@ class DanceScene {
         const hit = at(el('div', 'dance-step'), r.x, r.y, r.w, r.h);
         hit.dataset.tap = `step:${dir}`;
         hit.setAttribute('role', 'button');
-        hit.setAttribute('aria-label', DIRECTIONS[dir]!);
+        hit.setAttribute('aria-label', S.aria.danceDirections[dir]!);
         hit.addEventListener('pointerdown', (e) => {
           e.preventDefault();
           this.last?.d.tap(`step:${dir}`);

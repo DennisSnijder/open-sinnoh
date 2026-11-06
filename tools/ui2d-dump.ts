@@ -12,7 +12,7 @@ import { dirname, join, resolve } from 'node:path';
 import type { Ui2dSheet } from '@opensinnoh/contracts';
 import { NitroFs } from '@opensinnoh/nds';
 import namesFile from '../packages/importer/data/names.json' with { type: 'json' };
-import { blankImage, blit, crop, decodeImage, encodeImage, importUi2d, Names, type Image, type NamesFile } from '../packages/importer/src/index.ts';
+import { blankImage, blit, crop, decodeImage, encodeImage, importUi2d, Names, romBuildOfHeader, type Image, type NamesFile } from '../packages/importer/src/index.ts';
 
 const [romPath = process.env.OPENSINNOH_NDS_ROM, outArg = 'rom-out/ui2d'] = process.argv.slice(2);
 if (!romPath) {
@@ -27,11 +27,13 @@ try {
   process.exit(1);
 }
 
-const fs = new NitroFs(new Uint8Array(readFileSync(romPath)));
+const romBytes = new Uint8Array(readFileSync(romPath));
+const fs = new NitroFs(romBytes, { paths: romBuildOfHeader(romBytes).paths });
 const names = new Names(namesFile as NamesFile);
 const t0 = Date.now();
 const out = await importUi2d(
   fs,
+  romBuildOfHeader(romBytes),
   names.file.species.map((_, i) => names.species(i)),
   names.file.trainerClasses.map((_, i) => names.trainerClass(i)),
 );

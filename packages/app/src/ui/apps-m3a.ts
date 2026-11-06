@@ -12,6 +12,7 @@ import { at, atTiles, board, boardContext, dsPair } from './board.ts';
 import { el } from './core.ts';
 import type { Palette } from './pixel-font.ts';
 import { bgPicture, sprite, tapButton } from './sprites.ts';
+import { S } from '../strings/index.ts';
 
 /** Front: ID, name, money, Pokédex, score (17 tiles wide), time, adventure started (28 tiles) at card_text.c's windows; `started` is the last. */
 const FRONT_ROWS: [y: number, w: number][] = [[32, 136], [48, 136], [72, 136], [96, 136], [120, 136], [144, 224], [160, 224]];
@@ -74,7 +75,7 @@ function onPenUp(e: PointerEvent): void {
 
 function signaturePad(d: DrawContext, hex: string | null): HTMLElement {
   const pad = el('div', 'signature-pad', signatureCanvas(hex, d.unit));
-  pad.setAttribute('aria-label', 'Signature: draw with the pointer');
+  pad.setAttribute('aria-label', S.aria.signature);
   pad.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     if (stroke) return;
@@ -97,7 +98,7 @@ function cardBoard(d: DrawContext, v: TrainerCardView): HTMLElement {
   const screen = bgPicture(d, 'trainer_case/top_screen', 0, 0, 'card-screen');
   if (screen) root.append(screen);
   if (art) root.append(at(el('span', 'card-art', d.art.cells('trainer_case/card', [cell], d.unit)!), 0, 0, 256, 192));
-  if (!v.signing) root.append(at(tapButton(d, 'flip', 'card-flip', [], 'Flip the card'), 0, 0, 256, 192));
+  if (!v.signing) root.append(at(tapButton(d, 'flip', 'card-flip', [], S.aria.flipCard), 0, 0, 256, 192));
   const fields = v.side === 'front' ? [...v.fields, v.started] : v.back;
   const rows = v.side === 'front' ? FRONT_ROWS : BACK_ROWS;
   fields.forEach((f, i) => {
@@ -109,7 +110,7 @@ function cardBoard(d: DrawContext, v: TrainerCardView): HTMLElement {
     const pic = p && d.art.cells(`trainer_case/portrait_${v.gender}`, [0], d.unit);
     if (pic) root.append(at(el('div', 'card-portrait-art', pic), -p.ox, -p.oy, p.w, p.h));
   } else {
-    const sig = v.signing ? signaturePad(d, v.signature) : tapButton(d, 'sign', 'card-sign', [signatureCanvas(v.signature, d.unit)], 'Sign the card');
+    const sig = v.signing ? signaturePad(d, v.signature) : tapButton(d, 'sign', 'card-sign', [signatureCanvas(v.signature, d.unit)], S.aria.signCard);
     root.append(at(sig, SIGNATURE_AT.x, SIGNATURE_AT.y, SIGNATURE_WIDTH, SIGNATURE_HEIGHT));
   }
   return root;

@@ -36,6 +36,9 @@ function talk(game: Game): string {
   }
   throw new Error('the NPC is still talking');
 }
+/** A message's first page by text id, on one line (`talk`'s text with its breaks closed up). */
+const page = (game: Game, name: string) => flat(game.registries.texts.get(`platinum:${name}` as Id)!.text.split(/\{(?:clear|scroll)\}/)[0]!);
+const flat = (s: string) => s.replace(/\s+/g, ' ');
 const bits = (n: number) => [...Array(32).keys()].filter((i) => (n >>> i) & 1);
 
 describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('NPC template slots (OPENSINNOH_NDS_ROM)', () => {
@@ -49,14 +52,14 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('NPC template slots (OPENSINNOH
     await play(game, 'warp platinum:MAP_HEADER_SNOWPOINT_CITY_EAST_HOUSE 5 6 up\nuntil idle\n');
     expect(game.state.unlockedToughWords).toBe(0);
     const first = talk(game);
-    expect(first).toMatch(/would you like to hear/i);
+    expect(flat(first)).toContain(page(game, 'SnowpointCityEastHouse_Text_HearTrendySaying'));
     const [entry] = bits(game.state.unlockedToughWords);
     expect(bits(game.state.unlockedToughWords)).toHaveLength(1);
     expect(first).toContain(`${words[entry!]}!`);
     expect(game.state.flags[FLAG]).toBe(true);
 
     // The same day: no new word.
-    expect(talk(game)).toMatch(/use trendy sayings\s+in a trendy way/);
+    expect(flat(talk(game))).toContain(page(game, 'SnowpointCityEastHouse_Text_UseTrendySayings'));
     expect(bits(game.state.unlockedToughWords)).toEqual([entry]);
 
     // The next day the daily flag is clear: a second, different word.
@@ -72,7 +75,7 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('NPC template slots (OPENSINNOH
     // All unlocked: the check skips the question.
     game.state.unlockedToughWords = 0xffffffff;
     delete game.state.flags[FLAG];
-    expect(talk(game)).toMatch(/are you using trendy\s+sayings\?/i);
+    expect(flat(talk(game))).toContain(page(game, 'SnowpointCityEastHouse_Text_AreYouUsingTrendySayings'));
     expect(game.state.flags[FLAG] ?? false).toBe(false);
   });
 
@@ -81,9 +84,9 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('NPC template slots (OPENSINNOH
     // Below the groups man (164,761), facing him.
     await play(game, 'warp platinum:MAP_HEADER_JUBILIFE_CITY 164 762 up\nuntil idle\n');
     const read = talk(game);
-    expect(read).toMatch(/would you like to join a group\?/);
-    expect(read).toMatch(/What do you want to name\s+your group\?/);
-    expect(read).toMatch(/That’s too bad\.$/);
-    expect(read).not.toMatch(/great name|leader/);
+    expect(flat(read)).toContain(page(game, 'GroupConnection_Text_WantToJoinAGroup'));
+    expect(flat(read)).toContain(page(game, 'GroupConnection_Text_NameYourGroup'));
+    expect(flat(read).endsWith(page(game, 'GroupConnection_Text_ThatsTooBad'))).toBe(true);
+    expect(flat(read)).not.toContain(page(game, 'GroupConnection_Text_ThatsAGreatName').replace('{var 0}', ''));
   });
 });

@@ -1,9 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { REGISTRIES, type NewGame, type Ui2dSheet, type Zone } from '@opensinnoh/contracts';
+import { REGISTRIES, type Item, type NewGame, type Ui2dSheet, type Zone } from '@opensinnoh/contracts';
 import { loadPacks, type Id, type JsonValue, type PackData, type RegistryRecord } from '@opensinnoh/core';
 import { importPlatinum, type ImportReport } from './platinum.ts';
 import { decodeImage } from './ui2d/index.ts';
+import { romBuildOfHeader } from './layout.ts';
+import { keyboardPages } from '@opensinnoh/services';
 
 it('rejects ROMs it does not support, with the hash it saw', async () => {
   await expect(importPlatinum(new Uint8Array([1, 2, 3]))).rejects.toThrow(/Unsupported ROM: SHA1 7037807198c22a7d2b0807371d763779a84fdfcf.*Platinum \(US, rev 0\)/);
@@ -16,8 +18,11 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
   let pack: PackData;
   let report: ImportReport;
   let assets: Map<string, Uint8Array>;
+  /** The build's game language (decomp LANGUAGE_ENGLISH 2, LANGUAGE_GERMAN 5). */
+  let language: number;
   beforeAll(async () => {
     const rom = new Uint8Array(readFileSync(romPath as string));
+    language = { en: 2, de: 5 }[romBuildOfHeader(rom).rom.language];
     ({ pack, report, assets } = await importPlatinum(rom, (s) => stages.add(s), { names: { player: 'Ari', rival: 'Bo' }, gender: 'female' }));
   });
   const reg = <T>(name: string) => new Map(((pack.registries[name] ?? []) as unknown as (T & { id: Id })[]).map((r) => [r.id, r]));
@@ -215,6 +220,8 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
         label: 'platinum:InitNewGame',
         names: { player: 'Ari', rival: 'Bo' },
         gender: 'female',
+        language,
+        keyboard: expect.any(Array),
         playerSprite: { male: 'platinum:OBJ_EVENT_GFX_PLAYER_M', female: 'platinum:OBJ_EVENT_GFX_PLAYER_F' },
         playerHealSprite: { male: 'platinum:OBJ_EVENT_GFX_PLAYER_M_POKECENTER_HEAL', female: 'platinum:OBJ_EVENT_GFX_PLAYER_F_POKECENTER_HEAL' },
         playerVsSeekerSprite: { male: 'platinum:OBJ_EVENT_GFX_PLAYER_M_VS_SEEKER', female: 'platinum:OBJ_EVENT_GFX_PLAYER_F_VS_SEEKER' },
@@ -303,16 +310,31 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
           labels: { outOfSteps: 'platinum:SafariGame_OutOfSteps', outOfBalls: 'platinum:SafariGame_OutOfSafariBalls_Field', outOfBallsBattle: 'platinum:SafariGame_OutOfSafariBalls_Battle', retire: 'platinum:SafariGame_Retire', noRoom: 'platinum:SafariGame_OutOfRoomForPokemon' },
           tram: 'platinum:prop/475',
         }),
-        // sEndCreditStringProps (overlay 99): 237 rows, the first two centred, the last the final screen's.
+        // sEndCreditStringProps (overlay 99): 237 rows in US, 224 in German, the first two centred, the last the final screen's.
         creditsRide: expect.objectContaining({ models: expect.any(Array), rows: expect.any(Array), nightTrees: expect.any(Array) }),
-        credits: expect.arrayContaining([
-          { text: 'platinum:pl_msg_00000548_00000', y: 0, centered: true },
-          { text: 'platinum:pl_msg_00000548_00002', y: 146, centered: false },
-          { text: 'platinum:pl_msg_00000548_00236', y: 7581, centered: false },
-        ]),
+        credits: expect.arrayContaining(
+          language === 5
+            ? [
+                { text: 'platinum:pl_msg_00000548_00000', y: 0, centered: true },
+                { text: 'platinum:pl_msg_00000548_00002', y: expect.any(Number), centered: false },
+                { text: 'platinum:pl_msg_00000548_00223', y: expect.any(Number), centered: false },
+              ]
+            : [
+                { text: 'platinum:pl_msg_00000548_00000', y: 0, centered: true },
+                { text: 'platinum:pl_msg_00000548_00002', y: 146, centered: false },
+                { text: 'platinum:pl_msg_00000548_00236', y: 7581, centered: false },
+              ],
+        ),
       },
     ]);
-    expect((pack.registries.newGame![0] as unknown as NewGame).credits).toHaveLength(237);
+    expect((pack.registries.newGame![0] as unknown as NewGame).credits).toHaveLength(language === 5 ? 224 : 237);
+    // The check isHmItem makes for a pack's own HM holds on the ROM: of the move-teaching items, only the HMs can't be tossed.
+    for (const item of reg<Item>('items').values()) if (item.tm) expect(item.preventToss, item.id).toBe(/ITEM_HM\d+$/.test(item.id));
+    // The keyboard from the ROM: the decomp's US pages on the English builds; the German build's keys are its own.
+    const keyboard = (pack.registries.newGame![0] as unknown as NewGame).keyboard!;
+    const usPages = keyboardPages({ newGame: new Map([['t:NEW' as Id, {} as NewGame]]) }).map((page) => page.map((row) => row.join('')));
+    if (language === 5) expect(keyboard).not.toEqual(usPages);
+    else expect(keyboard).toEqual(usPages);
     // The SHA1-checked gym tables (structure and names only; overlay 8 gym_features.c).
     const gyms = (pack.registries.newGame![0] as unknown as NewGame).gyms!;
     expect(gyms.eterna).toMatchObject({ zone: 'platinum:MAP_HEADER_ETERNA_CITY_GYM', clockVar: 'platinum:VAR_ETERNA_GYM_FLOWER_CLOCK_STATE', message: 'platinum:EternaGym_Text_FountainWaterLevelDropped' });

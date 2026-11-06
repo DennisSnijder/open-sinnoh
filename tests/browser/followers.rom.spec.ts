@@ -8,11 +8,13 @@
  */
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import type { Registries } from '@opensinnoh/contracts';
+import type { Id } from '@opensinnoh/core';
 import { loadGamePacks, runReplay } from '@opensinnoh/game';
 import { mainCanvasStats, pageDriver, waitForScene } from '../../packages/cli/src/browser.ts';
 import { romSlice } from '../rom.ts';
 import { seedRomImport } from './seed.ts';
 import { readReplay, resolveReplay } from '../rom-replays/sys-replays.ts';
+import { appStrings, fixedPart } from './words.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 const HGSS = process.env.OPENSINNOH_HGSS_ROM;
@@ -77,8 +79,10 @@ async function followerStyle(value: number): Promise<void> {
   await page.locator('[data-screen="options"] [data-section="device"]').click();
   await page.evaluate(() => window.openSinnohGame!.advance(2));
   const row = page.locator('[data-setting="followerStyle"]');
-  await expect(row.locator('.options-label')).toHaveText('Follower style');
-  await expect(row.locator('.options-value')).toHaveText(['Still', 'Walk in place']);
+  // The labels in the game's language (the label in its casing: compared without case).
+  const words = (name: string) => registries.texts.get(`platinum:${name}` as Id)!.text;
+  await expect(row.locator('.options-label')).toHaveText(new RegExp(`^${words('Lantern_Options_FollowerStyle')}$`, 'i'));
+  await expect(row.locator('.options-value')).toHaveText([words('Lantern_Options_FollowerStill'), words('Lantern_Options_FollowerWalk')]);
   await row.locator('.options-value').nth(value).click();
   await page.evaluate(() => window.openSinnohGame!.advance(2));
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('lantern-nds:options')!).followerStyle)).toBe(value);
@@ -168,13 +172,15 @@ test('the optional HeartGold/SoulSilver add-on: picked in the first-run setup wh
   await page.locator('#rom-input').setInputFiles(ROM!);
   await expect(page.locator('#importing')).toBeVisible();
   await expect(page.locator('#wizard .fr-choices')).toHaveAttribute('data-question', 'addon');
-  await expect(page.locator('#wizard')).toContainText('later in Options');
+  // The stored game's language (main.ts, a re-import).
+  const words = appStrings();
+  await expect(page.locator('#wizard')).toContainText(words.ask.addon.entries[1]!.description);
   await page.locator('#addon-input').setInputFiles(HGSS!);
-  await expect(page.locator('#wizard')).toContainText('All set');
+  await expect(page.locator('#wizard')).toContainText(words.title.allSet);
   await expect(page.locator('#addon-job')).toBeVisible();
   // Platinum, then the add-on; Start playing waits for both, then goes home: the game opens with the add-on.
   await expect(page.locator('#start-playing')).not.toHaveAttribute('aria-disabled', { timeout: 420_000 });
-  await expect(page.locator('#addon-job')).toContainText('Every Pokémon can follow you');
+  await expect(page.locator('#addon-job')).toContainText(fixedPart((name) => words.rom.addonDone(name)));
   await page.locator('#start-playing').click();
   await page.waitForURL((url) => !url.search.includes('reimport'), { timeout: 60_000 });
   const meta = await page.evaluate(async () => {

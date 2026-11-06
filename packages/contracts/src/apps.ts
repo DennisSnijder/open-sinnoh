@@ -901,6 +901,7 @@ export interface PoffinCookingView {
 export interface PoffinCaseView {
   app: 'poffin-case';
   title: string;
+  /** `level`: the row's level as the game prints it (PoffinCase_Text_ListItem), the mark included. */
   rows: { name: string; level: string; type: number }[];
   close: string;
   cursor: number;

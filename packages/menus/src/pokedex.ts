@@ -5,6 +5,7 @@
  * record and the base pack's `pl_msg_pokedex_*` texts.
  */
 import { dayPeriod, type Button, type DayPeriod, type Id } from '@opensinnoh/core';
+import { dexNameOrder, gameLanguage, nameInitial } from '@opensinnoh/services';
 import { newGameRecord, type PokedexEntryView, type PokedexListView, type PokedexPageId, type PokedexRow, type PokedexSearchView, type Registries, type Species, type SpeciesDex, type GameState, type SeenForm } from '@opensinnoh/contracts';
 import type { MenuContext } from './context.ts';
 import { DexScroll } from './pokedex-scroll.ts';
@@ -93,11 +94,12 @@ export const TYPED_NAME = 10;
 /** Decomp MON_NAME_LEN: the longest name the search keyboard takes. */
 const NAME_LENGTH = 10;
 
-/** The A–Z order: the names compared by code unit (decomp strcmp of the names), ties by number. */
-const byName = (a: DexEntry, b: DexEntry) => (a.species.name < b.species.name ? -1 : a.species.name > b.species.name ? 1 : a.national - b.national);
-const SORTS: (((a: DexEntry, b: DexEntry) => number) | null)[] = [
+type DexSort = (a: DexEntry, b: DexEntry) => number;
+/** The A–Z order: the names in the game language's order (services `dexNameOrder`), ties by number. */
+const byName = (order: (a: string, b: string) => number): DexSort => (a, b) => order(a.species.name, b.species.name) || a.national - b.national;
+const SORTS: (DexSort | 'name' | null)[] = [
   null,
-  byName,
+  'name',
   (a, b) => b.dex.weight - a.dex.weight || a.national - b.national,
   (a, b) => a.dex.weight - b.dex.weight || a.national - b.national,
   (a, b) => b.dex.height - a.dex.height || a.national - b.national,
@@ -106,22 +108,23 @@ const SORTS: (((a: DexEntry, b: DexEntry) => number) | null)[] = [
 
 /**
  * The search over a mode's list (decomp PokedexSort_Sort with filters): seen species only; the weight
- * and height orders and the type filters keep caught ones only (decomp keepUncaught FALSE).
+ * and height orders and the type filters keep caught ones only (decomp keepUncaught FALSE). `language`: the game's
+ * (services `gameLanguage`), for the A–Z order and the name groups.
  */
-export function searchDex(base: DexEntry[], q: DexQuery, state: GameState, types: Id[]): DexEntry[] {
+export function searchDex(base: DexEntry[], q: DexQuery, state: GameState, types: Id[], language: number): DexEntry[] {
   const seen = new Set(state.pokedex.seen);
   const caught = new Set(state.pokedex.caught);
   let out = base.filter((e) => seen.has(e.species.id));
   const sort = SORTS[q.order];
   if (sort === undefined) throw new Error(`pokedex: order ${q.order}`);
   if (q.order >= 2) out = out.filter((e) => caught.has(e.species.id));
-  if (sort) out = [...out].sort(sort);
+  if (sort) out = [...out].sort(sort === 'name' ? byName(dexNameOrder(language)) : sort);
   if (q.name === TYPED_NAME) {
     const text = q.text.toLowerCase();
     out = out.filter((e) => e.species.name.toLowerCase().includes(text));
   } else if (q.name) {
     const letters = NAME_GROUPS[q.name - 1]![1];
-    out = out.filter((e) => letters.includes(e.species.name.charAt(0).toUpperCase()));
+    out = out.filter((e) => letters.includes(nameInitial(e.species.name)));
   }
   for (const t of [q.type1, q.type2]) {
     if (!t) continue;
@@ -210,7 +213,7 @@ export function pokedexScreen(ctx: MenuContext): Screen {
     query = { ...NO_QUERY };
     return {
       push: searchScreen(ctx, text, lists.types, query, (q) => {
-        const found = searchDex(base(), q, state, lists.types);
+        const found = searchDex(base(), q, state, lists.types, gameLanguage(ctx.registries));
         if (!found.length) return false;
         results = found;
         scroll.reset(0);

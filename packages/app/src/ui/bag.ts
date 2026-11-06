@@ -12,6 +12,7 @@ import { at, atTiles, board, boardContext } from './board.ts';
 import { el } from './core.ts';
 import { animCell, bgPicture, sprite, tapButton } from './sprites.ts';
 import './bag.css';
+import { S } from '../strings/index.ts';
 
 /** sprites.c sBagUISpriteTemplates (sprite positions: the cell's origin). */
 const SPRITES = { bag: [48, 50], prevArrow: [2, 96], nextArrow: [98, 96], item: [22, 172] } as const;
@@ -106,7 +107,7 @@ function pockets(d: DrawContext, v: BagView, types: number[]): HTMLElement[] {
     const cell = animCell(d, 'bag/arrows', dir === 'prev' ? 1 : 0);
     const art = cell === null ? null : sprite(d, 'bag/arrows', cell, x, y);
     if (art) out.push(art);
-    out.push(at(tapButton(d, dir, `pocket-arrow ${dir}${art ? ' rom' : ''}`, [], dir === 'prev' ? 'Previous pocket' : 'Next pocket'), Math.max(0, x - 8), y - 8, dir === 'prev' ? 12 : 14, 16));
+    out.push(at(tapButton(d, dir, `pocket-arrow ${dir}${art ? ' rom' : ''}`, [], S.aria.pocket(dir === 'prev')), Math.max(0, x - 8), y - 8, dir === 'prev' ? 12 : 14, 16));
   };
   if (n > 1) {
     arrow('prev');
@@ -138,10 +139,10 @@ function overlays(d: DrawContext, v: BagView): HTMLElement[] {
     out.push(atTiles(framed(d, 'qty-window'), 23, 18, 9, 6));
     const step = (id: string, label: string, cls: string, x: number, y: number, w: number) => at(tapButton(d, id, `qty-step ${cls}`, [], label), x, y, w, 16);
     out.push(
-      step('qty:+1', 'One more', 'up', 212, 144, 16),
-      step('qty:-1', 'One fewer', 'down', 212, 176, 16),
-      step('qty:-10', 'Ten fewer', 'down10', 192, 160, 12),
-      step('qty:+10', 'Ten more', 'up10', 244, 160, 12),
+      step('qty:+1', S.aria.oneMore, 'up', 212, 144, 16),
+      step('qty:-1', S.aria.oneFewer, 'down', 212, 176, 16),
+      step('qty:-10', S.aria.tenFewer, 'down10', 192, 160, 12),
+      step('qty:+10', S.aria.tenMore, 'up10', 244, 160, 12),
       at(stop(d, 'ok', [d.text(v.quantity.count)], 'qty-count', true), 204, 160, 40, 16),
     );
   }

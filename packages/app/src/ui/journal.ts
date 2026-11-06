@@ -16,6 +16,7 @@ import type { Art } from './art.ts';
 import { el } from './core.ts';
 import { layoutScene, place } from './evolution.ts';
 import './evolution.css';
+import { S } from '../strings/index.ts';
 
 const W = 256;
 const H = 192;
@@ -26,9 +27,9 @@ const EVENTS = { x: 32, y: 32 };
 const WEEKDAY_GAP = 12;
 /** Tap zones (DS px): the edges turn pages, the corner closes. */
 const ZONES = [
-  { id: 'prev', x: 0, y: 24, w: 32, h: H - 24, label: 'Newer page' },
-  { id: 'next', x: W - 32, y: 24, w: 32, h: H - 24, label: 'Older page' },
-  { id: 'back', x: W - 40, y: 0, w: 40, h: 24, label: 'Close' },
+  { id: 'prev', x: 0, y: 24, w: 32, h: H - 24, label: () => S.aria.newerPage },
+  { id: 'next', x: W - 32, y: 24, w: 32, h: H - 24, label: () => S.aria.olderPage },
+  { id: 'back', x: W - 40, y: 0, w: 40, h: 24, label: () => S.aria.close },
 ] as const;
 
 const sheetPath = (id: Id) => id.slice(id.indexOf(':') + 'ui2d/'.length + 1);
@@ -114,7 +115,7 @@ function pageCanvas(d: DrawContext, scene: DsScene, pages: Map<string, HTMLCanva
 
 export function journal(d: DrawContext, v: JournalView): HTMLElement {
   let s = journals.get(d.art);
-  if (!s || !s.scene.root.isConnected) journals.set(d.art, (s = { scene: new DsScene(d.art, 'journal-scene', 'Journal'), pages: new Map() }));
+  if (!s || !s.scene.root.isConnected) journals.set(d.art, (s = { scene: new DsScene(d.art, 'journal-scene', S.aria.journal), pages: new Map() }));
   const { scene, pages } = s;
   scene.redraw = () => journal(d, v);
   layoutScene(d, scene.root, scene.stage);
@@ -145,7 +146,7 @@ export function journal(d: DrawContext, v: JournalView): HTMLElement {
       b.type = 'button';
       b.tabIndex = -1;
       b.dataset.tap = z.id;
-      b.setAttribute('aria-label', z.label);
+      b.setAttribute('aria-label', z.label());
       b.addEventListener('click', () => d.tap(z.id));
       place(b, z);
       return b;
@@ -159,7 +160,7 @@ const diplomas = new WeakMap<Art, DsScene>();
 
 export function diploma(d: DrawContext, v: DiplomaView): HTMLElement {
   let scene = diplomas.get(d.art);
-  if (!scene || !scene.root.isConnected) diplomas.set(d.art, (scene = new DsScene(d.art, 'diploma-scene', 'Diploma')));
+  if (!scene || !scene.root.isConnected) diplomas.set(d.art, (scene = new DsScene(d.art, 'diploma-scene', S.aria.diploma)));
   const s = scene;
   s.redraw = () => diploma(d, v);
   layoutScene(d, s.root, s.stage);
@@ -183,7 +184,7 @@ export function diploma(d: DrawContext, v: DiplomaView): HTMLElement {
     next.type = 'button';
     next.tabIndex = -1;
     next.dataset.tap = 'next';
-    next.setAttribute('aria-label', 'Close');
+    next.setAttribute('aria-label', S.aria.close);
     next.addEventListener('click', () => d.tap('next'));
     place(next, { x: 0, y: 0, w: W, h: H });
     s.boxes.replaceChildren(text, next);

@@ -14,6 +14,7 @@ import { at, atTiles, board, boardContext, DS_HEIGHT, DS_WIDTH, dsPair } from '.
 import { el } from './core.ts';
 import { animCell, bgPicture, sprite, tapButton } from './sprites.ts';
 import './storage.css';
+import { S } from '../strings/index.ts';
 
 /** Compare mode moves the box 44 px left (ov19_021D7820). */
 const COMPARE_SHIFT = -44;
@@ -92,7 +93,7 @@ function boxBoard(d: DrawContext, v: StorageView): HTMLElement {
     const cell = animCell(d, 'box/cursor', CURSOR.arrows[i]! + (v.area === 'header' ? CURSOR.selected : 0));
     const art = cell === null ? null : sprite(d, 'box/cursor', cell, x + shift, HEADER.arrowY);
     if (art) root.append(art);
-    root.append(at(tapButton(d, i ? 'box:1' : 'box:-1', `box-arrow ${i ? 'next' : 'prev'}${art ? ' rom' : ''}`, [], i ? 'Next box' : 'Previous box'), x + shift - 12, HEADER.arrowY - 12, 24, 24));
+    root.append(at(tapButton(d, i ? 'box:1' : 'box:-1', `box-arrow ${i ? 'next' : 'prev'}${art ? ' rom' : ''}`, [], i ? S.aria.nextBox : S.aria.previousBox), x + shift - 12, HEADER.arrowY - 12, 24, 24));
   });
 
   // The hand's shadow while it is over the box: drawn behind the box's Pokémon (ov19_021D8B54: sprite priority 42,
@@ -163,7 +164,7 @@ function preview(d: DrawContext, v: StorageView): HTMLElement[] {
   const marks = d.art.cells('box/preview_marks', MARK_NAMES.map((_, i) => markCell(p.markings, i)), d.unit);
   if (marks) {
     const row = at(el('div', 'box-marks', marks), PREVIEW.marks[0], PREVIEW.marks[1], 48, 8);
-    row.setAttribute('aria-label', MARK_NAMES.filter((_, i) => (p.markings >> i) & 1).join(', ') || 'no marks');
+    row.setAttribute('aria-label', MARK_NAMES.filter((_, i) => (p.markings >> i) & 1).join(', ') || S.aria.noMarks);
     out.push(row);
   }
   return out;
@@ -308,6 +309,6 @@ function compareBoard(d: DrawContext, c: StorageCompare): HTMLElement {
   });
   const pageArt = sprite(d, 'box/compare_buttons', 'page_0', PAGE_BUTTON[0], PAGE_BUTTON[1]);
   if (pageArt) root.append(pageArt);
-  root.append(at(tapButton(d, 'compare:page', `cmp-page${pageArt ? ' rom' : ' pill'}`, [], 'Next compare page'), PAGE_BUTTON[0] - 16, PAGE_BUTTON[1] - 16, 32, 32));
+  root.append(at(tapButton(d, 'compare:page', `cmp-page${pageArt ? ' rom' : ' pill'}`, [], S.aria.nextComparePage), PAGE_BUTTON[0] - 16, PAGE_BUTTON[1] - 16, 32, 32));
   return root;
 }

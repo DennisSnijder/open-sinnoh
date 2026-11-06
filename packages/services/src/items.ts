@@ -342,9 +342,14 @@ export function useRepel(state: GameState, registries: Registries, id: Id): bool
   return true;
 }
 
-/** Decomp HM check (Item_IsHMMove / IsHM): an HM item is not used up and its move cannot be forgotten. */
+/**
+ * Decomp HM check (Item_IsHMMove / IsHM): an HM item is not used up and its move cannot be forgotten. A pack's own
+ * HM is a move-teaching item that cannot be tossed, as the ROM's HMs (and only they) are.
+ */
 export function isHmItem(registries: Registries, id: Id): boolean {
-  return /(^|:)ITEM_HM\d+$/.test(id) || itemRecord(registries, id).name.startsWith('HM');
+  if (/(^|:)ITEM_HM\d+$/.test(id)) return true;
+  const rec = itemRecord(registries, id);
+  return rec.tm !== undefined && rec.preventToss;
 }
 
 /** Whether a move is taught by an HM (decomp Item_IsHMMove: HMs' moves are not forgotten in the field). */

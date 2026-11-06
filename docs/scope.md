@@ -6,7 +6,7 @@ the decisions and why.
 
 ## 1. Goal and choice of game
 
-The engine reimplements the game in TypeScript. **Pokémon Platinum (US)** is the first base pack. The player imports it
+The engine reimplements the game in TypeScript. **Pokémon Platinum** (US, European English and German) is the first base pack. The player imports it
 locally from their own ROM, and it is never distributed. **HeartGold/SoulSilver** becomes the second base pack on the
 same engine. Diamond and Pearl may follow as variant packs.
 
@@ -50,7 +50,7 @@ Format names here are the community's common names. Each one is verified against
 | Clock | The device's real-time clock drives time of day, berries, honey trees, daily events and the Pokétch, as on the DS. Replays freeze and step it. |
 | UI | Screens that recreate the DS (battle, bag, party, summary, Pokédex, PC, naming) stay faithful and use the ROM's art. OpenSinnoh's own screens (Options, setup, crash, data, mods) use OpenSinnoh UI (`docs/design-system.md`). |
 | QoL | Each quality-of-life change is an option whose contract default is the DS behaviour, so replays and tests are unaffected. |
-| ROM support | Platinum US rev0, keyed by SHA-1. HGSS US later. |
+| ROM support | Platinum US rev0, European English rev10 and German rev0, keyed by SHA-1. HGSS US later. |
 
 ## 4. Hard rules
 

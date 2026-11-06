@@ -26,6 +26,7 @@ import { offerIntroSkip } from './intro-skip.ts';
 import { TitleScene3d } from './model3d.ts';
 import { TitleStrings } from './strings.ts';
 import { EXIT_DELAY, EXIT_FADE, exitBrightness, FADE_IN, hoverY, promptOn } from './timeline.ts';
+import { S } from '../strings/index.ts';
 import './title.css';
 
 export type { ContinueInfo } from './menu.ts';
@@ -104,7 +105,6 @@ const START: readonly Button[] = ['a', 'start'];
 /** decomp sequence numbers: SEQ_TITLE01 (title_screen.c TITLE_SCREEN_APP_STATE_INIT_SOUND), SEQ_PRESENT (mystery_gift_app.c). */
 const SEQ_TITLE01 = 1173;
 const SEQ_PRESENT = 1174;
-const LEGAL = 'Unofficial fan project · not affiliated with Nintendo, Game Freak or The Pokémon Company';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, className: string, text = ''): HTMLElementTagNameMap[K] {
   const e = document.createElement(tag);
@@ -130,14 +130,14 @@ export async function showTitle(deps: TitleDeps): Promise<void> {
   // --- DOM: 3D, vignette, brand (wordmark + prompt), legal line, screen fade, (menu) ---
   const root = el('section', 'title');
   root.id = 'title';
-  root.setAttribute('aria-label', 'Title screen');
+  root.setAttribute('aria-label', S.title.screen);
   // The brand on the dark theme's tokens, whatever the page's theme: the scene behind it is the game's.
   const brand = el('div', 'title-brand');
   brand.dataset.theme = 'dark';
   const mark = wordmark(2, { label: 'OpenSinnoh', animate: true });
-  const prompt = el('p', 'title-prompt', touch ? 'Tap to start' : 'Press start');
+  const prompt = el('p', 'title-prompt', touch ? S.title.tap : S.title.press);
   brand.append(mark, prompt);
-  const legal = el('p', 'title-legal', LEGAL);
+  const legal = el('p', 'title-legal', S.title.legal);
   const fade = el('div', 'title-fade');
   root.append(...(scene3d ? [scene3d.canvas] : []), el('div', 'title-vignette'), brand, legal, fade);
   document.body.append(root);
@@ -290,7 +290,7 @@ export async function showTitle(deps: TitleDeps): Promise<void> {
         // Over the silent menu, without stopping the SE_CONFIRM that chose it.
         deps.sound?.playBgm(deps.sound.sequenceBySource(SEQ_PRESENT));
         let finished = false;
-        return new TitleFlow(flowDeps, 'Mystery Gift', {
+        return new TitleFlow(flowDeps, S.title.mysteryGift, {
           view: () => app.view(),
           tick: (f) => {
             if (finished) return;
@@ -302,7 +302,7 @@ export async function showTitle(deps: TitleDeps): Promise<void> {
                 () => close(null),
                 (e: Error) => {
                   deps.sound?.stopBgm();
-                  close(`The gift could not be saved: ${e.message}`);
+                  close(S.title.giftNotSaved(e.message));
                 },
               );
             else close(null);

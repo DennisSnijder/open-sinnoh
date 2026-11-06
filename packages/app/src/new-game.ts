@@ -4,6 +4,7 @@
  * message font can draw.
  */
 import type { NewGameOptions } from '@opensinnoh/game';
+import { S } from './strings/index.ts';
 
 export const NAME_MAX = 7;
 const KEY = 'lantern-nds:new-game'; // pre-rename name, kept: players' stored data uses it
@@ -12,20 +13,20 @@ const KEY = 'lantern-nds:new-game'; // pre-rename name, kept: players' stored da
 export class NewGameSettingsError extends Error {}
 
 function checkName(label: string, value: unknown, fontChars: string): string {
-  if (typeof value !== 'string') throw new NewGameSettingsError(`${label} is missing.`);
+  if (typeof value !== 'string') throw new NewGameSettingsError(S.newGame.missing(label));
   const chars = [...value];
-  if (chars.length < 1 || chars.length > NAME_MAX) throw new NewGameSettingsError(`${label} must be 1 to ${NAME_MAX} characters.`);
+  if (chars.length < 1 || chars.length > NAME_MAX) throw new NewGameSettingsError(S.newGame.length(label, NAME_MAX));
   const bad = [...new Set(chars.filter((c) => !fontChars.includes(c)))];
-  if (bad.length) throw new NewGameSettingsError(`${label} uses characters the game cannot show: ${bad.join(' ')}`);
+  if (bad.length) throw new NewGameSettingsError(S.newGame.badChars(label, bad.join(' ')));
   return value;
 }
 
 /** Validates settings from the form or from storage against the message font's characters. */
 export function checkNewGame(input: unknown, fontChars: string): NewGameOptions {
   const o = (input ?? {}) as { names?: { player?: unknown; rival?: unknown }; gender?: unknown };
-  const player = checkName('Your name', o.names?.player, fontChars);
-  const rival = checkName("Your rival's name", o.names?.rival, fontChars);
-  if (o.gender !== 'male' && o.gender !== 'female') throw new NewGameSettingsError('Pick a gender.');
+  const player = checkName(S.newGame.yourName, o.names?.player, fontChars);
+  const rival = checkName(S.newGame.rivalName, o.names?.rival, fontChars);
+  if (o.gender !== 'male' && o.gender !== 'female') throw new NewGameSettingsError(S.newGame.pickGender);
   return { names: { player, rival }, gender: o.gender };
 }
 
@@ -35,13 +36,13 @@ export function readNewGame(): unknown {
   try {
     text = localStorage.getItem(KEY);
   } catch (e) {
-    throw new NewGameSettingsError(`This browser blocks storage: ${(e as Error).message}`);
+    throw new NewGameSettingsError(S.newGame.blocked((e as Error).message));
   }
   if (text === null) return null;
   try {
     return JSON.parse(text) as unknown;
   } catch {
-    throw new NewGameSettingsError('The stored new-game settings are corrupt.');
+    throw new NewGameSettingsError(S.newGame.corrupt);
   }
 }
 
@@ -49,6 +50,6 @@ export function storeNewGame(settings: NewGameOptions): void {
   try {
     localStorage.setItem(KEY, JSON.stringify(settings));
   } catch (e) {
-    throw new NewGameSettingsError(`Could not store the settings: ${(e as Error).message}`);
+    throw new NewGameSettingsError(S.newGame.notStored((e as Error).message));
   }
 }

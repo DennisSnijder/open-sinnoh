@@ -18,7 +18,7 @@ import { ROM, romSlice } from '../rom.ts';
 const SE_CONFIRM = 1500;
 const IDLE: InputFrame = { held: [], pressed: [], touch: null };
 const press = (b: Button): InputFrame => ({ held: [b], pressed: [b], touch: null });
-/** Three {clear}s, no template slots. */
+/** Several page breaks ({clear} or {scroll}), no template slots. */
 const PAGES = 'platinum:TwinleafTownSouthwestHouse_Text_PokemonProfessorReturned';
 
 describe.skipIf(!ROM)('message box sound (OPENSINNOH_NDS_ROM)', () => {
@@ -51,8 +51,8 @@ describe.skipIf(!ROM)('message box sound (OPENSINNOH_NDS_ROM)', () => {
 
   it('a field message: one SE_CONFIRM per page break pressed through; the closing press is silent', async () => {
     const { game, confirms } = await newGame();
-    const pageBreaks = game.registries.texts.get(PAGES as Id)!.text.match(/\{clear\}/g)!.length;
-    expect(pageBreaks).toBe(3);
+    const pageBreaks = game.registries.texts.get(PAGES as Id)!.text.match(/\{(clear|scroll)\}/g)!.length;
+    expect(pageBreaks).toBeGreaterThanOrEqual(2);
     game.scripts.start({ label: 'msg-test:Talk' as Id, zone: game.state.player.zone, source: 'test' });
     // Speed-up presses while the first page prints.
     game.step(IDLE);
@@ -71,13 +71,15 @@ describe.skipIf(!ROM)('message box sound (OPENSINNOH_NDS_ROM)', () => {
     expect(confirms()).toEqual([...talk, ...presses.slice(0, pageBreaks)]);
   }, 120_000);
 
+  /** The start of the wild line ("A wild {var 0} appeared!"), before its slot. */
+  const wildLine = (game: Game) => game.registries.texts.get('platinum:BattleStrings_Text_AWildPokemonAppeared' as Id)!.text.split('{')[0]!;
   /** Starts a wild Bidoof battle and steps it to the wild line's {clear} wait; `input` on the steps before. */
   const toWildWait = async () => {
     const g = await newGame();
     g.game.world.startBattle({ kind: 'wild', trainers: [], wild: [{ species: 'platinum:SPECIES_BIDOOF' as Id, level: 3 }] });
     for (let i = 0; i < 3000; i++) {
       const m = g.game.battle?.view().message;
-      if (m?.done && m.text.startsWith('A wild')) return g;
+      if (m?.done && m.text.startsWith(wildLine(g.game))) return g;
       g.game.step(IDLE);
     }
     throw new Error('the wild line never reached its wait');
@@ -85,7 +87,7 @@ describe.skipIf(!ROM)('message box sound (OPENSINNOH_NDS_ROM)', () => {
   /** Steps the battle until its message is no longer the wild line. */
   const pastWildLine = (game: Game, input: (n: number) => InputFrame) => {
     for (let n = 0; n < 500; n++) {
-      if (!game.battle!.view().message?.text.startsWith('A wild')) return;
+      if (!game.battle!.view().message?.text.startsWith(wildLine(game))) return;
       game.step(input(n));
     }
     throw new Error('the wild line never ended');

@@ -12,9 +12,9 @@
  * list's cursor move, choice and cancel, and when "no gift" shows; SEQ_SE_DP_UG_020 when the gift is received;
  * SEQ_SE_DP_CARD2 on another card and on turning a card over; SEQ_SE_DP_SAVE once a trashed card is saved away.
  */
-import type { Button, Id } from '@opensinnoh/core';
-import { MYSTERY_GIFTS, type AppHost, type GameState, type MysteryGiftId, type MysteryGiftView, type Registries, type StubLog } from '@opensinnoh/contracts';
-import { cardGiftPending, giftForCode, giftReceivable, GIFT_CODE_LENGTH, mysteryGiftOf, receiveGift, trashCard } from '@opensinnoh/services';
+import { forLanguage, type Button, type Id } from '@opensinnoh/core';
+import { MYSTERY_GIFT_TEXT, MYSTERY_GIFTS, type AppHost, type GameState, type MysteryGiftId, type MysteryGiftView, type Registries, type StubLog } from '@opensinnoh/contracts';
+import { cardGiftPending, gameLanguage, giftForCode, giftReceivable, GIFT_CODE_LENGTH, mysteryGiftOf, receiveGift, trashCard } from '@opensinnoh/services';
 import { menuSe } from './context.ts';
 import { Dialog } from './dialog.ts';
 import { namingScreen } from './naming.ts';
@@ -188,13 +188,14 @@ export function mysteryGiftScreen(o: MysteryGiftOptions, done: (received: boolea
 
   const cardView = (gift: MysteryGiftId, slot: number | null, back: boolean, index: number, count: number): MysteryGiftView['card'] => {
     const def = MYSTERY_GIFTS[gift];
+    const words = forLanguage(gameLanguage(o.registries), MYSTERY_GIFT_TEXT)[gift];
     const card = slot === null ? null : mg().cards[slot]!;
     let backSide: { date: string; status: string } | null = null;
     if (back && card && slot !== null) {
       const [y, mo, d] = card.received.split('-').map(Number) as [number, number, number];
       backSide = { date: `${t.message(TEXT.dateReceived)}  ${t.message(TEXT.dateTemplate, String(y), t.month(mo - 1), String(d))}`, status: t.message(cardGiftPending(o.state, slot) ? TEXT.pickUp : TEXT.receivedBefore) };
     }
-    return { title: def.title, description: def.description, species: speciesId(def.species), label: t.message(TEXT.wonderCard), back: backSide, index, count };
+    return { title: words.title, description: words.description, species: speciesId(def.species), label: t.message(TEXT.wonderCard), back: backSide, index, count };
   };
 
   return {

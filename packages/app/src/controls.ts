@@ -16,28 +16,15 @@
  * - A binding already used by another action swaps: the other action takes the one this action had.
  */
 import { BUTTONS, type Button } from '@opensinnoh/core';
+import { S } from './strings/index.ts';
 
 export const CONTROLS_KEY = 'lantern-nds:controls'; // pre-rename name, kept: players' stored data uses it
 
 /** What a binding triggers: a DS button, fast-forward (held; the backtick toggle is fixed), or the Pokétch (the DS has it always on screen). */
 export type Action = Button | 'fast' | 'poketch';
 
-export const ACTIONS: readonly { id: Action; label: string }[] = [
-  { id: 'up', label: 'D-PAD UP' },
-  { id: 'down', label: 'D-PAD DOWN' },
-  { id: 'left', label: 'D-PAD LEFT' },
-  { id: 'right', label: 'D-PAD RIGHT' },
-  { id: 'a', label: 'A' },
-  { id: 'b', label: 'B' },
-  { id: 'x', label: 'X' },
-  { id: 'y', label: 'Y' },
-  { id: 'l', label: 'L' },
-  { id: 'r', label: 'R' },
-  { id: 'start', label: 'START' },
-  { id: 'select', label: 'SELECT' },
-  { id: 'fast', label: 'FAST-FORWARD' },
-  { id: 'poketch', label: 'POKÉTCH' },
-];
+/** The actions in Options › Controls order; their names are `S.controls.actions` (`actionLabel`). */
+export const ACTIONS: readonly { id: Action }[] = (['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'l', 'r', 'start', 'select', 'fast', 'poketch'] as const).map((id) => ({ id }));
 
 /** A pad binding: a button (`b12`) or an axis direction (`a2-`), or none. */
 export type PadToken = string | null;
@@ -129,20 +116,13 @@ export function defaultBindings(): Bindings {
 }
 
 /** Keys the game itself uses (cancelling, the fast-forward toggle) and modifiers, which switch key reads off. */
-const RESERVED: Readonly<Record<string, string>> = {
-  Escape: 'Escape cancels and goes back',
-  [FAST_FORWARD_TOGGLE]: 'the backtick toggles fast-forward',
-  ControlLeft: 'a modifier key',
-  ControlRight: 'a modifier key',
-  AltLeft: 'a modifier key',
-  AltRight: 'a modifier key',
-  MetaLeft: 'a modifier key',
-  MetaRight: 'a modifier key',
-};
+const MODIFIERS = ['ControlLeft', 'ControlRight', 'AltLeft', 'AltRight', 'MetaLeft', 'MetaRight'];
 
 /** Why a key cannot be bound, or null. */
 export function reservedKey(code: string): string | null {
-  return RESERVED[code] ?? null;
+  if (code === 'Escape') return S.controls.reservedEscape;
+  if (code === FAST_FORWARD_TOGGLE) return S.controls.reservedFast(keyLabel(code));
+  return MODIFIERS.includes(code) ? S.controls.reservedModifier : null;
 }
 
 const PAD_TOKEN = /^(b\d{1,2}|a\d{1,2}[+-])$/;
@@ -220,13 +200,13 @@ export interface BindResult {
 }
 
 export function actionLabel(a: Action): string {
-  return ACTIONS.find((x) => x.id === a)!.label;
+  return S.controls.actions[a];
 }
 
 /** Binds a key to an action (its only key); a key another action uses is swapped. */
 export function bindKey(b: Bindings, action: Action, code: string): BindResult {
   const reason = reservedKey(code);
-  if (reason) throw new Error(`${keyLabel(code)} cannot be bound: ${reason}.`);
+  if (reason) throw new Error(S.controls.cannotBind(keyLabel(code), reason));
   const old = b.keys[action];
   const holder = actionIds.find((a) => a !== action && b.keys[a].includes(code)) ?? null;
   b.keys[action] = [code];
@@ -263,19 +243,8 @@ export function bindPad(b: Bindings, raw: boolean, kind: PadKind, action: Action
   return { holder };
 }
 
-const KEY_NAMES: Readonly<Record<string, string>> = {
-  ArrowUp: 'Up',
-  ArrowDown: 'Down',
-  ArrowLeft: 'Left',
-  ArrowRight: 'Right',
-  Space: 'Space',
-  Enter: 'Enter',
-  Backspace: 'Backspace',
-  Tab: 'Tab',
-  ShiftLeft: 'Left Shift',
-  ShiftRight: 'Right Shift',
-  PageUp: 'Page Up',
-  PageDown: 'Page Down',
+/** The US layout's characters, where the browser does not tell the keyboard's layout. Named keys are `S.controls.keys`. */
+const KEY_CHARS: Readonly<Record<string, string>> = {
   Backquote: '`',
   Minus: '-',
   Equal: '=',
@@ -290,13 +259,34 @@ const KEY_NAMES: Readonly<Record<string, string>> = {
   IntlBackslash: '\\',
 };
 
-/** A key's name for the player. */
+/** The keyboard's layout (`KeyboardEvent.code` → the character it types), where the browser tells it. */
+let layout: ReadonlyMap<string, string> | null = null;
+
+interface KeyboardLayoutApi {
+  getLayoutMap(): Promise<ReadonlyMap<string, string>>;
+}
+
+/** Asks the browser for the keyboard's layout (Chromium), so a QWERTZ keyboard's `KeyZ` is named Y. Others keep the US names. */
+export function readKeyboardLayout(): void {
+  const keyboard = (navigator as { keyboard?: KeyboardLayoutApi }).keyboard;
+  keyboard?.getLayoutMap().then(
+    (map) => (layout = map),
+    (e: Error) => console.info(`controls: the keyboard layout is not available (${e.message}); keys keep their US names`),
+  );
+}
+
+/** A key's name for the player: by the keyboard's layout where known. */
 export function keyLabel(code: string): string {
-  if (KEY_NAMES[code]) return KEY_NAMES[code]!;
+  const named = (S.controls.keys as Readonly<Record<string, string>>)[code];
+  if (named) return named;
+  const typed = layout?.get(code);
+  // Letters as the keycap shows them (ß stays ß, not SS).
+  if (typed) return typed.toUpperCase().length === typed.length ? typed.toUpperCase() : typed;
+  if (KEY_CHARS[code]) return KEY_CHARS[code]!;
   const k = /^Key([A-Z])$/.exec(code);
   if (k) return k[1]!;
   const d = /^(?:Digit|Numpad)(\d)$/.exec(code);
-  if (d) return code.startsWith('Numpad') ? `Num ${d[1]}` : d[1]!;
+  if (d) return code.startsWith('Numpad') ? S.controls.numpad(d[1]!) : d[1]!;
   return code.replace(/([a-z])([A-Z0-9])/g, '$1 $2');
 }
 
@@ -316,34 +306,17 @@ export function padFace(b: Bindings, id: string | undefined): PadKind {
   return b.layout === 'auto' ? padKind(id ?? '') : b.layout;
 }
 
-const STANDARD_NAMES: Readonly<Record<number, string>> = {
-  10: 'Left stick press',
-  11: 'Right stick press',
-  12: 'D-pad up',
-  13: 'D-pad down',
-  14: 'D-pad left',
-  15: 'D-pad right',
-};
-
-/** Standard-mapping buttons 0 to 9, then the home button, as each pad prints them. */
-const FACE_NAMES: Readonly<Record<PadKind, readonly string[]>> = {
-  generic: ['Bottom button', 'Right button', 'Left button', 'Top button', 'Left bumper', 'Right bumper', 'Left trigger', 'Right trigger', 'Back', 'Start', 'Home'],
-  xbox: ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'View', 'Menu', 'Xbox button'],
-  playstation: ['Cross', 'Circle', 'Square', 'Triangle', 'L1', 'R1', 'L2', 'R2', 'Share', 'Options', 'PS button'],
-  nintendo: ['B', 'A', 'Y', 'X', 'L', 'R', 'ZL', 'ZR', 'Minus', 'Plus', 'Home'],
-};
-
 /** A pad token's name for the player (`raw`: the pad has no standard layout, so only its indices are known). */
 export function padLabel(token: PadToken, raw: boolean, kind: PadKind = 'generic'): string {
-  if (token === null) return 'Unbound';
+  if (token === null) return S.controls.unbound;
   const n = Number(token.slice(1, token.length - (token[0] === 'a' ? 1 : 0)));
-  if (token[0] === 'b') return raw ? `Button ${n}` : (FACE_NAMES[kind][n === 16 ? 10 : n] ?? STANDARD_NAMES[n] ?? `Button ${n}`);
-  return `Axis ${n} ${token.endsWith('+') ? '+' : '-'}`;
+  if (token[0] === 'b') return raw ? S.controls.button(n) : (S.controls.padFaces[kind][n === 16 ? 10 : n] ?? S.controls.padSticks[n - 10] ?? S.controls.button(n));
+  return S.controls.axis(n, token.endsWith('+') ? '+' : '-');
 }
 
 /** A row's binding for the player: the keys, then the pad's button (`raw`: the pad in use has no standard layout). */
 export function bindingText(b: Bindings, a: Action, raw: boolean, kind: PadKind = 'generic'): string {
-  return `${b.keys[a].map(keyLabel).join(', ') || 'Unbound'} · ${padLabel(padTable(b, raw, kind)[a], raw, kind)}`;
+  return `${b.keys[a].map(keyLabel).join(', ') || S.controls.unbound} · ${padLabel(padTable(b, raw, kind)[a], raw, kind)}`;
 }
 
 /** Something the player pressed while binding. */

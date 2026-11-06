@@ -1,5 +1,6 @@
 export * from './names.ts';
 export * from './platinum.ts';
+export * from './layout.ts';
 export * from './formats/zone-headers.ts';
 export * from './formats/map.ts';
 export * from './formats/events.ts';
@@ -13,3 +14,4 @@ export * from './ui2d/index.ts';
 export * from './pokedex.ts';
 export * from './distortion/index.ts';
 export * from './hgss/followers.ts';
+export { objectiveTexts } from './objectives.ts';

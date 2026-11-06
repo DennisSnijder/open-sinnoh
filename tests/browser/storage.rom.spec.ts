@@ -15,6 +15,7 @@ import { romSha1 } from '../rom.ts';
 import { skipSetup } from './intro.ts';
 import { saveSlot } from './save.ts';
 import { seedRomImport } from './seed.ts';
+import { appStrings } from './words.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 test.skip(!ROM, 'OPENSINNOH_NDS_ROM is not set');
@@ -48,10 +49,10 @@ test('Options › Data shows the storage and asks the browser to keep it; a miss
   await board(page).locator('[role="tab"][data-section="data"]').click();
   const row = board(page).locator('[data-setting="storage"]');
   await row.locator('.options-value').click();
-  await expect(board(page).locator('.options-desc')).toContainText('did not agree');
+  await expect(board(page).locator('.options-desc')).toContainText(appStrings().game.keepRefused);
   await page.evaluate(() => ((window as { grantPersist?: boolean }).grantPersist = true));
   await row.locator('.options-value').click();
-  await expect(board(page).locator('.options-desc')).toContainText('keep your game and saves');
+  await expect(board(page).locator('.options-desc')).toContainText(appStrings().game.keepDone);
 
   // The whole import passes the boot check; a file gone from it does not.
   const sha1 = romSha1();
@@ -86,9 +87,9 @@ test('Options › Data shows the storage and asks the browser to keep it; a miss
 
   await page.goto('/');
   const notice = page.locator('#rom-notice .os-banner.info');
-  await expect(notice).toContainText('We need to re-import your ROM');
+  await expect(notice).toContainText(appStrings().rom.reimport);
   await expect(notice).toContainText(`${check.files - 1} of ${check.files} files`);
-  await expect(notice).toContainText('your save is safe');
+  await expect(notice).toContainText(appStrings().rom.saveSafe);
 
   // Choosing the ROM again repairs it; Start playing opens the title, and the new import is marked too.
   await page.locator('#rom-input').setInputFiles(ROM!);
@@ -161,8 +162,8 @@ test('an engine update re-imports the ROM: the notice, no setup again, and the s
 
   await page.goto('/');
   const notice = page.locator('#rom-notice .os-banner.info');
-  await expect(notice).toContainText('We need to re-import your ROM for the updated engine.');
-  await expect(notice).toContainText("Don't worry, your save is safe.");
+  await expect(notice).toContainText(appStrings().rom.reimportUpdated);
+  await expect(notice).toContainText(appStrings().rom.saveSafe);
   await expect(page.locator('#picker-error')).toBeHidden();
   await page.locator('#rom-input').setInputFiles(ROM!);
   await reimported(page);

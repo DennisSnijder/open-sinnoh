@@ -22,7 +22,7 @@ export const VIEWPORTS = [
 ] as const;
 
 /** The app adds `until` and `advanceText` (the same loops as the headless driver, run in the page) to the contracts bridge. */
-type BridgeWindow = Window & { openSinnohGame?: OpenSinnohBridge & { until(until: UntilCondition, max: number): number | null; advanceText(max: number): number | null; battleAuto(max: number, move?: number): number | null; battleCatch(ball: string, max: number): number | null; grind(slot: number, level: number, dirs: ["up" | "down" | "left" | "right", "up" | "down" | "left" | "right"], max: number): number | null } };
+type BridgeWindow = Window & { openSinnohGame?: OpenSinnohBridge & { until(until: UntilCondition, max: number): number | null; advanceText(max: number, close?: boolean): number | null; battleAuto(max: number, move?: number): number | null; battleCatch(ball: string, max: number): number | null; grind(slot: number, level: number, dirs: ["up" | "down" | "left" | "right", "up" | "down" | "left" | "right"], max: number): number | null } };
 
 export function appAvailable(): boolean {
   return existsSync(join(REPO_ROOT, 'index.html'));
@@ -45,7 +45,7 @@ export function pageDriver(page: Page, screenshotDir: string, prefix: string): R
     load: (json, entry) => page.evaluate(([j, e]) => (window as BridgeWindow).openSinnohGame!.load(j, e), [json, entry] as const),
     resetSave: () => page.evaluate(() => (window as BridgeWindow).openSinnohGame!.resetSave()),
     until: (until, max) => page.evaluate(([u, m]) => (window as BridgeWindow).openSinnohGame!.until(u, m), [until, max] as const),
-    advanceText: (max) => page.evaluate((m) => (window as BridgeWindow).openSinnohGame!.advanceText(m), max),
+    advanceText: (max, close) => page.evaluate(([m, c]) => (window as BridgeWindow).openSinnohGame!.advanceText(m, c), [max, close] as const),
     fieldMove: (slot, move) => page.evaluate(([s, m]) => (window as BridgeWindow).openSinnohGame!.useFieldMove(s, m), [slot, move] as const),
     setClock: (date, time) => page.evaluate(([d, t]) => (window as BridgeWindow).openSinnohGame!.setClock(d ?? undefined, t ?? undefined), [date ?? null, time ?? null] as const),
     battleChoose: (choice) => page.evaluate((c) => (window as BridgeWindow).openSinnohGame!.battleChoose(c), choice),

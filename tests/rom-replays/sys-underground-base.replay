@@ -38,9 +38,7 @@ until message
 +0 assert state underground.traps [1,23,28]
 +0 assert state underground.base.entrance {"x":168,"z":261,"dir":"down"}
 +0 assert position platinum:MAP_HEADER_UNDERGROUND 15 23
-+0 press a
-+1 release a
-until idle
+advance text
 # Out by the exit (with the entrance closed: open the door, the wireless notice), to the tile below the entrance.
 +0 press down
 until app ug-base
@@ -108,9 +106,7 @@ until app ug-base
 until app none
 until message
 +0 assert position platinum:MAP_HEADER_UNDERGROUND 15 23
-+0 press a
-+1 release a
-until idle
+advance text
 # To the PC (15, 12), facing north: DECORATE.
 +0 press up
 until position 15 13

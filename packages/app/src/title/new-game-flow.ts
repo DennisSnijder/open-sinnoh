@@ -21,6 +21,7 @@ import '../ui/apps.css';
 import '../ui/apps-m3a.css';
 import '../ui/naming.css';
 import { MAX_SCALE } from '../ui/rowan-intro.ts';
+import { S } from '../strings/index.ts';
 
 export interface FlowDeps {
   registries: Registries;
@@ -155,7 +156,7 @@ export function newGameFlow(deps: IntroDeps): Sheet {
   };
   if (!deps.offerSkip) return introFlow(deps, false, finish);
   const ask = new SetupFlow({ questions: ['introSkip'], textSpeed: () => 0, textDelay: () => 0, answer: (_q, c) => void (skip = c === 0), pickAddon: () => true });
-  const screen = new SetupScreen(ask, deps.tap, { tab: 'New game', lead: 'A choice for this new game.' });
+  const screen = new SetupScreen(ask, deps.tap, S.title.newGameHeading);
   let skip = false;
   let intro: TitleFlow | null = null;
   const root = document.createElement('div');
@@ -179,7 +180,7 @@ function introFlow(deps: IntroDeps, skip: boolean, done: IntroDeps['done']): Tit
   let quiet = false;
   const app: AppModel = createRowanIntro({ registries: deps.registries, log: deps.log, ...(deps.sound ? { sound: deps.sound } : {}), textDelay: deps.textDelay(), defaults: deps.defaults, autoLowercase: deps.autoLowercase, skip });
   let finished = false;
-  return new TitleFlow(deps, 'New game', {
+  return new TitleFlow(deps, S.title.newGameHeading.tab, {
     view: () => app.view(),
     tick: (f) => {
       if (finished) return;

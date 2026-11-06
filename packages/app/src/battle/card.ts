@@ -23,6 +23,7 @@ import { el } from '../ui/core.ts';
 import { Art, hpColor, ICON_ANIM } from '../ui/art.ts';
 import type { Palette, PixelFont } from '../ui/pixel-font.ts';
 import type { CardStrings } from './strings.ts';
+import { S } from '../strings/index.ts';
 
 export interface CardDeps {
   game(): Game;
@@ -67,7 +68,7 @@ export class BattleCard {
     this.pokemonArt = new Art(() => deps.assets, () => deps.game().registries);
     this.el.hidden = true;
     this.el.setAttribute('role', 'group');
-    this.el.setAttribute('aria-label', 'Battle commands');
+    this.el.setAttribute('aria-label', S.aria.battleCommands);
   }
 
   /**

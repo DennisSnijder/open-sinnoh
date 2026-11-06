@@ -20,9 +20,8 @@ advance text
 +1 press a
 +1 release a
 until message
-+1 press a
-+1 release a
-until app party
+advance text
++0 assert app party
 +0 assert app party
 # The female Pikachu: STORE
 +1 tap slot:1
@@ -35,9 +34,8 @@ advance text
 +1 press a
 +1 release a
 until message
-+1 press a
-+1 release a
-until app party
+advance text
++0 assert app party
 +1 tap slot:1
 +1 tap menu:0
 until app none
@@ -161,9 +159,8 @@ advance text
 +1 press a
 +1 release a
 until message
-+1 press a
-+1 release a
-until app party
+advance text
++0 assert app party
 +1 tap slot:2
 +1 tap menu:0
 until app none

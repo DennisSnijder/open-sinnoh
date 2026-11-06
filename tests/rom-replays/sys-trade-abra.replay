@@ -23,15 +23,15 @@ advance text
 until idle
 +0 assert flag platinum:FLAG_TRADED_FOR_KAZZA_ABRA true
 +0 assert state party[1].species "platinum:SPECIES_ABRA"
-+0 assert state party[1].nickname "Kazza"
-+0 assert state party[1].otName "Hilary"
++0 assert state party[1].nickname platinum:text/370/0
++0 assert state party[1].otName platinum:text/370/4
 +0 assert state party[1].level 14
 +0 assert state party[1].heldItem "platinum:ITEM_ORAN_BERRY"
 +0 assert state party[1].ivs {"hp":15,"attack":15,"defense":15,"speed":20,"spAttack":25,"spDefense":25}
 +0 assert state party[0].species "platinum:SPECIES_GROTLE"
 +0 reload
 until idle
-+0 assert state party[1].nickname "Kazza"
++0 assert state party[1].nickname platinum:text/370/0
 # Thanks to the trade, she remembers it.
 +0 press a
 +1 release a

@@ -44,9 +44,9 @@ describe.skipIf(!ROM)('a replacement after a drag (OPENSINNOH_NDS_ROM)', () => {
       return b;
     };
     // The seeds where U-turn takes Magikarp and Roar then drags out Snorlax.
-    const b = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(run).find((x) => /\|drag\|p1a: /.test(x.sim.log.join('\n')) && /\|faint\|p1b: MAGIKARP/.test(x.sim.log.join('\n')))!;
+    const b = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(run).find((x) => /\|drag\|p1a: /.test(x.sim.log.join('\n')) && x.sim.log.join('\n').includes(`|faint|p1b: ${reg.species.get(P('SPECIES_MAGIKARP'))!.name}`))!;
     expect(b).toBeDefined();
-    const dragged = b.sim.p1.active[0]!.name === 'BIDOOF' ? 2 : 3;
+    const dragged = b.sim.p1.active[0]!.name === reg.species.get(P('SPECIES_BIDOOF'))!.name ? 2 : 3;
     expect(b.view().prompt).toMatchObject({ kind: 'party', forced: true, actor: 2 });
     const sheet = b.app() as Extract<AppRequest, { app: 'party-select' }>;
     expect(sheet.inBattle).toBe(dragged);

@@ -21,7 +21,7 @@ advance text 600
 until app easy-chat 600
 +1 tap slot:0
 +1 tap group:4
-+1 tap word:6
++1 tap word:platinum:PeopleWords_Text_Everyone
 +1 tap yes
 until app none
 advance text 600

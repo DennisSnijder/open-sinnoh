@@ -148,7 +148,7 @@ export function poffinCaseScreen(ctx: MenuContext, done: () => Step): Screen {
       clamp();
       const rows = listed().map((i) => {
         const p = ctx.state.poffins[i]!;
-        return { name: name(p), level: String(poffinLevel(p)).padStart(2, '0'), type: p.type };
+        return { name: name(p), level: t.t('poffinListItem', '', String(poffinLevel(p)).padStart(2, '0')).trim(), type: p.type };
       });
       const sel = selected();
       const p = sel === null ? null : ctx.state.poffins[sel]!;

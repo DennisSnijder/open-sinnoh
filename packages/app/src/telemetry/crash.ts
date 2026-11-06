@@ -9,6 +9,7 @@ import { banner, button, h, snapPixels, titleTab } from '@opensinnoh/ui';
 import { isChunkError } from '../chunk.ts';
 import { splashDone } from '../splash.ts';
 import { ImportIncompleteError } from '../store.ts';
+import { S } from '../strings/index.ts';
 import { captureError, reportText, reportsSending } from './index.ts';
 import './crash.css';
 
@@ -29,39 +30,39 @@ export function crash(err: unknown, where: string, opts: CrashOptions = {}): voi
 
   // A tab left open across a deploy asks the server for files of the old build, which are gone.
   const updated = isChunkError(error);
-  const head = titleTab(updated ? 'OpenSinnoh was updated' : 'Something went wrong', { icon: updated ? 'reset' : 'warn', tone: updated ? 'system' : 'danger', id: 'crash-title' });
+  const head = titleTab(updated ? S.crash.updatedTitle : S.crash.title, { icon: updated ? 'reset' : 'warn', tone: updated ? 'system' : 'danger', id: 'crash-title' });
   // A file of the imported game is missing from the browser's storage: importing the ROM again repairs it.
   const damaged = error instanceof ImportIncompleteError;
   const body = updated
-    ? h('p', 'crash-text', 'A new version came out while this page was open. Reload to continue; progress since your last save may be lost.')
+    ? h('p', 'crash-text', S.crash.updatedText)
     : damaged
-      ? banner('Your imported game data is incomplete.', 'Import your ROM again to repair it. Your saves are kept; progress since your last save may be lost.')
-      : banner('The game stopped because of an error.', 'Progress since your last save may be lost.');
+      ? banner(S.crash.incompleteTitle, S.crash.incompleteText)
+      : banner(S.crash.stoppedTitle, S.crash.stoppedText);
   body.id = 'crash-text';
   // The window is the alert; its error line is not announced a second time.
   body.removeAttribute('role');
-  const sentNote = h('p', 'crash-note', reportsSending() ? 'An anonymous error report goes to the developer. To add your own words, copy the details.' : 'Copy the details to tell the developer what happened.');
+  const sentNote = h('p', 'crash-note', reportsSending() ? S.crash.reportSent : S.crash.copyToTell);
   const pre = h('pre', 'crash-report', text);
   pre.tabIndex = 0;
-  const details = h('details', 'crash-details', h('summary', '', 'Show details'), pre);
+  const details = h('details', 'crash-details', h('summary', '', S.crash.showDetails), pre);
 
   const status = h('p', 'crash-status');
   status.setAttribute('role', 'status');
-  const copy = button('Copy details', {
+  const copy = button(S.crash.copyDetails, {
     icon: 'copy',
     onClick: () =>
       void navigator.clipboard.writeText(text).then(
-        () => (status.textContent = 'Copied. Paste it in your message to the developer.'),
+        () => (status.textContent = S.crash.copied),
         () => {
           // No clipboard (permissions, an old browser): show the text selected for a manual copy.
           details.open = true;
           getSelection()?.selectAllChildren(pre);
-          status.textContent = 'Select the details above and copy them.';
+          status.textContent = S.crash.selectToCopy;
         },
       ),
   });
   copy.classList.add('crash-copy');
-  const reload = button('Reload', { icon: 'reset', ...(damaged && opts.secondary ? {} : { variant: 'primary' as const }), onClick: () => location.reload() });
+  const reload = button(S.crash.reload, { icon: 'reset', ...(damaged && opts.secondary ? {} : { variant: 'primary' as const }), onClick: () => location.reload() });
   reload.classList.add('crash-reload');
   const actions = h('div', 'crash-actions', reload, copy);
   if (opts.secondary) {

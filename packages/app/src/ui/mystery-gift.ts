@@ -12,6 +12,7 @@ import { ICON_ANIM } from './art.ts';
 import { at, atTiles, board, boardContext } from './board.ts';
 import { el } from './core.ts';
 import './mystery-gift.css';
+import { S } from '../strings/index.ts';
 
 const MESSAGE = [0, 18, 32, 6] as const;
 /** Two 16-px rows inside the ROM frame. */
@@ -45,7 +46,7 @@ export function mysteryGift(wide: DrawContext, v: MysteryGiftView): HTMLElement 
     card.dataset.card = c.title;
     root.append(atTiles(card, 1, 1, 30, 11));
     if (c.count > 1 && v.menu) {
-      root.append(at(arrow(d, 'card:prev', 'left', 'Previous card'), 0, 40, 8, 16), at(arrow(d, 'card:next', 'right', 'Next card'), 248, 40, 8, 16));
+      root.append(at(arrow(d, 'card:prev', 'left', S.aria.previousCard), 0, 40, 8, 16), at(arrow(d, 'card:next', 'right', S.aria.nextCard), 248, 40, 8, 16));
     }
   }
   if (v.menu) {
@@ -57,7 +58,7 @@ export function mysteryGift(wide: DrawContext, v: MysteryGiftView): HTMLElement 
   if (v.message) root.append(atTiles(messageBox(d, v.message.text, v.message.waiting), ...MESSAGE));
   if (v.yesNo) root.append(yesNo(d, v.yesNo));
   root.toggleAttribute('data-busy', v.busy);
-  root.setAttribute('aria-label', v.message?.text ?? 'Mystery Gift');
+  root.setAttribute('aria-label', v.message?.text ?? S.aria.mysteryGift);
   return root;
 }
 
@@ -85,8 +86,8 @@ export function easyChat(wide: DrawContext, v: EasyChatView): HTMLElement {
         root.append(at(stop(d, `word:${i}`, [d.text(w)], 'ec-word', v.cursor === i), WORDS.x[col]!, WORDS.y + row * WORDS.row, WORDS.width, WORDS.row));
       }
     const rows = Math.ceil(v.words.length / 2);
-    if (v.top > 0) root.append(at(arrow(d, 'up', 'up', 'Scroll up'), 240, 66, 16, 12));
-    if (v.top + v.rows < rows) root.append(at(arrow(d, 'down', 'down', 'Scroll down'), 240, 174, 16, 12));
+    if (v.top > 0) root.append(at(arrow(d, 'up', 'up', S.aria.scroll(true)), 240, 66, 16, 12));
+    if (v.top + v.rows < rows) root.append(at(arrow(d, 'down', 'down', S.aria.scroll(false)), 240, 174, 16, 12));
   }
   if (v.message) root.append(atTiles(messageBox(d, v.message.text, v.message.waiting), ...MESSAGE));
   if (v.yesNo) root.append(yesNo(d, v.yesNo));

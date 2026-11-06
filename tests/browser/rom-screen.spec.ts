@@ -65,7 +65,7 @@ for (const v of VIEWPORTS) {
     await expect(page.locator('.rom-tagline')).toContainText('Nothing is uploaded');
     await expect(page.getByText('Choose your Platinum ROM')).toBeVisible();
     await expect(page.getByLabel(/Choose your Platinum ROM/)).toHaveAttribute('id', 'rom-input');
-    await expect(page.locator('#rom-need')).toContainText('Platinum (US)');
+    await expect(page.locator('#rom-need')).toContainText('Pokémon Platinum');
     await expect(page.locator('#picker')).not.toContainText('HeartGold');
     await expect(page.locator('#addon-input')).toHaveCount(0);
     await expect(page.locator('#rom-rail li[aria-current="step"]')).toContainText('Your ROM');

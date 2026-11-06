@@ -11,11 +11,11 @@
  * bump. Tests that exercise the importer itself still call `importPlatinum` directly.
  */
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { closeSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, readSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { deserialize, serialize } from 'node:v8';
 import type { PackData } from '@opensinnoh/core';
-import { importPlatinum, type ImportReport } from '@opensinnoh/importer';
+import { importPlatinum, romBuildOfHeader, type ImportReport } from '@opensinnoh/importer';
 import { IMPORTER_VERSION } from '../packages/app/src/importer.ts';
 import { PACK_DATA_PATH } from '../packages/app/src/store.ts';
 
@@ -117,6 +117,18 @@ function load<T>(file: string): T {
   if (!existsSync(path)) throw new Error(`ROM test cache has no ${file}: the global setup did not prepare it`);
   return deserialize(readFileSync(path)) as T;
 }
+
+/** The ROM's build id (`SUPPORTED_ROMS`), from its header. */
+export function romBuildId(): string {
+  const header = new Uint8Array(0x200);
+  const file = openSync(ROM!, 'r');
+  readSync(file, header);
+  closeSync(file);
+  return romBuildOfHeader(header).rom.id;
+}
+
+/** Whether the build has the slot machines: only the US one (docs/research/german-rom.md, docs/research/european-rom.md). */
+export const hasSlotMachines = (): boolean => romBuildId() === 'platinum-us-rev0';
 
 /** A fresh copy of `importPlatinum(rom, …, { slice: true })`'s pack and report. */
 export function romSlice(): { pack: PackData; report: ImportReport } {

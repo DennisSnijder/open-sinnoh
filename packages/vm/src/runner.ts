@@ -146,6 +146,8 @@ export class Runner implements ScriptRunner {
     /** `font`: `message_unown`'s FONT_UNOWN. */
     message: { printer: TextPrinter; font?: 'unown' } | null;
     buttonWait: boolean;
+    /** wait_ab_press / wait_ab_pad_press: a wait for A or B without the arrow (`ScriptView.waitsForAB`). */
+    abWait: boolean;
     yesNo: { cursor: 0 | 1 } | null;
     menu: ScriptMenu | null;
     signpost: Signpost | null;
@@ -166,6 +168,7 @@ export class Runner implements ScriptRunner {
   } = {
     message: null,
     buttonWait: false,
+    abWait: false,
     yesNo: null,
     menu: null,
     floorWindow: null,
@@ -343,6 +346,7 @@ export class Runner implements ScriptRunner {
         this.thread = null;
         this.startMenuReady = t.startMenu;
         this.ui.buttonWait = false;
+        this.ui.abWait = false;
         this.ui.menu = null;
         // A signpost that is scrolling out finishes after the script (the field runs its command).
         if (!this.ui.signpost || this.ui.signpost.command === SIGNPOST_CMD.none) {
@@ -369,7 +373,7 @@ export class Runner implements ScriptRunner {
     const sp = this.ui.signpost;
     return {
       message: m ? { text: m.printer.text(), waitingForInput: m.printer.waiting || this.ui.buttonWait, ...(sp ? { signpost: { kind: sp.kind, offset: sp.offset } } : {}), ...(m.font ? { font: m.font } : {}) } : null,
-      yesNo: this.ui.yesNo ? { cursor: this.ui.yesNo.cursor } : null,
+      yesNo: this.ui.yesNo ? { ...this.yesNoLabels(), cursor: this.ui.yesNo.cursor } : null,
       menu: this.ui.menu?.shown ? this.ui.menu.view() : null,
       ...(this.ui.floorWindow ? { floorWindow: this.ui.floorWindow.view } : {}),
       ...(this.ui.moneyWindow ? { moneyWindow: { ...this.ui.moneyWindow } } : {}),
@@ -378,6 +382,7 @@ export class Runner implements ScriptRunner {
       ...(this.ui.coinWindow ? { coinWindow: { ...this.ui.coinWindow } } : {}),
       ...(this.ui.saveInfo ? { saveInfo: this.ui.saveInfo } : {}),
       ...(this.ui.savingIcon ? { savingIcon: true } : {}),
+      ...(this.ui.abWait ? { waitsForAB: true as const } : {}),
       ...(this.frontier && !this.frontier.done ? { frontier: this.frontier.view() } : {}),
       panel: this.ui.panel,
       app: this.app && !this.app.result ? this.app.request : null,
@@ -463,6 +468,12 @@ export class Runner implements ScriptRunner {
   setFieldVar(id: Id, value: number): void {
     if (!this.thread) throw new Error(`field var ${id}: no field script runs`);
     this.setVar(this.thread, id, value);
+  }
+
+  /** The YES/NO box's labels (decomp Menu_MakeYesNoChoice: MenuEntries_Text_Yes and _No of the base pack). */
+  private yesNoLabels(): { yes: string; no: string } {
+    const ns = newGameRecord(this.registries).id.split(':')[0]!;
+    return { yes: this.plainText(`${ns}:MenuEntries_Text_Yes` as Id), no: this.plainText(`${ns}:MenuEntries_Text_No` as Id) };
   }
 
   textOf(id: Id): string {

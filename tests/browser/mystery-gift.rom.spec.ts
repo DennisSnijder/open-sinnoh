@@ -6,8 +6,15 @@
  * Wonder Card, YES receives it, and the DS returns to the title with the save written.
  */
 import { expect, test, type BrowserContext, type Locator, type Page } from '@playwright/test';
+import { MYSTERY_GIFT_TEXT } from '@opensinnoh/contracts';
+import { forLanguage } from '@opensinnoh/core';
+import { loadGamePacks } from '@opensinnoh/game';
+import { GIFT_CODE_PROMPT } from '@opensinnoh/menus';
+import { gameLanguage } from '@opensinnoh/services';
+import { romSlice } from '../rom.ts';
 import { saveSlot } from './save.ts';
 import { seedRomImport } from './seed.ts';
+import { appStrings } from './words.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 
@@ -17,10 +24,16 @@ test.skip(!ROM, 'OPENSINNOH_NDS_ROM is not set');
 let context: BrowserContext;
 let page: Page;
 const errors: string[] = [];
+/** The gift code prompt and the Member Card's title in the game's language. */
+let giftCode: string;
+let memberCard: string;
 
 test.beforeAll(async ({ browser }, info) => {
   test.skip(info.project.name !== 'desktop' && info.project.name !== 'phone', 'desktop and phone');
   test.setTimeout(180_000);
+  const language = gameLanguage(loadGamePacks([romSlice().pack]).registries);
+  giftCode = forLanguage(language, GIFT_CODE_PROMPT);
+  memberCard = forLanguage(language, MYSTERY_GIFT_TEXT).darkrai.title;
   const use = info.project.use;
   context = await browser.newContext({ baseURL: use.baseURL, viewport: use.viewport, hasTouch: use.hasTouch, isMobile: use.isMobile, deviceScaleFactor: use.deviceScaleFactor });
   page = await context.newPage();
@@ -84,13 +97,13 @@ async function fits(board: Locator): Promise<void> {
   expect(box.y + box.height).toBeLessThanOrEqual(view.height + 0.5);
 }
 
-/** UPPER page keys (services KEYBOARD_PAGES) for the phone's taps. */
+/** UPPER page keys (services keyboardPages, English) for the phone's taps. */
 const KEYS: Record<string, string> = { A: 'key:0:0', D: 'key:0:3', E: 'key:0:4', K: 'key:1:0', Q: 'key:1:6', R: 'key:1:7', S: 'key:1:8', T: 'key:1:9' };
 
 async function enterCode(code: string, touch: boolean): Promise<void> {
   const naming = page.locator('[data-screen="naming"]');
   await expect(naming).toBeVisible();
-  await expect(naming).toContainText('Gift code?');
+  await expect(naming).toContainText(giftCode);
   await fits(naming);
   if (touch) for (const t of [...[...code].map((c) => KEYS[c]!), 'ok']) await naming.locator(`[data-tap="${t}"]`).click();
   else {
@@ -109,7 +122,7 @@ test('MYSTERY GIFT: a wrong code refused, a gift code received into the save', a
   const entry = page.locator('.tm-mystery-gift');
   await expect(entry).toBeVisible();
   await entry.click();
-  const dialog = page.getByRole('dialog', { name: 'Mystery Gift' });
+  const dialog = page.getByRole('dialog', { name: appStrings().title.mysteryGift });
   const screen = dialog.locator('.mystery-gift-screen');
   await expect(screen).toBeVisible();
   await fits(screen);
@@ -125,7 +138,7 @@ test('MYSTERY GIFT: a wrong code refused, a gift code received into the save', a
   // The Member Card's test code: the card, YES, received.
   await dialog.locator('[data-tap="menu:0"]').click();
   await enterCode('TESTDARK', touch);
-  const card = dialog.locator('[data-card="Member Card"]');
+  const card = dialog.locator(`[data-card="${memberCard}"]`);
   await expect(card).toBeVisible({ timeout: 10_000 });
   await fits(dialog.locator('.mystery-gift-screen'));
   await dialog.locator('[data-tap="yes"]').click();

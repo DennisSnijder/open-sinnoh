@@ -107,7 +107,7 @@ describe.skipIf(!ROM)('the visual round (OPENSINNOH_NDS_ROM)', () => {
     until(t, () => t.view().phase === 'scoring', 200);
   });
 
-  it('keeps the rank\'s limit: the sixth accessory at Normal rank goes back with "There is no more space."', () => {
+  it('keeps the rank\'s limit: the sixth accessory at Normal rank goes back with the no-space line', () => {
     const t = setup(0, { 0: 9 });
     toDress(t);
     expect(caseItems(t)).toHaveLength(9);
@@ -118,7 +118,7 @@ describe.skipIf(!ROM)('the visual round (OPENSINNOH_NDS_ROM)', () => {
     expect(t.view().dress!.placed).toBe(5);
     const item = caseItems(t)[0]!;
     drag(t, grip(t, item), [160, 120]);
-    expect(t.view().dress!.status).toBe('There is no more space.');
+    expect(t.view().dress!.status).toBe(t.g.registries.texts.get('platinum:pl_msg_00000385_00003' as Id)!.text);
     expect(t.view().dress!.placed).toBe(5);
     for (let k = 0; k < 6; k++) t.step();
     expect(caseItems(t)).toHaveLength(4);

@@ -1499,6 +1499,7 @@ until idle 6000
 until idle 3000
 +0 press a
 +1 release a
+advance text 600
 until yesno 600
 +0 press a
 +1 release a
@@ -1730,6 +1731,7 @@ until idle 6000
 until idle 3000
 +0 press a
 +1 release a
+advance text 600
 until yesno 600
 +0 press a
 +1 release a
@@ -1776,6 +1778,7 @@ until idle 6000
 until idle 3000
 +0 press a
 +1 release a
+advance text 600
 until yesno 600
 +0 press a
 +1 release a

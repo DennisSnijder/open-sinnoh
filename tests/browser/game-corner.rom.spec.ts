@@ -10,7 +10,7 @@ import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import type { AppView, Registries, SlotsView } from '@opensinnoh/contracts';
 import { loadGamePacks, runReplay } from '@opensinnoh/game';
 import { pageDriver } from '../../packages/cli/src/browser.ts';
-import { romSlice } from '../rom.ts';
+import { hasSlotMachines, romSlice } from '../rom.ts';
 import { canvasStats } from './canvas.ts';
 import { seedRomImport } from './seed.ts';
 import { readReplay, resolveReplay } from '../rom-replays/sys-replays.ts';
@@ -79,6 +79,7 @@ async function composition(name: string) {
 }
 
 test('the slot machine: opened by its script, played by keyboard and touch, left with START', async () => {
+  test.skip(!hasSlotMachines(), 'this build has no slot machines');
   test.setTimeout(300_000);
   const project = test.info().project.name;
   const setup = `give item platinum:ITEM_COIN_CASE
@@ -142,6 +143,7 @@ until state app.prompt "bet" 600
 });
 
 test('sys-game-corner-slots in the app: Clefairy on the field in standby, the bonus counters in a round', async () => {
+  test.skip(!hasSlotMachines(), 'this build has no slot machines');
   test.setTimeout(600_000);
   const project = test.info().project.name;
   const base = pageDriver(page, SHOTS, `${project}-replay`);

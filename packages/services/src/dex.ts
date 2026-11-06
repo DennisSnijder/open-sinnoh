@@ -4,6 +4,7 @@
  */
 import type { Id } from '@opensinnoh/core';
 import type { GameState, Registries, Species } from '@opensinnoh/contracts';
+import { dexNameOrder, gameLanguage, nameInitial } from './language.ts';
 
 /**
  * The species of the Pokédex list in order: the regional dex (by `regionalDex`) or, once the national dex
@@ -86,12 +87,14 @@ export const NAME_GROUP_LETTERS = ['ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQR', 'ST
 
 /**
  * A name group's species, A–Z (decomp zukan_data members 18–26, which the Battle Hall's record list reads): the
- * national list whose names start with the group's letters, the names compared by code unit, ties by number.
+ * national list whose names start with the group's letters (`nameInitial`), in the game language's A–Z order
+ * (`dexNameOrder`), ties by number.
  */
 export function nameGroupSpecies(registries: Registries, group: number): Species[] {
   const letters = NAME_GROUP_LETTERS[group];
   if (!letters) throw new Error(`dex: name group ${group}`);
+  const order = dexNameOrder(gameLanguage(registries));
   return dexList(registries, true)
-    .filter((s) => letters.includes(s.name.charAt(0).toUpperCase()))
-    .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : a.sourceIndex! - b.sourceIndex!));
+    .filter((s) => letters.includes(nameInitial(s.name)))
+    .sort((a, b) => order(a.name, b.name) || a.sourceIndex! - b.sourceIndex!);
 }

@@ -126,7 +126,8 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('the Villa, the journal and the
     for (let i = 0; i < 6; i++) frame();
     // The texts are the ROM's (checked by their sources, not their words): the month name and day, the weekday message.
     const text = (id: string) => game.registries.texts.get(id as Id)!.text;
-    expect(view()).toMatchObject({ black: 0, page: { index: 0, title: `${text('platinum:pl_msg_00000414_00002')} 1`, weekday: text('platinum:JournalEntries_Text_Monday') }, newer: false, older: true });
+    const date = text('platinum:JournalEntries_Text_Date').replace('{var 0}', text('platinum:pl_msg_00000414_00002')).replace('{var 1}', '1');
+    expect(view()).toMatchObject({ black: 0, page: { index: 0, title: date, weekday: text('platinum:JournalEntries_Text_Monday') }, newer: false, older: true });
     expect(view().page.rows[0]!.y).toBe(0);
     expect(view().page.rows[0]!.text).toContain(game.registries.zones.get('platinum:MAP_HEADER_TWINLEAF_TOWN' as Id)!.name);
     expect(view().page.rows.find((r) => r.y === 80)!.text).toContain(game.registries.species.get('platinum:SPECIES_BIDOOF' as Id)!.name);

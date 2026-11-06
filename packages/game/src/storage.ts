@@ -108,5 +108,5 @@ export function saveFromJson(text: string): unknown {
 
 export function saveFileName(save: SaveEnvelope): string {
   const stamp = save.savedAt.replace(/[^0-9T]/g, '').slice(0, 15);
-  return `opensinnoh-${save.state.names.player.replace(/[^A-Za-z0-9_-]/g, '') || 'save'}-${stamp}.json`;
+  return `opensinnoh-${save.state.names.player.replace(/[^\p{L}\p{N}_-]/gu, '') || 'save'}-${stamp}.json`;
 }

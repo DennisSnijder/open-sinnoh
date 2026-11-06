@@ -37,7 +37,7 @@ describe.skipIf(!ROM)('the move list after Transform (OPENSINNOH_NDS_ROM)', () =
     const copied = target.map((s) => s.id);
     expect(copied.length).toBeGreaterThan(1);
     const prompt = b.view().prompt as { moves: { move: Id; pp: number; maxPp: number }[] };
-    expect(prompt.moves.map((m) => m.move)).toEqual(copied.map((id) => [...reg.moves.values()].find((m) => m.name.toLowerCase().replace(/[^a-z]/g, '') === id)!.id));
+    expect(prompt.moves.map((m) => m.move)).toEqual(copied.map((id) => [...reg.moves.keys()].find((m) => m.replace('platinum:MOVE_', '').replace(/_/g, '').toLowerCase() === id)!));
     // Decomp: 5 PP; the maximum from Ditto's own PP Ups by slot (none), as BattleMon.ppUps is not copied.
     expect(prompt.moves.map((m) => [m.pp, m.maxPp])).toEqual(copied.map((id) => [5, b.sim.dex.moves.get(id).pp]));
     b.choose({ kind: 'fight' });

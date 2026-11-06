@@ -12,14 +12,25 @@
  * Packs without the art (the fixture) get CSS stand-ins in the same rects.
  */
 import type { Id } from '@opensinnoh/core';
-import type { SummaryPageId, SummaryView } from '@opensinnoh/contracts';
+import { dexOf, newGameRecord, type SummaryPageId, type SummaryView } from '@opensinnoh/contracts';
+import { levelMark } from '@opensinnoh/text';
 import { ICON_ANIM, hpColor, hpPixels } from './art.ts';
 import { messageBox, stop, type DrawContext } from './apps.ts';
 import { at, atTiles, board, boardContext } from './board.ts';
 import { el } from './core.ts';
 import { STATUS_CELLS, sprite, textColor } from './party.ts';
 import type { Palette } from './pixel-font.ts';
+import { plainText } from './strings.ts';
 import './summary.css';
+import { S } from '../strings/index.ts';
+
+/** The moves page's PP label (decomp PrintMoveNameAndPP: PokemonSummary_Text_LabelPp of the base pack). */
+function ppLabel(d: DrawContext): string {
+  const id = `${newGameRecord(d.registries).id.split(':')[0]!}:PokemonSummary_Text_LabelPp` as Id;
+  const text = d.registries.texts.get(id);
+  if (!text) throw new Error(`summary: no text ${id}`);
+  return plainText(text.text);
+}
 
 /** Decomp enum SummaryPage (INFO, MEMO, SKILLS, BATTLE_MOVES, CONDITION, CONTEST_MOVES, RIBBONS, EXIT): each page's tab animation (unselected; selected is + 8), EXIT's. */
 const TAB_ANIM: Record<SummaryPageId, number> = { info: 0, memo: 1, skills: 2, moves: 3, condition: 4, ribbons: 6 };
@@ -142,7 +153,7 @@ function tabs(d: DrawContext, v: SummaryView): HTMLElement[] {
     const cell = tabCell(d, t.anim + (on ? SELECTED : 0));
     const w = on ? TABS.focused : TABS.unfocused;
     const art = cell === null ? [d.text(t.id === 'exit' ? '×' : t.label.slice(0, 1), on ? 'light' : 'ink')] : [d.art.cells('summary/tabs', [cell], d.unit)!];
-    const content = [...art, el('span', 'sr-only', t.label || 'Exit')];
+    const content = [...art, el('span', 'sr-only', t.label || S.aria.exit)];
     const cls = `${t.id === 'exit' ? 'sum-exit' : 'sum-tab'}${on ? ' on' : ''}${cell === null ? ' css' : ''}`;
     const tab = button(d, t.id === 'exit' ? 'back' : `page:${t.id}`, cls, content);
     if (t.id !== 'exit') {
@@ -206,7 +217,7 @@ function moves(d: DrawContext, v: SummaryView, c: Colors): Node[] {
   const out: Node[] = [];
   m.rows.forEach((r, i) => {
     const y = MOVES.top + i * MOVES.step;
-    const row = stop(d, `move:${i}`, [at(el('span', 'sum-text', d.text(r.name, c.white)), 41, 2), at(el('span', 'sum-text', d.text('PP', c.black)), 56, 16), at(el('span', 'sum-text center', d.text(r.pp, c.black)), MOVES.ppX + 40 - 24, 16, 48)], `move-row${r.isNew ? ' new' : ''}${m.swapping === i ? ' swapping' : ''}`, m.cursor === i);
+    const row = stop(d, `move:${i}`, [at(el('span', 'sum-text', d.text(r.name, c.white)), 41, 2), at(el('span', 'sum-text', d.text(ppLabel(d), c.black)), 56, 16), at(el('span', 'sum-text center', d.text(r.pp, c.black)), MOVES.ppX + 40 - 24, 16, 48)], `move-row${r.isNew ? ' new' : ''}${m.swapping === i ? ' swapping' : ''}`, m.cursor === i);
     out.push(at(row, 128, y, 128, MOVES.step));
     out.push(typeIcon(d, r.type, '', MOVES.typeX, MOVES.typeY + i * MOVES.step));
   });
@@ -355,7 +366,7 @@ function ribbons(d: DrawContext, v: SummaryView, c: Colors): Node[] {
   const arrow = (dir: 'up' | 'down', show: boolean, y: number) => {
     if (!show) return;
     const art = d.art.cells('summary/ribbon_arrow', [dir === 'up' ? 1 : 0], d.unit);
-    out.push(at(button(d, `ribbons:${dir}`, `ribbon-arrow ${dir}${art ? ' rom' : ''}`, art ? [art] : [], dir === 'up' ? 'Previous row' : 'Next row'), 240, y, 16, ARROW_H));
+    out.push(at(button(d, `ribbons:${dir}`, `ribbon-arrow ${dir}${art ? ' rom' : ''}`, art ? [art] : [], dir === 'up' ? S.aria.previousRow : S.aria.nextRow), 240, y, 16, ARROW_H));
   };
   // Right of the grid, along the first shown row and the last.
   arrow('up', r.detail !== null && r.row > 0, RIBBONS.y - 20);
@@ -399,8 +410,10 @@ export function summary(wide: DrawContext, v: SummaryView): HTMLElement {
     if (!balls.names!.includes(ball)) throw new Error(`ui: no caught-ball art for ${m.ball}`);
     root.append(sprite(d, 'summary/balls', ball, BALL.x, BALL.y, 'sum-ball')!);
   }
-  // PrintLevel: the "Lv" mark at (0, 5) of the window, the number from x 16.
-  if (!m.egg) root.append(atTiles(el('span', 'sum-level', at(el('span', 'sum-text', d.text('Lv', c.black)), 0, 0), at(el('span', 'sum-text', d.text(m.level, c.black)), 16, 0)), ...W.level));
+  // PrintLevel: the level mark (the game language's "Lv" picture) at (0, 5) of the window, the number from x 16
+  // (past a mark wider than that).
+  const mark = levelMark(dexOf(d.registries).language);
+  if (!m.egg) root.append(atTiles(el('span', 'sum-level', at(el('span', 'sum-text', d.text(mark, c.black)), 0, 0), at(el('span', 'sum-text', d.text(m.level, c.black)), Math.max(16, d.measure(mark) + 1), 0)), ...W.level));
   if (m.status !== 'none') {
     const s = sprite(d, 'summary/status', STATUS_CELLS[m.status], STATUS.x, STATUS.y, 'status-icon');
     if (s) root.append(s);
@@ -412,7 +425,7 @@ export function summary(wide: DrawContext, v: SummaryView): HTMLElement {
 
   root.append(...page(d, v, c));
   // Previous/next beside the picture, while no detail panel covers it.
-  if (!v.moves.detail && !v.ribbons.detail) root.append(at(button(d, 'prev', 'mon-step prev', [], 'Previous Pokémon'), 84, 64, 20, 24), at(button(d, 'next', 'mon-step next', [], 'Next Pokémon'), 84, 112, 20, 24));
+  if (!v.moves.detail && !v.ribbons.detail) root.append(at(button(d, 'prev', 'mon-step prev', [], S.aria.previousMon), 84, 64, 20, 24), at(button(d, 'next', 'mon-step next', [], S.aria.nextMon), 84, 112, 20, 24));
   if (v.message) root.append(atTiles(messageBox(d, v.message.text, v.message.waiting), ...W.message));
   root.setAttribute('aria-label', m.name);
   return root;

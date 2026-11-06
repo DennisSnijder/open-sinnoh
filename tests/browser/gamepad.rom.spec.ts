@@ -38,7 +38,7 @@ test('the title to the field by pad alone', async ({ page }, info) => {
     if (naming) await press(page, PAD.start);
     const list = page.locator('.intro-menu [data-tap^="menu:"]');
     const entries = await list.count();
-    const yesNo = /yes/i.test((await list.first().getAttribute('aria-label', { timeout: 200 }).catch(() => null)) ?? (entries ? await list.first().innerText() : ''));
+    const yesNo = /^(yes|ja)$/i.test((await list.first().getAttribute('aria-label', { timeout: 200 }).catch(() => null)) ?? (entries ? await list.first().innerText() : ''));
     if (entries > 1 && !yesNo) {
       const cursor = () => page.locator('.intro-menu [aria-current="true"]').getAttribute('data-tap');
       while ((await cursor()) !== `menu:${entries - 1}`) await press(page, PAD.down);

@@ -83,6 +83,7 @@ until menu 3000
 +1 release down
 +10 press a
 +1 release a
+advance text 600
 until yesno 600
 +10 press up
 +1 release up

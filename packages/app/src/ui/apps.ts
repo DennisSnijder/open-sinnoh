@@ -40,6 +40,7 @@ import { at, atTiles, board, boardContext } from './board.ts';
 import { bgPicture } from './sprites.ts';
 import type { Palette } from './pixel-font.ts';
 import type { OptionsScreen } from './options-screen.ts';
+import { S } from '../strings/index.ts';
 
 export interface DrawContext {
   /** A label in the game font; `scale` (CSS px per font px) defaults to the UI's. */
@@ -351,7 +352,7 @@ function mart(wide: DrawContext, v: MartView): HTMLElement {
       const b = el('button', `pocket-arrow ${dir}`);
       b.type = 'button';
       b.dataset.tap = id;
-      b.setAttribute('aria-label', dir === 'prev' ? 'Previous pocket' : 'Next pocket');
+      b.setAttribute('aria-label', S.aria.pocket(dir === 'prev'));
       b.addEventListener('click', () => d.tap(id));
       return b;
     };
@@ -384,11 +385,11 @@ function mart(wide: DrawContext, v: MartView): HTMLElement {
         framed(
           d,
           'qty-window',
-          btn('qty:-10', 'Ten fewer', 'down10'),
-          btn('qty:-1', 'One fewer', 'down'),
+          btn('qty:-10', S.aria.tenFewer, 'down10'),
+          btn('qty:-1', S.aria.oneFewer, 'down'),
           stop(d, 'ok', [d.text(q.count)], 'qty-count', true),
-          btn('qty:+1', 'One more', 'up'),
-          btn('qty:+10', 'Ten more', 'up10'),
+          btn('qty:+1', S.aria.oneMore, 'up'),
+          btn('qty:+10', S.aria.tenMore, 'up10'),
           el('span', 'qty-total', d.text(q.total)),
         ),
         'quantity',

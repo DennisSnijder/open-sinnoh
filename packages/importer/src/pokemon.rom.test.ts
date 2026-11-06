@@ -6,7 +6,7 @@
 import { readFileSync } from 'node:fs';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { REGISTRIES, type Registries, type Species, type Trainer } from '@opensinnoh/contracts';
-import { createTrainerPokemon, Dex, genderOf, loadPacks, natureIndex, type Id } from '@opensinnoh/core';
+import { createTrainerPokemon, Dex, ENGLISH, genderOf, loadPacks, natureIndex, type Id } from '@opensinnoh/core';
 import { NitroFs, readNarc } from '@opensinnoh/nds';
 import { readTrainerHeader, readTrainerParty } from './formats/data.ts';
 import type { ImportReport } from './platinum.ts';
@@ -43,11 +43,13 @@ describe.skipIf(!romPath)('Pokémon data (OPENSINNOH_NDS_ROM)', () => {
     const text = (id: Id) => reg.texts.get(id)?.text;
     // The entry itself: tests/integration/pokedex.rom.test.ts.
     const turtwig = species('TURTWIG').dex!;
-    expect([text(turtwig.category), text(turtwig.heightText)?.trim(), text(turtwig.weightText)?.trim()]).toEqual(['Tiny Leaf Pokémon', '1’04”', '22.5 lbs.']);
-    expect(text(turtwig.description)).toMatch(/\S/);
+    // The English build's samples; every build's texts are checked in tests/integration/pokedex.rom.test.ts.
+    const english = new Dex(reg).language === ENGLISH;
+    if (english) expect([text(turtwig.category), text(turtwig.heightText)?.trim(), text(turtwig.weightText)?.trim()]).toEqual(['Tiny Leaf Pokémon', '1’04”', '22.5 lbs.']);
+    for (const id of [turtwig.category, turtwig.heightText, turtwig.weightText, turtwig.description]) expect(text(id)).toMatch(/\S/);
     expect(species('NONE').dex).toBeUndefined();
     expect(species('EGG').dex).toBeUndefined();
-    expect(text(reg.moves.get(P('MOVE_POUND'))!.description)).toMatch(/^The foe is physically\npounded/);
+    expect(text(reg.moves.get(P('MOVE_POUND'))!.description)).toMatch(english ? /^The foe is physically\npounded/ : /\S/);
     expect(text(reg.abilities.get(P('ABILITY_OVERGROW'))!.description)).toMatch(/\S/);
   });
   const trainer = (n: string) => reg.trainers.get(P(`TRAINER_${n}`)) as Trainer;

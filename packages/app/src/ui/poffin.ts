@@ -19,6 +19,7 @@ import { layoutScene, MESSAGE, place, sceneContext } from './evolution.ts';
 import { animCell, bgPicture, sprite, tapButton } from './sprites.ts';
 import './evolution.css';
 import './poffin.css';
+import { S } from '../strings/index.ts';
 
 type Img = HTMLImageElement;
 const W = DS_WIDTH;
@@ -68,7 +69,7 @@ class CookingScene {
     this.g = this.canvas.getContext('2d')!;
     this.stage.append(this.canvas, this.boxes);
     this.root.append(this.stage);
-    this.root.setAttribute('aria-label', 'Poffin cooking: stir the pot');
+    this.root.setAttribute('aria-label', S.aria.poffinCooking);
     // The stylus: down or moving on the pot sends its DS point, up lifts it (decomp gSystem.touchHeld).
     const point = (e: PointerEvent) => {
       const r = this.stage.getBoundingClientRect();
@@ -271,15 +272,15 @@ export function poffinCase(wide: DrawContext, v: PoffinCaseView): HTMLElement {
   const shown = [...v.rows.map((r, i) => ({ ...r, i })), { name: v.close, level: '', type: -1, i: v.rows.length }].slice(v.top, v.top + v.visible);
   const list = atTiles(el('div', 'poffin-case-list'), ...CASE.list);
   shown.forEach((r, k) => {
-    const row = stop(d, r.type < 0 ? 'close' : `row:${r.i}`, [el('span', 'poffin-row-name', d.text(r.name, 'ink')), ...(r.level ? [el('span', 'poffin-row-level', d.text(`Lv. ${r.level}`, 'ink'))] : [])], 'poffin-row', v.cursor === r.i);
+    const row = stop(d, r.type < 0 ? 'close' : `row:${r.i}`, [el('span', 'poffin-row-name', d.text(r.name, 'ink')), ...(r.level ? [el('span', 'poffin-row-level', d.text(r.level, 'ink'))] : [])], 'poffin-row', v.cursor === r.i);
     at(row, 8, k * CASE.row, CASE.list[2] * 8 - 8, CASE.row);
     list.append(row);
   });
   top.append(list);
   const box = sprite(d, 'poffin_case/main_sprites', 0, CASE.selectBox.x, CASE.selectBox.y + (v.cursor - v.top) * CASE.row, `poffin-select${v.menu ? ' held' : ''}`);
   if (box) top.append(box);
-  if (v.top > 0) top.append(at(tapButton(d, 'up', 'poffin-scroll up', [sprite(d, 'poffin_case/main_sprites', 1, 8, 8) ?? el('span')], 'Scroll up'), CASE.arrows.x - 8, CASE.arrows.up - 8, 16, 16));
-  if (v.top + v.visible < v.rows.length + 1) top.append(at(tapButton(d, 'down', 'poffin-scroll down', [sprite(d, 'poffin_case/main_sprites', 2, 8, 8) ?? el('span')], 'Scroll down'), CASE.arrows.x - 8, CASE.arrows.down - 8, 16, 16));
+  if (v.top > 0) top.append(at(tapButton(d, 'up', 'poffin-scroll up', [sprite(d, 'poffin_case/main_sprites', 1, 8, 8) ?? el('span')], S.aria.scroll(true)), CASE.arrows.x - 8, CASE.arrows.up - 8, 16, 16));
+  if (v.top + v.visible < v.rows.length + 1) top.append(at(tapButton(d, 'down', 'poffin-scroll down', [sprite(d, 'poffin_case/main_sprites', 2, 8, 8) ?? el('span')], S.aria.scroll(false)), CASE.arrows.x - 8, CASE.arrows.down - 8, 16, 16));
   if (v.selected) {
     const s = v.selected;
     const pic = sprite(d, 'poffin/poffins', String(s.type), CASE.poffin.x, CASE.poffin.y, 'poffin-picture');
@@ -331,7 +332,7 @@ class FeedScene {
     this.g = this.canvas.getContext('2d')!;
     this.stage.append(this.canvas, this.boxes);
     this.root.append(this.stage);
-    this.root.setAttribute('aria-label', 'Feeding a Poffin');
+    this.root.setAttribute('aria-label', S.aria.poffinFeeding);
   }
 
   private image(ref: Id): Img | null {

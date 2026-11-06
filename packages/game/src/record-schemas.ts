@@ -1045,6 +1045,8 @@ export const RECORD_SCHEMAS: Record<RegistryName, Schema> = {
     label: opt(label),
     names: obj({ player: str(), rival: str() }),
     gender: lit('male', 'female'),
+    language: opt(int(1, 8)),
+    keyboard: opt(arr(arr(str()))),
     playerSprite: obj({ male: ref('sprites'), female: ref('sprites') }),
     playerHealSprite: opt(obj({ male: ref('sprites'), female: ref('sprites') })),
     playerVsSeekerSprite: opt(obj({ male: ref('sprites'), female: ref('sprites') })),

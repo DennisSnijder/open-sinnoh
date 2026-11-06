@@ -32,28 +32,16 @@ until message
 until message
 +0 assert facing player right
 +0 assert facing 0 left
-+0 press a
-+1 release a
+advance message
+# he turns to the new PC (two short boxes), then back to the player; the stop while he faces it is the browser
+# spec's bedroom-desk check
 until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
++0 assert facing 0 up
+advance message
+advance message
 until message
 +0 assert facing player left
 +0 assert facing 0 right
-+0 press a
-+1 release a
 advance text
 +0 assert var platinum:VAR_PLAYER_HOUSE_RIVAL_STATE 1
 +0 assert flag platinum:FLAG_HIDE_TWINLEAF_TOWN_PLAYER_HOUSE_2F_RIVAL true
@@ -75,8 +63,6 @@ until position 9 4
 until message
 +0 assert facing player down
 +0 assert facing 0 up
-+0 press a
-+1 release a
 advance text
 +0 assert var platinum:VAR_PLAYER_HOUSE_STATE 1
 +0 assert flag platinum:FLAG_TALKED_TO_MOM true
@@ -91,8 +77,6 @@ until position 6 10
 until message
 +0 assert facing player up
 +0 assert facing 0 down
-+0 press a
-+1 release a
 advance text
 +0 assert var platinum:VAR_PLAYER_HOUSE_STATE 2
 # out the door
@@ -119,23 +103,7 @@ until position 105 876
 until message
 +0 assert facing player up
 +0 assert facing 2 down
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 assert facing player up
-+0 assert facing 2 down
-+0 press a
-+1 release a
-until idle
+advance text
 +0 assert var platinum:VAR_TWINLEAF_TOWN_RIVAL_TRIGGER_STATE 1
 +0 assert var platinum:VAR_TWINLEAF_TOWN_GUITARIST_TRIGGER_STATE 1
 # into the rival house
@@ -172,12 +140,9 @@ until position 3 3
 +0 assert facing player right
 +0 assert facing 0 up
 until message
-+0 press a
-+1 release a
+advance message
 until message
 +0 assert facing 0 left
-+0 press a
-+1 release a
 advance text
 +0 assert var platinum:VAR_RIVAL_HOUSE_STATE 1
 +0 assert var platinum:VAR_TWINLEAF_TOWN_GUITARIST_TRIGGER_STATE 2
@@ -223,59 +188,20 @@ until position 110 857
 until message
 +0 assert facing player up
 +0 assert facing 2 down
-+0 press a
-+1 release a
+advance message
 +15 screenshot route201-rowan
-until message
-+0 press a
-+1 release a
+advance message
 # at the tall grass with the rival; Rowan is still hidden
 +69 assert position platinum:MAP_HEADER_ROUTE_201 114 854
 +0 assert flag platinum:FLAG_HIDE_ROUTE_201_PROF_ROWAN true
 until message
 +0 assert facing player right
 +0 assert facing 2 left
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
+# four boxes, the last one Rowan's "Hold it!"
+advance message
+advance message
+advance message
+advance message
 # "Hold it!": Rowan is added and walks in before he speaks
 +42 assert flag platinum:FLAG_HIDE_ROUTE_201_PROF_ROWAN true
 +30 assert flag platinum:FLAG_HIDE_ROUTE_201_PROF_ROWAN false
@@ -291,51 +217,7 @@ advance text
 until yesno
 +0 press a
 +1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
+advance message
 # the counterpart arrives with the briefcase
 +52 assert flag platinum:FLAG_HIDE_ROUTE_201_COUNTERPART true
 +20 assert flag platinum:FLAG_HIDE_ROUTE_201_COUNTERPART false
@@ -344,59 +226,13 @@ until message
 until message
 # the counterpart (Dawn for a boy) at 112,853 names Rowan
 +0 screenshot route201-counterpart
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
+advance message
 # Rowan turns to the counterpart: the briefcase appears, then he speaks
 +23 assert flag platinum:FLAG_HIDE_ROUTE_201_BRIEFCASE false
 +20 assert message open
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
+# two boxes: Rowan's speech, then the briefcase
+advance message
+advance message
 # after the last line the box is closed; the rival state is set just before release_all
 +6 assert var platinum:VAR_FOLLOWER_RIVAL_STATE 0
 +0 assert message closed
@@ -429,18 +265,8 @@ until choice
 until message
 +0 assert facing player up
 +0 assert facing 2 left
-+0 press a
-+1 release a
 advance text
 until yesno
 +0 press a
 +1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
-until message
-+0 press a
-+1 release a
+advance message

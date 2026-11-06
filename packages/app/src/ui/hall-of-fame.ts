@@ -22,6 +22,7 @@ import { el } from './core.ts';
 import { sceneContext } from './evolution.ts';
 import { drawSpotlights } from './hof-spotlights.ts';
 import { bikePose } from './credits-bike.ts';
+import { S } from '../strings/index.ts';
 
 const W = 256;
 const H = 192;
@@ -187,7 +188,7 @@ export function hallOfFame(d: DrawContext, v: HallOfFameView): HTMLElement {
 }
 
 function record(d0: DrawContext, v: HallOfFameRecordView): HTMLElement {
-  const s = scene(d0, 'record', W, H, 'Hall of Fame');
+  const s = scene(d0, 'record', W, H, S.aria.hallOfFame);
   const d = s.layout(d0);
   const draw = () => {
     const g = s.g;
@@ -246,7 +247,7 @@ function record(d0: DrawContext, v: HallOfFameRecordView): HTMLElement {
 }
 
 function pc(d0: DrawContext, v: HallOfFamePcView): HTMLElement {
-  const s = scene(d0, 'pc', W, H, 'Hall of Fame');
+  const s = scene(d0, 'pc', W, H, S.aria.hallOfFame);
   const d = s.layout(d0);
   const draw = () => {
     const g = s.g;
@@ -296,7 +297,7 @@ const FINAL_Y = 80;
 const RIDES = new Set(['morning', 'day', 'night']);
 
 export function credits(d0: DrawContext, v: CreditsView): HTMLElement {
-  const s = scene(d0, 'credits', W, H, 'Credits');
+  const s = scene(d0, 'credits', W, H, S.aria.credits);
   const d = s.layout(d0);
   const draw = () => {
     const g = s.g;

@@ -20,6 +20,8 @@ const play = async (game: Game, text: string) => {
   const r = await runReplay(gameDriver(game), text, { name: 'inline', registries: game.registries, resolve: resolveReplay, seed: 1, repeat: false });
   expect(r.error).toBeUndefined();
 };
+/** A text record's text, by its name in the ROM's banks. */
+const text = (game: Game, name: string) => game.registries.texts.get(`platinum:${name}` as Id)!.text;
 const step = (game: Game, b?: Button) => game.step({ held: b ? [b] : [], pressed: b ? [b] : [], touch: null });
 /** A on every waiting message until the script ends and the field is idle; the texts read, in order. */
 function talkThrough(game: Game, max = 6000): string[] {
@@ -59,7 +61,9 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('town field commands (OPENSINNO
     const game = newGame();
     await play(game, 'party 0 platinum:SPECIES_BULBASAUR 20 platinum:MOVE_TACKLE\nset state party[0].friendship 100\nwarp platinum:MAP_HEADER_FOOTSTEP_HOUSE 5 7 up\nuntil idle\n+0 press a\n+1 release a\n');
     const read = talkThrough(game);
-    expect(read.some((t) => t.startsWith('Others say there are people who'))).toBe(true);
+    // FootstepHouse_Text_Cute_WithPrint_Level2: its words up to the first control code.
+    const reading = text(game, 'FootstepHouse_Text_Cute_WithPrint_Level2').split('{')[0]!;
+    expect(read.some((t) => t.startsWith(reading))).toBe(true);
     expect(game.state.records.counts[RECORD_CHECKED_FOOTPRINTS]).toBe(1);
     expect(game.state.party[0]!.ribbons).not.toContain(RIBBON_FOOTPRINT);
   });
@@ -121,7 +125,12 @@ describe.skipIf(!process.env.OPENSINNOH_NDS_ROM)('town field commands (OPENSINNO
     const setup = 'party 0 platinum:SPECIES_CHARIZARD 80 platinum:MOVE_FLAMETHROWER\ngive item platinum:ITEM_VS_SEEKER 1\nset state registeredItem "platinum:ITEM_VS_SEEKER"\nset state fieldRng {"seed":0}\nset flag platinum:FLAG_DEFEATED_TRAINER_YOUNGSTER_TRISTAN true\nset flag platinum:FLAG_UNLOCKED_VS_SEEKER_LVL_1 true\n';
     await play(game, `${setup}set var platinum:VAR_VS_SEEKER_BATTERY_LEVEL 40\nwarp platinum:MAP_HEADER_ROUTE_202 166 814 up\nuntil idle\n+0 press y\n+1 release y\n`);
     const read = talkThrough(game);
-    expect(read).toEqual(['The battery isn’t charged enough.', 'Number of steps required to fully\ncharge the battery: 60']);
+    // VsSeeker_Text_BatteryIsntChargedEnough with 60 steps missing: one wait a page (or scrolled line), the last
+    // ending on the count.
+    const missing = text(game, 'VsSeeker_Text_BatteryIsntChargedEnough').replace('{var 0}', '60');
+    expect(read).toHaveLength(missing.split(/\{(?:clear|scroll)\}/).length);
+    expect(read[0]).toBe(missing.split('{clear}')[0]);
+    expect(read.at(-1)!.endsWith(missing.split(/\{[^}]*\}/).at(-1)!)).toBe(true);
     game.state.vars['platinum:VAR_VS_SEEKER_BATTERY_LEVEL' as Id] = 100;
     step(game, 'y');
     const seeker = ng().playerVsSeekerSprite![game.state.gender];

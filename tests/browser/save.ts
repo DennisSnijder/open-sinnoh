@@ -4,6 +4,7 @@
  * bridge's save into the slot the app reads at the title, the same way `IndexedDbSaveStore` does.
  */
 import { expect, type Page } from '@playwright/test';
+import { pageStrings } from './words.ts';
 
 /** Whether the app's save slot holds a save (without creating the database, which the app creates itself). */
 export function hasSave(page: Page): Promise<boolean> {
@@ -27,9 +28,9 @@ export function hasSave(page: Page): Promise<boolean> {
 
 /** Normal play, an idle field: the start menu's SAVE, YES, then the confirmation is dismissed. */
 export async function saveGame(page: Page): Promise<void> {
-  await page.getByRole('button', { name: 'Start menu', exact: true }).click();
+  await page.getByRole('button', { name: (await pageStrings(page)).aria.hud.menu, exact: true }).click();
   await page.locator('[data-screen="start-menu"] [data-entry="save"]').click();
-  await page.locator('[data-screen="save"]').getByRole('button', { name: 'YES' }).click();
+  await page.locator('[data-screen="save"] [data-tap="yes"]').click();
   await expect.poll(() => hasSave(page)).toBe(true);
   await page.keyboard.press('Escape');
   await expect(page.locator('[data-screen]')).toHaveCount(0);
@@ -91,7 +92,7 @@ export async function pressData(page: Page, id: string): Promise<void> {
 
 /** Normal play, an idle field: the start menu's OPTIONS entry, then its DATA page. */
 export async function openOptionsData(page: Page): Promise<void> {
-  await page.getByRole('button', { name: 'Start menu', exact: true }).click();
+  await page.getByRole('button', { name: (await pageStrings(page)).aria.hud.menu, exact: true }).click();
   await page.locator('[data-screen="start-menu"] [data-entry="options"]').click();
   const tab = page.locator('[data-screen="options"] [data-section="data"]');
   // The screen is drawn again after each change: a click that lands mid-redraw is taken again.

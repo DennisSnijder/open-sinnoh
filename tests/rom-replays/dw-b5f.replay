@@ -24,11 +24,7 @@ until state player.x 99 400
 until idle 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
 +0 field move 0 platinum:MOVE_STRENGTH
-+46 press a
-+1 release a
-+184 press a
-+1 release a
-until idle 6000
+advance text 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
 +0 press left
 +20 release left
@@ -1382,11 +1378,7 @@ until state player.z 55 400
 until idle 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
 +0 field move 0 platinum:MOVE_STRENGTH
-+46 press a
-+1 release a
-+184 press a
-+1 release a
-until idle 6000
+advance text 6000
 +6 assert state player.zone "platinum:MAP_HEADER_DISTORTION_WORLD_B5F"
 +0 press down
 +20 release down

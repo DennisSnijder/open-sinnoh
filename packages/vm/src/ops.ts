@@ -173,7 +173,15 @@ export function m1aHandlers(r: Runner): Record<string, Handler> {
       r.ui.message ??= { printer: new TextPrinter([], { speed: TEXT_SPEED.instant }) };
       return 'continue';
     },
-    wait_ab_press: (_t, c) => r.pause(c, (input) => input.pressed.includes('a') || input.pressed.includes('b')),
+    // No arrow shows (ScriptView.waitsForAB).
+    wait_ab_press: (_t, c) => {
+      r.ui.abWait = true;
+      return r.pause(c, (input) => {
+        const done = input.pressed.includes('a') || input.pressed.includes('b');
+        if (done) r.ui.abWait = false;
+        return done;
+      });
+    },
     message_var: (t, c, a) => showText(t, c, r.bankText(localBank(a[1], 'message_var'), val(t, a[0]) & 0xff)),
     // Decomp ScrCmd_MessageNoSkip: ScriptMessage_Show with canSkipDelay FALSE (A and B do not speed it up).
     message_no_skip: (t, c, a) => {

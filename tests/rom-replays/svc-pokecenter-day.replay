@@ -1,0 +1,14 @@
+# svc-pokecenter-day: the nurse's day greeting, on the US build (services.rom.test.ts). The morning's, in
+# svc-pokecenter, holds on every build; the day's message differs by language (docs/research/german-rom.md).
+party 0 platinum:SPECIES_TURTWIG 9 platinum:MOVE_TACKLE platinum:MOVE_WITHDRAW
+time 12:00
+warp platinum:MAP_HEADER_JUBILIFE_CITY_POKECENTER_1F 8 6
+until idle
++0 assert facing player up
++1 press a
++1 release a
+until message
++0 assert text platinum:CommonStrings_Text_PokecenterGreeting_Day 0
+advance text
++0 assert message open
++0 assert text platinum:CommonStrings_Text_PokecenterGreeting_Day 2

@@ -10,6 +10,7 @@ import { stop, type DrawContext } from './apps.ts';
 import { at, board, boardContext, DS_HEIGHT, DS_WIDTH } from './board.ts';
 import { el } from './core.ts';
 import { animCell, sprite } from './sprites.ts';
+import { S } from '../strings/index.ts';
 
 /** The entry box of naming/bg (its interior) and what goes in it. */
 const ICON = { x: 20, y: 8, size: 32 };
@@ -85,7 +86,7 @@ export function naming(outer: DrawContext, v: NamingView): HTMLElement {
   v.keys.forEach((row, r) =>
     row.forEach((c, k) => {
       const key = at(stop(d, `key:${r}:${k}`, c === ' ' ? [] : [glyph(c)], `naming-key${c === ' ' ? ' space' : ''}`, v.cursor.row === r && v.cursor.col === k), PANEL.keysX + k * PANEL.keyW, PANEL.keysY + r * PANEL.keyH, PANEL.keyW, PANEL.keyH);
-      key.setAttribute('aria-label', c === ' ' ? 'space' : c);
+      key.setAttribute('aria-label', c === ' ' ? S.aria.space : c);
       keys.append(key);
     }),
   );

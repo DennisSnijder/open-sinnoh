@@ -12194,10 +12194,6 @@
    "text": "SUM"
   },
   {
-   "id": "fixture:Lantern_StartMenu_QuitAsk",
-   "text": "Head back to the title?"
-  },
-  {
    "id": "fixture:PartyMenu_Text_AbleToLearn",
    "text": "CAN!"
   },
@@ -12604,6 +12600,22 @@
   {
    "id": "fixture:EggHatch_Text_No",
    "text": "No"
+  },
+  {
+   "id": "fixture:Lantern_StartMenu_QuitAsk",
+   "text": "Head back to the title?"
+  },
+  {
+   "id": "fixture:MenuEntries_Text_Yes",
+   "text": "YES"
+  },
+  {
+   "id": "fixture:MenuEntries_Text_No",
+   "text": "NO"
+  },
+  {
+   "id": "fixture:PokemonSummary_Text_LabelPp",
+   "text": "PP"
   },
   {
    "id": "fixture:MoveReminder_Text_Reminder_AskTeachWhichToMon",

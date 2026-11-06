@@ -7,13 +7,13 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
-import type { PackData, ReplayLine } from '@opensinnoh/core';
+import type { Id, PackData, ReplayLine } from '@opensinnoh/core';
 import { soundFramesToTicks, type ScriptView } from '@opensinnoh/contracts';
 import { CountingStubLog, createGame, gameDriver, runReplay, type ReplayResolver } from '@opensinnoh/game';
-import { romSlice } from '../rom.ts';
+import { romBuildId, romSlice } from '../rom.ts';
 import { InputState } from '../../packages/app/src/input.ts';
 import { runTicks } from '../../packages/app/src/loop.ts';
-import { createApp } from '@opensinnoh/menus';
+import { createApp, MenuText } from '@opensinnoh/menus';
 import { createScriptRunner } from '@opensinnoh/vm';
 import { createWorld } from '@opensinnoh/world';
 
@@ -34,6 +34,13 @@ describe.skipIf(!romPath)('service replays (OPENSINNOH_NDS_ROM)', () => {
     const resolve: ReplayResolver = (file) => ({ name: file, text: read(file) });
     return runReplay(gameDriver(game), read(`${name}.replay`), { registries: game.registries, seed, name: `${name}.replay`, resolve, repeat });
   };
+
+  it('svc-pokecenter-day: the US scripts greet the day with the day message', async (ctx) => {
+    if (romBuildId() !== 'platinum-us-rev0') return ctx.skip('the day greeting is the US build\'s');
+    const r = await play('svc-pokecenter-day', 1, false);
+    expect(r.error).toBeUndefined();
+    expect(r.ok).toBe(true);
+  }, 120_000);
 
   it('svc-pokecenter: the healing machine gets one ball per Pokémon in the party, the egg not counted', async () => {
     const balls: number[] = [];
@@ -162,7 +169,7 @@ describe.skipIf(!romPath)('service replays (OPENSINNOH_NDS_ROM)', () => {
           running = now;
         }, () => 0);
       }
-      expect(texts.at(-1), `${speed}x`).toBe('We hope to see you again!');
+      expect(texts.at(-1), `${speed}x`).toBe(new MenuText(game.registries).text('platinum:CommonStrings_Text_PokecenterHopeToSeeYouAgain1' as Id));
       expect(starts, `${speed}x: the last A must not talk to the nurse again`).toBe(0);
       expect(running).toBe(false);
       expect(game.state.player.facing).toBe('up');
@@ -181,8 +188,10 @@ describe.skipIf(!romPath)('service replays (OPENSINNOH_NDS_ROM)', () => {
     };
     const seen: Record<string, string[]> = {};
     const money: Record<string, ScriptView['moneyWindow']> = {};
+    let menu: MenuText | undefined;
     for (const name of ['svc-dept-store', 'svc-dept-store-2f', 'svc-dept-store-3f', 'svc-dept-store-b1f']) {
       const game = createGame({ packs: [pack], createWorld, createScriptRunner, createApp, seed: 1, log: new CountingStubLog(() => {}), now: () => '2026-01-01T00:00:00.000Z' });
+      menu = new MenuText(game.registries);
       const r = await runReplay(gameDriver(game), read(`${name}.replay`), {
         registries: game.registries,
         seed: 1,
@@ -203,8 +212,10 @@ describe.skipIf(!romPath)('service replays (OPENSINNOH_NDS_ROM)', () => {
     }
     expect(seen).toEqual(want);
     // The Lava Cookie vendor's money window (ShowMoney 20, 2): "Money" and the amount, reprinted after paying, then closed.
-    const window = (amount: string) => ({ x: 160, y: 16, width: 80, height: 32, label: 'Money', amount });
-    expect(money).toEqual({ 'lava-cookie-menu': window('$ 19980'), 'lava-cookie-paid': window('$ 19780'), 'lava-cookie-closed': undefined });
+    // Bank 543's label (18) and amount (19, the money padded to 6 digits with spaces), e.g. "Money" and "$ 19980" in English.
+    const text = (n: number, ...slots: string[]) => menu!.text(`platinum:pl_msg_00000543_000${n}` as Id, ...slots);
+    const window = (amount: number) => ({ x: 160, y: 16, width: 80, height: 32, label: text(18), amount: text(19, String(amount).padStart(6, ' ')) });
+    expect(money).toEqual({ 'lava-cookie-menu': window(19980), 'lava-cookie-paid': window(19780), 'lava-cookie-closed': undefined });
   }, 120_000);
 
   for (const name of SERVICE_REPLAYS) {

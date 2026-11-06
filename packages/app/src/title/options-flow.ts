@@ -14,6 +14,7 @@ import { scrollToCursor } from '../ui/focus.ts';
 import { OptionsScreen } from '../ui/options-screen.ts';
 import type { PixelFont } from '../ui/pixel-font.ts';
 import type { AppSettings } from '../ui/settings.ts';
+import { S } from '../strings/index.ts';
 import '../ui/ui.css';
 import '../ui/apps.css';
 
@@ -43,7 +44,7 @@ export class OptionsFlow {
     this.root = document.createElement('div');
     this.root.className = 'ui-layer tm-options-flow';
     this.root.setAttribute('role', 'dialog');
-    this.root.setAttribute('aria-label', 'Options');
+    this.root.setAttribute('aria-label', S.title.options);
     this.model = createOptions(deps.registries, deps.host, deps.log);
     // The title's keys are the DS's own: BUTTON MODE belongs to a game's save.
     this.screen = new OptionsScreen({ where: 'title', settings: deps.settings, tap: deps.tap, buttonMode: () => 0 });
