@@ -19,7 +19,10 @@ export function scrollToCursor(root: HTMLElement): void {
 /** Covered menu rows cannot receive browser focus while a question, action menu or message waits. */
 export function isolatePrompt(root: HTMLElement): void {
   const prompt = root.querySelector<HTMLElement>('.yes-no, .app-menu, .party-menu, .msg-box.waiting, .os-layer, .mm-prompt');
-  if (prompt) for (const e of root.querySelectorAll<HTMLElement>(CONTROLS)) if (!prompt.contains(e)) e.inert = true;
+  // A count (the mart's): only its controls, so focus goes to the count and Space/Enter confirm it (focus left on
+  // the picked row re-picked the row).
+  const keep = prompt ? (e: HTMLElement) => prompt.contains(e) : root.querySelector('.qty-count') ? (e: HTMLElement) => e.matches('.qty-step, .qty-count, [data-tap="back"]') : null;
+  if (keep) for (const e of root.querySelectorAll<HTMLElement>(CONTROLS)) if (!keep(e)) e.inert = true;
 }
 
 export function focusKey(e: Element | null): string | null {

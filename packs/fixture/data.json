@@ -12602,6 +12602,10 @@
    "text": "No"
   },
   {
+   "id": "fixture:Lantern_StartMenu_QuitAsk",
+   "text": "Head back to the title?"
+  },
+  {
    "id": "fixture:MenuEntries_Text_Yes",
    "text": "YES"
   },

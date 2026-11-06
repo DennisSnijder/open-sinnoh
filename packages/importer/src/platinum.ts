@@ -420,6 +420,7 @@ const MODERN_OPTION_TEXTS_EN = {
   Lantern_Contest_Dance: 'DANCE',
   Lantern_Contest_Acting: 'ACTING',
   Lantern_Contest_Total: 'TOTAL',
+  Lantern_StartMenu_QuitAsk: 'Return to the title screen?',
 };
 
 /** The same in German (our words; labels in capitals and terms as the German game has them). */
@@ -469,6 +470,7 @@ const MODERN_OPTION_TEXTS: Record<RomLanguage, Record<keyof typeof MODERN_OPTION
     Lantern_Contest_Dance: 'TANZ',
     Lantern_Contest_Acting: 'AKTION',
     Lantern_Contest_Total: 'GESAMT',
+    Lantern_StartMenu_QuitAsk: 'Zurück zum Titelbildschirm?',
   },
 };
 

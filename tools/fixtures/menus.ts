@@ -194,6 +194,7 @@ export const menuTexts: Record<string, string> = {
   EggHatch_Text_WantToNickname: 'Give the newly hatched\n{var 0} a name?',
   EggHatch_Text_Yes: 'Yes',
   EggHatch_Text_No: 'No',
+  Lantern_StartMenu_QuitAsk: 'Head back to the title?',
   MenuEntries_Text_Yes: 'YES',
   MenuEntries_Text_No: 'NO',
   PokemonSummary_Text_LabelPp: 'PP',

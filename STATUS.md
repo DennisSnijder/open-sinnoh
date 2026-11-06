@@ -6,7 +6,7 @@ Platin-Edition (rev 0) imports and shows its game in German, with the shell in G
 system replays pass on both headless (see Tests). What's
 next is in [ROADMAP.md](ROADMAP.md); the design decisions are in [docs/decisions.md](docs/decisions.md).
 
-Versions: contracts 0.50.2, importer `platinum-113`, HeartGold follower add-on `hgss-followers-4`.
+Versions: contracts 0.50.3, importer `platinum-114`, HeartGold follower add-on `hgss-followers-4`.
 
 ## Works
 

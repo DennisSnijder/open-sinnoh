@@ -492,8 +492,9 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   to the field and keeps the decomp's saved data (the memo is lost on app change, as on the DS); its
   timers count game ticks so replays are exact.
 - **Keyboard and accessibility:** menus trap Tab, follow the game cursor with focus and restore focus on
-  close; Escape is B outside text fields. Canvas-drawn messages are read once per finished page into a
-  polite live region.
+  close; Escape is B outside text fields. A question, action menu, waiting message or count (the mart's) makes
+  the rest of the screen inert, so focus and Space/Enter go to it, not to the row picked before it. Canvas-drawn
+  messages are read once per finished page into a polite live region.
 - **Input:** physical key codes (arrows/WASD, Z/J/Space = A, X/K = B, …); gamepads follow their print (below).
   Options › Controls rebinds keys and pad buttons; replays use logical buttons only.
 - **A controller reaches everything but, sometimes, the file dialog.** The DOM screens with no game behind them (the
@@ -562,6 +563,10 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   device has seen Rowan's intro; a suspend point when the page hides; follower talk with the HGSS add-on
   (its global interaction rules; mood is not saved); auto lowercase after the first capital on the naming
   keyboard (not Platinum's); trade evolutions without a trade (labelled, off is faithful).
+- **The start menu's EXIT goes back to the title** (not the DS's, where it only closes the menu, as B still does): it
+  asks first in the save window (our words; NO stays), then the DS's save question; YES saves, and either answer
+  reloads the page to the title without `?continue`. The suspend point is cleared and not written on the way out, so
+  NO really leaves the unsaved play behind.
 - **The objective:** the start menu shows the next story beat in a field window beside it (above it on phones), on
   by default. It is derived, never tracked: an ordered table in the pack (`NewGame.objectives`, our words, written by
   the importer) whose first step with no check holding is shown; each step also lists a later beat that proves it

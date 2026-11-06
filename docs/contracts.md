@@ -36,11 +36,13 @@ a reviewed step: bump `CONTRACTS_VERSION` and add a line below.
   replays, stepped by `date`/`time` lines. Periods are core `dayPeriod(hour)` (decomp TimeOfDayForHour).
 
 ## Changelog
+- 0.50.3 (on 0.50.2; importer platinum-114): the start menu's EXIT in both languages: `Lantern_StartMenu_QuitAsk` in the German text set too.
 - 0.50.2 (the naming keyboard from the ROM, on 0.50.1; importer platinum-113): `NewGame.keyboard?`, the keyboard's pages as the build has them (absent: the decomp's US pages). Services `keyboardPages`, `nameChars` and `typedChars` take the registries instead of a language.
 - 0.50.1 (on 0.50.0): `PoffinCaseView.rows[].level` is the row's level as the game prints it, its mark included (PoffinCase_Text_ListItem); the app adds none.
-- 0.50.0 (game-drawn text from the ROM, on 0.49.7; same schema v24): A pack's own HM is a `tm` item with `preventToss` (services `isHmItem` no longer reads item names). `ScriptView.yesNo` is `{ yes, no, cursor }` (the labels from the ROM, MenuEntries_Text_Yes/No). `MYSTERY_GIFTS` lost `title`/`description`; `MYSTERY_GIFT_TEXT` holds them per language.
-- 0.49.7 (the game's language, on 0.49.6; same schema v24; importer platinum-112): `NewGame.language?` (the game's Gen 4 language id: 2 English; absent = English). Core `Dex.language` reads it, and `createPokemon` gives new Pokémon that language unless told otherwise.
-- 0.49.6 (replays that wait, on 0.49.5; same schema v24): `ScriptView.waitsForAB?` (a script waits for A or B with no arrow: ScrCmd_WaitABPress, ScrCmd_WaitABPadPress). Replays: `advance message [max]`; `assert state <path> <record id>`; `assert text` slot values may be record ids; the Easy Chat tap `word:<text id>`.
+- 0.50.0 (game-drawn text from the ROM, on 0.49.8; same schema v24): A pack's own HM is a `tm` item with `preventToss` (services `isHmItem` no longer reads item names). `ScriptView.yesNo` is `{ yes, no, cursor }` (the labels from the ROM, MenuEntries_Text_Yes/No). `MYSTERY_GIFTS` lost `title`/`description`; `MYSTERY_GIFT_TEXT` holds them per language.
+- 0.49.8 (the game's language, on 0.49.7; same schema v24; importer platinum-112): `NewGame.language?` (the game's Gen 4 language id: 2 English; absent = English). Core `Dex.language` reads it, and `createPokemon` gives new Pokémon that language unless told otherwise.
+- 0.49.7 (replays that wait, on 0.49.6; same schema v24): `ScriptView.waitsForAB?` (a script waits for A or B with no arrow: ScrCmd_WaitABPress, ScrCmd_WaitABPadPress). Replays: `advance message [max]`; `assert state <path> <record id>`; `assert text` slot values may be record ids; the Easy Chat tap `word:<text id>`.
+- 0.49.6 (back to the title, on 0.49.5; importer platinum-112): the start menu's result `quit?` (EXIT asked to go back to the title screen; OpenSinnoh, not the DS).
 - 0.49.5 (the one-pocket bag, on 0.49.4): `BagView.pocketTypes` (the DS pocket type each listed pocket is drawn as), so the `pick` and `poffin` bags, which list one pocket, draw it instead of failing.
 - 0.49.4 (on 0.49.3): `PartySlotView.shiny?` (the front picture of the Modern party; a view field, not state).
 - 0.49.3 (on 0.49.2): `FieldRenderer.render`'s `repeat?`, set on a frame no tick came before: the renderer may leave the last picture up.

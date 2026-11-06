@@ -366,8 +366,11 @@ export interface NamingRequest {
 
 /** What an app returns to whoever opened it (a script op writes it to its vars; the battle plays the pick). */
 export type AppResult =
-  /** 0.29.1: `retire`, RETIRE was picked (decomp StartMenu_SelectRetire: the menu closes and SAFARI_GAME 21 starts). */
-  | { app: 'start-menu'; retire?: true }
+  /**
+   * 0.29.1: `retire`, RETIRE was picked (decomp StartMenu_SelectRetire: the menu closes and SAFARI_GAME 21 starts).
+   * 0.49.6: `quit`, EXIT asked to go back to the title screen (OpenSinnoh, not the DS: the DS's EXIT only closes the menu).
+   */
+  | { app: 'start-menu'; retire?: true; quit?: true }
   /**
    * 0.37.0: `bought` and `sold`, the shop's purchase and sale counts for the journal (decomp itemPurchaseCount,
    * itemSoldCount: +1 per single item, 2 once a purchase or sale is of more than one; the sales of the last SELL visit).
