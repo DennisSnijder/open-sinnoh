@@ -10,7 +10,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import type { Id, PackData, ReplayLine } from '@opensinnoh/core';
 import { soundFramesToTicks, type ScriptView } from '@opensinnoh/contracts';
 import { CountingStubLog, createGame, gameDriver, runReplay, type ReplayResolver } from '@opensinnoh/game';
-import { romSlice } from '../rom.ts';
+import { romBuildId, romSlice } from '../rom.ts';
 import { InputState } from '../../packages/app/src/input.ts';
 import { runTicks } from '../../packages/app/src/loop.ts';
 import { createApp, MenuText } from '@opensinnoh/menus';
@@ -34,6 +34,13 @@ describe.skipIf(!romPath)('service replays (OPENSINNOH_NDS_ROM)', () => {
     const resolve: ReplayResolver = (file) => ({ name: file, text: read(file) });
     return runReplay(gameDriver(game), read(`${name}.replay`), { registries: game.registries, seed, name: `${name}.replay`, resolve, repeat });
   };
+
+  it('svc-pokecenter-day: the US scripts greet the day with the day message', async (ctx) => {
+    if (romBuildId() !== 'platinum-us-rev0') return ctx.skip('the day greeting is the US build\'s');
+    const r = await play('svc-pokecenter-day', 1, false);
+    expect(r.error).toBeUndefined();
+    expect(r.ok).toBe(true);
+  }, 120_000);
 
   it('svc-pokecenter: the healing machine gets one ball per Pokémon in the party, the egg not counted', async () => {
     const balls: number[] = [];

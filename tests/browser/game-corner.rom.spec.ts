@@ -10,7 +10,7 @@ import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import type { AppView, Registries, SlotsView } from '@opensinnoh/contracts';
 import { loadGamePacks, runReplay } from '@opensinnoh/game';
 import { pageDriver } from '../../packages/cli/src/browser.ts';
-import { romSlice } from '../rom.ts';
+import { hasSlotMachines, romSlice } from '../rom.ts';
 import { canvasStats } from './canvas.ts';
 import { seedRomImport } from './seed.ts';
 import { readReplay, resolveReplay } from '../rom-replays/sys-replays.ts';
@@ -22,17 +22,13 @@ test.describe.configure({ mode: 'serial' });
 test.skip(!ROM, 'OPENSINNOH_NDS_ROM is not set');
 
 let registries: Registries;
-/** Whether this build's scripts open the slot machine (ScrCmd_267; the European builds have no slots, docs/research/german-rom.md). */
-let slotMachines: boolean;
 let context: BrowserContext;
 let page: Page;
 const errors: string[] = [];
 
 test.beforeAll(async ({ browser }, info) => {
   test.setTimeout(120_000);
-  const { pack } = romSlice();
-  registries = loadGamePacks([pack]).registries;
-  slotMachines = Object.values(pack.scripts.labels).some((cmds) => cmds.some((c) => c.op === 'scr_cmd_267'));
+  registries = loadGamePacks([romSlice().pack]).registries;
   const use = info.project.use;
   context = await browser.newContext({ baseURL: use.baseURL, viewport: use.viewport, ...(use.isMobile ? { isMobile: true, hasTouch: true, deviceScaleFactor: use.deviceScaleFactor } : {}) });
   page = await context.newPage();
@@ -83,7 +79,7 @@ async function composition(name: string) {
 }
 
 test('the slot machine: opened by its script, played by keyboard and touch, left with START', async () => {
-  test.skip(!slotMachines, "this build's scripts never use scr_cmd_267");
+  test.skip(!hasSlotMachines(), 'this build has no slot machines');
   test.setTimeout(300_000);
   const project = test.info().project.name;
   const setup = `give item platinum:ITEM_COIN_CASE
@@ -147,7 +143,7 @@ until state app.prompt "bet" 600
 });
 
 test('sys-game-corner-slots in the app: Clefairy on the field in standby, the bonus counters in a round', async () => {
-  test.skip(!slotMachines, "this build's scripts never use scr_cmd_267");
+  test.skip(!hasSlotMachines(), 'this build has no slot machines');
   test.setTimeout(600_000);
   const project = test.info().project.name;
   const base = pageDriver(page, SHOTS, `${project}-replay`);
