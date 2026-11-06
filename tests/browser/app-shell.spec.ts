@@ -305,7 +305,7 @@ test('picker shows without an import; Options > DATA exports and toggles the dem
   const [download] = await Promise.all([page.waitForEvent('download'), data.locator('[data-setting="exportSave"] .options-value').click()]);
   expect(download.suggestedFilename()).toMatch(/^opensinnoh-save-.*\.json$/);
 
-  // Mods: the demo mod is offered; enabling it rebuilds the game with it (from the save), disabling restores vanilla.
+  // Mods: the demo mod is offered; enabling it rebuilds the game with it, disabling restores vanilla.
   const order = () => page.evaluate(() => window.openSinnohApp!.game.loadOrder.map((p) => p.id));
   const mod = data.locator('[data-setting="mod/demo-mod"] .options-value');
   await expect(mod).toHaveText('OFF');
@@ -313,13 +313,11 @@ test('picker shows without an import; Options > DATA exports and toggles the dem
   await page.locator('[data-tap="settings:answer:yes"]').click();
   await expect(page.locator('.ui-notice')).toContainText('Enabled', { timeout: 60_000 });
   expect(await order()).toEqual(['fixture', 'demo-mod']);
-  // The rebuilt game enters its map first (its scripts wait for the scene); the menu opens once the field is idle.
-  await expect
-    .poll(async () => {
-      await page.keyboard.press('z');
-      return page.evaluate(() => !window.openSinnohApp!.sceneLoading() && !document.querySelector<HTMLButtonElement>('.hud-menu')!.disabled);
-    }, { timeout: 60_000 })
-    .toBe(true);
+  // The save was made without the mod, so the rebuilt game is a new one: its intro starts once the map has loaded,
+  // and until then the field looks idle. Wait for that message and dismiss it, as above.
+  await page.waitForFunction(() => window.openSinnohApp!.game.scripts.view().message?.waitingForInput === true, undefined, { timeout: 60_000 });
+  await page.keyboard.press('z');
+  await page.waitForFunction(() => window.openSinnohApp!.game.canSave());
   await openOptionsData(page);
   await expect(page.locator('[data-setting="mod/demo-mod"] .options-value')).toHaveText('ON');
   await page.locator('[data-setting="mod/demo-mod"] .options-value').click();
