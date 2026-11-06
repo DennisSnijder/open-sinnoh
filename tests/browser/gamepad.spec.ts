@@ -368,11 +368,10 @@ test('the trainer card is signed by pad: Y signs, the d-pad and A draw, X is don
   await press(page, PAD.x);
   const menu = page.locator('[data-screen="start-menu"]');
   await expect(menu).toBeVisible();
-  const entries = menu.locator('[data-entry]');
-  const count = await entries.count();
-  const trainer = await entries.evaluateAll((e) => e.findIndex((x) => x.getAttribute('data-entry') === 'trainer'));
-  expect(trainer, `entries: ${count}`).toBeGreaterThanOrEqual(0);
-  for (let i = 0; i < trainer; i++) await press(page, PAD.down);
+  const entries = await menu.locator('[data-entry]').evaluateAll((e) => e.map((x) => x.getAttribute('data-entry')!));
+  expect(entries).toContain('trainer');
+  const at = () => page.evaluate(() => (window.openSinnohApp!.game.app() as { cursor: number } | null)?.cursor ?? -1).then((i) => entries[i] ?? null);
+  await stepTo(page, at, 'trainer', (now) => (entries.indexOf(now ?? '') > entries.indexOf('trainer') ? PAD.up : PAD.down));
   await press(page, PAD.a);
   const card = page.locator('[data-screen="trainer-card"]');
   await expect(card).toBeVisible();
