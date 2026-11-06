@@ -166,7 +166,8 @@ test('the Modern party: the list, the detail that follows the cursor, actions, k
   const root = party(page);
   await expect(root.locator('.mm-slot')).toHaveCount(3);
   await expect(root.locator('.mm-slot').first()).toContainText('Emberkit');
-  await expect(root.locator('.mm-slot').nth(1).locator('.os-chip')).toHaveText('PSN');
+  // The status is the ROM's picture, which this pack has not (modern-menus.rom.spec.ts checks it).
+  await expect(root.locator('.mm-slot').nth(1).locator('.mm-status')).toHaveCount(0);
   await expect(root.locator('.mm-slot').nth(2).locator('.mm-held')).toHaveCount(1);
   await expect(root.locator('.mm-slot').first().locator('.os-hp')).toHaveAttribute('aria-label', /HP \d+ of \d+/);
   await expect(root.locator('.mm-slot-empty')).toHaveCount(3);

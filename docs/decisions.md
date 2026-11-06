@@ -542,6 +542,11 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   override.
 - **Fonts** (OFL, self-hosted): Pixelify Sans for titles, Silkscreen for numbers and labels, Figtree for
   reading text. Gameplay text always uses the ROM font.
+- **Game words come from the ROM, also where the DS draws a picture.** The Modern party's status is the ROM's picture
+  (`summary/status`): each build has its own, and the text banks have no chip-sized word on every build (the US and
+  European menu entries say POISONED, the German ones GIF) and no word for fainted at all. Its screen-reader name is the
+  menu entry; fainted has none, and HP 0 says it. The level mark everywhere our screens print one is the party's text
+  entry, so the US summary and Battle Castle lists read "Lv." where the DS picture has no dot.
 - **Colour by meaning only; no Nintendo IP** (no Poké Ball, sprites or names) in our art; no key-cap hints;
   one focus mark (no ring over the cursor's mark). Setting labels in sentence case.
 - **Brand:** the mark is "OS" in a Distortion window with a gold title tab; the wordmark is pixel

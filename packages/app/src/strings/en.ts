@@ -415,7 +415,6 @@ export const EN = {
     emptyPocket: 'Nothing in this pocket.',
     heldItem: 'Holds an item',
     capsule: 'Capsule',
-    status: { paralysis: 'PAR', freeze: 'FRZ', sleep: 'SLP', poison: 'PSN', burn: 'BRN', fainted: 'FNT' },
   },
 
   /** @opensinnoh/ui's own words (components.ts `setUiWords`). */

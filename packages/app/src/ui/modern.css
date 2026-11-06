@@ -27,6 +27,8 @@
 .mm-wrap { flex-wrap: wrap; }
 .mm-st { display: grid; gap: 4px; min-width: 0; }
 .mm-lv { color: var(--os-muted); white-space: nowrap; }
+.mm-status { display: inline-flex; flex: none; }
+.mm-status canvas { image-rendering: pixelated; }
 .mm-held, .mm-reg { color: var(--os-muted); display: inline-flex; }
 .mm-note { color: var(--os-accent); font: 500 20px/24px var(--os-font-px); }
 .mm-prompt-line, .mm-empty { color: var(--os-muted); }

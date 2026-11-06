@@ -5,22 +5,46 @@
  * The game's cursor walks a 2-column grid; this list is one column, so `partyListInput` turns up and down into the
  * presses that reach the next stop. What reaches the game is ordinary presses.
  */
-import { genderMark, h, hpBar, icon, statusChip, type StatusName } from '@opensinnoh/ui';
+import { genderMark, h, hpBar, icon } from '@opensinnoh/ui';
 import type { InputFrame, PartySlotView, PartyView } from '@opensinnoh/contracts';
 import type { Button } from '@opensinnoh/core';
 import { ICON_ANIM, hpColor } from './art.ts';
 import type { DrawContext } from './apps.ts';
 import { actionsInSheet, actionsPane, actionsSheet, footButton, gameText, item, line, prompts, screen } from './modern.ts';
+import { STATUS_CELLS } from './party.ts';
+import { baseText } from './strings.ts';
 import { S } from '../strings/index.ts';
 
-const STATUS: Record<Exclude<PartySlotView['status'], 'none'>, StatusName> = { paralysis: 'par', freeze: 'frz', sleep: 'slp', poison: 'psn', toxic: 'psn', burn: 'brn', fainted: 'fnt' };
+/** The status picture's name for a screen reader: the ROM's word. It has none for fainted; HP 0 says that. */
+const STATUS_WORD: Partial<Record<PartySlotView['status'], string>> = {
+  paralysis: 'MenuEntries_Text_Status_Paralyzed',
+  freeze: 'MenuEntries_Text_Status_Frozen',
+  sleep: 'MenuEntries_Text_Status_Asleep',
+  poison: 'MenuEntries_Text_Status_Poisoned',
+  toxic: 'MenuEntries_Text_Status_Poisoned',
+  burn: 'MenuEntries_Text_Status_Burned',
+};
 const BAND = { max: 'high', green: 'high', yellow: 'mid', red: 'low' } as const;
 
-/** The front picture's scale: 80 DS px at 2 CSS px each. */
+/** The front picture's and the status picture's scale: a DS px is 2 CSS px, one dot. */
 const FRONT_SCALE = 2;
 
 const hp = (m: PartySlotView) => hpBar(m.hp, m.maxHp, BAND[hpColor(m.hp, m.maxHp)]);
-const status = (m: PartySlotView) => (m.status === 'none' || m.egg ? null : statusChip(STATUS[m.status], S.modern.status[m.status === 'toxic' ? 'poison' : m.status]));
+
+/** The status as the game draws it: the build's own picture, its word and colour (packs without the sheet: nothing). */
+function status(d: DrawContext, m: PartySlotView): HTMLElement | null {
+  if (m.status === 'none' || m.egg) return null;
+  const picture = d.art.cells('summary/status', [STATUS_CELLS[m.status]], FRONT_SCALE);
+  if (!picture) return null;
+  const s = h('span', 'mm-status', picture);
+  const word = STATUS_WORD[m.status];
+  if (word) {
+    s.setAttribute('role', 'img');
+    s.setAttribute('aria-label', baseText(d.registries, word));
+  } else s.setAttribute('aria-hidden', 'true');
+  return s;
+}
+
 const level = (m: PartySlotView) => (m.egg ? null : h('span', 'os-num mm-lv', `${m.levelLabel}${m.level}`));
 /** A name with the symbol in it (NIDORAN♂) says it already. */
 const gender = (m: PartySlotView) => (m.gender === 'none' || /[♂♀]/.test(m.name) ? null : genderMark(m.gender));
@@ -40,7 +64,7 @@ function row(d: DrawContext, v: PartyView, i: number, m: PartySlotView): HTMLEle
     `slot:${i}`,
     [
       d.art.pokemonIcon(m.species, m.form, iconAnim(m), m.egg),
-      h('span', 'mm-st', h('span', 'mm-nl', line('lab', m.name), gender(m), level(m), mark, status(m)), note ? line('mm-note', note) : m.egg ? null : hp(m)),
+      h('span', 'mm-st', h('span', 'mm-nl', line('lab', m.name), gender(m), level(m), mark, status(d, m)), note ? line('mm-note', note) : m.egg ? null : hp(m)),
     ],
     `mm-slot${v.moving === i ? ' is-moving' : ''}`,
     v.cursor === i && !v.menu,
@@ -73,7 +97,7 @@ function detail(d: DrawContext, v: PartyView, m: PartySlotView | null | undefine
         'mm-id',
         h('div', 'mm-nl', line('lab', m.name), gender(m), level(m)),
         note ? line('mm-note', note) : m.egg ? null : hp(m),
-        h('div', 'mm-nl mm-wrap', status(m), held, m.capsule ? h('span', 'mm-heldname', icon('ball'), S.modern.capsule) : null),
+        h('div', 'mm-nl mm-wrap', status(d, m), held, m.capsule ? h('span', 'mm-heldname', icon('ball'), S.modern.capsule) : null),
       ),
     ),
     after,

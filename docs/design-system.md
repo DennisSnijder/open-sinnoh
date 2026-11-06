@@ -133,7 +133,7 @@ Always beside a label; an icon-only button has an accessible name and a tooltip.
 | `row` | the ▶, label, description, one control; the cursor row (`is-cursor` or focus) | several focus stops in a row |
 | `.os-item` | a selectable row with parts of its own (a game list), the same selection model; its columns are the screen's | settings (use `row`) |
 | `hpBar` | HP as a bar in its band's colour with the numbers | anything but HP |
-| `statusChip` | a status colour with its word | status by colour alone |
+| `statusChip` | a status colour with its word, on our own screens; the Modern party shows the ROM's status picture instead | status by colour alone; a game word typed into source |
 | `genderMark` | ♂ or ♀ as an icon beside a name (no web font here has them) | the characters themselves |
 | `choices` | the answers to one question, all visible, each with a line under it (the setup) | more than 4 answers; settings that stay (use a row) |
 | `filePicker` | a file from the device: `drop` the big target with a dotted border (`.over` while a file is dragged over the page), `quiet` a secondary pick | a hidden input with a fake button |
