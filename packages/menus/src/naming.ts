@@ -43,7 +43,7 @@ export const GIFT_CODE_PROMPT: Readonly<Record<number, string>> = { [ENGLISH]: '
 export function namingScreen(ctx: NamingContext, request: NamingRequest, done: (name: string | null) => Step, autoLowercase: () => boolean = () => false): Screen {
   const t = ctx.text;
   const language = gameLanguage(ctx.registries);
-  const keys = keyboardPages(language);
+  const keys = keyboardPages(ctx.registries);
   let text = request.kind === 'box' ? request.initial : '';
   let page = 0;
   let row = 0;
@@ -119,7 +119,7 @@ export function namingScreen(ctx: NamingContext, request: NamingRequest, done: (
       if ('tap' in i) {
         if (i.tap.startsWith('type:')) {
           let entered = false;
-          for (const c of typedChars(i.tap.slice(5), language)) entered = enter(c) || entered;
+          for (const c of typedChars(i.tap.slice(5), ctx.registries)) entered = enter(c) || entered;
           if (entered) se(SE_KEY);
           return;
         }

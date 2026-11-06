@@ -15,10 +15,13 @@ const pack = readPackFolder((p) => (existsSync(join(root, p)) ? readFileSync(joi
 const { registries, loaded } = loadGamePacks([pack]);
 const record = [...registries.newGame.values()][0]!;
 
+/** A German game's keyboard for these tests: our own rows, with umlauts. */
+const KEYBOARD = [0, 1, 2].map((page) => ['ABCDEFGHIJ ,.', 'KLMNOPQRST ’-', 'UVWXYZ     “„', page === 1 ? 'äüöß         ' : 'ÄÜÖ          ', '0123456789   '].map((r) => (page === 1 ? r.replace(/[A-Z]/g, (c) => c.toLowerCase()) : r)));
+
 /** The fixture as a German game, `names` replacing species names by id. */
 function german(names: Record<string, string> = {}): Registries {
   const species = new Map([...registries.species].map(([id, s]): [Id, Species] => [id, names[id] ? { ...s, name: names[id] } : s]));
-  return { ...registries, species, newGame: new Map([[record.id, { ...record, language: GERMAN } as NewGame]]) };
+  return { ...registries, species, newGame: new Map([[record.id, { ...record, language: GERMAN, keyboard: KEYBOARD } as NewGame]]) };
 }
 
 function open(reg: Registries, request: AppRequest): AppModel {
@@ -37,12 +40,12 @@ describe('the naming screen in the game language', () => {
     expect(naming(app).text).toBe('Jrgen');
   });
 
-  it('German: Ä Ö Ü on the fourth row, ä ö ü ß on the lowercase page, umlauts and „“ typed', () => {
+  it('German: the pack’s keyboard, its keys pressed and typed', () => {
     const app = open(german(), player);
-    expect(naming(app).keys[3]!.join('')).toBe('ÄÖÜ          ');
-    tap(app, 'key:3:1');
+    expect(naming(app).keys[3]!.join('')).toBe('ÄÜÖ          ');
+    tap(app, 'key:3:2');
     tap(app, 'page:1');
-    expect(naming(app).keys[3]!.join('')).toBe('äöüß         ');
+    expect(naming(app).keys[3]!.join('')).toBe('äüöß         ');
     tap(app, 'key:3:3');
     tap(app, 'type:„ü“');
     expect(naming(app).text).toBe('Öß„ü“');

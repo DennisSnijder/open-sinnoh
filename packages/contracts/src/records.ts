@@ -1014,6 +1014,11 @@ export interface NewGame {
    * the game creates and the player's own in the outsider check. Absent: English.
    */
   language?: number;
+  /**
+   * The naming keyboard's pages UPPER, lower and Others (0.50.2; decomp sCharCodes): 5 rows of 13 characters each, a
+   * space for an empty key. Absent: the decomp's US pages (services `keyboardPages`).
+   */
+  keyboard?: string[][];
   playerSprite: { male: Id; female: Id };
   /** The avatar while cycling and surfing (0.12.0; decomp PLAYER_AVATAR_CYCLING / _SURFING gfx). */
   playerCycleSprite: { male: Id; female: Id };

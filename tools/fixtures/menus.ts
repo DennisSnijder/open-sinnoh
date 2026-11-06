@@ -194,6 +194,9 @@ export const menuTexts: Record<string, string> = {
   EggHatch_Text_WantToNickname: 'Give the newly hatched\n{var 0} a name?',
   EggHatch_Text_Yes: 'Yes',
   EggHatch_Text_No: 'No',
+  MenuEntries_Text_Yes: 'YES',
+  MenuEntries_Text_No: 'NO',
+  PokemonSummary_Text_LabelPp: 'PP',
 
   // The move relearner / tutor screen (original wording).
   ...Object.fromEntries(

@@ -64,6 +64,7 @@ export const LAYOUT: Layout = {
   'platinum.danceTints': { offset: 0x195a0, sha1: '42a74eb957bd05544df1707a1ce02807dab6cbbb' },
   'platinum.danceShades': { offset: 0x19884, sha1: 'e103557ffbeb74541a66d7815fcf0bb85ebbe780' },
   'platinum.amityFinds': { offset: 0xebfdc, sha1: '496aec185ca0a68b2a9477ffc26efa183a81953f' },
+  'platinum.keyboardRows': { offset: 0x100df0, sha1: 'e56dcb2a82457e801ef26bcb9e8d2589beb61a9d' },
   'platinum.credits': { offset: 0x3f64, sha1: '145b453ac4220d0497f10e2c51b2546472806f3a', count: 224 },
   'platinum.creditsRows': { offset: 0x4664, sha1: 'a58fb22e4fe0854a129637d1edcabefa24d1e2d7' },
   'platinum.frontierScenes': { offset: 0x116b4, sha1: '4796f3a1b8b761d6d5ec5b5b302e4fecfe29f924' },

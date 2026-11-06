@@ -53,23 +53,26 @@ describe('game language', () => {
 });
 
 describe('naming keyboards', () => {
-  it('keeps the US pages as the US build has them', () => {
-    expect(keyboardPages(ENGLISH).map((p) => p.map((r) => r.join('')))).toEqual([
+  /** A pack's own keyboard (test data, not any build's). */
+  const own = (keyboard: string[][]) => ({ newGame: new Map([['t:NEW' as Id, { ...record, keyboard }]]) }) as unknown as Registries;
+  const pages = own([['ÖÄÜß„        ', ...Array<string>(4).fill(' '.repeat(13))]]);
+
+  it('are the US pages without a keyboard in the pack', () => {
+    expect(keyboardPages(registries).map((p) => p.map((r) => r.join('')))).toEqual([
       ['ABCDEFGHIJ ,.', 'KLMNOPQRST ’-', 'UVWXYZ     ♂♀', '             ', '0123456789   '],
       ['abcdefghij ,.', 'klmnopqrst ’-', 'uvwxyz     ♂♀', '             ', '0123456789   '],
       [',.:;!?   ♂♀  ', '“”‘’()       ', '…·~@#%+-*/=  ', '◉●■▲◆♠♥♦♣★♪  ', '☀☁☂☃☺♚♛☹☽↗↘  '],
     ]);
   });
 
-  it('has the German build’s umlauts and „ on its pages', () => {
-    const pages = keyboardPages(GERMAN).map((p) => p.map((r) => r.join('')));
-    expect([pages[0]![3], pages[1]![3], pages[2]![1]]).toEqual(['ÄÖÜ          ', 'äöüß         ', '“„”‘’()      ']);
+  it('are the pack’s when it has them, and a row of another length fails', () => {
+    expect(keyboardPages(pages)[0]![0]!.join('')).toBe('ÖÄÜß„        ');
+    expect(() => keyboardPages(own([['short']]))).toThrow(/keyboard row/);
   });
 
-  it('takes typed characters on the game language’s keys only', () => {
-    expect(typedChars('Jürgen „Ö“ ß', ENGLISH).join('')).toBe('Jrgen “ ');
-    expect(typedChars('Jürgen „Ö“ ß', GERMAN).join('')).toBe('Jürgen „Ö“ ß');
-    expect(typedChars(`It's "x"`, GERMAN).join('')).toBe('It’s ”x”');
+  it('take typed characters on their keys only', () => {
+    expect(typedChars('Jürgen „Ö“ ß', registries).join('')).toBe('Jrgen “ ');
+    expect(typedChars('Jürgen „Ö“ ß', pages).join('')).toBe(' „Ö ß');
   });
 });
 

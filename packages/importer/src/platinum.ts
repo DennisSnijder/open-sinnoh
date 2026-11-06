@@ -236,6 +236,8 @@ const TABLES = {
   danceShades: { where: 17, offset: 0x19880, count: DANCE_POSITIONS, size: 1, sha1: 'e103557ffbeb74541a66d7815fcf0bb85ebbe780' },
   /** sMonFindableAccessories: the 6 pools of 10 accessories a walking Pokémon finds. */
   amityFinds: { where: 'arm9', offset: 0xebf84, count: 60, size: 2, sha1: '496aec185ca0a68b2a9477ffc26efa183a81953f' },
+  /** naming_screen.c sCharCodes: pointers to the rows (5 a page) of the keyboard's UPPER, lower and Others pages. */
+  keyboardRows: { where: 'arm9', offset: 0x100c54, count: 15, size: 4, sha1: '03fe308aa30cc4e79ba9c6a1e1729ae5f98340fe' },
   /** end_credits/strings.c sEndCreditStringProps (the end_credits overlay): {u16 message, u16 y, u16 centred} per staff row. */
   credits: { where: 99, offset: 0x3f64, count: 237, size: 6, sha1: '95df5e39b155b5bc01cb31e1ac31ff83a5fa5378' },
   creditsRows: { where: 99, offset: 0x46b4, count: 6, size: 28, sha1: 'a58fb22e4fe0854a129637d1edcabefa24d1e2d7' },
@@ -592,6 +594,8 @@ const SPECIAL_ENCOUNTERS = {
   sounds: { radar: 'SEQ_KUSAGASA', sweetScent: 'SEQ_SE_DP_FW230' },
 };
 const DEFAULT_NAMES = { player: 'Lucas', rival: 'Barry' };
+/** The keys of a keyboard row (naming_screen.c). */
+const KEYBOARD_COLUMNS = 13;
 /** Decomp LANGUAGE_ENGLISH, LANGUAGE_GERMAN: the game's language id by ROM language. */
 const GAME_LANGUAGES: Record<RomLanguage, number> = { en: 2, de: 5 };
 /** decomp SEQ_EYE_KID: FieldBGM_GetEyesMeetForTrainer's default. */
@@ -635,6 +639,23 @@ export async function importPlatinum(
     const got = await sha1Hex(bytes);
     if (got !== t.sha1) throw new ImportError(`ROM table ${key} at ${t.where}:0x${t.offset.toString(16)} has SHA1 ${got}, expected ${t.sha1}`);
     return bytes;
+  };
+  /** The naming keyboard's pages: 13 characters a row, each row ended by CHAR_EOS (naming_screen.c sCharCodes). */
+  const readKeyboard = async (): Promise<string[][]> => {
+    const pointers = new Reader(await table('keyboardRows'));
+    const code = new Reader(fs.arm9());
+    const row = (at: number) =>
+      Array.from({ length: KEYBOARD_COLUMNS + 1 }, (_, i) => {
+        const c = code.u16(at + i * 2);
+        if (i === KEYBOARD_COLUMNS) {
+          if (c !== 0xffff) throw new ImportError(`keyboard row at 0x${at.toString(16)} is not ${KEYBOARD_COLUMNS} keys long`);
+          return '';
+        }
+        const char = chars.get(c);
+        if (char === undefined) throw new ImportError(`keyboard row at 0x${at.toString(16)}: unknown character code ${c}`);
+        return char;
+      }).join('');
+    return Array.from({ length: 3 }, (_, page) => Array.from({ length: 5 }, (_, r) => row(pointers.u32((page * 5 + r) * 4) - fs.header.arm9RamAddress)));
   };
   const readGameRecordTables = async (): Promise<NewGame['gameRecords']> => {
     const scores = new Reader(await table('trainerScoreIncrements'));
@@ -1198,6 +1219,7 @@ export async function importPlatinum(
     names: options.names ?? DEFAULT_NAMES,
     gender: options.gender ?? 'male',
     language: GAME_LANGUAGES[supported.language],
+    keyboard: await readKeyboard(),
     playerSprite: { male: playerGfx('OBJ_EVENT_GFX_PLAYER_M'), female: playerGfx('OBJ_EVENT_GFX_PLAYER_F') },
     playerHealSprite: { male: playerGfx('OBJ_EVENT_GFX_PLAYER_M_POKECENTER_HEAL'), female: playerGfx('OBJ_EVENT_GFX_PLAYER_F_POKECENTER_HEAL') },
     playerVsSeekerSprite: { male: playerGfx('OBJ_EVENT_GFX_PLAYER_M_VS_SEEKER'), female: playerGfx('OBJ_EVENT_GFX_PLAYER_F_VS_SEEKER') },

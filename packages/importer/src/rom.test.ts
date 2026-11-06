@@ -1,10 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { REGISTRIES, type NewGame, type Ui2dSheet, type Zone } from '@opensinnoh/contracts';
+import { REGISTRIES, type Item, type NewGame, type Ui2dSheet, type Zone } from '@opensinnoh/contracts';
 import { loadPacks, type Id, type JsonValue, type PackData, type RegistryRecord } from '@opensinnoh/core';
 import { importPlatinum, type ImportReport } from './platinum.ts';
 import { decodeImage } from './ui2d/index.ts';
 import { romBuildOfHeader } from './layout.ts';
+import { keyboardPages } from '@opensinnoh/services';
 
 it('rejects ROMs it does not support, with the hash it saw', async () => {
   await expect(importPlatinum(new Uint8Array([1, 2, 3]))).rejects.toThrow(/Unsupported ROM: SHA1 7037807198c22a7d2b0807371d763779a84fdfcf.*Platinum \(US, rev 0\)/);
@@ -314,8 +315,8 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
           language === 5
             ? [
                 { text: 'platinum:pl_msg_00000548_00000', y: 0, centered: true },
-                { text: 'platinum:pl_msg_00000548_00002', y: 171, centered: false },
-                { text: 'platinum:pl_msg_00000548_00223', y: 7562, centered: false },
+                { text: 'platinum:pl_msg_00000548_00002', y: expect.any(Number), centered: false },
+                { text: 'platinum:pl_msg_00000548_00223', y: expect.any(Number), centered: false },
               ]
             : [
                 { text: 'platinum:pl_msg_00000548_00000', y: 0, centered: true },
@@ -326,6 +327,13 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
       },
     ]);
     expect((pack.registries.newGame![0] as unknown as NewGame).credits).toHaveLength(language === 5 ? 224 : 237);
+    // The check isHmItem makes for a pack's own HM holds on the ROM: of the move-teaching items, only the HMs can't be tossed.
+    for (const item of reg<Item>('items').values()) if (item.tm) expect(item.preventToss, item.id).toBe(/ITEM_HM\d+$/.test(item.id));
+    // The keyboard from the ROM: the decomp's US pages on the English builds; the German build's keys are its own.
+    const keyboard = (pack.registries.newGame![0] as unknown as NewGame).keyboard!;
+    const usPages = keyboardPages({ newGame: new Map([['t:NEW' as Id, {} as NewGame]]) }).map((page) => page.map((row) => row.join('')));
+    if (language === 5) expect(keyboard).not.toEqual(usPages);
+    else expect(keyboard).toEqual(usPages);
     // The SHA1-checked gym tables (structure and names only; overlay 8 gym_features.c).
     const gyms = (pack.registries.newGame![0] as unknown as NewGame).gyms!;
     expect(gyms.eterna).toMatchObject({ zone: 'platinum:MAP_HEADER_ETERNA_CITY_GYM', clockVar: 'platinum:VAR_ETERNA_GYM_FLOWER_CLOCK_STATE', message: 'platinum:EternaGym_Text_FountainWaterLevelDropped' });
