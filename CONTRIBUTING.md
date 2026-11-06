@@ -29,7 +29,7 @@ pnpm dev          # prints a Packs URL that starts the original fixture game: no
 pnpm check        # lint, typecheck, unit tests and fixture replays
 ```
 
-To test against the real game, keep your own dump of Pokémon Platinum (US, rev 0; the SHA-1 is in
+To test against the real game, keep your own dump of a supported Pokémon Platinum (the SHA-1s are in
 [README.md](README.md#supported-roms)) outside the repository and point the tests at it.
 
 ## Tests

@@ -18,7 +18,7 @@ ROM bytes or text. Tool: `pnpm relocate <rom> [--us <us.nds>] [--layout <file.ts
 - **RAM:** every German overlay loads 0x1A0 higher than its US one (the larger arm9). The tool solved the US
   addresses it needed from their pointer tables: ov5 `0x021D0D80`, ov8 and ov9 `0x02249960`, ov23 `0x0223E140`,
   ov104 `0x0222DCE0`.
-- **Pins:** all 185 placed. Shifts are small and constant per module: arm9 +0x58 and +0x19c, ov5 +0x1c (the
+- **Pins:** all 186 placed. Shifts are small and constant per module: arm9 +0x58 and +0x19c, ov5 +0x1c (the
   weather tasks +0x20), ov16 +0x1c/+0x20, ov17 +0x4, ov7 −0x48, ov99 −0x50/0, the rest 0. 118 differ from US and
   are in `importer/src/layouts/platinum-de.ts`.
 - **Placed by hand** (`tools/relocate-pins.ts`, each with its reason): the weather tasks (ov5 function pointers;
@@ -33,7 +33,7 @@ ROM bytes or text. Tool: `pnpm relocate <rom> [--us <us.nds>] [--layout <file.ts
   conversation's A presses and a wait's length differ by language. Replays answer them with `advance message` /
   `advance text`.
 - **Data the German build has of its own:** the staff credits, the Factory pools, the status icons, the naming
-  keyboard's pages (row 4 of the letters ÄÖÜ / äöüß, the others row „ “ ‘ ’), the sorted lists in arm9 (the
+  keyboard's pages (more keys on the letter pages' fourth row and on the Others page; read at import, `NewGame.keyboard`), the sorted lists in arm9 (the
   Pokédex A–Z, easy chat), which the German collator reproduces.
 
 ## How the port is built
@@ -47,7 +47,7 @@ ROM bytes or text. Tool: `pnpm relocate <rom> [--us <us.nds>] [--layout <file.ts
   people and items in them are the German game's.
 - **The game's language** goes into the pack (`NewGame.language`, 5), new Pokémon get it, and the outsider check
   compares with it.
-- **Engine:** YES/NO and AP from the ROM's banks, the level mark per language, German keyboard pages and typed
+- **Engine:** YES/NO and AP from the ROM's banks, the level mark per language, the keyboard's pages read from the ROM and typed
   umlauts, the German collator for the Pokédex and easy chat, `isHmItem` by id, the gift-code prompt, the Wonder
   Cards and our credits card per language.
 - **The shell** (`packages/app/src/strings/`) is German for a German game, or before an import with a German

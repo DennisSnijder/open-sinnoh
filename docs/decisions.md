@@ -481,7 +481,7 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   German game shows German. Where the DS has no such text (the gift-code prompt, the Wonder Cards, our credits card),
   a small table per game language. Alphabetical lists (the Pokédex A–Z and name groups, easy chat) sort by code unit
   in English and with the German collator in German, which reproduces the German ROM's own sorted lists; the naming
-  keyboard has the German pages (umlauts, ß, „ “) in a German game.
+  keyboard's pages are the build's, read from arm9 at import (`NewGame.keyboard`; without one, the decomp's US pages).
 - **A medicine that would do nothing goes back to the bag,** as the DS: "It won't have any effect.", then A, B (or a
   tap, in battle) returns to the Bag, in the field (ApplyItemEffectOnPokemon) and in battle (BattlePartyTask_UseItem,
   the error window). A refusal to send a Pokémon in stays on the party. In the field an Egg cannot be picked for an

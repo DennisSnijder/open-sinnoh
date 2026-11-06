@@ -17,7 +17,7 @@ export const DE: Strings = {
     tagline: 'Dein ROM bleibt deins: Es wird auf diesem Gerät gelesen. Nichts wird hochgeladen.',
     rail: ['Dein ROM', 'Einrichten', 'Spielen'],
     railLabel: 'Erste Schritte',
-    need: (b, code) => ['Du brauchst ', b('Pokémon Platinum (US)'), ' als ', code('.nds'), '-Datei, ausgelesen von deinem eigenen Spielmodul.'],
+    need: (b, code) => ['Du brauchst ', b('Pokémon Platin'), ' (deutsch, US oder europäisch-englisch) als ', code('.nds'), '-Datei, ausgelesen von deinem eigenen Spielmodul.'],
     choose: 'Wähle dein Platin-ROM',
     dropHint: 'oder zieh es irgendwo auf diese Seite',
     install: 'App installieren',

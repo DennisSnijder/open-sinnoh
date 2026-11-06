@@ -6,7 +6,7 @@ the decisions and why.
 
 ## 1. Goal and choice of game
 
-The engine reimplements the game in TypeScript. **Pokémon Platinum (US)** is the first base pack. The player imports it
+The engine reimplements the game in TypeScript. **Pokémon Platinum** (US, European English and German) is the first base pack. The player imports it
 locally from their own ROM, and it is never distributed. **HeartGold/SoulSilver** becomes the second base pack on the
 same engine. Diamond and Pearl may follow as variant packs.
 
