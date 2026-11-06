@@ -15,6 +15,7 @@ import { el } from './core.ts';
 import { CryPage } from './dex-cry.ts';
 import { bgPicture, sprite } from './sprites.ts';
 import './dex.css';
+import { S } from '../strings/index.ts';
 
 
 const dpr = () => devicePixelRatio || 1;
@@ -516,9 +517,9 @@ function drawEntry(wide: DrawContext, v: PokedexEntryView): HTMLElement {
     b.disabled = !p.enabled;
     tabs.append(b);
   }
-  root.append(at(button(d, 'back', 'dex-back', [], 'Back to the list'), ...BANNER.back), tabs);
+  root.append(at(button(d, 'back', 'dex-back', [], S.aria.backToList), ...BANNER.back), tabs);
   if (v.caught) root.append(at(ballMark(d), BANNER.ball[0] - 4, BANNER.ball[1] - 4, 8, 8));
-  root.append(at(button(d, 'prev', 'dex-step prev', [], 'Previous'), ...BANNER.prev), at(button(d, 'next', 'dex-step next', [], 'Next'), ...BANNER.next));
+  root.append(at(button(d, 'prev', 'dex-step prev', [], S.aria.previous), ...BANNER.prev), at(button(d, 'next', 'dex-step next', [], S.aria.next), ...BANNER.next));
   root.setAttribute('aria-label', `${v.number} ${v.name}`);
   return root;
 }
@@ -537,8 +538,8 @@ function drawSearch(wide: DrawContext, v: PokedexSearchView): HTMLElement {
     const k = r.value;
     const type = (r.id === 'type1' || r.id === 'type2') && k > 0 ? v.types[k] : null;
     const content = type ? [typeIcons(d, [type])] : r.id === 'shape' && k > 0 ? [cellCanvas(d, 'pokedex/shapes', (s) => s.names!.indexOf(`shape_${v.shapes[k]}`), kOf(d))] : [d.text(r.options[k]!, 'light')];
-    const arrow = (dir: -1 | 1) => button(d, `${r.id}:${(k + dir + n) % n}`, `dex-chip-step ${dir < 0 ? 'prev' : 'next'}`, [], dir < 0 ? 'Previous option' : 'Next option');
-    const chip = button(d, `${r.id}:${k}`, `dex-chip on${type ? ' type' : ''}`, content, r.id === 'shape' && k > 0 ? `Body shape ${v.shapes[k]! + 1}` : undefined);
+    const arrow = (dir: -1 | 1) => button(d, `${r.id}:${(k + dir + n) % n}`, `dex-chip-step ${dir < 0 ? 'prev' : 'next'}`, [], dir < 0 ? S.aria.previousOption : S.aria.nextOption);
+    const chip = button(d, `${r.id}:${k}`, `dex-chip on${type ? ' type' : ''}`, content, r.id === 'shape' && k > 0 ? S.aria.bodyShape(v.shapes[k]! + 1) : undefined);
     chip.setAttribute('aria-pressed', 'true');
     const row = el('div', `dex-search-row${i === v.cursor ? ' is-cursor' : ''}`, el('span', 'dex-search-label', d.text(r.label, 'light')), el('div', 'dex-chips stepper', arrow(-1), chip, arrow(1)));
     row.dataset.row = r.id;

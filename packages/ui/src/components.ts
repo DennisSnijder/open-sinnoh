@@ -28,6 +28,8 @@ export interface UiWords {
   close: string;
   /** A progress bar whose length is not known yet. */
   busy: string;
+  /** An HP bar's reading. */
+  hp(now: number, max: number): string;
 }
 
 let words: UiWords = {
@@ -40,6 +42,7 @@ let words: UiWords = {
   dismiss: 'Dismiss',
   close: 'Close',
   busy: 'Busy',
+  hp: (now, max) => `HP ${now} of ${max}`,
 };
 
 /** Sets the components' own words (English until called). */
@@ -433,7 +436,7 @@ export function hpBar(now: number, max: number, band: HpBand): HTMLElement {
   fill.style.width = `${now <= 0 ? 0 : Math.ceil((now / max) * 50) * 2}%`;
   const bar = h('span', `os-hp ${band}`, fill);
   bar.setAttribute('role', 'img');
-  bar.setAttribute('aria-label', `HP ${now} of ${max}`);
+  bar.setAttribute('aria-label', words.hp(now, max));
   return h('span', 'os-hpl', bar, h('span', 'os-num', `${now}/${max}`));
 }
 

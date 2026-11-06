@@ -10,7 +10,7 @@
  * the same buttons (pad-nav.ts).
  */
 import { choices, h, icon, snapPixels } from '@opensinnoh/ui';
-import { FILE_DIALOG_REFUSED, openFileDialog } from './file-dialog.ts';
+import { openFileDialog } from './file-dialog.ts';
 import { readReports, reportsAnswered } from './telemetry/settings.ts';
 import { setReportsEnabled } from './telemetry/index.ts';
 import { ASK, readAnswered, storeAnswered, type SetupQuestion } from './title/setup-questions.ts';
@@ -165,7 +165,7 @@ export class FirstRun {
   /** The add-on's file dialog, or why the browser refused it (the question stays, focus on its answer). */
   private pick(note: HTMLElement): void {
     if (openFileDialog(this.input)) return;
-    note.textContent = FILE_DIALOG_REFUSED;
+    note.textContent = S.rom.dialogRefused;
     note.hidden = false;
   }
 

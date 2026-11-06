@@ -115,7 +115,7 @@ function pageCanvas(d: DrawContext, scene: DsScene, pages: Map<string, HTMLCanva
 
 export function journal(d: DrawContext, v: JournalView): HTMLElement {
   let s = journals.get(d.art);
-  if (!s || !s.scene.root.isConnected) journals.set(d.art, (s = { scene: new DsScene(d.art, 'journal-scene', 'Journal'), pages: new Map() }));
+  if (!s || !s.scene.root.isConnected) journals.set(d.art, (s = { scene: new DsScene(d.art, 'journal-scene', S.aria.journal), pages: new Map() }));
   const { scene, pages } = s;
   scene.redraw = () => journal(d, v);
   layoutScene(d, scene.root, scene.stage);
@@ -160,7 +160,7 @@ const diplomas = new WeakMap<Art, DsScene>();
 
 export function diploma(d: DrawContext, v: DiplomaView): HTMLElement {
   let scene = diplomas.get(d.art);
-  if (!scene || !scene.root.isConnected) diplomas.set(d.art, (scene = new DsScene(d.art, 'diploma-scene', 'Diploma')));
+  if (!scene || !scene.root.isConnected) diplomas.set(d.art, (scene = new DsScene(d.art, 'diploma-scene', S.aria.diploma)));
   const s = scene;
   s.redraw = () => diploma(d, v);
   layoutScene(d, s.root, s.stage);

@@ -241,7 +241,7 @@ class MiningScene {
     for (const tool of ['hammer', 'pickaxe'] as const) {
       const [tx, ty] = BUTTONS[tool];
       const b = stop(d, tool, [], `ug-tool ug-${tool}`, v.tool === tool);
-      b.setAttribute('aria-label', tool === 'hammer' ? 'Hammer' : 'Pickaxe');
+      b.setAttribute('aria-label', tool === 'hammer' ? S.aria.hammer : S.aria.pickaxe);
       place(b, { x: tx * 8, y: ty * 8, w: 48, h: 64 });
       parts.push(b);
     }

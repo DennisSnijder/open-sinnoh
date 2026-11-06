@@ -7,6 +7,7 @@
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import { saveSlot } from './save.ts';
 import { romContext, resetRomDevice } from './rom-context.ts';
+import { appStrings } from './words.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 
@@ -178,7 +179,7 @@ test('the automatic quality step eases a slow Cinematic, says so, keeps the choi
   expect(await stored(), 'not stored during its trial').toEqual(['cinematic', null]);
   await page.locator('.ui-toast').waitFor({ state: 'hidden' });
   await frames(30, 150);
-  await expect(page.locator('.ui-toast')).toContainText('Visuals eased');
+  await expect(page.locator('.ui-toast')).toContainText(appStrings().game.visualsEased);
   expect(await stored(), 'the style stays the player\'s').toEqual(['cinematic', 'eased']);
 
   await page.reload();

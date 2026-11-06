@@ -60,7 +60,7 @@ export function buildRomScreen(deps: RomScreenDeps): void {
   note.id = 'picker-note';
   note.setAttribute('role', 'status');
   note.hidden = true;
-  const padNote = h('p', 'rom-need', 'The file dialog is your system\'s, so it can need a mouse, keyboard or touch screen. Your controller works for everything after it.');
+  const padNote = h('p', 'rom-need', S.rom.padNote);
   padNote.id = 'picker-pad-note';
   padNote.hidden = true;
   // Where the browser offers it (Chromium, Android): the app installs before the import, and keeps the game on the device.
@@ -202,7 +202,7 @@ export function chooseRomFile(): void {
  */
 export function showDialogRefused(): void {
   if (document.getElementById('rom-refused')) return;
-  const b = banner('Your controller cannot open the file dialog here.', 'This browser opens it only for a key press, click or tap. Press Enter or Space, click the box, or drop your ROM anywhere on this page. Your controller works for everything after it.', { tone: 'info' });
+  const b = banner(S.rom.padRefused, S.rom.padRefusedText, { tone: 'info' });
   b.id = 'rom-refused';
   const slot = $('rom-notice');
   slot.append(b);
@@ -212,7 +212,7 @@ export function showDialogRefused(): void {
 /** The pad was used: on the picker, its confirm button is named, and what it cannot do is said before it is tried. */
 export function showPadNote(confirm: string): void {
   const note = $('picker-pad-note');
-  note.textContent = `Confirm with ${confirm}. ${note.textContent}`;
+  note.textContent = `${S.rom.confirmWith(confirm)} ${note.textContent}`;
   note.hidden = false;
 }
 

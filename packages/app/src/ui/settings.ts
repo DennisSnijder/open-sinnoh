@@ -24,9 +24,11 @@ import { RENDER_SCALES, type RenderScale } from '../layout.ts';
 import { zoomLabel, type Zoom } from '../zoom.ts';
 import { VISUAL_STYLES, type Visuals } from '../visuals.ts';
 import { MENU_STYLES, readMenuStyle, storeMenuStyle } from '../menu-style.ts';
-import { S } from '../strings/index.ts';
+import { S, type Strings } from '../strings/index.ts';
 
 export type SectionId = 'game' | 'device' | 'controls' | 'data' | 'privacy';
+/** A row's heading on its page (`S.options.groups`). */
+export type GroupId = keyof Strings['options']['groups'];
 
 /** The sections in page order (L/R and the tabs), with their tab labels. */
 export const SECTIONS: readonly { id: SectionId; readonly label: string }[] = (['game', 'device', 'controls', 'data', 'privacy'] as const).map((id) => ({
@@ -118,7 +120,7 @@ export interface Setting {
   id: string;
   section: SectionId;
   /** Its heading on the page (`grouped`); a row without one stays under the row before it. */
-  group?: string;
+  group?: GroupId;
   kind: SettingKind;
   /** `save`: in the game's save (GameState options); `device`: this device's localStorage; `none`: an action. */
   storage: 'save' | 'device' | 'none';
@@ -158,7 +160,7 @@ function dsRow(env: SettingsEnv, key: keyof DeviceOptions): { row: OptionsView['
 }
 
 /** A DS option (the app's row): the DS's saved ones go in the save (game.ts), text speed and the modern options stay on the device. */
-function dsOption(key: keyof DeviceOptions, section: SectionId, kind: 'choice' | 'stepper', group?: string): Setting {
+function dsOption(key: keyof DeviceOptions, section: SectionId, kind: 'choice' | 'stepper', group?: GroupId): Setting {
   const storage = isSavedOption(key) ? 'save' : 'device';
   return {
     id: key,
@@ -215,7 +217,7 @@ function bindCaptured(action: Action, got: Captured): string {
 }
 
 /** Where the bindings' groups start (the rows after each stay in it). */
-const BIND_GROUPS: Partial<Record<Action, string>> = { up: 'D-pad', a: 'Face buttons', l: 'Other buttons' };
+const BIND_GROUPS: Partial<Record<Action, GroupId>> = { up: 'dpad', a: 'face', l: 'other' };
 
 /** A Controls row: one action's keys and gamepad button; A, then press the new key or button. */
 function bindRow(a: (typeof ACTIONS)[number]): Setting {
@@ -228,7 +230,7 @@ function bindRow(a: (typeof ACTIONS)[number]): Setting {
     storage: 'device',
     available: () => true,
     label: () => actionLabel(a.id),
-    description: () => (binding === a.id ? 'Press the key or gamepad button to use.\nEscape, or its own button, keeps it.' : S.options.bindText),
+    description: () => (binding === a.id ? S.options.bindWaiting : S.options.bindText),
     values: () => [binding === a.id ? S.options.pressKey : bindingText(controls.bindings, a.id, controls.padRaw, controls.face)],
     get: () => 0,
     set: () => {},
@@ -247,8 +249,8 @@ function bindRow(a: (typeof ACTIONS)[number]): Setting {
 /** The second line of the CONTROLLER row's description: what AUTO found. */
 function autoLine(): string {
   const found = controls.detected;
-  if (found === null) return 'AUTO follows the controller you use.';
-  return found === 'generic' ? 'AUTO has no name for this one.' : `AUTO found: ${found.toUpperCase()}.`;
+  if (found === null) return S.options.autoFollows;
+  return found === 'generic' ? S.options.autoNoName : S.options.autoFound(found.toUpperCase());
 }
 
 /** Rows that need the imported ROM (not in dev-pack runs). */
@@ -256,24 +258,24 @@ const hasRom = (env: SettingsEnv) => !!env.data.rom;
 
 export const SETTINGS: readonly Setting[] = [
   // GAME: the DS's own six, in the DS's order.
-  dsOption('textSpeed', 'game', 'choice', 'Platinum'),
-  dsOption('sound', 'game', 'choice', 'Platinum'),
-  dsOption('battleScene', 'game', 'choice', 'Platinum'),
-  dsOption('battleStyle', 'game', 'choice', 'Platinum'),
-  dsOption('buttonMode', 'game', 'choice', 'Platinum'),
-  dsOption('frame', 'game', 'stepper', 'Platinum'),
+  dsOption('textSpeed', 'game', 'choice', 'platinum'),
+  dsOption('sound', 'game', 'choice', 'platinum'),
+  dsOption('battleScene', 'game', 'choice', 'platinum'),
+  dsOption('battleStyle', 'game', 'choice', 'platinum'),
+  dsOption('buttonMode', 'game', 'choice', 'platinum'),
+  dsOption('frame', 'game', 'stepper', 'platinum'),
   // The QoL additions that change what the game offers (OpenSinnoh, not Platinum; docs/decisions.md).
-  dsOption('repelPrompt', 'game', 'choice', 'Additions'),
-  dsOption('followerTalk', 'game', 'choice', 'Additions'),
-  dsOption('statView', 'game', 'choice', 'Additions'),
-  dsOption('summaryRename', 'game', 'choice', 'Additions'),
-  dsOption('dexNameSearch', 'game', 'choice', 'Additions'),
-  dsOption('spiritombVendors', 'game', 'choice', 'Additions'),
-  dsOption('objective', 'game', 'choice', 'Additions'),
+  dsOption('repelPrompt', 'game', 'choice', 'additions'),
+  dsOption('followerTalk', 'game', 'choice', 'additions'),
+  dsOption('statView', 'game', 'choice', 'additions'),
+  dsOption('summaryRename', 'game', 'choice', 'additions'),
+  dsOption('dexNameSearch', 'game', 'choice', 'additions'),
+  dsOption('spiritombVendors', 'game', 'choice', 'additions'),
+  dsOption('objective', 'game', 'choice', 'additions'),
   // Repeat play: NEW GAME offers to skip Rowan's intro once this device has finished it (OpenSinnoh, title/intro-skip.ts).
   {
     id: 'introSkip',
-    group: 'Additions',
+    group: 'additions',
     section: 'game',
     kind: 'toggle',
     storage: 'device',
@@ -290,7 +292,7 @@ export const SETTINGS: readonly Setting[] = [
   // DEVICE: this device's zoom (`lantern-nds:zoom`): Auto, or a whole scale this window can show.
   {
     id: 'zoom',
-    group: 'Display',
+    group: 'display',
     section: 'device',
     kind: 'stepper',
     storage: 'device',
@@ -304,7 +306,7 @@ export const SETTINGS: readonly Setting[] = [
   // The field's 3D resolution (`lantern-nds:render-scale`): Auto caps phones at 2 device px per CSS px.
   {
     id: 'renderScale',
-    group: 'Display',
+    group: 'display',
     section: 'device',
     kind: 'choice',
     storage: 'device',
@@ -318,7 +320,7 @@ export const SETTINGS: readonly Setting[] = [
   // The visual style (`lantern-nds:visual-style`, visuals.ts): the DS look, or the enhanced visuals. Presentation only.
   {
     id: 'visualStyle',
-    group: 'Display',
+    group: 'display',
     section: 'device',
     kind: 'choice',
     storage: 'device',
@@ -326,7 +328,7 @@ export const SETTINGS: readonly Setting[] = [
     label: () => S.options.visualStyle,
     description: (env) =>
       env.visuals!.eased()
-        ? 'Eased on this device to keep it smooth.\nPick a style for its full look.'
+        ? S.options.visualStyleEased
         : env.visuals!.get().style === 'cinematic' && env.visuals!.phone
           ? S.options.visualStyleHeavy
           : S.options.visualStyleText,
@@ -338,13 +340,13 @@ export const SETTINGS: readonly Setting[] = [
   {
     id: 'menuStyle',
     section: 'device',
-    group: 'Display',
+    group: 'display',
     kind: 'choice',
     storage: 'device',
     available: () => true,
-    label: () => 'MENUS',
-    description: () => (readMenuStyle() === 'modern' ? "OpenSinnoh's own style for the Pokémon and\nBag screens. The game is unchanged." : 'As the DS drew them, from your ROM.\nThe game is the same either way.'),
-    values: () => ['ORIGINAL', 'MODERN'],
+    label: () => S.options.menus,
+    description: () => (readMenuStyle() === 'modern' ? S.options.menusModern : S.options.menusOriginal),
+    values: () => S.options.menuStyles,
     get: () => MENU_STYLES.indexOf(readMenuStyle()),
     set: (_env, v) => {
       const err = storeMenuStyle(MENU_STYLES[v]!);
@@ -354,7 +356,7 @@ export const SETTINGS: readonly Setting[] = [
   // The angled camera (`lantern-nds:angled-camera`): outdoors only, the DS camera in caves, buildings and fog.
   {
     id: 'angledCamera',
-    group: 'Display',
+    group: 'display',
     section: 'device',
     kind: 'toggle',
     storage: 'device',
@@ -368,7 +370,7 @@ export const SETTINGS: readonly Setting[] = [
   // Reduce flashing (`lantern-nds:reduce-flashing`, flashing.ts): follows the system's reduce-motion until chosen. Presentation only.
   {
     id: 'reduceFlashing',
-    group: 'Display',
+    group: 'display',
     section: 'device',
     kind: 'toggle',
     storage: 'device',
@@ -382,11 +384,11 @@ export const SETTINGS: readonly Setting[] = [
       if (err) console.warn(`flashing: the setting is kept for this visit only: ${err}`);
     },
   },
-  action('fullscreen', () => 'FULLSCREEN', (env) => (env.fullscreen!.active() ? 'ON' : 'OFF'), () => 'Fills the screen with the game.', async (env) => (await env.fullscreen!.run(), ''), { section: 'device', group: 'Display', available: (env) => !!env.fullscreen }),
+  action('fullscreen', () => S.options.fullscreen, (env) => (env.fullscreen!.active() ? S.options.on : S.options.off), () => S.options.fullscreenText, async (env) => (await env.fullscreen!.run(), ''), { section: 'device', group: 'display', available: (env) => !!env.fullscreen }),
   // This device's volume and mute (WebAudio settings, `lantern-nds:audio`).
   {
     id: 'volume',
-    group: 'Sound',
+    group: 'sound',
     section: 'device',
     kind: 'slider',
     storage: 'device',
@@ -400,7 +402,7 @@ export const SETTINGS: readonly Setting[] = [
   },
   {
     id: 'mute',
-    group: 'Sound',
+    group: 'sound',
     section: 'device',
     kind: 'toggle',
     storage: 'device',
@@ -414,7 +416,7 @@ export const SETTINGS: readonly Setting[] = [
   // The fast-forward speed (`lantern-nds:speed`).
   {
     id: 'speed',
-    group: 'Play',
+    group: 'play',
     section: 'device',
     kind: 'choice',
     storage: 'device',
@@ -426,18 +428,18 @@ export const SETTINGS: readonly Setting[] = [
     set: (env, v) => env.speed!.set(env.speed!.choices()[v]!),
   },
   // Following Pokémon (a DS-model row) and how a stopped follower stands.
-  dsOption('followers', 'device', 'choice', 'Play'),
-  dsOption('followerStyle', 'device', 'choice', 'Play'),
+  dsOption('followers', 'device', 'choice', 'play'),
+  dsOption('followerStyle', 'device', 'choice', 'play'),
   // The player's look in the field: Platinum's, or the HGSS add-on's Ethan or Lyra.
-  dsOption('character', 'device', 'choice', 'Play'),
+  dsOption('character', 'device', 'choice', 'play'),
   // Naming keyboard: lowercase after the first capital (OpenSinnoh, not Platinum).
-  dsOption('autoLowercase', 'device', 'choice', 'Play'),
+  dsOption('autoLowercase', 'device', 'choice', 'play'),
   // The modern trade-evolution rule (a DS-model row).
-  dsOption('tradeEvolution', 'device', 'choice', 'Play'),
+  dsOption('tradeEvolution', 'device', 'choice', 'play'),
   // OpenSinnoh's own screens: light or dark by the system, or always one (`lantern-nds:theme`, @opensinnoh/ui).
   {
     id: 'theme',
-    group: 'Appearance',
+    group: 'appearance',
     section: 'device',
     kind: 'choice',
     storage: 'device',
@@ -451,7 +453,7 @@ export const SETTINGS: readonly Setting[] = [
   // The frame of OpenSinnoh's own windows (`lantern-nds:ui-frame`, @opensinnoh/ui); the game's message box keeps FRAME.
   {
     id: 'uiFrame',
-    group: 'Appearance',
+    group: 'appearance',
     section: 'device',
     kind: 'choice',
     storage: 'device',
@@ -465,7 +467,7 @@ export const SETTINGS: readonly Setting[] = [
   // The touch controls (this device, `lantern-nds:phone`): their size and how opaque they are.
   {
     id: 'controlSize',
-    group: 'Touch',
+    group: 'touch',
     section: 'device',
     kind: 'choice',
     storage: 'device',
@@ -478,7 +480,7 @@ export const SETTINGS: readonly Setting[] = [
   },
   {
     id: 'controlOpacity',
-    group: 'Touch',
+    group: 'touch',
     section: 'device',
     kind: 'slider',
     storage: 'device',
@@ -492,7 +494,7 @@ export const SETTINGS: readonly Setting[] = [
   },
   {
     id: 'haptics',
-    group: 'Touch',
+    group: 'touch',
     section: 'device',
     kind: 'toggle',
     storage: 'device',
@@ -505,7 +507,7 @@ export const SETTINGS: readonly Setting[] = [
   },
   {
     id: 'keepAwake',
-    group: 'Touch',
+    group: 'touch',
     section: 'device',
     kind: 'toggle',
     storage: 'device',
@@ -517,25 +519,25 @@ export const SETTINGS: readonly Setting[] = [
     set: (env, v) => env.phone!.set({ ...env.phone!.get(), keepAwake: v === 0 }),
   },
   // CONTROLS: running without B and the item wheel on a held Y (OpenSinnoh), then this device's keyboard and gamepad bindings (`lantern-nds:controls`, controls.ts).
-  dsOption('autoRun', 'controls', 'choice', 'Play'),
-  dsOption('itemWheel', 'controls', 'choice', 'Play'),
+  dsOption('autoRun', 'controls', 'choice', 'play'),
+  dsOption('itemWheel', 'controls', 'choice', 'play'),
   ...ACTIONS.map(bindRow),
   {
     id: 'padLayout',
-    group: 'Setup',
+    group: 'setup',
     section: 'controls',
     kind: 'stepper',
     storage: 'device',
     available: () => true,
-    label: () => 'CONTROLLER',
-    description: () => `Sets the confirm button and button names.\n${autoLine()}`,
+    label: () => S.options.controller,
+    description: () => S.options.controllerText(autoLine()),
     values: () => PAD_LAYOUTS.map((l) => l.toUpperCase()),
     get: () => PAD_LAYOUTS.indexOf(controls.bindings.layout),
     set: (_env, v) => void controls.setLayout(PAD_LAYOUTS[v]!),
   },
   {
     id: 'deadZone',
-    group: 'Setup',
+    group: 'setup',
     section: 'controls',
     kind: 'slider',
     storage: 'device',
@@ -549,7 +551,7 @@ export const SETTINGS: readonly Setting[] = [
   },
   {
     id: 'resetControls',
-    group: 'Setup',
+    group: 'setup',
     section: 'controls',
     kind: 'action',
     storage: 'none',
@@ -565,19 +567,19 @@ export const SETTINGS: readonly Setting[] = [
     },
   },
   // DATA: the save file, the imported game, the optional HeartGold/SoulSilver follower art, and the mods.
-  action('exportSave', () => S.options.exportSave, () => S.options.export, () => S.options.exportSaveText, (env) => env.data.exportSave(), { group: 'Saves' }),
+  action('exportSave', () => S.options.exportSave, () => S.options.export, () => S.options.exportSaveText, (env) => env.data.exportSave(), { group: 'saves' }),
   action(
     'importSave',
     () => S.options.importSave,
     () => S.options.chooseFile,
     (env) => (env.where === 'title' ? S.options.importSaveTitle : S.options.importSaveGame),
     (env) => env.data.importSave((q) => env.ask(q)),
-    { group: 'Saves' },
+    { group: 'saves' },
   ),
   // The suspend point (suspend.ts): the game is kept when the app is hidden; CONTINUE picks up there once.
   {
     id: 'suspend',
-    group: 'Saves',
+    group: 'saves',
     section: 'data',
     kind: 'toggle',
     storage: 'device',
@@ -591,7 +593,7 @@ export const SETTINGS: readonly Setting[] = [
       if (err) console.warn(`suspend: the setting is not stored: ${err}`);
     },
   },
-  action('install', () => S.options.install, () => S.options.installButton, () => S.options.installText, (env) => env.install!.run(), { group: 'App', available: (env) => !!env.install?.available() }),
+  action('install', () => S.options.install, () => S.options.installButton, () => S.options.installText, (env) => env.install!.run(), { group: 'app', available: (env) => !!env.install?.available() }),
   action(
     'update',
     () => S.options.update,
@@ -601,17 +603,17 @@ export const SETTINGS: readonly Setting[] = [
       await env.update!.apply();
       return S.options.restarting;
     },
-    { group: 'App', available: (env) => !!env.update?.waiting(), confirm: (env) => (env.where === 'game' ? S.options.updateConfirm : null) },
+    { group: 'app', available: (env) => !!env.update?.waiting(), confirm: (env) => (env.where === 'game' ? S.options.updateConfirm : null) },
   ),
-  action('storage', () => S.options.storage, () => S.options.keepData, (env) => env.data.rom!.storage.line(), (env) => env.data.rom!.storage.keep(), { group: 'Game data', available: hasRom }),
-  action('reimport', () => S.options.reimport, () => S.options.chooseRom, () => S.options.reimportText, (env) => env.data.rom!.reimport(), { group: 'Game data', available: hasRom }),
+  action('storage', () => S.options.storage, () => S.options.keepData, (env) => env.data.rom!.storage.line(), (env) => env.data.rom!.storage.keep(), { group: 'gameData', available: hasRom }),
+  action('reimport', () => S.options.reimport, () => S.options.chooseRom, () => S.options.reimportText, (env) => env.data.rom!.reimport(), { group: 'gameData', available: hasRom }),
   action(
     'addon',
     () => S.options.addon,
     (env) => (env.data.rom!.addon ? S.options.remove : S.options.add),
     (env) => (env.data.rom!.addon ? S.options.addonOn(env.data.rom!.addon.replace(/ \(.*\)$/, '')) : S.options.addonOff),
     (env) => (env.data.rom!.addon ? env.data.rom!.removeAddon() : env.data.rom!.addAddon()),
-    { group: 'Game data', available: hasRom, danger: (env) => !!env.data.rom!.addon, confirm: (env) => (env.data.rom!.addon ? S.options.addonConfirm : null) },
+    { group: 'gameData', available: hasRom, danger: (env) => !!env.data.rom!.addon, confirm: (env) => (env.data.rom!.addon ? S.options.addonConfirm : null) },
   ),
   action(
     'deleteRom',
@@ -619,7 +621,7 @@ export const SETTINGS: readonly Setting[] = [
     () => S.options.delete,
     () => S.options.deleteRomText,
     (env) => env.data.rom!.remove(),
-    { group: 'Game data', available: hasRom, danger: () => true, confirm: () => S.options.deleteRomConfirm },
+    { group: 'gameData', available: hasRom, danger: () => true, confirm: () => S.options.deleteRomConfirm },
   ),
   // PRIVACY: anonymous error reports (`lantern-nds:error-reports`).
   {
@@ -646,7 +648,7 @@ function modSettings(env: SettingsEnv): Setting[] {
       () => S.options.modText,
       (e) => e.data.mods.set(mod.id, !e.data.mods.list().find((m) => m.id === mod.id)!.on),
       {
-        group: 'Mods',
+        group: 'mods',
         disabled: (e) => (e.where === 'title' ? S.options.modTitle : null),
         confirm: () => S.options.modConfirm,
       },
@@ -674,11 +676,11 @@ export function pages(env: SettingsEnv, settings: readonly Setting[] = allSettin
 
 /** A page's rows under their headings, in page order; '' is no heading (a page of one row needs none). */
 export function grouped(settings: readonly Setting[]): { label: string; settings: Setting[] }[] {
-  const out: { label: string; settings: Setting[] }[] = [];
+  const out: { id: GroupId | undefined; label: string; settings: Setting[] }[] = [];
   for (const s of settings) {
     const last = out.at(-1);
-    if (last && (s.group === undefined || s.group === last.label)) last.settings.push(s);
-    else out.push({ label: s.group ?? '', settings: [s] });
+    if (last && (s.group === undefined || s.group === last.id)) last.settings.push(s);
+    else out.push({ id: s.group, label: s.group ? S.options.groups[s.group] : '', settings: [s] });
   }
   return out;
 }

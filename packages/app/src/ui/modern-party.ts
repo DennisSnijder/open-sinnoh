@@ -11,23 +11,16 @@ import type { Button } from '@opensinnoh/core';
 import { ICON_ANIM, hpColor } from './art.ts';
 import type { DrawContext } from './apps.ts';
 import { actionsInSheet, actionsPane, actionsSheet, footButton, gameText, item, line, prompts, screen } from './modern.ts';
+import { S } from '../strings/index.ts';
 
-const STATUS: Record<Exclude<PartySlotView['status'], 'none'>, [StatusName, string]> = {
-  paralysis: ['par', 'PAR'],
-  freeze: ['frz', 'FRZ'],
-  sleep: ['slp', 'SLP'],
-  poison: ['psn', 'PSN'],
-  toxic: ['psn', 'PSN'],
-  burn: ['brn', 'BRN'],
-  fainted: ['fnt', 'FNT'],
-};
+const STATUS: Record<Exclude<PartySlotView['status'], 'none'>, StatusName> = { paralysis: 'par', freeze: 'frz', sleep: 'slp', poison: 'psn', toxic: 'psn', burn: 'brn', fainted: 'fnt' };
 const BAND = { max: 'high', green: 'high', yellow: 'mid', red: 'low' } as const;
 
 /** The front picture's scale: 80 DS px at 2 CSS px each. */
 const FRONT_SCALE = 2;
 
 const hp = (m: PartySlotView) => hpBar(m.hp, m.maxHp, BAND[hpColor(m.hp, m.maxHp)]);
-const status = (m: PartySlotView) => (m.status === 'none' || m.egg ? null : statusChip(...STATUS[m.status]));
+const status = (m: PartySlotView) => (m.status === 'none' || m.egg ? null : statusChip(STATUS[m.status], S.modern.status[m.status === 'toxic' ? 'poison' : m.status]));
 const level = (m: PartySlotView) => (m.egg ? null : h('span', 'os-num mm-lv', `${m.levelLabel}${m.level}`));
 /** A name with the symbol in it (NIDORAN♂) says it already. */
 const gender = (m: PartySlotView) => (m.gender === 'none' || /[♂♀]/.test(m.name) ? null : genderMark(m.gender));
@@ -40,7 +33,7 @@ function iconAnim(m: PartySlotView): number {
 }
 
 function row(d: DrawContext, v: PartyView, i: number, m: PartySlotView): HTMLElement {
-  const mark = m.heldItem ? h('span', 'mm-held', icon('bag', 16, 'Holds an item')) : null;
+  const mark = m.heldItem ? h('span', 'mm-held', icon('bag', 16, S.modern.heldItem)) : null;
   const note = v.notes[i];
   const b = item(
     d,
@@ -80,7 +73,7 @@ function detail(d: DrawContext, v: PartyView, m: PartySlotView | null | undefine
         'mm-id',
         h('div', 'mm-nl', line('lab', m.name), gender(m), level(m)),
         note ? line('mm-note', note) : m.egg ? null : hp(m),
-        h('div', 'mm-nl mm-wrap', status(m), held, m.capsule ? h('span', 'mm-heldname', icon('ball'), 'Capsule') : null),
+        h('div', 'mm-nl mm-wrap', status(m), held, m.capsule ? h('span', 'mm-heldname', icon('ball'), S.modern.capsule) : null),
       ),
     ),
     after,

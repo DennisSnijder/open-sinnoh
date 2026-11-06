@@ -623,7 +623,7 @@ class CastleScene extends FrontierScene<CastleView> {
     }
     // Choosing a Pokémon or EXIT (taps `mon:<i>`, `exit`).
     if (v.panel === 'main' && !v.menu && !v.message && !v.yesNo && !v.sparkle) {
-      v.mons.forEach((m, i) => tap(`mon:${i}`, m.hidden ? `Poké Ball ${i + 1}` : `Pokémon ${i + 1}, level ${m.level}`, { ...CASTLE_TAPS.slot, x: CASTLE_TAPS.slot.x + SLOT * i }, v.cursor === i));
+      v.mons.forEach((m, i) => tap(`mon:${i}`, m.hidden ? words.aria.ball(i + 1, false) : words.aria.castleMon(i + 1, m.level), { ...CASTLE_TAPS.slot, x: CASTLE_TAPS.slot.x + SLOT * i }, v.cursor === i));
       tap('exit', v.exit, CASTLE_TAPS.exit, v.cursor === exit);
     }
     if (v.hint) {

@@ -5,9 +5,6 @@
  * `showPicker()` says so, where `click()` fails without a word: the caller tells the player instead of doing nothing.
  */
 
-/** What the player sees when the browser refuses (the ROM page has its own, longer one). */
-export const FILE_DIALOG_REFUSED = 'This browser opens the file dialog only for a key press, click or tap: press Enter, click or tap this button.';
-
 /** Opens `input`'s dialog; false when the browser refused it (no user activation). */
 export function openFileDialog(input: HTMLInputElement): boolean {
   if (typeof input.showPicker !== 'function') {

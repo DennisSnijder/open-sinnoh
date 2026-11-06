@@ -17,6 +17,7 @@ import { pageDriver } from '../../packages/cli/src/browser.ts';
 import { romSlice } from '../rom.ts';
 import { canvasStats } from './canvas.ts';
 import { seedRomImport } from './seed.ts';
+import { appStrings } from './words.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 const SHOTS = join(import.meta.dirname, '../../test-artifacts/hall-of-fame');
@@ -187,7 +188,7 @@ test('the induction, the credits and the OpenSinnoh card on one screen, then CON
       const name = line.action.name;
       const app = (await page.evaluate(() => window.openSinnohGame!.snapshot().app)) as AppView;
       // The ROM pictures load once per page: wait for the canvas to be drawn with them.
-      await expect(page.locator('.ds-scene')).toHaveAttribute('aria-label', app.app === 'credits' ? 'Credits' : 'Hall of Fame', { timeout: 60_000 });
+      await expect(page.locator('.ds-scene')).toHaveAttribute('aria-label', app.app === 'credits' ? appStrings().aria.credits : appStrings().aria.hallOfFame, { timeout: 60_000 });
       const least = { 'hof-member': 12, 'hof-group': 30, 'credits-scroll': 4 }[name] ?? 0;
       if (least) await expect.poll(async () => {
         const art = await canvasStats(page, '.ds-scene-canvas');

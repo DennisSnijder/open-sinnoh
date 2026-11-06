@@ -10,7 +10,6 @@
  */
 import type { InputFrame } from '@opensinnoh/contracts';
 import { choices, h, snapPixels, titleTab, wordmark } from '@opensinnoh/ui';
-import { FILE_DIALOG_REFUSED } from '../file-dialog.ts';
 import { ASK, type SetupQuestion } from './setup-questions.ts';
 import { S } from '../strings/index.ts';
 import './setup.css';
@@ -87,7 +86,7 @@ export class SetupFlow {
     if (chosen === null) return false;
     if (q === 'addon' && chosen === 0) {
       // The picker; the ROM page imports it and offers Start playing. Cancelled: the question stays.
-      if (!this.deps.pickAddon()) this.note = FILE_DIALOG_REFUSED;
+      if (!this.deps.pickAddon()) this.note = S.rom.dialogRefused;
       return false;
     }
     this.deps.answer(q, chosen);

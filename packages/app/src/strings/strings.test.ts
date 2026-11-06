@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { SUPPORTED_ROMS } from '@opensinnoh/nds';
 import { keyLabel, reservedKey } from '../controls.ts';
@@ -49,7 +51,7 @@ describe('the German table', () => {
     expect(ASK.textSpeed.title).toBe('Text-Tempo');
     expect(SETTINGS.find((s) => s.id === 'bind/up')!.label({} as never)).toBe('Steuerkreuz oben');
     expect(keyLabel('Space')).toBe('Leertaste');
-    expect(reservedKey('KeyP')).toBe('P öffnet den Pokétch');
+    expect(reservedKey('Backquote')).toBe('` schaltet den Schnellvorlauf um');
     setLanguage('en');
     expect(SECTIONS[0]!.label).toBe('GAME');
     expect(reservedKey('Backquote')).toBe('the backtick toggles fast-forward');
@@ -70,5 +72,15 @@ describe('Options labels in capitals', () => {
     expect(labelCase('STIL DES KAMPFES')).toBe('Stil des Kampfes');
     expect(labelCase('ROM-IMPORT')).toBe('ROM-Import');
     expect(labelCase('POKéDEX')).toBe('POKéDEX');
+  });
+});
+
+describe('the shell', () => {
+  it('shows no literal where the player reads words: they come from the tables', () => {
+    const shown = /(?:aria-label', |toast\(|notice\(|banner\(|statusChip\(|label: \(\) => |description: \(\) => |confirm: \(\) => )['"`][A-Za-z]/;
+    const src = join(import.meta.dirname, '..');
+    const files = readdirSync(src, { recursive: true, encoding: 'utf8' }).filter((f) => f.endsWith('.ts') && !/\.test\.ts$|^strings|^debug|ui-gallery|recorder/.test(f));
+    expect(files.length).toBeGreaterThan(50);
+    expect(files.flatMap((f) => readFileSync(join(src, f), 'utf8').split('\n').filter((line) => shown.test(line)).map((line) => `${f}: ${line.trim()}`))).toEqual([]);
   });
 });

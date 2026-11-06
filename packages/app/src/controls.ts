@@ -306,28 +306,11 @@ export function padFace(b: Bindings, id: string | undefined): PadKind {
   return b.layout === 'auto' ? padKind(id ?? '') : b.layout;
 }
 
-const STANDARD_NAMES: Readonly<Record<number, string>> = {
-  10: 'Left stick press',
-  11: 'Right stick press',
-  12: 'D-pad up',
-  13: 'D-pad down',
-  14: 'D-pad left',
-  15: 'D-pad right',
-};
-
-/** Standard-mapping buttons 0 to 9, then the home button, as each pad prints them. */
-const FACE_NAMES: Readonly<Record<PadKind, readonly string[]>> = {
-  generic: ['Bottom button', 'Right button', 'Left button', 'Top button', 'Left bumper', 'Right bumper', 'Left trigger', 'Right trigger', 'Back', 'Start', 'Home'],
-  xbox: ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'View', 'Menu', 'Xbox button'],
-  playstation: ['Cross', 'Circle', 'Square', 'Triangle', 'L1', 'R1', 'L2', 'R2', 'Share', 'Options', 'PS button'],
-  nintendo: ['B', 'A', 'Y', 'X', 'L', 'R', 'ZL', 'ZR', 'Minus', 'Plus', 'Home'],
-};
-
 /** A pad token's name for the player (`raw`: the pad has no standard layout, so only its indices are known). */
 export function padLabel(token: PadToken, raw: boolean, kind: PadKind = 'generic'): string {
   if (token === null) return S.controls.unbound;
   const n = Number(token.slice(1, token.length - (token[0] === 'a' ? 1 : 0)));
-  if (token[0] === 'b') return raw ? S.controls.button(n) : (FACE_NAMES[kind][n === 16 ? 10 : n] ?? STANDARD_NAMES[n] ?? S.controls.button(n));
+  if (token[0] === 'b') return raw ? S.controls.button(n) : (S.controls.padFaces[kind][n === 16 ? 10 : n] ?? S.controls.padSticks[n - 10] ?? S.controls.button(n));
   return S.controls.axis(n, token.endsWith('+') ? '+' : '-');
 }
 

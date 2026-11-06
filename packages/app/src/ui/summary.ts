@@ -22,6 +22,7 @@ import { STATUS_CELLS, sprite, textColor } from './party.ts';
 import type { Palette } from './pixel-font.ts';
 import { plainText } from './strings.ts';
 import './summary.css';
+import { S } from '../strings/index.ts';
 
 /** The moves page's PP label (decomp PrintMoveNameAndPP: PokemonSummary_Text_LabelPp of the base pack). */
 function ppLabel(d: DrawContext): string {
@@ -152,7 +153,7 @@ function tabs(d: DrawContext, v: SummaryView): HTMLElement[] {
     const cell = tabCell(d, t.anim + (on ? SELECTED : 0));
     const w = on ? TABS.focused : TABS.unfocused;
     const art = cell === null ? [d.text(t.id === 'exit' ? '×' : t.label.slice(0, 1), on ? 'light' : 'ink')] : [d.art.cells('summary/tabs', [cell], d.unit)!];
-    const content = [...art, el('span', 'sr-only', t.label || 'Exit')];
+    const content = [...art, el('span', 'sr-only', t.label || S.aria.exit)];
     const cls = `${t.id === 'exit' ? 'sum-exit' : 'sum-tab'}${on ? ' on' : ''}${cell === null ? ' css' : ''}`;
     const tab = button(d, t.id === 'exit' ? 'back' : `page:${t.id}`, cls, content);
     if (t.id !== 'exit') {
@@ -365,7 +366,7 @@ function ribbons(d: DrawContext, v: SummaryView, c: Colors): Node[] {
   const arrow = (dir: 'up' | 'down', show: boolean, y: number) => {
     if (!show) return;
     const art = d.art.cells('summary/ribbon_arrow', [dir === 'up' ? 1 : 0], d.unit);
-    out.push(at(button(d, `ribbons:${dir}`, `ribbon-arrow ${dir}${art ? ' rom' : ''}`, art ? [art] : [], dir === 'up' ? 'Previous row' : 'Next row'), 240, y, 16, ARROW_H));
+    out.push(at(button(d, `ribbons:${dir}`, `ribbon-arrow ${dir}${art ? ' rom' : ''}`, art ? [art] : [], dir === 'up' ? S.aria.previousRow : S.aria.nextRow), 240, y, 16, ARROW_H));
   };
   // Right of the grid, along the first shown row and the last.
   arrow('up', r.detail !== null && r.row > 0, RIBBONS.y - 20);
@@ -424,7 +425,7 @@ export function summary(wide: DrawContext, v: SummaryView): HTMLElement {
 
   root.append(...page(d, v, c));
   // Previous/next beside the picture, while no detail panel covers it.
-  if (!v.moves.detail && !v.ribbons.detail) root.append(at(button(d, 'prev', 'mon-step prev', [], 'Previous Pokémon'), 84, 64, 20, 24), at(button(d, 'next', 'mon-step next', [], 'Next Pokémon'), 84, 112, 20, 24));
+  if (!v.moves.detail && !v.ribbons.detail) root.append(at(button(d, 'prev', 'mon-step prev', [], S.aria.previousMon), 84, 64, 20, 24), at(button(d, 'next', 'mon-step next', [], S.aria.nextMon), 84, 112, 20, 24));
   if (v.message) root.append(atTiles(messageBox(d, v.message.text, v.message.waiting), ...W.message));
   root.setAttribute('aria-label', m.name);
   return root;

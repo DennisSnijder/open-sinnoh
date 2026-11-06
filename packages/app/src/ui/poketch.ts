@@ -112,7 +112,7 @@ export class PoketchCard {
     close.type = 'button';
     close.setAttribute('aria-label', S.aria.closeWatch);
     close.addEventListener('click', () => this.deps.close());
-    this.el = el('aside', 'poketch', this.canvas, side('up', 'Previous app'), side('down', 'Next app'), close);
+    this.el = el('aside', 'poketch', this.canvas, side('up', S.aria.previousApp), side('down', S.aria.nextApp), close);
     this.el.hidden = true;
     this.el.setAttribute('aria-label', S.aria.watch);
   }

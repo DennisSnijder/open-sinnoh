@@ -12,7 +12,7 @@ import { readVisuals, storeVisuals, VISUAL_STYLES, visualStyleChosen, type Visua
 import { MENU_STYLES, menuStyleChosen, storeMenuStyle } from './menu-style.ts';
 import { createBridge, type AppBridge } from './bridge.ts';
 import type { ReplayRecorder } from './recorder.ts';
-import { FILE_DIALOG_REFUSED, openFileDialog } from './file-dialog.ts';
+import { openFileDialog } from './file-dialog.ts';
 import { attachGamepadEvents, attachKeyboard, controls, FAST_FORWARD_TOGGLE, gamepadFastForward, gamepadPoketch, InputState, onPadGesture, pollGamepads } from './input.ts';
 import { computeLayout, readRenderScale, renderPixelRatio, storeRenderScale, type Insets, type Layout, type Rect, type RenderScale } from './layout.ts';
 import { newLoopStats, startLoop, type LoopStats } from './loop.ts';
@@ -129,7 +129,7 @@ function pickFile(accept: string): Promise<File | null> {
     document.body.append(input);
     if (!openFileDialog(input)) {
       input.remove();
-      reject(new Error(FILE_DIALOG_REFUSED));
+      reject(new Error(S.rom.dialogRefused));
     }
   });
 }
@@ -529,7 +529,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   });
   addEventListener('gamepadconnected', () => {
     sawPhysical();
-    ui!.toast('Gamepad connected');
+    ui!.toast(S.game.gamepadHere);
   });
   onPadGesture(() => audio.unlock());
 
@@ -641,7 +641,7 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
     const step = autoQuality.frame(ms);
     if (step === 'keep') {
       storeQuality('eased');
-      ui!.toast('Visuals eased to keep the game smooth', 6000);
+      ui!.toast(S.game.visualsEased, 6000);
     } else if (step) {
       eased = step === 'ease';
       applyVisuals();

@@ -180,7 +180,7 @@ function introFlow(deps: IntroDeps, skip: boolean, done: IntroDeps['done']): Tit
   let quiet = false;
   const app: AppModel = createRowanIntro({ registries: deps.registries, log: deps.log, ...(deps.sound ? { sound: deps.sound } : {}), textDelay: deps.textDelay(), defaults: deps.defaults, autoLowercase: deps.autoLowercase, skip });
   let finished = false;
-  return new TitleFlow(deps, 'New game', {
+  return new TitleFlow(deps, S.title.newGameHeading.tab, {
     view: () => app.view(),
     tick: (f) => {
       if (finished) return;
