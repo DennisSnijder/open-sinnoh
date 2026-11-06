@@ -17,7 +17,7 @@ export const PINS: Pin[] = [
 /**
  * Pins the scan can't prove, placed by hand per build (`<gameCode>-rev<n>`): the offset, a row count where the
  * build's table is longer or shorter, and why. The layout takes the build's own SHA-1 there; the importer's readers
- * check the contents. A manual entry for a pin the scan finds is an error (it would hide a change).
+ * check the contents. A manual entry for a pin the scan finds elsewhere is an error (it would hide a change).
  */
 export interface ManualPin {
   offset: number;

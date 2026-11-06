@@ -108,7 +108,7 @@ const placed = found.map((f, i) => {
   const pin = PINS[i]!;
   const m = manual[f.key];
   if (!m) return f.status === 'missing' ? null : { key: f.key, offset: f.offset, sha1: f.sha1, count: null };
-  if (f.status !== 'missing') throw new Error(`manual entry ${f.key}: the scan found it (${f.status} at ${hex(f.offset)}); remove the entry`);
+  if (f.status !== 'missing' && f.offset !== m.offset) throw new Error(`manual entry ${f.key} at ${hex(m.offset)}: the scan found it elsewhere (${f.status} at ${hex(f.offset)})`);
   const length = (m.count ?? pin.length / pin.size) * pin.size;
   const bytes = targetModules.get(pin.where)!.bytes.subarray(m.offset, m.offset + length);
   if (bytes.length !== length) throw new Error(`manual entry ${f.key}: 0x${m.offset.toString(16)}+${length} is outside ${pin.where}`);

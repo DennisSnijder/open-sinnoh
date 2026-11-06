@@ -162,7 +162,7 @@ export const DE: Strings = {
     fullscreenFailed: (message) => `Vollbild konnte nicht starten: ${message}`,
     optionsReset: (problem) => `Deine gespeicherten Optionen konnten nicht gelesen werden (${problem}) und wurden zurückgesetzt.`,
     gamepadGone: 'Controller getrennt',
-    gamepadHere: 'Gamepad verbunden',
+    gamepadHere: 'Controller verbunden',
     visualsEased: 'Grafik reduziert, damit das Spiel flüssig bleibt',
     newGameStarted: 'Neues Spiel gestartet.',
     backAtSave: 'Zurück beim letzten Spielstand.',
