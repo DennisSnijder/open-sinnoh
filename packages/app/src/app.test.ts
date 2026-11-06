@@ -95,6 +95,11 @@ describe('layout', () => {
       [844, 390, 3],
       [1024, 600, 2],
       [667, 375, 2],
+      // Fractional scaling (Windows 125–175 %, Android): whole device pixels too.
+      [1463, 836, 1.75],
+      [1536, 864, 1.25],
+      [1280, 720, 1.5],
+      [412, 915, 2.625],
     ] as const) {
       const s = uiScales(w, h, dpr, false);
       expect(SHEET.width * s.dot).toBeLessThanOrEqual(w);
