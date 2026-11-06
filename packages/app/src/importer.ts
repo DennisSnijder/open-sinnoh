@@ -10,7 +10,7 @@ export interface ImportProgress {
 }
 
 /** Bump whenever the importer's output changes (records, assets, file layout): cached imports are then redone. */
-export const IMPORTER_VERSION = 'platinum-111';
+export const IMPORTER_VERSION = 'platinum-112';
 
 /** The ROM → the base pack's PackData and its assets (pack path → bytes). */
 export async function runImporter(rom: HashedRom, onProgress: (p: ImportProgress) => void): Promise<{ pack: PackData; assets: Map<string, Uint8Array> }> {

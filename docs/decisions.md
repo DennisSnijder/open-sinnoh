@@ -542,6 +542,10 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   device has seen Rowan's intro; a suspend point when the page hides; follower talk with the HGSS add-on
   (its global interaction rules; mood is not saved); auto lowercase after the first capital on the naming
   keyboard (not Platinum's); trade evolutions without a trade (labelled, off is faithful).
+- **The start menu's EXIT goes back to the title** (not the DS's, where it only closes the menu, as B still does): it
+  asks first in the save window (our words; NO stays), then the DS's save question; YES saves, and either answer
+  reloads the page to the title without `?continue`. The suspend point is cleared and not written on the way out, so
+  NO really leaves the unsaved play behind.
 - **The objective:** the start menu shows the next story beat in a field window beside it (above it on phones), on
   by default. It is derived, never tracked: an ordered table in the pack (`NewGame.objectives`, our words, written by
   the importer) whose first step with no check holding is shown; each step also lists a later beat that proves it

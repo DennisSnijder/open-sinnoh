@@ -195,6 +195,8 @@ export interface Game {
   readonly battle: Battle | null;
   /** A battle was started and has not ended (it may still be loading its engine). */
   inBattle(): boolean;
+  /** The start menu's EXIT asked to go back to the title screen (after its save question): true once, then cleared. */
+  takeQuitRequest(): boolean;
   /** The setup of the battle started and not ended (the app preloads its art from it), else null. */
   battleSetup(): BattleSetup | null;
   /** Answers the running battle's prompt (`Battle.choose`); throws when no battle waits. */
@@ -1015,6 +1017,9 @@ export function createGame(options: GameOptions): Game {
     }
   };
 
+  /** The start menu's EXIT result, until the app takes it (`Game.takeQuitRequest`). */
+  let quitRequest = false;
+
   /** One tick of game time: the tick counter and, every 30 ticks, a second of play time. */
   const countTick = () => {
     state.tick++;
@@ -1047,6 +1052,11 @@ export function createGame(options: GameOptions): Game {
       return battle?.run ?? null;
     },
     inBattle: () => battle !== null,
+    takeQuitRequest() {
+      const q = quitRequest;
+      quitRequest = false;
+      return q;
+    },
     battleSetup: () => battle?.setup ?? null,
     battleChoose(choice) {
       if (!battle?.run) throw new Error(`battleChoose: no battle is running (${JSON.stringify(choice)})`);
@@ -1179,6 +1189,7 @@ export function createGame(options: GameOptions): Game {
             useFieldItem(fieldItems(), pendingFieldItem);
             pendingFieldItem = null;
           }
+          if (result.app === 'start-menu' && result.quit) quitRequest = true;
           // The item wheel's pick is used as Y uses the registered item.
           if (result.app === 'item-wheel' && result.item) useRegisteredItem(fieldItems(), result.item);
         }

@@ -153,6 +153,43 @@ describe('start menu app', () => {
     expect(press(app, 'a')).toEqual({ app: 'start-menu' });
   });
 
+  it('EXIT in a Safari Game goes to the title with no save question: SAVE is hidden there', () => {
+    const s = fresh();
+    const flag = id('FLAG_SAFARI');
+    s.flags[flag] = true;
+    const safari = { ...registries, newGame: new Map([[record.id, { ...record, greatMarsh: { ...record.greatMarsh, flag } }]]) } as typeof registries;
+    const saves: GameState[] = [];
+    const app = createApp({ app: 'start-menu' }, { registries: safari, state: s, log: { stub: () => {} }, host: host(saves, s) });
+    expect((app.view() as StartMenuView).entries.map((e) => e.id)).not.toContain('save');
+    tap(app, `entry:${(app.view() as StartMenuView).entries.findIndex((e) => e.id === 'exit')}`);
+    expect(press(app, 'a')).toEqual({ app: 'start-menu', quit: true });
+    expect(saves).toHaveLength(0);
+  });
+
+  it('EXIT asks to go back to the title, then the save question: either answer quits, NO first stays', () => {
+    const s = fresh();
+    const saves: GameState[] = [];
+    const app = createApp({ app: 'start-menu' }, { registries, state: s, log: { stub: () => {} }, host: host(saves, s) });
+    const exit = () => tap(app, 'entry:4');
+    exit();
+    expect(app.view()).toMatchObject({ app: 'save', phase: 'ask', message: 'Head back to the title?', cursor: 0 });
+    press(app, 'b');
+    expect(app.view().app).toBe('start-menu');
+    // YES, then YES to saving: saved, and A on "saved" quits.
+    exit();
+    press(app, 'a');
+    expect(app.view()).toMatchObject({ app: 'save', phase: 'ask', message: 'Write your journey into the record?' });
+    press(app, 'a');
+    expect(saves).toHaveLength(1);
+    expect(press(app, 'a')).toEqual({ app: 'start-menu', quit: true });
+    // YES, then NO to saving: quits without a save.
+    const again = createApp({ app: 'start-menu' }, { registries, state: s, log: { stub: () => {} }, host: host(saves, s) });
+    tap(again, 'entry:4');
+    press(again, 'a');
+    expect(press(again, 'b')).toEqual({ app: 'start-menu', quit: true });
+    expect(saves).toHaveLength(1);
+  });
+
   it('auto-repeats a held d-pad (8 ticks, then every 3)', () => {
     const s = fresh();
     const app = createApp({ app: 'start-menu' }, { registries, state: s, log: { stub: () => {} }, host: host() });
