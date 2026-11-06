@@ -189,6 +189,7 @@ export function bagScreen(ctx: MenuContext, mode: BagMode): Screen {
         mode: mode.kind,
         title: t.t('startBag'),
         pockets: pocketLabels(),
+        pocketTypes: onePocket ? [only] : pocketIds.map((_, i) => i),
         pocket: onePocket ? 0 : pocket,
         rows: list,
         cancel: t.t(mode.kind === 'field' || mode.kind === 'pick' || mode.kind === 'poffin' ? 'bagCloseBag' : 'bagCancel'),

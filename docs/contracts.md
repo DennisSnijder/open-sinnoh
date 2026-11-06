@@ -36,6 +36,7 @@ a reviewed step: bump `CONTRACTS_VERSION` and add a line below.
   replays, stepped by `date`/`time` lines. Periods are core `dayPeriod(hour)` (decomp TimeOfDayForHour).
 
 ## Changelog
+- 0.49.5 (the one-pocket bag, on 0.49.4): `BagView.pocketTypes` (the DS pocket type each listed pocket is drawn as), so the `pick` and `poffin` bags, which list one pocket, draw it instead of failing.
 - 0.49.4 (on 0.49.3): `PartySlotView.shiny?` (the front picture of the Modern party; a view field, not state).
 - 0.49.3 (on 0.49.2): `FieldRenderer.render`'s `repeat?`, set on a frame no tick came before: the renderer may leave the last picture up.
 - 0.49.2 (on 0.49.1): `World.steps()`, a count of the field steps that moved the actors on; the view draws a still field (a menu or app over it, fishing) at its last tick instead of between two stale ticks.

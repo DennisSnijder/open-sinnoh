@@ -25,12 +25,16 @@ type Input = { button: Button } | { tap: string };
 type BagRequest = Extract<AppRequest, { app: 'bag-select' }>;
 type PartyRequest = Extract<AppRequest, { app: 'party-select' }>;
 
+/** decomp POCKET_*: the field pocket each battle pocket is drawn as (its icon and the bag picture). */
+const POCKET_MEDICINE = 1;
+const POCKET_BALLS = 2;
+const POCKET_BATTLE_ITEMS = 6;
 /** decomp BATTLE_POCKET_INDEX_* order, each with the battlePocket mask bits it collects (BattleBag_Init's sBattlePocketIndexes). */
-const POCKETS: { bits: number; label: MenuKey[] }[] = [
-  { bits: 4 | 16, label: ['battleBagHpPp', 'battleBagRestore'] },
-  { bits: 8, label: ['battleBagStatus', 'battleBagHealers'] },
-  { bits: 1, label: ['battleBagBalls'] },
-  { bits: 2, label: ['battleBagItems'] },
+const POCKETS: { bits: number; label: MenuKey[]; type: number }[] = [
+  { bits: 4 | 16, label: ['battleBagHpPp', 'battleBagRestore'], type: POCKET_MEDICINE },
+  { bits: 8, label: ['battleBagStatus', 'battleBagHealers'], type: POCKET_MEDICINE },
+  { bits: 1, label: ['battleBagBalls'], type: POCKET_BALLS },
+  { bits: 2, label: ['battleBagItems'], type: POCKET_BATTLE_ITEMS },
 ];
 const BALLS = 1;
 const BATTLE_ITEMS = 2;
@@ -88,6 +92,7 @@ export function battleBagScreen(ctx: MenuContext, req: BagRequest): Screen {
         app: 'bag',
         title: ctx.text.t('startBag'),
         pockets: POCKETS.map((p) => p.label.map((k) => ctx.text.t(k)).join(' ')),
+        pocketTypes: POCKETS.map((p) => p.type),
         pocket: ctx.memory.battlePocket,
         rows: list,
         cancel: ctx.text.t('bagCancel'),

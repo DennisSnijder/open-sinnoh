@@ -7,13 +7,11 @@ import type { BagView } from '@opensinnoh/contracts';
 import { stop, type DrawContext } from './apps.ts';
 import { actionsInSheet, actionsPane, actionsSheet, footButton, gameText, item, line, prompts, screen } from './modern.ts';
 
-/** The DS's eight pockets, in order; the battle bag's four (HP/PP, status, balls, battle items). */
-const FIELD_ICONS: IconName[] = ['bag', 'heart', 'ball', 'disc', 'berry', 'mail', 'spark', 'key'];
-const BATTLE_ICONS: IconName[] = ['heart', 'heart', 'ball', 'spark'];
+/** By the DS pocket type (`BagView.pocketTypes`). */
+const POCKET_ICONS: IconName[] = ['bag', 'heart', 'ball', 'disc', 'berry', 'mail', 'spark', 'key'];
 
 function pockets(d: DrawContext, v: BagView): HTMLElement {
-  const icons = v.mode === 'battle' ? BATTLE_ICONS : FIELD_ICONS;
-  const r = rail(v.pockets.map((label, i) => ({ label, icon: icons[i]! })), v.pocket, { label: 'Pockets', onPick: (i) => d.tap(`pocket:${i}`) });
+  const r = rail(v.pockets.map((label, i) => ({ label, icon: POCKET_ICONS[v.pocketTypes[i]!]! })), v.pocket, { label: 'Pockets', onPick: (i) => d.tap(`pocket:${i}`) });
   r.querySelectorAll<HTMLElement>('[role="tab"]').forEach((t, i) => (t.dataset.tap = `pocket:${i}`));
   return r;
 }
