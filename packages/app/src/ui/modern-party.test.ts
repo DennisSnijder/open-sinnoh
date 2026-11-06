@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { InputFrame, PartySlotView, PartyView } from '@opensinnoh/contracts';
 import type { Button } from '@opensinnoh/core';
-import { modernMenu } from './modern.ts';
 import { partyListInput } from './modern-party.ts';
 
 /** The game's own cursor rule (packages/menus stack.ts `moveCursor`, two columns). */
@@ -21,15 +20,6 @@ const member = {} as PartySlotView;
 const view = (members: number, cursor: number, confirm = false): PartyView =>
   ({ slots: Array.from({ length: 6 }, (_, i) => (i < members ? member : null)), cursor, menu: null, message: null, yesNo: null, ...(confirm ? { confirm: 'OK' } : {}) }) as PartyView;
 const frame = (b: Button): InputFrame => ({ held: [b], pressed: [b], touch: null });
-
-describe('which screens follow MENUS', () => {
-  it('follows the setting, in the field and in a battle', () => {
-    expect(modernMenu({ modern: true }, { mode: 'field' } as PartyView)).toBe(true);
-    expect(modernMenu({ modern: true }, { mode: 'battle' } as PartyView)).toBe(true);
-    expect(modernMenu({ modern: false }, { mode: 'field' } as PartyView)).toBe(false);
-    expect(modernMenu({}, { mode: 'field' } as PartyView)).toBe(false);
-  });
-});
 
 describe('the Modern party list on the game’s 2-column cursor', () => {
   for (const members of [1, 2, 3, 4, 5, 6]) {

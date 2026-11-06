@@ -4,20 +4,13 @@
  * packages/menus runs exactly as it does for the original screens. Art stays the ROM's (sprites and icons); the text
  * is the game's strings in the design system's faces, with ♂ and ♀ drawn as icons.
  *
- * `MODERN_IN_BATTLE` is the one switch for the party and bag a battle opens. The battle screen itself, the field and
- * message boxes outside these screens stay ROM-drawn.
+ * The party and bag a battle opens follow the setting too. The battle screen itself, the field and message boxes outside
+ * these screens stay ROM-drawn.
  */
 import { cursorMark, h, icon, titleTab, type IconName, type Tone } from '@opensinnoh/ui';
-import type { AppMenu, AppMessage, AppYesNo, BagView, PartyView } from '@opensinnoh/contracts';
+import type { AppMenu, AppMessage, AppYesNo } from '@opensinnoh/contracts';
 import { stop, type DrawContext } from './apps.ts';
 import './modern.css';
-
-const MODERN_IN_BATTLE = true;
-
-/** Whether this view draws in the Modern style. */
-export function modernMenu(d: Pick<DrawContext, 'modern'>, v: PartyView | BagView): boolean {
-  return !!d.modern && (MODERN_IN_BATTLE || v.mode !== 'battle');
-}
 
 /** A game string for a kit face: one line (the ROM's line breaks are for its windows), ♂ and ♀ as icons. */
 export function gameText(s: string): Node[] {

@@ -34,7 +34,6 @@ import { credits, hallOfFame } from './hall-of-fame.ts';
 import { icon, type IconName } from './icons.ts';
 import { party } from './party.ts';
 import { modernBag } from './modern-bag.ts';
-import { modernMenu } from './modern.ts';
 import { modernParty } from './modern-party.ts';
 import { summary } from './summary.ts';
 import { at, atTiles, board, boardContext } from './board.ts';
@@ -68,7 +67,7 @@ export interface DrawContext {
   compact: boolean;
   /** The UI layer's size in CSS px (the evolution scene picks its whole-pixel scale from it). */
   size?: { width: number; height: number };
-  /** The MENUS setting is Modern (not in replays). `modernMenu` says which screens follow it. */
+  /** The MENUS setting is Modern (not in replays): the party and bag draw in it, in a battle too. */
   modern?: boolean;
   /** The player's gender (the bag picture); absent outside a game (the title's naming screen). */
   gender?: 'male' | 'female';
@@ -128,9 +127,9 @@ export function drawApp(d: DrawContext, v: AppView): Drawn {
     case 'save':
       return { kind: 'window', root: save(d, v) };
     case 'party':
-      return modernMenu(d, v) ? { kind: 'os', root: modernParty(d, v) } : { kind: 'sheet', root: party(d, v) };
+      return d.modern ? { kind: 'os', root: modernParty(d, v) } : { kind: 'sheet', root: party(d, v) };
     case 'bag':
-      return modernMenu(d, v) ? { kind: 'os', root: modernBag(d, v) } : { kind: 'sheet', root: bag(d, v) };
+      return d.modern ? { kind: 'os', root: modernBag(d, v) } : { kind: 'sheet', root: bag(d, v) };
     case 'summary':
       return { kind: 'sheet', root: summary(d, v) };
     case 'trainer-card':

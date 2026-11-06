@@ -19,7 +19,6 @@ import { snapPixels } from '@opensinnoh/ui';
 import { icon } from './icons.ts';
 import { PixelFont } from './pixel-font.ts';
 import { readMenuStyle } from '../menu-style.ts';
-import { modernMenu } from './modern.ts';
 import { partyListInput } from './modern-party.ts';
 import { OptionsScreen } from './options-screen.ts';
 import { PoketchCard } from './poketch.ts';
@@ -387,7 +386,7 @@ export function mountUi(deps: UiDeps): InGameUi {
       if (poketch.shown && (scriptBusy(game) || game.app() || !game.poketch())) poketch.show(false);
       const view = game.app();
       if (view?.app === 'trainer-card') pen.input(frame, view);
-      if (view?.app === 'party' && modernMenu({ modern: modern() }, view)) frame = partyListInput(frame, view);
+      if (view?.app === 'party' && modern()) frame = partyListInput(frame, view);
       // The Underground's touch radar has no button on the DS: R pings around the player, as a touch on the field does.
       if (!view && !poketch.shown && frame.pressed.includes('r') && game.world.undergroundView()) deps.tap(`tile:${game.state.player.x},${game.state.player.z}`);
       // OPTIONS keeps its own page and cursor (options-screen.ts): it takes the d-pad, A, L/R and its taps.
