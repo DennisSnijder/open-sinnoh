@@ -26,7 +26,7 @@ describe.skipIf(!romPath)('Pokédex data (OPENSINNOH_NDS_ROM)', () => {
     romLists = readDexLists(new NitroFs(new Uint8Array(readFileSync(romPath as string))), true);
   }, 120_000);
   const text = (id: Id) => reg.texts.get(id)?.text;
-  /** The English build's imperial texts; the other builds' metric ones ("0,4m", "5,2kg") read the species' own decimetres and hectograms. */
+  /** The English build's imperial texts; the other builds' metric ones read the species' own decimetres and hectograms. */
   const english = () => dexOf(reg).language === ENGLISH;
   const metric = (s: string | undefined, unit: 'm' | 'kg') => Math.round(Number(s!.trim().replace(unit, '').trim().replace(',', '.')) * 10);
 

@@ -46,7 +46,7 @@ describe.skipIf(!ROM)('an item turn is no move (OPENSINNOH_NDS_ROM)', () => {
     const log = b.sim.log.slice(before).join('\n');
     expect(log).not.toMatch(/OpenSinnoh Pass|\|cant\||\[from\] confusion/);
     // The foe moved every turn; Lucario's last move is still Swords Dance.
-    expect(log.match(/\|move\|p2a: MAGIKARP\|Splash/g)).toHaveLength(4);
+    expect(log.match(new RegExp(`\\|move\\|p2a: ${reg.species.get(P('SPECIES_MAGIKARP'))!.name}\\|`, 'g'))).toHaveLength(4);
     expect(me.lastMove?.id).toBe('swordsdance');
     expect(me.boosts.atk).toBe(6);
     // Taunted and locked onto a status move, nothing can be used, yet the command card came each turn (the DS's

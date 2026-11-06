@@ -11,7 +11,7 @@ ROM bytes or text. Tool: `pnpm relocate <rom> [--us <us.nds>] [--layout <file.ts
 - **Text:** 724 banks, every bank's message count equal to `names.json`, 0 unknown characters with `charmap.json`
   (umlauts and ß decode as they are). So every text id holds.
 - **Pokédex text:** bank 706 (`TEXT_BANK_SPECIES_POKEDEX_ENTRY_EN` in the decomp's names) holds the game's own
-  language: German on CPUD, so the importer needs no change. Heights and weights are metric strings ("  6,9kg");
+  language: German on CPUD, so the importer needs no change. Heights and weights are metric strings;
   nothing parses them.
 - **Files:** 19 files with text drawn in live in `/resource/ger/<folder>/` instead of their US paths (the general
   folders or `/resource/eng/`); no file exists in both places. `GERMAN_PATHS` in `importer/src/layout.ts`.

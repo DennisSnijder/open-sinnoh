@@ -221,6 +221,7 @@ describe.skipIf(!romPath)('Platinum import (OPENSINNOH_NDS_ROM)', () => {
         names: { player: 'Ari', rival: 'Bo' },
         gender: 'female',
         language,
+        keyboard: expect.any(Array),
         playerSprite: { male: 'platinum:OBJ_EVENT_GFX_PLAYER_M', female: 'platinum:OBJ_EVENT_GFX_PLAYER_F' },
         playerHealSprite: { male: 'platinum:OBJ_EVENT_GFX_PLAYER_M_POKECENTER_HEAL', female: 'platinum:OBJ_EVENT_GFX_PLAYER_F_POKECENTER_HEAL' },
         playerVsSeekerSprite: { male: 'platinum:OBJ_EVENT_GFX_PLAYER_M_VS_SEEKER', female: 'platinum:OBJ_EVENT_GFX_PLAYER_F_VS_SEEKER' },
