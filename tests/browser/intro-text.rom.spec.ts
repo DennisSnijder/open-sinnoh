@@ -6,6 +6,7 @@
 import { expect, test } from '@playwright/test';
 import { seedRomImport } from './seed.ts';
 import { TitleScreens, press, skipSetup } from './intro.ts';
+import { appStrings } from './words.ts';
 
 test.skip(!process.env.OPENSINNOH_NDS_ROM, 'OPENSINNOH_NDS_ROM is not set');
 test.skip(({ isMobile }) => isMobile, 'one desktop window at a fractional device scale');
@@ -23,7 +24,7 @@ test('Rowan intro: every page fits its box at 175 %, ADVENTURE INFO opens', asyn
   await press(page, 'Enter');
   await page.waitForFunction(() => window.openSinnohTitle?.phase === 'menu', undefined, { timeout: 30_000 });
   await press(page, 'Enter');
-  const screens = new TitleScreens(page, false);
+  const screens = new TitleScreens(page, false, appStrings());
   const intro = screens.flow('New game');
   // Each waiting page: no line pushed out of the box (the DS shows two per page; the box hides any more).
   const overflowing: string[] = [];

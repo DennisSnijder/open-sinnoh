@@ -19,6 +19,7 @@ import { romSlice } from '../rom.ts';
 import { readReplay, resolveReplay } from '../rom-replays/sys-replays.ts';
 import { saveSlot } from './save.ts';
 import { seedHgssAddon, seedRomImport } from './seed.ts';
+import { appStrings } from './words.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 const HGSS = process.env.OPENSINNOH_HGSS_ROM;
@@ -270,7 +271,7 @@ test('the start menu opened mid-step: the characters hold still where they stopp
     const key = tries % 2 ? 'ArrowLeft' : 'ArrowRight';
     await page.keyboard.down(key);
     await expect.poll(between).toBe(true);
-    await page.getByRole('button', { name: 'Start menu', exact: true }).click();
+    await page.getByRole('button', { name: appStrings().aria.hud.menu, exact: true }).click();
     await page.keyboard.up(key);
     await expect(page.locator('[data-screen="start-menu"]')).toBeVisible();
     if (await between()) break;

@@ -36,9 +36,9 @@ export class TitleScreens {
     readonly words: Strings = strings('en'),
   ) {}
 
-  /** The open DS screen (setup or the intro; the intro's dialog is named in English in every language, new-game-flow.ts). */
+  /** The open DS screen (setup or the intro). */
   flow(name: 'Setup' | 'New game'): Locator {
-    return this.page.getByRole('dialog', { name: name === 'Setup' ? this.words.title.setup : name });
+    return this.page.getByRole('dialog', { name: name === 'Setup' ? this.words.title.setup : this.words.title.newGameHeading.tab });
   }
 
   /** A on the waiting message box or text block (a tap on the phone), else a tick, until `done`. */

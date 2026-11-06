@@ -12,6 +12,7 @@ import { romSlice } from '../rom.ts';
 import { romContext, resetRomDevice } from './rom-context.ts';
 import { saveSlot } from './save.ts';
 import { settle } from './settle.ts';
+import { appStrings } from './words.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 const SHOTS = process.env.OPENSINNOH_MODERN_SHOTS ?? 'test-artifacts/modern-menus-rom';
@@ -86,7 +87,7 @@ const closeAll = () =>
   }).toPass();
 
 async function entry(name: 'pokemon' | 'bag'): Promise<void> {
-  await tap(page.getByRole('button', { name: 'Start menu', exact: true }));
+  await tap(page.getByRole('button', { name: appStrings().aria.hud.menu, exact: true }));
   await tap(page.locator(`[data-screen="start-menu"] [data-entry="${name}"]`));
 }
 

@@ -92,7 +92,7 @@ test('title, menu, options, back to the title, the intro and the field: one BGM 
   // NEW GAME: the intro's SEQ_OPENING alone once Rowan fades in.
   expect(await page.evaluate(() => window.openSinnohTitle!.focused)).toBe('new-game');
   await press(page, 'Enter');
-  const screens = new TitleScreens(page, false);
+  const screens = new TitleScreens(page, false, appStrings());
   const intro = screens.flow('New game');
   await expect(intro).toBeVisible();
   await screens.menu(intro);
