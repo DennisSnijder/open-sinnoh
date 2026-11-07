@@ -409,7 +409,6 @@ export const DE: Strings = {
     emptyPocket: 'Nichts in dieser Tasche.',
     heldItem: 'Trägt ein Item',
     capsule: 'Kapsel',
-    status: { paralysis: 'PAR', freeze: 'GFR', sleep: 'SLF', poison: 'GIF', burn: 'BRT', fainted: 'K.O.' },
   },
 
   ui: {

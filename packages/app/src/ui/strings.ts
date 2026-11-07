@@ -3,11 +3,22 @@
  * their labels from packages/menus (their views carry plain strings). A pack that lacks a name fails at
  * mount.
  */
-import { POKETCH_APPS, poketchAppIndex, type Registries } from '@opensinnoh/contracts';
+import { newGameRecord, POKETCH_APPS, poketchAppIndex, type Registries } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
 import { plainText } from '@opensinnoh/menus';
 
 export { plainText, POKETCH_APPS, poketchAppIndex };
+
+/** A message of the base pack by name. A pack without it fails here. */
+export function baseText(registries: Registries, name: string): string {
+  const id = `${newGameRecord(registries).id.split(':')[0]!}:${name}` as Id;
+  const text = registries.texts.get(id);
+  if (!text) throw new Error(`ui: no text ${id}`);
+  return plainText(text.text);
+}
+
+/** The level mark before a level number: the ROM's word, the party's. The DS draws it as a picture on some screens. */
+export const levelMark = (registries: Registries): string => baseText(registries, 'BattleParty_Text_PokemonLevelLabel');
 
 const appNameMessage = (i: number) => `pl_msg_00000457_${String(i).padStart(5, '0')}`;
 

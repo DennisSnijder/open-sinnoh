@@ -46,6 +46,7 @@ let context: BrowserContext;
 let page: Page;
 const errors: string[] = [];
 const itemName = (item: string) => registries.items.get(`platinum:${item}` as Id)!.name;
+const romText = (name: string) => registries.texts.get(`platinum:${name}` as Id)!.text;
 const tap = (target: Locator) => (test.info().project.name === 'phone' ? target.tap() : target.click());
 const shot = async (name: string) => {
   await settle(page);
@@ -99,8 +100,13 @@ test('the party: ROM icons and the front picture, status, HP, held item, ♂ as 
   await expect(root.locator('.mm-slot')).toHaveCount(5);
   await expect.poll(() => root.locator('.mm-slot .mon-icon-sprite').evaluateAll((e) => e.filter((n) => (n as HTMLElement).style.backgroundImage.startsWith('url(')).length)).toBe(5);
   await expect(root.locator('.mm-slot').nth(1).locator('.lab .os-ico[data-icon="male"]')).toHaveCount(1);
-  await expect(root.locator('.mm-slot').nth(1).locator('.os-chip')).toHaveText(appStrings().modern.status.poison);
-  await expect(root.locator('.mm-slot').nth(2).locator('.os-chip')).toHaveText(appStrings().modern.status.fainted);
+  // Status: the ROM's picture, named by the ROM's word; two statuses, two pictures.
+  const status = (i: number) => root.locator('.mm-slot').nth(i).locator('.mm-status');
+  await expect(status(1)).toHaveAttribute('aria-label', romText('MenuEntries_Text_Status_Poisoned'));
+  const picture = (i: number) => status(i).locator('canvas').evaluate((c: HTMLCanvasElement) => [c.width, c.height, c.toDataURL()]);
+  const [poison, fainted] = [await picture(1), await picture(2)];
+  expect(poison[0]).toBeGreaterThan(0);
+  expect(poison[2]).not.toBe(fainted[2]);
   await expect(root.locator('.mm-slot').first().locator('.mm-held')).toHaveCount(1);
   await expect(root.locator('.mm-right')).toContainText(itemName('ITEM_ORAN_BERRY'));
   // Phones in portrait dock the detail without the picture.

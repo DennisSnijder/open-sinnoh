@@ -12,25 +12,19 @@
  * Packs without the art (the fixture) get CSS stand-ins in the same rects.
  */
 import type { Id } from '@opensinnoh/core';
-import { dexOf, newGameRecord, type SummaryPageId, type SummaryView } from '@opensinnoh/contracts';
-import { levelMark } from '@opensinnoh/text';
+import { type SummaryPageId, type SummaryView } from '@opensinnoh/contracts';
 import { ICON_ANIM, hpColor, hpPixels } from './art.ts';
 import { messageBox, stop, type DrawContext } from './apps.ts';
 import { at, atTiles, board, boardContext } from './board.ts';
 import { el } from './core.ts';
 import { STATUS_CELLS, sprite, textColor } from './party.ts';
 import type { Palette } from './pixel-font.ts';
-import { plainText } from './strings.ts';
+import { baseText, levelMark } from './strings.ts';
 import './summary.css';
 import { S } from '../strings/index.ts';
 
 /** The moves page's PP label (decomp PrintMoveNameAndPP: PokemonSummary_Text_LabelPp of the base pack). */
-function ppLabel(d: DrawContext): string {
-  const id = `${newGameRecord(d.registries).id.split(':')[0]!}:PokemonSummary_Text_LabelPp` as Id;
-  const text = d.registries.texts.get(id);
-  if (!text) throw new Error(`summary: no text ${id}`);
-  return plainText(text.text);
-}
+const ppLabel = (d: DrawContext): string => baseText(d.registries, 'PokemonSummary_Text_LabelPp');
 
 /** Decomp enum SummaryPage (INFO, MEMO, SKILLS, BATTLE_MOVES, CONDITION, CONTEST_MOVES, RIBBONS, EXIT): each page's tab animation (unselected; selected is + 8), EXIT's. */
 const TAB_ANIM: Record<SummaryPageId, number> = { info: 0, memo: 1, skills: 2, moves: 3, condition: 4, ribbons: 6 };
@@ -410,9 +404,8 @@ export function summary(wide: DrawContext, v: SummaryView): HTMLElement {
     if (!balls.names!.includes(ball)) throw new Error(`ui: no caught-ball art for ${m.ball}`);
     root.append(sprite(d, 'summary/balls', ball, BALL.x, BALL.y, 'sum-ball')!);
   }
-  // PrintLevel: the level mark (the game language's "Lv" picture) at (0, 5) of the window, the number from x 16
-  // (past a mark wider than that).
-  const mark = levelMark(dexOf(d.registries).language);
+  // PrintLevel: the level mark at (0, 5) of the window, the number from x 16 (past a mark wider than that).
+  const mark = levelMark(d.registries);
   if (!m.egg) root.append(atTiles(el('span', 'sum-level', at(el('span', 'sum-text', d.text(mark, c.black)), 0, 0), at(el('span', 'sum-text', d.text(m.level, c.black)), Math.max(16, d.measure(mark) + 1), 0)), ...W.level));
   if (m.status !== 'none') {
     const s = sprite(d, 'summary/status', STATUS_CELLS[m.status], STATUS.x, STATUS.y, 'status-icon');
