@@ -172,7 +172,11 @@ export function mountBattle(deps: {
       scene.resize(m.width, m.height, devicePixelRatio || 1, next.mode === 'portrait');
       placeCard();
     },
-    loading: () => shown && (scene.loading() || card.loading()),
+    loading() {
+      // A replay's ticks can start a battle with no frame in between: its art is not asked for yet, but it is still to load.
+      const setup = deps.game().battleSetup();
+      return (setup !== null && setup !== preloaded) || (shown && (scene.loading() || card.loading()));
+    },
     holding() {
       const v = view();
       return !!v?.transition && v.transition.close >= 1 && preloaded === deps.game().battleSetup() && (!scene.ready() || card.loading());
