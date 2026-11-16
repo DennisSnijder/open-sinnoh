@@ -352,3 +352,107 @@ test('the Modern summary: the Pokémon beside its page, the pager, moves, keys a
   await expect(party(page)).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test('the Modern PC: the box and the party beside it, the preview, moving and marking, keys and taps', async ({ page }, info) => {
+  test.setTimeout(150_000);
+  const project = info.project.name;
+  const touch = project === 'phone';
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.addInitScript(() => localStorage.setItem('lantern-nds:menu-style', 'modern'));
+  await skipSetup(page);
+  await toField(page);
+  // Two Pokémon in the first box, then the room's PC script (it opens MOVE POKéMON).
+  const state = await page.evaluate(() => window.openSinnohApp!.game.state);
+  const boxed = (
+    [
+      ['SPECIES_SKYLET', 3],
+      ['SPECIES_DRIPLING', 6],
+    ] as const
+  ).map(([sp, level], i) => setupPokemon(state as GameState, registries, 10 + i, `fixture:${sp}` as Id, level));
+  boxed[1]!.heldItem = 'fixture:ITEM_TONIC' as Id;
+  await page.evaluate((boxed) => {
+    const s = window.openSinnohApp!.game.state;
+    s.boxes[0]!.slots[0] = boxed[0]!;
+    s.boxes[0]!.slots[7] = boxed[1]!;
+    const g = window.openSinnohApp!.game;
+    g.scripts.start({ label: 'fixture:Common_PC' as never, zone: g.state.player.zone, source: 'test' });
+  }, boxed);
+  // A on the computer's line, once: a second A would open the first Pokémon's actions.
+  await page.waitForFunction(() => window.openSinnohApp!.game.scripts.view().message?.waitingForInput === true);
+  await page.keyboard.press('KeyZ');
+  await expect(page.locator('[data-screen="storage"]')).toBeVisible();
+  const root = page.locator('[data-screen="storage"]');
+  const view = async () => (await app(page)) as { area: string; cursor: number; box: { index: number }; held: unknown; menu: unknown };
+  await expect(root).toHaveClass(/mm-pc/);
+  await expect(page.locator('.box-board')).toHaveCount(0);
+  await expect(root.locator('.mm-box .mm-cell')).toHaveCount(30);
+  await expect(root.locator('.mm-boxparty .mm-cell')).toHaveCount(6);
+  await expect(root.locator('.mm-boxparty .mm-cell.filled')).toHaveCount(3);
+  await expect(root.locator('.mm-box .mm-cell').nth(7).locator('.mm-held')).toHaveCount(1);
+  await expect(root.locator('.mm-cell.is-cursor')).toBeFocused();
+  await expect(root.locator('.mm-right')).toContainText('Skylet');
+  await settle(page);
+  await fits(page, touch ? 44 : 36);
+  await page.screenshot({ path: `${SHOTS}/${project}-pc.png` });
+
+  // The d-pad walks the grid as the game does: right, down a row, up to the header, the box's arrows, back down.
+  await page.keyboard.press('ArrowRight');
+  await expect.poll(async () => (await view()).cursor).toBe(1);
+  await page.keyboard.press('ArrowDown');
+  await expect.poll(async () => (await view()).cursor).toBe(7);
+  await expect(root.locator('.mm-right')).toContainText('Dripling');
+  await page.keyboard.press('ArrowUp');
+  await expect.poll(async () => (await view()).cursor).toBe(1);
+  await page.keyboard.press('ArrowUp');
+  await expect.poll(async () => (await view()).area).toBe('header');
+  await expect(root.locator('.mm-boxname')).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await expect.poll(async () => (await view()).box.index).toBe(1);
+  await press(page, root.locator('[data-tap="box:-1"]'), touch);
+  await expect.poll(async () => (await view()).box.index).toBe(0);
+
+  // A tap on a Pokémon: the action window; MOVE takes it in hand, a tap on an empty slot puts it there.
+  await press(page, root.locator('[data-tap="slot:0"]'), touch);
+  await expect(root.locator('.mm-prompt')).toBeVisible();
+  await settle(page);
+  await page.screenshot({ path: `${SHOTS}/${project}-pc-actions.png` });
+  await press(page, root.locator('.mm-prompt [data-tap="menu:0"]'), touch);
+  await expect.poll(async () => (await view()).held).not.toBeNull();
+  await expect(root.locator('.mm-cell.is-cursor .mm-hand')).toHaveCount(1);
+  await expect(root.locator('.mm-right')).toContainText('Skylet');
+  await settle(page);
+  await page.screenshot({ path: `${SHOTS}/${project}-pc-holding.png` });
+  await press(page, root.locator('[data-tap="slot:3"]'), touch);
+  await expect.poll(() => page.evaluate(() => window.openSinnohApp!.game.state.boxes[0]!.slots[3]?.species)).toBe('fixture:SPECIES_SKYLET');
+
+  // MARK: the six marks toggle, CONFIRM keeps them.
+  await press(page, root.locator('[data-tap="slot:3"]'), touch);
+  await press(page, root.locator('.mm-prompt [data-tap="menu:2"]'), touch);
+  const marks = root.locator('.mm-prompt');
+  await expect(marks.locator('.mm-markrow')).toHaveCount(6);
+  await press(page, marks.locator('[data-tap="mark:1"]'), touch);
+  await expect(marks.locator('[data-tap="mark:1"]')).toHaveAttribute('aria-pressed', 'true');
+  await settle(page);
+  await page.screenshot({ path: `${SHOTS}/${project}-pc-marks.png` });
+  await press(page, marks.locator('[data-tap="mark:6"]'), touch);
+  await expect.poll(() => page.evaluate(() => window.openSinnohApp!.game.state.boxes[0]!.slots[3]!.markings)).toBe(2);
+  await expect(root.locator('.mm-right .mm-marks')).toHaveAttribute('aria-label', 'Triangle');
+
+  // The party column: right from the grid's last column.
+  for (const at of [4, 5]) {
+    await page.keyboard.press('ArrowRight');
+    await expect.poll(async () => (await view()).cursor).toBe(at);
+  }
+  await page.keyboard.press('ArrowRight');
+  await expect.poll(async () => (await view()).area).toBe('party');
+  await expect(root.locator('.mm-boxparty .mm-cell.is-cursor')).toBeFocused();
+  await expect(root.locator('.mm-right')).toContainText('Emberkit');
+  await press(page, root.locator('.os-foot [data-tap="close"]'), touch);
+  await expect(root.locator('[data-tap="yes"]')).toBeVisible();
+  await settle(page);
+  await page.screenshot({ path: `${SHOTS}/${project}-pc-close.png` });
+  await press(page, root.locator('[data-tap="yes"]'), touch);
+  await expect(root).toHaveCount(0);
+  expect(errors).toEqual([]);
+});

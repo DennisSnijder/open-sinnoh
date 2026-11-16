@@ -1,11 +1,11 @@
 /**
- * The Modern party, bag and summary on the real ROM (OPENSINNOH_NDS_ROM; skipped without it), desktop and phone, in normal play
+ * The Modern party, bag, summary and PC on the real ROM (OPENSINNOH_NDS_ROM; skipped without it), desktop and phone, in normal play
  * (replays keep the original drawing): a save made on the bridge, CONTINUEd from the title, the screens drawn with the
  * ROM's sprites and item icons, a name's ♂ as an icon, then the bag and party a battle opens.
  * Screenshots go to test-artifacts/modern-menus-rom (gitignored: ROM content, never commit), or OPENSINNOH_MODERN_SHOTS.
  */
 import { expect, test, type BrowserContext, type Locator, type Page } from '@playwright/test';
-import type { Registries } from '@opensinnoh/contracts';
+import { setupPokemon, type GameState, type Registries } from '@opensinnoh/contracts';
 import type { Id } from '@opensinnoh/core';
 import { loadGamePacks, runReplay } from '@opensinnoh/game';
 import { pageDriver } from '../../packages/cli/src/browser.ts';
@@ -168,6 +168,76 @@ test('the summary: the ROM front picture, ball, type and ribbon art, its words o
   await expect(root.locator('.mm-movedetail .mm-desc')).not.toBeEmpty();
   await shot('summary-ribbon');
   await closeAll();
+  expect(errors).toEqual([]);
+});
+
+test('the PC: the ROM icons, front picture, types and marks; the d-pad on the grid and the party', async () => {
+  test.setTimeout(120_000);
+  const state = (await page.evaluate(() => window.openSinnohApp!.game.state)) as GameState;
+  const boxed = [setupPokemon(state, registries, 0, 'platinum:SPECIES_BUDEW' as Id, 8), setupPokemon(state, registries, 1, 'platinum:SPECIES_KRICKETOT' as Id, 5)];
+  boxed[0]!.markings = 0b100101;
+  boxed[1]!.heldItem = 'platinum:ITEM_POTION' as Id;
+  await page.evaluate((boxed) => {
+    const g = window.openSinnohApp!.game;
+    g.state.boxes[0]!.slots[0] = boxed[0]!;
+    g.state.boxes[0]!.slots[8] = boxed[1]!;
+    // The PC of Jubilife's Pokémon Center, from the tile in front of it (back to Route 202 for the battle after).
+    g.world.warp('platinum:MAP_HEADER_JUBILIFE_CITY_POKECENTER_1F' as never, 12, 4, 'up');
+  }, boxed);
+  await page.waitForFunction(() => window.openSinnohApp!.game.state.player.zone === 'platinum:MAP_HEADER_JUBILIFE_CITY_POKECENTER_1F' && !window.openSinnohApp!.sceneLoading() && !window.openSinnohApp!.game.scripts.running(), undefined, { timeout: 60_000 });
+  // The PC's own menus (the field's): SOMEONE'S PC, then MOVE POKéMON.
+  const wanted = [romText('MenuEntries_Text_PC_SomeonesPC'), romText('MenuEntries_Text_PC_MovePokemon')];
+  for (let i = 0; i < 120 && !(await page.locator('[data-screen="storage"]').count()); i++) {
+    const step = await page.evaluate((wanted) => {
+      const v = window.openSinnohApp!.game.scripts.view();
+      if (v.menu) {
+        const at = v.menu.entries.findIndex((e) => wanted.includes(e));
+        return at < 0 ? 'none' : at === v.menu.cursor ? 'KeyZ' : 'ArrowDown';
+      }
+      // A at the PC until its script starts (the warp's fade-in takes the first presses).
+      return v.message?.waitingForInput || !window.openSinnohApp!.game.scripts.running() ? 'KeyZ' : 'wait';
+    }, wanted);
+    expect(step).not.toBe('none');
+    if (step !== 'wait') await page.keyboard.press(step);
+    await page.waitForTimeout(250);
+  }
+  const root = page.locator('[data-screen="storage"]');
+  await expect(root).toHaveClass(/mm-pc/);
+  await expect.poll(() => root.locator('.mm-box .mm-cell.filled .mon-icon-sprite').evaluateAll((e) => e.filter((n) => (n as HTMLElement).style.backgroundImage.startsWith('url(')).length)).toBe(2);
+  await expect(root.locator('.mm-boxparty .mm-cell.filled')).toHaveCount(5);
+  await expect(root.locator('.mm-right .mm-type canvas')).toHaveCount(2);
+  await expect(root.locator('.mm-right .mm-marks canvas')).toHaveCount(6);
+  await expect(root.locator('.mm-right .mm-marks')).toHaveAttribute('aria-label', /, .*, /);
+  if (await root.locator('.mm-right .mm-pic canvas').count()) {
+    const painted = () => root.locator('.mm-right .mm-pic canvas').evaluate((c: HTMLCanvasElement) => c.getContext('2d')!.getImageData(0, 0, c.width, c.height).data.some((v) => v > 0));
+    await expect.poll(painted).toBe(true);
+  }
+  await shot('pc');
+  const cursor = () => page.evaluate(() => (window.openSinnohApp!.game.app() as { area: string; cursor: number }).cursor);
+  for (const [key, at] of [['ArrowDown', 6], ['ArrowRight', 7], ['ArrowRight', 8]] as const) {
+    await page.keyboard.press(key);
+    await expect.poll(cursor).toBe(at);
+  }
+  await expect(root.locator('.mm-right')).toContainText(registries.species.get('platinum:SPECIES_KRICKETOT' as Id)!.name);
+  await expect(root.locator('.mm-right')).toContainText(itemName('ITEM_POTION'));
+  await tap(root.locator('[data-tap="slot:8"]'));
+  await expect(root.locator('.mm-prompt')).toBeVisible();
+  await shot('pc-actions');
+  await page.keyboard.press('KeyX');
+  await expect(root.locator('.mm-prompt')).toHaveCount(0);
+  await tap(root.locator('[data-tap="party:1"]'));
+  await expect(root.locator('.mm-prompt')).toBeVisible();
+  await page.keyboard.press('KeyX');
+  await tap(root.locator('.os-foot [data-tap="close"]'));
+  await tap(root.locator('[data-tap="yes"]'));
+  await expect(root).toHaveCount(0);
+  // The PC's menu and its goodbye, then back to the route's grass.
+  await expect(async () => {
+    await page.keyboard.press('KeyX');
+    expect(await page.evaluate(() => window.openSinnohApp!.game.scripts.running())).toBe(false);
+  }).toPass();
+  await page.evaluate(() => window.openSinnohApp!.game.world.warp('platinum:MAP_HEADER_ROUTE_202' as never, 178, 827, 'up'));
+  await page.waitForFunction(() => window.openSinnohApp!.game.state.player.zone === 'platinum:MAP_HEADER_ROUTE_202' && !window.openSinnohApp!.sceneLoading() && !window.openSinnohApp!.game.scripts.running(), undefined, { timeout: 60_000 });
   expect(errors).toEqual([]);
 });
 

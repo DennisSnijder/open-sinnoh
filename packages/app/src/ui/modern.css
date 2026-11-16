@@ -179,3 +179,44 @@
 @container os-screen (max-height: 400px) {
   .mm-sum .mm-left { padding-top: 16px; }
 }
+
+/* The PC: the box (its name between arrows, the 6 × 5 grid, the party beside it) and the preview. */
+.mm-pc .mm-left { grid-template-rows: auto minmax(0, 1fr); align-content: start; gap: 8px; padding: 8px 12px 8px 4px; }
+.mm-boxhead { display: flex; align-items: center; gap: 8px; }
+.mm .mm-boxstep { width: 44px; min-height: 44px; }
+.mm-boxname { flex: 1 1 auto; min-width: 0; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 12px; border: 0; background: none; color: var(--os-ink); font: 500 20px/24px var(--os-font-px); text-shadow: var(--os-tsd); cursor: pointer; }
+.mm .mm-boxname.is-cursor { background: var(--os-sel); box-shadow: inset 0 0 0 2px var(--os-sel-line); color: var(--os-accent); }
+.mm-boxcount { color: var(--os-muted); text-shadow: none; }
+.mm-boxarea { display: grid; grid-template-columns: minmax(0, 6fr); gap: 12px; align-content: start; min-height: 0; }
+.mm-boxarea.with-party { grid-template-columns: minmax(0, 6fr) minmax(0, 1fr); }
+.mm-box { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; align-content: start; }
+.mm-boxparty { display: grid; grid-template-rows: repeat(6, auto); gap: 4px; align-content: start; padding-left: 12px; border-left: 2px solid var(--os-line); }
+.mm-cell { position: relative; display: grid; place-items: center; aspect-ratio: 1; min-height: 44px; padding: 0; border: 0; background: var(--os-face-alt); color: var(--os-ink); cursor: pointer; }
+.mm .mm-cell.is-cursor { background: var(--os-sel); box-shadow: inset 0 0 0 2px var(--os-sel-line); }
+.mm .mm-cell .mon-icon-box { width: 64px; height: 64px; margin: 0; max-width: 100%; max-height: 100%; }
+.mm-cell .mm-held { position: absolute; right: 2px; bottom: 2px; }
+.mm-hand { position: absolute; left: 50%; top: -12px; translate: -50% 0; z-index: 2; pointer-events: none; filter: drop-shadow(0 4px 0 var(--os-shadow)); }
+.mm-species { color: var(--os-muted); font: 500 20px/24px var(--os-font-px); }
+.mm-marks { display: inline-flex; gap: 4px; align-items: center; }
+.mm-marks canvas, .mm-markrow canvas { display: block; image-rendering: pixelated; }
+.mm-markcss { width: 16px; height: 16px; box-shadow: inset 0 0 0 2px var(--os-edge); }
+.mm-markcss.on { background: var(--os-accent); box-shadow: none; }
+.mm-markrow { grid-template-columns: 24px auto minmax(0, 1fr); }
+.mm-compare { border-collapse: collapse; width: 100%; font: 500 20px/24px var(--os-font-px); }
+.mm-compare :is(th, td) { padding: 4px; text-align: center; }
+.mm-compare tr > th:nth-child(2) { color: var(--os-muted); font-weight: 500; }
+.mm-compare th.is-live { color: var(--os-accent); }
+.mm-compare th .mm-nl { justify-content: center; }
+.mm-comparebox { display: grid; gap: 12px; }
+.mm-comparebox .mm-nl { justify-content: space-between; }
+
+@container os-screen (max-width: 480px) {
+  .mm-pc .mm-left { padding: 8px 8px 0; }
+  .mm-boxarea.with-party { grid-template-columns: minmax(0, 6fr) minmax(44px, 1fr); gap: 4px; }
+  .mm-boxparty { padding-left: 4px; }
+  .mm-box { gap: 2px; }
+  .mm .mm-cell .mon-icon-box { width: 32px; height: 32px; }
+  .mm .mm-cell .mon-icon-sprite { width: 32px; height: 32px; background-size: 32px 64px; }
+  .mm-pc .mm-body { grid-template-rows: auto minmax(0, 1fr); }
+  .mm-pc .mm-right { max-height: none; }
+}

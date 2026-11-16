@@ -11,7 +11,8 @@
  *  - fixture:ROUTE_W / fixture:ROUTE_E — one 2×1 matrix with a zone per cell (a seamless connection,
  *    different areas): grass, cave floor and ledges in the west; trainers with sight (single, a double
  *    pair, two singles) and wander / look-around / back-and-forth NPCs in the east.
- *  Room furniture tiles (PC, TV-less wall, bookshelf, trash can, town map) run their tile-behaviour scripts.
+ *  Room furniture tiles (PC, TV-less wall, bookshelf, trash can, town map) run their tile-behaviour scripts; the PC
+ *  opens the boxes (MOVE POKéMON).
  *  - fixture:TERRAIN — one chunk of terrain (layout at `terrainTiles`): water with a bridge and a
  *    waterfall, puddle, shallow water, sand, snow, mud, ice, spin tiles, a bike slope, a ramp, a bike
  *    bridge, a rock-climb wall, a directional wall and a Strength boulder; surf encounters.
@@ -1816,6 +1817,7 @@ fixture:Common_PC::
   message text(fixture:Text_Pc)
   wait_button
   close_message
+  open_pokemon_storage 2
   release_all
   end
 
