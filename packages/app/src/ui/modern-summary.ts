@@ -21,9 +21,19 @@ const RIBBONS_PER_ROW = 4;
 /** The sheen's most sparkles (decomp MAX_SHEEN_SPRITES). */
 const SHEEN_MAX = 12;
 
+/**
+ * The front picture's whole scale (80 DS px a side): on a phone the height of the name's three lines, on a big screen
+ * three times, between them twice.
+ */
+function pictureScale(d: DrawContext): number {
+  const room = d.size ?? { width: innerWidth, height: innerHeight };
+  if (d.compact || room.height < 480) return 1;
+  return room.height >= 700 && room.width >= 1000 ? 3 : FRONT_SCALE;
+}
+
 function hero(d: DrawContext, v: SummaryView, steps: HTMLElement[]): HTMLElement {
   const m = v.mon;
-  const pic = d.compact ? null : d.art.pokemonFront(m.species, m.form, m.shiny, m.gender === 'female', FRONT_SCALE, m.egg);
+  const pic = d.art.pokemonFront(m.species, m.form, m.shiny, m.gender === 'female', pictureScale(d), m.egg);
   const ballName = d.registries.items.get(m.ball)?.name;
   const ballArt = d.art.sheet('summary/balls') ? d.art.cells('summary/balls', [m.ball.slice(m.ball.indexOf(':') + 1)], FRONT_SCALE) : null;
   const ball = ballArt ? h('span', 'mm-ball', ballArt) : null;
@@ -35,7 +45,7 @@ function hero(d: DrawContext, v: SummaryView, steps: HTMLElement[]): HTMLElement
   return h(
     'div',
     'mm-hero mm-sumhero',
-    h('span', 'mm-pic', pic ?? d.art.pokemonIcon(m.species, m.form, ICON_ANIM.hpMax, m.egg)),
+    h('div', 'mm-picrow', h('span', 'mm-pic', pic ?? d.art.pokemonIcon(m.species, m.form, ICON_ANIM.hpMax, m.egg)), steps.length ? h('div', 'mm-monsteps', ...steps) : null),
     h(
       'div',
       'mm-id',
@@ -43,7 +53,6 @@ function hero(d: DrawContext, v: SummaryView, steps: HTMLElement[]): HTMLElement
       h('div', 'mm-nl mm-wrap', m.egg ? null : h('span', 'os-num mm-lv', `${levelMark(d.registries)}${m.level}`), statusMark(d, m.status, m.egg), ...v.info.types.map((t) => typeMark(d, t.id, t.name))),
       fields([m.item], 'mm-helditem'),
     ),
-    steps.length ? h('div', 'mm-monsteps', ...steps) : null,
   );
 }
 
@@ -192,7 +201,8 @@ export const summaryDrawn = (v: SummaryView): SummaryView => ({ ...v, condition:
 
 export function modernSummary(d: DrawContext, v: SummaryView): HTMLElement {
   const choosing = v.moves.cursor !== null || v.ribbons.cursor !== null;
-  const hint = v.page === 'moves' ? v.moves.hint : v.page === 'ribbons' ? v.ribbons.hint : '';
+  // The DS's hint is the A button's word (INFO, SWITCH, CANCEL) but for the forget-a-move question, which is a sentence.
+  const hint = v.mode === 'teach' ? v.moves.hint : '';
   // With nothing picked, the page holds the cursor: the d-pad and A go to the game from it.
   const body = h('div', `mm-page${!choosing && !v.condition.prompt ? ' is-cursor' : ''}`, ...page(d, v));
   body.tabIndex = 0;

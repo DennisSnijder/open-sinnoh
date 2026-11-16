@@ -111,10 +111,10 @@
 /* The summary: the Pokémon on the left, the page under its pager on the right. */
 .mm-sum .mm-body { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
 .mm-sum .mm-left { align-content: start; padding: 8px 12px 8px 4px; overflow: auto; scrollbar-width: none; }
-.mm-sumhero { flex-direction: column; align-items: stretch; gap: 8px; position: relative; }
-.mm-sumhero .mm-pic { align-self: center; }
+.mm-sumhero { flex-direction: column; align-items: stretch; gap: 8px; }
+.mm-picrow { display: flex; align-items: center; justify-content: center; gap: 12px; }
 .mm-sumhero .mm-id { flex: none; }
-.mm-monsteps { position: absolute; top: 0; right: 0; display: grid; gap: 4px; }
+.mm-monsteps { display: grid; gap: 4px; }
 .mm-ball { display: inline-flex; flex: none; }
 .mm-type { display: inline-flex; flex: none; }
 .mm-type canvas { display: block; }
@@ -169,13 +169,13 @@
   .mm-sum .mm-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
   .mm-sum .mm-left { padding: 8px 12px 0; overflow: visible; }
   .mm-sum .mm-right { border-top: 2px solid var(--os-line); max-height: none; min-height: 0; padding: 8px 12px; }
-  .mm-sumhero { flex-direction: row; align-items: center; }
+  .mm-sumhero { flex-direction: row; align-items: center; gap: 12px; }
+  .mm-picrow { display: contents; }
   .mm-sumhero .mm-id { flex: 1 1 auto; gap: 4px; }
-  .mm-monsteps { position: static; }
+  .mm-monsteps { order: 2; }
   .mm-ribbon { min-width: 48px; min-height: 48px; }
   .mm-graph { width: 136px; height: 136px; }
 }
 @container os-screen (max-height: 400px) {
   .mm-sum .mm-left { padding-top: 16px; }
-  .mm-sumhero .mm-pic canvas { width: 80px !important; height: 80px !important; }
 }
