@@ -90,15 +90,20 @@ describe.skipIf(!ROM)('the move list refuses a move that cannot be used now (OPE
     expect(b.view().prompt).toMatchObject({ kind: 'command' });
   }, 120_000);
 
-  it('Disable, Encore, Torment, Taunt, Imprison, Gravity and Heal Block each print their message', () => {
+  it('Disable, Torment, Taunt, Imprison, Gravity and Heal Block each print their message; Encore uses its move at once', () => {
     load();
     let b = secondTurn();
     condition(b, (me, foe) => me.addVolatile('disable', foe));
     refused(b, 0, page('PokemonsMoveIsDisabled', [lucario(), move(0)]));
 
+    // Encore: FIGHT opens no list, the encored move goes at once (decomp PLAYER_INPUT_FIGHT); picked from the
+    // command prompt, another move is refused with the Disable message.
     b = secondTurn();
     condition(b, (me, foe) => me.addVolatile('encore', foe));
-    refused(b, 2, page('PokemonsMoveIsDisabled', [lucario(), move(2)]));
+    expect(() => b.choose({ kind: 'move', slot: 2 })).toThrow(/can't be used now/);
+    b.choose({ kind: 'fight' });
+    expect(b.view().prompt?.kind).not.toBe('fight');
+    expect(untilPrompt(b).join('|')).toContain(move(0));
 
     b = secondTurn();
     condition(b, (me, foe) => me.addVolatile('torment', foe));

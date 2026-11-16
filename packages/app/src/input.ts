@@ -158,6 +158,7 @@ export function attachKeyboard(target: Window, input: InputState): () => void {
     // Elsewhere (a HUD button left focused by a click) Space and Enter stay the game's A and Start.
     if ((e.code === 'Space' || e.code === 'Enter') && e.target instanceof HTMLElement && e.target.closest('[data-screen] :is(button:not([data-button]), [role="button"], [role="slider"])')) return;
     e.preventDefault();
+    if (down) controls.device = 'keys';
     input.set('keyboard', button, down);
   };
   const keydown = onKey(true);
@@ -232,7 +233,9 @@ export function pollGamepads(input: InputState): void {
     return;
   }
   const pad = currentPad();
-  input.setAll('gamepad', pad ? gamepadButtons(pad, controls.bindings) : []);
+  const buttons = pad ? gamepadButtons(pad, controls.bindings) : [];
+  if (buttons.length) controls.device = 'pad';
+  input.setAll('gamepad', buttons);
   const poketch = !!pad && padHolds(pad, padTableOf(controls.bindings, pad).poketch, controls.bindings.deadZone);
   if (poketch && !poketchHeld) poketchPress = true;
   poketchHeld = poketch;

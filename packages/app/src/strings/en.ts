@@ -182,6 +182,10 @@ export const EN = {
     modToggled: (on: boolean, name: string, result: string) => `${on ? 'Enabled' : 'Disabled'} ${name}. ${result}`,
     modsUnreadable: (message: string) => `The list of mods could not be read: ${message}`,
     saveUnreadable: (message: string) => `Your save cannot be read: ${message}`,
+    /** The card's back: `key` signs (signature-pen.ts); null: a tap on the box does. */
+    signHint: (key: string | null) => (key ? `Press ${key} to sign` : 'Tap the box to sign'),
+    /** The Underground: `key` (R) pings the touch radar; null: a tap on the ground does. */
+    radarHint: (key: string | null) => (key ? `Press ${key} for the radar` : 'Tap the ground for the radar'),
   },
 
   title: {

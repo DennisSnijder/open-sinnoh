@@ -353,7 +353,7 @@ const GERMAN_LOWER = new Set(['der', 'die', 'das', 'des', 'dem', 'den', 'und', '
 /**
  * A label in capitals (ours, or the ROM's) in the game's casing; any other label is shown as written. English is
  * sentence case ("BATTLE STYLE" → "Battle style"); German capitalises each word and each part after a hyphen, as
- * its nouns are ("TEXT-TEMPO" → "Text-Tempo"), except the small words. ROM and HGSS stay in capitals.
+ * its nouns are ("TEXT-TEMPO" → "Text-Tempo"), except the small words. ROM, HGSS, EV and IV stay in capitals.
  */
 export const labelCase = (s: string): string => {
   if (s !== s.toUpperCase()) return s;
@@ -362,7 +362,7 @@ export const labelCase = (s: string): string => {
     language() === 'de'
       ? lower.replace(/(^|[\s-])([^\s-]+)/g, (_, sep: string, word: string) => sep + (sep !== '' && GERMAN_LOWER.has(word) ? word : word.charAt(0).toUpperCase() + word.slice(1)))
       : lower.charAt(0).toUpperCase() + lower.slice(1);
-  return cased.replace(/\b(rom|hgss)\b/gi, (word) => word.toUpperCase());
+  return cased.replace(/\b(rom|hgss|ev|iv)\b/gi, (word) => word.toUpperCase());
 };
 
 /** The DS descriptions break lines for its window; ours wrap. */

@@ -756,6 +756,12 @@ class BattleController implements Battle {
     }
     if (choice.kind === 'fight') {
       if (p.kind !== 'command') throw new Error('battle: Fight opens only from the command prompt');
+      // Decomp PLAYER_INPUT_FIGHT under Encore: no move list, the encored move goes at once.
+      const encored = this.encoreSlot(this.actor);
+      if (encored !== null) {
+        this.choose({ kind: 'move', slot: encored });
+        return;
+      }
       this.prompt = { kind: 'fight', cursor: this.moveCursor.get(this.acting.mon) ?? 0, moves: this.moveViews(this.acting.mon, this.acting), actor: p.actor };
       return;
     }
@@ -836,6 +842,12 @@ class BattleController implements Battle {
       this.moveCursor.set(this.acting.mon, choice.slot);
       this.prompt = { kind: 'target', cursor: m.aim.targets[0]!, slot: choice.slot, move: m, actor };
       return;
+    }
+    // The encored move in a double, with no target named: a random one (decomp BattleControllerPlayer_FightCommand,
+    // randomizeTarget: an opponent standing, or the ally for a move that aims only at it).
+    if (this.doubles && choice.target === undefined && choice.slot === this.encoreSlot(actor)) {
+      const aim = this.targets(this.acting, this.activeSim(this.teams[actor]!).moveSlots[choice.slot]);
+      if (aim) choice = { ...choice, target: aim.some((b) => (b & 1) !== (actor & 1)) ? this.randomOpponent(actor) : aim[0]! };
     }
     if (choice.target !== undefined) {
       if (!this.doubles) throw new Error('battle: a single battle takes no move target');
@@ -1826,6 +1838,20 @@ class BattleController implements Battle {
     if (!first) throw new Error(`battle: battler ${b} has no move request`);
     const targets = first.id === 'struggle' ? null : this.targets(this.battlers[b]!, first);
     return targets ? `move 1 ${this.simTarget(b, targets[0] ?? b ^ 2)}` : 'move 1';
+  }
+
+  /**
+   * The move slot battler `b` is encored into (decomp moveEffectsData.encoredMoveSlot), or null: FIGHT then acts on it
+   * without the move list (`choose`). The sim's Encore volatile names the move; no PP left in it (the sim ends the
+   * Encore) or no usable move at all (Struggle comes first, decomp STRUGGLING_ALL) is none.
+   */
+  private encoreSlot(b: number): number | null {
+    if (this.struggling(b)) return null;
+    const sim = this.activeSim(this.teams[b]!);
+    const move = (sim.volatiles['encore'] as { move?: string } | undefined)?.move;
+    if (!move) return null;
+    const slot = sim.moveSlots.findIndex((m) => m.id === move);
+    return slot >= 0 && sim.moveSlots[slot]!.pp > 0 ? slot : null;
   }
 
   /** The sim refuses the acting battler's move in `slot` this turn (Disable, Encore, Taunt, Torment, Imprison, a Choice item). */
@@ -3907,7 +3933,16 @@ class BattleController implements Battle {
   private commandPrompt(): BattlePrompt {
     const all = this.setup.kind !== 'first';
     // The frontier's touch screen has no BAG (decomp BattleSubscreen with BATTLE_TYPE_FRONTIER).
-    return { kind: 'command', cursor: 0, enabled: [true, all && !this.frontier, all, all], moves: this.safari ? [] : this.moveViews(this.acting.mon, this.acting), actor: this.actor, ...(this.canRewind ? { canRewind: true } : {}) };
+    const encore = this.safari ? null : this.encoreSlot(this.actor);
+    return {
+      kind: 'command',
+      cursor: 0,
+      enabled: [true, all && !this.frontier, all, all],
+      moves: this.safari ? [] : this.moveViews(this.acting.mon, this.acting),
+      actor: this.actor,
+      ...(this.canRewind ? { canRewind: true } : {}),
+      ...(encore !== null ? { encore } : {}),
+    };
   }
 
   /**

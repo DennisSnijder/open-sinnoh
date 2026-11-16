@@ -32,6 +32,9 @@ import './apps-m3a.css';
 import './naming.css';
 import { S } from '../strings/index.ts';
 
+/** How long a control hint stays up. */
+const HINT_MS = 4000;
+
 export interface UiDeps {
   /** The #game element; the UI adds its own layer. */
   root: HTMLElement;
@@ -377,6 +380,25 @@ export function mountUi(deps: UiDeps): InGameUi {
     followCursor = false;
   };
 
+  // The hints for what only the app's buttons do (the card's signature on Y, the Underground's radar on R), named in
+  // the controls the player uses: once each time the card's back shows, once a visit to the Underground.
+  let signHinted = false;
+  let radarHinted = false;
+  const hints = (game: Game, view: AppView | null) => {
+    const back = view?.app === 'trainer-card' && view.side === 'back';
+    if (back && !view.signing && !signHinted) {
+      signHinted = true;
+      api.toast(S.game.signHint(controls.buttonName('y')), HINT_MS);
+    }
+    if (!back) signHinted = false;
+    const underground = !!game.world.undergroundView();
+    if (underground && !view && !radarHinted && !scriptBusy(game)) {
+      radarHinted = true;
+      api.toast(S.game.radarHint(controls.buttonName('r')), HINT_MS);
+    }
+    if (!underground) radarHinted = false;
+  };
+
   const api: InGameUi = {
     get state() {
       return { menu: deps.game().app()?.app ?? null, poketch: poketch.shown, fractionalFits };
@@ -386,6 +408,7 @@ export function mountUi(deps: UiDeps): InGameUi {
       const game = deps.game();
       if (poketch.shown && (scriptBusy(game) || game.app() || !game.poketch())) poketch.show(false);
       const view = game.app();
+      hints(game, view);
       if (view?.app === 'trainer-card') pen.input(frame, view);
       if (view?.app === 'party' && modern()) frame = partyListInput(frame, view);
       // The Underground's touch radar has no button on the DS: R pings around the player, as a touch on the field does.

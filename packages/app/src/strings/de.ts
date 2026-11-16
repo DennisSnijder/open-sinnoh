@@ -180,6 +180,8 @@ export const DE: Strings = {
     modToggled: (on, name, result) => `${name} ${on ? 'eingeschaltet' : 'ausgeschaltet'}. ${result}`,
     modsUnreadable: (message) => `Die Liste der Mods konnte nicht gelesen werden: ${message}`,
     saveUnreadable: (message) => `Dein Spielstand kann nicht gelesen werden: ${message}`,
+    signHint: (key) => (key ? `Drück ${key}, um zu unterschreiben` : 'Tippe auf das Feld, um zu unterschreiben'),
+    radarHint: (key) => (key ? `Drück ${key} für das Radar` : 'Tippe auf den Boden für das Radar'),
   },
 
   title: {
@@ -299,7 +301,7 @@ export const DE: Strings = {
     no: 'Nein',
     yes: 'Ja',
     groups: { platinum: 'Platin', additions: 'Zusätze', display: 'Anzeige', sound: 'Ton', play: 'Spiel', appearance: 'Aussehen', touch: 'Touchscreen', dpad: 'Steuerkreuz', face: 'Aktionstasten', other: 'Weitere Tasten', setup: 'Einrichtung', saves: 'Spielstände', app: 'App', gameData: 'Spieldaten', mods: 'Mods' },
-    section: { game: 'Spiel', device: 'Gerät', controls: 'Steuerung', data: 'Daten', privacy: 'Datenschutz' },
+    section: { game: 'Spiel', device: 'Gerät', controls: 'Tasten', data: 'Daten', privacy: 'Datenschutz' },
     needsGame: 'Im Spielstand gespeichert: Ändere es,\nsobald ein Spiel offen ist.',
     auto: 'AUTO',
     full: 'VOLL',

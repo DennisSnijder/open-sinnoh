@@ -314,9 +314,30 @@ export function padLabel(token: PadToken, raw: boolean, kind: PadKind = 'generic
   return S.controls.axis(n, token.endsWith('+') ? '+' : '-');
 }
 
-/** A row's binding for the player: the keys, then the pad's button (`raw`: the pad in use has no standard layout). */
+/**
+ * A row's binding for the player: the keys, then the pad's button (`raw`: the pad in use has no standard layout).
+ * Each name keeps its words together (no-break spaces) and the dot stays on the keys' line, so a narrow row wraps
+ * between names, never inside one.
+ */
 export function bindingText(b: Bindings, a: Action, raw: boolean, kind: PadKind = 'generic'): string {
-  return `${b.keys[a].map(keyLabel).join(', ') || S.controls.unbound} · ${padLabel(padTable(b, raw, kind)[a], raw, kind)}`;
+  const whole = (s: string) => s.replaceAll(' ', '\u00a0');
+  const keys = b.keys[a].map((k) => whole(keyLabel(k))).join(', ') || whole(S.controls.unbound);
+  return `${keys}\u00a0· ${whole(padLabel(padTable(b, raw, kind)[a], raw, kind))}`;
+}
+
+/** The controls the player used last: the keyboard, a gamepad, or the touch screen's buttons. */
+export type Device = 'keys' | 'pad' | 'touch';
+
+/**
+ * A DS button's name in the controls `device` has: its first key, the pad's button (`raw`, `kind` as `padLabel`), or
+ * on the touch screen the DS name its on-screen button carries. Null when it has none there (no key or pad button
+ * bound; L and R, which the touch screen does not draw).
+ */
+export function buttonName(b: Bindings, button: Button, device: Device, raw: boolean, kind: PadKind = 'generic'): string | null {
+  if (device === 'touch') return button === 'l' || button === 'r' ? null : S.controls.actions[button];
+  if (device === 'keys') return b.keys[button][0] === undefined ? null : keyLabel(b.keys[button][0]);
+  const token = padTable(b, raw, kind)[button];
+  return token === null ? null : padLabel(token, raw, kind);
 }
 
 /** Something the player pressed while binding. */
@@ -352,6 +373,8 @@ export class Controls {
   private holdOff = new Set<string>();
   /** A DOM screen drives the pad itself (pad-nav.ts): the game reads nothing. */
   padTaken = false;
+  /** The controls the player used last (input.ts and the on-screen buttons set it): what a hint names. */
+  device: Device = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches ? 'touch' : 'keys';
 
   constructor(
     private readonly storage: Pick<Storage, 'getItem' | 'setItem'> | null,
@@ -428,6 +451,11 @@ export class Controls {
   /** What the pad in use says it is, or null with none (the CONTROLLER row's AUTO). */
   get detected(): PadKind | null {
     return this.mapping === null ? null : padKind(this.padId);
+  }
+
+  /** A DS button's name in the controls the player used last (`buttonName`). */
+  buttonName(button: Button): string | null {
+    return buttonName(this.current, button, this.device, this.padRaw, this.face);
   }
 
   /** The name of the button that confirms on the pad in use. */

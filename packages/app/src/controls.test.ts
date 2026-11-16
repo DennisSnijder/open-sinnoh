@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ActivePad, gamepadButtons } from './input.ts';
-import { bindKey, bindPad, bindingText, Controls, CONTROLS_KEY, defaultBindings, keyLabel, keyMapOf, KEY_MAP, padFace, padKind, padLabel, padTable, parseBindings, type Action, type PadKind } from './controls.ts';
+import { bindKey, bindPad, bindingText, buttonName, Controls, CONTROLS_KEY, defaultBindings, keyLabel, keyMapOf, KEY_MAP, padFace, padKind, padLabel, padTable, parseBindings, type Action, type PadKind } from './controls.ts';
 
 const pad = (mapping: string, down: number[] = [], axes: number[] = [], id?: string) => ({ mapping, ...(id ? { id } : {}), buttons: Array.from({ length: 17 }, (_, i) => ({ pressed: down.includes(i) })), axes });
 
@@ -46,7 +46,21 @@ describe('bindings', () => {
   it('names keys and pad buttons', () => {
     expect(['KeyZ', 'ArrowUp', 'Digit4', 'Numpad2', 'F5', 'ShiftRight'].map(keyLabel)).toEqual(['Z', 'Up', '4', 'Num 2', 'F5', 'Right Shift']);
     expect([padLabel('b1', false), padLabel('b1', true), padLabel('a2-', true), padLabel(null, true)]).toEqual(['Right button', 'Button 1', 'Axis 2 -', 'Unbound']);
-    expect(bindingText(defaultBindings(), 'a', false)).toBe('Z, J, Space · Bottom button');
+    // Each name's words stay together, the dot with the keys: a narrow row wraps between names.
+    expect(bindingText(defaultBindings(), 'a', false)).toBe('Z, J, Space\u00a0· Bottom\u00a0button');
+  });
+
+  it('names a DS button in the controls in use, for hints', () => {
+    const b = defaultBindings();
+    expect(buttonName(b, 'y', 'keys', false)).toBe('V');
+    expect(buttonName(b, 'y', 'pad', false, 'xbox')).toBe('Y');
+    expect(buttonName(b, 'x', 'pad', false, 'nintendo')).toBe('X');
+    expect(buttonName(b, 'r', 'pad', false, 'playstation')).toBe('R1');
+    expect(buttonName(b, 'y', 'touch', false)).toBe('Y');
+    // The touch screen draws no L or R; an unbound key has no name.
+    expect(buttonName(b, 'r', 'touch', false)).toBeNull();
+    b.keys.r = [];
+    expect(buttonName(b, 'r', 'keys', false)).toBeNull();
   });
 });
 
@@ -157,7 +171,7 @@ describe('layouts', () => {
     expect(gamepadButtons(pad('standard', [0], [], 'Some pad'))).toEqual(['a']);
     expect(gamepadButtons(pad('standard', [1], [], PRO))).toEqual(['a']);
     expect(gamepadButtons(pad('standard', [0], [], PRO))).toEqual(['b']);
-    const name = (kind: PadKind) => bindingText(defaultBindings(), 'a', false, kind);
+    const name = (kind: PadKind) => bindingText(defaultBindings(), 'a', false, kind).replaceAll('\u00a0', ' ');
     expect((['xbox', 'playstation', 'nintendo', 'generic'] as const).map(name)).toEqual(['Z, J, Space · A', 'Z, J, Space · Cross', 'Z, J, Space · A', 'Z, J, Space · Bottom button']);
   });
 
@@ -180,7 +194,7 @@ describe('layouts', () => {
     b.layout = 'xbox';
     expect(gamepadButtons(pad('standard', [0], [], PRO), b)).toEqual(['a']);
     b.layout = 'playstation';
-    expect(bindingText(b, 'a', false, padFace(b, 'Some pad'))).toBe('Z, J, Space · Cross');
+    expect(bindingText(b, 'a', false, padFace(b, 'Some pad')).replaceAll('\u00a0', ' ')).toBe('Z, J, Space · Cross');
   });
 
   it('the first binding copies the table in use; from then on it is the one every standard pad reads', () => {

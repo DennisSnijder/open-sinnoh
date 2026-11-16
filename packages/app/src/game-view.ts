@@ -565,6 +565,8 @@ export async function mountGame(source: PackSource, opts: GameOptions): Promise<
   };
   panel.addEventListener('pointerup', panelUp);
   panel.addEventListener('pointercancel', panelUp);
+  // A touch anywhere: hints name the touch controls (a mouse leaves the keys' names).
+  window.addEventListener('pointerdown', (e) => e.pointerType === 'touch' && (controls.device = 'touch'), true);
   // A scripted menu (ScriptView.menu) is a box over the field: touches on it go to the VM in the overlay's DS frame.
   mainCanvas.addEventListener('pointerdown', (e) => {
     // The Underground's field: a touch is the touch radar on the tile under it (UndergroundMan_CheckForTouchInput).

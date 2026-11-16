@@ -112,6 +112,8 @@
 .ui-notices { position: absolute; left: 12px; right: 12px; bottom: 12px; display: grid; gap: 8px; pointer-events: none; }
 .ui-notice { margin: 0; padding: 8px 12px; background: #b42318; color: #fff; font: 600 13px/1.3 system-ui, sans-serif; }
 /* A brief neutral note (the zoom after a shortcut), top centre. */
-.ui-toast { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); margin: 0; padding: 6px 12px; border-radius: 6px; background: rgb(24 26 32 / 0.82); color: #fff; font: 600 13px/1.3 system-ui, sans-serif; font-variant-numeric: tabular-nums; pointer-events: none; }
+/* Under the HUD row (44 px buttons at the safe-area top), so a long toast never runs beneath them; it wraps inside the
+ * field instead of running off it. */
+.ui-toast { position: absolute; top: calc(max(8px, var(--sat)) + 52px); left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 24px); box-sizing: border-box; text-align: center; margin: 0; padding: 6px 12px; border-radius: 6px; background: rgb(24 26 32 / 0.82); color: #fff; font: 600 13px/1.3 system-ui, sans-serif; font-variant-numeric: tabular-nums; pointer-events: none; }
 .ui-toast[hidden] { display: none; }
 .ui-layer[data-mode] .mart-board .yes-no .choice { min-height: 0; }
