@@ -185,8 +185,11 @@ export class ReplayRecorder {
     const r = new ReplayRecorder(header, game);
     const { battleChoose, reset, load } = game;
     game.battleChoose = (choice) => {
-      const before = game.battle?.view().prompt?.kind;
+      const prompt = game.battle?.view().prompt;
+      const before = prompt?.kind;
       battleChoose.call(game, choice);
+      // FIGHT under Encore uses the encored move at once: the replay spells it as that move.
+      if (choice.kind === 'fight' && prompt?.kind === 'command' && prompt.encore !== undefined) choice = { kind: 'move', slot: prompt.encore };
       r.battleChoice(choice, before, game.battle?.view().prompt?.kind, game);
     };
     game.reset = (...args) => {

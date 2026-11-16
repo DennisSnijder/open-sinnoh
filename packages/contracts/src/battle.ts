@@ -252,7 +252,8 @@ export interface BattleMoveView {
  * forced `party` (a replacement after a faint) names the battler it replaces as `actor`.
  */
 export type BattlePrompt =
-  | { kind: 'command'; cursor: number; enabled: [boolean, boolean, boolean, boolean]; moves: BattleMoveView[]; actor: number; canRewind?: boolean }
+  /** 0.50.4: `encore`, the move slot Encore locks the actor into: FIGHT (`fight`) uses it at once, with no move list. */
+  | { kind: 'command'; cursor: number; enabled: [boolean, boolean, boolean, boolean]; moves: BattleMoveView[]; actor: number; canRewind?: boolean; encore?: number }
   | { kind: 'fight'; cursor: number; moves: BattleMoveView[]; actor: number }
   /**
    * 0.27.6. The DS target screen after A (or a tap) on a move in a double battle (decomp BattleSubscreen target

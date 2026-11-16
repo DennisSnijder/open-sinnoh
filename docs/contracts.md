@@ -36,6 +36,7 @@ a reviewed step: bump `CONTRACTS_VERSION` and add a line below.
   replays, stepped by `date`/`time` lines. Periods are core `dayPeriod(hour)` (decomp TimeOfDayForHour).
 
 ## Changelog
+- 0.50.4 (on 0.50.3): the command prompt's `encore?` (the move slot Encore locks the actor into); `fight` there uses that move at once, as the DS does, with no move list.
 - 0.50.3 (on 0.50.2; importer platinum-114): the start menu's EXIT in both languages: `Lantern_StartMenu_QuitAsk` in the German text set too.
 - 0.50.2 (the naming keyboard from the ROM, on 0.50.1; importer platinum-113): `NewGame.keyboard?`, the keyboard's pages as the build has them (absent: the decomp's US pages). Services `keyboardPages`, `nameChars` and `typedChars` take the registries instead of a language.
 - 0.50.1 (on 0.50.0): `PoffinCaseView.rows[].level` is the row's level as the game prints it, its mark included (PoffinCase_Text_ListItem); the app adds none.
