@@ -47,7 +47,7 @@ describe('the German table', () => {
   it('is what the screens read once chosen: nothing keeps the English from module load', () => {
     setLanguage('de');
     expect(S.rom.startPlaying).toBe('Losspielen');
-    expect(SECTIONS.map((s) => s.label)).toEqual(['Spiel', 'Gerät', 'Steuerung', 'Daten', 'Datenschutz']);
+    expect(SECTIONS.map((s) => s.label)).toEqual(['Spiel', 'Gerät', 'Tasten', 'Daten', 'Datenschutz']);
     expect(ASK.textSpeed.title).toBe('Text-Tempo');
     expect(SETTINGS.find((s) => s.id === 'bind/up')!.label({} as never)).toBe('Steuerkreuz oben');
     expect(keyLabel('Space')).toBe('Leertaste');
@@ -62,6 +62,7 @@ describe('Options labels in capitals', () => {
   it('are sentence case in English, ROM and HGSS kept', () => {
     expect(labelCase('BATTLE STYLE')).toBe('Battle style');
     expect(labelCase('HGSS ADD-ON')).toBe('HGSS add-on');
+    expect(labelCase('EV/IV VIEW')).toBe('EV/IV view');
     expect(labelCase('Mixed Case')).toBe('Mixed Case');
   });
 
@@ -71,6 +72,7 @@ describe('Options labels in capitals', () => {
     expect(labelCase('TEXT-TEMPO')).toBe('Text-Tempo');
     expect(labelCase('STIL DES KAMPFES')).toBe('Stil des Kampfes');
     expect(labelCase('ROM-IMPORT')).toBe('ROM-Import');
+    expect(labelCase('EV/IV-ANSICHT')).toBe('EV/IV-Ansicht');
     expect(labelCase('POKéDEX')).toBe('POKéDEX');
   });
 });

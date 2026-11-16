@@ -314,9 +314,15 @@ export function padLabel(token: PadToken, raw: boolean, kind: PadKind = 'generic
   return S.controls.axis(n, token.endsWith('+') ? '+' : '-');
 }
 
-/** A row's binding for the player: the keys, then the pad's button (`raw`: the pad in use has no standard layout). */
+/**
+ * A row's binding for the player: the keys, then the pad's button (`raw`: the pad in use has no standard layout).
+ * Each name keeps its words together (no-break spaces) and the dot stays on the keys' line, so a narrow row wraps
+ * between names, never inside one.
+ */
 export function bindingText(b: Bindings, a: Action, raw: boolean, kind: PadKind = 'generic'): string {
-  return `${b.keys[a].map(keyLabel).join(', ') || S.controls.unbound} · ${padLabel(padTable(b, raw, kind)[a], raw, kind)}`;
+  const whole = (s: string) => s.replaceAll(' ', '\u00a0');
+  const keys = b.keys[a].map((k) => whole(keyLabel(k))).join(', ') || whole(S.controls.unbound);
+  return `${keys}\u00a0· ${whole(padLabel(padTable(b, raw, kind)[a], raw, kind))}`;
 }
 
 /** The controls the player used last: the keyboard, a gamepad, or the touch screen's buttons. */

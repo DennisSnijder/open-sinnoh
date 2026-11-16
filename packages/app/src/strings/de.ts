@@ -301,7 +301,7 @@ export const DE: Strings = {
     no: 'Nein',
     yes: 'Ja',
     groups: { platinum: 'Platin', additions: 'Zusätze', display: 'Anzeige', sound: 'Ton', play: 'Spiel', appearance: 'Aussehen', touch: 'Touchscreen', dpad: 'Steuerkreuz', face: 'Aktionstasten', other: 'Weitere Tasten', setup: 'Einrichtung', saves: 'Spielstände', app: 'App', gameData: 'Spieldaten', mods: 'Mods' },
-    section: { game: 'Spiel', device: 'Gerät', controls: 'Steuerung', data: 'Daten', privacy: 'Datenschutz' },
+    section: { game: 'Spiel', device: 'Gerät', controls: 'Tasten', data: 'Daten', privacy: 'Datenschutz' },
     needsGame: 'Im Spielstand gespeichert: Ändere es,\nsobald ein Spiel offen ist.',
     auto: 'AUTO',
     full: 'VOLL',
