@@ -524,6 +524,18 @@ function drawEntry(wide: DrawContext, v: PokedexEntryView): HTMLElement {
   return root;
 }
 
+/**
+ * The Modern Pokédex's AREA, CRY and SIZE (modern-dex.ts): the page's DS screen alone (no banner), its ROM art and its
+ * parts as above, `unit` CSS px per DS px.
+ */
+export function dexPageBoard(wide: DrawContext, v: PokedexEntryView, unit: number): HTMLElement {
+  const d = boardContext({ ...wide, unit });
+  const root = dexBoard(d, `dex-entry-sheet page-${v.page}`, PAGE_ART[v.page]);
+  root.append(...(v.page === 'area' ? areaPage(d, v) : v.page === 'size' ? sizePage(d, v) : cryPage(d, v)));
+  root.style.setProperty('--unit', `${unit}px`);
+  return root;
+}
+
 // --- The search ----------------------------------------------------------------------------------
 
 /** One row per filter (the DS's touch-screen grid): its label at x 8, ◀ value ▶ from x 88; OK; the message box at the bottom. */

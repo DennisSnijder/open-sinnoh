@@ -21,6 +21,7 @@ import { PixelFont } from './pixel-font.ts';
 import { readMenuStyle } from '../menu-style.ts';
 import { partyListInput } from './modern-party.ts';
 import { summaryDrawn } from './modern-summary.ts';
+import { dexDrawn } from './modern-dex.ts';
 import { OptionsScreen } from './options-screen.ts';
 import { PoketchCard } from './poketch.ts';
 import { SignaturePen } from './signature-pen.ts';
@@ -305,7 +306,7 @@ export function mountUi(deps: UiDeps): InGameUi {
   };
 
   const draw = (view: AppView | null) => {
-    const key = view ? `${scale}|${unit}|${deps.frame()}|${view.app === 'options' ? options.key(view) : ''}|${JSON.stringify(view.app === 'summary' && modern() ? summaryDrawn(view) : view)}` : '';
+    const key = view ? `${scale}|${unit}|${deps.frame()}|${view.app === 'options' ? options.key(view) : ''}|${JSON.stringify(!modern() ? view : view.app === 'summary' ? summaryDrawn(view) : view.app === 'pokedex' ? dexDrawn(view) : view)}` : '';
     if (key === drawn) return;
     const entering = view !== null && view.app !== drawnApp;
     const oldRoot = host.querySelector<HTMLElement>('[data-screen]');

@@ -193,7 +193,13 @@
 .mm-boxparty { display: grid; grid-template-rows: repeat(6, auto); gap: 4px; align-content: start; padding-left: 12px; border-left: 2px solid var(--os-line); }
 .mm-cell { position: relative; display: grid; place-items: center; aspect-ratio: 1; min-height: 44px; padding: 0; border: 0; background: var(--os-face-alt); color: var(--os-ink); cursor: pointer; }
 .mm .mm-cell.is-cursor { background: var(--os-sel); box-shadow: inset 0 0 0 2px var(--os-sel-line); }
-.mm .mm-cell .mon-icon-box { width: 64px; height: 64px; margin: 0; max-width: 100%; max-height: 100%; }
+.mm-box, .mm-boxparty { min-width: 0; }
+/* The ROM's icons (32 × 32, their Pokémon about half of it) at a whole scale that fills about 70 % of the cell. */
+.mm .mm-cell .mon-icon-box { width: 96px; height: 96px; margin: -16px; pointer-events: none; }
+.mm .mm-cell .mon-icon-sprite { width: 96px; height: 96px; background-size: 96px 192px; }
+.mm-cell .mm-held { z-index: 1; }
+/* The preview's labels: the game's words from two banks (NATURE, Item), in one case. */
+.mm-pc .mm-kv dt { text-transform: uppercase; }
 .mm-cell .mm-held { position: absolute; right: 2px; bottom: 2px; }
 .mm-hand { position: absolute; left: 50%; top: -12px; translate: -50% 0; z-index: 2; pointer-events: none; filter: drop-shadow(0 4px 0 var(--os-shadow)); }
 .mm-species { color: var(--os-muted); font: 500 20px/24px var(--os-font-px); }
@@ -215,8 +221,42 @@
   .mm-boxarea.with-party { grid-template-columns: minmax(0, 6fr) minmax(44px, 1fr); gap: 4px; }
   .mm-boxparty { padding-left: 4px; }
   .mm-box { gap: 2px; }
-  .mm .mm-cell .mon-icon-box { width: 32px; height: 32px; }
-  .mm .mm-cell .mon-icon-sprite { width: 32px; height: 32px; background-size: 32px 64px; }
+  .mm .mm-cell .mon-icon-box { width: 64px; height: 64px; margin: -8px; }
+  .mm .mm-cell .mon-icon-sprite { width: 64px; height: 64px; background-size: 64px 128px; }
   .mm-pc .mm-body { grid-template-rows: auto minmax(0, 1fr); }
   .mm-pc .mm-right { max-height: none; }
+}
+
+/* The Pokédex: the list beside the species under its cursor; an entry as the summary (.mm-sum); the search's rows. */
+.mm-dexlist { scroll-behavior: auto; }
+.mm-dexrow { grid-template-columns: 24px 56px minmax(0, 1fr) auto; min-height: 40px; padding-block: 2px; }
+.mm-dexno { color: var(--os-muted); }
+.mm .lab.off { color: var(--os-ink-off); text-shadow: none; }
+.mm-caught { display: inline-flex; flex: none; }
+.mm-caught canvas { display: block; image-rendering: pixelated; }
+.mm-dexopen { display: block; padding: 0; border: 0; background: none; cursor: pointer; }
+.mm-count { color: var(--os-on-tone); }
+.mm-dex .os-foot { gap: 8px; flex-wrap: wrap; }
+.mm-foot { display: inline-flex; flex: none; }
+.mm-foot canvas { width: 32px; height: 32px; image-rendering: pixelated; }
+.mm-dexboard { display: grid; place-items: center; min-width: 0; overflow: hidden; }
+.mm-forms { gap: 4px; }
+.mm-search { gap: 4px; align-content: start; overflow: auto; scrollbar-width: none; }
+.mm-searchrow { grid-template-columns: 24px minmax(0, 1fr) auto; min-height: 48px; cursor: default; }
+.mm-searchvalue { display: flex; align-items: center; gap: 4px; }
+.mm-searchchoice { display: inline-flex; justify-content: center; width: 168px; min-width: 0; }
+.mm-searchchoice .lab { max-width: 100%; }
+.mm-shape canvas { display: block; image-rendering: pixelated; }
+.mm .mm-searchrow:focus-visible { outline: none; }
+
+@container os-screen (max-width: 480px) {
+  .mm-dexrow { min-height: 48px; }
+  .mm-dex-list .mm-right { max-height: 112px; }
+  .mm-dex-list .mm-sumhero { flex-direction: row; align-items: center; }
+  .mm-dex-list .mm-picrow { display: contents; }
+  .mm-dex .os-foot .os-btn { padding: 0 8px; }
+  .mm-dex-search .mm-body { grid-template-rows: minmax(0, 1fr) auto; }
+  .mm-searchrow { padding-right: 4px; gap: 4px; }
+  .mm-searchchoice { width: 128px; }
+  .mm-searchchoice .lab { font-size: 16px; }
 }

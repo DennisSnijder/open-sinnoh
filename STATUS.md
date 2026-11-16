@@ -45,7 +45,7 @@ Versions: contracts 0.50.3, importer `platinum-114`, HeartGold follower add-on `
   Pokémon and the optional HeartGold sprites, quality-of-life options (the start menu's objective among them, its destination marked on the Town Map), remappable controls, zoom,
   fast-forward, accessibility options, touch controls and an installable, offline-capable app; optional enhanced
   visuals (a visual style and an angled camera, asked once in the setup, DS by default); Modern menus for the party,
-  bag, summary and PC, opt-in beside the original screens.
+  bag, summary, PC and Pokédex, opt-in beside the original screens.
 
 ## Not yet
 
