@@ -312,6 +312,34 @@ it('draws billboards opaque, so their pixels carry their own polygon ID to edge 
   expect((shader.uniforms.uFieldId!.value as THREE.Vector4).w).toBe(1);
 });
 
+it('cuts away only map and prop pixels, and only while the angled camera places the hole', async () => {
+  const { fieldOutputs } = await import('./composite.ts');
+  const { CUTAWAY, placeCutaway } = await import('./cutaway.ts');
+  const compile = (cutaway: boolean) => {
+    const material = fieldOutputs(new THREE.MeshBasicMaterial(), { polygonId: 0, fog: true, cutaway });
+    const shader = { uniforms: {} as Record<string, { value: unknown }>, vertexShader: '', fragmentShader: 'void main() {\n}' };
+    material.onBeforeCompile(shader as unknown as THREE.WebGLProgramParametersWithUniforms, {} as THREE.WebGLRenderer);
+    return { shader, key: material.customProgramCacheKey() };
+  };
+  expect(compile(false).shader.fragmentShader).not.toContain('uCutaway');
+  expect(compile(true).shader.uniforms.uCutaway).toBe(CUTAWAY);
+  expect(compile(true).key).not.toBe(compile(false).key);
+  const camera = new THREE.PerspectiveCamera(30, 4 / 3, 1, 1000);
+  camera.position.set(0, 200, 300);
+  camera.lookAt(0, 0, 0);
+  camera.updateMatrixWorld();
+  placeCutaway(camera, new THREE.Vector3(0, 0, 0), 32, 400, 300);
+  const [x, y, radius, depth] = CUTAWAY.value.toArray();
+  // Centred on the sprite's middle (above the target, so above the buffer's middle), in front of its head's depth.
+  expect(x).toBeCloseTo(200);
+  expect(y).toBeGreaterThan(150);
+  expect(radius).toBeGreaterThan(0);
+  expect(depth).toBeGreaterThan(0);
+  expect(depth).toBeLessThan(1);
+  placeCutaway(camera, null, 0, 0, 0);
+  expect(CUTAWAY.value.toArray()).toEqual([0, 0, 0, 0]);
+});
+
 it('maps DS fog through the density table: offset, slope steps, interpolation, 127 as full', async () => {
   const { fogDensity } = await import('./composite.ts');
   const fog = { slope: 6, offset: 30037, color: [1, 1, 1] as [number, number, number], alpha: 31, densities: Array.from({ length: 32 }, (_, i) => i * 4) };

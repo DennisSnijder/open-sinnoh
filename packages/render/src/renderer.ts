@@ -14,6 +14,7 @@ import { billboardMaterial, billboardMatrix, slopeDepthLift, faceCameraNodes, no
 import { Composite, fieldOutputs } from './composite.ts';
 import { cameraAllowed, enhancedVisuals, needsPost, type EnhancedConfig } from './enhanced/config.ts';
 import { glowKind, type GlowKind } from './enhanced/light-sources.ts';
+import { placeCutaway } from './cutaway.ts';
 import type { EnhancedPipeline } from './enhanced/pipeline.ts';
 import { FieldEffects } from './effects.ts';
 import { FeatureModels } from './gyms/index.ts';
@@ -571,6 +572,8 @@ class Field implements FieldRenderer {
   private enhancedLoading = false;
   /** The enhanced camera replaced the DS camera's projection last frame. */
   private enhancedCamera = false;
+  /** The player's sprite this frame (its billboard's anchor), for the angled camera's cutaway. */
+  private playerSprite: { feet: THREE.Vector3; frameSize: number; visible: boolean } | null = null;
   private glows: { key: string; list: THREE.Mesh[] } = { key: '', list: [] };
   /** `RenderDebug.syncTiming`'s GPU timer queries in flight (null: the browser has no timer query). */
   private gpuQueries: { ext: { TIME_ELAPSED_EXT: number; GPU_DISJOINT_EXT: number } | null; pending: WebGLQuery[] } | null = null;
@@ -1365,6 +1368,7 @@ class Field implements FieldRenderer {
   private drawActors(view: FieldView, alpha: number): void {
     this.camera.updateMatrixWorld();
     this.frustum.setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(this.camera.projectionMatrix, this.camera.matrixWorldInverse));
+    this.playerSprite = null;
     const live = new Set<string>();
     const keys = actorKeys(view.actors);
     const drawn: RenderStats['actors'] = [];
@@ -1461,7 +1465,9 @@ class Field implements FieldRenderer {
     // A turned sprite stands on a wall or the ceiling: no upright plane is behind it, so it keeps the quad's depth.
     a.plain.value = ((roll % 360) + 360) % 360 === 0 ? 0 : 1;
     // The sprite sinks into mud and deep snow (ActorView.sink); its shadow and reflection stay on the ground.
-    this.placeBillboard(a.object, p.clone().setZ(p.z + BILLBOARD_ANCHOR_Z).setY(p.y - (v.sink ?? 0)), a.record.frameSize);
+    const feet = p.clone().setZ(p.z + BILLBOARD_ANCHOR_Z).setY(p.y - (v.sink ?? 0));
+    this.placeBillboard(a.object, feet, a.record.frameSize);
+    if (v.localId === LOCALID_PLAYER && v.home === undefined && kind === 'live') this.playerSprite = { feet, frameSize: a.record.frameSize, visible: v.visible };
     a.anchorZ.value = p.z + BILLBOARD_ANCHOR_Z;
     // The angled camera looks down less steeply than a stair rises: the steps above a character on a stair down to
     // the north hide its lower half (or all of it), where the DS camera shows it whole.
@@ -1922,7 +1928,11 @@ class Field implements FieldRenderer {
     // then the 2D layers (weather, darkness) and the fade.
     for (const c of this.chunks.values()) if (c.group) c.group.visible = !this.debug.spritesOnly;
     this.composite.clear(this.renderer);
+    // The angled camera cuts away what stands between it and the player (cutaway.ts), for this render only.
+    const player = this.enhancedCamera && this.playerSprite?.visible ? this.playerSprite : null;
+    placeCutaway(this.camera, player?.feet ?? null, player?.frameSize ?? 0, this.composite.target.width, this.composite.target.height);
     this.renderer.render(this.scene, this.camera);
+    placeCutaway(this.camera, null, 0, 0, 0);
     // Enhanced post: the composite goes to the pipeline's buffer, which draws it to the screen with its effects.
     const post = enhanced && needsPost(this.enhancedConfig!) ? enhanced : null;
     if (post) post.begin();

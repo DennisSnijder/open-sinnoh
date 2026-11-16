@@ -346,11 +346,20 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   (`c1_o02`, `c1_o02b`) and Route 206's lamp heads (`lambert14` with `r206_cy6`) are land parts whose names don't say
   light, and nothing else in the data does: white texels also make up snow, sand and the cycling road's dashes (the
   dashes share `r206_cy6`, so a name alone isn't enough there). The three pairs came from a look through every outdoor
-  land texture; they name no positions and hold no ROM data, and the importer's output stays as it was.
-- **Nothing the field draws is a light source by day, and the sun reads no pixels:** the field's colours are albedo,
-  so the day's bloom threshold sits at white (only the glows and particles pass it) and the golden-hour shafts are a
+  land texture; they name no positions and hold no ROM data, and the importer's output stays as it was. The other
+  way round, the Poké Mart's `light2` and the Pokémon Center's `light_a` (with their roof textures) are not lights:
+  they are the white trim bands around the whole roofs, and glowed like lamps from the angled camera.
+- **Nothing the field draws is a light source, and the sun reads no pixels:** the field's colours are albedo, so the
+  bloom threshold sits at white by day and at night (only the glows and particles pass it; at night a lower one
+  bloomed Jubilife's pale fountain) and the golden-hour shafts are a
   fan from the sun's side, not a radial scatter of the frame's bright pixels. A top-down view has no sky to scatter
   from: the scatter washed beaches out to white and dragged lit windows and white roofs into streaks.
+- **The angled camera cuts away what hides the player** (`cutaway.ts`): it looks down less steeply than the DS
+  camera, so canopies and roofs south of the player cover it. Map and prop pixels nearer the camera than the player's
+  sprite, inside a circle around it on screen, are discarded: one shared uniform and one test in shaders that
+  already discard for the alpha test, so no extra pass, no sorting and no per-object state on phones. A fade per tree
+  was the other way, but chunks merge their meshes by material, and translucent canopies would need sorting under the
+  DS's translucency rules. The hole is edge-marked like any polygon edge. The DS camera never sets it.
 - **Phones take a cheaper post chain** (`lowPower`, a coarse pointer): the bloom at a quarter of the pixels, half the
   AO samples, and depth of field as one 8-tap disc pass instead of two 13-tap passes. A fixed tier, not an
   auto-scale: the same device draws the same frame.

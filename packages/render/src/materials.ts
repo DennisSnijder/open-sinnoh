@@ -253,11 +253,11 @@ export class Materials {
     const fog = ex.fog ?? false;
     // Lit materials are lit per vertex when the chunk is built (lighting.ts), so every material is unlit here.
     const opaque = (texelsOnly: boolean) =>
-      fieldOutputs(new THREE.MeshBasicMaterial({ ...base, transparent: false, depthWrite: true, alphaTest: 0.5 }), { polygonId, fog, ...(texelsOnly ? { texels: 'opaque' as const } : {}) });
+      fieldOutputs(new THREE.MeshBasicMaterial({ ...base, transparent: false, depthWrite: true, alphaTest: 0.5 }), { polygonId, fog, cutaway: true, ...(texelsOnly ? { texels: 'opaque' as const } : {}) });
     // Translucent pixels keep the depth under them unless the material sets depth update.
     const translucent = () =>
       translucentId(
-        fieldOutputs(new THREE.MeshBasicMaterial({ ...base, transparent: true, depthWrite: ex.depthUpdate ?? false, ...TRANSLUCENT_DEPTH(true) }), { polygonId, fog, texels: 'blend' }),
+        fieldOutputs(new THREE.MeshBasicMaterial({ ...base, transparent: true, depthWrite: ex.depthUpdate ?? false, ...TRANSLUCENT_DEPTH(true) }), { polygonId, fog, texels: 'blend', cutaway: true }),
         polygonId,
       );
     let material: THREE.MeshBasicMaterial;
