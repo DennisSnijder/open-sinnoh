@@ -35,6 +35,7 @@ import { icon, type IconName } from './icons.ts';
 import { party } from './party.ts';
 import { modernBag } from './modern-bag.ts';
 import { modernParty } from './modern-party.ts';
+import { modernSummary } from './modern-summary.ts';
 import { summary } from './summary.ts';
 import { at, atTiles, board, boardContext } from './board.ts';
 import { bgPicture } from './sprites.ts';
@@ -68,7 +69,7 @@ export interface DrawContext {
   compact: boolean;
   /** The UI layer's size in CSS px (the evolution scene picks its whole-pixel scale from it). */
   size?: { width: number; height: number };
-  /** The MENUS setting is Modern (not in replays): the party and bag draw in it, in a battle too. */
+  /** The MENUS setting is Modern (not in replays): the party, bag and summary draw in it, in a battle too. */
   modern?: boolean;
   /** The player's gender (the bag picture); absent outside a game (the title's naming screen). */
   gender?: 'male' | 'female';
@@ -132,7 +133,7 @@ export function drawApp(d: DrawContext, v: AppView): Drawn {
     case 'bag':
       return d.modern ? { kind: 'os', root: modernBag(d, v) } : { kind: 'sheet', root: bag(d, v) };
     case 'summary':
-      return { kind: 'sheet', root: summary(d, v) };
+      return d.modern ? { kind: 'os', root: modernSummary(d, v) } : { kind: 'sheet', root: summary(d, v) };
     case 'trainer-card':
       return { kind: 'sheet', root: trainerCard(d, v) };
     case 'options':

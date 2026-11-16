@@ -279,3 +279,76 @@ test('the Modern bag: pockets, the item under the cursor, actions, the toss coun
   }).toPass();
   expect(errors).toEqual([]);
 });
+
+test('the Modern summary: the Pokémon beside its page, the pager, moves, keys and taps', async ({ page }, info) => {
+  test.setTimeout(120_000);
+  const project = info.project.name;
+  const touch = project === 'phone';
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.addInitScript(() => localStorage.setItem('lantern-nds:menu-style', 'modern'));
+  await skipSetup(page);
+  await toField(page);
+  await open(page, 'pokemon', touch);
+  await press(page, party(page).locator('.mm-slot').first(), touch);
+  await press(page, party(page).locator('.mm-prompt .os-item').first(), touch);
+  const root = page.locator('[data-screen="summary"]');
+  await expect(root).toHaveClass(/mm-sum/);
+  await expect(page.locator('.sum-bg')).toHaveCount(0);
+  const view = async () => (await app(page)) as { page: string; moves: { cursor: number | null } };
+  const title = root.locator('.os-tab');
+  const body = root.locator('.mm-page');
+  await expect(title).toContainText('Emberkit');
+  await expect(body).toHaveAttribute('data-page', 'info');
+  await expect(body).toBeFocused();
+  await settle(page);
+  await fits(page, touch ? 44 : 36);
+  await page.screenshot({ path: `${SHOTS}/${project}-summary.png` });
+
+  // Left and right turn the page, up and down change the Pokémon: the game's own keys.
+  await page.keyboard.press('ArrowRight');
+  await expect.poll(async () => (await view()).page).toBe('memo');
+  await page.keyboard.press('ArrowDown');
+  await expect(title).toContainText('Skylet');
+  await page.keyboard.press('ArrowUp');
+  await expect(title).toContainText('Emberkit');
+  // The pager's arrows and the Pokémon's do the same by touch.
+  await press(page, root.locator('.mm-pagestep').last(), touch);
+  await expect(body).toHaveAttribute('data-page', 'skills');
+  await expect(root.locator('.mm-stats .os-hp')).toHaveCount(1);
+  await settle(page);
+  await page.screenshot({ path: `${SHOTS}/${project}-summary-skills.png` });
+  await press(page, root.locator('[data-tap="next"]'), touch);
+  await expect(title).toContainText('Skylet');
+  await press(page, root.locator('[data-tap="prev"]'), touch);
+  await expect(title).toContainText('Emberkit');
+
+  // BATTLE MOVES (CONDITION shows once the Contest Hall was visited: modern-menus.rom.spec.ts): A picks the first move,
+  // its detail shows, and the row holds the focus; B lets go.
+  await page.keyboard.press('ArrowRight');
+  await expect(body).toHaveAttribute('data-page', 'moves');
+  await page.keyboard.press('KeyZ');
+  await expect.poll(async () => (await view()).moves.cursor).toBe(0);
+  await expect(root.locator('.mm-move.is-cursor')).toBeFocused();
+  await expect(root.locator('.mm-movedetail .mm-desc')).not.toBeEmpty();
+  await expect(root.locator('[data-tap="prev"]')).toHaveCount(0);
+  await settle(page);
+  await page.screenshot({ path: `${SHOTS}/${project}-summary-moves.png` });
+  await fits(page, touch ? 44 : 36);
+  await page.keyboard.press('KeyX');
+  await expect.poll(async () => (await view()).moves.cursor).toBe(null);
+  // A tap selects a move, as on the original screen.
+  await press(page, root.locator('.mm-move').first(), touch);
+  await expect.poll(async () => (await view()).moves.cursor).toBe(0);
+  await page.keyboard.press('KeyX');
+  await expect.poll(async () => (await view()).moves.cursor).toBe(null);
+
+  await press(page, root.locator('.mm-pagestep').last(), touch);
+  await expect(body).toHaveAttribute('data-page', 'ribbons');
+  await settle(page);
+  await page.screenshot({ path: `${SHOTS}/${project}-summary-ribbons.png` });
+  // Back, the footer's button, returns to the party.
+  await press(page, root.locator('.os-foot [data-tap="back"]'), touch);
+  await expect(party(page)).toBeVisible();
+  expect(errors).toEqual([]);
+});

@@ -27,17 +27,17 @@ const STATUS_WORD: Partial<Record<PartySlotView['status'], string>> = {
 const BAND = { max: 'high', green: 'high', yellow: 'mid', red: 'low' } as const;
 
 /** The front picture's and the status picture's scale: a DS px is 2 CSS px, one dot. */
-const FRONT_SCALE = 2;
+export const FRONT_SCALE = 2;
 
 const hp = (m: PartySlotView) => hpBar(m.hp, m.maxHp, BAND[hpColor(m.hp, m.maxHp)]);
 
 /** The status as the game draws it: the build's own picture, its word and colour (packs without the sheet: nothing). */
-function status(d: DrawContext, m: PartySlotView): HTMLElement | null {
-  if (m.status === 'none' || m.egg) return null;
-  const picture = d.art.cells('summary/status', [STATUS_CELLS[m.status]], FRONT_SCALE);
+export function statusMark(d: DrawContext, status: PartySlotView['status'], egg: boolean): HTMLElement | null {
+  if (status === 'none' || egg) return null;
+  const picture = d.art.cells('summary/status', [STATUS_CELLS[status]], FRONT_SCALE);
   if (!picture) return null;
   const s = h('span', 'mm-status', picture);
-  const word = STATUS_WORD[m.status];
+  const word = STATUS_WORD[status];
   if (word) {
     s.setAttribute('role', 'img');
     s.setAttribute('aria-label', baseText(d.registries, word));
@@ -64,7 +64,7 @@ function row(d: DrawContext, v: PartyView, i: number, m: PartySlotView): HTMLEle
     `slot:${i}`,
     [
       d.art.pokemonIcon(m.species, m.form, iconAnim(m), m.egg),
-      h('span', 'mm-st', h('span', 'mm-nl', line('lab', m.name), gender(m), level(m), mark, status(d, m)), note ? line('mm-note', note) : m.egg ? null : hp(m)),
+      h('span', 'mm-st', h('span', 'mm-nl', line('lab', m.name), gender(m), level(m), mark, statusMark(d, m.status, m.egg)), note ? line('mm-note', note) : m.egg ? null : hp(m)),
     ],
     `mm-slot${v.moving === i ? ' is-moving' : ''}`,
     v.cursor === i && !v.menu,
@@ -97,7 +97,7 @@ function detail(d: DrawContext, v: PartyView, m: PartySlotView | null | undefine
         'mm-id',
         h('div', 'mm-nl', line('lab', m.name), gender(m), level(m)),
         note ? line('mm-note', note) : m.egg ? null : hp(m),
-        h('div', 'mm-nl mm-wrap', status(d, m), held, m.capsule ? h('span', 'mm-heldname', icon('ball'), S.modern.capsule) : null),
+        h('div', 'mm-nl mm-wrap', statusMark(d, m.status, m.egg), held, m.capsule ? h('span', 'mm-heldname', icon('ball'), S.modern.capsule) : null),
       ),
     ),
     after,

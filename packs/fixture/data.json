@@ -12154,6 +12154,26 @@
    "text": "STAGE ROUND"
   },
   {
+   "id": "fixture:ContestCommon_Text_Cool",
+   "text": "SHARP"
+  },
+  {
+   "id": "fixture:ContestCommon_Text_Beauty",
+   "text": "GRACE"
+  },
+  {
+   "id": "fixture:ContestCommon_Text_Cute",
+   "text": "CHARM"
+  },
+  {
+   "id": "fixture:ContestCommon_Text_Smart",
+   "text": "WITS"
+  },
+  {
+   "id": "fixture:ContestCommon_Text_Tough",
+   "text": "GRIT"
+  },
+  {
    "id": "fixture:ContestResults_Text_JudgingCompleted",
    "text": "Scoring is done.{clear}Here come the results!"
   },

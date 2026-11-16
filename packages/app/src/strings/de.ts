@@ -413,6 +413,10 @@ export const DE: Strings = {
     emptyPocket: 'Nichts in dieser Tasche.',
     heldItem: 'Trägt ein Item',
     capsule: 'Kapsel',
+    page: 'Seite',
+    natureUp: 'Durch sein Wesen erhöht',
+    natureDown: 'Durch sein Wesen gesenkt',
+    raised: 'Gestiegen',
   },
 
   ui: {
