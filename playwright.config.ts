@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import { browserExecutable } from './tools/browser.ts';
-import { browserArtifacts, browserShard, machineBrowserWorkers } from './tools/browser-options.ts';
+import { browserArtifacts, browserGlArgs, browserShard, machineBrowserWorkers } from './tools/browser-options.ts';
 
 const MENU_SPECS = /(menus|fit|options)\.rom\.spec\.ts$/;
 const SHARD = browserShard(process.argv) ?? process.env.OPENSINNOH_TEST_SHARD;
@@ -27,7 +27,7 @@ export default defineConfig({
   reporter: [['list'], ['json', { outputFile: `${ARTIFACTS}/playwright.json` }], ['blob', { outputDir: `${ARTIFACTS}/blob-report` }], ...(process.env.OPENSINNOH_TIMING_DIR ? [['./tools/timing-playwright.ts'] as [string]] : [])],
   outputDir: `${ARTIFACTS}/playwright`,
   // English whatever the machine's language: without an imported game the app speaks the browser's (packages/app/src/strings).
-  use: { baseURL: `http://127.0.0.1:${PORT}`, browserName: 'chromium', locale: 'en-US', launchOptions: { executablePath: browserExecutable(), args: process.env.OPENSINNOH_TEST_HARDWARE_GPU === '1' ? [] : ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] } },
+  use: { baseURL: `http://127.0.0.1:${PORT}`, browserName: 'chromium', locale: 'en-US', launchOptions: { executablePath: browserExecutable(), args: browserGlArgs(process.env.OPENSINNOH_TEST_HARDWARE_GPU, process.platform) } },
   projects: [
     { name: 'desktop', use: { viewport: { width: 1280, height: 720 } } },
     { name: 'phone', testIgnore: SITE_SPEC, use: { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, deviceScaleFactor: 3 } },

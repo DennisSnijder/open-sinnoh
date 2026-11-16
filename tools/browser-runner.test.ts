@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { browserShard, browserWorkers } from './browser-options.ts';
+import { browserGlArgs, browserShard, browserWorkers } from './browser-options.ts';
 import { selectBrowserSpecs } from './browser-changes.ts';
 
 const specs = ['debug.spec.ts', 'site.spec.ts', 'platinum.rom.spec.ts', 'title.spec.ts', 'onboarding.spec.ts', 'ui.spec.ts'].map((name) => `tests/browser/${name}`);
@@ -81,5 +81,14 @@ describe('browser runner resources and shards', () => {
     expect(browserWorkers(1, 1 * 2 ** 30)).toBe(1);
     expect(browserWorkers(6, 24 * 2 ** 30, '8')).toBe(8);
     for (const value of ['0', '-1', '2.5', '', 'NaN']) expect(() => browserWorkers(6, 24 * 2 ** 30, value)).toThrow();
+  });
+  it('draws with Metal on macOS and SwiftShader elsewhere unless told otherwise', () => {
+    const swiftshader = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
+    expect(browserGlArgs(undefined, 'darwin')).toEqual(['--use-angle=metal']);
+    expect(browserGlArgs(undefined, 'linux')).toEqual(swiftshader);
+    expect(browserGlArgs('0', 'darwin')).toEqual(swiftshader);
+    expect(browserGlArgs('1', 'darwin')).toEqual(['--use-angle=metal']);
+    expect(browserGlArgs('1', 'linux')).toEqual([]);
+    for (const value of ['', 'yes', '2']) expect(() => browserGlArgs(value, 'darwin')).toThrow();
   });
 });

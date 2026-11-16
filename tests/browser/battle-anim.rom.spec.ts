@@ -11,12 +11,12 @@
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { expect, test, type BrowserContext, type Page } from '@playwright/test';
+import { expect, test, type ConsoleMessage, type Page } from '@playwright/test';
 import type { ReplayLine } from '@opensinnoh/core';
 import type { BattleView, Registries } from '@opensinnoh/contracts';
 import { loadGamePacks, runReplay } from '@opensinnoh/game';
 import { romSlice } from '../rom.ts';
-import { romContext, resetRomDevice } from './rom-context.ts';
+import { replayPage } from './rom-context.ts';
 import { pageDriver, waitForScene } from '../../packages/cli/src/browser.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
@@ -26,29 +26,28 @@ test.describe.configure({ mode: 'parallel' });
 test.skip(!ROM, 'OPENSINNOH_NDS_ROM is not set');
 
 let registries: Registries;
-let context: BrowserContext;
 let page: Page;
 const errors: string[] = [];
 
+const onPageError = (e: Error) => errors.push(e.message);
+const onConsole = (m: ConsoleMessage) => m.type() === 'error' && errors.push(m.text());
+
 test.beforeAll(async ({ browser }, info) => {
   test.setTimeout(420_000);
-  const { pack } = romSlice();
-  registries = loadGamePacks([pack]).registries;
-  const use = info.project.use;
-  context = await romContext(browser, use);
-  page = await context.newPage();
-  page.on('pageerror', (e) => errors.push(e.message));
-  page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
-  await resetRomDevice(page);
-  await page.goto('/?replay');
-  await page.waitForFunction(() => window.openSinnohGame?.ready === true, undefined, { timeout: 60_000 });
+  registries ??= loadGamePacks([romSlice().pack]).registries;
+  page = await replayPage(browser, info.project.use, 'battle-anim');
 });
 
-// Each replay resets its game; workers share only their own imported pack.
-test.beforeEach(() => { errors.length = 0; });
+// Each test starts its own game on the worker's shared page (rom-context.ts `replayPage`).
+test.beforeEach(() => {
+  errors.length = 0;
+  page.on('pageerror', onPageError);
+  page.on('console', onConsole);
+});
 
-test.afterAll(async () => {
-  await page?.close();
+test.afterEach(() => {
+  page.off('pageerror', onPageError);
+  page.off('console', onConsole);
 });
 
 /**

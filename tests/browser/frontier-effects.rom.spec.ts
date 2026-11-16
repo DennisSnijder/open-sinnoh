@@ -102,12 +102,11 @@ test("Palmer's cut-in: the banner in its band, the lit mugshot, the room dimmed"
       await frame(page);
       const cut = (await view())!.brainCutIn!;
       expect(cut).toMatchObject({ facility: 'tower', band: { y1: 46, y2: 114 }, mugshot: { x: 208, dark: false }, roomDark: true });
-      // The art loads on first use: the banner fills its band, the mugshot stands out, the room around is dark.
+      // The art loads on first use: the banner fills its band, the mugshot stands out, the room around is dark. The
+      // banner's art may arrive after its first colours (two frames are a few ms on a GPU): wait for it to be lit.
       await expect.poll(async () => (await region(0, 50, 256, 110)).colours, { timeout: 20_000 }).toBeGreaterThan(4);
-      const above = await region(0, 0, 256, 40);
-      const band = await region(0, 50, 256, 110);
-      expect(band.luma).toBeGreaterThan(above.luma + 20);
-      expect(above.luma).toBeLessThan(40);
+      await expect.poll(async () => (await region(0, 50, 256, 110)).luma - (await region(0, 0, 256, 40)).luma, { timeout: 20_000 }).toBeGreaterThan(20);
+      expect((await region(0, 0, 256, 40)).luma).toBeLessThan(40);
       // The mugshot (96 × 64 about x 208, y 80) over the banner's colours.
       await expect.poll(async () => (await region(168, 52, 248, 108)).colours, { timeout: 20_000 }).toBeGreaterThan((await region(8, 52, 88, 108)).colours + 4);
       await page.screenshot({ path: `${SHOTS}/${project}-palmer-cut-in.png` });
@@ -217,8 +216,9 @@ test('the Hall battle room: its light frames swap and its lights are drawn brigh
       });
       for (const sheet of sheets) frames.add(sheet);
       await frame(page);
+      // The lights' art loads on first use; the game holds still meanwhile (the bridge ticks only on request).
+      await expect.poll(async () => (bright = await particleCentres((await view())!)), { timeout: 20_000 }).toBeGreaterThan(0.5);
       await page.screenshot({ path: `${SHOTS}/${project}-hall-lights.png` });
-      bright = await particleCentres((await view())!);
       return true;
     },
   });

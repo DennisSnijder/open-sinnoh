@@ -144,14 +144,17 @@ test('the overlay shows the signboard from the ticks that bring it and is empty 
 
 test('a still field is drawn once a tick, a walking one every display frame', async () => {
   test.setTimeout(120_000);
-  // Stood still since the last test's popup. Software GL may draw under 30 fps: then every frame has its tick.
+  // Stood still since the last test's popup. Software GL may draw under 30 fps: then every frame has its tick. On a fast
+  // display (120 Hz: four frames a tick) a field drawn every frame would draw 60; a villager's step in Twinleaf draws its
+  // few frames between ticks, which the margin allows.
   await page.waitForTimeout(500);
   const [a, b] = await afterFrames(60);
-  expect(b.field - a.field, 'no more drawn than ticks ran').toBeLessThanOrEqual(b.ticks - a.ticks + 2);
-  await page.keyboard.down('ArrowLeft');
+  expect(b.field - a.field, 'no more drawn than ticks ran').toBeLessThanOrEqual(b.ticks - a.ticks + 8);
+  // Back down the road just walked (left of here is a wall: a blocked walk draws only its ticks).
+  await page.keyboard.down('ArrowDown');
   await page.waitForTimeout(300);
   const [c, d] = await afterFrames(20);
-  await page.keyboard.up('ArrowLeft');
+  await page.keyboard.up('ArrowDown');
   expect(d.field - c.field, 'every frame of the walk').toBeGreaterThanOrEqual(d.shown - c.shown - 2);
   expect(errors).toEqual([]);
 });

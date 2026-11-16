@@ -846,6 +846,11 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   and dropped), and perf checks compare with the same machine's 1x; heap checks count live objects in a snapshot, not
   the used heap (the JIT's code comes and goes); ROM specs take the worker's seeded context (`romContext`) instead of
   copying the import per file; each test in a serial file sets up its own start.
+- **Browser specs draw with the GPU on macOS** (ANGLE Metal). The full ROM suite went from about 1.2 h to 39 min, and
+  the pixel checks measured the same. Linux and CI stay on SwiftShader, and `OPENSINNOH_TEST_HARDWARE_GPU=0` forces it
+  ([`browser-tests.md`](browser-tests.md)). Specs that open the same replays share them: fit's checks run at menus'
+  beats, and parallel replay specs share one ready page per worker (`replayPage`), because Playwright runs a parallel
+  file's `beforeAll` before each test. Specs close their pages, never the worker's ROM context.
 - **The zone sweep** spawns at every warp arrival and every zone, with exemptions as exact lists.
 
 ## Performance

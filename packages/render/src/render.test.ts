@@ -22,12 +22,14 @@ it('a view is still between ticks only while nothing it draws moves', () => {
   const actor = { prev: at, cur: at } as ActorView;
   const view = { camera: { prev: at, cur: at }, actors: [actor], previews: [actor], effects: [], doors: [], props: [{ key: 'a', position: at, rotation: at }] } as unknown as FieldView;
   expect(stillBetweenTicks(view)).toBe(true);
+  // An effect in place (a sign's glint, grass at rest) animates by its tick only.
+  expect(stillBetweenTicks({ ...view, effects: [{ prev: at, cur: at, tick: 3 }] } as unknown as FieldView)).toBe(true);
   const walker = { prev: at, cur: moved } as ActorView;
   for (const change of [
     { camera: { prev: at, cur: moved } },
     { actors: [actor, walker] },
     { previews: [walker] },
-    { effects: [{}] },
+    { effects: [{ prev: at, cur: moved }] },
     { doors: [{}] },
     { props: [{ key: 'a', position: moved, rotation: at, prev: at }] },
     { features: { models: [{ key: 'a', position: moved, rotation: at, prev: at }] } },

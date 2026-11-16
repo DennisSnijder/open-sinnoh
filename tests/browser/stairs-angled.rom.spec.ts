@@ -30,7 +30,7 @@ test.beforeAll(async ({ browser }, info) => {
   await page.waitForFunction(() => window.openSinnohGame?.ready === true, undefined, { timeout: 60_000 });
 });
 test.afterAll(async () => {
-  await context?.close();
+  await page?.close();
 });
 
 type Stats = { frames: number; enhancedFrame: { angled: boolean } | null };

@@ -425,11 +425,13 @@ const sameVec = (a: Vec3, b: Vec3) => a[0] === b[0] && a[1] === b[1] && a[2] ===
 
 /** Nothing in the view is drawn between its last two ticks: `render`'s alpha changes no part of the picture. */
 export function stillBetweenTicks(view: FieldView): boolean {
-  if (view.distortion || view.viewCamera || view.doors?.length || view.effects.length) return false;
+  if (view.distortion || view.viewCamera || view.doors?.length) return false;
   if (!sameVec(view.camera.prev, view.camera.cur)) return false;
   for (const m of [...(view.features?.models ?? []), ...(view.props ?? [])]) if (m.prev && !sameVec(m.prev, m.position)) return false;
   for (const a of view.actors) if (!sameVec(a.prev, a.cur)) return false;
   for (const a of view.previews) if (!sameVec(a.prev, a.cur)) return false;
+  // An effect's frame, fade and bob follow its tick; between two ticks only its position moves.
+  for (const e of view.effects) if (!sameVec(e.prev, e.cur)) return false;
   return true;
 }
 

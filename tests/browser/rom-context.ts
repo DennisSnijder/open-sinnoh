@@ -60,3 +60,33 @@ export async function freshRomPage(browser: Browser, use: BrowserContextOptions)
     throw error;
   }
 }
+
+let shared: { key: string; page: Promise<Page> } | null = null;
+
+/**
+ * A page at `/?replay` with the game ready, kept across tests for the worker's lifetime. In parallel mode Playwright
+ * runs a file's `beforeAll` before each test (each test is its own group), and opening the game every time cost about
+ * as much as the tests that ran on it. Specs that pass the same `group` share the page: each of their tests starts its
+ * own game (a reset, or a replay's setup lines). A worker keeps one page: asking for another group or other options
+ * closes it. A failed test ends the worker, so the next test starts on a new page. Callers attach their listeners per
+ * test and never close the page.
+ */
+export function replayPage(browser: Browser, use: BrowserContextOptions, group: string): Promise<Page> {
+  const key = JSON.stringify([group, use]);
+  if (shared?.key === key) return shared.page;
+  const previous = shared?.page;
+  const page = (async () => {
+    // A page that failed to open has already failed its test.
+    await previous?.then((p) => p.close(), () => undefined);
+    const page = await (await romContext(browser, use)).newPage();
+    await resetRomDevice(page);
+    await page.goto('/?replay');
+    await page.waitForFunction(() => window.openSinnohGame?.ready === true, undefined, { timeout: 60_000 });
+    return page;
+  })();
+  shared = { key, page };
+  page.catch(() => {
+    if (shared?.page === page) shared = null;
+  });
+  return page;
+}
