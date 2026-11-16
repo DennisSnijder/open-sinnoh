@@ -94,9 +94,14 @@ initAnalytics({
 
 /** The ROM screen (rom-screen.ts): the picker or the session (the imports and the first-run setup). Never shown with the title. */
 function show(screen: 'picker' | 'importing'): void {
-  buildRomScreen({ onFile: (file) => void pickBase(file), onStart: goHome });
+  romScreen();
   showRomStep(screen);
   splashDone();
+}
+
+/** Builds the ROM screen (once). A game started from the stored import has not built it yet. */
+function romScreen(): void {
+  buildRomScreen({ onFile: (file) => void pickBase(file), onStart: goHome });
 }
 
 /** Shows an error on the picker: a file's (with a retry hint) unless `heading` names another failure. */
@@ -231,6 +236,7 @@ function updateStart(): void {
 /** A ROM from the Platinum picker (or dropped on the page): the session, the first-run setup, the import. */
 async function pickBase(file: File): Promise<void> {
   if (session.baseRunning) return;
+  romScreen();
   clearRomError();
   const problem = await preflight(file, false);
   if (problem) return fail(problem.message, problem.sha1, problem.heading);

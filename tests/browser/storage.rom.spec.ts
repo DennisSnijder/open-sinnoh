@@ -6,6 +6,8 @@
  *   mark (stored before it) is checked fully once on its first start and marked, a new import as it finishes;
  * - a file missing from the import (the Sentry issue "imported pack platinum has no file ...") leads to the ROM page
  *   with a calm re-import notice instead of a crash; choosing the ROM again repairs it and Start playing opens the title;
+ * - Options › Data's re-import works when the game started from the stored import, before the ROM screen was ever built
+ *   (the Sentry issue "Cannot set properties of null" in clearRomError);
  * - an import from an older importer (an engine update) shows the same notice, asks no setup again, and the save
  *   made before it is untouched and CONTINUE loads it.
  */
@@ -103,6 +105,23 @@ test('Options › Data shows the storage and asks the browser to keep it; a miss
     return imports.map((m) => m.checked);
   });
   expect(marks).toEqual([true]);
+  expect(errors).toEqual([]);
+});
+
+test('Options › Data re-imports the ROM when the game started from the stored import (the ROM screen not built yet)', async ({ page }) => {
+  test.setTimeout(420_000);
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await seedRomImport(page);
+  await skipSetup(page);
+  await page.goto('/');
+  await toMenu(page);
+  await page.locator('.tm-options').click();
+  await board(page).locator('[role="tab"][data-section="data"]').click();
+  const [chooser] = await Promise.all([page.waitForEvent('filechooser'), board(page).locator('[data-setting="reimport"] .options-value').click()]);
+  await chooser.setFiles(ROM!);
+  await reimported(page);
+  await toMenu(page);
   expect(errors).toEqual([]);
 });
 
