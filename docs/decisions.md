@@ -167,7 +167,8 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   before the next import starts, and a refusal there stops the import with what to do (free space; other
   sites' data, not OpenSinnoh's). The saves live in their own database and are never part of it. A save write
   Safari aborts on a full device (no error, or an AbortError) gets the same plain out-of-storage message as a
-  QuotaExceededError, in English and German.
+  QuotaExceededError, in English and German. A refused removal of the import a new one replaces (at the end
+  of an import) shows the same "old game data is still stored" banner, not a report.
 - **`.sav` import:** one-way, Platinum US first.
 
 ## Script VM
