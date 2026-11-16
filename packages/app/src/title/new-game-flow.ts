@@ -68,7 +68,8 @@ export class TitleFlow {
   /** One 30 Hz tick. */
   tick(frame: InputFrame): void {
     this.model.tick(frame);
-    this.draw();
+    // Leaving (Mystery Gift's B) closes the sheet during the model's tick: it is off the page, with nothing to draw.
+    if (this.root.isConnected) this.draw();
   }
 
   /**
