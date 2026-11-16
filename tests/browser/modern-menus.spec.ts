@@ -66,7 +66,7 @@ async function toField(page: Page, query = ''): Promise<void> {
 const press = (page: Page, target: Locator, touch: boolean) => (touch ? target.tap() : target.click());
 
 /** The start menu's entry, from the field. */
-async function open(page: Page, entry: 'pokemon' | 'bag' | 'options', touch: boolean): Promise<void> {
+async function open(page: Page, entry: 'pokemon' | 'bag' | 'options' | 'pokedex', touch: boolean): Promise<void> {
   await press(page, page.getByRole('button', { name: 'Start menu', exact: true }), touch);
   await press(page, menu(page).locator(`[data-entry="${entry}"]`), touch);
 }
@@ -454,5 +454,72 @@ test('the Modern PC: the box and the party beside it, the preview, moving and ma
   await page.screenshot({ path: `${SHOTS}/${project}-pc-close.png` });
   await press(page, root.locator('[data-tap="yes"]'), touch);
   await expect(root).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test('the Modern Pokédex: the list beside the species, an entry and its pages, the search', async ({ page }, info) => {
+  test.setTimeout(120_000);
+  const project = info.project.name;
+  const touch = project === 'phone';
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.addInitScript(() => localStorage.setItem('lantern-nds:menu-style', 'modern'));
+  await skipSetup(page);
+  await toField(page);
+  await page.evaluate(() => {
+    const d = window.openSinnohApp!.game.state.pokedex;
+    d.obtained = true;
+    d.seen.push('fixture:SPECIES_EMBERKIT' as never, 'fixture:SPECIES_SKYLET' as never, 'fixture:SPECIES_DRIPLING' as never);
+    d.caught.push('fixture:SPECIES_EMBERKIT' as never, 'fixture:SPECIES_DRIPLING' as never);
+  });
+  await open(page, 'pokedex', touch);
+  const root = page.locator('[data-screen="pokedex"]');
+  const view = async () => (await app(page)) as { screen: string; cursor: number; page?: string };
+  await expect(root).toHaveClass(/mm-dex-list/);
+  await expect(page.locator('.dex-list-sheet')).toHaveCount(0);
+  const rows = root.locator('.mm-dexrow');
+  expect(await rows.count()).toBeGreaterThanOrEqual(3);
+  await expect(root.locator('.mm-dexrow.is-cursor')).toBeFocused();
+  await expect(root.locator('.os-tab')).toContainText(/\d/);
+  await settle(page);
+  await fits(page, touch ? 44 : 36);
+  await page.screenshot({ path: `${SHOTS}/${project}-dex.png` });
+
+  // The d-pad moves the cursor; the detail follows it. A tap selects a row; its picture opens the entry.
+  const start = (await view()).cursor;
+  await page.keyboard.press('ArrowDown');
+  await expect.poll(async () => (await view()).cursor).toBe(start + 1);
+  const name = (await root.locator('.mm-dexrow.is-cursor .lab').textContent())!;
+  await expect(root.locator('.mm-right')).toContainText(name);
+  const seen = root.locator('.mm-dexrow[data-species]').first();
+  await press(page, seen, touch);
+  await expect(seen).toHaveClass(/is-cursor/);
+  await press(page, root.locator('[data-tap="open"]'), touch);
+  await expect.poll(async () => (await view()).screen).toBe('entry');
+
+  // The entry: the Pokémon beside its page; left and right turn the page, up and down step to the next species.
+  await expect(root).toHaveClass(/mm-dex-entry/);
+  await expect(root.locator('.mm-page')).toHaveAttribute('data-page', 'info');
+  await settle(page);
+  await fits(page, touch ? 44 : 36);
+  await page.screenshot({ path: `${SHOTS}/${project}-dex-entry.png` });
+  await press(page, root.locator('.os-foot [data-tap="back"]'), touch);
+  await expect(root).toHaveClass(/mm-dex-list/);
+
+  // The search: a row per filter, ◀ value ▶, OK.
+  await press(page, root.locator('.os-foot [data-tap="search"]'), touch);
+  await expect(root).toHaveClass(/mm-dex-search/);
+  await expect(root.locator('.mm-searchrow.is-cursor')).toBeFocused();
+  const first = root.locator('.mm-searchrow').first();
+  const before = await first.locator('.mm-searchchoice').textContent();
+  await press(page, first.locator('.mm-pagestep').last(), touch);
+  await expect(first.locator('.mm-searchchoice')).not.toHaveText(before!);
+  await settle(page);
+  await fits(page, touch ? 44 : 36);
+  await page.screenshot({ path: `${SHOTS}/${project}-dex-search.png` });
+  await page.keyboard.press('KeyX');
+  await expect(root).toHaveClass(/mm-dex-list/);
+  await press(page, root.locator('.os-foot [data-tap="quit"]'), touch);
+  await expect(menu(page)).toBeVisible();
   expect(errors).toEqual([]);
 });

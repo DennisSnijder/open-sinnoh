@@ -1,5 +1,5 @@
 /**
- * The Modern party, bag, summary and PC on the real ROM (OPENSINNOH_NDS_ROM; skipped without it), desktop and phone, in normal play
+ * The Modern party, bag, summary, PC and Pokédex on the real ROM (OPENSINNOH_NDS_ROM; skipped without it), desktop and phone, in normal play
  * (replays keep the original drawing): a save made on the bridge, CONTINUEd from the title, the screens drawn with the
  * ROM's sprites and item icons, a name's ♂ as an icon, then the bag and party a battle opens.
  * Screenshots go to test-artifacts/modern-menus-rom (gitignored: ROM content, never commit), or OPENSINNOH_MODERN_SHOTS.
@@ -91,7 +91,7 @@ const closeAll = () =>
     await expect(page.locator('[data-screen]')).toHaveCount(0, { timeout: 500 });
   }).toPass();
 
-async function entry(name: 'pokemon' | 'bag'): Promise<void> {
+async function entry(name: 'pokemon' | 'bag' | 'pokedex'): Promise<void> {
   await tap(page.getByRole('button', { name: appStrings().aria.hud.menu, exact: true }));
   await tap(page.locator(`[data-screen="start-menu"] [data-entry="${name}"]`));
 }
@@ -167,6 +167,53 @@ test('the summary: the ROM front picture, ball, type and ribbon art, its words o
   await tap(root.locator('.mm-ribbon').nth(1));
   await expect(root.locator('.mm-movedetail .mm-desc')).not.toBeEmpty();
   await shot('summary-ribbon');
+  await closeAll();
+  expect(errors).toEqual([]);
+});
+
+test('the Pokédex: the list with the ROM caught mark, an entry, its AREA, CRY and SIZE screens, the search', async () => {
+  test.setTimeout(120_000);
+  await page.evaluate(() => {
+    const d = window.openSinnohApp!.game.state.pokedex;
+    d.obtained = true;
+    for (const s of ['SPECIES_STARLY', 'SPECIES_BIDOOF', 'SPECIES_SHINX', 'SPECIES_PIPLUP', 'SPECIES_KRICKETOT']) {
+      if (!d.seen.includes(`platinum:${s}` as never)) d.seen.push(`platinum:${s}` as never);
+      if (s !== 'SPECIES_KRICKETOT' && !d.caught.includes(`platinum:${s}` as never)) d.caught.push(`platinum:${s}` as never);
+    }
+  });
+  await entry('pokedex');
+  const root = page.locator('[data-screen="pokedex"]');
+  await expect(root).toHaveClass(/mm-dex-list/);
+  await expect.poll(() => root.locator('.mm-dexrow .mm-caught canvas').count()).toBeGreaterThanOrEqual(4);
+  await shot('dex');
+  // Starly: a tap selects it, its picture opens its entry.
+  const starly = root.locator('.mm-dexrow[data-species="platinum:SPECIES_STARLY"]');
+  await tap(starly);
+  await expect(starly).toHaveClass(/is-cursor/);
+  await tap(root.locator('[data-tap="open"]'));
+  await expect(root).toHaveClass(/mm-dex-entry/);
+  await expect(root.locator('.mm-sumhero .mm-type canvas')).toHaveCount(2);
+  await expect(root.locator('.mm-page .mm-desc')).not.toBeEmpty();
+  await shot('dex-entry');
+  const body = root.locator('.mm-page');
+  for (const id of ['area', 'cry', 'size']) {
+    await expect(async () => {
+      await tap(root.locator('.mm-pagestep').last());
+      await expect(body).toHaveAttribute('data-page', id, { timeout: 1000 });
+    }).toPass();
+    await expect(root.locator('.mm-dexboard .dex-board')).toHaveCount(1);
+    if (id !== 'cry') await expect(root.locator('.mm-dexboard canvas.dex-map')).toHaveCount(1);
+    await shot(`dex-${id}`);
+  }
+  // Up and down step to the next species the list has seen, as on the DS.
+  const number = await root.locator('.mm-sumhero .mm-lv').textContent();
+  await page.keyboard.press('ArrowDown');
+  await expect(root.locator('.mm-sumhero .mm-lv')).not.toHaveText(number!);
+  await tap(root.locator('.os-foot [data-tap="back"]'));
+  await expect(root).toHaveClass(/mm-dex-list/);
+  await tap(root.locator('.os-foot [data-tap="search"]'));
+  await expect(root).toHaveClass(/mm-dex-search/);
+  await shot('dex-search');
   await closeAll();
   expect(errors).toEqual([]);
 });

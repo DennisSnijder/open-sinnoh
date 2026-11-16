@@ -25,7 +25,7 @@ const SHEEN_MAX = 12;
  * The front picture's whole scale (80 DS px a side): on a phone the height of the name's three lines, on a big screen
  * three times, between them twice.
  */
-function pictureScale(d: DrawContext): number {
+export function pictureScale(d: DrawContext): number {
   const room = d.size ?? { width: innerWidth, height: innerHeight };
   if (d.compact || room.height < 480) return 1;
   return room.height >= 700 && room.width >= 1000 ? 3 : FRONT_SCALE;

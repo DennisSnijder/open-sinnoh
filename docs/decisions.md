@@ -483,8 +483,7 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   and frames. OpenSinnoh's own screens use the OpenSinnoh UI design system, even when opened mid-game.
 - **The player may pick.** MENUS (Options › Device, a setup question on a new device, `lantern-nds:menu-style`, Original
   by default) swaps a recreated screen for a second drawing of the same app view in the design system: one window, a
-  list and a detail that follows the cursor (the Inspector direction). Party, bag, summary and PC so far; the rest stay original, so
-  a modern game mixes both. Same model, taps and sounds, no new state; not in the save, and replays keep the original
+  list and a detail that follows the cursor (the Inspector direction), for the party, bag, summary, PC and Pokédex. Same model, taps and sounds, no new state; not in the save, and replays keep the original
   drawing. The party and bag a battle opens follow it, like everywhere else: the battle screen itself stays ROM-drawn. The party list
   is one column over the game's 2-column cursor: the app turns up and down into the presses that reach the next stop.
   The summary is the Pokémon beside its page under a pager (◀ the page's name ▶): six long page names do not fit tabs on
@@ -494,6 +493,9 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   walks them), so the d-pad needs no translation; the party column shows whenever the mode has it, not only while the
   cursor is in it. The game's "pick a box" and "mark it" lines are a line in the detail, not a message box, so the box
   stays in reach.
+  The Pokédex list is a plain scrolling list of every row that keeps the cursor's row in the middle, as the DS's wheel
+  does; it is redrawn when the cursor moves, not for the wheel's position between rows. AREA, CRY and SIZE show the
+  DS's own screen for the page inside the window (the map, the waveform and the silhouettes are the ROM's pictures).
 - **Every menu app is a DS screen** laid out in DS pixels at a whole unit (`ui/board.ts`), windows at the
   decomp's rects. Menus never scroll internally or clip; only lists the DS scrolls do. On phones a DS
   screen sits on a backdrop of its art's edge colours over the whole view.

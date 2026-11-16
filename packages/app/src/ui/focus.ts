@@ -7,7 +7,9 @@ const controls = (root: HTMLElement) => [...root.querySelectorAll<HTMLElement>(C
 export function scrollToCursor(root: HTMLElement): void {
   const cursor = root.querySelector<HTMLElement>('.is-cursor');
   const list = cursor?.closest<HTMLElement>('[data-scrolls]');
-  if (cursor && list) {
+  // A list that keeps its cursor in the middle (the Modern Pokédex, as the DS's wheel).
+  if (cursor && list?.dataset.scrolls === 'center') list.scrollTop += cursor.getBoundingClientRect().top + cursor.offsetHeight / 2 - (list.getBoundingClientRect().top + list.clientHeight / 2);
+  else if (cursor && list) {
     const pad = parseFloat(getComputedStyle(list).scrollPaddingTop) || 0;
     const l = list.getBoundingClientRect();
     const c = cursor.getBoundingClientRect();

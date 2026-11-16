@@ -35,6 +35,7 @@ import { icon, type IconName } from './icons.ts';
 import { party } from './party.ts';
 import { modernBag } from './modern-bag.ts';
 import { modernParty } from './modern-party.ts';
+import { modernDex } from './modern-dex.ts';
 import { modernStorage } from './modern-storage.ts';
 import { modernSummary } from './modern-summary.ts';
 import { summary } from './summary.ts';
@@ -70,7 +71,7 @@ export interface DrawContext {
   compact: boolean;
   /** The UI layer's size in CSS px (the evolution scene picks its whole-pixel scale from it). */
   size?: { width: number; height: number };
-  /** The MENUS setting is Modern (not in replays): the party, bag, summary and PC draw in it, in a battle too. */
+  /** The MENUS setting is Modern (not in replays): the party, bag, summary, PC and Pokédex draw in it, in a battle too. */
   modern?: boolean;
   /** The player's gender (the bag picture); absent outside a game (the title's naming screen). */
   gender?: 'male' | 'female';
@@ -141,7 +142,7 @@ export function drawApp(d: DrawContext, v: AppView): Drawn {
       if (!d.options) throw new Error('ui: OPTIONS without the options screen');
       return { kind: 'os', root: d.options.draw(d, v) };
     case 'pokedex':
-      return { kind: 'sheet', root: drawPokedex(d, v) };
+      return d.modern ? { kind: 'os', root: modernDex(d, v) } : { kind: 'sheet', root: drawPokedex(d, v) };
     case 'mart':
       return { kind: 'mart', root: mart(d, v) };
     case 'storage':
