@@ -180,6 +180,8 @@ export const DE: Strings = {
     modToggled: (on, name, result) => `${name} ${on ? 'eingeschaltet' : 'ausgeschaltet'}. ${result}`,
     modsUnreadable: (message) => `Die Liste der Mods konnte nicht gelesen werden: ${message}`,
     saveUnreadable: (message) => `Dein Spielstand kann nicht gelesen werden: ${message}`,
+    signHint: (key) => (key ? `Drück ${key}, um zu unterschreiben` : 'Tippe auf das Feld, um zu unterschreiben'),
+    radarHint: (key) => (key ? `Drück ${key} für das Radar` : 'Tippe auf den Boden für das Radar'),
   },
 
   title: {

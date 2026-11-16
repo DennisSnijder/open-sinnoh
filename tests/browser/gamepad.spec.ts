@@ -376,6 +376,8 @@ test('the trainer card is signed by pad: Y signs, the d-pad and A draw, X is don
   const card = page.locator('[data-screen="trainer-card"]');
   await expect(card).toBeVisible();
   await press(page, PAD.a); // Flip to the back, where the signature is.
+  // Nothing on the card says Y signs: the hint does, in the pad's names.
+  await expect(page.locator('.ui-toast')).toHaveText('Press Top button to sign');
   await press(page, PAD.y);
   await expect(card.locator('.signature-pad')).toBeVisible();
 
@@ -413,6 +415,7 @@ test('the Underground: R pings the touch radar around the player', async ({ page
     };
     game.world.undergroundView = () => ({});
   });
+  await expect(page.locator('.ui-toast')).toHaveText('Press Right bumper for the radar');
   await press(page, PAD.r);
   const taps = await page.evaluate(() => (window.openSinnohApp!.game as unknown as { __taps: string[] }).__taps);
   const p = await page.evaluate(() => window.openSinnohApp!.game.state.player);

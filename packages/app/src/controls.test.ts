@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ActivePad, gamepadButtons } from './input.ts';
-import { bindKey, bindPad, bindingText, Controls, CONTROLS_KEY, defaultBindings, keyLabel, keyMapOf, KEY_MAP, padFace, padKind, padLabel, padTable, parseBindings, type Action, type PadKind } from './controls.ts';
+import { bindKey, bindPad, bindingText, buttonName, Controls, CONTROLS_KEY, defaultBindings, keyLabel, keyMapOf, KEY_MAP, padFace, padKind, padLabel, padTable, parseBindings, type Action, type PadKind } from './controls.ts';
 
 const pad = (mapping: string, down: number[] = [], axes: number[] = [], id?: string) => ({ mapping, ...(id ? { id } : {}), buttons: Array.from({ length: 17 }, (_, i) => ({ pressed: down.includes(i) })), axes });
 
@@ -47,6 +47,19 @@ describe('bindings', () => {
     expect(['KeyZ', 'ArrowUp', 'Digit4', 'Numpad2', 'F5', 'ShiftRight'].map(keyLabel)).toEqual(['Z', 'Up', '4', 'Num 2', 'F5', 'Right Shift']);
     expect([padLabel('b1', false), padLabel('b1', true), padLabel('a2-', true), padLabel(null, true)]).toEqual(['Right button', 'Button 1', 'Axis 2 -', 'Unbound']);
     expect(bindingText(defaultBindings(), 'a', false)).toBe('Z, J, Space · Bottom button');
+  });
+
+  it('names a DS button in the controls in use, for hints', () => {
+    const b = defaultBindings();
+    expect(buttonName(b, 'y', 'keys', false)).toBe('V');
+    expect(buttonName(b, 'y', 'pad', false, 'xbox')).toBe('Y');
+    expect(buttonName(b, 'x', 'pad', false, 'nintendo')).toBe('X');
+    expect(buttonName(b, 'r', 'pad', false, 'playstation')).toBe('R1');
+    expect(buttonName(b, 'y', 'touch', false)).toBe('Y');
+    // The touch screen draws no L or R; an unbound key has no name.
+    expect(buttonName(b, 'r', 'touch', false)).toBeNull();
+    b.keys.r = [];
+    expect(buttonName(b, 'r', 'keys', false)).toBeNull();
   });
 });
 
