@@ -800,7 +800,9 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
 - **Browser tests prove pixels, not just state:** non-blank frames, with-and-without comparisons for
   effects, measured row centres and overlaps, whole-pixel fits, axe and contrast checks. They run on a
   built preview with dev hooks, across desktop, phone, landscape and tablet projects. ROM screenshots stay
-  in ignored `test-artifacts`.
+  in ignored `test-artifacts`. The WebGL canvases keep no drawing buffer: a frame that draws nothing leaves its
+  picture on screen, but the buffer may already be cleared, so a spec reads a canvas in the task that drew it (or
+  takes a screenshot), never at an arbitrary later frame.
 - **ROM tests share one import** per run (`romSlice()`, cached by ROM SHA-1, `IMPORTER_VERSION` and the
   importer's sources); browser specs seed it (`seedRomImport`).
 - **Tiers:** fast (`pnpm test:changed`, one file, changed browser specs) while working; full

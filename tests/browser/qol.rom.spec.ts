@@ -255,8 +255,30 @@ test('the start menu opened mid-step: the characters hold still where they stopp
   });
   await saveSlot(page);
   // A 120 Hz display: two frames per tick, each drawn at its share of the tick (at 60 Hz the share hardly changes).
+  // While `drawnFrames` is set, each frame that draws the field (RenderStats.frames counts them) is read back right
+  // after it is drawn, in the same task. A frame that draws nothing leaves the last picture on screen, but the
+  // canvas's own buffer (no preserved drawing buffer) may already be cleared for the next draw: read later, it can
+  // come back empty.
   await page.addInitScript(() => {
-    window.requestAnimationFrame = (cb) => setTimeout(() => cb(performance.now()), 1000 / 120) as unknown as number;
+    const w = window as unknown as { drawnFrames?: number[]; openSinnohRenderStats?: { frames: number } };
+    let seen = -1;
+    const hashCanvas = () => {
+      const src = document.getElementById('main-canvas') as HTMLCanvasElement;
+      const c = Object.assign(document.createElement('canvas'), { width: src.width, height: src.height });
+      const g = c.getContext('2d', { willReadFrequently: true })!;
+      g.drawImage(src, 0, 0);
+      const px = g.getImageData(0, 0, c.width, c.height).data;
+      let h = 0;
+      for (let i = 0; i < px.length; i++) h = (Math.imul(h, 31) + px[i]!) | 0;
+      return h;
+    };
+    window.requestAnimationFrame = (cb) =>
+      setTimeout(() => {
+        cb(performance.now());
+        const frames = w.openSinnohRenderStats?.frames ?? -1;
+        if (w.drawnFrames && frames !== seen) w.drawnFrames.push(hashCanvas());
+        seen = frames;
+      }, 1000 / 120) as unknown as number;
     window.cancelAnimationFrame = (id) => clearTimeout(id);
   });
   await page.goto('/');
@@ -281,24 +303,15 @@ test('the start menu opened mid-step: the characters hold still where they stopp
   // The characters under the menu are drawn the same in every frame (one drawn between its last two ticks moved
   // with each frame's share of the tick).
   const frames = await page.evaluate(async () => {
-    const src = document.getElementById('main-canvas') as HTMLCanvasElement;
-    const c = document.createElement('canvas');
-    c.width = src.width;
-    c.height = src.height;
-    const g = c.getContext('2d', { willReadFrequently: true })!;
-    const out: number[] = [];
+    const w = window as unknown as { drawnFrames?: number[]; openSinnohRenderDebug: { spritesOnly: boolean } };
     // The characters alone: the map's own animations run on under the menu.
-    (globalThis as unknown as { openSinnohRenderDebug: { spritesOnly: boolean } }).openSinnohRenderDebug.spritesOnly = true;
+    w.openSinnohRenderDebug.spritesOnly = true;
     await new Promise((r) => setTimeout(r, 300));
-    for (let f = 0; f < 20; f++) {
-      await new Promise(requestAnimationFrame);
-      g.drawImage(src, 0, 0);
-      const px = g.getImageData(0, 0, c.width, c.height).data;
-      let h = 0;
-      for (let i = 0; i < px.length; i++) h = (Math.imul(h, 31) + px[i]!) | 0;
-      out.push(h);
-    }
-    (globalThis as unknown as { openSinnohRenderDebug: { spritesOnly: boolean } }).openSinnohRenderDebug.spritesOnly = false;
+    w.drawnFrames = [];
+    while (w.drawnFrames.length < 20) await new Promise(requestAnimationFrame);
+    const out = w.drawnFrames;
+    delete w.drawnFrames;
+    w.openSinnohRenderDebug.spritesOnly = false;
     return out;
   });
   expect(new Set(frames).size).toBe(1);
