@@ -851,6 +851,9 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   ([`browser-tests.md`](browser-tests.md)). Specs that open the same replays share them: fit's checks run at menus'
   beats, and parallel replay specs share one ready page per worker (`replayPage`), because Playwright runs a parallel
   file's `beforeAll` before each test. Specs close their pages, never the worker's ROM context.
+- **Browser specs play sound into a fake output** (`--disable-audio-output`). It renders in real time like a device does,
+  so the audio specs stop depending on the machine's speakers. With a MacBook's lid closed, Chromium's output stalled
+  and every sound spec heard silence. `waitForScene` also waits for running animations, so a card is measured at rest.
 - **The zone sweep** spawns at every warp arrival and every zone, with exemptions as exact lists.
 
 ## Performance

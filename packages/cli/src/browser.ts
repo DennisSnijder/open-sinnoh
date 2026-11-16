@@ -120,6 +120,8 @@ export async function runBrowserReplays(args: { files: string[]; dirs: Map<strin
 export async function waitForScene(page: Page): Promise<void> {
   await page.waitForFunction(() => (window as { openSinnohApp?: { sceneLoading(): boolean } }).openSinnohApp?.sceneLoading() === false, undefined, { timeout: 30_000 });
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+  // A screen that has just been drawn (the battle card after a resize) slides in for a few frames: measure it at rest.
+  await page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.playState === 'running' && Number.isFinite(Number(a.effect?.getComputedTiming().endTime))).map((a) => a.finished.catch(() => undefined))));
 }
 
 /** Samples the main WebGL canvas right after a frame: distinct colours and share of non-black pixels. */
