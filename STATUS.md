@@ -56,7 +56,7 @@ Versions: contracts 0.50.3, importer `platinum-114`, HeartGold follower add-on `
 
 ## Tests
 
-- `pnpm check`: lint, typecheck, about 1,700 unit tests and the fixture replays, no ROM needed.
+- `pnpm check`: lint, typecheck, about 1,950 unit tests and the fixture replays, no ROM needed.
 - ROM `pnpm test`: the importer, the story chain and every system replay against the real game.
 - ROM `pnpm test:browser`: the app on desktop and phone viewports, incl. the story in the browser.
 - German and European English ROMs: ROM `pnpm test` passes as on the US game (the replays wait on the game, the tests
