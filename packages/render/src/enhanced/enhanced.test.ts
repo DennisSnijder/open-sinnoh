@@ -87,4 +87,12 @@ describe('light sources', () => {
     expect(glowKind('r206_cy6_lm8', 'r206_cy6')).toBeNull();
     expect(glowKind('lambert14_lm3', 'c5_base_a')).toBeNull();
   });
+
+  it('leaves out the parts named as lights that are none', () => {
+    // The Poké Mart's and the Pokémon Center's roof trims; another texture under the same name stays a light.
+    expect(glowKind('light2', 'fsloof')).toBeNull();
+    expect(glowKind('light2_lm3', 'fsloof')).toBeNull();
+    expect(glowKind('light_a', 'pcloof')).toBeNull();
+    expect(glowKind('light_a', 'fsloof')).toBe('lamp');
+  });
 });
