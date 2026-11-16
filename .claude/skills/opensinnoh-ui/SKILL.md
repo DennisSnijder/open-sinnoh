@@ -1,6 +1,6 @@
 ---
 name: opensinnoh-ui
-description: The OpenSinnoh UI design system (v0.7, the Distortion look). Use when building or changing any OpenSinnoh-owned screen or UI (Options, the onboarding setup, data and mods, crash screens, mod tooling, any new DOM screen or control in packages/app) or doing website and brand work for opensinnoh.com. Also for the Modern menus, the player's opt-in second drawing of the party, bag and summary (`packages/app/src/ui/modern*.ts`). Not for the Original drawing of screens that recreate the DS (battle, bag, party, summary, Pokédex, PC, naming, the intro) or anything else the ROM draws.
+description: The OpenSinnoh UI design system (v0.7, the Distortion look). Use when building or changing any OpenSinnoh-owned screen or UI (Options, the onboarding setup, data and mods, crash screens, mod tooling, any new DOM screen or control in packages/app) or doing website and brand work for opensinnoh.com. Also for the Modern menus, the player's opt-in second drawing of the party, bag, summary and PC (`packages/app/src/ui/modern*.ts`). Not for the Original drawing of screens that recreate the DS (battle, bag, party, summary, Pokédex, PC, naming, the intro) or anything else the ROM draws.
 ---
 
 # OpenSinnoh UI
@@ -24,7 +24,7 @@ Spec: `docs/design-system.md`. Code: `packages/ui` (`@opensinnoh/ui`).
 - Components: `packages/ui/src/components.ts` (button, iconButton, toggle, pick, cycle, slider, textInput,
   select, tabs, rail, row, hpBar, statusChip, genderMark, choices, filePicker, titleTab, pixelTitle, typeText, footer, backButton, toast, banner,
   dialog, sheet, progress).
-- Users: the Modern menus (`packages/app/src/ui/modern.ts`, `modern-party.ts`, `modern-bag.ts`, `modern-summary.ts`, `modern.css`), Options (`packages/app/src/ui/options-screen.ts`, `options.css`; its in-layer frame `.ui-os` is in
+- Users: the Modern menus (`packages/app/src/ui/modern.ts`, `modern-party.ts`, `modern-bag.ts`, `modern-summary.ts`, `modern-storage.ts`, `modern.css`), Options (`packages/app/src/ui/options-screen.ts`, `options.css`; its in-layer frame `.ui-os` is in
   `ui/ui.css`), the setup (`title/setup.ts`), the crash and update screens (`telemetry/crash.ts`) and the ROM page
   (`rom-screen.ts`; no ROM art there, it shows before any import). Gallery: `?ui-gallery`
   (`packages/app/src/ui-gallery.ts`, spec `tests/browser/ui-gallery.spec.ts`). Add a new component to the

@@ -480,13 +480,17 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
   and frames. OpenSinnoh's own screens use the OpenSinnoh UI design system, even when opened mid-game.
 - **The player may pick.** MENUS (Options › Device, a setup question on a new device, `lantern-nds:menu-style`, Original
   by default) swaps a recreated screen for a second drawing of the same app view in the design system: one window, a
-  list and a detail that follows the cursor (the Inspector direction). Party, bag and summary so far; the rest stay original, so
+  list and a detail that follows the cursor (the Inspector direction). Party, bag, summary and PC so far; the rest stay original, so
   a modern game mixes both. Same model, taps and sounds, no new state; not in the save, and replays keep the original
   drawing. The party and bag a battle opens follow it, like everywhere else: the battle screen itself stays ROM-drawn. The party list
   is one column over the game's 2-column cursor: the app turns up and down into the presses that reach the next stop.
   The summary is the Pokémon beside its page under a pager (◀ the page's name ▶): six long page names do not fit tabs on
   a phone, and left and right turn the page as on the DS. With nothing picked the page holds the focus, so the d-pad and
   A reach the game. It is not redrawn for the sheen's frame count (CONDITION would replace its buttons every frame).
+  The PC keeps the game's grid as it is (6 × 5, the header above, the party as one column to its right, as the cursor
+  walks them), so the d-pad needs no translation; the party column shows whenever the mode has it, not only while the
+  cursor is in it. The game's "pick a box" and "mark it" lines are a line in the detail, not a message box, so the box
+  stays in reach.
 - **Every menu app is a DS screen** laid out in DS pixels at a whole unit (`ui/board.ts`), windows at the
   decomp's rects. Menus never scroll internally or clip; only lists the DS scrolls do. On phones a DS
   screen sits on a backdrop of its art's edge colours over the whole view.

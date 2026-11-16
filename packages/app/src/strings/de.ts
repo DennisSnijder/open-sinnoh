@@ -417,6 +417,9 @@ export const DE: Strings = {
     natureUp: 'Durch sein Wesen erhöht',
     natureDown: 'Durch sein Wesen gesenkt',
     raised: 'Gestiegen',
+    emptySlot: (n) => `Freier Platz ${n}`,
+    nothingHere: 'Hier ist kein Pokémon.',
+    marks: ['Kreis', 'Dreieck', 'Quadrat', 'Herz', 'Stern', 'Raute'],
   },
 
   ui: {

@@ -277,6 +277,7 @@ fixture:Common_PC::
   message text(fixture:Text_Pc)
   wait_button
   close_message
+  open_pokemon_storage 2
   release_all
   end
 

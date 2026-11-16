@@ -105,9 +105,14 @@ export function actionsPane(d: DrawContext, menu: AppMenu): HTMLElement {
 
 /** The action window on a phone: a bottom sheet (a tap outside is B). */
 export function actionsSheet(d: DrawContext, menu: AppMenu): HTMLElement[] {
+  return promptSheet(d, actionRows(d, menu));
+}
+
+/** A window of cursor rows as a bottom sheet (a tap outside is B). */
+export function promptSheet(d: DrawContext, rows: HTMLElement[]): HTMLElement[] {
   const scrim = h('div', 'os-sheet-scrim');
   scrim.addEventListener('click', () => d.tap('back'));
-  const sheet = h('div', 'os-sheet mm-sheet mm-prompt', ...actionRows(d, menu));
+  const sheet = h('div', 'os-sheet mm-sheet mm-prompt', ...rows);
   sheet.setAttribute('role', 'menu');
   sheet.dataset.scrolls = '';
   return [scrim, sheet];

@@ -425,6 +425,9 @@ export const EN = {
     natureUp: 'Raised by its nature',
     natureDown: 'Lowered by its nature',
     raised: 'Raised',
+    emptySlot: (n: number) => `Empty slot ${n}`,
+    nothingHere: 'No Pokémon here.',
+    marks: ['Circle', 'Triangle', 'Square', 'Heart', 'Star', 'Diamond'],
   },
 
   /** @opensinnoh/ui's own words (components.ts `setUiWords`). */
