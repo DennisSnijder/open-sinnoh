@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto';
 import { describe, expect, it, vi } from 'vitest';
-import { batchedReader, checkImport, deleteImport, ImportIncompleteError, importKey, listImports, openDb, PACK_DATA_PATH, putFiles, putMeta, StorageAbortedError, type ImportMeta } from './store.ts';
+import { batchedReader, checkImport, deleteImport, ImportIncompleteError, importKey, listImports, openDb, PACK_DATA_PATH, putFiles, putMeta, StorageAbortedError, storageRefused, type ImportMeta } from './store.ts';
 
 const bytes = (n: number) => new Uint8Array(n).fill(7);
 const metaFor = (key: string, files: number, size: number): ImportMeta => ({ key, romSha1: 'abc', romName: 'Test ROM', importerVersion: 'v', files, bytes: size, importedAt: 'now' });
@@ -101,6 +101,41 @@ describe('import integrity', () => {
     put.mockRestore();
     warn.mockRestore();
     expect((await listImports(db)).find((m) => m.key === meta.key)!.checked).toBeUndefined();
+    db.close();
+  });
+
+  it('a removal the browser refuses (no room, or an abort) is storageRefused and leaves the import whole', async () => {
+    const db = await openDb();
+    const meta = await importPack(db, importKey('g', 'old'), [['models/1.gltf', bytes(100)]]);
+    // A full device: the transaction aborts with the browser's QuotaExceededError as its error.
+    const quota = new DOMException('The quota has been exceeded.', 'QuotaExceededError');
+    // The browser aborts the transaction once its requests have run, as a commit that finds no room does.
+    const original = IDBObjectStore.prototype.delete;
+    const made = new WeakMap<IDBTransaction, number>();
+    let error: DOMException | undefined = quota;
+    const del = vi.spyOn(IDBObjectStore.prototype, 'delete').mockImplementation(function (this: IDBObjectStore, query: IDBValidKey | IDBKeyRange) {
+      const tx = this.transaction;
+      const req = original.call(this, query);
+      const n = (made.get(tx) ?? 0) + 1;
+      made.set(tx, n);
+      req.addEventListener('success', () => {
+        if (made.get(tx) !== n) return;
+        if (error) Object.defineProperty(tx, 'error', { value: error });
+        tx.abort();
+      });
+      return req;
+    });
+    const refused = await deleteImport(db, meta.key).catch((e: unknown) => e);
+    expect(refused).toBe(quota);
+    expect(storageRefused(refused)).toBe(true);
+    // Safari's abort with no failed request.
+    error = undefined;
+    const stopped = await deleteImport(db, meta.key).catch((e: unknown) => e);
+    expect(stopped).toBeInstanceOf(StorageAbortedError);
+    expect(storageRefused(stopped)).toBe(true);
+    del.mockRestore();
+    expect(storageRefused(new Error('IndexedDB transaction failed'))).toBe(false);
+    expect(await checkImport(db, meta)).toMatchObject({ key: meta.key });
     db.close();
   });
 });

@@ -14,7 +14,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { IMPORTER_VERSION } from '../../packages/app/src/importer.ts';
-import { fakeImportWorker, fakeRom, importDone } from './fake-import.ts';
+import { fakeImports, fakeImportWorker, fakeRom, importDone } from './fake-import.ts';
 import { skipSetup } from './intro.ts';
 import { saveGame } from './save.ts';
 
@@ -82,11 +82,9 @@ test('a partial import leads to the ROM page with the reason', async ({ page }) 
   expect(errors).toEqual([]);
 });
 
-test('an engine update: the re-import notice, no setup for a player who answered, Start playing, the save untouched', async ({ page }) => {
-  await fakeImportWorker(page);
-  await skipSetup(page);
+/** An import from an older importer, and a save in the saves database (its own database: an import never touches it). */
+async function storeOldImportAndSave(page: Page): Promise<void> {
   await page.goto('/__opensinnoh/packs.json');
-  // An import from an older importer, and a save in the saves database (its own database: an import never touches it).
   await page.evaluate(async () => {
     const store = (await new Function('u', 'return import(u)')('/__test/store.js')) as Store;
     const db = await store.openDb();
@@ -105,6 +103,12 @@ test('an engine update: the re-import notice, no setup for a player who answered
       };
     });
   });
+}
+
+test('an engine update: the re-import notice, no setup for a player who answered, Start playing, the save untouched', async ({ page }) => {
+  await fakeImportWorker(page);
+  await skipSetup(page);
+  await storeOldImportAndSave(page);
   await page.goto('/');
   const notice = page.locator('#rom-notice .os-banner.info');
   await expect(notice).toContainText('We need to re-import your ROM for the updated engine.');
@@ -129,6 +133,64 @@ test('an engine update: the re-import notice, no setup for a player who answered
       }),
   );
   expect(save).toBe('{"a save":1}');
+});
+
+test('an engine update on a full device: the old import the browser will not remove stops the import with what to do, the save untouched', async ({ page }) => {
+  await fakeImportWorker(page);
+  await skipSetup(page);
+  // Each removal from the imports' database aborts with the browser's QuotaExceededError once its requests have run,
+  // while `refuseDeletes` is set (a device with no room left: WebKit needs room to delete as well).
+  await page.addInitScript(() => {
+    const w = window as unknown as { refuseDeletes: boolean };
+    w.refuseDeletes = true;
+    const original = IDBObjectStore.prototype.delete;
+    const made = new WeakMap<IDBTransaction, number>();
+    IDBObjectStore.prototype.delete = function (this: IDBObjectStore, query: IDBValidKey | IDBKeyRange) {
+      const tx = this.transaction;
+      const req = original.call(this, query);
+      if (!w.refuseDeletes || tx.db.name !== 'lantern-nds') return req;
+      const n = (made.get(tx) ?? 0) + 1;
+      made.set(tx, n);
+      req.addEventListener('success', () => {
+        if (made.get(tx) !== n) return;
+        Object.defineProperty(tx, 'error', { value: new DOMException('The quota has been exceeded.', 'QuotaExceededError') });
+        tx.abort();
+      });
+      return req;
+    };
+  });
+  await storeOldImportAndSave(page);
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+  const warned = page.waitForEvent('console', (m) => m.type() === 'warning' && m.text().includes('did not remove the old imported game'));
+  await page.goto('/');
+  await expect(page.locator('#rom-notice .os-banner.info')).toContainText('We need to re-import your ROM for the updated engine.');
+  // The removal as the page comes up is refused: no crash, no report; the ROM page stays as it is.
+  await warned;
+  await page.locator('#rom-input').setInputFiles(fakeRom());
+  // The import does not start beside the old data: what happened, that the save is safe, what to do.
+  const error = page.locator('#picker-error');
+  await expect(error).toContainText('The old game data is still stored');
+  await expect(error).toContainText('Your save is stored apart and stays safe.');
+  await expect(error).toContainText('Free some space on your device, then choose the file again.');
+  await expect(page.locator('#importing')).toBeHidden();
+  expect(await fakeImports(page)).toEqual([]);
+  // Space freed: the same file again removes the old import and imports.
+  await page.evaluate(() => ((window as unknown as { refuseDeletes: boolean }).refuseDeletes = false));
+  await page.locator('#rom-input').setInputFiles(fakeRom());
+  await expect(page.locator('#importing')).toBeVisible();
+  expect(await fakeImports(page)).toEqual([{ name: 'platinum.nds', addon: false }]);
+  const imports = await page.evaluate(async () => {
+    const store = (await new Function('u', 'return import(u)')('/__test/store.js')) as Store;
+    const db = await store.openDb();
+    const list = await store.listImports(db);
+    db.close();
+    return list.map((m) => m.key);
+  });
+  expect(imports).toEqual([]);
+  expect(await slot(page)).toBe('{"a save":1}');
+  expect(errors).toEqual([]);
 });
 
 /** The title (already loading) to its main menu. */

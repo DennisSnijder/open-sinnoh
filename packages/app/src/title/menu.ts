@@ -192,6 +192,7 @@ export class MainMenu {
     this.root.querySelector('.tm-list')!.setAttribute('inert', '');
     this.root.append(sheet.root);
     this.sheet = sheet;
+    sheet.draw();
   }
 
   private closeSheet(): void {

@@ -162,6 +162,10 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
 - **Storage:** imports in IndexedDB `lantern-nds`, saves in `lantern-nds-saves`, device settings in
   localStorage under `lantern-nds:*`, each validated per entry on read. Persistent storage is requested
   after an import and from Options › Data, not at every boot (Firefox would ask each time).
+- **A refused storage write is the device's state, not a bug** (`storageRefused`: a QuotaExceededError, or
+  Safari's abort with no failed request). Removing an outdated import at boot can be refused; it is retried
+  before the next import starts, and a refusal there stops the import with what to do (free space; other
+  sites' data, not OpenSinnoh's). The saves live in their own database and are never part of it.
 - **`.sav` import:** one-way, Platinum US first.
 
 ## Script VM
@@ -809,7 +813,9 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
 - **Browser tests prove pixels, not just state:** non-blank frames, with-and-without comparisons for
   effects, measured row centres and overlaps, whole-pixel fits, axe and contrast checks. They run on a
   built preview with dev hooks, across desktop, phone, landscape and tablet projects. ROM screenshots stay
-  in ignored `test-artifacts`.
+  in ignored `test-artifacts`. The WebGL canvases keep no drawing buffer: a frame that draws nothing leaves its
+  picture on screen, but the buffer may already be cleared, so a spec reads a canvas in the task that drew it (or
+  takes a screenshot), never at an arbitrary later frame.
 - **ROM tests share one import** per run (`romSlice()`, cached by ROM SHA-1, `IMPORTER_VERSION` and the
   importer's sources); browser specs seed it (`seedRomImport`).
 - **Tiers:** fast (`pnpm test:changed`, one file, changed browser specs) while working; full

@@ -56,6 +56,8 @@ export const EN = {
     importFailed: (message: string) => `Import failed: ${message}`,
     workerCrashed: 'The import worker crashed (out of memory?).',
     importFailedHeading: 'The import failed',
+    oldDataHeading: 'The old game data is still stored',
+    oldDataStuck: "The browser would not remove the previous version's game data, and the new import needs that room. Your save is stored apart and stays safe. Free some space on your device, then choose the file again. Your browser's settings can also remove other websites' data; keep OpenSinnoh's, which holds your save.",
     notEnoughStorage: 'Not enough storage',
     addedNeedPlatinum: (name: string) => `Added ${name}: every Pokémon can follow you. Now choose your Pokémon Platinum ROM.`,
     waitingForPlatinum: 'Waiting for Pokémon Platinum to finish.',

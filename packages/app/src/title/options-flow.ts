@@ -49,7 +49,6 @@ export class OptionsFlow {
     // The title's keys are the DS's own: BUTTON MODE belongs to a game's save.
     this.screen = new OptionsScreen({ where: 'title', settings: deps.settings, tap: deps.tap, buttonMode: () => 0 });
     this.art = new Art(() => deps.assets, () => deps.registries);
-    this.draw();
   }
 
   /** One 30 Hz tick. */
@@ -59,10 +58,13 @@ export class OptionsFlow {
     this.draw();
   }
 
-  private draw(): void {
+  /** Draws the view at the title's box; only on the page (as `TitleFlow.draw`). */
+  draw(): void {
+    const parent = this.root.parentElement;
+    if (!parent) throw new Error('OptionsFlow.draw: not on the page');
     const view = this.model.view() as OptionsView;
-    // The title's box (the game area, clear of the touch controls), not the window; the window's until it is on the page.
-    const box = { width: this.root.parentElement?.clientWidth || innerWidth, height: this.root.parentElement?.clientHeight || innerHeight };
+    // The title's box (the game area, clear of the touch controls), not the window.
+    const box = { width: parent.clientWidth, height: parent.clientHeight };
     const { unit, dot, compact } = uiScales(box.width, box.height, devicePixelRatio || 1, box.height > box.width);
     const key = `${box.width}x${box.height}|${unit}|${dot}|${compact}|${this.screen.key(view)}|${JSON.stringify(view)}`;
     if (key === this.drawn) return;
