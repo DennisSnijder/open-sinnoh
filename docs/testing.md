@@ -51,7 +51,8 @@ Rules:
 Browser runner details (workers, sharding, changed-spec selection) are in `docs/browser-tests.md`. Measured suite
 timings are in `docs/test-speed.md`. Performance budgets are in `docs/performance.md`.
 
-If SwiftShader stalls on a loaded machine, `OPENSINNOH_TEST_HARDWARE_GPU=1` uses the browser's default GPU backend.
+Browser specs draw with the GPU (ANGLE's Metal backend) on macOS and with SwiftShader (software GL) elsewhere;
+`OPENSINNOH_TEST_HARDWARE_GPU=0` forces SwiftShader, `=1` the GPU (`docs/browser-tests.md`).
 
 ## Replays
 

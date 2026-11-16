@@ -30,6 +30,15 @@ between concurrent shard processes; each process otherwise sees the whole host.
 `OPENSINNOH_TEST_PORT` overrides the preview port. `OPENSINNOH_TIMING_DIR` enables the
 per-test/hook JSON timing reporter, separated by shard.
 
+GL backend (`browserGlArgs` in `tools/browser-options.ts`, `OPENSINNOH_TEST_HARDWARE_GPU`):
+
+- macOS draws with the GPU through ANGLE's Metal backend (`--use-angle=metal`) by default. The headless shell picks
+  SwiftShader unless told otherwise, so leaving out the SwiftShader flags alone is not enough.
+- Linux, Windows and CI stay on SwiftShader. `=1` there leaves the backend to the browser (untested).
+- `=0` forces SwiftShader anywhere: use it to compare with CI.
+- A spec that reads the canvas right after two animation frames must wait for the art it checks. On the GPU two frames
+  take a few milliseconds, too short for the art to load.
+
 ## Changed specs
 
 `pnpm test:browser:changed [Playwright options]` compares the working tree with
@@ -98,6 +107,29 @@ Merge failed shards too so their failures are visible. The shard exit codes are
 the test gate; report generation is not a substitute for checking them.
 
 ## Measurements
+
+2026-11-16, Apple M1 Max (10 cores, 32 GB), Playwright 1.64.0, headless shell 1234, ROM import cache warm. Other
+agents ran browser specs alongside: the 1-minute load average is given for each run.
+
+- Full ROM suite: SwiftShader at 3 workers, about **1.2 h** (main `b024c23a`, 11,650 test-seconds), then Metal at 4
+  workers **2,338 s (39 min)**: 7,347 test-seconds, 963 passed, 5 failed (load average 33, one spike to 290). Two of
+  the five failed because two specs closed the shared ROM context (fixed below); two were load flakes that passed on
+  rerun.
+- Metal against SwiftShader, same 3 workers: fit, battle-anim and first-battle on every project took 823 s → 319 s
+  (175/175 passed on both). enhanced-visuals took 49 s for both projects on Metal, against 307 s for desktop alone on
+  SwiftShader. Its logged pixel measurements match within 0.003, and frame time drops from 69–175 ms to 2–5 ms.
+  first-battle plays in real time and does not change.
+- Workers on Metal, 271 tests: 3 / 6 / 8 workers took 626 / 637 / 680 s (load 29 / 115 / 65). Each extra worker
+  repeats setup: Playwright starts a new worker for each project it switches to (69 workers at 8), and in parallel mode
+  it runs a file's `beforeAll` before each test, because every test is its own group. The CPU-bound story replays stop
+  gaining past about 4 workers. The automatic default (13 here) was not changed: run with `OPENSINNOH_TEST_WORKERS=4` on
+  this machine.
+- fit.rom used to play 8 of the svc replays that menus.rom plays, on the same 9 projects. menus.rom now runs fit's checks
+  at those beats, and fit.rom keeps the other 6 (72 fewer replay runs). fit, menus and battle-anim keep one ready
+  `/?replay` page per worker (`replayPage`): on the 271-test sample their `beforeAll` time fell from 364 s to 269 s.
+- "Target page, context or browser has been closed" at 4 or more workers came from stairs-angled.rom and quit.rom
+  closing the worker's shared ROM context (`romContext`). Any spec that ran after them in that worker failed. They now
+  close their pages.
 
 2026-10-18, source baseline `9b6fa1e`: QEMU x86-64 VM, 10 vCPUs, 23 GiB RAM,
 Node 24.18.1, Playwright 1.64.0, Chrome headless shell 151.0.7922.34 with

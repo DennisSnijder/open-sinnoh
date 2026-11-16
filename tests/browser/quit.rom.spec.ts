@@ -92,5 +92,5 @@ test('EXIT goes to the title, offering to save first', async ({ browser }, info)
   expect(ticksOf(await slot(page, 'main'))).toBeGreaterThan(saved);
   expect(await slot(page, 'suspend')).toBeUndefined();
   expect(errors).toEqual([]);
-  await context.close();
+  await page.close();
 });
