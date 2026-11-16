@@ -183,9 +183,17 @@ async function finishImport(meta: ImportMeta, ms: number): Promise<ImportMeta> {
   console.info(`import done in ${ms} ms: ${meta.files} files, ${formatBytes(meta.bytes)}${meta.addon ? ` (${meta.addon})` : ''}`);
   await requestPersistence();
   const db = await openDb();
-  // One base and at most one add-on: a new import replaces the older one of its kind.
-  for (const other of await listImports(db)) if (other.key !== meta.key && !!other.addon === !!meta.addon) await deleteImport(db, other.key);
-  db.close();
+  try {
+    // One base and at most one add-on: a new import replaces the older one of its kind.
+    for (const other of await listImports(db)) if (other.key !== meta.key && !!other.addon === !!meta.addon) await deleteImport(db, other.key);
+  } catch (e) {
+    // The browser refused the removal (a full device): not a bug. The new import is stored; the player frees space and chooses the file again.
+    if (!storageRefused(e)) throw e;
+    breadcrumb('import', `replaced import not removed: ${(e as Error).name}`);
+    throw new ImportFailure(S.rom.oldDataStuck, undefined, S.rom.oldDataHeading);
+  } finally {
+    db.close();
+  }
   return meta;
 }
 

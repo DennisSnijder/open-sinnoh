@@ -6,6 +6,7 @@
  */
 import type { SaveEnvelope, StubLog } from '@opensinnoh/contracts';
 import { NOT_APPLIED, OPTIONS_KEY, parseOptions, storeOptions } from './options-store.ts';
+import { S } from '../strings/index.ts';
 import { SaveStorageFullError, type GameDevice } from '@opensinnoh/game';
 
 export { DEFAULT_OPTIONS, NOT_APPLIED, OPENSINNOH_OPTIONS, OPTIONS_KEY, parseOptions, playerDefaults, storeOptions, type Options } from './options-store.ts';
@@ -46,7 +47,7 @@ export function createDevice(deps: { log: () => StubLog; write(save: SaveEnvelop
       store();
     },
     persist(save) {
-      deps.write(save).catch((e: Error) => deps.failed(e instanceof SaveStorageFullError ? e.message : `The save could not be written: ${e.message}`));
+      deps.write(save).catch((e: Error) => deps.failed(e instanceof SaveStorageFullError ? S.storage.saveFull : `The save could not be written: ${e.message}`));
     },
   };
 }

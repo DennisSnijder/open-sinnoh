@@ -292,7 +292,12 @@ test('the start menu opened mid-step: the characters hold still where they stopp
     expect(tries).toBeLessThan(6);
     const key = tries % 2 ? 'ArrowLeft' : 'ArrowRight';
     await page.keyboard.down(key);
-    await expect.poll(between).toBe(true);
+    // A wall or a character in the way stops the walk before it is ever between ticks: that way is no good, try the other.
+    const walking = await expect.poll(between, { timeout: 4000 }).toBe(true).then(() => true, () => false);
+    if (!walking) {
+      await page.keyboard.up(key);
+      continue;
+    }
     await page.getByRole('button', { name: appStrings().aria.hud.menu, exact: true }).click();
     await page.keyboard.up(key);
     await expect(page.locator('[data-screen="start-menu"]')).toBeVisible();

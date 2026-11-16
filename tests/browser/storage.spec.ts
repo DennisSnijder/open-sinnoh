@@ -135,14 +135,14 @@ test('an engine update: the re-import notice, no setup for a player who answered
   expect(save).toBe('{"a save":1}');
 });
 
-test('an engine update on a full device: the old import the browser will not remove stops the import with what to do, the save untouched', async ({ page }) => {
-  await fakeImportWorker(page);
-  await skipSetup(page);
-  // Each removal from the imports' database aborts with the browser's QuotaExceededError once its requests have run,
-  // while `refuseDeletes` is set (a device with no room left: WebKit needs room to delete as well).
-  await page.addInitScript(() => {
+/**
+ * Each removal from the imports' database aborts with the browser's QuotaExceededError once its requests have run,
+ * while `window.refuseDeletes` is set (a device with no room left: WebKit needs room to delete as well).
+ */
+async function refuseDeletes(page: Page, on = true): Promise<void> {
+  await page.addInitScript((on) => {
     const w = window as unknown as { refuseDeletes: boolean };
-    w.refuseDeletes = true;
+    w.refuseDeletes = on;
     const original = IDBObjectStore.prototype.delete;
     const made = new WeakMap<IDBTransaction, number>();
     IDBObjectStore.prototype.delete = function (this: IDBObjectStore, query: IDBValidKey | IDBKeyRange) {
@@ -158,7 +158,13 @@ test('an engine update on a full device: the old import the browser will not rem
       });
       return req;
     };
-  });
+  }, on);
+}
+
+test('an engine update on a full device: the old import the browser will not remove stops the import with what to do, the save untouched', async ({ page }) => {
+  await fakeImportWorker(page);
+  await skipSetup(page);
+  await refuseDeletes(page);
   await storeOldImportAndSave(page);
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -190,6 +196,33 @@ test('an engine update on a full device: the old import the browser will not rem
   });
   expect(imports).toEqual([]);
   expect(await slot(page)).toBe('{"a save":1}');
+  expect(errors).toEqual([]);
+});
+
+test("an import that replaces another ROM's on a full device: the browser refuses the removal, no bug report, the old data banner", async ({ page }) => {
+  await fakeImportWorker(page);
+  await skipSetup(page);
+  await refuseDeletes(page, false);
+  await page.goto('/');
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+  await page.locator('#rom-input').setInputFiles(fakeRom());
+  await expect(page.locator('#importing')).toBeVisible();
+  // While it imports, another ROM's import is stored and the device runs out of room: the new import cannot replace it.
+  await page.evaluate(async () => {
+    const store = (await new Function('u', 'return import(u)')('/__test/store.js')) as Store;
+    const db = await store.openDb();
+    const sha1 = 'c'.repeat(40);
+    await store.putMeta(db, { key: store.importKey(sha1, 'fake'), romSha1: sha1, romName: 'Another Platinum', importerVersion: 'fake', files: 0, bytes: 0, importedAt: new Date().toISOString() });
+    db.close();
+    (window as unknown as { refuseDeletes: boolean }).refuseDeletes = true;
+  });
+  await importDone(page, 0);
+  const error = page.locator('#picker-error');
+  await expect(error).toContainText('The old game data is still stored');
+  await expect(error).toContainText('Free some space on your device, then choose the file again.');
+  await expect(page.locator('#importing')).toBeHidden();
   expect(errors).toEqual([]);
 });
 

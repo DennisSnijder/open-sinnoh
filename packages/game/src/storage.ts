@@ -20,6 +20,13 @@ export class SaveStorageFullError extends Error {
   }
 }
 
+/** A transaction the browser aborted with no failed request to blame (Safari does this on a full device). */
+class TransactionAbortedError extends Error {
+  constructor() {
+    super('IndexedDB transaction aborted');
+  }
+}
+
 export class IndexedDbSaveStore {
   private db: Promise<IDBDatabase> | undefined;
   /** The open connection, once the open has resolved. */
@@ -54,7 +61,7 @@ export class IndexedDbSaveStore {
       const req = op(tx.objectStore(STORE));
       tx.oncomplete = () => resolve(req.result);
       tx.onerror = () => reject(tx.error ?? req.error ?? new Error('IndexedDB transaction failed'));
-      tx.onabort = () => reject(tx.error ?? new Error('IndexedDB transaction aborted'));
+      tx.onabort = () => reject(tx.error ?? new TransactionAbortedError());
     });
   }
 
@@ -63,7 +70,9 @@ export class IndexedDbSaveStore {
     try {
       await this.run('readwrite', (s) => s.put(saveToJson(save), slot));
     } catch (e) {
-      if (e instanceof DOMException && e.name === 'QuotaExceededError') throw new SaveStorageFullError(e);
+      // Safari aborts a write on a full device with no QuotaExceededError: a bare abort, or an AbortError.
+      const refused = e instanceof TransactionAbortedError || (e instanceof DOMException && (e.name === 'QuotaExceededError' || e.name === 'AbortError'));
+      if (refused) throw new SaveStorageFullError(e);
       throw e;
     }
   }
