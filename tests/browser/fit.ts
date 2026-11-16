@@ -1,9 +1,13 @@
 /**
- * The fit checks of fit.rom.spec.ts, shared with the specs that open an app on their own way (frontier.rom.spec.ts):
+ * The fit checks of fit.rom.spec.ts, shared with menus.rom.spec.ts (at its replays' beats) and the specs that open an
+ * app on their own way (frontier.rom.spec.ts):
  * the open app's screen inside the viewport and the field view, centred in the room, whole device pixels, clear of
  * the controls and HUD buttons, nothing clipped or scrolled out, every pixel label inside its window.
  */
 import type { Page } from '@playwright/test';
+
+/** Probe mode (OPENSINNOH_FIT_PROBE): report what does not fit instead of failing (to survey a change). */
+export const FIT_PROBE = !!process.env.OPENSINNOH_FIT_PROBE;
 
 /** The open app's fit problems (empty when it fits), measured in the page. */
 export function screenProblems(page: Page): Promise<string[]> {

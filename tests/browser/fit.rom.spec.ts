@@ -10,25 +10,24 @@
  * - nothing in it is clipped or scrolled out: the screen and every panel in it have no overflow, except
  *   lists that scroll on purpose (`data-scrolls`), whose rows must then still fit their width;
  * - every pixel label lies inside its window (text never runs past a frame).
+ * The svc-* replays that menus.rom.spec.ts plays run these checks there, at the same beats on the same projects, so
+ * each replay plays once per project; this file plays the rest.
  * Screenshots go to test-artifacts/fit-rom (gitignored: ROM content, never commit), or OPENSINNOH_FIT_SHOTS.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { expect, test, type BrowserContext, type Page } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import type { ReplayLine } from '@opensinnoh/core';
 import type { Registries } from '@opensinnoh/contracts';
 import { loadGamePacks, runReplay } from '@opensinnoh/game';
 import { romSlice } from '../rom.ts';
-import { romContext, resetRomDevice } from './rom-context.ts';
-import { fromChainAnchor } from './replay-anchor.ts';
+import { replayPage } from './rom-context.ts';
 import { settle } from './settle.ts';
-import { screenProblems } from './fit.ts';
+import { FIT_PROBE, screenProblems } from './fit.ts';
 import { pageDriver } from '../../packages/cli/src/browser.ts';
 
 const ROM = process.env.OPENSINNOH_NDS_ROM;
 const SHOTS = process.env.OPENSINNOH_FIT_SHOTS ?? 'test-artifacts/fit-rom';
-/** Probe mode: report what does not fit instead of failing (to survey a change). */
-const PROBE = !!process.env.OPENSINNOH_FIT_PROBE;
 const REPLAYS = join(import.meta.dirname, '../rom-replays');
 const read = (file: string) => readFileSync(join(REPLAYS, file), 'utf8');
 
@@ -36,31 +35,29 @@ test.describe.configure({ mode: 'parallel' });
 test.skip(!ROM, 'OPENSINNOH_NDS_ROM is not set');
 
 let registries: Registries;
-let context: BrowserContext;
 let page: Page;
 const errors: string[] = [];
 
+const onPageError = (e: Error) => errors.push(e.message);
+
 test.beforeAll(async ({ browser }, info) => {
   test.setTimeout(420_000);
-  const { pack } = romSlice();
-  registries = loadGamePacks([pack]).registries;
-  const use = info.project.use;
-  context = await romContext(browser, use);
-  page = await context.newPage();
-  page.on('pageerror', (e) => errors.push(e.message));
-  await resetRomDevice(page);
-  await page.goto('/?replay');
-  await page.waitForFunction(() => window.openSinnohGame?.ready === true, undefined, { timeout: 60_000 });
+  registries ??= loadGamePacks([romSlice().pack]).registries;
+  page = await replayPage(browser, info.project.use, 'menus');
 });
 
-// Each replay resets its game; workers share only their own imported pack.
-test.beforeEach(() => { errors.length = 0; });
-
-test.afterAll(async () => {
-  await page?.close();
+// Each test starts its own game on the worker's shared page (rom-context.ts `replayPage`).
+test.beforeEach(() => {
+  errors.length = 0;
+  page.on('pageerror', onPageError);
 });
 
-const REPLAY_FILES = ['svc-card', 'svc-dex', 'svc-party', 'svc-naming', 'svc-bag', 'svc-mart', 'svc-dept-store', 'svc-dept-store-2f', 'svc-dept-store-3f', 'svc-dept-store-b1f', 'svc-pc-storage', 'svc-pc-compare', 'svc-name-rater', 'svc-registered'];
+test.afterEach(() => {
+  page.off('pageerror', onPageError);
+});
+
+/** The svc-* replays menus.rom.spec.ts does not play (it checks the fit of its own). */
+const REPLAY_FILES = ['svc-dex', 'svc-mart', 'svc-dept-store', 'svc-dept-store-2f', 'svc-dept-store-3f', 'svc-dept-store-b1f'];
 
 for (const name of REPLAY_FILES) {
   test(`${name}: every app fits, centred, nothing cut`, async () => {
@@ -70,8 +67,7 @@ for (const name of REPLAY_FILES) {
     let beats = 0;
     await page.evaluate(() => window.openSinnohGame!.reset(1));
     const driver = pageDriver(page, SHOTS, `${project}-${name}`);
-    const replay = name === 'svc-naming' ? await fromChainAnchor(driver, `${name}.replay`) : { driver, text: read(`${name}.replay`) };
-    const result = await runReplay(replay.driver, replay.text, {
+    const result = await runReplay(driver, read(`${name}.replay`), {
       registries,
       name: `${name}.replay`,
       resolve: (file) => ({ name: file, text: read(file) }),
@@ -87,7 +83,7 @@ for (const name of REPLAY_FILES) {
     expect(result.ok).toBe(true);
     expect(beats).toBeGreaterThan(0);
     expect(await page.evaluate(() => window.openSinnohApp!.ui.state.fractionalFits)).toBe(0);
-    if (PROBE) console.log(`${project} ${name}\n${found.join('\n')}`);
+    if (FIT_PROBE) console.log(`${project} ${name}\n${found.join('\n')}`);
     else expect(found).toEqual([]);
     expect(errors).toEqual([]);
   });

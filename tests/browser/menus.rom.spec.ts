@@ -5,19 +5,21 @@
  * screen is up, its ROM art is drawn (box wallpapers, box marks, the compare pages, the summary's page tabs,
  * front sprite and ribbons, type icons, the naming screen's panels (its keys and glyphs on the panel's cells), badges, the card, its portrait and
  * signature), no horizontal scroll and tap targets of 40/48 px. A pointer drag on the card's signature pad
- * draws (the DOM's pen taps).
+ * draws (the DOM's pen taps). At every beat the open app also passes fit.rom.spec.ts's fit checks (fit.ts), and no
+ * replay needs a fractional fit.
  * Screenshots go to test-artifacts/menus-rom (gitignored: ROM content, never commit), or OPENSINNOH_MENU_SHOTS.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { expect, test, type BrowserContext, type Page } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import type { ReplayLine } from '@opensinnoh/core';
 import type { Registries } from '@opensinnoh/contracts';
 import { loadGamePacks, runReplay } from '@opensinnoh/game';
 import { romSlice } from '../rom.ts';
+import { FIT_PROBE, screenProblems } from './fit.ts';
 import { expectNamingGrid } from './naming-grid.ts';
 import { narrowRowHits } from './row-hits.ts';
-import { romContext, resetRomDevice } from './rom-context.ts';
+import { replayPage } from './rom-context.ts';
 import { fromChainAnchor } from './replay-anchor.ts';
 import { settle } from './settle.ts';
 import { pageDriver } from '../../packages/cli/src/browser.ts';
@@ -31,28 +33,25 @@ test.describe.configure({ mode: 'parallel' });
 test.skip(!ROM, 'OPENSINNOH_NDS_ROM is not set');
 
 let registries: Registries;
-let context: BrowserContext;
 let page: Page;
 const errors: string[] = [];
 
+const onPageError = (e: Error) => errors.push(e.message);
+
 test.beforeAll(async ({ browser }, info) => {
   test.setTimeout(420_000);
-  const { pack } = romSlice();
-  registries = loadGamePacks([pack]).registries;
-  const use = info.project.use;
-  context = await romContext(browser, use);
-  page = await context.newPage();
-  page.on('pageerror', (e) => errors.push(e.message));
-  await resetRomDevice(page);
-  await page.goto('/?replay');
-  await page.waitForFunction(() => window.openSinnohGame?.ready === true, undefined, { timeout: 60_000 });
+  registries ??= loadGamePacks([romSlice().pack]).registries;
+  page = await replayPage(browser, info.project.use, 'menus');
 });
 
-// Each replay resets its game; workers share only their own imported pack.
-test.beforeEach(() => { errors.length = 0; });
+// Each test starts its own game on the worker's shared page (rom-context.ts `replayPage`).
+test.beforeEach(() => {
+  errors.length = 0;
+  page.on('pageerror', onPageError);
+});
 
-test.afterAll(async () => {
-  await page?.close();
+test.afterEach(() => {
+  page.off('pageerror', onPageError);
 });
 
 /** The smallest tap target outside a DS screen per project (design.md §2): 48 px on phones and tablets (touch), 40 on desktops. */
@@ -249,6 +248,7 @@ for (const name of ['svc-pc-storage', 'svc-pc-compare', 'svc-naming', 'svc-bag',
     const project = test.info().project.name;
     test.setTimeout(300_000);
     const checks: string[] = [];
+    const misfits: string[] = [];
     await page.evaluate(() => window.openSinnohGame!.reset(1));
     const driver = pageDriver(page, SHOTS, `${project}-${name}`);
     const replay = name === 'svc-naming' ? await fromChainAnchor(driver, `${name}.replay`) : { driver, text: read(`${name}.replay`) };
@@ -259,8 +259,9 @@ for (const name of ['svc-pc-storage', 'svc-pc-compare', 'svc-naming', 'svc-bag',
       repeat: false,
       async beforeLine(line: ReplayLine) {
         if (line.action.type !== 'screenshot') return;
-        const beat = BEATS[line.action.name];
-        if (!beat) throw new Error(`no checks for the beat ${line.action.name}`);
+        const shot = line.action.name;
+        const beat = BEATS[shot];
+        if (!beat) throw new Error(`no checks for the beat ${shot}`);
         if (beat.screen) await expect(page.locator(`[data-screen="${beat.screen}"]`)).toBeVisible({ timeout: 30_000 });
         await expect.poll(async () => beat.art(await art()), { timeout: 30_000, message: `${line.action.name}: ${JSON.stringify(await art())}` }).toBe(true);
         await layoutChecks(minTarget(project));
@@ -269,12 +270,16 @@ for (const name of ['svc-pc-storage', 'svc-pc-compare', 'svc-naming', 'svc-bag',
           await expectNamingGrid(page);
         }
         await settle(page);
+        misfits.push(...(await screenProblems(page)).map((p) => `${shot}: ${p}`));
         checks.push(line.action.name);
       },
     });
     expect(result.error).toBeUndefined();
     expect(result.ok).toBe(true);
     expect(checks.length).toBeGreaterThan(0);
+    expect(await page.evaluate(() => window.openSinnohApp!.ui.state.fractionalFits)).toBe(0);
+    if (FIT_PROBE) console.log(`${project} ${name}\n${misfits.join('\n')}`);
+    else expect(misfits, 'every app fits, centred, nothing cut').toEqual([]);
     expect(errors).toEqual([]);
   });
 }

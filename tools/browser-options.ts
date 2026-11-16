@@ -23,6 +23,19 @@ export function browserWorkers(cores: number, memoryBytes: number, override?: st
   return Math.max(1, Math.min(Math.floor(cores * 4 / 3), Math.floor((memoryBytes / 2 ** 30 - 2) / 2)));
 }
 
+/**
+ * Chromium's GL flags (`OPENSINNOH_TEST_HARDWARE_GPU`): `1` the GPU, `0` SwiftShader (software GL), unset the
+ * platform's default. On macOS that is the GPU through ANGLE's Metal backend (the headless shell picks SwiftShader
+ * unless told otherwise), which drew the same results several times faster (docs/browser-tests.md); elsewhere
+ * SwiftShader, and `1` leaves the backend to the browser.
+ */
+export function browserGlArgs(setting: string | undefined, platform: NodeJS.Platform): string[] {
+  if (setting !== undefined && setting !== '0' && setting !== '1') throw new Error('OPENSINNOH_TEST_HARDWARE_GPU must be 0 or 1');
+  const hardware = setting === undefined ? platform === 'darwin' : setting === '1';
+  if (!hardware) return ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
+  return platform === 'darwin' ? ['--use-angle=metal'] : [];
+}
+
 export function machineBrowserWorkers(): number {
   const constrained = process.constrainedMemory();
   return browserWorkers(availableParallelism(), Math.min(totalmem(), constrained || Infinity), process.env.OPENSINNOH_TEST_WORKERS);
