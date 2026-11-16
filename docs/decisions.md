@@ -162,6 +162,10 @@ changelog lives in [`docs/contracts.md`](contracts.md); scope and the core rules
 - **Storage:** imports in IndexedDB `lantern-nds`, saves in `lantern-nds-saves`, device settings in
   localStorage under `lantern-nds:*`, each validated per entry on read. Persistent storage is requested
   after an import and from Options › Data, not at every boot (Firefox would ask each time).
+- **A refused storage write is the device's state, not a bug** (`storageRefused`: a QuotaExceededError, or
+  Safari's abort with no failed request). Removing an outdated import at boot can be refused; it is retried
+  before the next import starts, and a refusal there stops the import with what to do (free space; other
+  sites' data, not OpenSinnoh's). The saves live in their own database and are never part of it.
 - **`.sav` import:** one-way, Platinum US first.
 
 ## Script VM

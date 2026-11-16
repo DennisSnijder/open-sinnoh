@@ -31,6 +31,14 @@ export class StorageAbortedError extends Error {
   }
 }
 
+/**
+ * The browser refused a write for its own reasons, not a bug: no room (a QuotaExceededError) or an abort with no failed
+ * request (StorageAbortedError). The player can act on it (free space, keep the page in front); a report cannot.
+ */
+export function storageRefused(e: unknown): boolean {
+  return e instanceof StorageAbortedError || (e instanceof Error && e.name === 'QuotaExceededError');
+}
+
 export interface ImportMeta {
   key: string;
   romSha1: string;

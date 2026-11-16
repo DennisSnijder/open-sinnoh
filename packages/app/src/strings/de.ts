@@ -56,6 +56,8 @@ export const DE: Strings = {
     importFailed: (message) => `Import fehlgeschlagen: ${message}`,
     workerCrashed: 'Der Import ist abgestürzt (zu wenig Arbeitsspeicher?).',
     importFailedHeading: 'Der Import ist fehlgeschlagen',
+    oldDataHeading: 'Die alten Spieldaten sind noch gespeichert',
+    oldDataStuck: 'Der Browser hat die Spieldaten der vorherigen Version nicht entfernt, und der neue Import braucht diesen Platz. Dein Spielstand ist getrennt gespeichert und bleibt sicher. Schaffe etwas Platz auf deinem Gerät und wähle die Datei dann noch einmal. In den Einstellungen deines Browsers kannst du auch die Daten anderer Websites entfernen; behalte die von OpenSinnoh, sie enthalten deinen Spielstand.',
     notEnoughStorage: 'Nicht genug Speicherplatz',
     addedNeedPlatinum: (name) => `${name} ist hinzugefügt: Jedes Pokémon kann dir folgen. Wähle jetzt dein Pokémon-Platin-ROM.`,
     waitingForPlatinum: 'Wartet, bis die Platin-Edition fertig ist.',

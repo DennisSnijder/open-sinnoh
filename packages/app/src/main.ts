@@ -20,7 +20,7 @@ import type { ImportMessage, ImportRequest } from './import-worker.ts';
 import { captureInstallPrompt, formatBytes, importSpaceProblem, installSafeAreaHook, registerServiceWorker, requestPersistence, showIosHint, storageSummary } from './platform.ts';
 import { isChunkError, loadChunk } from './chunk.ts';
 import { checkRomSize } from './rom-check.ts';
-import { checkImport, deleteImport, ImportIncompleteError, listImports, openDb, type ImportMeta } from './store.ts';
+import { checkImport, deleteImport, ImportIncompleteError, listImports, openDb, storageRefused, type ImportMeta } from './store.ts';
 import { crash } from './telemetry/crash.ts';
 import { IMPORT_SECONDS_KEY } from './telemetry/perf.ts';
 import { durationBucket, initAnalytics, track } from './telemetry/analytics.ts';
@@ -131,6 +131,8 @@ async function preflight(file: File, addon: boolean): Promise<ImportFailure | nu
   if (sizeError) return new ImportFailure(sizeError);
   // The old imports go first: the space they free counts, and the new import does not write over their removal.
   await staleRemoved;
+  const left = await removeOutdated();
+  if (left) return left;
   // Room first: a full disk should not be found out 100 MB into the import. An import this one replaces gives its space back.
   const space = await importSpaceProblem(await replacedBytes(addon));
   return space ? new ImportFailure(space, undefined, S.rom.notEnoughStorage) : null;
@@ -187,9 +189,13 @@ async function finishImport(meta: ImportMeta, ms: number): Promise<ImportMeta> {
   return meta;
 }
 
+/** An import from an older importer (or add-on version): never played again, only removed. */
+const outdated = (m: ImportMeta) => m.importerVersion !== (m.addon ? ADDON_VERSION : IMPORTER_VERSION);
+
 /**
  * The imports from an older importer, removed once the page is up (deleting 14,600 files held the ROM page for 1.8 s).
- * A failure is reported; the next import of that kind removes them again (`finishImport`).
+ * The browser can refuse the removal (Safari aborts it on a full device, or when the page goes to the background):
+ * not a bug, and the next import removes what is left before it starts (`removeOutdated`). Any other failure is reported.
  */
 let staleRemoved: Promise<void> = Promise.resolve();
 function removeStale(db: IDBDatabase, stale: readonly ImportMeta[]): void {
@@ -197,9 +203,32 @@ function removeStale(db: IDBDatabase, stale: readonly ImportMeta[]): void {
   staleRemoved = (async () => {
     for (const m of stale) await deleteImport(db, m.key);
   })().catch((e: Error) => {
+    if (storageRefused(e)) {
+      console.warn(`the browser did not remove the old imported game: ${e.message}`);
+      breadcrumb('import', `old import not removed: ${e.name}`);
+      return;
+    }
     console.error(`could not remove the old imported game: ${e.message}`);
     captureError(e, 'start');
   });
+}
+
+/**
+ * Removes the outdated imports still stored, before an import starts: on a nearly full device the new import has no
+ * room beside them. The browser refusing their removal stops the import with what to do.
+ */
+async function removeOutdated(): Promise<ImportFailure | null> {
+  const db = await openDb();
+  try {
+    for (const m of (await listImports(db)).filter(outdated)) await deleteImport(db, m.key);
+    return null;
+  } catch (e) {
+    if (!storageRefused(e)) throw e;
+    breadcrumb('import', `old import not removed: ${(e as Error).name}`);
+    return new ImportFailure(S.rom.oldDataStuck, undefined, S.rom.oldDataHeading);
+  } finally {
+    db.close();
+  }
 }
 
 /** The bytes of the stored import (base or add-on) that a new import of that kind replaces. */
@@ -379,7 +408,7 @@ async function start(): Promise<void> {
   // The page is going away for good (not into the back/forward cache): close the connection so a new version can upgrade the database.
   addEventListener('pagehide', (e) => !e.persisted && db.close());
   const imports = await listImports(db);
-  const stale = imports.filter((m) => m.importerVersion !== (m.addon ? ADDON_VERSION : IMPORTER_VERSION));
+  const stale = imports.filter(outdated);
   let current: ImportMeta | undefined = imports.find((m) => !m.addon && m.importerVersion === IMPORTER_VERSION);
   let addon: ImportMeta | undefined = imports.find((m) => m.addon && m.importerVersion === ADDON_VERSION);
   // The stored game's language (an older import's too: its re-import notice speaks it), else the browser's.
