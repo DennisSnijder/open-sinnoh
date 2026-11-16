@@ -192,9 +192,10 @@ test('Twinleaf outlines are the DS dark grey blended over the far side, at day, 
     expect(f.meanEdge, `${name}: lines darker than the scene`).toBeLessThan(f.meanScene);
     // Every ground layer (grass, paths, flower patches, trees) and the characters are ID 0, most of the
     // frame; the houses are 8, the sign and mailbox models 32 and 40, the rear plane 63 (a few pixels no polygon covers, at the
-    // frame's edge). So ground pixels carry a line only against the rear plane: none on path or flower seams.
+    // frame's edge, which the GPU's rasterizer may leave covered). So ground pixels carry a line only against the rear
+    // plane: none on path or flower seams.
     expect(f.groundShare, `${name}: ground share`).toBeGreaterThan(0.5);
-    expect(f.ids, `${name}: IDs`).toEqual([0, 8, 32, 40, 63]);
+    expect(f.ids.filter((id) => id !== 63), `${name}: IDs`).toEqual([0, 8, 32, 40]);
     expect(Object.keys(f.pairs).filter((p) => p.startsWith('0>') && p !== '0>63'), `${name}: ground lines`).toEqual([]);
     // One DS pixel wide: the vertical house walls give runs of exactly k device pixels, the commonest run.
     const [common] = Object.entries(f.runs).sort((a, b) => b[1] - a[1])[0]!;
