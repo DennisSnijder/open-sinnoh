@@ -99,6 +99,7 @@ export const EN = {
   },
 
   storage: {
+    saveFull: 'Your browser is out of storage space, so this save was not written. Your previous save is kept. Free some space on your device, then save again.',
     notEnough: (needMb: number, free: string) =>
       `There is not enough free storage to set up the game. It needs about ${needMb} MB free and this browser has ${free}. Free some space on your device (or close other tabs and private windows), then choose the file again.`,
     usedOf: (usage: string, quota: string) => `${usage} of ${quota} used.`,

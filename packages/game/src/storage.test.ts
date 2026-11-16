@@ -45,6 +45,20 @@ describe('save storage', () => {
     expect(saveFromJson((await store.get('main'))!)).toEqual(newer);
   });
 
+  it("Safari's bare abort on a full device (no error on the transaction) is the same full-disk message, and the old slot stays", async () => {
+    const store = new IndexedDbSaveStore('opensinnoh-test-bare-abort');
+    await store.put('main', save);
+    const original = IDBObjectStore.prototype.put;
+    const put = vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(function (this: IDBObjectStore, ...args: Parameters<IDBObjectStore['put']>) {
+      const req = original.apply(this, args);
+      req.addEventListener('success', () => this.transaction.abort());
+      return req;
+    });
+    await expect(store.put('main', { ...save, savedAt: '2026-10-15T08:00:00.000Z' })).rejects.toThrow(SaveStorageFullError);
+    put.mockRestore();
+    expect(saveFromJson((await store.get('main'))!)).toEqual(save);
+  });
+
   it('any other write failure is not turned into the full-disk message', async () => {
     const store = new IndexedDbSaveStore('opensinnoh-test-other');
     const put = vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(() => {

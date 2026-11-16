@@ -97,6 +97,7 @@ export const DE: Strings = {
   },
 
   storage: {
+    saveFull: 'Der Speicher deines Browsers ist voll, deshalb wurde dieser Spielstand nicht geschrieben. Dein vorheriger Spielstand bleibt erhalten. Schaffe etwas Platz auf deinem Gerät und speichere dann noch einmal.',
     notEnough: (needMb, free) =>
       `Es ist nicht genug Speicher frei, um das Spiel einzurichten. Es braucht etwa ${needMb} MB, dieser Browser hat ${free}. Schaffe etwas Platz auf deinem Gerät (oder schließe andere Tabs und private Fenster) und wähle die Datei dann noch einmal.`,
     usedOf: (usage, quota) => `${usage} von ${quota} belegt.`,
