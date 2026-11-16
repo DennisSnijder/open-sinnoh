@@ -37,10 +37,14 @@ export interface FlowDeps {
   frame(): number;
 }
 
-/** What the main menu shows over itself for a while (NEW GAME, Mystery Gift): its root and a 30 Hz tick. */
+/**
+ * What the main menu shows over itself for a while (NEW GAME, Mystery Gift): its root, a 30 Hz tick, and its first
+ * draw once the root is on the page (its size is the title's box, which a detached root does not have).
+ */
 export interface Sheet {
   readonly root: HTMLElement;
   tick(frame: InputFrame): void;
+  draw(): void;
 }
 
 /** A DS screen the title runs for a while: ticks its model and draws its view. */
@@ -59,7 +63,6 @@ export class TitleFlow {
     this.root.setAttribute('role', 'dialog');
     this.root.setAttribute('aria-label', label);
     this.art = new Art(() => deps.assets, () => deps.registries);
-    this.draw();
   }
 
   /** One 30 Hz tick. */
@@ -68,14 +71,19 @@ export class TitleFlow {
     this.draw();
   }
 
-  private draw(): void {
+  /**
+   * Draws the view at the title's box. Only on the page: drawn detached, a screen was laid out for the window (on a
+   * phone, taller than the box above the touch controls) and drawn again a tick later, the board jumping.
+   */
+  draw(): void {
+    if (!this.root.isConnected) throw new Error('TitleFlow.draw: not on the page');
     const view = this.model.view();
     this.root.toggleAttribute('data-naming', view.app === 'naming');
     this.root.toggleAttribute('data-board', view.app === 'mystery-gift' || view.app === 'easy-chat');
     // The naming board fits and centres in the same padded safe area as the intro's canvas stage.
     const cs = getComputedStyle(this.root);
-    // The title's box (the game area, clear of the touch controls), not the window; the window's until it is on the page.
-    const box = { width: this.root.clientWidth || innerWidth, height: this.root.clientHeight || innerHeight };
+    // The title's box (the game area, clear of the touch controls), not the window.
+    const box = { width: this.root.clientWidth, height: this.root.clientHeight };
     const width = box.width - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
     const height = box.height - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
     const scale = this.deps.scale();
@@ -169,7 +177,9 @@ export function newGameFlow(deps: IntroDeps): Sheet {
       if (!ask.tick(f)) return screen.draw();
       intro = introFlow(deps, skip, finish);
       root.replaceChildren(intro.root);
+      intro.draw();
     },
+    draw: () => (intro ? intro.draw() : screen.draw()),
   };
 }
 
