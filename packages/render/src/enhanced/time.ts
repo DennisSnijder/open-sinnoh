@@ -45,10 +45,11 @@ export function sunDirection(hour: number): { x: number; y: number; z: number } 
 /** Bloom by the hour: subtle by day, strong at night (lamps and windows). */
 export function bloomAt(hour: number, lamps: boolean): { strength: number; threshold: number; radius: number } {
   const n = nightAt(hour);
-  // By day nothing the field draws blooms: its colours are albedo, and a threshold under white took a beach's or a
-  // desert's near-white sand for a light and washed it, and everything on it, out. Only light past white (the glows,
-  // particles) blooms by day; at night the lit windows and lamps.
-  return { strength: 0.18 + n * (lamps ? 0.42 : 0.32), threshold: 1 - n * 0.28, radius: 0.4 + n * 0.2 };
+  // Nothing the field draws blooms, by day or at night: its colours are albedo. A threshold under white took a beach's
+  // near-white sand for a light by day, and at night (it was 0.72) the pale texels the night light leaves bright, such
+  // as Jubilife's fountain. Only light past white blooms: the glows (lamps.ts) add to their lamps' and windows' texels,
+  // and the particles.
+  return { strength: 0.18 + n * (lamps ? 0.42 : 0.32), threshold: 1, radius: 0.4 + n * 0.2 };
 }
 
 export interface Grade {

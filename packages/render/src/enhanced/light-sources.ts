@@ -3,10 +3,10 @@ export type GlowKind = 'lamp' | 'window';
 
 /**
  * The map's light sources, by the material names the map models give them (an `_lmN` suffix is the importer's): the
- * buildings' `light` parts (porch lamps, the Poké Mart's and the Pokémon Center's signs, street lamp props), street
- * lamps and beacons on the land (`c1_lamp01`, `lamp03`, `c2_light_a`), and windows (`h_mado`, `gingamado`,
- * `window01_mat`). Only their bright texels glow (lamps.ts), so the dark frame of a lamp or a window stays as drawn.
- * Glows draw outdoors only (pipeline.ts): a cave's `dun_light` and a room's lights never do.
+ * buildings' `light` parts (porch lamps, street lamp props), street lamps and beacons on the land (`c1_lamp01`,
+ * `lamp03`, `c2_light_a`), and windows (`h_mado`, `gingamado`, `window01_mat`). Only their bright texels glow
+ * (lamps.ts), so the dark frame of a lamp or a window stays as drawn. Glows draw outdoors only (pipeline.ts): a cave's
+ * `dun_light` and a room's lights never do.
  */
 const LIGHT = /^(light|lamp)|_(lamp|light)/i;
 const WINDOW = /mado|^window/i;
@@ -23,7 +23,18 @@ const LAND_LAMPS = new Map([
   ['lambert14', 'r206_cy6'],
 ]);
 
+/**
+ * Parts named as lights that are none, as material → texture: the Poké Mart's `light2` and the Pokémon Center's
+ * `light_a` (their roofs' textures, `fsloof` and `pcloof`) are the white trim bands around their whole roofs, the
+ * logos with them, and lit every town's Mart and Center roofs like lamps.
+ */
+const NOT_LIGHTS = new Map([
+  ['light2', 'fsloof'],
+  ['light_a', 'pcloof'],
+]);
+
 export function glowKind(material: string, texture: string): GlowKind | null {
   const name = material.replace(/_lm\d+$/, '');
+  if (NOT_LIGHTS.get(name) === texture) return null;
   return WINDOW.test(name) ? 'window' : LIGHT.test(name) || LAND_LAMPS.get(name) === texture ? 'lamp' : null;
 }

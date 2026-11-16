@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { disposeTree } from './assets.ts';
+import { CUTAWAY, CUTAWAY_GLSL } from './cutaway.ts';
 import type { Weather } from '@opensinnoh/contracts';
 
 /**
@@ -84,6 +85,8 @@ export interface FieldOutput {
    * `opaque` its alpha-31 texels, `blend` the others. Absent: the material's own alpha test.
    */
   texels?: 'opaque' | 'blend';
+  /** Map and prop parts: the angled camera's cutaway can leave the pixels out (cutaway.ts). */
+  cutaway?: boolean;
 }
 
 /**
@@ -123,12 +126,13 @@ export function fieldOutputs<M extends THREE.Material>(material: M, out: FieldOu
       if (!shader.fragmentShader.includes('#include <alphatest_fragment>')) throw new Error(`render: material ${material.name} has no alpha test to draw texel alpha in`);
       shader.fragmentShader = shader.fragmentShader.replace('#include <alphatest_fragment>', `#include <alphatest_fragment>${TEXEL_ALPHA[out.texels]}`);
     }
+    if (out.cutaway) shader.uniforms.uCutaway = CUTAWAY;
     shader.fragmentShader = shader.fragmentShader
-      .replace('void main() {', 'layout(location = 1) out highp vec4 pc_fragField;\nuniform vec4 uFieldId;\nvoid main() {')
+      .replace('void main() {', `layout(location = 1) out highp vec4 pc_fragField;\nuniform vec4 uFieldId;\n${out.cutaway ? 'uniform vec4 uCutaway;\n' : ''}void main() {${out.cutaway ? CUTAWAY_GLSL : ''}`)
       .replace(/}\s*$/, '\tpc_fragField = uFieldId;\n}\n');
   };
   const key = material.customProgramCacheKey.bind(material);
-  material.customProgramCacheKey = () => `${key()}|field${out.texels ? `|${out.texels}` : ''}`;
+  material.customProgramCacheKey = () => `${key()}|field${out.texels ? `|${out.texels}` : ''}${out.cutaway ? '|cutaway' : ''}`;
   return material;
 }
 

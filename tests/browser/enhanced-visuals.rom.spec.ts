@@ -2,7 +2,9 @@
  * Enhanced visuals on the real ROM (OPENSINNOH_NDS_ROM; skipped without it), on desktop and phone: the angled camera
  * on a fogged route (Route 210 North) draws its fog from linear depth, so the field fades into the DS's fog colour
  * rather than into black; the night glows on a town's lamps and lit windows in SUBTLE and CINEMATIC, and on the street
- * lamps the map draws as land; and CINEMATIC's frame time on the phone (logged, with the quality the renderer picked). Screenshots go to
+ * lamps the map draws as land, and nowhere else (no bloom on pale albedo, no glow on the Poké Mart's or the Pokémon Center's roof trim); the angled
+ * camera's cutaway around the player under trees; and CINEMATIC's frame time on the phone (logged, with the quality the
+ * renderer picked). Screenshots go to
  * test-artifacts/enhanced-visuals (gitignored: ROM content, never commit).
  */
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
@@ -212,6 +214,88 @@ test('the street lamps drawn as land glow at night', async () => {
   expect(lamps, 'only the lamp heads glow').toBeLessThan(0.05);
   expect(dashes, 'the road dashes stay dark').toBe(0);
   expect(noon, 'no glow by day').toBeLessThan(0.001);
+  expect(errors).toEqual([]);
+});
+
+/**
+ * At night only light sources bloom and glow, in Jubilife City: its fountain (pale texels the night light leaves
+ * bright) bloomed under a threshold below white, and the roof trims of the Poké Mart and the Pokémon Center south of
+ * it (parts named as lights, light-sources.ts) glowed around their whole roofs. Bloom with the glows off adds next to
+ * nothing (the fountain's water moves); the glows add the plaza lamps' (about 1 % of the frame; the roofs added 10 to 12 %).
+ */
+test('the night bloom and glows stay off the fountain and the Poké Mart', async () => {
+  test.setTimeout(240_000);
+  const added = async (zone: string, x: number, z: number, base: string, more: string) => {
+    await arrive(zone, x, z, 'up', '22:00');
+    await look(base);
+    const off = await lumaGrid();
+    await look(`${base},${more}`);
+    const on = await lumaGrid();
+    await page.screenshot({ path: `${SHOTS}/${project}-${zone.toLowerCase().replace(/_/g, '-')}-${x}-${z}-night-${more}.png` });
+    return on.filter((v, i) => v - off[i]! > 20).length / on.length;
+  };
+  const fountain = await added('JUBILIFE_CITY', 167, 767, 'grade', 'bloom');
+  const mart = await added('JUBILIFE_CITY', 180, 767, 'bloom,grade', 'lamps');
+  console.log(`night bloom (${project}): ${JSON.stringify({ fountain, mart })}`);
+  expect(fountain, 'the bloom spares the fountain').toBeLessThan(0.01);
+  expect(mart, "the Poké Mart's and the Pokémon Center's roofs do not glow").toBeLessThan(0.04);
+  expect(errors).toEqual([]);
+});
+
+/**
+ * The angled camera cuts away what stands between it and the player (cutaway.ts): on Route 201 south of Sandgem's
+ * tree row (the player at the row's north edge, the canopies south of it), the player's sprite shows whole under the
+ * angled camera; the DS camera still draws the canopies over its lower half, as the DS does. Only the player is drawn
+ * (other characters off) and edge marking is off, so a sprite pixel matches the sprite drawn alone.
+ */
+test('the angled camera cuts the trees away from the player', async () => {
+  test.setTimeout(120_000);
+  await arrive('ROUTE_201', 160, 847, 'down', '12:00');
+  const shown = () =>
+    page.evaluate(async () => {
+      const world = window.openSinnohApp!.game.world;
+      const view = world.view.bind(world);
+      world.view = () => ({ ...view(), actors: view().actors.slice(0, 1), previews: [], departed: undefined });
+      const debug = (globalThis as unknown as { openSinnohRenderDebug: { edges: boolean; spritesOnly: boolean } }).openSinnohRenderDebug;
+      debug.edges = false;
+      const capture = async () => {
+        await new Promise(requestAnimationFrame);
+        await new Promise(requestAnimationFrame);
+        const src = document.getElementById('main-canvas') as HTMLCanvasElement;
+        const c = document.createElement('canvas');
+        c.width = src.width;
+        c.height = src.height;
+        const g = c.getContext('2d')!;
+        g.drawImage(src, 0, 0);
+        return g.getImageData(0, 0, c.width, c.height).data;
+      };
+      try {
+        const scene = await capture();
+        debug.spritesOnly = true;
+        const sprite = await capture();
+        // The sprite's pixels: what differs from the empty frame's colour (its first pixel).
+        let full = 0;
+        let visible = 0;
+        for (let i = 0; i < sprite.length; i += 4) {
+          if (Math.abs(sprite[i]! - sprite[0]!) + Math.abs(sprite[i + 1]! - sprite[1]!) + Math.abs(sprite[i + 2]! - sprite[2]!) < 30) continue;
+          full++;
+          if (scene[i] === sprite[i] && scene[i + 1] === sprite[i + 1] && scene[i + 2] === sprite[i + 2]) visible++;
+        }
+        return full ? visible / full : 0;
+      } finally {
+        world.view = view;
+        debug.edges = true;
+        debug.spritesOnly = false;
+      }
+    });
+  const ds = await shown();
+  await page.screenshot({ path: `${SHOTS}/${project}-route-201-trees-ds.png` });
+  await look('follow', true);
+  const angled = await shown();
+  await page.screenshot({ path: `${SHOTS}/${project}-route-201-trees-angled.png` });
+  console.log(`cutaway (${project}): ${JSON.stringify({ ds, angled })}`);
+  expect(ds, 'the DS camera draws the canopies over the player').toBeLessThan(0.9);
+  expect(angled, 'the angled camera shows the player whole').toBeGreaterThan(0.98);
   expect(errors).toEqual([]);
 });
 
