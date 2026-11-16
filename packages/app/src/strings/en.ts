@@ -422,6 +422,10 @@ export const EN = {
     emptyPocket: 'Nothing in this pocket.',
     heldItem: 'Holds an item',
     capsule: 'Capsule',
+    page: 'page',
+    natureUp: 'Raised by its nature',
+    natureDown: 'Lowered by its nature',
+    raised: 'Raised',
   },
 
   /** @opensinnoh/ui's own words (components.ts `setUiWords`). */

@@ -92,7 +92,7 @@ cries, battle music by encounter, the title and app music.
 - skipping the intro on a repeat play, a suspend point;
 - a trade-evolution substitute;
 - the current objective in the start menu, its destination marked on the Town Map;
-- Modern menus (MENUS in Options): the party and bag in OpenSinnoh's own style, Original by default.
+- Modern menus (MENUS in Options): the party, bag and summary in OpenSinnoh's own style, Original by default.
 
 **Enhanced visuals (opt-in).** Options › Device's VISUAL STYLE (DS, Subtle, Cinematic) and ANGLED CAMERA, also asked
 once in the setup (DS by default): bloom, grading by the hour, particles, depth of field, ambient occlusion, golden-hour
@@ -108,7 +108,7 @@ browser suite pass on the US, the European English and the German game.
 
 ## Next
 
-- **Modern menus:** Summary, then the PC, then the Pokédex, on the same setting.
+- **Modern menus:** the PC, then the Pokédex, on the same setting.
 - **Town extras:** the TV's group segments, once groups exist.
 - **Modding 1.0:** script eject to TypeScript, a mod sandbox, mod docs, and Gen 4 extension points (3D model
   replacement, mod Pokétch apps, camera hooks).

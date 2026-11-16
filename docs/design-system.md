@@ -15,8 +15,8 @@ time (`site/prerender.ts`) and adds only its layout and the device bezels.
   are drawn by the engine from the ROM's art and font. In that drawing this system has no place: no `os-` class, no
   token, no web font there (Pokemon DP Pro or otherwise).
 - **The player may pick.** Options › Device › Menus (Original by default, `lantern-nds:menu-style`, also a setup
-  question) offers a second drawing of a recreated screen in this system: the Modern menus, today the party and the
-  bag. It reads the same app view, adds no state and keeps the ROM's sprites and icons; replays and saves never read
+  question) offers a second drawing of a recreated screen in this system: the Modern menus, today the party, the
+  bag and the summary. It reads the same app view, adds no state and keeps the ROM's sprites and icons; replays and saves never read
   it. Original stays exactly as it is. Battle, the field and message boxes outside these screens stay ROM-drawn.
 - **OpenSinnoh's own screens** (Options, the setup, the crash and update screens, the ROM page) use this system
   throughout, their dialogs included, even when opened mid-game.

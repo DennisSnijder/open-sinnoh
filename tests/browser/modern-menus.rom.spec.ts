@@ -1,5 +1,5 @@
 /**
- * The Modern party and bag on the real ROM (OPENSINNOH_NDS_ROM; skipped without it), desktop and phone, in normal play
+ * The Modern party, bag and summary on the real ROM (OPENSINNOH_NDS_ROM; skipped without it), desktop and phone, in normal play
  * (replays keep the original drawing): a save made on the bridge, CONTINUEd from the title, the screens drawn with the
  * ROM's sprites and item icons, a name's ♂ as an icon, then the bag and party a battle opens.
  * Screenshots go to test-artifacts/modern-menus-rom (gitignored: ROM content, never commit), or OPENSINNOH_MODERN_SHOTS.
@@ -36,6 +36,8 @@ give item platinum:ITEM_POTION 4
 give item platinum:ITEM_ANTIDOTE 2
 give item platinum:ITEM_POKE_BALL 5
 give item platinum:ITEM_ORAN_BERRY 3
+set state party[0].ribbons [0,3,5,10,20]
+set flag platinum:FLAG_CONTEST_HALL_VISITED true
 set var platinum:VAR_ROUTE_202_STATE 1
 warp platinum:MAP_HEADER_ROUTE_202 178 827 up
 until idle
@@ -132,6 +134,39 @@ test('the bag: ROM item icons, pockets, the description', async () => {
   await expect(root.locator('.mm-right .item-icon')).toHaveCSS('background-image', /url\(/);
   await expect(root.locator('.mm-desc')).toContainText(/HP|KP/);
   await shot('bag');
+  await closeAll();
+  expect(errors).toEqual([]);
+});
+
+test('the summary: the ROM front picture, ball, type and ribbon art, its words on every page', async () => {
+  await entry('pokemon');
+  await tap(page.locator('[data-screen="party"] .mm-slot').first());
+  await tap(page.locator('[data-screen="party"] .mm-prompt .os-item').first());
+  const root = page.locator('[data-screen="summary"]');
+  const body = root.locator('.mm-page');
+  await expect(root).toHaveClass(/mm-sum/);
+  await expect(root.locator('.mm-ball canvas')).toHaveCount(1);
+  await expect(root.locator('.mm-sumhero .mm-type canvas')).toHaveCount(1);
+  await expect(root.locator('.mm-sumhero')).toContainText(itemName('ITEM_ORAN_BERRY'));
+  await expect(body).toHaveAttribute('data-page', 'info');
+  await expect(root.locator('.mm-pagetitle')).toHaveText(romText('PokemonSummary_Text_PageTitleInfo'));
+  await shot('summary');
+  const next = root.locator('.mm-pagestep').last();
+  for (const id of ['memo', 'skills', 'condition', 'moves', 'ribbons'] as const) {
+    await tap(next);
+    await expect(body).toHaveAttribute('data-page', id);
+    if (id === 'condition') {
+      const words = ['Cool', 'Beauty', 'Cute', 'Smart', 'Tough'].map((w) => romText(`ContestCommon_Text_${w}`));
+      await expect(root.locator('.mm-graph')).toHaveAttribute('aria-label', new RegExp(words.map((w) => `${w} \\d+`).join(', ')));
+    }
+    if (id === 'moves') await expect.poll(() => root.locator('.mm-move .mm-type canvas').count()).toBeGreaterThan(0);
+    if (id === 'ribbons') await expect(root.locator('.mm-ribbon canvas')).toHaveCount(5);
+    await shot(`summary-${id}`);
+  }
+  // A ribbon picked by touch shows its name and description.
+  await tap(root.locator('.mm-ribbon').nth(1));
+  await expect(root.locator('.mm-movedetail .mm-desc')).not.toBeEmpty();
+  await shot('summary-ribbon');
   await closeAll();
   expect(errors).toEqual([]);
 });
